@@ -5,6 +5,7 @@
 import { mintPlayerId, externalKey } from '../../shared/canonical/identity.js';
 import { normalizeMatch } from '../../shared/canonical/normalize.js';
 import { diffRecord } from '../../shared/change-ledger.js';
+import { diffSnapshots, snapshotOf, eventId, CONTRACT } from '../../shared/canonical/events.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentKey, tournamentId, editionId, drawId, matchId, snapshotId, competitionFor, slugify, SLAMS } from '../../shared/canonical/ids.js';
 
@@ -151,7 +152,7 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     normalized.push({ sm, n, id: await matchId(sm.provider, sm.provider_match_id) });
   }
   if (normalized.length) {
-    const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
+    const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
     let keep = [];
     const changes = [];
     for (const x of normalized) {
@@ -204,7 +205,10 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
         }
       }
     };
-    await upsertMatches(rest, matchRow);
+    // a match that just went final gets its statistics re-fetched (live values are provisional)
+    const wentFinal = (x) => x.prev && !FINAL.has(x.prev.status) && FINAL.has(x.n.match.status) && x.n.match.status !== 'walkover';
+    await upsertMatches(rest.filter((x) => !wentFinal(x)), matchRow);
+    await upsertMatches(rest.filter(wentFinal), (x) => ({ ...matchRow(x), stats_status: 'pending' }));
     await upsertMatches(wo, (x) => ({ ...matchRow(x), stats_status: 'not_applicable' }));
     keep = keep.filter((x) => !rejected.has(x.id));
     await store.upsert('tennis_match_external_ids', keep.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
@@ -213,6 +217,7 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     await store.upsert('tennis_sets', sets, { onConflict: 'match_id,set_no' });
     // a score correction that removed a set: delete the stale tail (only for matches whose score changed)
     for (const x of keep.filter((k) => k.prev && k.prev.score_text !== k.n.match.score_text)) await store.del('tennis_sets', `match_id=eq.${x.id}&set_no=gt.${(x.n.match.sets || []).length}`);
+    await writeSnapshotEvents(store, keep, captureId);
     if (changes.length) await store.insert('tennis_source_changes', changes.map((c) => ({ entity_type: c.entity_type, entity_id: c.entity_id, field: c.field, kind: c.kind, from_value: c.from_value, to_value: c.to_value, source_family: c.source_family, capture_id: c.capture_id })));
     result.written = keep.length;
     result.changes = changes.length;
@@ -226,6 +231,38 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
   await hold(store, dedupe(holds, (h) => `${h.provider}:${h.external_id}`));
   result.held = holds.length;
   return result;
+}
+
+const prevSnapshot = (p) => snapshotOf({ status: p.status, live: p.live_state, sets: (p.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ games: { A: t.games_a, B: t.games_b }, tiebreak: t.tb_a == null ? null : { A: t.tb_a, B: t.tb_b }, is_match_tiebreak: t.is_match_tiebreak })) });
+
+/**
+ * tennis_event/1.0.0 score_snapshot events: ONE per observed change of a live (or just-finished) match.
+ * Matches first seen already final (backfill) get none — we did not observe them live.
+ */
+async function writeSnapshotEvents(store, keep, captureId) {
+  const live = keep.filter((x) => x.n.match.status === 'in_progress' || (x.prev && x.prev.status === 'in_progress'));
+  if (!live.length) return 0;
+  const maxSeq = new Map();
+  const seqRows = await store.select('tennis_match_events', `select=match_id,event_sequence&quality=eq.score_snapshot&match_id=${inList(live.map((x) => x.id))}&order=event_sequence.desc&limit=1000`);
+  for (const r of seqRows) if (!maxSeq.has(r.match_id)) maxSeq.set(r.match_id, r.event_sequence);
+  const rows = [];
+  const observedAt = now();
+  for (const x of live) {
+    const prevSnap = x.prev ? prevSnapshot(x.prev) : null;
+    const next = snapshotOf({ status: x.n.match.status, sets: x.n.match.sets, live: x.n.match.live });
+    const e = diffSnapshots(prevSnap, next, x.n.match.format_key);
+    if (!e) continue;
+    const seq = (maxSeq.get(x.id) ?? -1) + 1;
+    const lastSet = next.sets.length ? next.sets.length : null;
+    rows.push({
+      event_id: await eventId(x.id, 'score_snapshot', String(seq)), match_id: x.id, contract: CONTRACT, quality: 'score_snapshot', event_sequence: seq,
+      event_type: e.event_type, source: x.sm.provider, source_event_id: null, observed_at: observedAt, event_at: null,
+      set_number: lastSet, game_number: null, server_side: e.server_side, winner_side: e.winner_side, derivation: e.derivation,
+      event_detail: e.event_detail, state: e.state, raw_source_ref: captureId
+    });
+  }
+  await store.upsert('tennis_match_events', rows, { onConflict: 'event_id', ignore: true });
+  return rows.length;
 }
 
 function setWinner(s) {

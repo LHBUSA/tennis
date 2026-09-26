@@ -192,4 +192,16 @@ export const ausopenMatches = {
   parse: (body) => parseAusopenDay(safeJson(body))
 };
 
-export const ADAPTERS = [wimbledonDraw, ausopenDay, ausopenMatches];
+// AO match centre: genuine point-by-point (winner, reason, server-first score), current edition only.
+export const ausopenMatchCentre = {
+  key: 'ausopen.match_centre',
+  family: 'ausopen',
+  capabilities: ['point_by_point', 'match_stats'],
+  parser_version: PARSER,
+  cadence: { class: 'on_final' },
+  request: ({ matchId }) => ({ url: `https://prod-scores-api.ausopen.com/match-centre/${matchId}` }),
+  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['match_id', 'teams', 'commentary']) : ['not_json']; },
+  parse: (body) => { const j = safeJson(body); return j.commentary?.length ? [j] : []; }
+};
+
+export const ADAPTERS = [wimbledonDraw, ausopenDay, ausopenMatches, ausopenMatchCentre];

@@ -9,6 +9,9 @@ import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import { editionId, tournamentId, tournamentKey } from '../../shared/canonical/ids.js';
+import { aoPointEvents, eventId, CONTRACT } from '../../shared/canonical/events.js';
+import { normalizeName } from '../../shared/canonical/identity.js';
+import { hold } from './writer.js';
 import { recordCapture, recordRun, writeRankingPage, finalizeSnapshot, writeEditions, writeMatches, writeMatchStats, writeCrosswalk, upsertPlayersFull } from './writer.js';
 
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -132,6 +135,44 @@ export async function ausopenDayMatches(ctx, year, day) {
   const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null });
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.ausopen&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   return { state: 'PASS', ...w };
+}
+
+// ---- AO point-by-point -> point_event rows ---------------------------------------------------------------
+export async function ausopenPointStep(ctx, batch = 3) {
+  const st = (await ctx.kv.get('bf:aopbp', 'json')) || { offset: 0 };
+  const ext = await ctx.store.select('tennis_match_external_ids', `select=match_id,external_id&provider=eq.ausopen&order=external_id.asc&limit=${batch}&offset=${st.offset}`);
+  if (!ext.length) return { done: true };
+  const out = [];
+  for (const x of ext) {
+    const code = x.external_id.split('-').pop();
+    const r = await fetchRun(ctx, slams.ausopenMatchCentre, { matchId: code });
+    if (r.state !== 'PASS') { out.push({ match: code, state: r.state, error: r.error }); continue; }
+    const mc = r.records[0];
+    const [m] = await ctx.store.select('tennis_matches', `select=match_id,format_key,status,tennis_sets(set_no,games_a,games_b,winner_side),tennis_match_participants(side,tennis_participants(tennis_participant_members(tennis_players(last_name,full_name))))&match_id=eq.${x.match_id}`);
+    const lastNames = {};
+    for (const p of m.tennis_match_participants) lastNames[p.side] = p.tennis_participants.tennis_participant_members.map((mm) => normalizeName(mm.tennis_players.last_name || mm.tennis_players.full_name.split(' ').slice(-1)[0]));
+    const nameSide = (raw) => {
+      const n = normalizeName(String(raw).replace(/^[A-Z]\.\s*/, ''));
+      const hits = ['A', 'B'].filter((sd) => (lastNames[sd] || []).some((ln) => ln && (n === ln || n.endsWith(` ${ln}`) || ln.endsWith(` ${n}`))));
+      return hits.length === 1 ? hits[0] : null;
+    };
+    const finalSets = (m.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ A: t.games_a, B: t.games_b, winner: t.winner_side }));
+    try {
+      const evs = aoPointEvents(mc.commentary, { formatKey: m.format_key, sideOfTeam: (t) => (t === 1 ? 'A' : t === 2 ? 'B' : null), nameSide, finalSets: m.status === 'completed' ? finalSets : null });
+      const rows = [];
+      for (let i = 0; i < evs.length; i += 1) {
+        const e = evs[i];
+        rows.push({ event_id: await eventId(x.match_id, 'point_event', e.source_event_id), match_id: x.match_id, contract: CONTRACT, quality: 'point_event', event_sequence: i, event_type: e.event_type, source: 'ausopen', source_event_id: e.source_event_id, observed_at: new Date().toISOString(), event_at: e.event_at, set_number: e.set_number, game_number: e.game_number, server_side: e.server_side, winner_side: e.winner_side, derivation: null, event_detail: e.event_detail, state: e.state, raw_source_ref: r.capture?.capture_id || null });
+      }
+      await ctx.store.upsert('tennis_match_events', rows, { onConflict: 'event_id', ignore: true, chunk: 200 });
+      out.push({ match: code, state: 'PASS', points: rows.length });
+    } catch (e) {
+      await hold(ctx.store, [{ provider: 'ausopen', entity_type: 'point_feed', external_id: x.external_id, problems: [String(e.message).slice(0, 300)], payload: null, capture_id: r.capture?.capture_id || null }]);
+      out.push({ match: code, state: 'HELD', error: String(e.message).slice(0, 120) });
+    }
+  }
+  await ctx.kv.put('bf:aopbp', JSON.stringify({ offset: st.offset + ext.length }));
+  return { offset: st.offset + ext.length, results: out };
 }
 
 // ---- Australian Open player registry (identity evidence: tour ids, DOB, gender) ------------------------

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "PropBetEdge Tennis \u00e2\u20ac\u201d tennis.propbetedge.ai. Vercel static frontend + Cloudflare Workers runtime + Supabase system of record.",
+  "description": "PropBetEdge Tennis â€” tennis.propbetedge.ai. Vercel static frontend + Cloudflare Workers runtime + Supabase system of record.",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
@@ -22,6 +22,7 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "playwright-core": "^1.63.0",
+    "sharp": "^0.35.4",
     "vite": "^5.4.21"
   }
 }
