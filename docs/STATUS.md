@@ -1,48 +1,76 @@
-# Status — 2026-09-26 (evening)
+# Status — 2026-09-26 21:00 UTC (production snapshot)
 
-**PRODUCTION READY: NO** for the full owner bar (ATP Tour / Challenger / ITF match data and official ATP
-rankings are not legitimately acquirable yet; the newsroom runs in SHADOW; the simulator is RESEARCH).
-What is live is real, sourced and labelled.
+**FULL OWNER BAR: NOT YET MET.** Live and real: the Tennis frontend, the WTA core product, Australian Open
+2026 men's coverage with genuine point-by-point, Wimbledon archive (degraded source) and Roland-Garros
+(ingesting). Not legitimately acquirable yet: ATP Tour / Challenger match data, official ATP rankings, ITF.
+Newsroom runs in SHADOW (OpenAI secret not set). Men's Tennis DNA is held by its population gate.
 
 ## Production components
+
+Current versions and rollback targets: `docs/RELEASE.md` → *Current production*.
 
 | Component | State |
 |---|---|
 | Vercel `tennis` | main = production (tennis.propbetedge.ai). SPA + prerendered static heads; data routes proxied to tennis-web |
-| `tennis-web` | edge heads (title/description/canonical/robots/OG/X/JSON-LD incl. NewsArticle), 1200x630 cards (player, Player DNA, match, PBEcast, tournament, rankings, news), dynamic sitemap |
-| `tennis-api` | public read API incl. `/v1/news` (published only; token preview), `/v1/pbecast/:id` (read-time corrections of append-only events), tour-scoped DNA (`?tour=atp|wta`) |
-| `tennis-ingest` | cron */2: calendar, active editions, stats, rankings, DNA (daily + monthly history lane), identity (Wikidata P597/P536), backfill lanes: ranking history ↔ match history (Wimbledon archive → AO qualifying → AO match-centre stats + point-by-point → WTA calendar queue) |
+| `tennis-web` | edge heads, 1200x630 cards, dynamic sitemap |
+| `tennis-api` | public read API; tour-scoped DNA with the ATP publication gate; `/v1/news` published-only |
+| `tennis-ingest` | cron */2; lane scheduler: `ao_current` every tick + one rotating lane (rank_history, wimbledon_archive, rolandgarros, wta_calendar) with per-lane backoff. Backfill cursors advance only on a proven-absent edition, never on a block |
 | `tennis-live` | cron every minute; ~18 s observed-live polling |
-| `tennis-news` | cron */2; **SHADOW** (`NEWS_PUBLISH_ENABLED=false`): detection + frozen packets + held drafts. **OPENAI SECRET REQUIRED** for model prose (`npx wrangler secret put OPENAI_API_KEY` in `workers/tennis-news`); without it the deterministic fact-safe writer is used or the story holds |
-| Supabase (tkmln) | migrations 0100–0600 applied with ledger rows |
+| `tennis-news` | cron */2; **SHADOW** (`NEWS_PUBLISH_ENABLED=false`, `OPENAI_API_KEY` not set). Canary PASS 11/11: 0 published, held stories 404 + noindex + not in sitemap |
+| Supabase (tkmln) | migrations applied with ledger rows |
 
-Deploy/rollback ids: `docs/RELEASE.md` and the commit messages on main.
+## Women (WTA API)
 
-## Coverage
+3,987 canonical matches across 52 editions, 3,164 with match statistics; live state via tennis-live;
+WTA singles + doubles rankings (weekly history from 2026-07-27, backfilling). Tennis DNA: 568 players,
+249 with medium/high service samples — published. Photos: 480 players approved; WTA top-100 singles
+94/100, doubles 86/100.
 
-- **Women:** WTA Tour + WTA 125 + women's Slam draws via the WTA API: live state, results, stats, rankings
-  (history backfilling weekly to 2020), DNA (481 players with snapshots, 192 with medium/high metrics).
-- **Men:** Australian Open 2026 (main draw, qualifying, doubles, mixed) with match-centre statistics and
-  genuine point-by-point (reason + server-first score; no speed/rally/coordinates in the feed). Wimbledon
-  draws archive 1979–2025 (MS, MD, QS) ingesting now; identity only through exact ids (Wikidata
-  P4503→P536, same-match 2025 join, archive tourid) — unmapped players are held, never guessed.
-- **Blocked / not acquired:** atptour.com + Infosys (Cloudflare challenge), US Open (edge tarpit), official
-  ATP rankings (no legitimate source), ESPN (Disney ToU: commercial use + automated extraction banned →
-  reference only, tennis-scoped owner decision pending). Adaptable next: Roland-Garros results API
-  2018–2026, Davis Cup (ITF Stadion API, 1900+), ProTennisLive PDFs (ATP + Challenger draws, names only).
-- **Photos:** 479 approved (policy tiers: live → today → fields → top 100 → top 200 → recent PBEcast →
-  rest; tiled small-face detection and square-only approval added without weakening identity/licence/face
-  gates). Live 2/2, today 152/264, WTA top-100 93/100. Men: pending the ATP Wikidata crawl.
+## Men
 
-## Product surfaces
+- **Australian Open 2026 — COMPLETE.** 333 canonical matches: MS main 127/127, qualifying 112/112,
+  MD 63/63, XD 31/31; 1 walkover, 10 retirements, 0 unknown rounds. 332 with statistics (the walkover has
+  none), 327 with genuine point-by-point (56,231 point events; reason + server-first score only — 0 events
+  with coordinates, serve speed or rally length). 5 point feeds held: the official feed contradicts its own
+  score/server sequence (MD121, MQ203, MS159, XD102, XD114). 0 unresolved identities.
+- **Wimbledon archive (da.wimbledon.com) — DEGRADED.** 778 canonical matches (2015, 2017–2019, 2021–2025);
+  cursor re-set to 2016 after a fix (2016 and 2014 had been skipped on a 403; now retried). 398 held for
+  unresolved identity, 9 held for impossible deciding-set tiebreak scores reported by the source (e.g. 2022
+  QF Nadal d. Fritz 10-4 appears as 7-4). The ingest Worker's Cloudflare egress receives intermittent 403
+  (2 of 30 draw requests in 12 h); the lane backs off, never works around it.
+- **Roland-Garros (rolandgarros.com) — INGESTING.** Source/parser PASS for every edition 2018–2026 (127
+  matches each). Men's singles 2021–2026 written (391+ canonical), cursor at 2020 SM; DM and QM follow.
+  Identity: 271 players inspected, 149 resolved to ATP ids by exact name + DOB + nationality, 0 ambiguous,
+  the rest held (never name-only).
+- **ATP Tour / Challenger:** ProTennisLive draw PDFs are reachable but carry names only — draw context,
+  never canonical. atptour.com / Infosys: Cloudflare challenge. **Official ATP rankings: BLOCKED.**
+- **Davis Cup (ITF Stadion):** reachable, NOT INGESTED — `tennisId` has no crosswalk to tour ids and no DOB.
+- **US Open:** BLOCKED from Cloudflare egress.
+- **Photos:** 329 men approved; AO 2026 men's main draw 123/128; 2026 men's field (all ingested events)
+  272/324.
+- **Tennis DNA (ATP):** 7/30 qualified → **held** on every surface (API, player page, leaders, PBEcast,
+  newsroom packet).
 
-PBEcast V2 (truth-mode badge, serve-indicator ball, tracked ball only from coordinates, engine-derived
-break/set/match point, identity anchors, moment rail, intelligence strip, broadcast fullscreen; live entry
-from the nav + live switcher) · Tennis DNA (WTA/ATP populations) · newsroom (/news desks + story pages,
-shadow) · schedule, tournaments, players, rankings, H2H, venues, credits, coverage.
+## Open ingest holds (844)
+
+| Count | Source | Class | Action |
+|---|---|---|---|
+| 426 | rolandgarros | identity ambiguity (FFT id without a unique name+DOB+nat ATP match) | legitimate hold |
+| 398 | wimbledon | identity ambiguity (archive UUID without an exact ATP id path) | legitimate hold |
+| 8 (+1 also identity) | wimbledon | source inconsistency (impossible deciding tiebreak) | legitimate hold |
+| 5 | wta | malformed record (completed without a score) | legitimate hold |
+| 5 | ausopen | source inconsistency (point feed contradicts itself) | legitimate hold |
+| 1 | wta | source inconsistency (stale set fields) | legitimate hold |
+| 1 | wta | malformed record (same participant on both sides) | legitimate hold |
+
+Engineering fixes this pass: WTA winner code 7 (walkover), AO mixed match tiebreak, AO qualifying final
+round, AO walkover gap fill, AO opening server when game 1's serve row is missing (MQ206 resolved),
+point-feed hold retry per parser revision, backfill cursor never skipping a blocked year.
 
 ## Evidence
 
-`docs/evidence/`: production-canary-latest (28 PASS / 1 WARN), photo-contract-latest (PASS, 0 approved photos
-dropped), photo-pipeline-latest, news-shadow-latest (14/14 real candidates pass gates), sim-backtest-latest
-(RESEARCH: fails vs coin at current depth), mens-coverage-latest.
+`docs/evidence/`: source-canary-latest (20 PASS, 2 BLOCKED), wimbledon-archive-latest, daviscup-stadion-latest,
+news-canary-latest (PASS 11/11), photo-pipeline-latest, espn-gap-latest (internal reference only),
+production-canary-latest, sim-backtest-latest (RESEARCH, hidden).
+Browser QA 2026-09-26: 26 routes × 8 widths on production — no overflow, no console errors, no broken
+images; PBEcast replay acceptance (`scripts/qa/pbecast-replay.mjs`) PASS on 3 matches × 2 widths.

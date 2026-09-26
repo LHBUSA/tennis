@@ -24,6 +24,19 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
+## Current production (2026-09-26 21:00 UTC)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| Vercel `tennis` (tennis.propbetedge.ai) | main HEAD — this docs commit on top of f365f75 (f365f75 = `dpl_EcNXmY5uZuK5UK17BVBLR786Kdz7`) | `dpl_EcNXmY5uZuK5UK17BVBLR786Kdz7` (f365f75), then `dpl_5Dw2PDZ5NQDzQmvQbiXkCJdKcGXk` (7e57dd8) |
+| tennis-web | 825f1fd9-ac18-417f-854e-904aa20d552f | 0d5965cd-781b-49f6-8ef6-c0893e730129 |
+| tennis-api | 747792c0-91a0-4c5e-a42a-6708790b496b | 67120e95-9e93-47c1-8c1a-b34794838ce5 |
+| tennis-ingest | 76604c7d-1bfb-4db3-b5cc-9addb7784e0d | abdf960a-ff9b-4e89-beaf-aa1010589cdb |
+| tennis-live | 3cfd7fd6-e635-4d55-aeab-4849200e0096 | c38a77b3-1d6a-49ff-ad46-6eeddec98068 |
+| tennis-news | 847e4338-dd3b-43b7-bd37-a09c6377457c (SHADOW) | 595afd96-228b-4f20-863b-a31938fdbe33 |
+
+Rows below are the historical deploy log; the table above is authoritative for what is running.
+
 ## Deploy log
 
 | Date (UTC) | Component | Version | Rollback | Note |
@@ -35,3 +48,7 @@ forward-only fixes.
 | 2026-09-26 | tennis-model / tennis-news | 8598487b / bca67020 | — | skeletons |
 | 2026-09-26 | tennis-ingest | e44a5264 | 2a9e0b60 | exact ranking counts, hold resolution, AO men, row-level fallback |
 | 2026-09-26 | tennis-live | 59e89b03 | 3eb569df | shared writer changes |
+| 2026-09-26 | tennis-api | 747792c0 | 67120e95 | registry truth (evidence for every claim; Wimbledon archive DEGRADED; ProTennisLive duplicate removed) |
+| 2026-09-26 | tennis-ingest | abdf960a | ae972ba5 | AO opening-server fix (MQ206), point-feed hold retry, PBP batch 20 |
+| 2026-09-26 | tennis-ingest | 76604c7d | abdf960a | backfill cursor never skips a blocked edition; bf:wima reset to 2016 |
+| 2026-09-26 | Vercel | dpl_EcNXmY5uZuK5UK17BVBLR786Kdz7 (f365f75) | dpl_5Dw2PDZ5NQDzQmvQbiXkCJdKcGXk | builds green again after c403ca4 (registry evidence) |
