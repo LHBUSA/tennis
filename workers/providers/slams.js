@@ -133,7 +133,9 @@ export const ausopenDay = {
 // per-set `winner` flag is unreliable on unfinished sets (a 0-0 set after a retirement is flagged), so set
 // winners are derived from games. Only men's and mixed events are taken: women's AO matches come from
 // the WTA API, and taking them twice would duplicate matches.
-const AO_EVENTS = { "Men's Singles": { event_type: 'MS', gender: 'M', format: 'BO5_FINAL_TB10' }, "Men's Doubles": { event_type: 'MD', gender: 'M', format: 'BO3_FINAL_TB10' }, 'Mixed Doubles': { event_type: 'XD', gender: null, format: 'DOUBLES_TOUR' } };
+const AO_EVENTS = { "Men's Singles": { event_type: 'MS', gender: 'M', format: 'BO5_FINAL_TB10' }, "Men's Doubles": { event_type: 'MD', gender: 'M', format: 'BO3_FINAL_TB10' }, 'Mixed Doubles': { event_type: 'XD', gender: null, format: 'DOUBLES_TOUR' },
+  // qualifying: best of three with a 10-point final-set tiebreak (Grand Slam qualifying since 2022); rounds are Q-1..Q-3
+  "Men's Qualifying Singles": { event_type: 'MS', gender: 'M', format: 'BO3_FINAL_TB10', stage: 'qualifying' } };
 const AO_STATUS = { C: 'completed', R: 'retired' };
 const AO_ROUNDS = { '1st Round': '1', '2nd Round': '2', '3rd Round': '3', '4th Round': '4', Quarterfinals: 'Q', 'Quarter-finals': 'Q', Semifinals: 'S', 'Semi-finals': 'S', Final: 'F' };
 
@@ -169,7 +171,7 @@ export function parseAusopenDay(j) {
     const rn = rounds.get(m.round_id);
     out.push({
       type: 'match', provider: 'ausopen', provider_match_id: `${year}-${m.match_id}`, provider_event: { id: 'australian-open', year },
-      event_type: ev.event_type, stage: 'main', round_code: AO_ROUNDS[rn] || rn || null, format_key: ev.format,
+      event_type: ev.event_type, stage: ev.stage || 'main', round_code: ev.stage === 'qualifying' ? (/^(\d)(st|nd|rd|th) Round$/.test(rn || '') ? `Q-${rn[0]}` : null) : AO_ROUNDS[rn] || rn || null, format_key: ev.format,
       status, winner_side: winner, end_reason: status === 'retired' ? 'retirement' : status === 'completed' ? 'completed' : null,
       retired_side: status === 'retired' && winner ? (winner === 'A' ? 'B' : 'A') : null, sets, live: null,
       sides: { A: side(tA), B: side(tB) }, seeds: { A: Number(teams.get(tA?.team_id)?.seed) || null, B: Number(teams.get(tB?.team_id)?.seed) || null },
@@ -187,7 +189,8 @@ export const ausopenMatches = {
   capabilities: ['set_game_scoring', 'withdrawals_ret_wo', 'player_identity'],
   parser_version: PARSER,
   cadence: { class: 'event_window', active_s: 120, idle_s: 86400 },
-  request: ({ year, day }) => ({ url: `https://prod-scores-api.ausopen.com/year/${year}/period/MD/day/${day}/results` }),
+  // period MD = main draw days, Q = qualifying days (same payload shape)
+  request: ({ year, day, period = 'MD' }) => ({ url: `https://prod-scores-api.ausopen.com/year/${year}/period/${period === 'Q' ? 'Q' : 'MD'}/day/${day}/results` }),
   shape: ausopenDay.shape,
   parse: (body) => parseAusopenDay(safeJson(body))
 };

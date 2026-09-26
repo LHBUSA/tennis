@@ -235,3 +235,15 @@ test('AO match-centre stats -> canonical counts; opponent break points; inconsis
   assert.throws(() => slams.parseAusopenStats({ stats: { key_stats: [{ name: 'Key', sets: [{ set: 'All', stats: bad }] }] } }), /inconsistent/);
   assert.equal(slams.parseAusopenStats({ stats: {} }), null);
 });
+
+test('AO qualifying: stage qualifying, rounds Q-1..Q-3 (never confused with an AO quarterfinal "Q"), BO3 + 10-point final set', () => {
+  const j = JSON.parse(fs.readFileSync('tests/fixtures/ausopen/day2-2026.json', 'utf8'));
+  const body = j.payload || j;
+  const ms = (body.events || []).find((e) => e.name === "Men's Singles");
+  assert.ok(ms, 'fixture has a men singles event');
+  ms.name = "Men's Qualifying Singles";
+  for (const r of body.rounds || []) r.name = '2nd Round';
+  const out = slams.parseAusopenDay(body).filter((m) => m.stage === 'qualifying');
+  assert.ok(out.length > 0);
+  for (const m of out) { assert.equal(m.round_code, 'Q-2'); assert.equal(m.format_key, 'BO3_FINAL_TB10'); assert.equal(m.event_type, 'MS'); }
+});

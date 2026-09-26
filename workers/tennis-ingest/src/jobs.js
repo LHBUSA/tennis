@@ -124,8 +124,8 @@ export async function wimbledonMen(ctx, year) {
 }
 
 // ---- Australian Open match days (men's + mixed; women's come from the WTA API) -------------------------
-export async function ausopenDayMatches(ctx, year, day) {
-  const r = await fetchRun(ctx, slams.ausopenMatches, { year, day });
+export async function ausopenDayMatches(ctx, year, day, period = 'MD') {
+  const r = await fetchRun(ctx, slams.ausopenMatches, { year, day, period });
   if (r.state === 'DEGRADED' && r.error === 'zero_records') return { state: 'PASS', written: 0, note: 'no men/mixed matches that day' };
   if (r.state !== 'PASS') return { state: r.state, error: r.error };
   const tid = await tournamentId('slam:australian-open');

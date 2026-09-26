@@ -159,7 +159,14 @@ async function tickInner(env, store, kv, force) {
       if (r.state === 'PASS') await kv.put('bf:ao', JSON.stringify({ year: ao.year, day: ao.day + 1 }));
       return { ausopen: `${ao.year} day ${ao.day}`, ...r };
     }
-    const pbp = await ausopenPointStep(ctx, 5);
+    // AO qualifying (period Q, days 1-4): same parser, men's + mixed only (women come from the WTA feed)
+    const aoq = (await kv.get('bf:aoq', 'json')) || { year: 2026, day: 1 };
+    if (aoq.day <= 4) {
+      const r = await ausopenDayMatches(ctx, aoq.year, aoq.day, 'Q');
+      if (r.state === 'PASS') await kv.put('bf:aoq', JSON.stringify({ year: aoq.year, day: aoq.day + 1 }));
+      return { ausopen_qualifying: `${aoq.year} day ${aoq.day}`, ...r };
+    }
+    const pbp = await ausopenPointStep(ctx, 8);
     if (!pbp.done) return { ausopen_point_by_point: pbp };
     let calKey = 'bf:cal';
     let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
