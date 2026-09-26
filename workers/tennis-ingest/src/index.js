@@ -126,14 +126,31 @@ async function tickInner(env, store, kv, force) {
     return out;
   });
 
+  async function rankingHistoryStep() {
+    const rk = (await kv.get('bf:rank', 'json')) || { date: addDays(wta.rankingMonday(started), -7) };
+    if (rk.date < RANK_HISTORY_FLOOR) return 'rank_history_complete';
+    const s = await rankingStep(ctx, 'singles', rk.date, 6);
+    const d = s.done ? await rankingStep(ctx, 'doubles', rk.date, 6) : { done: false };
+    if (s.done && d.done) await kv.put('bf:rank', JSON.stringify({ date: addDays(rk.date, -7) }));
+    return { ranking_history: rk.date, singles: s.page, doubles: d.page ?? 0, list_date: s.list_date || null };
+  }
+
   // 5. backfill — one unit per tick, only with budget left
   await step(ctx, 'backfill', async () => {
     if (ctx.upstream >= UPSTREAM_BUDGET) return 'budget_spent';
-    // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue
+    // Two lanes alternate by tick so neither starves the other: official ranking history (point-in-time
+    // lists) and match history (Slam jobs, then the calendar queue).
+    if (Math.floor(started.getTime() / 120000) % 2 === 1) {
+      const lane = await rankingHistoryStep();
+      if (lane !== 'rank_history_complete') return lane;
+    }
+    // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue.
+    // A source that refuses us (403 / challenge) is recorded and skipped for a week — never worked around.
     for (const y of WIMBLEDON_YEARS) {
       if (await kv.get(`bf:wim:${y}`)) continue;
       const r = await wimbledonMen(ctx, y);
       if (r.state === 'PASS') await kv.put(`bf:wim:${y}`, iso(new Date()));
+      else if (r.state === 'BLOCKED_BY_ACCESS_CONTROL') { await kv.put(`bf:wim:${y}`, `blocked:${iso(new Date())}`, { expirationTtl: 7 * 86400 }); continue; }
       return { wimbledon_ms: y, ...r };
     }
     const ao = (await kv.get('bf:ao', 'json')) || { year: 2026, day: 1 };
@@ -177,12 +194,7 @@ async function tickInner(env, store, kv, force) {
       await kv.put('bf:events', JSON.stringify(queue));
       return { editions: done, remaining: queue.length };
     }
-    const rk = (await kv.get('bf:rank', 'json')) || { date: addDays(wta.rankingMonday(started), -7) };
-    if (rk.date < RANK_HISTORY_FLOOR) return 'rank_history_complete';
-    const s = await rankingStep(ctx, 'singles', rk.date, 6);
-    const d = s.done ? await rankingStep(ctx, 'doubles', rk.date, 6) : { done: false };
-    if (s.done && d.done) await kv.put('bf:rank', JSON.stringify({ date: addDays(rk.date, -7) }));
-    return { ranking_history: rk.date, singles: s.page, doubles: d.page ?? 0 };
+    return rankingHistoryStep();
   });
 
   // 5b. daily Tennis DNA snapshots (stored values the API / PBEcast read)

@@ -6,7 +6,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { STATIC_ROUTES, resolveRoute } from '../src/lib/routes.js';
-import { routeMeta, headHtml, SITE, breadcrumb } from '../src/seo/meta.js';
+import { routeMeta, headHtml, SITE, OG_VERSION, breadcrumb } from '../src/seo/meta.js';
 
 const DIST = path.resolve('dist');
 const base = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
@@ -21,7 +21,10 @@ const written = [];
 for (const r of STATIC_ROUTES) {
   const resolved = resolveRoute(r.path);
   const crumbs = r.path === '/' ? null : breadcrumb([['PropBetEdge Tennis', '/'], [r.title.split(' — ')[0].split(' | ')[0], r.path]]);
-  const m = routeMeta(resolved, { jsonld: crumbs ? [crumbs] : [] });
+  // rankings pages share the dynamic list card (tennis-web renders it from the stored official list)
+  const list = { '/rankings/women': 'wta-singles', '/rankings/women/doubles': 'wta-doubles' }[r.path];
+  const image = list ? { url: `${SITE}/og/rankings/${list}.png?v=${OG_VERSION}`, type: 'image/png', width: 1200, height: 630, alt: `PropBetEdge Tennis — ${r.title.split(' | ')[0]}` } : undefined;
+  const m = routeMeta(resolved, { jsonld: crumbs ? [crumbs] : [], image });
   const file = r.path === '/' ? 'index.html' : `${r.path.slice(1)}.html`;
   fs.mkdirSync(path.dirname(path.join(DIST, file)), { recursive: true });
   fs.writeFileSync(path.join(DIST, file), withHead(m, { preload: r.path === '/' }));
