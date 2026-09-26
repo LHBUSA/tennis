@@ -1,0 +1,60 @@
+{
+  "checked_at": "2026-09-26T19:49:06.166Z",
+  "result": "PASS",
+  "summary": {
+    "pass": 11,
+    "fail": 0
+  },
+  "checks": [
+    {
+      "name": "tennis-news health",
+      "result": "PASS",
+      "mode": "shadow",
+      "editorial": "OPENAI SECRET REQUIRED (baseline fallback / HOLD only)"
+    },
+    {
+      "name": "public list contains published stories only",
+      "result": "PASS",
+      "published": 0
+    },
+    {
+      "name": "DB: no published story without passing gates",
+      "result": "PASS",
+      "violations": 0
+    },
+    {
+      "name": "held tang-xu-edge-kato-perez-in-a-deciding-se: API 404 without token",
+      "result": "PASS"
+    },
+    {
+      "name": "held tang-xu-edge-kato-perez-in-a-deciding-se: page 404 + noindex",
+      "result": "PASS"
+    },
+    {
+      "name": "held falkowska-smith-win-the-ankara-125-doubl: API 404 without token",
+      "result": "PASS"
+    },
+    {
+      "name": "held falkowska-smith-win-the-ankara-125-doubl: page 404 + noindex",
+      "result": "PASS"
+    },
+    {
+      "name": "held jorge-jorge-win-the-porto-125-doubles-ti: API 404 without token",
+      "result": "PASS"
+    },
+    {
+      "name": "held jorge-jorge-win-the-porto-125-doubles-ti: page 404 + noindex",
+      "result": "PASS"
+    },
+    {
+      "name": "sitemap lists no held story",
+      "result": "PASS",
+      "held_checked": 3
+    },
+    {
+      "name": "sitemap lists every published story",
+      "result": "PASS",
+      "published": 0
+    }
+  ]
+}
