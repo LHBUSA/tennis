@@ -4,6 +4,7 @@ dist/
 .env
 .env.*
 !.env.example
+!.env.production
 qa-artifacts/
 *.log
 .DS_Store

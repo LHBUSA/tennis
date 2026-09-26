@@ -12,7 +12,7 @@ export class StoreError extends Error {
   }
 }
 
-export function storeFromEnv(env, { fetch: f = globalThis.fetch } = {}) {
+export function storeFromEnv(env, { fetch: f = (...a) => globalThis.fetch(...a) } = {}) {
   const url = env?.TENNIS_MODEL_SUPABASE_URL;
   const key = env?.TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return null;
@@ -24,7 +24,7 @@ export class Store {
   constructor(url, key, f) {
     this.base = `${url.replace(/\/+$/, '')}/rest/v1`;
     this.key = key;
-    this.f = f;
+    this.f = f; // always a plain function: Workers throw 'Illegal invocation' on a detached method call
     this.requests = 0;
   }
 
@@ -34,7 +34,8 @@ export class Store {
 
   async req(method, path, { body, prefer } = {}) {
     this.requests += 1;
-    const res = await this.f(`${this.base}/${path}`, { method, headers: this.headers(prefer ? { prefer } : {}), body: body === undefined ? undefined : JSON.stringify(body) });
+    const call = this.f;
+    const res = await call(`${this.base}/${path}`, { method, headers: this.headers(prefer ? { prefer } : {}), body: body === undefined ? undefined : JSON.stringify(body) });
     const text = await res.text();
     if (!res.ok) throw new StoreError(res.status, text, `${method} ${path.split('?')[0]}`);
     return text ? JSON.parse(text) : null;

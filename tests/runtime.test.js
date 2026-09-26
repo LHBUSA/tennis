@@ -132,3 +132,16 @@ test('adapters fail independently', async () => {
   assert.deepEqual(out.map((o) => o.state), ['ERROR', 'PASS', 'DEGRADED']);
   assert.equal(out[2].error, 'shape_drift');
 });
+
+test('clients call fetch detached (Workers throw "Illegal invocation" otherwise)', async () => {
+  const { Store } = await import('../workers/shared/store/postgrest.js');
+  function strictFetch() {
+    'use strict';
+    if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
+    return Promise.resolve(new Response('[]', { status: 200, headers: { 'content-type': 'application/json' } }));
+  }
+  const store = new Store('https://tkmlnhmylqnttmnsnief.supabase.co', 'k', strictFetch);
+  assert.deepEqual(await store.select('t'), []);
+  const c = new SourceClient({ fetch: strictFetch, sleep: async () => {}, jitter: () => 0 });
+  assert.equal((await c.get('https://a.test/')).status, 200);
+});

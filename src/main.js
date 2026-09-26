@@ -17,6 +17,13 @@ const PAGES = {
   labs: () => import('./pages/labs.js'),
   'not-found': () => import('./pages/not-found.js')
 };
+const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
+Object.assign(PAGES, {
+  live: lp('live'), tenniscast: lp('live'), matches: lp('matches'), match: lp('match'),
+  tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'),
+  rankings: lp('rankings'), 'rankings-list': lp('rankings'),
+  players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h')
+});
 const dataPage = () => import('./pages/data-page.js');
 
 const app = document.getElementById('app');

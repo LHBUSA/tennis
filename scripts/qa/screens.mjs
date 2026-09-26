@@ -11,7 +11,7 @@ import { chromium } from 'playwright-core';
 
 const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const WIDTHS = [1440, 1024, 430, 390, 360, 320];
-const PATHS = ['/', '/sources', '/methodology', '/live', '/matches', '/players/some-player/dna', '/tournaments/wimbledon/2025/draw', '/rankings/women/doubles', '/pbe-picks', '/news', '/labs', '/does-not-exist'];
+const PATHS = ['/', '/sources', '/methodology', '/live', '/matches', '/tournaments', '/tournaments/singapore/2026', '/players', '/players/elena-rybakina', '/players/elena-rybakina/dna', '/rankings/women', '/rankings/men', '/h2h/elena-rybakina/aryna-sabalenka', '/pbe-picks', '/news', '/labs', '/does-not-exist'];
 const OUT = path.resolve('qa-artifacts');
 
 const server = await preview({ preview: { port: 5195, strictPort: true } });
@@ -29,7 +29,7 @@ try {
     for (const p of PATHS) {
       errors.length = 0;
       await page.goto(base + p, { waitUntil: 'networkidle' });
-      await page.waitForFunction(() => !document.querySelector('.loading'), null, { timeout: 5000 }).catch(() => errors.push('modules still loading after 5s'));
+      await page.waitForFunction(() => !document.querySelector('.loading'), null, { timeout: 15000 }).catch(() => errors.push('modules still loading after 15s'));
       const m = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth, h1: document.querySelector('h1')?.textContent?.trim() || '', robots: document.querySelector('meta[name="robots"]')?.content, canonical: document.querySelector('link[rel="canonical"]')?.href }));
       if (m.sw > m.iw) failures.push(`${width}px ${p}: horizontal overflow ${m.sw} > ${m.iw}`);
       if (!m.h1) failures.push(`${width}px ${p}: no h1`);

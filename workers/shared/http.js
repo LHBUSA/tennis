@@ -33,7 +33,7 @@ export class SourceClient {
    * @param {(ms:number)=>Promise<void>} [o.sleep]
    * @param {()=>number} [o.now]
    */
-  constructor({ policies = {}, fetch: f = globalThis.fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)), now = () => Date.now(), jitter = secureJitter } = {}) {
+  constructor({ policies = {}, fetch: f = (...a) => globalThis.fetch(...a), sleep = (ms) => new Promise((r) => setTimeout(r, ms)), now = () => Date.now(), jitter = secureJitter } = {}) {
     this.policies = policies;
     this.fetch = f;
     this.sleep = sleep;
@@ -88,7 +88,8 @@ export class SourceClient {
         const ctl = new AbortController();
         const timer = setTimeout(() => ctl.abort(), p.timeout_ms);
         try {
-          res = await this.fetch(url, { headers: h, signal: ctl.signal, redirect: 'follow' });
+          const call = this.fetch; // detached: Workers reject fetch invoked with a foreign `this`
+          res = await call(url, { headers: h, signal: ctl.signal, redirect: 'follow' });
         } finally {
           clearTimeout(timer);
         }
