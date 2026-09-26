@@ -78,9 +78,10 @@ for (const a of list) {
   const r = await page.evaluate(() => ({
     robots: document.querySelector('meta[name="robots"]')?.content,
     ents: [...document.querySelectorAll('.nw-ent, .nwv-chip, .nwv-face')].map((x) => x.getAttribute('href')),
-    share: [...document.querySelectorAll('.nwv .share a, .nwv .share button')].map((x) => x.getAttribute('href') || x.dataset.copy),
+    share: [...document.querySelectorAll('.nwm .share a, .nwm .share button')].map((x) => x.getAttribute('href') || x.dataset.copy),
     pbecast: [...document.querySelectorAll('a[href^="/pbecast/"]')].length,
-    heroImgs: [...document.querySelectorAll('.nwm-hero img')], heroSvg: document.querySelectorAll('.nwm-hero svg, .nwx-thumb svg, .nwx-hero svg').length, heroMono: [...document.querySelectorAll('.nwm-hero img')].filter((i) => i.src.startsWith('data:')).length, cardSvg: document.querySelectorAll('.nw-card svg').length.map((i) => ({ ok: i.complete && i.naturalWidth > 0, eager: i.loading === 'eager', w: i.getAttribute('width') })),
+    heroImgs: [...document.querySelectorAll('.nwm-hero img')].map((i) => ({ ok: i.complete && i.naturalWidth > 0, eager: i.loading === 'eager', w: i.getAttribute('width') })),
+    heroSvg: document.querySelectorAll('.nwm-hero svg, .nwx-thumb svg, .nwx-hero svg').length, heroMono: [...document.querySelectorAll('.nwm-hero img')].filter((i) => i.src.startsWith('data:')).length, cardSvg: document.querySelectorAll('.nw-card svg').length,
     sw: document.documentElement.scrollWidth, iw: innerWidth
   }));
   const url = `${BASE}/news/${a.slug}`;
