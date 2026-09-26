@@ -323,7 +323,7 @@ async function rgIdentityIndex(ctx) {
   return { index: { byExternal, players: players.filter((p) => atp.has(p.pbe_player_id)) }, atp };
 }
 
-export async function rolandGarrosStep(ctx, { lookups = 25 } = {}) {
+export async function rolandGarrosStep(ctx, { lookups = 60 } = {}) {
   const st = (await ctx.kv.get('bf:rg', 'json')) || { e: 0, year: 2026 };
   if (st.e >= RG_EVENTS.length) return { done: true };
   const event = RG_EVENTS[st.e];
