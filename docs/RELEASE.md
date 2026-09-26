@@ -24,16 +24,16 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
-## Current production (2026-09-26 22:30 UTC)
+## Current production (2026-09-26 23:30 UTC)
 
 | Component | Current | Rollback target |
 |---|---|---|
-| Vercel `tennis` (tennis.propbetedge.ai) | main HEAD — this docs commit on top of efdde5f (efdde5f = `dpl_EJPAgTUg9iFWvPX3cjwMKNhYNPit`) | `dpl_EJPAgTUg9iFWvPX3cjwMKNhYNPit` (efdde5f), then `dpl_6fuAg99Tam8ASYSB1JhVM1osxgzk` (5365a02, pre-men's-productization) |
-| tennis-web | d79cf4bb-d17e-4732-be60-a806d9e2e970 | 825f1fd9-ac18-417f-854e-904aa20d552f |
-| tennis-api | 9d1429c8-24c8-4b31-bf94-925e2bd574f4 | 747792c0-91a0-4c5e-a42a-6708790b496b |
+| Vercel `tennis` (tennis.propbetedge.ai) | main HEAD — this docs commit on top of ac58f10 (ac58f10 = `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W`) | `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W` (ac58f10), then `dpl_F3CxdfsLu57sAHAMtAontuesuk4V` (e21d468) |
+| tennis-web | 8d6db251-db10-44ff-b664-492d046a4741 | 6334502d-2f1d-4286-8124-c45a35d4bd52 |
+| tennis-api | 37331ed5-76e2-48fd-9975-b74787e8b668 | 9d1429c8-24c8-4b31-bf94-925e2bd574f4 |
 | tennis-ingest | 76604c7d-1bfb-4db3-b5cc-9addb7784e0d | abdf960a-ff9b-4e89-beaf-aa1010589cdb |
 | tennis-live | 3cfd7fd6-e635-4d55-aeab-4849200e0096 | c38a77b3-1d6a-49ff-ad46-6eeddec98068 |
-| tennis-news | 847e4338-dd3b-43b7-bd37-a09c6377457c (SHADOW; `OPENAI_API_KEY` set 2026-09-26, model canary PASS) | 595afd96-228b-4f20-863b-a31938fdbe33 |
+| tennis-news | c5b5e942-43a7-4d9d-afde-a833b03658ea (**PUBLISH**, owner-approved) | 847e4338-dd3b-43b7-bd37-a09c6377457c (shadow) |
 
 Rows below are the historical deploy log; the table above is authoritative for what is running.
 
@@ -55,3 +55,7 @@ Rows below are the historical deploy log; the table above is authoritative for w
 | 2026-09-26 | tennis-api | 9d1429c8 | 747792c0 | /v1/men + /v1/men/players; schedule gender filter |
 | 2026-09-26 | tennis-web | 588b151b → d79cf4bb | 825f1fd9 | sitemap from the route table + men's profiles/editions; men's heads never mention a ranking |
 | 2026-09-26 | Vercel | dpl_EJPAgTUg9iFWvPX3cjwMKNhYNPit (efdde5f) | dpl_6fuAg99Tam8ASYSB1JhVM1osxgzk | /men, Men + News in nav, homepage men/women balance, players/schedule filters, rankings hub |
+| 2026-09-26 | tennis-news | c5b5e942 | 847e4338 | NEWS_PUBLISH_ENABLED=true (owner-approved); 3 stories republished through the same gates |
+| 2026-09-26 | tennis-api | 37331ed5 | 9d1429c8 | /v1/slams (tournament-first, all five events) |
+| 2026-09-26 | tennis-web | 6334502d → 8d6db251 | d79cf4bb | /news indexable in sitemap; app shell cached 30 s (deploy-skew fix) |
+| 2026-09-26 | Vercel | dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W (ac58f10) | dpl_EJPAgTUg9iFWvPX3cjwMKNhYNPit | one Tennis product (Men out of nav; activity-first homepage); ssr heads kept on first load |
