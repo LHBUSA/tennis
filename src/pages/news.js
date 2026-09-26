@@ -142,7 +142,7 @@ function heroArt(team, opp) {
   const big = team.length > 1 ? 176 : 240;
   return html`<div class="nwv-art${team.length > 1 ? ' duo' : ''}">
     <div class="nwv-faces">${team.map((p) => html`<a class="nwv-face" href="/players/${p.slug}">${avatar(p, { size: 'square', px: big, eager: true })}<span><b>${p.name}</b>${p.nationality ? html`<small>${p.nationality}</small>` : ''}</span></a>`)}</div>
-    ${opp.length ? html`<p class="nwv-def"><span>def.</span>${opp.map((p) => html`<a href="/players/${p.slug}">${avatar(p, { px: 30 })}${p.name}</a>`)}</p>` : ''}
+    ${opp.length ? html`<p class="nwv-def"><span>def.</span>${opp.map((p) => html`<a href="/players/${p.slug}">${avatar(p, { px: 30, eager: true })}${p.name}</a>`)}</p>` : ''}
   </div>`;
 }
 
