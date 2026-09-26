@@ -73,3 +73,31 @@ export function situationLine(sit, name = (s) => s) {
   if (sit.tiebreak) return { kind: 'tiebreak', text: sit.match_tiebreak ? 'MATCH TIEBREAK' : 'TIEBREAK', side: null };
   return null;
 }
+
+/** A set is complete by the rules of tennis (6+ games and two clear, 7-6 / 13-12 tiebreak sets, or a won match tiebreak). */
+export function isSetComplete(s) {
+  if (!s) return false;
+  if (s.mtb || s.match_tiebreak) return !!s.tb && Math.max(s.tb.A, s.tb.B) >= 10 && Math.abs(s.tb.A - s.tb.B) >= 2;
+  const hi = Math.max(s.A, s.B);
+  const lo = Math.min(s.A, s.B);
+  return hi >= 6 && (hi - lo >= 2 || (hi === 7 && lo === 6) || (hi === 13 && lo === 12));
+}
+
+/**
+ * Key marker for one REAL point, from the official score progression only: FINAL (match over), SET (the set in
+ * play became complete on this point), BREAK (the receiver won the game). Point-by-point states list a set only
+ * once its first game is won, so the set in play is found by counting completed sets.
+ */
+export function pointMarker(prev, cur, e) {
+  if (!cur) return null;
+  if (cur.status === 'completed' || cur.status === 'retired') return 'FINAL';
+  if (!prev) return null;
+  const done = (st) => (st.sets || []).filter(isSetComplete).length;
+  const k = done(prev);
+  const setEnded = done(cur) > k;
+  const games = (st, idx) => (st.sets?.[idx] ? st.sets[idx].A + st.sets[idx].B : 0);
+  const gameWon = setEnded || games(cur, k) > games(prev, k);
+  if (setEnded) return 'SET';
+  if (gameWon && e?.server_side && e?.winner_side && e.winner_side !== e.server_side) return 'BREAK';
+  return null;
+}

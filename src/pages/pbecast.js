@@ -18,18 +18,19 @@ import { eventLabel, roundLabel, fmtDuration, pct, cap, statusLabel } from '../u
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
-import { courtSituation, situationLine } from '../lib/pbecast-state.js';
+import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
+import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 
 const MODE_LABEL = {
   point_by_point_live: 'Point-by-point live', point_by_point_replay: 'Replay · point-by-point',
   observed_live: 'Observed live', observed_replay: 'Replay · observed score feed', scheduled: 'Scheduled', result_only: 'Result only'
 };
 const REASON = { ace: 'Ace', double_fault: 'Double fault', winner: 'Winner', forced_error: 'Forced error', unforced_error: 'Unforced error', service_winner: 'Service winner', point: 'Point' };
-const SPEEDS = [0.5, 1, 2, 4];
 // observed transition -> court motion (no ball, no rally, no player movement: none of that is in the feed)
 const ANIM = { game_won: 'game', break: 'game', set_won: 'set', tiebreak: 'game', match_end: 'end', retired: 'end', walkover: 'end', suspended: 'pause', resumed: 'point', score_update: 'point', point: 'point', ace: 'point', double_fault: 'point', winner: 'point', unforced_error: 'point', forced_error: 'point' };
 
-const surname = (p) => (p?.name || '').split(' ').slice(-1)[0];
+// the stored surname when the source gave one (all-caps sources are title-cased), else the last word of the name
+const surname = (p) => (p?.last_name ? p.last_name.split(' ').map((w) => (w === w.toUpperCase() && w.length > 1 ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(' ') : (p?.name || '').split(' ').slice(-1)[0]);
 const sideName = (m, s) => (m.players?.[s] || m.sides?.[s]?.players || []).map(surname).join(' / ') || s;
 
 /** Human text for one event — only facts the event carries. Exported for truth tests. */
@@ -163,7 +164,7 @@ function modeBadge(mode, evs) {
   return html`<div class="pbc-mode k-${key}" role="status"><span class="pbc-mode-l">${mode.includes('live') ? html`<i class="dot"></i>` : ''}${label}</span><small>${sub}</small></div>`;
 }
 
-const lastName = (p) => (p?.name || '').split(' ').slice(-1)[0];
+const lastName = (p) => surname(p);
 function identity(m, s, state, final) {
   const ps = m.players?.[s] || m.sides?.[s]?.players || [];
   const serving = !final && state?.server === s;
@@ -235,147 +236,306 @@ function momentRail(evs, m, pos, isPoint) {
   })}</ol>`;
 }
 
+// ================= PBEcast V3: one broadcast stage, updated in place =================
+// Truth contract unchanged: the court shows the serve indicator (never a position), a tracked ball only from
+// source coordinates, and moments only from stored events. Pacing is presentation-only (pbecast-player.js).
+
+const KEY_EVENTS = { break: 'BREAK', set_won: 'SET', tiebreak: 'TB', retired: 'RET', match_end: 'FINAL', walkover: 'W/O', suspended: 'SUSP' };
+const surnameUp = (m, s) => sideName(m, s).toUpperCase();
+const setsWon = (state, s) => (state?.sets || []).filter((x, i, a) => {
+  const done = i < a.length - 1 || ['completed', 'retired'].includes(state.status);
+  return done && (x.tb && x.A === x.B ? x.tb[s] > x.tb[s === 'A' ? 'B' : 'A'] : x[s] > x[s === 'A' ? 'B' : 'A']);
+}).length;
+
+function v3Score(m, state, prev) {
+  const final = ['completed', 'retired', 'walkover'].includes(state?.status || m.status);
+  const row = (s) => {
+    const ps = m.players?.[s] || m.sides?.[s]?.players || [];
+    const sets = state?.sets || [];
+    return html`<div class="v3s-row${final && m.winner_side === s ? ' win' : ''}${!final && state?.server === s ? ' is-srv' : ''}">
+      <span class="v3s-srv" aria-hidden="true"></span>
+      <span class="v3s-n">${ps.map((p) => lastName(p)).join(' / ')}${!final && state?.server === s ? html`<span class="sr"> serving</span>` : ''}</span>
+      <span class="v3s-sets tabnum">${sets.map((x, i) => html`<b class="${prev && prev.sets?.[i]?.[s] !== x[s] ? 'chg' : ''}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`)}</span>
+      <span class="v3s-pt tabnum${prev && prev.point?.[s] !== state?.point?.[s] ? ' chg' : ''}">${!final && state?.point ? state.point[s] : ''}</span>
+    </div>`;
+  };
+  return html`${row('B')}${row('A')}`;
+}
+
+function pidShell(m, s) {
+  const ps = m.players?.[s] || m.sides?.[s]?.players || [];
+  return html`<div class="v3-pid v3-pid-${s}" data-pid="${s}">
+    <span class="v3-av">${ps.map((p) => avatar(p, { size: 'square', px: 72, eager: true }))}</span>
+    <span class="v3-who"><b class="v3-sn">${ps.map(lastName).join(' / ')}</b><small class="v3-full">${ps.map((p) => p.name).join(' / ')}</small><small class="v3-meta">${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
+    <span class="v3-now"><span class="v3-tagsrv" data-srv hidden>SERVING</span><span class="v3-ctx tabnum" data-ctx></span></span>
+  </div>`;
+}
+
+function momentPanel(e, m, state, marker = null) {
+  if (!e) return html`<p class="v3-mo-empty">Waiting for the first observed event.</p>`;
+  const t0 = eventText(e, m);
+  // a real point that decided a game/set/match leads with that moment; the point reason stays underneath
+  const t = marker ? { ...t0, tag: marker === 'FINAL' ? 'MATCH' : marker, line: `${t0.tag}: ${t0.line}` } : t0;
+  const photo = e.winner_side ? (m.players?.[e.winner_side] || m.sides?.[e.winner_side]?.players || [])[0] : null;
+  const cur = state?.sets?.at(-1);
+  const when = e.event_at || e.observed_at;
+  const speed = e.serve_speed_kmh != null ? `${Math.round(e.serve_speed_kmh)} km/h` : null;
+  const rally = e.rally_length != null ? `${e.rally_length}-shot rally` : null;
+  return html`<div class="v3-mo k-${String(t.tag).replace(/\s+/g, '-').toLowerCase()}" data-key="${e.event_id}">
+    <div class="v3-mo-top"><span class="v3-mo-tag">${t.tag}</span><span class="v3-mo-q q-${t.quality}">${t.quality === 'point' ? 'POINT' : 'OBSERVED'}</span></div>
+    <div class="v3-mo-body">${photo ? avatar(photo, { size: 'square', px: 44 }) : ''}<p class="v3-mo-line">${t.line}</p></div>
+    <p class="v3-mo-meta tabnum">${cur ? `Set ${state.sets.length} · ${cur.A}–${cur.B}` : ''}${state?.point && !['completed', 'retired'].includes(state.status) ? ` · ${state.point.A}–${state.point.B}` : ''}${[speed, rally].filter(Boolean).map((x) => ` · ${x}`).join('')}${when ? html` · <time datetime="${when}">${t.quality === 'point' ? '' : 'Observed '}${new Date(when).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</time>` : ''}</p>
+  </div>`;
+}
+
+function recentList(evs, pos, m) {
+  const list = evs.slice(Math.max(0, pos - 4), pos + 1).reverse();
+  const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
+  return html`<ol class="v3-rc">${list.map((e, i) => { const t = eventText(e, m); const st = e.state; const when = e.event_at || e.observed_at; return html`<li class="${i === 0 ? 'on' : ''}">
+    <span class="v3-rc-av">${e.winner_side && photoOf(e.winner_side) ? avatar(photoOf(e.winner_side), { px: 26 }) : ''}</span>
+    <b class="v3-rc-tag t-${String(t.tag).replace(/\s+/g, '-').toLowerCase()}">${t.tag}</b>
+    <span class="v3-rc-sc tabnum">${st ? (st.sets || []).map((x) => `${x.A}-${x.B}`).join(' ') : ''}</span>
+    <span class="v3-rc-q">${t.quality === 'point' ? 'POINT' : 'OBS'}${when ? ` · ${new Date(when).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : ''}</span></li>`; })}</ol>`;
+}
+
+function timelineBar(evs, m) {
+  const groups = [];
+  evs.forEach((e, i) => {
+    const set = e.set_number || e.state?.sets?.length || 1;
+    if (!groups.length || groups.at(-1).set !== set) groups.push({ set, items: [] });
+    let key = KEY_EVENTS[e.event_type] || null;
+    if (!key && e.quality === 'point_event') key = pointMarker(evs[i - 1]?.state, e.state, e); // from the official score progression
+    groups.at(-1).items.push({ i, e, key, kind: key ? ({ FINAL: 'match_end', SET: 'set_won', BREAK: 'break' }[key] || e.event_type) : e.event_type });
+  });
+  return html`<div class="v3-tl" role="group" aria-label="Match timeline">${groups.map((g) => html`<div class="v3-tl-set"><span class="v3-tl-h">SET ${g.set}</span><div class="v3-tl-track">${g.items.map(({ i, e, key, kind }) => html`<button type="button" class="v3-tl-e${key ? ` key k-${kind}` : ''}" data-seek="${i}" title="${eventText(e, m).tag}" aria-label="Event ${i + 1}: ${eventText(e, m).tag}">${key ? html`<span>${key}</span>` : ''}</button>`)}</div></div>`)}</div>`;
+}
+
+function controlsBar(st, count) {
+  if (st.mode === 'live') {
+    return html`<div class="v3-ctl" role="group" aria-label="Live controls">
+      ${st.paused ? html`<button type="button" class="v3-b v3-golive" data-act="live">● RETURN TO LIVE</button>` : html`<span class="v3-livepill"><i></i>LIVE · following</span><button type="button" class="v3-b" data-act="pause-live">Pause updates</button>`}
+      <button type="button" class="v3-b" data-act="prev" aria-label="Previous event">‹ Prev</button>
+      <button type="button" class="v3-b" data-act="next" aria-label="Next event">Next ›</button>
+      <span class="v3-pos tabnum">${st.pos + 1}/${count}</span>
+      <button type="button" class="v3-b v3-fs" data-act="fs">Fullscreen</button></div>`;
+  }
+  return html`<div class="v3-ctl" role="group" aria-label="Replay controls">
+    <button type="button" class="v3-b" data-act="start" aria-label="Back to the first event">↶ Start</button>
+    <button type="button" class="v3-b" data-act="prev" aria-label="Previous event">‹</button>
+    <button type="button" class="v3-b v3-play" data-act="play" aria-label="${st.playing ? 'Pause replay' : 'Play replay'}">${st.playing ? '❚❚ PAUSE' : st.done ? '↻ REPLAY' : '▶ PLAY'}</button>
+    <button type="button" class="v3-b" data-act="next" aria-label="Next event">›</button>
+    <span class="v3-speed" role="group" aria-label="Replay speed (presentation only)"><small>Replay speed</small>${SPEEDS.map((sp) => html`<button type="button" class="v3-chip${sp === st.speed ? ' on' : ''}" data-speed="${sp}" aria-pressed="${sp === st.speed}">${sp}×</button>`)}</span>
+    <span class="v3-pos tabnum">${st.pos + 1}/${count}</span>
+    <button type="button" class="v3-b v3-fs" data-act="fs">Fullscreen</button></div>`;
+}
+
 export function mount(root, { params, live = null }) {
   const ctl = new AbortController();
   const q = new URLSearchParams(location.search);
-  const st = { data: null, pos: 0, playing: false, speed: 1, timer: null, poll: null, lastEvent: null, following: true, animate: false, prevState: null };
-  render(root, html`<div data-switch></div><div class="pbc" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
-  // live switcher: separate container so the court's redraws never reset it; polls the canonical live list
+  let data = null;
+  let ps = null; // playback state (pbecast-player.js)
+  let timer = null;
+  let poll = null;
+  let queue = [];
+  let lastPainted = -1;
+  let ctlSig = '';
+  render(root, html`<div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   const drawSwitch = (list) => { const el = root.querySelector('[data-switch]'); if (el) render(el, liveSwitcher(switcherItems(list, params.id))); };
   const loadLive = async () => { try { const r = await api('/v1/live', { signal: ctl.signal }); if (Array.isArray(r.data)) drawSwitch(r.data); } catch { /* aborted */ } };
   if (live) drawSwitch(live);
   loadLive();
   const livePoll = setInterval(loadLive, 30000);
+  const $ = (sel) => root.querySelector(sel);
 
-  const draw = () => {
-    const d = st.data;
-    const m = d.match;
-    const evs = d.events;
-    const cur = evs.length ? evs[Math.min(st.pos, evs.length - 1)] : null;
-    const state = cur?.state || { status: m.status, sets: (m.sets || []).map((x) => ({ A: x.A, B: x.B, tb: x.tb })), point: m.live?.point || null, server: m.live?.server || null };
-    const tb = inTiebreakScore(state.point);
-    const isPoint = d.quality === 'point_event';
-    // the court banner is for real moments only; plain observed score updates stay in the rail
-    const tagNow = cur ? eventText(cur, m).tag : null;
-    const banner = tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
-    const url = `${location.origin}/pbecast/${m.id}${cur ? `?t=${cur.event_id}` : ''}`;
-    const title = `${sideName(m, 'A')} vs ${sideName(m, 'B')}`;
-    const replay = d.mode.includes('replay');
-    const final = ['completed', 'retired', 'walkover'].includes(state.status);
-    const sit = final ? null : situationLine(courtSituation(state, m.format), (x) => sideName(m, x));
-    // Level-1 motion: only a REAL observed transition animates (a new live event or one forward step).
-    const anim = st.animate && cur ? ANIM[cur.event_type] || 'point' : null;
-    st.animate = false;
-    // the half of the court that won the observed/official change (never a rally position)
-    const hl = anim && cur?.winner_side && ['point', 'game', 'set', 'end'].includes(anim) ? cur.winner_side : isPoint && cur ? cur.winner_side : null;
-    render(root.querySelector('[data-pbc]'), html`
-      <div class="pbc-top page">
-        ${scoreboard(m, state, d.mode, anim ? st.prevState : null)}
-      </div>
-      <div class="pbc-stage-wrap page">
-        ${modeBadge(d.mode, evs)}
-        <div class="pbc-stage${final ? ' is-final' : ''}">
-          <div class="pbc-side pbc-side-B">${identity(m, 'B', state, final)}</div>
-          <section class="pbc-court" aria-label="Court">
-            <div class="court-wrap${d.mode.includes('live') && !final ? ' is-live' : ''}${sit ? ` sit-${sit.kind}` : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''} ${hl ? raw(`data-hl="${hl}"`) : ''}>
-              ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: tb, highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null })}
-              ${sit ? html`<span class="court-sit k-${sit.kind}" role="status">${sit.text}${state.point && state.server ? html`<small class="tabnum">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}</small>` : ''}</span>` : !final && state.point && state.server ? html`<span class="court-pt tabnum" aria-label="Point score, server first">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}<small>server first</small></span>` : ''}
-              ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(banner).replace(/\s+/g, '-').toLowerCase()}">${banner}</span>` : ''}
-              ${!final && state.server ? html`<span class="court-key"><i class="k-serve"></i> Serve indicator — not tracked position</span>` : ''}
-            </div>
-          </section>
-          <div class="pbc-side pbc-side-A">${identity(m, 'A', state, final)}</div>
-        </div>
-        ${evs.length ? html`<div class="rp" role="group" aria-label="Replay controls">
-          <button type="button" data-rp="first" aria-label="First event">|◀</button>
-          <button type="button" data-rp="prev" aria-label="Previous event">◀</button>
-          <button type="button" data-rp="play" class="rp-play" aria-label="${st.playing ? 'Pause' : 'Play'}">${st.playing ? 'Pause' : 'Play'}</button>
-          <button type="button" data-rp="next" aria-label="Next event">▶</button>
-          <button type="button" data-rp="last" aria-label="Latest event">▶|</button>
-          <label class="rp-speed">Speed <select data-rp-speed>${SPEEDS.map((sp) => html`<option value="${sp}" ${sp === st.speed ? 'selected' : ''}>${sp}×</option>`)}</select></label>
-          <input type="range" min="0" max="${evs.length - 1}" value="${st.pos}" data-rp-range aria-label="Event position">
-          <span class="rp-pos tabnum">${st.pos + 1}/${evs.length}</span>
-        </div>` : ''}
-        <div class="pbc-actions">
-          <button type="button" class="btn line" data-fs>Fullscreen PBEcast</button>
-          ${shareBar({ url, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}
-        </div>
-        <p class="pbc-note">${freshnessBadge(d.meta)} ${d.cadence_note}${isPoint ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'}</p>
-      </div>
-      ${intelStrip(d, m, state, evs, st.pos)}
-      <section class="pbc-feed page" aria-label="${isPoint ? 'Points' : 'Observed updates'}">
-        <h2>${isPoint ? (replay ? 'Every point' : 'Live points') : 'Match moments'} <small>${isPoint ? 'official point-by-point' : 'observed score changes'}</small></h2>
-        ${evs.length ? momentRail(evs, m, st.pos, isPoint) : emptyModule(d.meta, d.mode === 'scheduled' ? 'PBEcast starts when live coverage begins.' : 'No stored events for this match: it finished before live observation began.')}
-      </section>
-      <div class="page pbc-panels">
-        <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${d.moments.length ? html`<div class="km">${d.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
-        <section class="mod"><header class="mod-h"><h2>Match progression</h2></header><div class="mod-b">${timeline(d, st.pos)}</div></section>
-        <div class="grid-2">
-          <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${d.control ? html`<div class="ctl"><span style="flex:${d.control.A}">${sideName(m, 'A')} ${d.control.A}</span><span style="flex:${d.control.B}">${d.control.B} ${sideName(m, 'B')}</span></div><p class="note">${d.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
-          <section class="mod"><header class="mod-h"><h2>Serve &amp; return</h2></header><div class="mod-b">${statsPanel(d.statistics)}</div></section>
-          <section class="mod"><header class="mod-h"><h2>Player DNA</h2></header><div class="mod-b">${dnaCompare(d, m)}</div></section>
-          <section class="mod"><header class="mod-h"><h2>Head to head</h2></header><div class="mod-b">${d.h2h ? html`<p class="h2h-big tabnum">${sideName(m, 'A')} <b>${d.h2h.A}</b> – <b>${d.h2h.B}</b> ${sideName(m, 'B')}</p>${d.h2h.meetings.length ? html`<ul class="opp">${d.h2h.meetings.map((x) => html`<li><a href="/matches/${x.id}">${x.year || ''} ${x.tournament || ''}</a><b>${x.score || ''}</b></li>`)}</ul>` : ''}<p class="note">${d.h2h.basis}.</p>` : html`<p class="note">Head-to-head is shown for singles.</p>`}</div></section>
-        </div>
-      </div>`);
+  const viewState = (i) => {
+    const m = data.match;
+    const e = data.events[i];
+    return e?.state || { status: m.status, sets: (m.sets || []).map((x) => ({ A: x.A, B: x.B, tb: x.tb })), point: m.live?.point || null, server: m.live?.server || null };
   };
+
+  function buildShell() {
+    const m = data.match;
+    const t = m.tournament || {};
+    const title = `${sideName(m, 'A')} vs ${sideName(m, 'B')}`;
+    render($('[data-pbc]'), html`
+      <h1 class="sr">${title} — PBEcast</h1>
+      <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${roundLabel(m.round)} · ${eventLabel(m.event_type)}${t.surface ? ` · ${cap(t.surface)}` : ''}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
+      <div class="v3-score-wrap page"><div class="v3-score" data-score aria-live="polite"></div></div>
+      <div class="v3-stage page" data-stage>
+        <div class="v3-courtcol">
+          ${pidShell(m, 'B')}
+          <div class="v3-court" data-court></div>
+          ${pidShell(m, 'A')}
+        </div>
+        <section class="v3-moment" aria-label="Current moment" aria-live="polite" data-moment></section>
+        <section class="v3-recent" aria-label="Recent moments"><h2>Recent moments</h2><div data-recent></div></section>
+        <section class="v3-intel" aria-label="Live intelligence" data-intel></section>
+        <div class="v3-controls" data-controls></div>
+        <div class="v3-timeline" data-timeline></div>
+      </div>
+      <p class="pbc-note page">${freshnessBadge(data.meta)} ${data.cadence_note}${data.quality === 'point_event' ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'} <a href="#pbc-more">More intelligence ↓</a></p>
+      <div class="page pbc-panels" id="pbc-more">
+        <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${data.moments.length ? html`<div class="km">${data.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
+        <div class="grid-2">
+          <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${sideName(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${sideName(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Serve &amp; return</h2></header><div class="mod-b">${statsPanel(data.statistics)}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Player DNA</h2></header><div class="mod-b">${dnaCompare(data, m)}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Head to head</h2></header><div class="mod-b">${data.h2h ? html`<p class="h2h-big tabnum">${sideName(m, 'A')} <b>${data.h2h.A}</b> – <b>${data.h2h.B}</b> ${sideName(m, 'B')}</p>${data.h2h.meetings.length ? html`<ul class="opp">${data.h2h.meetings.map((x) => html`<li><a href="/matches/${x.id}">${x.year || ''} ${x.tournament || ''}</a><b>${x.score || ''}</b></li>`)}</ul>` : ''}<p class="note">${data.h2h.basis}.</p>` : html`<p class="note">Head-to-head is shown for singles.</p>`}</div></section>
+        </div>
+        <div class="pbc-actions">${shareBar({ url: `${location.origin}/pbecast/${m.id}`, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}</div>
+      </div>`);
+    if (data.events.length) render($('[data-timeline]'), timelineBar(data.events, m));
+    lastPainted = -1;
+    ctlSig = '';
+  }
+
+  // flash a full-stage moment (SET / MATCH) — driven by a real event only
+  function stageFlash(text, kind) {
+    const stage = $('[data-stage]');
+    if (!stage) return;
+    stage.querySelector('.v3-flash')?.remove();
+    stage.insertAdjacentHTML('beforeend', String(html`<div class="v3-flash k-${kind}" aria-hidden="true"><span>${text}</span></div>`));
+    setTimeout(() => stage.querySelector('.v3-flash')?.remove(), 2200);
+  }
+
+  function paint(animate) {
+    if (!data || !ps) return;
+    const m = data.match;
+    const evs = data.events;
+    const cur = evs.length ? evs[Math.min(ps.pos, evs.length - 1)] : null;
+    const state = viewState(ps.pos);
+    const prev = animate && ps.pos > 0 ? viewState(ps.pos - 1) : null;
+    const final = ['completed', 'retired', 'walkover'].includes(state.status);
+    const isPoint = data.quality === 'point_event';
+    const anim = animate && cur ? ANIM[cur.event_type] || 'point' : null;
+    const tracked = !!cur?.coordinates;
+    const sit = final ? null : situationLine(courtSituation(state, m.format), (x) => sideName(m, x));
+    const hl = anim && cur?.winner_side && ['point', 'game', 'set', 'end'].includes(anim) ? cur.winner_side : isPoint && cur ? cur.winner_side : null;
+    const tagNow = cur ? eventText(cur, m).tag : null;
+    const mkNow = isPoint && cur ? pointMarker(ps.pos > 0 ? viewState(ps.pos - 1) : null, state, cur) : null;
+    const banner = mkNow ? (mkNow === 'FINAL' ? 'MATCH' : mkNow) : tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
+
+    render($('[data-mode]'), modeBadge(data.mode, evs));
+    render($('[data-score]'), v3Score(m, state, prev));
+    render($('[data-court]'), html`<div class="court-wrap${data.mode.includes('live') && !final ? ' is-live' : ''}${tracked ? ' is-tracked' : ''}${sit ? ` sit-${sit.kind}` : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''}>
+      ${tracked ? html`<span class="v3-tracked">TRACKED · ball position from the source</span>` : ''}
+      ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: inTiebreakScore(state.point), highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null })}
+      ${sit ? html`<span class="court-sit k-${sit.kind}" role="status">${sit.text}${state.point && state.server ? html`<small class="tabnum">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}</small>` : ''}</span>` : !final && state.point && state.server ? html`<span class="court-pt tabnum" aria-label="Point score, server first">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}<small>server first</small></span>` : ''}
+      ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(banner).replace(/\s+/g, '-').toLowerCase()}" data-k="${cur.event_id}">${banner}</span>` : ''}
+      ${!final && state.server ? html`<span class="court-key"><i class="k-serve"></i> Serve indicator — not tracked position</span>` : ''}
+      ${ps.mode === 'replay' && ps.done ? html`<div class="v3-done" role="status"><b>REPLAY COMPLETE</b><span><button type="button" class="v3-b v3-play" data-act="again">↻ Replay again</button><button type="button" class="v3-b" data-act="start">Jump to start</button></span></div>` : ''}
+    </div>`);
+    // player cards: headshots stay mounted; only live state changes
+    for (const s of ['A', 'B']) {
+      const card = root.querySelector(`[data-pid="${s}"]`);
+      if (!card) continue;
+      const serving = !final && state.server === s;
+      card.classList.toggle('is-srv', serving);
+      card.classList.toggle('is-win', final && m.winner_side === s);
+      const lastSet = state.sets?.at(-1);
+      const won = animate && prev && ((lastSet?.[s] ?? 0) > (prev.sets?.at(-1)?.[s] ?? 0) || (cur?.winner_side === s && anim && anim !== 'point'));
+      card.classList.remove('pulse');
+      if (won || (animate && cur?.winner_side === s)) { void card.offsetWidth; card.classList.add('pulse'); }
+      card.querySelector('[data-srv]').hidden = !serving;
+      card.querySelector('[data-srv]').textContent = serving ? 'SERVING' : '';
+      const sw = setsWon(state, s);
+      card.querySelector('[data-ctx]').textContent = final ? (m.winner_side === s ? 'WINNER' : '') : `${sw} set${sw === 1 ? '' : 's'} · ${lastSet?.[s] ?? 0} games${state.point ? ` · ${state.point[s]}` : ''}`;
+    }
+    render($('[data-moment]'), momentPanel(cur, m, state, isPoint && cur ? pointMarker(prev || (ps.pos > 0 ? viewState(ps.pos - 1) : null), state, cur) : null));
+    render($('[data-recent]'), evs.length ? recentList(evs, ps.pos, m) : html`<p class="note">No stored events for this match.</p>`);
+    render($('[data-intel]'), intelStrip(data, m, state, evs, ps.pos) || html`<p class="note">No live intelligence yet: needs games with a provable winner or published statistics.</p>`);
+    // controls: re-render only when their own state changes (keeps focus)
+    const sig = `${ps.mode}|${ps.playing}|${ps.paused}|${ps.done}|${ps.speed}|${evs.length}|${ps.mode === 'live' ? ps.pos === evs.length - 1 : ''}`;
+    if (sig !== ctlSig) { render($('[data-controls]'), evs.length ? controlsBar(ps, evs.length) : ''); ctlSig = sig; }
+    const posEl = root.querySelector('.v3-pos');
+    if (posEl) posEl.textContent = `${ps.pos + 1}/${evs.length}`;
+    root.querySelectorAll('.v3-tl-e.on').forEach((b) => b.classList.remove('on'));
+    const dot = root.querySelector(`.v3-tl-e[data-seek="${ps.pos}"]`);
+    if (dot) { dot.classList.add('on'); root.querySelectorAll('.v3-tl-e').forEach((b) => b.classList.toggle('past', Number(b.dataset.seek) < ps.pos)); }
+    if (animate && cur && (cur.event_type === 'set_won' || cur.event_type === 'match_end') && cur.winner_side) stageFlash(`${cur.event_type === 'match_end' ? 'MATCH' : 'SET'} · ${surnameUp(m, cur.winner_side)}`, cur.event_type === 'match_end' ? 'match' : 'set');
+    else if (animate && isPoint && cur?.winner_side) {
+      const mk = pointMarker(prev, state, cur);
+      if (mk === 'FINAL') stageFlash(`MATCH · ${surnameUp(m, cur.winner_side)}`, 'match');
+      else if (mk === 'SET') stageFlash(`SET · ${surnameUp(m, cur.winner_side)}`, 'set');
+    }
+    lastPainted = ps.pos;
+  }
+
+  const clearTimer = () => { clearTimeout(timer); timer = null; };
+  function schedule() {
+    clearTimer();
+    if (!data) return;
+    if (ps.mode === 'replay' && ps.playing) {
+      timer = setTimeout(() => { ps = advance(ps, data.events.length); paint(true); schedule(); }, dwellMs(data.events[ps.pos]?.event_type, ps.speed));
+    } else if (ps.mode === 'live' && queue.length && ps.following && !ps.paused) {
+      timer = setTimeout(() => { ps = { ...ps, pos: queue.shift() }; paint(true); schedule(); }, dwellMs(data.events[ps.pos]?.event_type, 1.5));
+    }
+  }
 
   const load = async (first) => {
     let res;
     try { res = await api(`/v1/pbecast/${params.id}`, { signal: ctl.signal }); } catch { return; }
-    if (!res.data) { if (first) render(root.querySelector('[data-pbc]'), html`<div class="page">${emptyModule(res.meta, 'This match is not in the canonical store.')}</div>`); return; }
+    if (!res.data) { if (first) render($('[data-pbc]'), html`<div class="page">${emptyModule(res.meta, 'This match is not in the canonical store.')}</div>`); return; }
     const d = { ...res.data, meta: res.meta };
-    const lastId = d.events.at(-1)?.event_id || null;
-    if (!first && lastId === st.lastEvent) return;
-    st.lastEvent = lastId;
-    const prevData = st.data;
-    st.data = d;
-    if (first) {
+    const prevCount = data?.events.length || 0;
+    const modeChanged = data && data.mode !== d.mode;
+    data = d;
+    if (first || modeChanged) {
       const t = q.get('t');
-      const i = t ? d.events.findIndex((e) => e.event_id === t) : -1;
-      st.pos = i >= 0 ? i : d.mode.includes('replay') ? 0 : Math.max(0, d.events.length - 1);
-      st.following = !(i >= 0) && !d.mode.includes('replay');
-      track(d.mode.includes('replay') ? 'tennis_pbecast_replay_open' : 'tennis_pbecast_open', { match_id: d.match.id, pbecast_mode: d.mode, match_status: d.match.status, surface: d.match.tournament?.surface });
-      document.title = `${sideName(d.match, 'A')} vs ${sideName(d.match, 'B')} ${d.mode.includes('live') ? 'Live PBEcast' : 'PBEcast Replay'} | PropBetEdge Tennis`;
-    } else if (st.following) { st.prevState = prevData?.events?.[st.pos]?.state || null; st.pos = d.events.length - 1; st.animate = true; }
-    draw();
-    if (d.mode.includes('live') && !st.poll) st.poll = setInterval(() => load(false), 15000);
+      const i = first && t ? d.events.findIndex((e) => e.event_id === t) : -1;
+      ps = initialState({ live: d.mode.includes('live'), count: d.events.length, deepLinkIndex: i, speed: ps?.speed || DEFAULT_SPEED });
+      buildShell();
+      paint(false);
+      if (first) {
+        track(d.mode.includes('replay') ? 'tennis_pbecast_replay_open' : 'tennis_pbecast_open', { match_id: d.match.id, pbecast_mode: d.mode, match_status: d.match.status, surface: d.match.tournament?.surface });
+        document.title = `${sideName(d.match, 'A')} vs ${sideName(d.match, 'B')} ${d.mode.includes('live') ? 'Live PBEcast' : 'PBEcast Replay'} | PropBetEdge Tennis`;
+      }
+      schedule();
+    } else if (d.events.length > prevCount) {
+      render($('[data-timeline]'), timelineBar(d.events, d.match));
+      const r = liveArrivals(ps, prevCount, d.events.length);
+      ps = r.st;
+      queue.push(...r.queue);
+      paint(false);
+      schedule();
+    }
+    if (d.mode.includes('live') && !poll) poll = setInterval(() => load(false), 15000);
   };
 
-  const stopPlay = () => { st.playing = false; clearInterval(st.timer); st.timer = null; };
-  const step = (n) => { const max = st.data.events.length - 1; const from = st.pos; st.pos = Math.max(0, Math.min(max, st.pos + n)); st.following = st.pos === max; if (n === 1 && st.pos === from + 1) { st.prevState = st.data.events[from]?.state || null; st.animate = true; } draw(); };
   const onClick = (e) => {
-    const b = e.target.closest('[data-rp],[data-jump],[data-fs]');
-    if (!b || !st.data) return;
-    if (b.dataset.fs !== undefined) {
-      const el = root.querySelector('[data-pbc]');
+    const b = e.target.closest('[data-act],[data-seek],[data-speed],[data-jump]');
+    if (!b || !data) return;
+    const n = data.events.length;
+    const act = b.dataset.act;
+    if (act === 'fs') {
+      const el = $('[data-pbc]');
       if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen?.().catch(() => el.classList.toggle('is-fs'));
-      track('pbecast_fullscreen', { match_id: st.data.match.id });
+      track('pbecast_fullscreen', { match_id: data.match.id });
       return;
     }
-    if (b.dataset.jump) { const i = st.data.events.findIndex((x) => x.event_id === b.dataset.jump); if (i >= 0) { stopPlay(); st.pos = i; st.following = false; draw(); track('pbecast_key_moment_jump', { match_id: st.data.match.id }); } return; }
-    const a = b.dataset.rp;
-    if (a === 'first') { stopPlay(); st.pos = 0; st.following = false; draw(); }
-    if (a === 'last') { stopPlay(); st.pos = st.data.events.length - 1; st.following = true; draw(); }
-    if (a === 'prev') { stopPlay(); step(-1); }
-    if (a === 'next') { stopPlay(); step(1); }
-    if (a === 'play') {
-      if (st.playing) { stopPlay(); draw(); return; }
-      st.playing = true;
-      if (st.pos >= st.data.events.length - 1) st.pos = 0;
-      st.timer = setInterval(() => { if (st.pos >= st.data.events.length - 1) { stopPlay(); draw(); return; } step(1); }, 1200 / st.speed);
-      draw();
-    }
+    if (b.dataset.speed) { ps = { ...ps, speed: Number(b.dataset.speed) }; track('pbecast_replay_speed', { match_id: data.match.id, speed: ps.speed }); paint(false); schedule(); return; }
+    if (b.dataset.seek) { ps = seek(ps, Number(b.dataset.seek), n); queue = []; paint(false); schedule(); return; }
+    if (b.dataset.jump) { const i = data.events.findIndex((x) => x.event_id === b.dataset.jump); if (i >= 0) { ps = seek(ps, i, n); queue = []; paint(false); schedule(); track('pbecast_key_moment_jump', { match_id: data.match.id }); document.querySelector('[data-stage]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } return; }
+    if (act === 'play') ps = togglePlay(ps, n);
+    else if (act === 'again') ps = replayAgain(ps, n);
+    else if (act === 'start') ps = jumpToStart(ps);
+    else if (act === 'prev') ps = step(ps, -1, n);
+    else if (act === 'next') ps = step(ps, 1, n);
+    else if (act === 'pause-live') ps = pauseLive(ps);
+    else if (act === 'live') { ps = returnToLive(ps, n); queue = []; }
+    else return;
+    paint(act === 'next' || act === 'again');
+    schedule();
   };
-  const onInput = (e) => {
-    if (!st.data) return;
-    if (e.target.matches('[data-rp-range]')) { stopPlay(); st.pos = Number(e.target.value); st.following = st.pos === st.data.events.length - 1; draw(); }
-    if (e.target.matches('[data-rp-speed]')) { st.speed = Number(e.target.value); track('pbecast_replay_speed', { match_id: st.data.match.id, speed: st.speed }); if (st.playing) { stopPlay(); onClick({ target: root.querySelector('[data-rp="play"]') }); } }
+  const onKey = (e) => {
+    if (!data || !e.target.closest?.('[data-controls],[data-timeline]')) return;
+    if (e.key === 'ArrowRight') { ps = step(ps, 1, data.events.length); paint(true); schedule(); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { ps = step(ps, -1, data.events.length); paint(false); schedule(); e.preventDefault(); }
   };
   root.addEventListener('click', onClick);
-  root.addEventListener('change', onInput);
-  root.addEventListener('input', onInput);
+  root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); stopPlay(); clearInterval(st.poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('change', onInput); root.removeEventListener('input', onInput); };
+  return () => { ctl.abort(); clearTimer(); clearInterval(poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL };

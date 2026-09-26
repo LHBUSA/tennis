@@ -1,13 +1,13 @@
 {
-  "run_at": "2026-09-26T17:26:05.188Z",
-  "considered": 35,
-  "approved": 1,
+  "run_at": "2026-09-26T18:31:55.745Z",
+  "considered": 237,
+  "approved": 196,
   "rejected": {
-    "too_small_for_square": 13,
+    "too_small_for_square": 15,
     "original_too_small": 8,
-    "low_confidence": 2,
-    "multiple_faces": 7,
-    "no_face": 2,
+    "multiple_faces": 10,
+    "low_confidence": 3,
+    "no_face": 3,
     "license": 2
   },
   "license_rejected": 2,
@@ -15,7 +15,7 @@
     {
       "id": "20d988a4-b469-5c92-9092-238b79a421d9",
       "tier": 2,
-      "rank": 159,
+      "rank": null,
       "result": "too_small_for_square"
     },
     {
@@ -29,20 +29,6 @@
       "tier": 3,
       "rank": 25,
       "result": "original_too_small"
-    },
-    {
-      "id": "6dc3380d-ed9a-5f31-833c-71f94858c17e",
-      "tier": 3,
-      "rank": 92,
-      "result": "approved",
-      "tiled": false,
-      "portrait": true
-    },
-    {
-      "id": "b7737dbb-3f8c-533f-a701-9796c34fc3c8",
-      "tier": 3,
-      "rank": 133,
-      "result": "low_confidence"
     },
     {
       "id": "c209aa99-c87b-5adb-8ef3-cf5d31193c30",
@@ -67,6 +53,12 @@
       "tier": 3,
       "rank": 508,
       "result": "too_small_for_square"
+    },
+    {
+      "id": "b7737dbb-3f8c-533f-a701-9796c34fc3c8",
+      "tier": 3,
+      "rank": null,
+      "result": "low_confidence"
     },
     {
       "id": "ea50a40e-4dd0-5cd7-b9d0-22d5b2c78448",
@@ -129,12 +121,6 @@
       "result": "too_small_for_square"
     },
     {
-      "id": "2f157094-6c1f-5263-b8dd-67cec3f518f6",
-      "tier": 7,
-      "rank": 623,
-      "result": "license"
-    },
-    {
       "id": "a0906bce-c538-5fb9-977f-09da9fd5d672",
       "tier": 7,
       "rank": 651,
@@ -145,12 +131,6 @@
       "tier": 7,
       "rank": 724,
       "result": "multiple_faces"
-    },
-    {
-      "id": "23ac999c-1fe2-5e72-a735-57c2e8f42e08",
-      "tier": 7,
-      "rank": 739,
-      "result": "too_small_for_square"
     },
     {
       "id": "2d0a2c78-fa93-5b86-b562-e3ccd77b800c",
@@ -207,6 +187,18 @@
       "result": "too_small_for_square"
     },
     {
+      "id": "23ac999c-1fe2-5e72-a735-57c2e8f42e08",
+      "tier": 7,
+      "rank": null,
+      "result": "too_small_for_square"
+    },
+    {
+      "id": "2f157094-6c1f-5263-b8dd-67cec3f518f6",
+      "tier": 7,
+      "rank": null,
+      "result": "license"
+    },
+    {
       "id": "ff7f3e81-2b05-5221-923c-79b9572ae6ac",
       "tier": 7,
       "rank": null,
@@ -223,6 +215,1616 @@
       "tier": 7,
       "rank": null,
       "result": "multiple_faces"
+    },
+    {
+      "id": "072f5062-c3f3-5194-9316-ccf9af51cb6c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a6cdf999-085b-51e3-88f5-f8bcfd13ab20",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b9b881f2-e266-5dc8-983c-4daefaf6f5bc",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3a6d533f-3f96-537a-b853-5a88394dd337",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "48515584-7440-5db7-a87e-478d52868396",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ed80b035-6275-5912-84a3-698e5d2e9368",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "62c9ff63-b082-50b6-847e-39474a6ec101",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "349c8b18-21af-59e5-a8a2-228672e01fc6",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "92162c5d-e56b-5bf7-9b03-3db6d0dfddfd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6fcfdc8e-8038-532f-9371-cd8a5321bb35",
+      "tier": 7,
+      "rank": null,
+      "result": "multiple_faces"
+    },
+    {
+      "id": "149233e4-9bb7-5841-97bb-feca44f3ad97",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "66da34b3-1fe8-5a02-993b-41d06634a5ea",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "282421b5-5fc1-5e5f-b301-8b535ec389e8",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "0605d0e9-c8dd-5ad3-b4a2-343c4c89894d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "a9b4e64d-dbb0-597f-95b6-5cc0a0eb9bf9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "43d47ea3-981a-5673-ab3a-848314c98ca2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ff1852ff-e9df-5bd5-be86-ed7258ff1315",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "14d5e0ea-86d5-51c4-9677-53ecf7ffd7d4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "5469f1e8-69fe-5516-adeb-f870b5ab1123",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "101d63b4-d5c4-52b2-8291-9d4284d8103c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "f3ccafc9-bae3-515e-9e2c-c361c9386079",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c2041915-8772-546b-85f3-4935ca9041f7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b10b7c9a-e40b-5ce6-9045-0ff205827acb",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a9391d3a-111c-5414-a8ce-063eaac0bc5a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "07270935-b1a1-567d-9cb9-c29499a69b0c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6988a59e-8325-5a1c-9d8b-77327a072ac7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a42009f0-b32e-5f39-8996-2cbd46eedbc7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "bfab2dd0-c213-58cd-b89a-986de5e9578b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "900be3b4-6a0b-5b0d-9b59-f9e3555a2481",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "58e35cae-2c26-55eb-8b96-5aa41693de10",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "f3b5b11c-24f2-59bf-a6ca-0ad6cbb00dbc",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a65f6949-e3cd-5726-b892-b855e45b60c2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a5d086e5-11b6-5170-8bae-42f4c3ae1608",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "7625f275-8a2c-5fb3-ae9a-2b05816d42e5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "f40a37b0-cc0f-585d-945b-28413ee5f820",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c47b3671-eeba-511d-96ff-ce772d3e21ba",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "448a69fc-8448-5324-a072-63e808e8fcbc",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "5dbead44-97fa-58cb-a6f2-a592b320d735",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3a1bacd9-24d6-5223-aa36-4d95c023ecf7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3138ee50-2b66-5055-a23c-db1360c6607f",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "57de9eae-0f39-5cc6-a75a-296f90c1a47b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a0f1e51c-6a3a-5775-948a-7e86d114e80e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fb3d3bb4-a9ca-50f9-8e85-1fc225a5016e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "36d65b96-ac3f-57ad-97ac-ff6de0e9ba7e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e811e898-1040-56a6-be1e-57144e5c1acf",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "da1dce54-4959-54df-8bd7-f67b75b7dc46",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b6453644-b0fb-5d67-9e36-569bce89a976",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "d8cf769a-cc64-5c5e-947a-98357d297a8a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "b9090557-bba8-5f5c-bfc6-6527635c9ba1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "bce42610-b3da-5ac5-b154-ea694cca00dd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "9eb19557-0281-5772-b65e-d335e9329d38",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "8f0f4ba2-7986-5bd3-880d-f1ea97489f1a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a40544ab-c390-52e0-b15d-5a3d0790238b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e6495da8-60af-5e5f-a227-5c34499f977a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e1978034-04f4-577f-a44f-581b28857884",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c93edbe0-4235-5d62-89d1-60930f620a91",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "05793d7e-b954-5727-a2ad-126bb89c1e3e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fca5d3e9-d02e-5144-b87c-987b6d453a03",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c16c1b21-b8a9-5f45-909e-ddfe59460544",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "de1d1d5b-568b-5dce-8bd4-ffd41bcf8858",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "1ec24229-36cc-5007-8260-abe93686aeb1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3afc116a-ae9f-500a-ba24-c2009355afb5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "8b727ede-1907-5552-834e-1201184494a5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "50f3cc1e-901e-5f90-8468-a30bfadebe7b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "9f1ad79b-df5c-5a42-8975-0bb3fa6cd0bd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "63bed660-d212-5274-9a72-646282f33e7f",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "11df844b-94ab-531d-8335-e92f6298b2a7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "796191d5-5a1b-5480-9a79-abcb48435fc9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "f72ac745-eae7-541a-b159-9e9b5687f0a0",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "befacc71-68d7-550d-b9c0-34c3bc40eaa6",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b9b3e716-5c49-51c0-a6da-d42f8c21f317",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b0369243-141d-5f54-9bd6-84a7412cb38e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "5eae6eec-e018-5242-91b5-8e3207674e1c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c7dc1be7-1212-515f-9774-0df3af8914b7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "da4a2a4c-e3c8-524e-8248-99cd105300a8",
+      "tier": 7,
+      "rank": null,
+      "result": "too_small_for_square"
+    },
+    {
+      "id": "5446ad2b-dd71-5faa-ba16-8e2289994802",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "45e47cfa-d7b5-5df3-98ee-67c354c9838f",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "8ae1ca00-64ee-5ae1-8773-44033bb88e2d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "1ee51c09-d86b-54b9-9095-c5fc1bc14a21",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6c348680-39c7-50ab-a15c-7b721ed0af25",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6d0a5275-7770-56a7-a5e8-f19b56d870e5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "eed33cbb-46d7-5d57-a742-72cd2f153421",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "2a34412c-6652-5a6b-93f1-20f81c09ec7f",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "447fdfcd-e316-55cb-9b85-94de0d72ba6d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "537c424e-3e5d-57e2-a7ee-a73291dec771",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ffe8fd25-d438-5109-9181-03dc54d7f24a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "80fcea66-3ee0-5d0c-a309-d361560ddfc1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e235b6ad-dc91-5980-aa00-461f71aaef35",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "930c7e7b-2d97-5fba-8ce5-24059195bc53",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a279cff2-b49a-59a2-a9e5-21fef3bf99d9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "caccedbd-a27b-5a6e-a79e-c29cf55f3760",
+      "tier": 7,
+      "rank": null,
+      "result": "low_confidence"
+    },
+    {
+      "id": "b96a845d-2322-5747-9176-d3940c4fe2da",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "8303bb66-3520-5e20-98b7-95e83fd45e37",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fe8f1b97-3e0a-5fc3-89df-62e064458f73",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "9931f529-ff9a-5960-8b28-69e061eef419",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "1258e21b-dd1b-5885-bd8f-3b53fd68dc99",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c6574da5-be3e-5896-95cc-9a73ac3f5ed4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "671b44a0-610e-59d2-ab0c-49d91d84e708",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "534c9f12-71e9-5623-b8f0-46b4c149187b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "25e944b6-ccfd-54d5-8874-a939c06caf8e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "09aa6dde-e235-5972-8b93-f472707eeae8",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "430f0f77-f245-5495-8441-3661df1fce61",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e832b582-f8eb-513c-99d1-acb87c93c3a8",
+      "tier": 7,
+      "rank": null,
+      "result": "no_face"
+    },
+    {
+      "id": "62c480c9-10db-5fe2-8051-93a91f28b13d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "dacb31dd-57a5-54a0-bd4b-72d42aa8a5df",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "4b2d4cbb-7529-5aa2-b1ef-9d4a1a00c8ef",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a4b667de-b685-5272-aa05-dbede90265b9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6c8884bf-bdc3-549f-8332-0617e4229d89",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": false
+    },
+    {
+      "id": "01379ed8-8e2f-5ce9-a7f8-f4a17fa7e986",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "bd04adcd-6b7b-52a3-a20f-5d0cee60aa44",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6e366f54-3f50-5aab-a8d0-514c6cbf6015",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "678489b0-0b4e-55de-a65c-3a7dda64f35e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ffe60364-cba9-5478-a60f-6b04a0c5f99a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c8ab7697-6c75-51a6-b094-848a2f844eb1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "f86ebe87-8e2b-5c11-9142-b9a29969e381",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "02fbaf03-4181-58e0-aea3-82ed46bbd2de",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "75e7383e-cdf4-5fff-a58f-466f269b3ddd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6d916c2a-72bf-5f2d-a36c-270a533735e0",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3d56883a-64f3-5831-bd71-25e88b609e7d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": false
+    },
+    {
+      "id": "874e8e7e-459f-55a2-8626-cf7da516ddcf",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "2a435e81-3333-52b1-b92f-b12b91ce38b2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3e74e4be-69aa-5e47-a620-c1cd566c12f0",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "0d457180-2597-5aca-b772-14c83994eb38",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "abd69eec-c130-5531-b98a-506ea79fdbbd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "d882bd26-6431-5d4f-8ef3-14fc4a7cd549",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "20e31462-a796-5ca6-aca3-8b7823a4b0f2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b4bccbb0-d3a4-5159-a3fa-1b615f315582",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "020a59cc-3d24-5c0b-8bb6-b26424708ec4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "e49f0018-90ae-5f51-9210-ddee557de381",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "45b8b7c2-9c9c-5429-9167-57b059a8599e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b06a8879-d8f3-5aec-a191-fc262571b5b4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "52108662-6ef1-5c3d-8cc2-7743cef7113e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "95da2e4e-1202-5cb9-a143-3ff5d820fd50",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c99b4e2f-9037-50dc-a41c-662adfc9b8d4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6fad80fb-3f12-5f66-a997-92a8de6706cc",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a2e06733-28b1-5c59-9fa6-8c1075355522",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "37026a95-67e4-5fc5-9d94-f49bd26107a3",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "0c2fb7ee-eb3a-52b9-bea3-fceb1fcee09e",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "386d1942-1dcb-5f02-bd98-d2e0917b3ec1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "fbf1a233-6d4c-56ab-bb47-8c98e73fd942",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "82a99fde-0305-5a13-9113-55e9b871a07c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c1efa9d7-e2cd-5a1f-9444-d3c124d6e5fe",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "aef18cd6-8b53-572b-a502-a8e38fc9059c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "95b4d680-fa5c-515d-b196-1130fe6913a6",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "0e9bcdd0-ce7e-5fa2-8a86-ef74f2f7060b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "83e506ef-4860-5bd3-99b9-a132192853d2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b94939c1-1102-5972-8f59-b7acd9b430f9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "6fd56406-57de-5e12-8c85-05c6388d4f72",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "4d7ef8e3-5eb2-5bff-b9fd-738b2ff345cf",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "586bc65f-cc51-543c-b755-8789f36746a4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "7b59f700-0059-5ab1-92b4-3b902f6cf8b7",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ea0e6bf7-8881-5c06-9456-3001e8339855",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "eefe569d-7a96-52d9-8b0c-f824ce669442",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "186a487e-8cc9-5992-9bbb-334ed17eba97",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "9dd7f8f4-7ac4-5707-baa3-fea9ba6f93d8",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "968b2d04-e066-5b18-a331-51653413665b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "9c091273-522c-57db-b9f0-1104afe5cc9c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "cdbd79b9-c9e5-5b79-ba5f-e8e6be03fb01",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "1c6c8911-cf93-5050-adf1-7a6e31af3b1b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "02d8e239-f042-58ae-914e-314f5c091d42",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b1500655-29b7-5e12-a6a1-c3f522d09152",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b01438fe-e0e7-58e6-a6ab-fb98afe9e845",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "57cd0ae9-e95f-576a-9965-406ab07bd78d",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fbd21de7-33b1-53ab-92f1-7f92f86129b1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fa68a69c-39ef-54e8-a297-3d92a1dd1640",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b45b78d9-4fa1-5f3a-896c-19dabbb59b38",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ee949ce1-0710-5ff7-b804-53c0ad957291",
+      "tier": 7,
+      "rank": null,
+      "result": "too_small_for_square"
+    },
+    {
+      "id": "6371834a-8663-563f-9490-fe08544556dd",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "f9961cb1-6e0d-5393-94cc-3c0eafed99c5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "2a1f6bb4-d99f-5cbd-8251-7abb7fc61527",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "f71c924f-73ff-53ec-a644-b13e52edfab2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "320bd0a9-1f12-515b-8a18-04bf4ee403d9",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "677b657a-157f-5b13-9ad6-45d12af6ce08",
+      "tier": 7,
+      "rank": null,
+      "result": "multiple_faces"
+    },
+    {
+      "id": "5c5ab05e-9c78-5bb9-8ed1-bc9f5658c37a",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "07681d30-9e80-5788-ab26-d9b047b79db5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "2d7b0142-d76e-51bb-bc05-013dbfcee51b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "fa56a21c-1ee4-550a-a850-7620d385947c",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3877a2de-989d-556a-b458-a87ea995ed44",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "50f19f0e-96f0-5822-8eb2-479870624e47",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "30e99857-08d9-5215-a249-3c102e22613b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ec1c50e9-2e65-50e1-950a-9f84caefdc0b",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b405d5d7-5f4c-580f-936c-fe89bee974ad",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "67661ef2-3c4b-584d-9412-671ea90d8563",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "8e60512b-164a-5ff6-8ac8-4df5d1db4064",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "ef0d09d1-9952-597c-957b-2b63803c2586",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "d0200271-667f-5adf-9269-a980e867dfb1",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "db94f4a5-3213-57a2-a7b0-d54da483afbc",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3679246f-42b9-5ee8-a952-21e475e50d40",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": true,
+      "portrait": true
+    },
+    {
+      "id": "261b5266-e415-54fe-8de2-d0c121835981",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "020e6df0-5cc1-51ba-a77d-2b350d90c029",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "64ec832a-01c2-50a5-aa88-215fc393cbc8",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "dfd5f6aa-ed70-5d62-863d-900296f2c864",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "8fbe98a4-e0a2-5590-99e5-b4a4d2b73a83",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "a820c6d4-cf5c-5371-9a24-ed289560c6d2",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "2ac87510-ffd2-5b8e-8da8-88db2968eb36",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "5e670281-1ffc-508d-ad2d-39a337976b91",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "b58e15eb-f81d-5ebe-b029-6c353a04d510",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "3468ecd8-b0d9-5ec3-bfcc-ef7ec2fbc696",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "c76a1e3b-baef-591f-b2e6-8c11aec677c5",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "7ae0e54a-2143-5570-82a5-896f0df8c350",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "11e971ec-0608-5ea5-af6f-44af4a3977f4",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
+    },
+    {
+      "id": "25a335ab-3262-5246-b7d9-0572f0b142ac",
+      "tier": 7,
+      "rank": null,
+      "result": "multiple_faces"
+    },
+    {
+      "id": "281f4ea2-39b6-5128-8170-b1ad359b7fad",
+      "tier": 7,
+      "rank": null,
+      "result": "approved",
+      "tiled": false,
+      "portrait": true
     }
   ]
 }

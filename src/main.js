@@ -8,6 +8,7 @@ import './styles/base.css';
 import './styles/components.css';
 import './styles/pbecast.css';
 import './styles/pbecast-v2.css';
+import './styles/pbecast-v3.css';
 import { render } from './lib/dom.js';
 import { resolveRoute } from './lib/routes.js';
 import { routeMeta } from './seo/meta.js';

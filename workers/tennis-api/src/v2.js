@@ -168,7 +168,7 @@ async function dnaLeaders(store, url) {
   const asOf = await latestAsOf(store);
   if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
   const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}`);
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}`);
   const list = rows.map((r) => ({ player: shapePlayer(r.tennis_players), m: r.metrics?.[metric] })).filter((x) => x.m && x.m.value != null && ['medium', 'high'].includes(x.m.confidence));
   list.sort((a, b) => (LOWER_IS_BETTER.has(metric) ? a.m.value - b.m.value : b.m.value - a.m.value));
   const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);

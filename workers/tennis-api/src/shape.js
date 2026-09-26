@@ -3,7 +3,7 @@
 import { approvedMedia } from '../../shared/media.js';
 
 export const MEDIA = 'tennis_player_media(approval,derivatives,attribution,source_page_url,license,author)';
-export const PLAYER = `tennis_players(pbe_player_id,slug,full_name,nationality,gender,${MEDIA})`;
+export const PLAYER = `tennis_players(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})`;
 export const SIDES = `tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(kind,tennis_participant_members(slot,${PLAYER})))`;
 export const EDITION = 'tennis_tournament_editions(year,name,level,surface,indoor,start_date,end_date,city,country,venue_id,tennis_tournaments(slug,name))';
 export const MATCH = `match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,scheduled_at,court,schedule_note,live_state,stats_status,source_family,source_updated_at,updated_at,edition_id,${EDITION},tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),${SIDES}`;
@@ -26,7 +26,8 @@ export function shapePhoto(media) {
 
 export function shapePlayer(p) {
   if (!p) return null;
-  return { id: p.pbe_player_id, slug: p.slug, name: p.full_name, nationality: p.nationality, gender: p.gender, photo: shapePhoto(p.tennis_player_media) };
+  // last_name only when the source gave one (display surnames like 'Maristany Zuleta de Reales')
+  return { id: p.pbe_player_id, slug: p.slug, name: p.full_name, ...(p.last_name ? { last_name: p.last_name } : {}), nationality: p.nationality, gender: p.gender, photo: shapePhoto(p.tennis_player_media) };
 }
 
 export function shapeEdition(e) {

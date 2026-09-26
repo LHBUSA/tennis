@@ -94,7 +94,7 @@ function serveMarker(x, y, indicator) {
   if (!indicator) return `<g class="c-srv"><circle cx="${X(x)}" cy="${Y(y)}" r="0.42"/><circle class="c-srv-ring" cx="${X(x)}" cy="${Y(y)}" r="0.95"/></g>`;
   const cx = Number(X(x));
   const cy = Number(Y(y));
-  const r = 0.5;
+  const r = 0.72;
   return `<g class="c-srv c-serve-ball" data-kind="serve-indicator"><title>Serve indicator — not tracked position</title>`
     + `<circle class="c-srv-ring" cx="${cx}" cy="${cy}" r="1.05"/>`
     + `<circle class="c-sb" cx="${cx}" cy="${cy}" r="${r}" fill="url(#c-sbgrad)"/>`

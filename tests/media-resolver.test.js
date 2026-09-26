@@ -25,6 +25,6 @@ test('no approved row -> null (monogram); pending/rejected never public', () => 
 });
 test('shapePlayer carries the full public identity contract', () => {
   const p = shapePlayer({ pbe_player_id: 'x', slug: 's', full_name: 'N', nationality: 'ITA', gender: 'F', tennis_player_media: [row('pending', 'P'), row('approved', 'OK')] });
-  assert.deepEqual(Object.keys(p).sort(), ['gender', 'id', 'name', 'nationality', 'photo', 'slug']);
+  assert.deepEqual(Object.keys(p).sort(), ['gender', 'id', 'name', 'nationality', 'photo', 'slug'], 'last_name appears only when stored');
   assert.equal(p.photo.square, 'OK');
 });
