@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.8",
+    "@mediapipe/tasks-vision": "^1.0.1",
     "playwright-core": "^1.63.0",
     "sharp": "^0.35.4",
     "vite": "^5.4.21"

@@ -1,0 +1,15 @@
+{
+  "run_at": "2026-09-26T15:15:46.676Z",
+  "considered": 514,
+  "approved": 413,
+  "rejected": {
+    "too_small_for_portrait": 22,
+    "original_too_small": 8,
+    "no_face": 39,
+    "low_confidence": 25,
+    "error:extract_area: bad extract area": 2,
+    "multiple_faces": 3,
+    "license": 2
+  },
+  "license_rejected": 2
+}

@@ -1,8 +1,7 @@
 // Data renderers. Everything shown comes from tennis-api payloads; nothing here invents a value.
 
 import { html, raw } from '../lib/dom.js';
-import { freshnessBadge } from './state.js';
-import { initials } from './identity-card.js';
+import { avatar, nat } from './avatar.js';
 
 const EVENT = { MS: "Men's singles", WS: "Women's singles", MD: "Men's doubles", WD: "Women's doubles", XD: 'Mixed doubles' };
 export const eventLabel = (e) => EVENT[e] || e;
@@ -15,40 +14,62 @@ export function roundLabel(code) {
 }
 
 export const surfaceClass = (s) => (s ? `surf-${s}` : '');
+export const cap = (s) => String(s || '').replace(/^./, (c) => c.toUpperCase());
+const STATUS = { in_progress: 'Live', scheduled: 'Upcoming', completed: 'Final', retired: 'Ret.', walkover: 'W/O', suspended: 'Suspended' };
+export const statusLabel = (s) => STATUS[s] || s;
 
-function names(side) {
-  return html`${(side?.players || []).map((p, i) => html`${i ? html`<span class="sep"> / </span>` : ''}<a class="pl" href="/players/${p.slug}">${p.name}</a>${p.nationality ? html` <span class="nat">${p.nationality}</span>` : ''}`)}`;
+export function fmtDate(d) {
+  return d ? new Date(`${String(d).slice(0, 10)}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '';
 }
-
-const STATUS = { in_progress: 'LIVE', scheduled: 'UPCOMING', completed: 'FINAL', retired: 'RET.', walkover: 'W/O', suspended: 'SUSP.' };
-
-/** One match: two rows (A, B) with set scores. */
-export function matchCard(m, { showTournament = true } = {}) {
-  const live = m.status === 'in_progress';
-  const setCell = (s, side) => {
-    if (s.match_tiebreak && s.tb) return html`<td class="g${s.winner === side ? ' w' : ''}">${s.tb[side]}</td>`;
-    const tb = s.tb && Math.min(s.tb.A, s.tb.B) === s.tb[side] ? html`<sup>${s.tb[side]}</sup>` : '';
-    return html`<td class="g${s.winner === side ? ' w' : ''}">${s[side]}${tb}</td>`;
-  };
-  const row = (side) => html`<tr class="${m.winner_side === side ? 'win' : ''}">
-    <th scope="row"><span class="seed">${m.sides?.[side]?.seed ? `[${m.sides[side].seed}]` : ''}</span> ${names(m.sides?.[side])}${live && m.live?.server === side ? html` <span class="srv" title="Serving">●</span>` : ''}</th>
-    ${(m.sets || []).map((s) => setCell(s, side))}
-    ${live ? html`<td class="pt">${m.live?.point?.[side] ?? ''}</td>` : ''}
-  </tr>`;
-  return html`<article class="mc ${live ? 'is-live' : ''}">
-    <header class="mc-h"><span class="st st-${m.status}">${STATUS[m.status] || m.status}</span>
-      <span>${eventLabel(m.event_type)} · ${roundLabel(m.round)}</span>
-      ${showTournament && m.tournament ? html`<a href="/tournaments/${m.tournament.slug}/${m.tournament.year}" class="mc-t">${m.tournament.tournament}</a>` : ''}
-    </header>
-    <table class="mc-s"><tbody>${row('A')}${row('B')}</tbody></table>
-    <footer class="mc-f">${m.status === 'scheduled' ? html`${m.court || ''}${m.schedule_note ? ` · ${m.schedule_note}` : ''}` : ''}${m.duration_s ? html`${fmtDuration(m.duration_s)}` : ''}<a href="/matches/${m.id}">Match Lab →</a></footer>
-  </article>`;
+export function fmtRange(a, b) {
+  if (!a) return '';
+  const o = { month: 'short', day: 'numeric', timeZone: 'UTC' };
+  return `${new Date(`${a}T00:00:00Z`).toLocaleDateString('en-US', o)} – ${new Date(`${b}T00:00:00Z`).toLocaleDateString('en-US', { ...o, year: 'numeric' })}`;
 }
-
+/** User-local time for a full timestamp (never for a date-less source time). */
+export function localTime(iso) {
+  if (!iso || !/T\d{2}:\d{2}/.test(iso)) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleString(undefined, { weekday: 'short', hour: 'numeric', minute: '2-digit', timeZoneName: 'short' });
+}
 export function fmtDuration(s) {
+  if (!s) return '';
   const h = Math.floor(s / 3600);
   const m = Math.round((s % 3600) / 60);
   return h ? `${h}h ${String(m).padStart(2, '0')}m` : `${m}m`;
+}
+
+const names = (side) => html`${(side?.players || []).map((p) => html`<a href="/players/${p.slug}">${p.name}</a>`)}`;
+
+/** PBEcast lifecycle CTA: scheduled -> soon, live -> watch, final -> replay. */
+export function pbecastCta(m) {
+  if (m.status === 'in_progress' || m.status === 'suspended') return html`<a class="live" href="/pbecast/${m.id}">Watch PBEcast</a>`;
+  if (['completed', 'retired'].includes(m.status)) return html`<a href="/pbecast/${m.id}">Replay PBEcast</a>`;
+  return '';
+}
+
+export function matchCard(m, { showTournament = true } = {}) {
+  const live = m.status === 'in_progress';
+  const sc = (side) => html`<div class="mc-sc tabnum">${(m.sets || []).map((s) => {
+    if (s.match_tiebreak && s.tb) return html`<span class="${s.winner === side ? 'w' : ''}">${s.tb[side]}</span>`;
+    const tb = s.tb && Math.min(s.tb.A, s.tb.B) === s.tb[side] ? html`<sup>${s.tb[side]}</sup>` : '';
+    return html`<span class="${s.winner === side ? 'w' : ''}">${s[side]}${tb}</span>`;
+  })}${live ? html`<span class="pt">${m.live?.point?.[side] ?? ''}</span>` : ''}</div>`;
+  const row = (side) => html`<div class="mc-row ${m.winner_side === side ? 'win' : ''}">
+    <span class="mc-av">${(m.sides?.[side]?.players || []).map((p) => avatar(p, { px: 32 }))}</span>
+    <div class="mc-names">${names(m.sides?.[side])}<span class="seed">${m.sides?.[side]?.seed ? `[${m.sides[side].seed}] ` : ''}${(m.sides?.[side]?.players || []).map((p) => p.nationality).filter(Boolean).join(' / ')}${live && m.live?.server === side ? html`<span class="srv" title="Serving"></span><span class="sr">serving</span>` : ''}</span></div>
+    ${sc(side)}
+  </div>`;
+  const when = m.status === 'scheduled' ? [localTime(m.scheduled_at), m.court, m.schedule_note].filter(Boolean).join(' · ') : m.duration_s ? fmtDuration(m.duration_s) : '';
+  return html`<article class="mc ${live ? 'is-live' : ''}">
+    <header class="mc-h"><span class="st st-${m.status}">${statusLabel(m.status)}</span>
+      <span>${eventLabel(m.event_type)} · ${roundLabel(m.round)}</span>
+      ${showTournament && m.tournament ? html`<a href="/tournaments/${m.tournament.slug}/${m.tournament.year}" class="mc-t">${m.tournament.tournament}</a>` : ''}
+    </header>
+    ${row('A')}${row('B')}
+    <footer class="mc-f"><span>${when}</span><span class="mc-cta">${pbecastCta(m)}<a href="/matches/${m.id}">Match</a></span></footer>
+  </article>`;
 }
 
 export function matchList(matches, opts) {
@@ -56,35 +77,26 @@ export function matchList(matches, opts) {
 }
 
 export function tournamentRow(t) {
+  const where = [t.city, t.country].filter(Boolean).join(', ');
   return html`<a class="tr ${surfaceClass(t.surface)}" href="/tournaments/${t.slug}/${t.year}">
-    <span class="tr-l">${t.level || ''}</span>
+    <span class="tr-l">${t.level || ''}${t.surface ? ` · ${t.surface}` : ''}${t.indoor ? ' · indoor' : ''}</span>
     <b>${t.tournament}</b>
-    <span class="tr-d">${fmtRange(t.start_date, t.end_date)}${t.surface ? ` · ${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : ''}</span>
-    ${t.status === 'live' || t.status === 'inProgress' ? html`<span class="st st-in_progress">IN PROGRESS</span>` : ''}
+    <span class="tr-d">${fmtRange(t.start_date, t.end_date)}${where ? ` · ${where}` : ''}</span>
+    ${t.status === 'live' || t.status === 'inProgress' ? html`<span class="st st-in_progress">Live</span>` : ''}
   </a>`;
 }
 
-const cap = (s) => String(s || '').replace(/^./, (c) => c.toUpperCase());
-export function fmtDate(d) {
-  return d ? new Date(`${d}T00:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' }) : '';
-}
-export function fmtRange(a, b) {
-  if (!a) return '';
-  const o = { month: 'short', day: 'numeric', timeZone: 'UTC' };
-  return `${new Date(`${a}T00:00:00Z`).toLocaleDateString('en-US', o)} – ${new Date(`${b}T00:00:00Z`).toLocaleDateString('en-US', { ...o, year: 'numeric' })}`;
-}
-
-export function rankingTable(d) {
-  return html`<div class="rk-wrap"><table class="rk">
-    <thead><tr><th scope="col">Rank</th><th scope="col">Player</th><th scope="col" class="n">Points</th><th scope="col" class="n">Move</th></tr></thead>
+export function rankingTable(d, { compact = false } = {}) {
+  return html`<div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th scope="col" style="width:${compact ? 44 : 60}px">#</th><th scope="col">Player</th><th scope="col" class="n" style="width:${compact ? 80 : 100}px">Points</th>${compact ? '' : html`<th scope="col" class="n hide-s" style="width:70px">Move</th>`}</tr></thead>
     <tbody>${d.rows.map((r) => {
       const mv = r.previous_rank == null ? null : r.previous_rank - r.rank;
-      return html`<tr><td class="rk-n">${r.rank}</td><td><a href="/players/${r.player.slug}">${r.player.name}</a> <span class="nat">${r.player.nationality || ''}</span></td><td class="n">${r.points == null ? '—' : r.points.toLocaleString('en-US')}</td><td class="n mv ${mv > 0 ? 'up' : mv < 0 ? 'down' : ''}">${mv == null ? '—' : mv === 0 ? '=' : mv > 0 ? `▲${mv}` : `▼${-mv}`}</td></tr>`;
+      return html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}">${r.player?.name}</a> ${nat(r.player?.nationality)}</span></td><td class="n">${r.points == null ? '—' : r.points.toLocaleString('en-US')}</td>${compact ? '' : html`<td class="n mv hide-s ${mv > 0 ? 'up' : mv < 0 ? 'down' : ''}">${mv == null ? '—' : mv === 0 ? '=' : mv > 0 ? `▲${mv}` : `▼${-mv}`}</td>`}</tr>`;
     })}</tbody>
   </table></div>`;
 }
 
-/** Rank history (lower is better, so the axis is inverted). Pure SVG, only real archived points. */
+/** Rank history (lower is better, so the axis is inverted). Only real archived points. */
 export function rankSpark(history, list) {
   const pts = history.filter((h) => h.list === list).sort((a, b) => (a.date < b.date ? -1 : 1));
   if (pts.length < 2) return html`<p class="note">${pts.length ? `One archived list so far (${fmtDate(pts[0].date)}: No. ${pts[0].rank}). The trend appears as weekly lists accumulate.` : 'No archived ranking lists yet.'}</p>`;
@@ -95,49 +107,28 @@ export function rankSpark(history, list) {
   const y = (r) => (hi === lo ? H / 2 : P + ((r - lo) * (H - 2 * P)) / (hi - lo));
   const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p.rank).toFixed(1)}`).join(' ');
   return html`<figure class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Ranking history">${raw(`<path d="${d}" />`)}</svg>
-    <figcaption>${fmtDate(pts[0].date)}: No. ${pts[0].rank} → ${fmtDate(pts[pts.length - 1].date)}: No. ${pts[pts.length - 1].rank} · best ${lo} · ${pts.length} weekly lists</figcaption></figure>`;
+    <figcaption>${fmtDate(pts[0].date)}: No. ${pts[0].rank} → ${fmtDate(pts[pts.length - 1].date)}: No. ${pts[pts.length - 1].rank} · best ${lo} · ${pts.length} weekly lists archived</figcaption></figure>`;
 }
 
-const pct = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
-export function dnaTable(dna) {
-  const rows = Object.values(dna.metrics || {});
-  return html`<div class="rk-wrap"><table class="dna">
-    <thead><tr><th scope="col">Metric</th><th scope="col" class="n">Value</th><th scope="col" class="n">Sample</th><th scope="col">Confidence</th></tr></thead>
-    <tbody>${rows.map((m) => html`<tr><th scope="row"><code>${m.metric_key}</code></th><td class="n">${pct(m.value)}</td><td class="n">${m.numerator == null ? '—' : `${m.numerator}/${m.denominator}`} · ${m.sample_matches} m</td><td><span class="conf c-${m.confidence}">${m.confidence}</span></td></tr>`)}</tbody>
-  </table></div>`;
+export const pct = (v, d = 1) => (v == null ? '—' : `${(v * 100).toFixed(d)}%`);
+
+/** Radar of stored DNA percentiles (null percentiles are drawn at the centre and labelled n/a). */
+export function dnaRadar(dims, other = null) {
+  const N = dims.length;
+  const R = 120, C = 170;
+  const ang = (i) => -Math.PI / 2 + (i * 2 * Math.PI) / N;
+  const pt = (i, r) => [C + Math.cos(ang(i)) * r, C + Math.sin(ang(i)) * r];
+  const ring = (f) => dims.map((_, i) => pt(i, R * f).map((v) => v.toFixed(1)).join(',')).join(' ');
+  const area = (ds) => ds.map((d, i) => pt(i, R * ((d.percentile ?? 0) / 100)).map((v) => v.toFixed(1)).join(',')).join(' ');
+  const labels = dims.map((d, i) => { const [x, y] = pt(i, R + 26); return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" text-anchor="middle" dominant-baseline="middle">${d.label}${d.percentile == null ? ' (n/a)' : ''}</text>`; }).join('');
+  return raw(`<svg class="radar" viewBox="0 0 340 340" role="img" aria-label="Tennis DNA percentiles">
+    ${[0.25, 0.5, 0.75, 1].map((f) => `<polygon class="grid" points="${ring(f)}"/>`).join('')}
+    ${dims.map((_, i) => { const [x, y] = pt(i, R); return `<line class="axis" x1="${C}" y1="${C}" x2="${x}" y2="${y}"/>`; }).join('')}
+    <polygon class="area" points="${area(dims)}"/>
+    ${other ? `<polygon class="area b" points="${area(other)}"/>` : ''}
+    ${labels}</svg>`);
 }
 
-const STAT_ROWS = [
-  ['Aces', (s) => s.aces], ['Double faults', (s) => s.double_faults],
-  ['1st serve in', (s) => ratio(s.first_serves_in, s.service_points)],
-  ['1st serve points won', (s) => ratio(s.first_serve_points_won, s.first_serves_in)],
-  ['2nd serve points won', (s) => ratio(s.second_serve_points_won, s.service_points - s.first_serves_in)],
-  ['Break points saved', (s) => (s.break_points_faced == null ? null : `${s.break_points_saved}/${s.break_points_faced}`)],
-  ['Service games', (s) => s.service_games], ['Total points won', (s) => s.total_points_won]
-];
-function ratio(n, d) { return n == null || !d ? null : `${n}/${d} (${Math.round((n / d) * 100)}%)`; }
-export function statsCompare(m) {
-  const A = m.statistics?.A, B = m.statistics?.B;
-  if (!A || !B) return null;
-  const nameOf = (side) => (m.sides?.[side]?.players || []).map((p) => p.name?.split(' ').slice(-1)[0]).join(' / ');
-  return html`<div class="rk-wrap"><table class="cmp"><thead><tr><th scope="col" class="n">${nameOf('A')}</th><th scope="col"></th><th scope="col">${nameOf('B')}</th></tr></thead>
-    <tbody>${STAT_ROWS.map(([label, f]) => html`<tr><td class="n">${f(A) ?? '—'}</td><th scope="row">${label}</th><td>${f(B) ?? '—'}</td></tr>`)}</tbody></table></div>`;
-}
-
-export function playerHero(p, meta) {
-  const age = p.dob ? Math.floor((Date.now() - Date.parse(`${p.dob}T00:00:00Z`)) / (365.2425 * 86400000)) : null;
-  const r = p.rankings || {};
-  return html`<header class="ph">
-    <figure class="idcard is-portrait" aria-hidden="true"><span class="idcard-ini">${initials(p.name)}</span>${p.nationality ? html`<figcaption class="idcard-nat">${p.nationality}</figcaption>` : ''}</figure>
-    <div class="ph-b">
-      <p class="eyebrow">${p.gender === 'F' ? 'WTA' : p.gender === 'M' ? 'ATP' : 'Player'}${p.nationality ? ` · ${p.nationality}` : ''}</p>
-      <h1>${p.name}</h1>
-      <dl class="ph-f">
-        ${r.wta_singles ? html`<div><dt>WTA singles</dt><dd>No. ${r.wta_singles.rank}<small>${r.wta_singles.points?.toLocaleString('en-US')} pts · ${fmtDate(r.wta_singles.date)}</small></dd></div>` : ''}
-        ${r.wta_doubles ? html`<div><dt>WTA doubles</dt><dd>No. ${r.wta_doubles.rank}<small>${fmtDate(r.wta_doubles.date)}</small></dd></div>` : ''}
-        ${age != null ? html`<div><dt>Age</dt><dd>${age}<small>born ${fmtDate(p.dob)}</small></dd></div>` : ''}
-      </dl>
-      <p class="note">${freshnessBadge(meta)} No licensed photo approved yet — identity card shown.</p>
-    </div>
-  </header>`;
+export function dnaBars(dims) {
+  return html`<div class="bars">${dims.map((d) => html`<div class="bar"><span>${d.label}</span><i><b style="width:${d.percentile ?? 0}%"></b></i><span class="v">${d.percentile == null ? html`<span class="conf c-${d.confidence}">${d.confidence}</span>` : `${d.percentile}th`}</span></div>`)}</div>`;
 }

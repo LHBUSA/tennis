@@ -1,58 +1,49 @@
-// Site chrome: header + primary nav + mobile drawer + network footer.
+// Site chrome: header + primary nav + mobile drawer + PropBetEdge network footer.
 
 import { html } from '../lib/dom.js';
-import { NETWORK, CURRENT_SPORT } from '../data/network.js';
-import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
+import { NETWORK, CURRENT_SPORT, PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
 
 export const PRIMARY_NAV = [
   { href: '/', label: 'Today', id: 'today' },
+  { href: '/schedule', label: 'Schedule', id: 'schedule' },
   { href: '/live', label: 'Live', id: 'live' },
-  { href: '/pbe-picks', label: 'PBE Picks', id: 'pbe-picks' },
-  { href: '/matches', label: 'Matches', id: 'matches' },
-  { href: '/players', label: 'Players', id: 'players' },
   { href: '/tournaments', label: 'Tournaments', id: 'tournaments' },
-  { href: '/rankings', label: 'Rankings', id: 'rankings' },
-  { href: '/tenniscast', label: 'TennisCast', id: 'tenniscast' },
-  { href: '/news', label: 'News', id: 'news' }
+  { href: '/players', label: 'Players', id: 'players' },
+  { href: '/rankings/women', label: 'Rankings', id: 'rankings' },
+  { href: '/dna', label: 'Tennis DNA', id: 'dna' },
+  { href: '/pbecast', label: 'PBEcast', id: 'pbecast' }
 ];
 
-export const LABS_NAV = [
-  { href: '/tournaments', label: 'Draw Explorer', note: 'Bracket progression per event' },
-  { href: '/labs#h2h', label: 'H2H Lab', note: 'Head-to-head with surface and recency context' },
-  { href: '/methodology', label: 'Tennis DNA', note: 'Serve, return and pressure definitions' },
-  { href: '/labs#surface', label: 'Surface Lab', note: 'Opponent-adjusted strength by surface' },
-  { href: '/labs#serve', label: 'Serve Lab', note: 'Hold, first-strike and pressure serve' },
-  { href: '/labs#return', label: 'Return Lab', note: 'Return points, breaks and conversion' },
-  { href: '/doubles', label: 'Doubles Lab', note: 'Pairs as first-class participants' },
-  { href: '/breakout-watch', label: 'Breakout Watch', note: 'ITF → Challenger/WTA 125 → tour' },
-  { href: '/track-record', label: 'Track Record', note: 'Every graded PBE pick' },
-  { href: '/methodology', label: 'Methodology', note: 'Formulas, samples, as-of rules' },
-  { href: '/sources', label: 'Sources', note: 'Audited sources and canary results' }
+export const MORE_NAV = [
+  { href: '/methodology', label: 'Methodology', note: 'Tennis DNA formulas, samples, as-of rules' },
+  { href: '/sources', label: 'Sources', note: 'Where every number comes from' },
+  { href: '/credits', label: 'Photo credits', note: 'Every player photo, its author and license' }
 ];
 
-const NAV_GROUP = { 'player-sub': 'players', player: 'players', match: 'matches', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'rankings-list': 'rankings', 'news-desk': 'news' };
+const NAV_GROUP = { 'player-sub': 'players', player: 'players', match: 'schedule', matches: 'schedule', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'rankings-list': 'rankings', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
 
 export function shellHtml() {
   return html`
   <header class="hdr" data-hdr>
     <div class="hdr-in">
-      <a class="brand" href="/" aria-label="PropBetEdge Tennis home">
-        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="28" height="28"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M6.2 8.4c5.6 3.4 5.6 11.8 0 15.2M25.8 8.4c-5.6 3.4-5.6 11.8 0 15.2" fill="none" stroke="currentColor" stroke-width="2"/></svg></span>
-        <span class="brand-text"><b>PROPBETEDGE</b><i>TENNIS</i></span>
+      <a class="brand" href="/" aria-label="PropBetEdge Tennis — home">
+        <picture><source srcset="/brand/pbe-mark-40.webp 1x, /brand/pbe-mark-80.webp 2x" type="image/webp"><img src="/brand/pbe-mark-40.webp" width="73" height="40" alt="PropBetEdge"></picture>
+        <span class="brand-sep" aria-hidden="true"></span>
+        <span class="brand-text"><b>TENNIS</b><i>Intelligence</i></span>
       </a>
       <nav class="nav" aria-label="Primary">
         ${PRIMARY_NAV.map((n) => html`<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
-        <a href="/labs" data-nav="labs">More</a>
       </nav>
+      <a class="hdr-search" href="/search" aria-label="Search players and tournaments"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" data-menu><span></span><span></span><span></span><em class="sr">Menu</em></button>
     </div>
   </header>
   <div class="drawer" id="drawer" hidden data-drawer>
     <nav aria-label="Mobile">
-      <p class="drawer-h">Navigate</p>
       ${PRIMARY_NAV.map((n) => html`<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
-      <p class="drawer-h">Labs</p>
-      ${LABS_NAV.map((n) => html`<a href="${n.href}">${n.label}</a>`)}
+      <a href="/search">Search</a>
+      <p class="drawer-h">More</p>
+      ${MORE_NAV.map((n) => html`<a href="${n.href}">${n.label}</a>`)}
     </nav>
   </div>
   <main id="main" class="main" tabindex="-1"></main>
@@ -60,25 +51,29 @@ export function shellHtml() {
 }
 
 export function footerHtml() {
-  const o = ALL_ACCESS_OFFER;
   return html`<footer class="ftr">
     <div class="ftr-in">
       <div class="ftr-brand">
-        <b>PROPBETEDGE TENNIS</b>
-        <p>Independent tennis intelligence built on PropBetEdge’s own data graph. Not affiliated with, endorsed by or licensed by the ATP, WTA, ITF, any Grand Slam or any tournament.</p>
-        <p class="ftr-aa">Tennis is planned for <a href="${o.learnUrl}">PropBetEdge All Access</a> (${o.tagline}) Tennis Pro features are not live yet.</p>
+        <img src="/brand/pbe-mark-80.webp" width="110" height="60" alt="PropBetEdge" loading="lazy">
+        <p class="ftr-net-name"><b>PropBetEdge</b> Sports Intelligence Network</p>
+        <p>PropBetEdge Tennis is independent tennis intelligence built on PropBetEdge’s own data graph. Not affiliated with, endorsed by or licensed by the ATP, WTA, ITF, any Grand Slam or any tournament.</p>
+        <a class="ftr-x" href="${PROPBETEDGE_X_URL}" target="_blank" rel="noopener noreferrer" aria-label="Follow PropBetEdge on X"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.9 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg><span>${PROPBETEDGE_X_HANDLE}</span></a>
       </div>
-      <nav class="ftr-net" aria-label="PropBetEdge network">
-        <p>PropBetEdge Network</p>
+      <nav class="ftr-sports" aria-label="PropBetEdge network">
+        <p>Network</p>
         <ul>${NETWORK.sports.map((s) => html`<li><a href="${s.href}" ${s.key === CURRENT_SPORT ? html`aria-current="page"` : ''}><b>${s.label}</b><span>${s.name}</span></a></li>`)}</ul>
       </nav>
       <nav class="ftr-links" aria-label="More">
+        <p>Tennis</p>
+        ${PRIMARY_NAV.slice(1).map((n) => html`<a href="${n.href}">${n.label}</a>`)}
+        ${MORE_NAV.map((n) => html`<a href="${n.href}">${n.label}</a>`)}
+      </nav>
+      <nav class="ftr-links" aria-label="PropBetEdge">
+        <p>PropBetEdge</p>
         <a href="${NETWORK.news.href}">${NETWORK.news.label}</a>
         <a href="${NETWORK.learn.href}">${NETWORK.learn.label}</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
         <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
-        <a href="/sources">Sources</a>
-        <a href="/methodology">Methodology</a>
       </nav>
     </div>
   </footer>`;

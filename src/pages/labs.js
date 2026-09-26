@@ -1,5 +1,5 @@
 import { html, render } from '../lib/dom.js';
-import { LABS_NAV } from '../ui/shell.js';
+import { MORE_NAV as LABS_NAV } from '../ui/shell.js';
 
 export function mount(root) {
   render(root, html`<div class="page">

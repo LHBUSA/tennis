@@ -1,68 +1,57 @@
-// Home / Today. Real modules from /v1/today and /v1/rankings; modules whose product does not exist yet
-// (picks, newsroom, Breakout Watch, doubles pairs, track record) say so.
+// Home: what is happening in tennis right now. Hero -> live strip -> live -> today -> tournaments ->
+// rankings -> player intelligence. Every module is real data or states why it is empty.
 
 import { html, render } from '../lib/dom.js';
 import { api } from '../data/api.js';
-import { emptyModule, moduleCard, freshnessBadge } from '../ui/state.js';
+import { emptyModule } from '../ui/state.js';
+import { avatar } from '../ui/avatar.js';
 import { matchList, tournamentRow, rankingTable, fmtDate } from '../ui/render.js';
-import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
-import registry from '../../data/source-registry/sources.json';
-import { coverageMatrix } from './coverage.js';
-
-const LATER = [
-  ['picks', 'Today’s PBE Picks', 'The PBE Tennis model is not trained or validated. No picks exist, and none will be shown before out-of-sample validation.'],
-  ['news', 'Latest News', 'The newsroom publishes only from verified evidence once its factual gates exist. Nothing yet — no filler.'],
-  ['breakout', 'Breakout Watch', 'Methodology and historical backtest first.'],
-  ['track', 'Track Record', 'Nothing graded — no picks have been locked.']
-];
 
 export function mount(root) {
   const ctl = new AbortController();
-  const o = ALL_ACCESS_OFFER;
   render(root, html`
-    <section class="hero">
+    <section class="hero" aria-labelledby="hero-h">
+      <picture class="hero-bg">
+        <source media="(max-width: 600px)" type="image/avif" srcset="/brand/tennis-hero-mobile-900x1200.avif">
+        <source media="(max-width: 600px)" type="image/webp" srcset="/brand/tennis-hero-mobile-900x1200.webp">
+        <source type="image/avif" srcset="/brand/tennis-hero-1200.avif 1200w, /brand/tennis-hero-1600.avif 1600w, /brand/tennis-hero-2400.avif 2400w" sizes="100vw">
+        <img src="/brand/tennis-hero-1600.webp" srcset="/brand/tennis-hero-1200.webp 1200w, /brand/tennis-hero-1600.webp 1600w, /brand/tennis-hero-2400.webp 2400w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async">
+      </picture>
       <div class="hero-in">
-        <p class="eyebrow">Men’s · Women’s · Singles · Doubles · Mixed</p>
-        <h1><span>PropBetEdge</span> Tennis</h1>
-        <p class="hero-sub">Global tennis intelligence built on a data graph we collect, normalize and own.</p>
-        <p class="hero-status" data-strip>Checking live matches…</p>
-        <div class="hero-cta"><a class="btn" href="/live">Live now</a><a class="btn ghost" href="/rankings/women">Rankings</a><a class="btn ghost" href="/sources">Sources</a></div>
+        <p class="eyebrow">PropBetEdge Tennis</p>
+        <h1 id="hero-h">Global Tennis Intelligence</h1>
+        <p class="hero-sub">Live tennis intelligence, player analytics and match data — built on a data graph PropBetEdge collects, normalizes and owns.</p>
+        <div class="hero-cta"><a class="btn" href="/live">Live now</a><a class="btn ghost" href="/schedule">Today’s matches</a><a class="btn ghost" href="/rankings/women">Player rankings</a><a class="btn ghost" href="/players">Explore players</a></div>
+        <p class="hero-strip" data-strip>Checking live matches…</p>
       </div>
-      <svg class="hero-court" viewBox="0 0 400 220" aria-hidden="true"><rect x="10" y="10" width="380" height="200" rx="2"/><line x1="200" y1="10" x2="200" y2="210"/><line x1="10" y1="35" x2="390" y2="35"/><line x1="10" y1="185" x2="390" y2="185"/><line x1="95" y1="35" x2="95" y2="185"/><line x1="305" y1="35" x2="305" y2="185"/><line x1="95" y1="110" x2="305" y2="110"/></svg>
     </section>
     <div class="page">
-      <div class="home">
-        <div class="home-main">
-          ${moduleCard({ title: 'Live Now', id: 'm-live', body: html`<p class="loading">Loading…</p>` })}
-          ${moduleCard({ title: 'Latest Results', id: 'm-results', body: html`<p class="loading">Loading…</p>` })}
-        </div>
-        <aside class="home-side">
-          ${moduleCard({ title: 'Current Tournaments', id: 'm-tours', body: html`<p class="loading">Loading…</p>` })}
-          ${moduleCard({ title: 'WTA Top 10', kicker: 'Rankings', id: 'm-rank', body: html`<p class="loading">Loading…</p>` })}
-        </aside>
+      <section data-live></section>
+      <div class="grid-2">
+        <section class="mod"><header class="mod-h"><h2>Current tournaments</h2></header><div class="mod-b" data-tours><p class="loading">Loading…</p></div></section>
+        <section class="mod"><header class="mod-h"><h2>WTA rankings</h2><span class="mod-k">Top 10</span></header><div class="mod-b" data-rank><p class="loading">Loading…</p></div></section>
       </div>
-      <div class="mods grid">${LATER.map(([k, t, n]) => moduleCard({ title: t, id: `m-${k}`, body: emptyModule({ freshness: 'NOT_CONFIGURED' }, n) }))}</div>
-      ${moduleCard({ title: 'What PropBetEdge can acquire today', kicker: 'Source audit', id: 'coverage', body: coverageMatrix(registry) })}
-      <section class="aa">
-        <div><p class="eyebrow">PropBetEdge Network</p><h2>All Access</h2><p>${o.tagline} ${o.price}. Tennis is planned to join All Access; Tennis Pro features are not live yet.</p></div>
-        <a class="btn" href="${o.learnUrl}">What’s included</a>
-      </section>
+      <section data-results></section>
+      <section class="mod"><header class="mod-h"><h2>Player intelligence</h2><span class="mod-k">Tennis DNA · head-to-head · form · surface · rank history</span></header><div class="mod-b" data-intel><p class="loading">Loading…</p></div></section>
+      <section class="mod"><header class="mod-h"><h2>Coverage today</h2></header><div class="mod-b"><p>Live and results: <b>WTA Tour, WTA 125 and Grand Slam women’s events</b>; men’s Grand Slam results from Wimbledon and the Australian Open. ATP, Challenger and ITF live data are not yet acquirable — we show nothing rather than something unsourced. <a href="/sources">Sources →</a></p></div></section>
     </div>`);
-
-  const put = (id, content) => { const b = root.querySelector(`#${id} .mod-b`); if (b) render(b, content); };
+  const $ = (s) => root.querySelector(s);
   const refresh = async () => {
     let t;
     try { t = await api('/v1/today', { signal: ctl.signal }); } catch { return; }
     const d = t.data;
-    const strip = root.querySelector('[data-strip]');
-    if (strip) render(strip, d ? html`${freshnessBadge(t.meta)} <b>LIVE NOW · ${d.live.length} MATCH${d.live.length === 1 ? '' : 'ES'}</b> across ${d.tournaments.length} tournament${d.tournaments.length === 1 ? '' : 's'} in progress. Coverage today: WTA Tour, WTA 125, Grand Slams — ATP, Challenger and ITF are not yet acquirable.` : html`${freshnessBadge(t.meta)} Live data unavailable right now.`);
-    if (!d) { for (const id of ['m-live', 'm-results', 'm-tours']) put(id, emptyModule(t.meta, 'Data unavailable.')); return; }
-    put('m-live', d.live.length ? matchList(d.live.slice(0, 6)) : html`<p class="note">No matches in progress right now.</p>`);
-    put('m-results', d.latest_results.length ? matchList(d.latest_results.slice(0, 8)) : html`<p class="note">No completed matches today yet.</p>`);
-    put('m-tours', d.tournaments.length ? html`<div class="trs">${d.tournaments.map(tournamentRow)}</div>` : html`<p class="note">No covered tournament is in progress today.</p>`);
+    render($('[data-strip]'), d ? html`${d.live.length ? html`<i class="dot"></i>` : ''}<b>${d.live.length ? `LIVE NOW · ${d.live.length} MATCH${d.live.length === 1 ? '' : 'ES'}` : 'NO MATCH LIVE RIGHT NOW'}</b><span>· ${d.tournaments.length} tournament${d.tournaments.length === 1 ? '' : 's'} in progress</span>` : html`Live data unavailable right now.`);
+    if (!d) return;
+    render($('[data-live]'), d.live.length ? html`<h2 class="sec">Live now <small>WATCH PBECAST for the live court</small></h2>${matchList(d.live.slice(0, 6))}` : d.upcoming.length ? html`<h2 class="sec">Up next</h2>${matchList(d.upcoming.slice(0, 6))}` : '');
+    render($('[data-tours]'), d.tournaments.length ? html`<div class="trs">${d.tournaments.map(tournamentRow)}</div>` : html`<p class="note">No covered tournament is in progress today.</p>`);
+    render($('[data-results]'), d.latest_results.length ? html`<h2 class="sec">Latest results</h2>${matchList(d.latest_results.slice(0, 9))}` : '');
   };
   refresh();
   const timer = setInterval(refresh, 60000);
-  api('/v1/rankings?tour=wta&type=singles&limit=10', { signal: ctl.signal }).then((r) => put('m-rank', r.data ? html`${rankingTable(r.data)}<p class="note">List dated ${fmtDate(r.data.ranking_date)} · <a href="/rankings/women">Full rankings →</a></p>` : emptyModule(r.meta, 'No complete ranking list archived yet.'))).catch(() => {});
+  api('/v1/rankings?tour=wta&type=singles&limit=10', { signal: ctl.signal }).then((r) => {
+    render($('[data-rank]'), r.data ? html`${rankingTable(r.data, { compact: true })}<p class="note">Official list dated ${fmtDate(r.data.ranking_date)} · <a href="/rankings/women">Full rankings →</a></p>` : emptyModule(r.meta, 'No complete ranking list archived yet.'));
+    const top = (r.data?.rows || []).slice(0, 4).map((x) => x.player);
+    render($('[data-intel]'), top.length ? html`<ul class="plist">${top.map((p) => html`<li><a href="/players/${p.slug}">${avatar(p, { px: 40 })}<span>${p.name}</span></a></li>`)}</ul><p class="note" style="margin-top:10px">Profiles combine the official ranking history PropBetEdge archives, stored results, surface records, head-to-head and <a href="/dna">Tennis DNA</a>.</p>` : html`<p class="note">No players yet.</p>`);
+  }).catch(() => {});
   return () => { ctl.abort(); clearInterval(timer); };
 }

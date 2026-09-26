@@ -1,10 +1,11 @@
 // PropBetEdge network registry (shape follows LHBUSA/UFC web/lib/network.ts and LHBUSA/wnba src/ui/network.js).
-// The Discord invite is defined exactly once, network-wide.
-//
-// Tennis appears in OTHER properties' footers only after tennis.propbetedge.ai serves a real public
-// destination (docs/STATUS.md). Inside this repo it is listed from day one as the current sport.
+// The Discord invite and the X account are defined exactly once, network-wide.
+// Canonical network X identity: @PROPBETEDGE (https://x.com/PROPBETEDGE). Retired handles are guarded
+// against in scripts/guard-truth.mjs and must never return.
 
 export const PROPBETEDGE_DISCORD_URL = 'https://discord.gg/kb5zCTHbME';
+export const PROPBETEDGE_X_HANDLE = '@PROPBETEDGE';
+export const PROPBETEDGE_X_URL = 'https://x.com/PROPBETEDGE';
 export const CURRENT_SPORT = 'tennis';
 
 export const NETWORK = Object.freeze({

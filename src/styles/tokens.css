@@ -1,48 +1,54 @@
-/* PropBetEdge Tennis design tokens.
-   Shared PBE near-black/gold intelligence identity + a light editorial surface for long-form reading,
-   with restrained surface accents (hard / clay / grass). Generic court geometry only; no tour or
-   tournament trade dress. */
+/* PropBetEdge Tennis — green + white tennis identity inside the PropBetEdge network.
+   Deep court green for chrome and the court; crisp white / warm paper for reading surfaces; charcoal
+   text; restrained PropBetEdge gold for selected states, Pro and model/rank highlights. No neon, no
+   casino, no textures. Contrast: every text/background pair below is WCAG AA or better. */
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  --ink: #0f0d0a;
-  --ink-1: #15120e;
-  --ink-2: #1c1813;
-  --ink-3: #26211a;
-  --ink-4: #332c23;
+  /* court + chrome */
+  --night: #062019;
+  --court-900: #08291f;
+  --court-800: #0c3a2c;
+  --court-700: #0f4d38;
+  --court-600: #15634a;
+  --court-500: #1d7a5b;
+  --court-100: #e3efe8;
+  --court-50: #f0f6f2;
+  --line: #f3f6f1;
 
-  --paper: #f5f1eb;
-  --paper-2: #e3dccf;
-  --dim: #b8b2a6;
-  --faint: #9a9489;
+  /* reading surfaces */
+  --paper: #f6f5f0;
+  --paper-2: #efede5;
+  --white: #ffffff;
+  --rule: #e2e0d6;
+  --rule-2: #cfccbf;
 
-  --gold: #d4af37;
-  --gold-bright: #ecc95c;
-  --gold-soft: rgba(212, 175, 55, 0.14);
-  --gold-line: rgba(212, 175, 55, 0.35);
+  /* text */
+  --ink: #16201b;
+  --ink-2: #33403a;
+  --muted: #5d6862;
+  --faint: #7c8580;
+  --on-dark: #f3f6f1;
+  --on-dark-2: #c9d6cf;
 
-  /* surface accents — used sparingly, only where a surface is a fact of the data */
-  --hard: #4f8fd6;
-  --clay: #d0703f;
-  --grass: #5fa35a;
-  --indoor: #9a86d1;
+  /* PropBetEdge gold (restrained) */
+  --gold: #9a7414;        /* text-safe on white */
+  --gold-bright: #d9b44a; /* marks on green */
+  --gold-soft: #f6eed7;
 
-  --live: #ff4d5e;
-  --pos: #52b57f;
-  --neg: #e05a5a;
-  --warn: #e0a83e;
-  --model: #7aa9ff;
-  --market: #b99cff;
+  /* state */
+  --live: #c8332f;
+  --live-soft: #fbe9e8;
+  --win: #1d7a5b;
+  --loss: #9a3a2c;
+  --warn: #946200;
+  --model: #2d5fa8;
 
-  --line: rgba(255, 245, 220, 0.09);
-  --line-2: rgba(255, 245, 220, 0.16);
-
-  /* light editorial surface (articles, methodology) */
-  --sheet: #fbf9f5;
-  --sheet-ink: #1a1712;
-  --sheet-dim: #5b554b;
-  --sheet-line: #e6e0d4;
+  /* surfaces as facts, used sparingly */
+  --hard: #2f6fb5;
+  --clay: #b8562a;
+  --grass: #3f8f4f;
 
   --f-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
   --f-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
@@ -50,6 +56,7 @@
 
   --r: 10px;
   --r-lg: 16px;
+  --shadow: 0 1px 2px rgba(6, 32, 25, 0.06), 0 4px 16px rgba(6, 32, 25, 0.05);
   --gutter: clamp(16px, 4vw, 40px);
-  --max: 1240px;
+  --max: 1280px;
 }

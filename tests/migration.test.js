@@ -14,7 +14,7 @@ const U = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 async function db() {
   const pg = new PGlite();
   // the target guard requires the sports-project markers
-  await pg.exec('create table ufc_bouts (id int); create table ufc_model_versions (id int);');
+  await pg.exec('create table ufc_bouts (id int); create table ufc_model_versions (id int); create role anon; create role authenticated;');
   await pg.exec(SQL);
   return pg;
 }
@@ -97,4 +97,26 @@ test('player slugs: readable, accent-folded, collision-safe, never rewritten', a
   assert.deepEqual(r.rows.map((x) => x.slug), ['iga-swiatek', 'maria-sample', 'maria-sample-000000']);
   await pg.query(`update tennis_players set full_name = 'Renamed' where pbe_player_id = '${U(1)}'`);
   assert.equal((await pg.query(`select slug from tennis_players where pbe_player_id = '${U(1)}'`)).rows[0].slug, 'iga-swiatek');
+});
+
+test('quality levels: Q2 sets only, Q3 with stats, Q4 with point events; views are security_invoker', async () => {
+  const pg = await db();
+  const m = (await pg.query(`insert into tennis_matches (event_type, round, format_key, status, winner_side, source_family) values ('WS','1','BO3_TB7','completed','A','wta') returning match_id`)).rows[0].match_id;
+  await pg.query(`insert into tennis_sets (match_id, set_no, games_a, games_b) values ('${m}', 1, 6, 4)`);
+  assert.equal((await pg.query(`select quality from tennis_match_quality where match_id='${m}'`)).rows[0].quality, 'Q2');
+  await pg.query(`insert into tennis_match_stats (match_id, side, source_family, stats, captured_at) values ('${m}','A','wta','{}', now())`);
+  assert.equal((await pg.query(`select quality from tennis_match_quality where match_id='${m}'`)).rows[0].quality, 'Q3');
+  await pg.query(`insert into tennis_match_events (event_id, match_id, quality, event_sequence, event_type, source, observed_at, state) values ('e1','${m}','point_event',0,'ace','ausopen',now(),'{}')`);
+  assert.equal((await pg.query(`select quality from tennis_match_quality where match_id='${m}'`)).rows[0].quality, 'Q4');
+  await assert.rejects(pg.query(`insert into tennis_match_events (event_id, match_id, quality, event_sequence, event_type, source, observed_at, state) values ('e2','${m}','score_snapshot',0,'ace','wta',now(),'{}')`), /check/i);
+  await assert.rejects(pg.query(`insert into tennis_match_events (event_id, match_id, quality, event_sequence, event_type, source, observed_at, state, serve_speed_kmh) values ('e3','${m}','score_snapshot',1,'score_update','wta',now(),'{}', 190)`), /check/i);
+  await assert.rejects(pg.query(`update tennis_match_events set event_type='x' where event_id='e1'`), /append-only/);
+  const v = await pg.query(`select reloptions from pg_class where relname='tennis_match_quality'`);
+  assert.ok(String(v.rows[0].reloptions).includes('security_invoker=true'));
+});
+
+test('venues without venue precision cannot carry coordinates; broadcasts need https + scope', async () => {
+  const pg = await db();
+  await assert.rejects(pg.query(`insert into tennis_venues (venue_id, slug, city, precision, source_family, latitude, longitude) values (gen_random_uuid(), 'x', 'Paris', 'city', 'wta', 48.8, 2.3)`), /check/i);
+  await assert.rejects(pg.query(`insert into tennis_broadcasts (territory, broadcaster, distribution_type, official_url, source, source_url, verified_at) values ('US','X','tv','https://x.test','s','https://s.test', now())`), /check/i);
 });

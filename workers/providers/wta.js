@@ -189,7 +189,9 @@ export function parseWtaMatch(m, ctx = {}) {
     // NotBeforeISOTime is sometimes a full timestamp, sometimes time-only ("15:00+0300"). Only a full
     // timestamp becomes scheduled_at; a bare time stays source text (the date is never assumed).
     scheduled_at: state === 'scheduled' && FULL_ISO.test(m.NotBeforeISOTime || '') ? m.NotBeforeISOTime : null,
-    schedule_note: state === 'scheduled' ? [m.NotBefore, m.NotBeforeText, m.NotBeforeISOTime && !FULL_ISO.test(m.NotBeforeISOTime) ? `not before ${m.NotBeforeISOTime}` : null].filter(Boolean).join(' · ') || null : null,
+    // NotBefore carries the full source phrase ("Starting at 2:30 PM", "Followed By"); NotBeforeText repeats
+    // its prefix. The bare time is used only when no phrase exists.
+    schedule_note: state === 'scheduled' ? m.NotBefore || m.NotBeforeText || (m.NotBeforeISOTime && !FULL_ISO.test(m.NotBeforeISOTime) ? `Not before ${m.NotBeforeISOTime}` : null) || null : null,
     duration_s: hms(m.MatchTimeTotal),
     source_updated_at: m.LastUpdated || null,
     source_text: m.ResultString || null,

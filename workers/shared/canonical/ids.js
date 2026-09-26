@@ -31,3 +31,5 @@ export function competitionFor(level) {
   if (l.includes('finals')) return 'wta_finals';
   return null;
 }
+
+export const venueId = (city, country) => uuidv5(`venue:${slugify(city)}:${String(country || '').toLowerCase()}`);

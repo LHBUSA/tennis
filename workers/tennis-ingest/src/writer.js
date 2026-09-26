@@ -7,7 +7,7 @@ import { normalizeMatch } from '../../shared/canonical/normalize.js';
 import { diffRecord } from '../../shared/change-ledger.js';
 import { diffSnapshots, snapshotOf, eventId, CONTRACT } from '../../shared/canonical/events.js';
 import { inList } from '../../shared/store/postgrest.js';
-import { tournamentKey, tournamentId, editionId, drawId, matchId, snapshotId, competitionFor, slugify, SLAMS } from '../../shared/canonical/ids.js';
+import { tournamentKey, tournamentId, editionId, drawId, matchId, snapshotId, competitionFor, slugify, SLAMS, venueId } from '../../shared/canonical/ids.js';
 
 const FINAL = new Set(['completed', 'retired', 'walkover']);
 const now = () => new Date().toISOString();
@@ -101,6 +101,7 @@ export async function finalizeSnapshot(store, sid) {
 export async function writeEditions(store, editions, provider = 'wta') {
   const tRows = new Map();
   const eRows = [];
+  const venues = new Map();
   const tExt = [];
   const eExt = [];
   for (const e of editions) {
@@ -111,7 +112,13 @@ export async function writeEditions(store, editions, provider = 'wta') {
     tRows.set(tid, { tournament_id: tid, slug, name: slam ? Object.keys(SLAMS).find((k) => SLAMS[k] === slam).replace(/\b\w/g, (c) => c.toUpperCase()) : titleCase(e.name), competition_key: competitionFor(e.level), country: e.country && /^[A-Z]{3}$/.test(e.country) ? e.country : null, city: e.city ? titleCase(e.city) : null });
     tExt.push({ provider, external_id: String(e.provider_tournament_id), tournament_id: tid });
     const eid = await editionId(tid, e.year);
-    eRows.push({ edition_id: eid, tournament_id: tid, year: e.year, competition_key: competitionFor(e.level), start_date: e.start_date, end_date: e.end_date, surface: e.surface, indoor: e.indoor, source_family: provider, name: e.title || e.name, level: e.level, city: e.city ? titleCase(e.city) : null, country: e.country && /^[A-Z]{3}$/.test(e.country) ? e.country : null, singles_draw_size: e.singles_draw_size, doubles_draw_size: e.doubles_draw_size, source_status: e.status, updated_at: now() });
+    let vid = null;
+    if (e.city) {
+      vid = await venueId(e.city, e.country);
+      const country = e.country && /^[A-Z]{3}$/.test(e.country) ? e.country : null;
+      venues.set(vid, { venue_id: vid, slug: `${slugify(e.city)}${country ? `-${country.toLowerCase()}` : ''}`, venue_name: null, city: titleCase(e.city), country, precision: 'city', source_family: provider, updated_at: now() });
+    }
+    eRows.push({ venue_id: vid, edition_id: eid, tournament_id: tid, year: e.year, competition_key: competitionFor(e.level), start_date: e.start_date, end_date: e.end_date, surface: e.surface, indoor: e.indoor, source_family: provider, name: e.title || e.name, level: e.level, city: e.city ? titleCase(e.city) : null, country: e.country && /^[A-Z]{3}$/.test(e.country) ? e.country : null, singles_draw_size: e.singles_draw_size, doubles_draw_size: e.doubles_draw_size, source_status: e.status, updated_at: now() });
     eExt.push({ provider, external_id: `${e.live_scoring_id || e.provider_tournament_id}-${e.year}`, edition_id: eid });
   }
   // slug collisions between distinct tournaments get the provider id appended (never a silent merge)
@@ -124,6 +131,7 @@ export async function writeEditions(store, editions, provider = 'wta') {
     if (clash) r.slug = `${r.slug}-${tExt.find((t) => t.tournament_id === r.tournament_id).external_id}`;
     seen.set(r.slug, r.tournament_id);
   }
+  await store.upsert('tennis_venues', [...venues.values()], { onConflict: 'venue_id' });
   await store.upsert('tennis_tournaments', rows, { onConflict: 'tournament_id' });
   await store.upsert('tennis_tournament_external_ids', dedupe(tExt, (x) => `${x.provider}:${x.external_id}`), { onConflict: 'provider,external_id', ignore: true });
   await store.upsert('tennis_tournament_editions', dedupe(eRows, (x) => x.edition_id), { onConflict: 'edition_id' });

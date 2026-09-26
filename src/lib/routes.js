@@ -1,34 +1,45 @@
-// Route authority for tennis.propbetedge.ai. PURE (no DOM) so the prerender script, the sitemap and
-// the tests read the same table the browser router uses. docs/SEO.md.
+// Route authority for tennis.propbetedge.ai. PURE (no DOM) so the prerender script, the sitemap, the
+// tennis-web head renderer and the tests read the same table the browser router uses. docs/SEO.md.
 //
-// `index: true` only when the route has substantive, truthful content TODAY. Data routes flip to
-// indexable once the canonical store serves them — never because a URL pattern exists.
+// `index`: static routes prerendered with their own head. `ssr`: parameterized routes whose head (title,
+// canonical, OG, JSON-LD) is rendered at the edge by tennis-web from real data; they are indexable only
+// when that data exists (tennis-web answers noindex otherwise).
 
 export const ROUTE_TABLE = [
-  { id: 'today', path: '/', title: 'PropBetEdge Tennis — Global Tennis Intelligence', description: 'PropBetEdge Tennis is an independent tennis intelligence platform being built on its own canonical data graph: ATP, WTA, Challenger, ITF and Grand Slam singles, doubles and mixed doubles.', index: true },
-  { id: 'live', path: '/live', title: 'Live Tennis Matches', description: 'Matches in progress across professional tours.', index: false },
-  { id: 'matches', path: '/matches', title: 'Tennis Matches', description: 'Scheduled, live and completed professional tennis matches.', index: false },
-  { id: 'match', path: '/matches/:id', title: 'Match Lab', description: 'Match Lab: identity, form, surface strength and head-to-head for one match.', index: false },
-  { id: 'tenniscast', path: '/tenniscast', title: 'TennisCast', description: 'TennisCast: point-by-point live match state.', index: false },
-  { id: 'players', path: '/players', title: 'Tennis Players', description: 'Professional tennis player directory.', index: false },
-  { id: 'player', path: '/players/:slug', title: 'Player', description: 'Player profile.', index: false },
+  { id: 'today', path: '/', title: 'PropBetEdge Tennis — Live Tennis Intelligence, Player Analytics & Match Data', description: 'Live tennis scores, schedules, rankings, player analytics, Tennis DNA and PBEcast — independent tennis intelligence from PropBetEdge.', index: true },
+  { id: 'schedule', path: '/schedule', title: 'Tennis Schedule — Today, Tomorrow & This Week', description: 'Today’s and upcoming professional tennis matches with live status, courts and PBEcast coverage.', index: true },
+  { id: 'live', path: '/live', title: 'Live Tennis Scores', description: 'Tennis matches in progress right now with live set, game and point scores and PBEcast.', index: true },
+  { id: 'matches', path: '/matches', title: 'Tennis Matches Today', description: 'Every observed match at tournaments in progress today.', index: false },
+  { id: 'match', path: '/matches/:id', title: 'Match', description: 'Match Lab.', index: false, ssr: true },
+  { id: 'pbecast-hub', path: '/pbecast', title: 'Tennis PBEcast — Live Analytical Court & Replay', description: 'PBEcast: the live tennis court, score, serve and match intelligence — and replays of completed matches.', index: true },
+  { id: 'pbecast', path: '/pbecast/:id', title: 'PBEcast', description: 'Tennis PBEcast.', index: false, ssr: true },
+  { id: 'tenniscast', path: '/tenniscast', title: 'TennisCast', description: 'Moved to PBEcast.', index: false, redirect: '/pbecast' },
+  { id: 'players', path: '/players', title: 'Tennis Players', description: 'Professional tennis players with rankings, photos and profiles.', index: true },
+  { id: 'player', path: '/players/:slug', title: 'Player', description: 'Player profile.', index: false, ssr: true },
   { id: 'player-sub', path: '/players/:slug/:tab', title: 'Player', description: 'Player intelligence.', index: false, tabs: ['dna', 'matches', 'surfaces', 'rankings'] },
-  { id: 'h2h', path: '/h2h/:a/:b', title: 'Head-to-Head Lab', description: 'Head-to-head record and context.', index: false },
-  { id: 'tournaments', path: '/tournaments', title: 'Tennis Tournaments', description: 'Professional tennis tournament calendar.', index: false },
-  { id: 'tournament', path: '/tournaments/:slug/:year', title: 'Tournament', description: 'Tournament edition.', index: false },
+  { id: 'h2h', path: '/h2h/:a/:b', title: 'Head-to-Head', description: 'Head-to-head record and context.', index: false },
+  { id: 'tournaments', path: '/tournaments', title: 'Tennis Tournaments', description: 'Current and upcoming WTA Tour, WTA 125 and Grand Slam tournaments with dates, surfaces and locations.', index: true },
+  { id: 'tournament', path: '/tournaments/:slug/:year', title: 'Tournament', description: 'Tournament edition.', index: false, ssr: true },
   { id: 'tournament-sub', path: '/tournaments/:slug/:year/:event', title: 'Tournament', description: 'Tournament draw.', index: false, events: ['draw', 'mens-singles', 'womens-singles', 'mens-doubles', 'womens-doubles', 'mixed-doubles'] },
-  { id: 'rankings', path: '/rankings', title: 'Tennis Rankings', description: 'ATP and WTA ranking snapshots.', index: false },
-  { id: 'rankings-list', path: '/rankings/:tour', title: 'Tennis Rankings', description: 'Ranking snapshots.', index: false, tours: ['men', 'women'] },
-  { id: 'rankings-list', path: '/rankings/:tour/doubles', title: 'Doubles Rankings', description: 'Doubles ranking snapshots.', index: false, tours: ['men', 'women'], doubles: true },
-  { id: 'pbe-picks', path: '/pbe-picks', title: 'PBE Picks', description: 'Locked pre-match PBE model calls.', index: false },
-  { id: 'track-record', path: '/track-record', title: 'Track Record', description: 'Graded PBE picks.', index: false },
-  { id: 'news', path: '/news', title: 'Tennis News', description: 'Evidence-grounded tennis newsroom.', index: false },
-  { id: 'news-desk', path: '/news/:desk', title: 'Tennis News', description: 'Tennis newsroom desk.', index: false, desks: ['atp', 'wta', 'challenger', 'itf', 'doubles'] },
-  { id: 'doubles', path: '/doubles', title: 'Doubles Lab', description: 'Doubles pair intelligence.', index: false },
-  { id: 'breakout-watch', path: '/breakout-watch', title: 'Breakout Watch', description: 'Players climbing the professional ladder.', index: false },
-  { id: 'labs', path: '/labs', title: 'Labs', description: 'PropBetEdge Tennis labs and tools.', index: false },
+  { id: 'venue', path: '/venues/:slug', title: 'Venue', description: 'Tennis venue.', index: false },
+  { id: 'rankings', path: '/rankings', title: 'Tennis Rankings', description: 'Official WTA singles and doubles rankings, archived weekly.', index: false, redirect: '/rankings/women' },
+  { id: 'rankings-list', path: '/rankings/women', title: 'WTA Singles Rankings', description: 'The official WTA singles ranking list as published, with movement against the previous list PropBetEdge archived.', index: true, fixed: { tour: 'women' } },
+  { id: 'rankings-list', path: '/rankings/women/doubles', title: 'WTA Doubles Rankings', description: 'The official WTA doubles ranking list as published, archived weekly by PropBetEdge.', index: true, fixed: { tour: 'women' }, doubles: true },
+  { id: 'rankings-list', path: '/rankings/men', title: 'ATP Rankings', description: 'ATP rankings are not yet available on PropBetEdge Tennis.', index: false, fixed: { tour: 'men' } },
+  { id: 'rankings-list', path: '/rankings/men/doubles', title: 'ATP Doubles Rankings', description: 'ATP doubles rankings are not yet available.', index: false, fixed: { tour: 'men' }, doubles: true },
+  { id: 'dna', path: '/dna', title: 'Tennis DNA — Serve, Return & Pressure Leaders', description: 'Tennis DNA: PropBetEdge’s serve, return and pressure metrics with samples, confidence and percentiles.', index: true },
+  { id: 'search', path: '/search', title: 'Search', description: 'Search players and tournaments.', index: false },
+  { id: 'pbe-picks', path: '/pbe-picks', title: 'PBE Picks', description: 'Not live.', index: false },
+  { id: 'track-record', path: '/track-record', title: 'Track Record', description: 'Not live.', index: false },
+  { id: 'news', path: '/news', title: 'Tennis News', description: 'Not live.', index: false },
+  { id: 'news-desk', path: '/news/:desk', title: 'Tennis News', description: 'Not live.', index: false, desks: ['atp', 'wta', 'challenger', 'itf', 'doubles'] },
+  { id: 'doubles', path: '/doubles', title: 'Doubles Lab', description: 'Not live.', index: false },
+  { id: 'breakout-watch', path: '/breakout-watch', title: 'Breakout Watch', description: 'Not live.', index: false },
+  { id: 'labs', path: '/labs', title: 'More', description: 'PropBetEdge Tennis tools.', index: false },
   { id: 'methodology', path: '/methodology', title: 'Methodology — Tennis DNA v1 Definitions', description: 'How PropBetEdge Tennis defines every derived number: Tennis DNA v1 formulas, sample sizes, confidence tiers and as-of rules.', index: true },
-  { id: 'sources', path: '/sources', title: 'Sources — Where PropBetEdge Tennis Data Comes From', description: 'Every tennis data source PropBetEdge has audited, what it provides, and the latest canary result.', index: true }
+  { id: 'sources', path: '/sources', title: 'Sources — Where PropBetEdge Tennis Data Comes From', description: 'Every tennis data source PropBetEdge has audited, what it provides, and the latest canary result.', index: true },
+  { id: 'credits', path: '/credits', title: 'Photo Credits', description: 'Every player photo on PropBetEdge Tennis with its author, license and source.', index: false },
+  { id: 'coverage', path: '/coverage', title: 'Data Coverage', description: 'Internal: historical warehouse coverage.', index: false }
 ];
 
 function compile(path) {
@@ -51,16 +62,17 @@ export function resolveRoute(pathname) {
   for (const r of COMPILED) {
     const m = r.re.exec(path);
     if (!m) continue;
-    const params = Object.fromEntries(r.keys.map((k, i) => [k, decodeURIComponent(m[i + 1])]));
+    const params = { ...(r.fixed || {}), ...Object.fromEntries(r.keys.map((k, i) => [k, decodeURIComponent(m[i + 1])])) };
     if (r.tabs && !r.tabs.includes(params.tab)) continue;
     if (r.events && !r.events.includes(params.event)) continue;
-    if (r.tours && !r.tours.includes(params.tour)) continue;
     if (r.desks && !r.desks.includes(params.desk)) continue;
     if (params.year && !/^\d{4}$/.test(params.year)) continue;
+    if (params.id && r.id !== 'news-desk' && !/^[0-9a-f-]{36}$/.test(params.id)) continue;
     return { id: r.id, params, path, route: r };
   }
   return { id: 'not-found', params: {}, path, route: { id: 'not-found', title: 'Not found', description: 'This page does not exist.', index: false } };
 }
 
 /** Static (param-free) routes: prerendered with their own head, listed in the sitemap if indexable. */
-export const STATIC_ROUTES = ROUTE_TABLE.filter((r) => !r.path.includes(':'));
+export const STATIC_ROUTES = ROUTE_TABLE.filter((r) => !r.path.includes(':') && !r.redirect);
+export const REDIRECTS = ROUTE_TABLE.filter((r) => r.redirect).map((r) => ({ source: r.path, destination: r.redirect }));

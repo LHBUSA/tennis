@@ -17,13 +17,15 @@ import { storeFromEnv } from '../../shared/store/postgrest.js';
 import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
+import { buildDnaSnapshots } from './dna-job.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
-const RANK_HISTORY_FLOOR = '2023-01-02';  // weekly ranking history floor
+const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
+const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
 const WIMBLEDON_YEARS = [2022, 2023, 2024, 2025];
-const UPSTREAM_BUDGET = 30;
+const UPSTREAM_BUDGET = 40;
 
 /** Kept for the canary endpoint + tests: one bounded request per adapter. */
 export function canaryPlan() {
@@ -104,7 +106,7 @@ async function tickInner(env, store, kv, force) {
   });
 
   // 3. stats
-  await step(ctx, 'stats', () => pendingStats(ctx, 10));
+  await step(ctx, 'stats', () => pendingStats(ctx, 20));
 
   // 4. current rankings
   await step(ctx, 'rankings', async () => {
@@ -127,28 +129,7 @@ async function tickInner(env, store, kv, force) {
   // 5. backfill — one unit per tick, only with budget left
   await step(ctx, 'backfill', async () => {
     if (ctx.upstream >= UPSTREAM_BUDGET) return 'budget_spent';
-    const cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
-    if (!cal.done) {
-      const to = addDays(cal.from, 13);
-      const { ok, editions: eds } = await calendarWindow(ctx, cal.from, to < today ? to : today);
-      if (!ok) return { calendar_window: cal.from, state: 'fetch_failed_will_retry' };
-      const past = await Promise.all(eds.filter((e) => e.live_scoring_id && TOUR_LEVELS.test(e.level || '') && e.end_date < addDays(today, -1)).map(editionContext));
-      const queue = (await kv.get('bf:events', 'json')) || [];
-      const seen = new Set(queue.map((q) => q.edition_id));
-      for (const p of past) if (!seen.has(p.edition_id)) queue.push(p);
-      await kv.put('bf:events', JSON.stringify(queue));
-      const next = addDays(cal.from, 14);
-      await kv.put('bf:cal', JSON.stringify(next > today ? { from: next, done: true } : { from: next, done: false }));
-      return { calendar_window: cal.from, queued: queue.length };
-    }
-    const queue = (await kv.get('bf:events', 'json')) || [];
-    if (queue.length) {
-      const ed = queue.shift();
-      const r = await editionMatches(ctx, ed);
-      if (r.state === 'PASS') await kv.put('bf:events', JSON.stringify(queue));
-      else { ed.attempts = (ed.attempts || 0) + 1; if (ed.attempts < 4) queue.push(ed); await kv.put('bf:events', JSON.stringify(queue)); }
-      return { edition: `${ed.name} ${ed.year}`, ...r, remaining: queue.length };
-    }
+    // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue
     for (const y of WIMBLEDON_YEARS) {
       if (await kv.get(`bf:wim:${y}`)) continue;
       const r = await wimbledonMen(ctx, y);
@@ -161,14 +142,56 @@ async function tickInner(env, store, kv, force) {
       if (r.state === 'PASS') await kv.put('bf:ao', JSON.stringify({ year: ao.year, day: ao.day + 1 }));
       return { ausopen: `${ao.year} day ${ao.day}`, ...r };
     }
-    const pbp = await ausopenPointStep(ctx, 3);
+    const pbp = await ausopenPointStep(ctx, 5);
     if (!pbp.done) return { ausopen_point_by_point: pbp };
+    let calKey = 'bf:cal';
+    let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
+    let ceiling = today;
+    if (cal.done) {
+      calKey = 'bf:cal:a';
+      cal = (await kv.get(calKey, 'json')) || { from: HISTORY_PHASE_A.from, done: false };
+      ceiling = HISTORY_PHASE_A.to;
+    }
+    if (!cal.done && ((await kv.get('bf:events', 'json')) || []).length < 40) {
+      const to = addDays(cal.from, 13);
+      const { ok, editions: eds } = await calendarWindow(ctx, cal.from, to < ceiling ? to : ceiling);
+      if (!ok) return { calendar_window: cal.from, state: 'fetch_failed_will_retry' };
+      const past = await Promise.all(eds.filter((e) => e.live_scoring_id && TOUR_LEVELS.test(e.level || '') && e.end_date < addDays(today, -1)).map(editionContext));
+      const queue = (await kv.get('bf:events', 'json')) || [];
+      const seen = new Set(queue.map((q) => q.edition_id));
+      for (const p of past) if (!seen.has(p.edition_id)) queue.push(p);
+      await kv.put('bf:events', JSON.stringify(queue));
+      const next = addDays(cal.from, 14);
+      await kv.put(calKey, JSON.stringify(next > ceiling ? { from: next, done: true } : { from: next, done: false }));
+      return { calendar_window: cal.from, phase: calKey, queued: queue.length };
+    }
+    const queue = (await kv.get('bf:events', 'json')) || [];
+    if (queue.length) {
+      const done = [];
+      for (let k = 0; k < 2 && queue.length; k += 1) {
+        const ed = queue.shift();
+        const r = await editionMatches(ctx, ed);
+        if (r.state !== 'PASS') { ed.attempts = (ed.attempts || 0) + 1; if (ed.attempts < 4) queue.push(ed); }
+        done.push({ edition: `${ed.name} ${ed.year}`, state: r.state, written: r.written, held: r.held });
+      }
+      await kv.put('bf:events', JSON.stringify(queue));
+      return { editions: done, remaining: queue.length };
+    }
     const rk = (await kv.get('bf:rank', 'json')) || { date: addDays(wta.rankingMonday(started), -7) };
     if (rk.date < RANK_HISTORY_FLOOR) return 'rank_history_complete';
     const s = await rankingStep(ctx, 'singles', rk.date, 6);
     const d = s.done ? await rankingStep(ctx, 'doubles', rk.date, 6) : { done: false };
     if (s.done && d.done) await kv.put('bf:rank', JSON.stringify({ date: addDays(rk.date, -7) }));
     return { ranking_history: rk.date, singles: s.page, doubles: d.page ?? 0 };
+  });
+
+  // 5b. daily Tennis DNA snapshots (stored values the API / PBEcast read)
+  await step(ctx, 'dna', async () => {
+    const day = iso(started);
+    if (!force.dna && (await kv.get('dna:last')) === day) return 'fresh';
+    const r = await buildDnaSnapshots(ctx, { asOf: day });
+    await kv.put('dna:last', day);
+    return r;
   });
 
   // 6. weekly identity jobs
@@ -206,10 +229,20 @@ export default {
       const [last, bfCal, bfEvents, bfRank, active] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active'].map((k) => env.TENNIS_STATE.get(k, 'json')));
       return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
     }
+    // admin: store an approved, pipeline-generated player-media derivative (scripts/media/photos.mjs)
+    if (path === '/v1/media' && request.method === 'PUT') {
+      const auth = request.headers.get('authorization') || '';
+      if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      const key = url.searchParams.get('key') || '';
+      if (!/^players\/[0-9a-f-]{36}\/(portrait|square|thumb|wide)\.(webp|jpg)$/.test(key) || !env.TENNIS_MEDIA) return json({ ok: false, error: 'bad_key' }, { status: 400 });
+      const ct = key.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
+      await env.TENNIS_MEDIA.put(key, await request.arrayBuffer(), { httpMetadata: { contentType: ct, cacheControl: 'public, max-age=31536000, immutable' } });
+      return json({ ok: true, key });
+    }
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1' } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },

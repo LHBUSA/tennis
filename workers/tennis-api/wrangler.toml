@@ -14,3 +14,7 @@ binding = "TENNIS_STATE"
 id = "a117d7b3846c4a39a27ee74c49574c99"
 
 # Secrets: TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY (sports project only)
+
+[[r2_buckets]]
+binding = "TENNIS_MEDIA"
+bucket_name = "tennis-media"

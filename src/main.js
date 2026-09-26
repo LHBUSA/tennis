@@ -1,35 +1,46 @@
 // Boot + path router. Each page module exports mount(root, ctx) -> unmount(); the router always
-// unmounts before mounting the next page, so no fetch or listener outlives its page.
+// unmounts before mounting the next page. Page views: one GA page_view per navigation, emitted after
+// the route's meta is applied (send_page_view is off in the GA config).
 
 import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
+import './styles/pbecast.css';
 import { render } from './lib/dom.js';
 import { resolveRoute } from './lib/routes.js';
 import { routeMeta } from './seo/meta.js';
 import { shellHtml, markActiveNav, wireDrawer } from './ui/shell.js';
+import { wireCopy } from './ui/share.js';
+import { wireImageFallback } from './ui/avatar.js';
+import { initAnalytics, trackPageView, track } from './analytics.js';
 
+const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
   today: () => import('./pages/today.js'),
   sources: () => import('./pages/sources.js'),
   methodology: () => import('./pages/methodology.js'),
   labs: () => import('./pages/labs.js'),
-  'not-found': () => import('./pages/not-found.js')
+  pbecast: () => import('./pages/pbecast.js'),
+  'not-found': () => import('./pages/not-found.js'),
+  live: lp('live'), schedule: lp('schedule'), matches: lp('schedule'), match: lp('match'),
+  tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'), venue: lp('venue'),
+  'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
+  dna: lp('dna'), 'pbecast-hub': lp('pbecastHub'), search: lp('search'), credits: lp('credits'), coverage: lp('coverage')
 };
-const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
-Object.assign(PAGES, {
-  live: lp('live'), tenniscast: lp('live'), matches: lp('matches'), match: lp('match'),
-  tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'),
-  rankings: lp('rankings'), 'rankings-list': lp('rankings'),
-  players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h')
-});
 const dataPage = () => import('./pages/data-page.js');
 
 const app = document.getElementById('app');
 render(app, shellHtml());
 const main = document.getElementById('main');
 const closeDrawer = wireDrawer(app);
+wireCopy(document);
+wireImageFallback(document);
+initAnalytics();
+document.addEventListener('click', (e) => {
+  const s = e.target.closest('.share-b');
+  if (s) track('tennis_share', { method: s.dataset.copy ? 'copy' : /linkedin/i.test(s.href || '') ? 'linkedin' : 'x', route: location.pathname });
+});
 let unmount = null;
 let seq = 0;
 
@@ -42,11 +53,13 @@ function setMeta(m) {
   set('meta[property="og:url"]', 'content', m.canonical);
   set('meta[property="og:title"]', 'content', m.title);
   set('meta[property="og:description"]', 'content', m.description);
+  set('meta[name="twitter:title"]', 'content', m.title);
+  set('meta[name="twitter:description"]', 'content', m.description);
 }
 
-async function go(pathname, { push = false } = {}) {
-  const r = resolveRoute(pathname);
-  if (push) history.pushState({}, '', r.path + location.hash);
+async function go(pathname) {
+  let r = resolveRoute(pathname);
+  if (r.route.redirect) { r = resolveRoute(r.route.redirect); history.replaceState({}, '', r.path); }
   const mine = ++seq;
   const mod = await (PAGES[r.id] || dataPage)();
   if (mine !== seq) return;
@@ -55,17 +68,27 @@ async function go(pathname, { push = false } = {}) {
   markActiveNav(app, r.id);
   closeDrawer(false);
   unmount = mod.mount(main, r);
-  if (push) window.scrollTo(0, 0);
+  // allow the page to set a data-derived title before the page_view is sent
+  setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600);
 }
 
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a[href]');
   if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target) return;
   const url = new URL(a.href, location.href);
-  if (url.origin !== location.origin) return;
-  if (url.pathname === location.pathname && url.hash) return;
+  if (url.origin !== location.origin || /^\/(brand|media|fonts|assets)\//.test(url.pathname)) return;
+  if (url.pathname === location.pathname && url.search === location.search && url.hash) return;
   e.preventDefault();
-  go(url.pathname, { push: true }).then(() => { if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView(); });
+  history.pushState({}, '', url.pathname + url.search + url.hash);
+  go(url.pathname).then(() => { window.scrollTo(0, 0); if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView(); });
+});
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('form[action="/search"]');
+  if (!f) return;
+  e.preventDefault();
+  const q = new FormData(f).get('q');
+  history.pushState({}, '', `/search?q=${encodeURIComponent(q)}`);
+  go('/search');
 });
 window.addEventListener('popstate', () => go(location.pathname));
 go(location.pathname);

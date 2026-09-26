@@ -20,3 +20,7 @@ bucket_name = "tennis-source"
 crons = ["*/2 * * * *"]
 
 # Secrets: TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY, INGEST_ADMIN_TOKEN
+
+[[r2_buckets]]
+binding = "TENNIS_MEDIA"
+bucket_name = "tennis-media"

@@ -1,16 +1,22 @@
-// Data-backed pages: Live, Matches, Tournaments, Tournament, Match Lab, Rankings, Players, Player, H2H.
-// Every page: fetch one tennis-api route, render real rows, or state exactly why there are none.
+// Data-backed pages. Every page fetches tennis-api routes, renders real rows, or says exactly why not.
 
 import { html, render } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, freshnessBadge } from '../ui/state.js';
-import { matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaTable, statsCompare, playerHero, eventLabel, roundLabel, fmtRange, fmtDate } from '../ui/render.js';
+import { avatar, nat } from '../ui/avatar.js';
+import { shareBar } from '../ui/share.js';
+import { matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
+import { track } from '../analytics.js';
 
-const shell = (root, { eyebrow, heading, lede = '', chips = null }) => render(root, html`<div class="page">
-  <header class="page-h"><p class="eyebrow">${eyebrow}</p><h1>${heading}</h1>${lede ? html`<p class="lede">${lede}</p>` : ''}
-  ${chips ? html`<nav class="chips">${chips.map(([h, l, on]) => html`<a class="chip${on ? ' on' : ''}" href="${h}">${l}</a>`)}</nav>` : ''}
-  <p class="meta" data-meta></p></header>
-  <div data-body><p class="loading">Loading…</p></div></div>`);
+const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
+function shell(root, { eyebrow, heading, lede = '', chips = null }) {
+  render(root, html`<div class="page">
+    <header class="page-h"><p class="eyebrow">${eyebrow}</p><h1>${heading}</h1>${lede ? html`<p class="lede">${lede}</p>` : ''}
+    ${chips ? html`<nav class="chips" aria-label="Views">${chips.map(([h, l, on]) => html`<a class="chip${on ? ' on' : ''}" href="${h}" ${on ? html`aria-current="page"` : ''}>${l}</a>`)}</nav>` : ''}
+    <p class="meta" data-meta></p></header>
+    <div data-body><p class="loading">Loading…</p></div></div>`);
+}
 
 async function fill(root, path, draw, note, signal, { poll = 0 } = {}) {
   const run = async () => {
@@ -19,7 +25,7 @@ async function fill(root, path, draw, note, signal, { poll = 0 } = {}) {
     const body = root.querySelector('[data-body]');
     const meta = root.querySelector('[data-meta]');
     if (!body) return;
-    if (meta) render(meta, html`${freshnessBadge(res.meta)} <span class="sem">${res.meta?.semantics || ''}</span>`);
+    if (meta) render(meta, html`${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span>`);
     const out = res.data != null ? draw(res.data, res.meta) : null;
     render(body, out || emptyModule(res.meta, note));
   };
@@ -38,112 +44,230 @@ function mountWith(fn) {
   };
 }
 
-const byStatus = (ms, st) => ms.filter((m) => st.includes(m.status));
-
+// ---- live ---------------------------------------------------------------------------------------------
 export const live = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Live', heading: 'Live Now', lede: 'Matches in progress, with the point score and server exactly as the source last published them. Refreshes every 30 seconds.' });
-  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="count">${d.length} match${d.length === 1 ? '' : 'es'} live</p>${matchList(d)}` : html`<div class="empty"><p class="empty-h">No matches in progress right now.</p><p>Covered live today: WTA Tour, WTA 125 and Grand Slam women's events. ATP, Challenger and ITF live data are not yet acquirable.</p></div>`), 'Live data unavailable.', signal, { poll: 30 });
+  track('tennis_live_open', { route: '/live' });
+  shell(root, { eyebrow: 'Live', heading: 'Live Now', lede: 'Matches in progress, with set, game and point scores and the server exactly as the source last published them. Open PBEcast for the live analytical court.' });
+  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="sec"><span>${d.length} match${d.length === 1 ? '' : 'es'} live</span></p>${matchList(d)}` : html`<div class="mod"><p class="empty-h">No matches in progress right now.</p><p class="note">Covered live: WTA Tour, WTA 125 and Grand Slam women’s events. ATP, Challenger and ITF live data are not yet acquirable. <a href="/schedule">See the schedule →</a></p></div>`), 'Live data unavailable.', signal, { poll: 30 });
 });
 
-export const matches = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Matches', heading: "Today's Matches", lede: 'Every observed match at tournaments in progress today.' });
-  return fill(root, '/v1/today', (d) => {
-    const all = [...d.live, ...d.upcoming, ...d.latest_results];
-    if (!all.length) return null;
-    return html`${d.live.length ? html`<h2 class="sec">Live</h2>${matchList(d.live)}` : ''}${d.upcoming.length ? html`<h2 class="sec">Up next</h2>${matchList(d.upcoming)}` : ''}${d.latest_results.length ? html`<h2 class="sec">Latest results</h2>${matchList(d.latest_results)}` : ''}`;
-  }, 'No matches at tournaments in progress today.', signal, { poll: 60 });
+// ---- schedule -----------------------------------------------------------------------------------------
+const VIEWS = [['today', 'Today'], ['tomorrow', 'Tomorrow'], ['week', 'This week'], ['upcoming', 'Upcoming']];
+export const schedule = mountWith((root, _c, signal) => {
+  const q = new URLSearchParams(location.search);
+  const view = VIEWS.some(([v]) => v === q.get('view')) ? q.get('view') : 'today';
+  const f = { status: q.get('status') || '', event: q.get('event') || '', surface: q.get('surface') || '', tour: q.get('tour') || '' };
+  track('tennis_schedule_open', { route: '/schedule' });
+  const link = (patch) => { const p = new URLSearchParams({ view, ...f, ...patch }); for (const [k, v] of [...p]) if (!v) p.delete(k); return `/schedule?${p}`; };
+  shell(root, { eyebrow: 'Schedule', heading: 'Tennis Schedule', lede: `Covered tours only: WTA Tour, WTA 125 and Grand Slam women’s events. Start times appear in your time zone (${Intl.DateTimeFormat().resolvedOptions().timeZone}) when the source publishes a full timestamp.`, chips: VIEWS.map(([v, l]) => [link({ view: v }).replace(/view=[a-z]+/, `view=${v}`), l, v === view]) });
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Filters">
+    ${[['', 'All tours'], ['wta', 'WTA'], ['wta-125', 'WTA 125'], ['grand-slam', 'Grand Slam']].map(([v, l]) => html`<a class="chip${f.tour === v ? ' on' : ''}" href="${link({ tour: v })}">${l}</a>`)}
+    ${[['', 'Singles + doubles'], ['singles', 'Singles'], ['doubles', 'Doubles']].map(([v, l]) => html`<a class="chip${f.event === v ? ' on' : ''}" href="${link({ event: v })}">${l}</a>`)}
+    ${[['', 'Any surface'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([v, l]) => html`<a class="chip${f.surface === v ? ' on' : ''}" href="${link({ surface: v })}">${l}</a>`)}
+    ${[['', 'Any status'], ['live', 'Live'], ['scheduled', 'Scheduled'], ['completed', 'Completed']].map(([v, l]) => html`<a class="chip${f.status === v ? ' on' : ''}" href="${link({ status: v })}">${l}</a>`)}
+  </div>`));
+  const qs = new URLSearchParams({ view, ...f });
+  for (const [k, v] of [...qs]) if (!v) qs.delete(k);
+  return fill(root, `/v1/schedule?${qs}`, (d) => html`
+    ${d.tournaments.length ? html`<h2 class="sec">Tournaments <small>${fmtRange(d.window[0], d.window[1])}</small></h2><div class="trs">${d.tournaments.map(tournamentRow)}</div>` : html`<p class="note">No covered tournament in this window.</p>`}
+    ${d.live.length ? html`<h2 class="sec">Live</h2>${matchList(d.live)}` : ''}
+    ${d.scheduled.length ? html`<h2 class="sec">Order of play <small>as published; a match without a time follows the one before it on that court</small></h2>${matchList(d.scheduled)}` : ''}
+    ${d.completed.length ? html`<h2 class="sec">Completed</h2>${matchList(d.completed.slice(0, 60))}` : ''}
+    ${view === 'week' || view === 'upcoming' ? html`<p class="note">Match-level order of play is published a day ahead; future days show tournaments only.</p>` : ''}
+    <div class="mod"><header class="mod-h"><h2>Where to watch</h2></header><p class="note">Broadcast rights are territorial. PropBetEdge shows official broadcasters only when a verified official source is ingested — none is yet, so no watch links are shown.</p></div>`, 'Schedule unavailable.', signal, { poll: view === 'today' ? 60 : 0 });
 });
 
+export const matches = schedule;
+
+// ---- tournaments --------------------------------------------------------------------------------------
 export const tournaments = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Tournaments', heading: 'Tournaments', lede: 'WTA Tour, WTA 125 and Grand Slam editions from the last week through the next two months.' });
+  shell(root, { eyebrow: 'Tournaments', heading: 'Tournaments', lede: 'WTA Tour, WTA 125 and Grand Slam editions from the last week through the next two months — surface, dates and location.' });
   return fill(root, '/v1/tournaments', (d) => (d.length ? html`<div class="trs">${d.map(tournamentRow)}</div>` : null), 'No tournaments stored for this window yet.', signal);
 });
 
+const EVENT_SLUG = { MS: 'mens-singles', WS: 'womens-singles', MD: 'mens-doubles', WD: 'womens-doubles', XD: 'mixed-doubles' };
 export const tournament = mountWith((root, { params }, signal) => {
-  shell(root, { eyebrow: `Tournament · ${params.year}`, heading: params.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) });
-  const want = { 'mens-singles': 'MS', 'womens-singles': 'WS', 'mens-doubles': 'MD', 'womens-doubles': 'WD', 'mixed-doubles': 'XD' }[params.event];
+  track('tennis_tournament_open', { tournament_id: `${params.slug}-${params.year}` });
+  shell(root, { eyebrow: `Tournament · ${params.year}`, heading: title(params.slug) });
+  const want = Object.entries(EVENT_SLUG).find(([, s]) => s === params.event)?.[0];
   return fill(root, `/v1/tournaments/${params.slug}/${params.year}`, (d) => {
+    const e = d.edition;
     const h = root.querySelector('.page-h h1');
-    if (h && d.edition.tournament) h.textContent = d.edition.tournament;
+    if (h && e.tournament) h.textContent = e.tournament;
     const ms = want ? d.matches.filter((m) => m.event_type === want) : d.matches;
     const events = [...new Set(d.matches.map((m) => m.event_type))];
-    const order = (r) => { const [st, n] = String(r).split('-'); return (st === 'Q' ? 0 : 100) + ({ Q: 50, S: 60, F: 70 }[n] ?? Number(n) ?? 0); };
+    const order = (r) => { const [st, n] = String(r).split('-'); return (st === 'Q' ? 0 : 100) + ({ Q: 50, S: 60, F: 70 }[n] ?? (Number(n) || 0)); };
     const groups = new Map();
-    for (const m of ms.sort((a, b) => order(b.round) - order(a.round))) {
-      const k = `${m.event_type}|${m.round}`;
-      if (!groups.has(k)) groups.set(k, []);
-      groups.get(k).push(m);
-    }
-    return html`<p class="lede">${d.edition.name} · ${fmtRange(d.edition.start_date, d.edition.end_date)}${d.edition.surface ? ` · ${d.edition.surface}` : ''}</p>
-      <nav class="chips"><a class="chip${!want ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}">All</a>${events.map((e) => html`<a class="chip${want === e ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}/${{ MS: 'mens-singles', WS: 'womens-singles', MD: 'mens-doubles', WD: 'womens-doubles', XD: 'mixed-doubles' }[e]}">${eventLabel(e)}</a>`)}</nav>
-      ${ms.length ? [...groups].map(([k, list]) => html`<h2 class="sec">${eventLabel(k.split('|')[0])} · ${roundLabel(k.split('|')[1])}</h2>${matchList(list, { showTournament: false })}`) : html`<p class="note">No matches stored for this event.</p>`}
-      <p class="note">Draw positions and bracket lines are not published by our current source for this event; matches are grouped by round as observed.</p>`;
+    for (const m of [...ms].sort((a, b) => order(b.round) - order(a.round))) { const k = `${m.event_type}|${m.round}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
+    const live = ms.filter((m) => m.status === 'in_progress');
+    const where = [e.city, e.country].filter(Boolean).join(', ');
+    return html`<div class="mod"><div class="grid-3" style="gap:10px">
+        <div><p class="eyebrow">Dates</p><b>${fmtRange(e.start_date, e.end_date)}</b></div>
+        <div><p class="eyebrow">Surface</p><b>${cap(e.surface || '—')}${e.indoor === true ? ' · indoor' : e.indoor === false ? ' · outdoor' : ''}</b></div>
+        <div><p class="eyebrow">Location</p><b>${where || '—'}</b>${e.venue?.slug ? html` <a href="/venues/${e.venue.slug}">venue page</a>` : ''}<br><small class="note">${e.venue?.precision === 'city' ? 'City from the source; the venue itself is not named by our source.' : ''}</small></div>
+        <div><p class="eyebrow">Category</p><b>${e.level || '—'}</b></div>
+      </div></div>
+      <nav class="chips" aria-label="Events"><a class="chip${!want ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}">All events</a>${events.map((ev) => html`<a class="chip${want === ev ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}/${EVENT_SLUG[ev]}">${eventLabel(ev)}</a>`)}</nav>
+      ${live.length ? html`<h2 class="sec">Live now</h2>${matchList(live, { showTournament: false })}` : ''}
+      ${ms.length ? [...groups].map(([k, list]) => html`<h2 class="sec">${eventLabel(k.split('|')[0])} · ${roundLabel(k.split('|')[1])} <small>${list.length} match${list.length === 1 ? '' : 'es'}</small></h2>${matchList(list, { showTournament: false })}`) : html`<p class="note">No matches stored for this event.</p>`}
+      <p class="note">Draw positions and bracket lines are not published by our current source for this event; matches are grouped by round as observed. Where to watch: no verified broadcast source yet.</p>
+      ${shareBar({ url: `${location.origin}/tournaments/${params.slug}/${params.year}`, text: `${e.tournament} ${e.year} — PropBetEdge Tennis` })}`;
   }, 'This edition is not in the canonical store.', signal, { poll: 120 });
 });
 
-export const match = mountWith((root, { params }, signal) => {
-  shell(root, { eyebrow: 'Match Lab', heading: 'Match Lab' });
-  return fill(root, `/v1/matches/${params.id}`, (m) => {
+export const venue = mountWith((root, { params }, signal) => {
+  shell(root, { eyebrow: 'Venue', heading: title(params.slug) });
+  return fill(root, `/v1/venues/${params.slug}`, (d) => {
     const h = root.querySelector('.page-h h1');
+    if (h) h.textContent = d.venue.name || `${d.venue.city}${d.venue.country ? `, ${d.venue.country}` : ''}`;
+    return html`<p class="lede">${d.venue.precision === 'city' ? 'Location known to city level only — the venue name and coordinates are not in our source, so none are shown.' : ''}</p><h2 class="sec">Tournament editions here</h2><div class="trs">${d.editions.map(tournamentRow)}</div>`;
+  }, 'Venue not found.', signal);
+});
+
+// ---- match lab ------------------------------------------------------------------------------------------
+export const match = mountWith((root, { params }, signal) => {
+  shell(root, { eyebrow: 'Match', heading: 'Match' });
+  return fill(root, `/v1/matches/${params.id}`, (m) => {
+    track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
+    const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${nm('A')} vs ${nm('B')}`;
-    const stats = statsCompare(m);
-    return html`${matchCard(m)}
-      <section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${stats || html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>
-      <section class="mod"><header class="mod-h"><h2>Observed changes</h2></header><div class="mod-b">${m.observed_changes?.length ? html`<ul class="chg">${m.observed_changes.map((c) => html`<li><time>${new Date(c.observed_at).toLocaleString('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })} UTC</time> ${c.kind.replace(/_/g, ' ')}: ${JSON.stringify(c.from_value)} → ${JSON.stringify(c.to_value)}</li>`)}</ul>` : html`<p class="note">No upstream changes recorded since we first observed this match.</p>`}</div></section>
-      <section class="mod"><header class="mod-h"><h2>PBE evaluation</h2></header><div class="mod-b"><p class="note">The PBE Tennis model is not trained or validated; no probability is shown. Market: UNAVAILABLE.</p></div></section>
-      ${m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 ? html`<p><a class="btn ghost" href="/h2h/${m.sides.A.players[0].slug}/${m.sides.B.players[0].slug}">Head-to-head →</a></p>` : ''}`;
+    const vs = (s) => html`<div class="vs-side">${(m.sides?.[s]?.players || []).map((p) => html`<a href="/players/${p.slug}">${avatar(p, { size: 'square', px: 112, eager: true })}<b>${p.name}</b></a>`)}</div>`;
+    const A = m.statistics?.A, B = m.statistics?.B;
+    return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>
+      ${matchCard(m)}
+      <div class="grid-2" style="margin-top:16px">
+        <section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>
+        <section class="mod"><header class="mod-h"><h2>PBEcast</h2></header><div class="mod-b"><p>${m.status === 'scheduled' ? 'PBEcast opens when live coverage begins.' : 'Open the analytical court: score, serve, key moments, stats, DNA and head-to-head.'}</p>${m.status !== 'scheduled' ? html`<a class="btn green" href="/pbecast/${m.id}">${m.status === 'in_progress' ? 'Watch PBEcast' : 'Replay PBEcast'}</a>` : ''}</div></section>
+        <section class="mod"><header class="mod-h"><h2>Observed changes</h2></header><div class="mod-b">${m.observed_changes?.length ? html`<ul class="opp">${m.observed_changes.slice(-12).map((c) => html`<li><span>${c.kind.replace(/_/g, ' ')}</span><b>${String(c.to_value ?? '')}</b></li>`)}</ul>` : html`<p class="note">No upstream changes recorded since we first observed this match.</p>`}</div></section>
+        <section class="mod"><header class="mod-h"><h2>Model</h2></header><div class="mod-b"><p class="note">No PBE model output: the Tennis model is research-only and unvalidated. Market: unavailable.</p></div></section>
+      </div>
+      ${m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 ? html`<p><a class="btn line" href="/h2h/${m.sides.A.players[0].slug}/${m.sides.B.players[0].slug}">Head-to-head →</a></p>` : ''}
+      ${shareBar({ url: `${location.origin}/matches/${m.id}`, text: `${nm('A')} vs ${nm('B')} — PropBetEdge Tennis` })}`;
   }, 'This match is not in the canonical store.', signal, { poll: 30 });
 });
 
+// ---- rankings -----------------------------------------------------------------------------------------
 export const rankings = mountWith((root, { params, route }, signal) => {
   const tour = params.tour === 'men' ? 'atp' : 'wta';
   const type = route?.doubles ? 'doubles' : 'singles';
-  const chips = [['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles'], ['/rankings/men', 'ATP singles', tour === 'atp' && type === 'singles'], ['/rankings/men/doubles', 'ATP doubles', tour === 'atp' && type === 'doubles']];
-  shell(root, { eyebrow: 'Rankings', heading: `${tour.toUpperCase()} ${type === 'doubles' ? 'Doubles' : 'Singles'} Rankings`, lede: 'The official list exactly as published, archived weekly so ranking history belongs to PropBetEdge. Movement compares with our previous archived list.', chips });
-  return fill(root, `/v1/rankings?tour=${tour}&type=${type}&limit=200`, (d) => html`<p class="count">List dated ${fmtDate(d.ranking_date)} · ${d.total.toLocaleString('en-US')} ranked${d.previous_date ? ` · movement vs ${fmtDate(d.previous_date)}` : ''}</p>${rankingTable(d)}`, tour === 'atp' ? 'ATP rankings are not available: atptour.com refuses automated access and we do not evade it. We are working on another legitimate path.' : 'No complete ranking list archived yet.', signal);
+  track('tennis_rankings_open', { tour, route: location.pathname });
+  const chips = [['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles']];
+  shell(root, { eyebrow: 'Rankings', heading: `${tour.toUpperCase()} ${type === 'doubles' ? 'Doubles' : 'Singles'} Rankings`, lede: tour === 'atp' ? '' : 'The official list exactly as published, archived weekly so ranking history belongs to PropBetEdge. Movement compares with our previous archived list.', chips });
+  return fill(root, `/v1/rankings?tour=${tour}&type=${type}&limit=200`, (d) => html`<p class="note">List dated ${fmtDate(d.ranking_date)} · ${d.total.toLocaleString('en-US')} ranked${d.previous_date ? ` · movement vs ${fmtDate(d.previous_date)}` : ''}</p>${rankingTable(d)}`, tour === 'atp' ? 'ATP rankings are not available yet: atptour.com refuses automated access and PropBetEdge does not evade it. Another legitimate path is being built.' : 'No complete ranking list archived yet.', signal);
 });
 
+// ---- players + search --------------------------------------------------------------------------------
 export const players = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Players', heading: 'Players', lede: 'One canonical identity per player across every source. Search, or browse by current WTA singles ranking.' });
-  const body = () => root.querySelector('[data-body]');
-  root.querySelector('.page-h').insertAdjacentHTML('beforeend', '<form class="search" role="search"><label class="sr" for="q">Search players</label><input id="q" name="q" type="search" placeholder="Search players" autocomplete="off" minlength="2" maxlength="60"><button class="btn" type="submit">Search</button></form>');
-  root.querySelector('form.search').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const q = new FormData(e.target).get('q');
-    if (String(q).trim().length < 2) return;
-    const res = await api(`/v1/players?q=${encodeURIComponent(q)}`, { signal });
-    render(body(), res.data?.length ? html`<ul class="plist">${res.data.map((p) => html`<li><a href="/players/${p.slug}">${p.name}</a> <span class="nat">${p.nationality || ''}</span></li>`)}</ul>` : emptyModule(res.meta, `No player matches “${q}”.`));
-  });
-  return fill(root, '/v1/players', (d) => html`<p class="count">WTA singles · list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`, 'No ranking list archived yet.', signal);
+  shell(root, { eyebrow: 'Players', heading: 'Players', lede: 'One canonical identity per player across every source. Search, or browse by the current WTA singles ranking.' });
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', '<form class="search" role="search" action="/search"><label class="sr" for="q">Search players and tournaments</label><input id="q" name="q" type="search" placeholder="Search players or tournaments" autocomplete="off" minlength="2" maxlength="60"><button class="btn green" type="submit">Search</button></form>');
+  return fill(root, '/v1/players', (d) => html`<p class="note">WTA singles · list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`, 'No ranking list archived yet.', signal);
 });
 
-export const player = mountWith((root, { params }, signal) => {
-  shell(root, { eyebrow: 'Player', heading: params.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) });
-  const tab = params.tab || null;
-  if (tab === 'dna' || tab === 'surfaces') {
-    return fill(root, `/v1/players/${params.slug}/dna`, (d, meta) => html`
-      <p class="lede"><a href="/players/${params.slug}">← ${d.player.name}</a> · Tennis DNA v${d.definition_version} (singles), as of ${fmtDate(d.as_of)} (exclusive) · ${d.matches_considered} matches considered</p>
-      ${dnaTable(d)}
-      <p class="note">${meta?.degraded?.join(' ') || ''} Definitions: <a href="/methodology">methodology</a>.</p>`, 'No Tennis DNA yet.', signal);
+export const search = mountWith((root, _c, signal) => {
+  const q = new URLSearchParams(location.search).get('q') || '';
+  shell(root, { eyebrow: 'Search', heading: 'Search' });
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', `<form class="search" role="search" action="/search"><label class="sr" for="q">Search players and tournaments</label><input id="q" name="q" type="search" value="${q.replace(/"/g, '&quot;')}" placeholder="e.g. Rybakina, Wimbledon 2025" autocomplete="off" minlength="2" maxlength="60"><button class="btn green" type="submit">Search</button></form>`);
+  if (q.trim().length < 2) { render(root.querySelector('[data-body]'), html`<p class="note">Type at least two characters.</p>`); return () => {}; }
+  return fill(root, `/v1/search?q=${encodeURIComponent(q)}`, (d) => {
+    track('tennis_search', { results: d.players.length + d.tournaments.length });
+    return html`<h2 class="sec">Players <small>${d.players.length}</small></h2>${d.players.length ? html`<ul class="plist">${d.players.map((p) => html`<li><a href="/players/${p.slug}">${avatar(p, { px: 36 })}<span>${p.name}</span> ${nat(p.nationality)}</a></li>`)}</ul>` : html`<p class="note">No player matches.</p>`}
+      <h2 class="sec">Tournaments <small>${d.tournaments.length}</small></h2>${d.tournaments.length ? html`<ul class="plist">${d.tournaments.flatMap((t) => (t.editions.length ? t.editions.slice(0, 4) : [{ year: null }]).map((e) => html`<li><a href="${e.year ? `/tournaments/${t.slug}/${e.year}` : '#'}"><span>${t.name}${e.year ? ` ${e.year}` : ''}</span></a></li>`))}</ul>` : html`<p class="note">No tournament matches.</p>`}`;
+  }, 'Search unavailable.', signal);
+});
+
+// ---- player -------------------------------------------------------------------------------------------
+function playerHero(p, meta, tab) {
+  const age = p.dob ? Math.floor((Date.now() - Date.parse(`${p.dob}T00:00:00Z`)) / (365.2425 * 86400000)) : null;
+  const r = p.rankings || {};
+  return html`<div class="ph-band"><div class="page"><div class="ph">
+      <div class="ph-photo">${avatar(p, { size: 'portrait', px: 240, eager: true, cls: 'ph-img' })}</div>
+      <div>
+        <p class="eyebrow">${p.gender === 'F' ? 'WTA' : p.gender === 'M' ? 'ATP' : 'Player'}${p.nationality ? ` · ${p.nationality}` : ''}</p>
+        <h1>${p.name}</h1>
+        <dl class="ph-f">
+          ${r.wta_singles ? html`<div><dt>WTA singles</dt><dd>No. ${r.wta_singles.rank}<small>${r.wta_singles.points?.toLocaleString('en-US')} pts · ${fmtDate(r.wta_singles.date)}</small></dd></div>` : ''}
+          ${r.wta_doubles ? html`<div><dt>WTA doubles</dt><dd>No. ${r.wta_doubles.rank}<small>${fmtDate(r.wta_doubles.date)}</small></dd></div>` : ''}
+          ${age != null ? html`<div><dt>Age</dt><dd>${age}<small>born ${fmtDate(p.dob)}</small></dd></div>` : ''}
+        </dl>
+        ${p.photo ? html`<p class="ph-credit">Photo: ${p.photo.author || 'unknown'} · ${p.photo.license} · <a href="${p.photo.source_page}" rel="noopener nofollow" target="_blank">Wikimedia Commons</a></p>` : html`<p class="ph-credit">No licensed photo approved yet — identity card shown.</p>`}
+        ${shareBar({ url: `${location.origin}/players/${p.slug}`, text: `${p.name} — PropBetEdge Tennis` })}
+      </div></div></div></div>
+    <div class="page" style="padding-top:0"><nav class="tabs" aria-label="Player sections"><a href="/players/${p.slug}" ${!tab ? html`aria-current="page"` : ''}>Overview</a><a href="/players/${p.slug}/dna" ${tab === 'dna' ? html`aria-current="page"` : ''}>Tennis DNA</a></nav><p class="meta">${freshnessBadge(meta)} <span>${meta?.semantics || ''}</span></p></div>`;
+}
+
+export const player = mountWith(async (root, { params }, signal) => {
+  render(root, html`<div class="page"><p class="loading">Loading player…</p></div>`);
+  const [pr, prof] = await Promise.all([api(`/v1/players/${params.slug}`, { signal }), api(`/v1/players/${params.slug}/profile`, { signal })]).catch(() => [null, null]);
+  if (!pr) return;
+  if (!pr.data) { render(root, html`<div class="page">${emptyModule(pr.meta, 'This player is not in the canonical store.')}</div>`); return; }
+  const p = pr.data;
+  const f = prof?.data || null;
+  track(params.tab === 'dna' ? 'tennis_dna_open' : 'tennis_player_open', { player_id: p.id });
+  document.title = `${p.name} — ${params.tab === 'dna' ? 'Tennis DNA' : 'Profile, Rankings & Matches'} | PropBetEdge Tennis`;
+  if (params.tab === 'dna' || params.tab === 'surfaces') {
+    const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
+    const d = dr?.data?.dna;
+    render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page" style="padding-top:0">
+      ${d ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · singles · as of ${fmtDate(d.as_of)}</span></header>
+        <div class="dna-wrap"><div>${dnaRadar(d.dimensions)}<p class="note">Percentile vs ${d.percentile_basis}. Dimensions whose sample is not yet medium confidence show n/a.</p></div>
+        <div>${dnaBars(d.dimensions)}
+          <table class="cmp2" style="margin-top:14px"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n">Sample</th></tr></thead><tbody>${Object.values(d.metrics).map((m) => html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${pct(m.value)}</td><td class="n">${m.numerator == null ? '—' : `${m.numerator}/${m.denominator}`} · ${m.sample_matches}m <span class="conf c-${m.confidence}">${m.confidence}</span></td></tr>`)}</tbody></table></div></div></section>
+      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}` : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
+      <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
+    return;
   }
-  return fill(root, `/v1/players/${params.slug}`, (p, meta) => {
-    const h = root.querySelector('.page-h');
-    if (h) h.remove();
-    const hist = p.ranking_history || [];
-    return html`${playerHero(p, meta)}
-      <nav class="chips"><a class="chip on" href="/players/${p.slug}">Overview</a><a class="chip" href="/players/${p.slug}/dna">Tennis DNA</a></nav>
-      <section class="mod"><header class="mod-h"><h2>Ranking history</h2></header><div class="mod-b">${rankSpark(hist, p.gender === 'M' ? 'atp_singles' : 'wta_singles')}</div></section>
-      <section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches) : html`<p class="note">No matches stored yet — history is backfilling from January 2025.</p>`}</div></section>
-      <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>`;
-  }, 'This player is not in the canonical store.', signal);
+  const surf = f?.surface_record || {};
+  render(root, html`${playerHero(p, pr.meta, null)}<div class="page" style="padding-top:0">
+    <div class="grid-2">
+      <section class="mod"><header class="mod-h"><h2>Recent form</h2><span class="mod-k">last ${f?.form?.length || 0}</span></header><div class="mod-b">${f?.form?.length ? html`<div class="form">${f.form.map((x) => html`<a class="${x.result}" href="/matches/${x.id}" title="${x.result} ${x.score || ''} · ${x.tournament || ''} ${x.year || ''}">${x.result}</a>`)}</div>` : html`<p class="note">No completed singles matches in the store yet — history is backfilling.</p>`}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>
+      <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
+    </div>
+    <section class="mod"><header class="mod-h"><h2>Ranking history</h2></header><div class="mod-b">${rankSpark(p.ranking_history || [], p.gender === 'M' ? 'atp_singles' : 'wta_singles')}</div></section>
+    <section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>
+    ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
+    <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
+  </div>`);
 });
 
 export const h2h = mountWith((root, { params }, signal) => {
-  shell(root, { eyebrow: 'H2H Lab', heading: 'Head-to-Head', lede: 'Descriptive evidence from matches in our store — not the PBE prediction. Older meetings are shown with their dates; recency matters.' });
+  shell(root, { eyebrow: 'Head-to-head', heading: 'Head-to-Head', lede: 'Descriptive evidence from matches in our store — not a prediction. Older meetings carry their dates; recency matters.' });
   return fill(root, `/v1/h2h/${params.a}/${params.b}`, (d) => {
     const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${d.a.name} vs ${d.b.name}`;
-    return html`<p class="count">Record in stored matches: ${d.a.name} ${d.record[d.a.slug]} – ${d.record[d.b.slug]} ${d.b.name}</p>${d.meetings.length ? matchList(d.meetings) : html`<p class="note">No meetings in the canonical store yet (history backfills from January 2025).</p>`}`;
+    return html`<p class="h2h-big tabnum">${d.a.name} <b>${d.record[d.a.slug]}</b> – <b>${d.record[d.b.slug]}</b> ${d.b.name}</p>${d.meetings.length ? matchList(d.meetings) : html`<p class="note">No meetings in the canonical store yet (history is backfilling).</p>`}`;
   }, 'One of these players is not in the canonical store.', signal);
+});
+
+// ---- Tennis DNA hub -----------------------------------------------------------------------------------
+const DNA_METRICS = [['hold_rate', 'Hold rate'], ['service_points_won', 'Service points won'], ['first_serve_won', '1st serve points won'], ['second_serve_won', '2nd serve points won'], ['return_points_won', 'Return points won'], ['return_games_won', 'Break rate'], ['break_points_saved', 'Break points saved'], ['break_points_converted', 'Break points converted'], ['ace_rate', 'Ace rate']];
+export const dna = mountWith((root, _c, signal) => {
+  const q = new URLSearchParams(location.search);
+  const metric = DNA_METRICS.some(([k]) => k === q.get('metric')) ? q.get('metric') : 'hold_rate';
+  const surface = ['hard', 'clay', 'grass'].includes(q.get('surface')) ? q.get('surface') : 'all';
+  track('tennis_dna_open', { route: '/dna', surface });
+  shell(root, { eyebrow: 'Tennis DNA', heading: 'Tennis DNA', lede: 'PropBetEdge’s serve, return and pressure metrics — summed over real match statistics, with numerator, denominator, sample and confidence on every number. Leaders include only medium- or high-confidence samples.', chips: DNA_METRICS.map(([k, l]) => [`/dna?metric=${k}${surface !== 'all' ? `&surface=${surface}` : ''}`, l, k === metric]) });
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="/dna?metric=${metric}${s !== 'all' ? `&surface=${s}` : ''}">${l}</a>`)}</div>`));
+  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&limit=50`, (d) => html`<p class="note">${d.definition} · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
+    ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${pct(r.value)}</td><td class="n hide-s">${r.numerator}/${r.denominator} · ${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No player has a medium-confidence sample for this metric yet.</p><p class="note">Tennis DNA is built from stored match statistics; the historical backfill adds them every few minutes. Small samples are never ranked.</p></div>`}
+    <p class="note"><a href="/methodology">Definitions and confidence rules →</a></p>`, 'Tennis DNA unavailable.', signal);
+});
+
+// ---- PBEcast hub --------------------------------------------------------------------------------------
+export const pbecastHub = mountWith((root, _c, signal) => {
+  shell(root, { eyebrow: 'PBEcast', heading: 'PBEcast', lede: 'The live analytical court: score, server, key moments, serve and return, Tennis DNA and head-to-head — and replays of completed matches. Observed-live coverage updates about every 18 seconds; point-by-point appears only where a source publishes it.' });
+  return fill(root, '/v1/today', (d) => html`${d.live.length ? html`<h2 class="sec">Live now</h2>${matchList(d.live)}` : html`<div class="mod"><p class="empty-h">No PBEcast live right now.</p><p class="note"><a href="/schedule">See today’s schedule →</a></p></div>`}
+    ${d.latest_results.length ? html`<h2 class="sec">Replays <small>matches finished at tournaments in progress</small></h2>${matchList(d.latest_results.filter((m) => ['completed', 'retired'].includes(m.status)).slice(0, 12))}` : ''}`, 'PBEcast unavailable.', signal, { poll: 60 });
+});
+
+// ---- credits + coverage --------------------------------------------------------------------------------
+export const credits = mountWith((root, _c, signal) => {
+  shell(root, { eyebrow: 'Credits', heading: 'Photo Credits', lede: 'Player photos are shown only when the file’s license is CC0, public domain, CC BY or CC BY-SA and the player’s identity is proven through an exact tour-id match. Every photo, its author and license:' });
+  return fill(root, '/v1/credits', (d) => html`<ul class="credits">${d.map((c) => html`<li><div><b><a href="/players/${c.player.slug}">${c.player.name}</a></b><br>${c.author || 'Unknown author'} · ${c.license} · <a href="${c.source_page}" rel="noopener nofollow" target="_blank">source</a></div></li>`)}</ul>`, 'No approved photos yet.', signal);
+});
+
+export const coverage = mountWith((root, _c, signal) => {
+  shell(root, { eyebrow: 'Internal', heading: 'Data Coverage', lede: 'Historical warehouse depth. Q1 result only · Q2 set/game score · Q3 match statistics · Q4 point-by-point · Q5 point + spatial.' });
+  return fill(root, '/v1/coverage', (d) => html`<p class="note">${d.players.toLocaleString('en-US')} players · ${d.approved_photos} approved photos · ${d.dna_snapshots} DNA snapshots · ${d.ranking_snapshots} complete ranking lists</p>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:56px">Year</th><th>Level</th><th style="width:46px">Evt</th><th class="n">Matches</th><th class="n hide-s">Q1</th><th class="n hide-s">Q2</th><th class="n">Q3</th><th class="n">Q4</th></tr></thead><tbody>${d.by_year.map((r) => html`<tr><td>${r.year}</td><td>${r.level}</td><td>${r.event_type}</td><td class="n">${r.matches}</td><td class="n hide-s">${r.q1}</td><td class="n hide-s">${r.q2}</td><td class="n">${r.q3}</td><td class="n">${r.q4}</td></tr>`)}</tbody></table></div>`, 'Coverage unavailable.', signal);
 });

@@ -97,7 +97,9 @@ test('WTA order-of-play row (MatchState U) is a scheduled match; placeholder tim
   assert.equal(u.schedule_note, 'Followed By');
   const t = wta.parseWtaMatch({ MatchState: 'U', DrawMatchType: 'S', DrawLevelType: 'M', EventID: '1', EventYear: 2026, MatchID: 'LS001', NotBefore: 'Not Before', NotBeforeISOTime: '15:00+0300', PlayerIDA: '1', PlayerIDB: '2' }, { level: 'WTA 500' });
   assert.equal(t.scheduled_at, null, 'a time without a date is not a timestamp');
-  assert.equal(t.schedule_note, 'Not Before · not before 15:00+0300');
+  assert.equal(t.schedule_note, 'Not Before');
+  const t2 = wta.parseWtaMatch({ MatchState: 'U', DrawMatchType: 'S', DrawLevelType: 'M', EventID: '1', EventYear: 2026, MatchID: 'LS003', NotBefore: 'Starting at 3:00 PM', NotBeforeText: 'Starting at', NotBeforeISOTime: '15:00+0300', PlayerIDA: '1', PlayerIDB: '2' }, { level: 'WTA 125' });
+  assert.equal(t2.schedule_note, 'Starting at 3:00 PM', 'no duplicated source fragments');
   const f = wta.parseWtaMatch({ MatchState: 'U', DrawMatchType: 'S', DrawLevelType: 'M', EventID: '1', EventYear: 2026, MatchID: 'LS002', NotBeforeISOTime: '2026-09-27T12:00:00+08:00', PlayerIDA: '1', PlayerIDB: '2' }, { level: 'WTA 500' });
   assert.equal(f.scheduled_at, '2026-09-27T12:00:00+08:00');
   assert.deepEqual(u.warnings, []);

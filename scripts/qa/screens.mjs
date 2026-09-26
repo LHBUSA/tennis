@@ -10,8 +10,8 @@ import { preview } from 'vite';
 import { chromium } from 'playwright-core';
 
 const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const WIDTHS = [1440, 1024, 430, 390, 360, 320];
-const PATHS = ['/', '/sources', '/methodology', '/live', '/matches', '/tournaments', '/tournaments/singapore/2026', '/players', '/players/elena-rybakina', '/players/elena-rybakina/dna', '/rankings/women', '/rankings/men', '/h2h/elena-rybakina/aryna-sabalenka', '/pbe-picks', '/news', '/labs', '/does-not-exist'];
+const WIDTHS = [1440, 1280, 1024, 768, 430, 390, 360, 320];
+const PATHS = ['/', '/schedule', '/live', '/tournaments', '/tournaments/singapore/2026', '/players', '/players/elena-rybakina', '/players/elena-rybakina/dna', '/rankings/women', '/dna', '/pbecast', '/pbecast/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/matches/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/search?q=rybakina', '/credits', '/methodology', '/sources', '/does-not-exist'];
 const OUT = path.resolve('qa-artifacts');
 
 const server = await preview({ preview: { port: 5195, strictPort: true } });
@@ -33,9 +33,11 @@ try {
       const m = await page.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth, h1: document.querySelector('h1')?.textContent?.trim() || '', robots: document.querySelector('meta[name="robots"]')?.content, canonical: document.querySelector('link[rel="canonical"]')?.href }));
       if (m.sw > m.iw) failures.push(`${width}px ${p}: horizontal overflow ${m.sw} > ${m.iw}`);
       if (!m.h1) failures.push(`${width}px ${p}: no h1`);
+      const broken = await page.evaluate(() => [...document.images].filter((i) => i.complete && i.naturalWidth === 0 && !i.src.startsWith('data:')).map((i) => i.src));
+      for (const b of broken) failures.push(`${width}px ${p}: broken image ${b}`);
       for (const e of errors) failures.push(`${width}px ${p}: ${e}`);
-      const name = `${width}${p.replace(/\//g, '_') || '_home'}.png`;
-      if ([1440, 390, 320].includes(width)) await page.screenshot({ path: path.join(OUT, name), fullPage: true });
+      const name = `${width}${p.replace(/[/?=]/g, '_') || '_home'}.png`;
+      if ([1440, 768, 390, 320].includes(width)) await page.screenshot({ path: path.join(OUT, name), fullPage: true });
     }
     await ctx.close();
   }
