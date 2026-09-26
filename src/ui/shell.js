@@ -2,6 +2,7 @@
 
 import { html } from '../lib/dom.js';
 import { NETWORK, CURRENT_SPORT, PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
+import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
 
 export const PRIMARY_NAV = [
   { href: '/', label: 'Today', id: 'today' },
@@ -70,6 +71,7 @@ export function footerHtml() {
       </nav>
       <nav class="ftr-links" aria-label="PropBetEdge">
         <p>PropBetEdge</p>
+        <a class="ftr-aa" href="${ALL_ACCESS_OFFER.learnUrl}" data-pbe-footer-all-access>All Access · ${ALL_ACCESS_OFFER.price}</a>
         <a href="${NETWORK.news.href}">${NETWORK.news.label}</a>
         <a href="${NETWORK.learn.href}">${NETWORK.learn.label}</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>

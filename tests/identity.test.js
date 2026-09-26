@@ -36,3 +36,12 @@ test('footer: one PropBetEdge X link, new tab, safe rel, accessible name', () =>
   assert.match(links[0], /@PROPBETEDGE<\/a>$/);
   assert.doesNotMatch(f, STALE);
 });
+
+test('Tennis is in PropBetEdge All Access: footer links /pro; contract lists Tennis', async () => {
+  const { NETWORK: CONTRACT_NETWORK, SPORT_LABELS, CONTRACT_VERSION } = await import('../src/lib/pbe-membership.js');
+  assert.equal(CONTRACT_VERSION, '1.2.0');
+  assert.equal(SPORT_LABELS.tennis, 'Tennis');
+  assert.ok(CONTRACT_NETWORK.some((s) => s.key === 'tennis' && s.url === 'https://tennis.propbetedge.ai'));
+  const f = String(footerHtml());
+  assert.match(f, /<a class="ftr-aa" href="https:\/\/propbetedge\.ai\/pro" data-pbe-footer-all-access>All Access · \$29\/month<\/a>/);
+});
