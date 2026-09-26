@@ -19,7 +19,7 @@ function projector({ W, H }) {
   return (u, v) => { const t = f(v); const y = far.y + (near.y - far.y) * t; const half = far.half + (near.half - far.half) * t; return [W / 2 + (u - 0.5) * 2 * half, y]; };
 }
 
-export function courtVisualSvg({ surface = 'hard', indoor = false, top = [], bottom = [], winner = 'bottom', sets = [], tournament = '', round = '', kicker = '', width = 1600, height = 900, label = true, text = true } = {}) {
+export function courtVisualSvg({ surface = 'hard', indoor = false, top = [], bottom = [], winner = 'bottom', sets = [], tournament = '', round = '', kicker = '', width = 1600, height = 900, label = true, text = true, fit = 'slice' } = {}) {
   const W = width; const H = height;
   const c = SURF[surface] || SURF.hard;
   const P = projector({ W, H });
@@ -61,7 +61,7 @@ export function courtVisualSvg({ surface = 'hard', indoor = false, top = [], bot
     <text x="${W / 2}" y="${(nearY - 30).toFixed(1)}" text-anchor="middle" font-family="Barlow Condensed, sans-serif" font-weight="800" font-size="${bFs}" fill="${winner === 'bottom' ? '#d9b44a' : '#f3f6f1'}">${esc(botS)}</text>
     ${plate}` : '';
   const tag = label ? `<text x="${W - 24}" y="${H - 20}" text-anchor="end" font-family="Barlow Condensed, sans-serif" font-weight="700" font-size="${Math.round(H * 0.022)}" letter-spacing="3" fill="#f3f6f1" fill-opacity="0.55">PROPBETEDGE COURT GRAPHIC · ${esc(`${surface}${indoor ? ' · indoor' : ''}`.toUpperCase())}</text>` : '';
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice" role="img" aria-label="${esc(`Court graphic: ${botS} ${winner === 'bottom' ? 'def.' : 'vs'} ${topS}${tournament ? `, ${tournament}` : ''}`)}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid ${fit === 'meet' ? 'meet' : 'slice'}" role="img" aria-label="${esc(`Court graphic: ${botS} ${winner === 'bottom' ? 'def.' : 'vs'} ${topS}${tournament ? `, ${tournament}` : ''}`)}">
   <defs>${sky}<linearGradient id="cvs" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.10"/><stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.22"/></linearGradient><radialGradient id="cvv" cx="50%" cy="55%" r="75%"><stop offset="0.55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.55"/></radialGradient><linearGradient id="cvb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050d0a"/><stop offset="0.55" stop-color="${c.band}"/><stop offset="1" stop-color="#050d0a"/></linearGradient></defs>
   <rect width="${W}" height="${H}" fill="url(#cvb)"/>${stands}${court}<polygon points="${[[-0.14, -0.1], [1.14, -0.1], [1.14, 1.07], [-0.14, 1.07]].map(([u, v]) => P(u, v).map((n) => n.toFixed(1)).join(',')).join(' ')}" fill="url(#cvs)"/>${net}<rect width="${W}" height="${H}" fill="url(#cvl)"/><rect width="${W}" height="${H}" fill="url(#cvv)"/>${txt}${tag}</svg>`;
 }

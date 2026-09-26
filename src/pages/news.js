@@ -242,7 +242,7 @@ export function article(root, ctx) {
     // if the hero is a photo and no second photo exists, the court graphic takes the later slot.
     const slots = [inline[0] ? figure(inline[0]) : '', inline[1] ? figure(inline[1]) : isPhoto(hero) && court ? courtFigure(court) : ''];
     render(body, html`<article class="nw-story nwv nwx">
-      <div class="nwx-hero">${isPhoto(hero) ? editorialPicture(hero, { hero: true, alt: hero.caption }) : court ? html`<div class="nwx-cv">${raw(courtVisualSvg({ ...court, kicker: KIND[a.story_type] || '' }))}</div>` : ''}</div>
+      <div class="nwx-hero">${isPhoto(hero) ? editorialPicture(hero, { hero: true, alt: hero.caption }) : court ? html`<div class="nwx-cv cv-wide">${raw(courtVisualSvg({ ...court, tournament: '', round: '', fit: 'meet' }))}</div><div class="nwx-cv cv-narrow">${raw(courtVisualSvg({ ...court, tournament: '', round: '' }))}</div>` : ''}</div>
       <header class="nwv-hero nwx-head"><div class="page nwv-hero-in">
         <div class="nwv-hero-t">
           <nav class="nwv-crumbs" aria-label="Breadcrumb"><a href="/">Tennis</a><span>›</span><a href="/news">News</a>${t?.slug ? html`<span>›</span><a href="/tournaments/${t.slug}/${t.year}">${t.name} ${t.year}</a>` : ''}</nav>
