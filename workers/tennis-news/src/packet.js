@@ -5,6 +5,8 @@
 // official list in force on the match date, DNA is the stored snapshot built strictly before the match,
 // form and head-to-head use only earlier tournaments. Families with no data are omitted, never padded.
 
+import { approvedMedia } from '../../shared/media.js';
+
 export const PACKET_VERSION = 'tennis-packet/1.0.0';
 
 const ROUND_ORDER = (code) => {
@@ -51,7 +53,7 @@ export function statLines(sa, sb) {
 
 export const durationParts = (s) => (Number.isFinite(s) && s > 0 ? { hours: Math.floor(s / 3600), minutes: Math.floor((s % 3600) / 60) } : null);
 
-const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,edition_id,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,derivatives,attribution,license,author,source_page_url)))))';
+const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,edition_id,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)))))';
 const inList = (xs) => `in.(${xs.map((x) => `"${x}"`).join(',')})`;
 
 function shapeRow(m) {
@@ -62,7 +64,7 @@ function shapeRow(m) {
       key: p.participant_key, seed: p.seed ?? null, entry: p.entry_type || null,
       players: (p.tennis_participants?.tennis_participant_members || []).sort((a, b) => a.slot - b.slot).map((x) => {
         const pl = x.tennis_players;
-        const media = (Array.isArray(pl.tennis_player_media) ? pl.tennis_player_media[0] : pl.tennis_player_media) || null;
+        const media = approvedMedia(pl.tennis_player_media);
         const d = media?.derivatives;
         return { id: pl.pbe_player_id, slug: pl.slug, name: pl.full_name, last_name: pl.last_name || null, nationality: pl.nationality, photo: d?.square?.url ? { player_id: media.pbe_player_id, square: d.square.url, wide: d.wide?.url || null, square_jpg: d.square_jpg?.url || null, credit: media.attribution, license: media.license, author: media.author, source_page: media.source_page_url } : null };
       })
@@ -123,9 +125,9 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
   if (!event.match_id) {
     // ranking-list events carry their facts; add the player identity + photo
     const pid = event.entity_ids[0];
-    const p = (await store.select('tennis_players', `select=pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,derivatives,attribution,license,author,source_page_url)`+`&pbe_player_id=eq.${pid}`))[0];
+    const p = (await store.select('tennis_players', `select=pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)`+`&pbe_player_id=eq.${pid}`))[0];
     if (!p) return null;
-    const media = (Array.isArray(p.tennis_player_media) ? p.tennis_player_media[0] : p.tennis_player_media) || null;
+    const media = approvedMedia(p.tennis_player_media);
     packet.player = { id: p.pbe_player_id, slug: p.slug, name: p.full_name, last_name: p.last_name || null, nationality: p.nationality, photo: media?.derivatives?.square?.url ? { player_id: media.pbe_player_id, square: media.derivatives.square.url, wide: media.derivatives.wide?.url || null, credit: media.attribution, license: media.license, author: media.author } : null };
     const hist = await store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date)&pbe_player_id=eq.${pid}&tennis_ranking_snapshots.list_key=eq.${event.facts.list}&tennis_ranking_snapshots.ranking_date=lte.${event.facts.list_date}&order=tennis_ranking_snapshots(ranking_date).desc&limit=52`);
     packet.ranking_history = hist.map((r) => ({ date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points })).sort((a, b) => (a.date < b.date ? -1 : 1));

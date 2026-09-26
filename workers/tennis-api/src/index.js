@@ -148,7 +148,7 @@ async function playerDna(store, slug, url) {
   const mp = (await playerMatchIds(store, p.pbe_player_id)).filter((x) => x.participant_key === `S:${p.pbe_player_id}`);
   const surface = url.searchParams.get('surface');
   const opts = { asOf, surface: ['hard', 'clay', 'grass'].includes(surface) ? surface : null };
-  if (!mp.length) return ok({ player: { slug: p.slug, name: p.full_name }, ...buildDna([], opts) }, { rows: [], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 (singles): no stored matches yet' });
+  if (!mp.length) return ok({ player: shapePlayer(p), ...buildDna([], opts) }, { rows: [], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 (singles): no stored matches yet' });
   const ids = mp.map((x) => x.match_id);
   const side = new Map(mp.map((x) => [x.match_id, x.side]));
   const [stats, ms] = await Promise.all([
@@ -167,7 +167,7 @@ async function playerDna(store, slug, url) {
     const sets = m.tennis_sets || [];
     rows.push({ match_id: mid, match_date: m.source_updated_at.slice(0, 10), surface: m.surface, sets_played: sets.length, games_played: sets.reduce((t, x) => t + x.games_a + x.games_b, 0), source_family: sides[me].source_family, side: sides[me].stats, opp: sides[opp].stats });
   }
-  return ok({ player: { slug: p.slug, name: p.full_name }, ...buildDna(rows, opts) }, { rows: stats, updated: maxTime(ms, 'source_updated_at'), policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 singles metrics from stored source statistics; match date = date of the final source update; as_of exclusive', degraded: ['sample limited to matches whose statistics have been ingested so far'] });
+  return ok({ player: shapePlayer(p), ...buildDna(rows, opts) }, { rows: stats, updated: maxTime(ms, 'source_updated_at'), policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 singles metrics from stored source statistics; match date = date of the final source update; as_of exclusive', degraded: ['sample limited to matches whose statistics have been ingested so far'] });
 }
 
 async function h2h(store, a, b) {
@@ -183,15 +183,15 @@ async function h2h(store, a, b) {
   const meetings = rows.map(shapeMatch);
   const won = (m, key) => FINAL.includes(m.status) && m.winner_side === bySide.get(m.id)[key];
   const record = { [pa.slug]: meetings.filter((m) => won(m, ka)).length, [pb.slug]: meetings.filter((m) => won(m, kb)).length };
-  return ok({ a: { slug: pa.slug, name: pa.full_name }, b: { slug: pb.slug, name: pb.full_name }, record, meetings }, { rows, policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'singles meetings present in the canonical store (coverage-limited while history backfills); descriptive, not a prediction' });
+  return ok({ a: shapePlayer(pa), b: shapePlayer(pb), record, meetings }, { rows, policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'singles meetings present in the canonical store (coverage-limited while history backfills); descriptive, not a prediction' });
 }
 
 async function players(store, url) {
   const q = (url.searchParams.get('q') || '').trim();
   if (q) {
     const safe = q.replace(/[^\p{L}\p{N} '-]/gu, '').slice(0, 60);
-    const rows = await store.select('tennis_players', `select=slug,full_name,nationality,gender,updated_at,${MEDIA}&full_name=ilike.*${encodeURIComponent(safe)}*&order=full_name.asc&limit=50`);
-    return ok(rows.map((r) => ({ slug: r.slug, name: r.full_name, nationality: r.nationality, photo: shapePhoto(r.tennis_player_media) })), { rows, source: ['pbe_identity_graph'], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: `players matching "${safe}"` });
+    const rows = await store.select('tennis_players', `select=pbe_player_id,slug,full_name,nationality,gender,updated_at,${MEDIA}&full_name=ilike.*${encodeURIComponent(safe)}*&order=full_name.asc&limit=50`);
+    return ok(rows.map(shapePlayer), { rows, source: ['pbe_identity_graph'], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: `players matching "${safe}"` });
   }
   return rankings(store, new URL('https://x/?tour=wta&type=singles&limit=200'));
 }

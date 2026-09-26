@@ -316,3 +316,4 @@
   .nw-body p { font-size: 17px; }
   .nw-hero.has-img .nw-hero-t { margin-top: -60px; }
 }
+.h2h-p { display: inline-flex; align-items: center; gap: 8px; }

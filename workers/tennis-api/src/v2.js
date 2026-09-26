@@ -180,7 +180,7 @@ async function profile(store, slug) {
   const key = `S:${p.pbe_player_id}`;
   const mp = await store.select('tennis_match_participants', `select=match_id,side&participant_key=eq.${key}&limit=2000`);
   const side = new Map(mp.map((r) => [r.match_id, r.side]));
-  const ms = mp.length ? await allRows(store, 'tennis_matches', `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(slug,full_name)'})))&match_id=${inList([...side.keys()].slice(0, 900))}&order=source_updated_at.desc.nullslast`) : [];
+  const ms = mp.length ? await allRows(store, 'tennis_matches', `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(pbe_player_id,slug,full_name,nationality,gender,' + MEDIA + ')'})))&match_id=${inList([...side.keys()].slice(0, 900))}&order=source_updated_at.desc.nullslast`) : [];
   const finals = ms.filter((m) => FINAL.includes(m.status) && m.status !== 'walkover');
   const result = (m) => (m.winner_side === side.get(m.match_id) ? 'W' : 'L');
   const surf = {};
@@ -190,7 +190,7 @@ async function profile(store, slug) {
     const o = m.tennis_match_participants.find((x) => x.side !== side.get(m.match_id));
     const op = o?.tennis_participants?.tennis_participant_members?.[0]?.tennis_players;
     if (!op) continue;
-    opp[op.slug] = opp[op.slug] || { slug: op.slug, name: op.full_name, W: 0, L: 0 };
+    opp[op.slug] = opp[op.slug] || { ...shapePlayer(op), W: 0, L: 0 };
     opp[op.slug][result(m)] += 1;
   }
   const d = today();

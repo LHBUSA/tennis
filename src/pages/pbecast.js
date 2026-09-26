@@ -17,6 +17,7 @@ import { freshnessBadge, emptyModule } from '../ui/state.js';
 import { eventLabel, roundLabel, fmtDuration, pct, cap, statusLabel } from '../ui/render.js';
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
+import { switcherItems } from '../lib/pbecast-live.js';
 
 const MODE_LABEL = {
   point_by_point_live: 'Point-by-point live', point_by_point_replay: 'Replay · point-by-point',
@@ -126,11 +127,30 @@ function dnaCompare(data, m) {
     <p class="note">Stored Tennis DNA v1 as of ${data.dna?.A?.all?.as_of || data.dna?.B?.all?.as_of || '—'} (exclusive). Percentiles only where the metric sample is medium or high confidence. <a href="/methodology">Definitions</a>.</p>`;
 }
 
-export function mount(root, { params }) {
+/** LIVE MATCHES switcher: every live court, deterministic order; the current court is marked. */
+function liveSwitcher(items) {
+  if (!items.length) return '';
+  const score = (m) => (m.sets || []).map((x) => (x.match_tiebreak && x.tb ? `[${x.tb.A}-${x.tb.B}]` : `${x.A}-${x.B}`)).join(' ') + (m.live?.point ? ` · ${m.live.point.A}–${m.live.point.B}` : '');
+  const side = (m, s) => (m.sides?.[s]?.players || []);
+  return html`<nav class="pbc-switch page" aria-label="Live matches"><p class="pbc-switch-h"><span class="live-dot" aria-hidden="true"></span>Live matches <small>${items.length}</small></p>
+    <ul>${items.map(({ href, current, match: m }) => html`<li><a href="${href}" class="${current ? 'on' : ''}" ${current ? raw('aria-current="page"') : ''}>
+      <span class="sw-live">LIVE</span>
+      <span class="sw-p">${['A', 'B'].map((s) => html`<span class="sw-row">${side(m, s).map((p) => avatar(p, { px: 26 }))}<b>${side(m, s).map((p) => p.name).join(' / ')}</b></span>`)}</span>
+      <span class="sw-sc tabnum">${score(m)}</span>
+      <span class="sw-t">${m.tournament?.name || ''}${m.court ? ` · ${m.court}` : ''}</span></a></li>`)}</ul></nav>`;
+}
+
+export function mount(root, { params, live = null }) {
   const ctl = new AbortController();
   const q = new URLSearchParams(location.search);
   const st = { data: null, pos: 0, playing: false, speed: 1, timer: null, poll: null, lastEvent: null, following: true };
-  render(root, html`<div class="pbc" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
+  render(root, html`<div data-switch></div><div class="pbc" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
+  // live switcher: separate container so the court's redraws never reset it; polls the canonical live list
+  const drawSwitch = (list) => { const el = root.querySelector('[data-switch]'); if (el) render(el, liveSwitcher(switcherItems(list, params.id))); };
+  const loadLive = async () => { try { const r = await api('/v1/live', { signal: ctl.signal }); if (Array.isArray(r.data)) drawSwitch(r.data); } catch { /* aborted */ } };
+  if (live) drawSwitch(live);
+  loadLive();
+  const livePoll = setInterval(loadLive, 30000);
 
   const draw = () => {
     const d = st.data;
@@ -242,7 +262,7 @@ export function mount(root, { params }) {
   root.addEventListener('change', onInput);
   root.addEventListener('input', onInput);
   load(true);
-  return () => { ctl.abort(); stopPlay(); clearInterval(st.poll); root.removeEventListener('click', onClick); root.removeEventListener('change', onInput); root.removeEventListener('input', onInput); };
+  return () => { ctl.abort(); stopPlay(); clearInterval(st.poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('change', onInput); root.removeEventListener('input', onInput); };
 }
 
 export const __test = { eventText, MODE_LABEL };

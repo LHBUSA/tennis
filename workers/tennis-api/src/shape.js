@@ -1,7 +1,8 @@
 // Shared select fragments + response shaping for tennis-api. Every player object carries its approved
 // photo (or null -> the UI's deterministic monogram), never a guessed image.
+import { approvedMedia } from '../../shared/media.js';
 
-export const MEDIA = 'tennis_player_media(derivatives,attribution,source_page_url,license,author)';
+export const MEDIA = 'tennis_player_media(approval,derivatives,attribution,source_page_url,license,author)';
 export const PLAYER = `tennis_players(pbe_player_id,slug,full_name,nationality,gender,${MEDIA})`;
 export const SIDES = `tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(kind,tennis_participant_members(slot,${PLAYER})))`;
 export const EDITION = 'tennis_tournament_editions(year,name,level,surface,indoor,start_date,end_date,city,country,venue_id,tennis_tournaments(slug,name))';
@@ -14,7 +15,7 @@ export const today = () => new Date().toISOString().slice(0, 10);
 export const addDays = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
 
 export function shapePhoto(media) {
-  const m = Array.isArray(media) ? media[0] : media;
+  const m = approvedMedia(media);
   const d = m?.derivatives;
   if (!d?.square?.url) return null;
   return {

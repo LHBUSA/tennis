@@ -7,6 +7,7 @@ import { avatar, nat } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
 import { track } from '../analytics.js';
+import { liveEntry } from '../lib/pbecast-live.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -235,7 +236,7 @@ export const h2h = mountWith((root, { params }, signal) => {
   return fill(root, `/v1/h2h/${params.a}/${params.b}`, (d) => {
     const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${d.a.name} vs ${d.b.name}`;
-    return html`<p class="h2h-big tabnum">${d.a.name} <b>${d.record[d.a.slug]}</b> – <b>${d.record[d.b.slug]}</b> ${d.b.name}</p>${d.meetings.length ? matchList(d.meetings) : html`<p class="note">No meetings in the canonical store yet (history is backfilling).</p>`}`;
+    return html`<p class="h2h-big tabnum"><span class="h2h-p">${avatar(d.a, { px: 44 })}${d.a.name}</span> <b>${d.record[d.a.slug]}</b> – <b>${d.record[d.b.slug]}</b> <span class="h2h-p">${d.b.name}${avatar(d.b, { px: 44 })}</span></p>${d.meetings.length ? matchList(d.meetings) : html`<p class="note">No meetings in the canonical store yet (history is backfilling).</p>`}`;
   }, 'One of these players is not in the canonical store.', signal);
 });
 
@@ -254,9 +255,20 @@ export const dna = mountWith((root, _c, signal) => {
 });
 
 // ---- PBEcast hub --------------------------------------------------------------------------------------
-export const pbecastHub = mountWith((root, _c, signal) => {
+export const pbecastHub = mountWith(async (root, _c, signal) => {
+  // Clicking PBEcast enters a live court when one exists (no extra landing click). replaceState keeps the
+  // back button honest and never loops; with zero live matches this stays the replay hub.
+  render(root, html`<div class="page"><p class="loading">Finding live PBEcast…</p></div>`);
+  let live = null;
+  try { live = await api('/v1/live', { signal }); } catch { return () => {}; }
+  const entry = liveEntry(live?.data || []);
+  if (entry.mode === 'live' && location.pathname === '/pbecast') {
+    history.replaceState({}, '', entry.path);
+    const { mount } = await import('./pbecast.js');
+    return mount(root, { params: { id: entry.id }, live: live.data });
+  }
   shell(root, { eyebrow: 'PBEcast', heading: 'PBEcast', lede: 'The live analytical court: score, server, key moments, serve and return, Tennis DNA and head-to-head — and replays of completed matches. Observed-live coverage updates about every 18 seconds; point-by-point appears only where a source publishes it.' });
-  return fill(root, '/v1/today', (d) => html`${d.live.length ? html`<h2 class="sec">Live now</h2>${matchList(d.live)}` : html`<div class="mod"><p class="empty-h">No PBEcast live right now.</p><p class="note"><a href="/schedule">See today’s schedule →</a></p></div>`}
+  return fill(root, '/v1/today', (d) => html`<div class="mod"><p class="empty-h">No PBEcast live right now.</p><p class="note">When a covered match goes live, PBEcast opens straight onto its court. <a href="/schedule">See today’s schedule →</a></p></div>
     ${d.latest_results.length ? html`<h2 class="sec">Replays <small>matches finished at tournaments in progress</small></h2>${matchList(d.latest_results.filter((m) => ['completed', 'retired'].includes(m.status)).slice(0, 12))}` : ''}`, 'PBEcast unavailable.', signal, { poll: 60 });
 });
 

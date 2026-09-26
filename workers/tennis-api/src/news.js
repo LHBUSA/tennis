@@ -3,11 +3,12 @@
 // a published story never re-reads live rankings or DNA.
 
 import { envelope, notConfigured } from '../../shared/envelope.js';
+import { approvedMedia } from '../../shared/media.js';
 
 const DESKS = ['all', 'wta', 'atp', 'grand-slams', 'challenger', 'itf', 'doubles', 'rankings'];
-const LIST = 'article_id,slug,status,headline,deck,story_type,desk,primary_player_id,player_ids,match_id,tournament,key_stat,prose_origin,published_at,updated_at,hold_reason,tennis_players!tennis_articles_primary_player_id_fkey(slug,full_name,tennis_player_media(derivatives))';
+const LIST = 'article_id,slug,status,headline,deck,story_type,desk,primary_player_id,player_ids,match_id,tournament,key_stat,prose_origin,published_at,updated_at,hold_reason,tennis_players!tennis_articles_primary_player_id_fkey(slug,full_name,tennis_player_media(approval,derivatives))';
 const shapeCard = (a) => {
-  const d = (Array.isArray(a.tennis_players?.tennis_player_media) ? a.tennis_players.tennis_player_media[0] : a.tennis_players?.tennis_player_media)?.derivatives;
+  const d = approvedMedia(a.tennis_players?.tennis_player_media)?.derivatives;
   return { id: a.article_id, slug: a.slug, status: a.status, headline: a.headline, dek: a.deck, story_type: a.story_type, desk: a.desk, match_id: a.match_id, tournament: a.tournament, key_stat: a.key_stat, published_at: a.published_at, updated_at: a.updated_at, player: a.tennis_players ? { slug: a.tennis_players.slug, name: a.tennis_players.full_name, photo: d?.square?.url ? { square: d.square.url, wide: d.wide?.url || null } : null } : null, ...(a.status !== 'published' ? { hold_reason: a.hold_reason } : {}) };
 };
 
