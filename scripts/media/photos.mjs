@@ -180,7 +180,10 @@ function cropBox(W, H, f, aspect, faceFrac, yAt) {
   let top = Math.round(cy - ch * yAt);
   left = Math.max(0, Math.min(left, W - cw));
   top = Math.max(0, Math.min(top, H - ch));
-  return { left: Math.round(left), top: Math.round(top), width: Math.round(cw), height: Math.round(ch) };
+  // clamp AFTER rounding: a box may never extend past the image edge (sharp extract_area error)
+  const L = Math.max(0, Math.round(left));
+  const T = Math.max(0, Math.round(top));
+  return { left: L, top: T, width: Math.min(Math.round(cw), W - L), height: Math.min(Math.round(ch), H - T) };
 }
 
 const VARIANTS = [

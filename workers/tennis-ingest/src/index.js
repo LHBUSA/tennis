@@ -200,9 +200,15 @@ async function tickInner(env, store, kv, force) {
   // 5b. daily Tennis DNA snapshots (stored values the API / PBEcast read)
   await step(ctx, 'dna', async () => {
     const day = iso(started);
-    if (!force.dna && (await kv.get('dna:last')) === day) return 'fresh';
-    const r = await buildDnaSnapshots(ctx, { asOf: day });
-    await kv.put('dna:last', day);
+    // historical lane: one first-of-month snapshot per daily run, walking back to 2025-02-01 (stats begin 2024-12-29)
+    const hist = (await kv.get('dna:hist')) || `${day.slice(0, 7)}-01`;
+    const dates = [];
+    if (force.dna || (await kv.get('dna:last')) !== day) dates.push(day);
+    if (hist >= '2025-02-01') dates.push(hist);
+    if (!dates.length) return 'fresh';
+    const r = await buildDnaSnapshots(ctx, { asOfs: dates });
+    if (dates.includes(day)) await kv.put('dna:last', day);
+    if (dates.includes(hist)) { const d = new Date(`${hist}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); await kv.put('dna:hist', d.toISOString().slice(0, 10)); }
     return r;
   });
 

@@ -1,17 +1,16 @@
 {
-  "run_at": "2026-09-26T17:14:15.747Z",
-  "considered": 90,
-  "approved": 61,
+  "run_at": "2026-09-26T17:26:05.188Z",
+  "considered": 35,
+  "approved": 1,
   "rejected": {
-    "too_small_for_square": 12,
-    "original_too_small": 5,
-    "error:extract_area: bad extract area": 1,
+    "too_small_for_square": 13,
+    "original_too_small": 8,
     "low_confidence": 2,
-    "multiple_faces": 6,
+    "multiple_faces": 7,
     "no_face": 2,
-    "license": 1
+    "license": 2
   },
-  "license_rejected": 1,
+  "license_rejected": 2,
   "players": [
     {
       "id": "20d988a4-b469-5c92-9092-238b79a421d9",
@@ -32,49 +31,11 @@
       "result": "original_too_small"
     },
     {
-      "id": "5413596a-8daf-51eb-964c-95f7ff3692ae",
-      "tier": 3,
-      "rank": 69,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "8fc6d44d-7d9f-56e4-9725-b2e43a43e293",
-      "tier": 3,
-      "rank": 70,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
       "id": "6dc3380d-ed9a-5f31-833c-71f94858c17e",
       "tier": 3,
       "rank": 92,
-      "result": "error:extract_area: bad extract area"
-    },
-    {
-      "id": "30a78d53-47a8-504e-801b-2a113f33200b",
-      "tier": 3,
-      "rank": 95,
       "result": "approved",
       "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "7d4a3238-442a-51cc-ad47-90015eb9cf1c",
-      "tier": 3,
-      "rank": 119,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "8da9c3e1-cdd2-59b9-bf39-7f1aeb894baa",
-      "tier": 3,
-      "rank": 132,
-      "result": "approved",
-      "tiled": true,
       "portrait": true
     },
     {
@@ -82,30 +43,6 @@
       "tier": 3,
       "rank": 133,
       "result": "low_confidence"
-    },
-    {
-      "id": "b907fb69-0ba1-59ef-8458-2b3264b8ffc4",
-      "tier": 3,
-      "rank": 158,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "011b3dd5-fe57-508c-b184-4e65719dad52",
-      "tier": 3,
-      "rank": 163,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "1cde6f31-ad97-579a-8bc5-80f3dd0f7ea2",
-      "tier": 3,
-      "rank": 195,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
     },
     {
       "id": "c209aa99-c87b-5adb-8ef3-cf5d31193c30",
@@ -120,152 +57,16 @@
       "result": "multiple_faces"
     },
     {
-      "id": "12b95570-f517-526a-a7dd-9f05e204a308",
-      "tier": 3,
-      "rank": 252,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "e79e335e-217c-5679-aca6-3f1e97823f29",
-      "tier": 3,
-      "rank": 289,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "55bda8b9-e339-589d-a6db-a4cbd10193de",
-      "tier": 3,
-      "rank": 309,
-      "result": "approved",
-      "tiled": false,
-      "portrait": true
-    },
-    {
-      "id": "4964d102-12f5-5112-9304-a5b81749bf22",
-      "tier": 3,
-      "rank": 314,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "2276c174-9963-556d-8851-8cc29854d252",
-      "tier": 3,
-      "rank": 322,
-      "result": "approved",
-      "tiled": false,
-      "portrait": true
-    },
-    {
-      "id": "54cedcdc-fcb6-513c-b4bd-163b0b44005b",
-      "tier": 3,
-      "rank": 340,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "24ea587d-2fb9-56cf-aa65-35c45056824a",
-      "tier": 3,
-      "rank": 381,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
       "id": "1962c909-d80d-552a-ba6b-c985cbbc2738",
       "tier": 3,
       "rank": 405,
       "result": "too_small_for_square"
     },
     {
-      "id": "02faee46-438a-57ce-94fe-60323fec96fc",
-      "tier": 3,
-      "rank": 447,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
       "id": "5d1eb8c7-012b-50d4-8e60-338e9b8e3abc",
       "tier": 3,
       "rank": 508,
       "result": "too_small_for_square"
-    },
-    {
-      "id": "bfebba1d-2726-58cc-82df-0c86f1248b3c",
-      "tier": 3,
-      "rank": 823,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "d288031f-168d-54e9-bc20-2c5dae1051e5",
-      "tier": 3,
-      "rank": null,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "4dbcc731-163c-5a80-bb2f-c1140291aa49",
-      "tier": 4,
-      "rank": 16,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "cece0b88-5daa-595c-a1d2-9e30ad50f394",
-      "tier": 4,
-      "rank": 27,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "789ff8a9-e7c6-546a-82ef-b896daa7020a",
-      "tier": 4,
-      "rank": 34,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "9cabc480-d2cf-5e2a-b140-57f7b89ae9c9",
-      "tier": 4,
-      "rank": 43,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "72084195-96ac-5648-8719-703561447f51",
-      "tier": 4,
-      "rank": 59,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "a4b210cf-3aa6-5b36-9c93-8c10f0d46c1f",
-      "tier": 4,
-      "rank": 61,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "e5252ab2-bda8-5a46-9efd-5a439e5286bb",
-      "tier": 4,
-      "rank": 74,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
     },
     {
       "id": "ea50a40e-4dd0-5cd7-b9d0-22d5b2c78448",
@@ -280,160 +81,16 @@
       "result": "too_small_for_square"
     },
     {
-      "id": "f5733996-cf0e-56b7-8858-a6ac32109e2a",
-      "tier": 4,
-      "rank": 90,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "d7e01f70-64b3-5a09-a06c-3a85297bccd4",
-      "tier": 5,
-      "rank": 104,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "6c769afa-6638-5e4f-a2f7-d59ba4d2b900",
-      "tier": 5,
-      "rank": 124,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "b1a01b82-4c4e-5c58-99ff-7e670b06a479",
-      "tier": 5,
-      "rank": 136,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "d0ad4b56-5809-5d09-9f9b-eab6a5e6ebf7",
-      "tier": 5,
-      "rank": 148,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "70a9be87-84d7-5f62-a78f-31156ba5f26f",
-      "tier": 5,
-      "rank": 181,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "5de6cc0d-1347-5e63-9aca-834086d81c9f",
-      "tier": 5,
-      "rank": 182,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "0425ab7d-1fb7-5a09-a3ee-5ff0e5fbda4d",
-      "tier": 5,
-      "rank": 200,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "140564e7-fb31-5e68-9bcb-738ac8451115",
-      "tier": 7,
-      "rank": 204,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
       "id": "44b6b930-9533-515a-b6a9-0cda58b7b413",
       "tier": 7,
       "rank": 235,
       "result": "too_small_for_square"
     },
     {
-      "id": "76a4bb17-3170-5729-8220-97d01d2531de",
-      "tier": 7,
-      "rank": 238,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "8efdcc97-715b-5716-9cf0-ab11f8d1c029",
-      "tier": 7,
-      "rank": 241,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "9c6f1dcd-1fb3-5649-882f-f6da0d84e931",
-      "tier": 7,
-      "rank": 243,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "9b1f4a45-154f-5e1b-84fc-189ac5599a9e",
-      "tier": 7,
-      "rank": 271,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "c13a5b26-5dea-5000-8b74-8cbfd22b9ec0",
-      "tier": 7,
-      "rank": 311,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
       "id": "a3f3a1c3-ee39-598c-a997-fda38f79df63",
       "tier": 7,
       "rank": 321,
       "result": "multiple_faces"
-    },
-    {
-      "id": "3d75951f-d759-5796-89ca-b392e89aa76f",
-      "tier": 7,
-      "rank": 333,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "c6d87e7e-ffaf-5dcc-838d-10d0dda727e7",
-      "tier": 7,
-      "rank": 334,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "dff98e3b-8fe6-54e3-bf69-4ed4ec2a64fb",
-      "tier": 7,
-      "rank": 338,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "6f657790-0ff3-5270-a399-04b38748795d",
-      "tier": 7,
-      "rank": 358,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
     },
     {
       "id": "2f05f336-e289-53bc-a51e-5dc33d61a9a1",
@@ -472,78 +129,6 @@
       "result": "too_small_for_square"
     },
     {
-      "id": "48c88af6-5f13-57b1-abcd-c534e7d481d2",
-      "tier": 7,
-      "rank": 474,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "e0700c90-5ece-5e8f-98a9-63b26e835bb9",
-      "tier": 7,
-      "rank": 497,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "d239c19c-bd74-50bb-9a50-de1e74c65650",
-      "tier": 7,
-      "rank": 502,
-      "result": "approved",
-      "tiled": false,
-      "portrait": false
-    },
-    {
-      "id": "4843dc5b-7f93-5480-9a31-ff4c0d7caf8f",
-      "tier": 7,
-      "rank": 510,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "0722fbf1-7b59-53a8-a1f3-62d09b2dc03a",
-      "tier": 7,
-      "rank": 533,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "c7514b71-0160-5da7-aeba-598d128e6307",
-      "tier": 7,
-      "rank": 540,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "09911585-5908-5efa-afd1-d205faef940b",
-      "tier": 7,
-      "rank": 548,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "a95d0731-6161-5002-87ef-3fb01e382efe",
-      "tier": 7,
-      "rank": 565,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "1bfbcaea-6030-58ec-beca-84e2f263fbfa",
-      "tier": 7,
-      "rank": 613,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
       "id": "2f157094-6c1f-5263-b8dd-67cec3f518f6",
       "tier": 7,
       "rank": 623,
@@ -554,30 +139,6 @@
       "tier": 7,
       "rank": 651,
       "result": "too_small_for_square"
-    },
-    {
-      "id": "e82fb95e-28ec-5c4b-bf14-39430d9ea0da",
-      "tier": 7,
-      "rank": 662,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
-      "id": "a3e944a8-4a8e-5aa7-9ed5-ba45f1eb958e",
-      "tier": 7,
-      "rank": 685,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "2b4ed326-1afa-5b37-8db0-b68227eb7a23",
-      "tier": 7,
-      "rank": 707,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
     },
     {
       "id": "c4a550ac-7bea-5d1a-ba8c-49b1a764d81b",
@@ -604,56 +165,16 @@
       "result": "original_too_small"
     },
     {
-      "id": "7fd5c99a-cf37-52a7-9dc6-bad9e8e7db46",
-      "tier": 7,
-      "rank": 819,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
       "id": "1c1906b1-4c8f-5197-8544-b904bfe13c95",
       "tier": 7,
       "rank": 855,
       "result": "no_face"
     },
     {
-      "id": "abffda9d-d29c-5fcf-9cac-c3fc31daea7e",
-      "tier": 7,
-      "rank": 863,
-      "result": "approved",
-      "tiled": false,
-      "portrait": true
-    },
-    {
-      "id": "03ea32ad-194e-542d-b7ed-7b0ad87e394c",
-      "tier": 7,
-      "rank": 949,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
-    },
-    {
-      "id": "80e1a890-41a5-5810-9db9-22bc851650e0",
-      "tier": 7,
-      "rank": 954,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
-    },
-    {
       "id": "7dc6d108-33f8-5067-8368-1fedc237326a",
       "tier": 7,
       "rank": 970,
       "result": "too_small_for_square"
-    },
-    {
-      "id": "97749d53-6664-5c59-8761-6919483eae91",
-      "tier": 7,
-      "rank": 996,
-      "result": "approved",
-      "tiled": true,
-      "portrait": true
     },
     {
       "id": "d3bca95d-98a5-55c7-9c5c-79085e74353e",
@@ -668,12 +189,40 @@
       "result": "low_confidence"
     },
     {
-      "id": "30b2f4e3-abbc-5d01-9536-7d0b2b380d17",
+      "id": "5593a333-f111-53a8-91e2-e77f6c05576b",
       "tier": 7,
-      "rank": 1250,
-      "result": "approved",
-      "tiled": true,
-      "portrait": false
+      "rank": 1334,
+      "result": "license"
+    },
+    {
+      "id": "50f52a9d-14f6-501f-a0cc-e0aa9d66b90e",
+      "tier": 7,
+      "rank": null,
+      "result": "original_too_small"
+    },
+    {
+      "id": "ad6ab732-335b-57cc-9865-0771c8e47170",
+      "tier": 7,
+      "rank": null,
+      "result": "too_small_for_square"
+    },
+    {
+      "id": "ff7f3e81-2b05-5221-923c-79b9572ae6ac",
+      "tier": 7,
+      "rank": null,
+      "result": "original_too_small"
+    },
+    {
+      "id": "6739e5e7-7df7-5b2c-b969-6b8422ffdbf0",
+      "tier": 7,
+      "rank": null,
+      "result": "original_too_small"
+    },
+    {
+      "id": "5dde8a9a-f98d-555b-b1e1-bf1e4e101974",
+      "tier": 7,
+      "rank": null,
+      "result": "multiple_faces"
     }
   ]
 }

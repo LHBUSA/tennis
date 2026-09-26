@@ -11,7 +11,7 @@ import { chromium } from 'playwright-core';
 
 const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const WIDTHS = [1440, 1280, 1024, 768, 430, 390, 360, 320];
-const PATHS = ['/', '/schedule', '/live', '/tournaments', '/tournaments/singapore/2026', '/players', '/players/elena-rybakina', '/players/elena-rybakina/dna', '/rankings/women', '/dna', '/pbecast', '/pbecast/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/matches/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/search?q=rybakina', '/credits', '/methodology', '/sources', '/does-not-exist'];
+const PATHS = ['/', '/schedule', '/live', '/tournaments', '/tournaments/singapore/2026', '/players', '/players/elena-rybakina', '/players/elena-rybakina/dna', '/rankings/women', '/dna', '/pbecast', '/pbecast/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/matches/4f748053-db73-5077-b7ca-e7ccfd57f7b9', '/search?q=rybakina', '/credits', '/methodology', '/sources', '/news', '/h2h/elena-rybakina/iga-swiatek', '/does-not-exist', ...(process.env.QA_EXTRA ? process.env.QA_EXTRA.split(',') : [])];
 const OUT = path.resolve('qa-artifacts');
 // QA_BASE=https://tennis.propbetedge.ai runs the matrix against production instead of a local preview.
 const server = process.env.QA_BASE ? null : await preview({ preview: { port: 5195, strictPort: true } });
