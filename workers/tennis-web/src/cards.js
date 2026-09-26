@@ -121,41 +121,31 @@ function wrap(text, maxW, base, maxLines, min = 34) {
 
 const KIND_LABEL = { upset: 'UPSET', seed_upset: 'SEED UPSET', title: 'TITLE', doubles_title: 'DOUBLES TITLE', retirement: 'RETIREMENT', walkover: 'WALKOVER', marathon: 'MARATHON', comeback: 'COMEBACK', deciding_tiebreak: 'DECIDING TIEBREAK', dominant: 'DOMINANT WIN', qualifier_run: 'QUALIFIER RUN', new_no1: 'NEW NO. 1', enters_top10: 'TOP 10', enters_top20: 'TOP 20', enters_top50: 'TOP 50', enters_top100: 'TOP 100' };
 
-export function newsCard({ headline, kind, context, stat, jpegB64, name, faces = null }) {
-  // faces: the story's featured side (1 player, or both players of a doubles team); approved photos only,
-  // anyone without one gets the deterministic monogram tile — never another person's photo
-  const fs = (faces || (jpegB64 || name ? [{ jpegB64, name }] : [])).slice(0, 2);
-  const two = fs.length === 2;
-  const x = fs.length ? (two ? 500 : 400) : 60;
-  const maxW = fs.length ? (two ? 640 : 740) : 1080;
-  const { lines, size } = wrap(headline, maxW, 60, 3);
-  const top = 250 - ((lines.length - 1) * size) / 2;
-  const art = two
-    ? `${portrait({ x: 60, y: 150, size: 250, name: fs[0].name, jpegB64: fs[0].jpegB64 })}${portrait({ x: 200, y: 290, size: 250, name: fs[1].name, jpegB64: fs[1].jpegB64 })}`
-    : fs.length ? portrait({ x: 60, y: 170, size: 300, name: fs[0].name, jpegB64: fs[0].jpegB64 }) : '';
-  return frame(`${brand('NEWS')}
-    ${art}
-    <text x="${x + 2}" y="${top - size * 0.95}" font-family="Barlow Condensed" font-weight="800" font-size="26" letter-spacing="5" fill="${C.gold}">${esc(KIND_LABEL[kind] || 'STORY')}</text>
-    ${lines.map((l, i) => `<text x="${x}" y="${top + i * size * 1.04}" font-family="Barlow Condensed" font-weight="800" font-size="${size}" fill="${C.line}">${esc(l)}</text>`).join('')}
-    ${context ? `<text x="${x + 2}" y="${top + lines.length * size * 1.04 + 20}" font-family="Barlow Condensed" font-weight="600" font-size="28" fill="${C.line}" opacity="0.82">${esc(String(context).slice(0, 60))}</text>` : ''}
-    ${stat ? `<text x="${x + 2}" y="${Math.min(560, top + lines.length * size * 1.04 + 80)}" font-family="Barlow Condensed" font-weight="800" font-size="40" fill="${C.gold}">${esc(`${stat.label}: ${stat.value}`.toUpperCase().slice(0, 40))}</text>` : ''}`);
-}
 
-/** News V3 share card: the story's editorial photo full-bleed (or its court graphic), restrained brand,
- *  kicker, headline, event context and the evidence key stat. No faces-in-boxes, no betting framing. */
-export function newsCardV3({ headline, kind, context, stat, bgB64 = null, courtSvg = null }) {
-  const { lines, size } = wrap(headline, 700, 62, 3);
-  const top = 360 - ((lines.length - 1) * size) / 2;
-  const bg = bgB64
-    ? `<image href="data:image/jpeg;base64,${bgB64}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>`
-    : courtSvg ? courtSvg.replace(/^<svg /, `<svg x="0" y="0" `) : backdrop();
+/** News share card — the propbetedge.ai news composition (api/social-card.js): ink ground, 8px gold top rule,
+ *  real art on the right (event photo 62% cover; canonical headshots bottom-anchored), left scrim, league pill,
+ *  headline, gold entity line, PropBetEdge sign-off. No art -> radial accent only. Never a generated scene. */
+export function newsCardV4({ headline, kind, league = 'TENNIS', entity = '', photoB64 = null, heads = [] }) {
+  const len = String(headline).length;
+  const base = len > 90 ? 42 : len > 70 ? 48 : len > 50 ? 55 : 62;
+  const hasArt = !!photoB64 || heads.some((h) => h);
+  const { lines, size } = wrap(String(headline).slice(0, 118), hasArt ? 640 : 1000, base, 4);
+  const top = 250;
+  let art = '';
+  if (photoB64) art = `<image href="data:image/jpeg;base64,${photoB64}" x="${W * 0.38}" y="0" width="${W * 0.62}" height="${H}" preserveAspectRatio="xMidYMid slice"/>`;
+  else if (heads.length) {
+    const hs = heads.slice(0, 2); const sz = hs.length > 1 ? 300 : 430;
+    art = hs.map((b64, k) => { const x = W - 40 - sz * (hs.length - k) - (hs.length > 1 && k === 0 ? 16 : 0); const y = H - sz; return b64 ? `<defs><clipPath id="hc${k}"><rect x="${x}" y="${y}" width="${sz}" height="${sz}" rx="18"/></clipPath></defs><image href="data:image/jpeg;base64,${b64}" x="${x}" y="${y}" width="${sz}" height="${sz}" clip-path="url(#hc${k})" preserveAspectRatio="xMidYMid slice"/>` : ''; }).join('');
+  }
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs><linearGradient id="nshade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#041009" stop-opacity="${bgB64 ? 0.94 : 0.82}"/><stop offset="0.55" stop-color="#041009" stop-opacity="${bgB64 ? 0.72 : 0.3}"/><stop offset="1" stop-color="#041009" stop-opacity="${bgB64 ? 0.05 : 0}"/></linearGradient></defs>
-  ${bg}<rect width="${W}" height="${H}" fill="url(#nshade)"/>
-  ${brand('NEWS')}
-  <text x="62" y="${top - size * 0.95}" font-family="Barlow Condensed" font-weight="800" font-size="26" letter-spacing="5" fill="${C.gold}">${esc(KIND_LABEL[kind] || 'STORY')}</text>
-  ${lines.map((l, i) => `<text x="60" y="${top + i * size * 1.04}" font-family="Barlow Condensed" font-weight="800" font-size="${size}" fill="${C.line}">${esc(l)}</text>`).join('')}
-  ${context ? `<text x="62" y="${top + lines.length * size * 1.04 + 16}" font-family="Barlow Condensed" font-weight="600" font-size="28" fill="${C.line}" opacity="0.86">${esc(String(context).slice(0, 60))}</text>` : ''}
-  ${stat ? `<text x="62" y="${Math.min(590, top + lines.length * size * 1.04 + 70)}" font-family="Barlow Condensed" font-weight="800" font-size="38" fill="${C.gold}">${esc(`${stat.label}: ${stat.value}`.toUpperCase().slice(0, 40))}</text>` : ''}
-  <text x="${W - 40}" y="${H - 30}" text-anchor="end" font-family="Barlow Condensed" font-weight="600" font-size="24" fill="${C.line}" opacity="0.72">tennis.propbetedge.ai</text></svg>`;
+  <defs><linearGradient id="scrim" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#06120d" stop-opacity="1"/><stop offset="0.42" stop-color="#06120d" stop-opacity="0.96"/><stop offset="0.62" stop-color="#06120d" stop-opacity="0.35"/><stop offset="1" stop-color="#06120d" stop-opacity="0"/></linearGradient>
+  <radialGradient id="acc" cx="85%" cy="20%" r="70%"><stop offset="0" stop-color="#15634a" stop-opacity="0.9"/><stop offset="1" stop-color="#06120d" stop-opacity="0"/></radialGradient></defs>
+  <rect width="${W}" height="${H}" fill="#06120d"/>${hasArt ? art : `<rect width="${W}" height="${H}" fill="url(#acc)"/>`}<rect width="${W}" height="${H}" fill="url(#scrim)"/>
+  <rect width="${W}" height="8" fill="${C.gold}"/>
+  <image href="data:image/png;base64,${PBE_MARK_PNG_B64}" x="60" y="52" height="54" width="99"/>
+  <rect x="60" y="136" width="${22 + (league.length + (KIND_LABEL[kind] || 'STORY').length + 3) * 14}" height="40" rx="20" fill="${C.gold}"/>
+  <text x="80" y="164" font-family="Barlow Condensed" font-weight="800" font-size="24" letter-spacing="3" fill="#06120d">${esc(`${league} · ${KIND_LABEL[kind] || 'STORY'}`)}</text>
+  ${lines.map((l, i) => `<text x="60" y="${top + i * size * 1.06}" font-family="Barlow Condensed" font-weight="800" font-size="${size}" fill="${C.line}">${esc(l)}</text>`).join('')}
+  ${entity ? `<text x="62" y="${top + lines.length * size * 1.06 + 24}" font-family="Barlow Condensed" font-weight="700" font-size="30" fill="${C.gold}">${esc(String(entity).slice(0, 56))}</text>` : ''}
+  <rect x="60" y="${H - 58}" width="36" height="4" fill="${C.gold}"/><text x="108" y="${H - 48}" font-family="Barlow Condensed" font-weight="700" font-size="26" letter-spacing="2" fill="${C.line}">PropBetEdge Tennis</text></svg>`;
 }

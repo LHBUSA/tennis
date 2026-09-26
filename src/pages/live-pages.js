@@ -106,8 +106,8 @@ export const tournament = mountWith((root, { params }, signal) => {
     const h = root.querySelector('.page-h h1');
     if (h && e.tournament) h.textContent = e.tournament;
     // editorial hero (licensed photo of this edition / this tournament's venue), mounted once above the page
-    const hm = d.media?.hero;
-    if (hm?.wide && !root.querySelector('.tnx-hero')) root.insertAdjacentHTML('afterbegin', String(html`<figure class="tnx-hero nwx-hero">${editorialPicture(hm, { hero: true, alt: hm.caption })}<figcaption class="page">${hm.caption}. Photo: <a href="${hm.source_page}" rel="noopener nofollow" target="_blank">${hm.author || 'Author'} / ${hm.license}</a></figcaption></figure>`));
+    const hm = d.media?.hero?.images?.[0];
+    if (hm?.derivatives && !root.querySelector('.tnx-hero')) root.insertAdjacentHTML('afterbegin', String(html`<figure class="tnx-hero nwx-hero">${editorialPicture(hm, { hero: true, alt: hm.caption })}<figcaption class="page">${hm.caption}. Photo: <a href="${hm.source_page}" rel="noopener nofollow" target="_blank">${hm.author || 'Author'} / ${hm.license}</a></figcaption></figure>`));
     const isQ = (m) => String(m.round || '').startsWith('Q-');
     const ms = qual ? d.matches.filter(isQ) : want ? d.matches.filter((m) => m.event_type === want && !isQ(m)) : d.matches;
     const present = new Set(d.matches.map((m) => m.event_type));

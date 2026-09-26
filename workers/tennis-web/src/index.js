@@ -10,8 +10,7 @@ import fontXB from './fonts/BarlowCondensed-ExtraBold.ttf';
 import fontSB from './fonts/BarlowCondensed-SemiBold.ttf';
 import { resolveRoute, STATIC_ROUTES } from '../../../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_DEFAULT, NOINDEX_ROBOTS, canonicalUrl } from '../../../src/seo/meta.js';
-import { playerCard, matchCard, tournamentCard, rankingsCard, newsCard, newsCardV3 } from './cards.js';
-import { courtVisualSvg, courtFromStory } from '../../shared/court-visual.js';
+import { playerCard, matchCard, tournamentCard, rankingsCard, newsCardV4 } from './cards.js';
 
 export const VERSION = '0.1.0';
 let wasmReady = null;
@@ -74,12 +73,14 @@ async function cardSvg(env, path) {
   if ((m = /^\/og\/news\/([a-z0-9-]+)\.png$/.exec(path))) {
     const a = await apiGet(env, `/v1/news/${m[1]}`);
     if (!a) return null;
-    // editorial hierarchy (same resolver as the article): licensed photo full-bleed, else the court graphic
-    const round = a.evidence?.match?.round_label ? a.evidence.match.round_label.replace(/^\w/, (c) => c.toUpperCase()) : null;
-    const hero = a.media?.hero;
-    const bgB64 = hero?.id && hero.type !== 'data_visual' ? await r2Jpeg(env, `editorial/${hero.id}/card.jpg`) : null;
-    const court = bgB64 ? null : courtFromStory(a);
-    return newsCardV3({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), round].filter(Boolean).join(' · '), stat: a.key_stat, bgB64, courtSvg: court ? courtVisualSvg({ ...court, width: 1200, height: 630, text: false, label: false }) : null });
+    // same resolver as the article (workers/shared/editorial.js): real event photo, else the featured
+    // players' approved headshots, else the branded treatment. Never a generated scene.
+    const h = a.media?.hero;
+    const photoB64 = (h?.type === 'event_photo' || h?.type === 'venue_photo') && h.images?.[0]?.id ? await r2Jpeg(env, `editorial/${h.images[0].id}/card.jpg`) : null;
+    const heads = !photoB64 && h?.type === 'player_photos' ? await Promise.all(h.images.slice(0, 2).map((p) => jpeg(env, p.square_jpg || p.square))) : [];
+    const league = a.desk === 'grand-slams' ? 'GRAND SLAMS' : a.desk === 'atp' ? 'ATP' : a.desk === 'doubles' ? 'DOUBLES' : 'TENNIS';
+    const entity = [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), (a.team || []).map((p) => p.name).join(' / ')].filter(Boolean).join(' · ');
+    return newsCardV4({ headline: a.headline, kind: a.story_type, league, entity, photoB64, heads });
   }
   if ((m = /^\/og\/rankings\/wta-(singles|doubles)\.png$/.exec(path))) {
     const d = await apiGet(env, `/v1/rankings?tour=wta&type=${m[1]}&limit=1`);

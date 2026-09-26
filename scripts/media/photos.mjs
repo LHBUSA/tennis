@@ -40,7 +40,8 @@ const ADMIN = fs.readFileSync('D:/Workers/secrets/tennis-ingest-admin-token', 'u
 async function candidates() {
   const imgs = [];
   for (let off = 0; ; off += 1000) {
-    const r = await store.select('tennis_player_external_ids', `select=pbe_player_id,external_id&provider=eq.commons_image&limit=1000&offset=${off}`);
+    // stable order: offset paging without ORDER BY can skip and repeat rows between pages
+    const r = await store.select('tennis_player_external_ids', `select=pbe_player_id,external_id&provider=eq.commons_image&order=pbe_player_id.asc,external_id.asc&limit=1000&offset=${off}`);
     imgs.push(...r);
     if (r.length < 1000) break;
   }
@@ -71,6 +72,8 @@ async function priorityTiers(rank) {
   const today = new Date().toISOString().slice(0, 10);
   const ago = (d) => new Date(Date.now() - d * 86400e3).toISOString().slice(0, 10);
   set(await membersOf(await store.select('tennis_matches', 'select=match_id,tennis_match_participants(participant_key)&status=eq.in_progress&limit=200')), 1);
+  // newsroom subjects (published stories and candidates): a story's hero and cards need their real photos
+  set((await store.select('tennis_articles', 'select=player_ids&order=created_at.desc&limit=200')).flatMap((a) => a.player_ids || []), 2);
   const eds = await store.select('tennis_tournament_editions', `select=edition_id&start_date=lte.${today}&end_date=gte.${ago(1)}&limit=200`);
   if (eds.length) {
     const ms = await store.select('tennis_matches', `select=match_id,status,tennis_match_participants(participant_key)&edition_id=${inList(eds.map((e) => e.edition_id))}&limit=2000`);

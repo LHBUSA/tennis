@@ -17,8 +17,21 @@ import { compose, slugFor, COMPOSE_VERSION } from './compose.js';
 import { buildPlan } from './plan.js';
 import { runGates, GATES_VERSION } from './gates.js';
 import { editorialize, costUsd, redactSecrets, EDITORIAL_VERSION } from './editorial.js';
+import { resolveHero } from '../../shared/editorial.js';
+import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.0';
+
+function heroAtCreation(packet, plan) {
+  const parts = packet.participants || null;
+  const all = parts ? ['A', 'B'].flatMap((s) => parts[s]?.players || []) : packet.player ? [packet.player] : [];
+  const winner = (plan.modules || []).find((m) => m.id === 'scoreboard')?.data?.winner_side || null;
+  const featured = winner && parts?.[winner] ? parts[winner].players : packet.player ? [packet.player] : [];
+  const photos = new Map(all.filter((p) => p.photo?.square).map((p) => [p.id, { slug: p.slug, name: p.name, square: p.photo.square, wide: p.photo.wide || null, portrait: p.photo.portrait || null, square_jpg: p.photo.square_jpg || null, author: p.photo.author || null, license: p.photo.license || null, source_page: p.photo.source_page || null }]));
+  const t = packet.tournament || {};
+  const r = resolveHero({ match_id: packet.match?.id || null, tournament: { slug: t.slug || null, year: t.year || null }, featured_ids: featured.map((p) => p.id), player_ids: all.map((p) => p.id) }, editorial, photos);
+  return { resolved_at: new Date().toISOString(), type: r.type, confidence: r.confidence, fallback_reason: r.fallback_reason, subjects: r.subjects, images: r.images.map((i) => ({ kind: i.kind, id: i.id || null, player_id: i.player_id || null, source_page: i.source_page || null, license: i.license || null })) };
+}
 const FRESH_H = 72;
 const ENRICH_LIMIT = 3;
 const LEASE_S = 360;
@@ -107,6 +120,10 @@ export async function enrichOne(env, store, ev) {
 
   const baseline = compose(packet);
   const plan = buildPlan(packet, baseline);
+  // presentation only: the hero chosen at creation from approved imagery (frozen packet photos + editorial
+  // catalog), recorded with its fallback reason; tennis-api re-resolves at read time so an approved photo found
+  // later upgrades the story without touching its facts
+  plan.media = heroAtCreation(packet, plan);
   const articleId = crypto.randomUUID();
   const slug = slugFor(baseline, packet);
   // FREEZE the evidence before any prose is generated

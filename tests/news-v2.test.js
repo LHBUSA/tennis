@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { linkParts } from '../src/pages/news.js';
 import { newsArticleLd, breadcrumb } from '../src/seo/meta.js';
 import { newsEntities } from '../workers/tennis-web/src/heads.js';
-import { newsCard } from '../workers/tennis-web/src/cards.js';
+import { newsCardV4 } from '../workers/tennis-web/src/cards.js';
 
 const ents = [
   { key: 'p:1', name: 'Qianhui Tang', href: '/players/qianhui-tang' },
@@ -43,9 +43,13 @@ test('schema: about = winners + the match event, mentions = every player + the e
   assert.deepEqual(bc.itemListElement.map((i) => i.item), ['https://propbetedge.ai/', 'https://tennis.propbetedge.ai/', 'https://tennis.propbetedge.ai/news', 'https://tennis.propbetedge.ai/news/s']);
 });
 
-test('share card composes the whole featured team; a player without an approved photo gets a monogram, never another photo', () => {
-  const svg = newsCard({ headline: 'Tang and Xu edge Kato and Perez', kind: 'deciding_tiebreak', context: 'Singapore 2026 · Semifinal', stat: { label: 'Score', value: '6-0, 3-6, [10-6]' }, faces: [{ name: 'Qianhui Tang', jpegB64: null }, { name: 'Yifan Xu', jpegB64: 'AAAA' }] });
-  assert.match(svg, /width="1200" height="630"/);
-  assert.equal((svg.match(/data:image\/jpeg;base64,/g) || []).length, 1);
-  assert.match(svg, />QT</, 'monogram for the player without a photo');
+test('share card: real art only — event photo, or the featured players’ headshots; otherwise no image at all', () => {
+  const imgs = (svg) => (svg.match(/data:image\/jpeg;base64,/g) || []).length;
+  const photo = newsCardV4({ headline: 'Tang and Xu edge Kato and Perez', kind: 'deciding_tiebreak', entity: 'Singapore 2026', photoB64: 'AAAA' });
+  assert.match(photo, /width="1200" height="630"/);
+  assert.equal(imgs(photo), 1);
+  assert.equal(imgs(newsCardV4({ headline: 'H', kind: 'doubles_title', heads: ['AAAA', null] })), 1, 'a player without an approved photo is simply absent');
+  const none = newsCardV4({ headline: 'Francisca Jorge and Matilde Jorge win Porto 125 doubles title', kind: 'doubles_title' });
+  assert.equal(imgs(none), 0);
+  assert.ok(!/<text[^>]*>[A-Z]{2}<\/text>/.test(none), 'no initials tiles');
 });

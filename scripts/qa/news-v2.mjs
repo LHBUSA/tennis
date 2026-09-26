@@ -80,7 +80,7 @@ for (const a of list) {
     ents: [...document.querySelectorAll('.nw-ent, .nwv-chip, .nwv-face')].map((x) => x.getAttribute('href')),
     share: [...document.querySelectorAll('.nwv .share a, .nwv .share button')].map((x) => x.getAttribute('href') || x.dataset.copy),
     pbecast: [...document.querySelectorAll('a[href^="/pbecast/"]')].length,
-    heroImgs: [...document.querySelectorAll('.nwv-hero img')].map((i) => ({ ok: i.complete && i.naturalWidth > 0, eager: i.loading === 'eager', w: i.getAttribute('width') })),
+    heroImgs: [...document.querySelectorAll('.nwm-hero img')], heroSvg: document.querySelectorAll('.nwm-hero svg, .nwx-thumb svg, .nwx-hero svg').length, heroMono: [...document.querySelectorAll('.nwm-hero img')].filter((i) => i.src.startsWith('data:')).length, cardSvg: document.querySelectorAll('.nw-card svg').length.map((i) => ({ ok: i.complete && i.naturalWidth > 0, eager: i.loading === 'eager', w: i.getAttribute('width') })),
     sw: document.documentElement.scrollWidth, iw: innerWidth
   }));
   const url = `${BASE}/news/${a.slug}`;
@@ -90,6 +90,10 @@ for (const a of list) {
   ok(r.share.length === 3 && r.share[0].includes(encodeURIComponent(url)) && r.share[1].includes(encodeURIComponent(url)) && r.share[2] === url, `${a.slug}: share ${JSON.stringify(r.share)}`);
   ok(d.replay?.available ? r.pbecast > 0 : r.pbecast === 0, `${a.slug}: PBEcast links ${r.pbecast} vs replay ${JSON.stringify(d.replay)}`);
   ok(r.heroImgs.every((i) => i.ok && i.eager && i.w), `${a.slug}: hero image state ${JSON.stringify(r.heroImgs)}`);
+  ok(r.heroSvg === 0 && r.cardSvg === 0, `${a.slug}: generated SVG visuals present (${r.heroSvg} hero, ${r.cardSvg} card)`);
+  ok(r.heroMono === 0, `${a.slug}: initials tile in the hero`);
+  const want = d.media?.hero?.images?.length || 0;
+  ok(r.heroImgs.length === want, `${a.slug}: hero shows ${r.heroImgs.length} images, resolver chose ${want} (${d.media?.hero?.type})`);
   ok(r.sw <= r.iw, `${a.slug}: overflow at 390`);
   // cross-links back: a featured player's page and the tournament page list this story
   const first = [...slugs][0];

@@ -481,3 +481,70 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .tnx-hero figcaption { position: relative; z-index: 1; font-size: 12px; color: var(--on-dark-2); padding-top: 8px; padding-bottom: 10px; background: #0a2a20; }
 .tnx-hero figcaption a { color: var(--on-dark-2); }
 .tnx-hero::after { display: none; }
+
+/* ---- News (propbetedge.ai news structure): headline-first, 16:9 real-photo hero, 720 body + 320 rail --------- */
+.nwm-shell { max-width: 1140px; padding-top: 22px; padding-bottom: 48px; }
+.nwm-crumbs { color: var(--muted); margin: 0 0 18px; }
+.nwm-crumbs a { color: var(--muted); } .nwm-crumbs a:hover { color: var(--ink); }
+.nwm-grid { display: block; }
+.nwm-art { max-width: 760px; margin: 0 auto; }
+.nwm-rail { max-width: 760px; margin: 24px auto 0; display: grid; gap: 18px; }
+@media (min-width: 1100px) {
+  .nwm-grid { display: flex; gap: 40px; align-items: flex-start; }
+  .nwm-art { flex: 1 1 760px; margin: 0; min-width: 0; }
+  .nwm-rail { flex: 0 0 320px; margin: 0; position: sticky; top: 84px; }
+}
+.nwm-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 0 0 12px; border-bottom: 1px solid var(--rule); font: 700 11px/1 var(--f-data); letter-spacing: 0.1em; text-transform: uppercase; }
+.nwm-sport { background: var(--gold-bright); color: var(--night); padding: 5px 9px; border-radius: 3px; }
+.nwm-cat { border: 1px solid var(--rule-2); color: var(--ink-2); padding: 4px 8px; border-radius: 3px; }
+.nwm-date { margin-left: auto; color: var(--muted); }
+.nwm-head h1 { font: 800 clamp(36px, 5.6vw, 64px)/1.02 var(--f-display); letter-spacing: -0.005em; color: var(--ink); margin: 18px 0 14px; text-transform: none; overflow-wrap: anywhere; }
+.nwm-dek { font-size: clamp(18px, 1.8vw, 22px); line-height: 1.45; color: var(--ink-2); max-width: 640px; margin: 0 0 16px; }
+.nwm-by { font: 600 11.5px/1.5 var(--f-data); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 12px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin: 0 0 14px; }
+.nwm-by a { color: var(--ink); }
+.nwm-head .share { margin: 0 0 18px; }
+.nwm-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 18px; padding-left: 12px; border-left: 3px solid var(--gold-bright); }
+.nwm-chips-l { font: 800 11px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.nwm-tchip { padding-left: 12px; }
+.nwm-hero { margin: 0 0 22px; }
+.nwm-hero figcaption { font-size: 12.5px; color: var(--muted); margin-top: 8px; line-height: 1.45; }
+.nwm-hero figcaption a { color: var(--muted); }
+.nwm-ph { aspect-ratio: 16 / 9; background: #0a2a20; border-radius: 6px; overflow: hidden; box-shadow: 0 16px 50px rgba(6, 32, 25, 0.22); }
+.nwm-ph img, .nwm-ph picture { display: block; width: 100%; height: 100%; object-fit: cover; }
+.nwm-ph.one:not(.wide) { display: grid; place-items: center; background: radial-gradient(120% 120% at 70% 0%, #145c43, var(--night)); }
+.nwm-ph.one:not(.wide) img { width: auto; height: 100%; aspect-ratio: 4 / 5; }
+.nwm-ph.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--night); }
+.nwm-ph.duo > div { overflow: hidden; }
+@media (max-width: 640px) { .nwm-ph { border-radius: 4px; } }
+.nwm .nw-body { background: transparent; border: 0; box-shadow: none; padding: 0; }
+.nwm .nw-body p { font-size: 19px; line-height: 1.75; margin: 0 0 22px; max-width: none; }
+@media (max-width: 640px) { .nwm .nw-body p { font-size: 17px; } }
+.nwm .nw-body h2 { margin-top: 8px; }
+.nwm .nw-body .mod { background: var(--white); border: 1px solid var(--rule); }
+.nwm-mu { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 6px 0 30px; }
+@media (max-width: 520px) { .nwm-mu { grid-template-columns: 1fr; } }
+.nwm-mu-side { background: var(--white); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: 12px; display: grid; gap: 8px; align-content: start; }
+.nwm-mu-l { margin: 0; font: 800 11px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+.nwm-mu-p { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; color: var(--ink); padding: 6px; border-radius: var(--r); }
+.nwm-mu-p:hover { text-decoration: none; background: var(--paper); }
+.nwm-mu-p img { width: 64px; height: 80px; object-fit: cover; border-radius: 8px; }
+.nwm-mu-p span { display: grid; gap: 2px; min-width: 0; }
+.nwm-mu-p b { font-weight: 800; overflow-wrap: anywhere; }
+.nwm-mu-p small { color: var(--muted); font-size: 12px; }
+.nwm-mu-p em { font-style: normal; font-size: 12px; font-weight: 700; color: var(--court-700); }
+.nwm-mu-seed { margin: 0; font-size: 12px; color: var(--muted); }
+.nwm-rbox { background: var(--white); border: 1px solid var(--rule); border-radius: var(--r-lg); padding: 16px; }
+.nwm-rbox h2 { font: 800 16px/1.1 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; margin: 0 0 12px; color: var(--court-700); }
+.nwm-rbox .nwv-links { grid-template-columns: 1fr; }
+.nwm-rel { display: grid; gap: 10px; }
+.nwm-rel .nw-card { margin: 0; box-shadow: none; }
+.nwm-rel .nw-card h2 { font-size: 16px; }
+.nwm-rel .nw-dek { display: none; }
+/* card visuals: real photos; branded card when none */
+.nwx-thumb .nwm-ph { border-radius: 0; box-shadow: none; height: 100%; aspect-ratio: auto; }
+.nwm-brand { display: grid; align-content: center; justify-items: center; gap: 8px; text-align: center; background: radial-gradient(120% 130% at 80% 0%, #145c43 0%, var(--night) 62%); color: var(--on-dark); padding: 12px; }
+.nwm-brand img { width: 74px; height: auto; opacity: 0.95; }
+.nwm-brand span { font: 800 11px/1.2 var(--f-display); letter-spacing: 0.18em; color: var(--gold-bright); }
+.nwm-brand b { font: 800 clamp(16px, 2.2vw, 22px)/1.1 var(--f-display); text-transform: uppercase; }
+/* share bar at <=380px: icon-only (network pattern) */
+@media (max-width: 380px) { .share-b span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .share-b { padding: 0 11px; } .share-l { display: none; } }

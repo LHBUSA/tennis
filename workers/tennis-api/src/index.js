@@ -17,7 +17,7 @@ import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdi
 import { v2Route } from './v2.js';
 import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
-import { resolveMedia } from '../../shared/editorial.js';
+import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 export { shapeMatch };
 
@@ -66,7 +66,7 @@ async function tournament(store, slug, year) {
   const e = await store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_status,source_family,updated_at,tennis_tournaments(slug,name),tennis_venues(slug,city,country,venue_name,precision)&tournament_id=eq.${t[0].tournament_id}&year=eq.${year}`);
   if (!e.length) return null;
   const matches = await store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&limit=1000`);
-  return ok({ edition: { ...shapeEdition(e[0]), status: e[0].source_status, venue: e[0].tennis_venues || null }, media: resolveMedia({ tournament: { slug, year }, surface: e[0].surface, featured_ids: [], player_ids: [] }, editorial), matches: matches.map(shapeMatch) }, { rows: [...e, ...matches], policy: { currentS: 300, staleS: 3600 }, semantics: 'one tournament edition with every observed match (all events and stages)' });
+  return ok({ edition: { ...shapeEdition(e[0]), status: e[0].source_status, venue: e[0].tennis_venues || null }, media: { hero: resolveHero({ tournament: { slug, year }, featured_ids: [], player_ids: [] }, editorial) }, matches: matches.map(shapeMatch) }, { rows: [...e, ...matches], policy: { currentS: 300, staleS: 3600 }, semantics: 'one tournament edition with every observed match (all events and stages)' });
 }
 
 async function match(store, id) {
