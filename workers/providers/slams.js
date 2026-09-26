@@ -128,4 +128,68 @@ export const ausopenDay = {
   }))
 };
 
-export const ADAPTERS = [wimbledonDraw, ausopenDay];
+// AO match rows. Observed (2026 day 2-3 captures): match_status.code C = complete, R = retired; each
+// team's score[] carries games per set plus BOTH tiebreak totals (`tie_break`) when one was played; the
+// per-set `winner` flag is unreliable on unfinished sets (a 0-0 set after a retirement is flagged), so set
+// winners are derived from games. Only men's and mixed events are taken: women's AO matches come from
+// the WTA API, and taking them twice would duplicate matches.
+const AO_EVENTS = { "Men's Singles": { event_type: 'MS', gender: 'M', format: 'BO5_FINAL_TB10' }, "Men's Doubles": { event_type: 'MD', gender: 'M', format: 'BO3_FINAL_TB10' }, 'Mixed Doubles': { event_type: 'XD', gender: null, format: 'DOUBLES_TOUR' } };
+const AO_STATUS = { C: 'completed', R: 'retired' };
+const AO_ROUNDS = { '1st Round': '1', '2nd Round': '2', '3rd Round': '3', '4th Round': '4', Quarterfinals: 'Q', 'Quarter-finals': 'Q', Semifinals: 'S', 'Semi-finals': 'S', Final: 'F' };
+
+export function parseAusopenDay(j) {
+  const events = new Map((j.events || []).map((e) => [e.uuid, e.name]));
+  const rounds = new Map((j.rounds || []).map((r) => [r.uuid, r.name]));
+  const teams = new Map((j.teams || []).map((t) => [t.uuid, t]));
+  const players = new Map((j.players || []).map((p) => [p.uuid, p]));
+  const year = Number(j.year?.year || j.year?.name) || null;
+  const out = [];
+  for (const m of j.matches || []) {
+    const ev = AO_EVENTS[events.get(m.event_uuid)];
+    if (!ev) continue;
+    const warnings = [];
+    const status = AO_STATUS[m.match_status?.code] || null;
+    if (!status) warnings.push(`unmapped_status:${m.match_status?.code}`);
+    const [tA, tB] = m.teams || [];
+    const member = (pid) => {
+      const p = players.get(pid) || {};
+      return { provider: 'ausopen', provider_id: pid, tour_id: tourIdFromSlamId(p.tour_id || p.player_id), first_name: p.first_name || null, last_name: p.last_name || null, country: p.nationality?.code || null, gender: p.gender === 'M' || p.gender === 'F' ? p.gender : ev.gender, dob: p.dob || null };
+    };
+    const side = (t) => (teams.get(t?.team_id)?.players || []).map(member);
+    const n = Math.max(tA?.score?.length || 0, tB?.score?.length || 0);
+    const sets = [];
+    for (let i = 0; i < n; i += 1) {
+      const a = tA.score[i];
+      const b = tB.score[i];
+      if (!a || !b) { warnings.push(`ragged_score:set${i + 1}`); break; }
+      const tb = a.tie_break != null && b.tie_break != null ? { A: Number(a.tie_break), B: Number(b.tie_break), winner_points_derived: false } : null;
+      sets.push({ games: { A: Number(a.game), B: Number(b.game) }, tiebreak: tb, is_match_tiebreak: false });
+    }
+    const winner = tA?.status === 'Winner' ? 'A' : tB?.status === 'Winner' ? 'B' : null;
+    const rn = rounds.get(m.round_id);
+    out.push({
+      type: 'match', provider: 'ausopen', provider_match_id: `${year}-${m.match_id}`, provider_event: { id: 'australian-open', year },
+      event_type: ev.event_type, stage: 'main', round_code: AO_ROUNDS[rn] || rn || null, format_key: ev.format,
+      status, winner_side: winner, end_reason: status === 'retired' ? 'retirement' : status === 'completed' ? 'completed' : null,
+      retired_side: status === 'retired' && winner ? (winner === 'A' ? 'B' : 'A') : null, sets, live: null,
+      sides: { A: side(tA), B: side(tB) }, seeds: { A: Number(teams.get(tA?.team_id)?.seed) || null, B: Number(teams.get(tB?.team_id)?.seed) || null },
+      entry: { A: teams.get(tA?.team_id)?.entry_status?.abbr || null, B: teams.get(tB?.team_id)?.entry_status?.abbr || null },
+      duration_s: /^(\d+):(\d{2})$/.test(m.duration || '') ? Number(m.duration.split(':')[0]) * 3600 + Number(m.duration.split(':')[1]) * 60 : null,
+      source_updated_at: m.date ? `${m.date}T00:00:00Z` : null, warnings
+    });
+  }
+  return out;
+}
+
+export const ausopenMatches = {
+  key: 'ausopen.matches',
+  family: 'ausopen',
+  capabilities: ['set_game_scoring', 'withdrawals_ret_wo', 'player_identity'],
+  parser_version: PARSER,
+  cadence: { class: 'event_window', active_s: 120, idle_s: 86400 },
+  request: ({ year, day }) => ({ url: `https://prod-scores-api.ausopen.com/year/${year}/period/MD/day/${day}/results` }),
+  shape: ausopenDay.shape,
+  parse: (body) => parseAusopenDay(safeJson(body))
+};
+
+export const ADAPTERS = [wimbledonDraw, ausopenDay, ausopenMatches];

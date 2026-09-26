@@ -1,0 +1,448 @@
+{
+ "_capture": {
+  "url": "https://prod-scores-api.ausopen.com/year/2026/period/MD/day/2/results",
+  "captured_at": "2026-09-26",
+  "note": "Minimal subset of a real response, names tokenized, for parser tests."
+ },
+ "payload": {
+  "tournament": {
+   "name": "AusOpen 2027"
+  },
+  "year": {
+   "uuid": "c6034f91-4abc-4684-8419-563be06b6127",
+   "name": "2026",
+   "year": "2026"
+  },
+  "matches": [
+   {
+    "date": "2026-01-19",
+    "uuid": "258042",
+    "match_id": "MS132",
+    "match_status": {
+     "name": "Retired",
+     "abbr": "RET",
+     "color": "orange-mid",
+     "code": "R"
+    },
+    "match_state": "Complete",
+    "round_id": "9158e17d-077f-40f8-bcc5-2d2fe9543432",
+    "duration": "2:09",
+    "teams": [
+     {
+      "team_id": "259154",
+      "score": [
+       {
+        "set": 1,
+        "game": "3",
+        "winner": false
+       },
+       {
+        "set": 2,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 3,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 4,
+        "game": "0",
+        "winner": true
+       }
+      ],
+      "status": "Winner"
+     },
+     {
+      "team_id": "259155",
+      "score": [
+       {
+        "set": 1,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 2,
+        "game": "4",
+        "winner": false
+       },
+       {
+        "set": 3,
+        "game": "4",
+        "winner": false
+       },
+       {
+        "set": 4,
+        "game": "0",
+        "winner": false
+       }
+      ]
+     }
+    ],
+    "event_uuid": "c495773f-74c9-44aa-bd9f-99fb97119882",
+    "court_id": "8081"
+   },
+   {
+    "date": "2026-01-19",
+    "uuid": "258314",
+    "match_id": "MS125",
+    "match_status": {
+     "name": "Complete",
+     "abbr": "CMP",
+     "color": "",
+     "code": "C"
+    },
+    "match_state": "Complete",
+    "round_id": "9158e17d-077f-40f8-bcc5-2d2fe9543432",
+    "duration": "2:52",
+    "teams": [
+     {
+      "team_id": "259191",
+      "score": [
+       {
+        "set": 1,
+        "game": "7",
+        "winner": true
+       },
+       {
+        "set": 2,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 3,
+        "game": "7",
+        "winner": true,
+        "tie_break": 7
+       }
+      ],
+      "status": "Winner"
+     },
+     {
+      "team_id": "259192",
+      "score": [
+       {
+        "set": 1,
+        "game": "5",
+        "winner": false
+       },
+       {
+        "set": 2,
+        "game": "2",
+        "winner": false
+       },
+       {
+        "set": 3,
+        "game": "6",
+        "winner": false,
+        "tie_break": 2
+       }
+      ]
+     }
+    ],
+    "event_uuid": "c495773f-74c9-44aa-bd9f-99fb97119882",
+    "court_id": "2266"
+   },
+   {
+    "date": "2026-01-19",
+    "uuid": "258361",
+    "match_id": "MS116",
+    "match_status": {
+     "name": "Complete",
+     "abbr": "CMP",
+     "color": "",
+     "code": "C"
+    },
+    "match_state": "Complete",
+    "round_id": "9158e17d-077f-40f8-bcc5-2d2fe9543432",
+    "duration": "1:48",
+    "teams": [
+     {
+      "team_id": "259807",
+      "score": [
+       {
+        "set": 1,
+        "game": "2",
+        "winner": false
+       },
+       {
+        "set": 2,
+        "game": "2",
+        "winner": false
+       },
+       {
+        "set": 3,
+        "game": "3",
+        "winner": false
+       }
+      ]
+     },
+     {
+      "team_id": "259224",
+      "score": [
+       {
+        "set": 1,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 2,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 3,
+        "game": "6",
+        "winner": true
+       }
+      ],
+      "status": "Winner"
+     }
+    ],
+    "event_uuid": "c495773f-74c9-44aa-bd9f-99fb97119882",
+    "court_id": "12"
+   },
+   {
+    "date": "2026-01-19",
+    "uuid": "257932",
+    "match_id": "WS117",
+    "match_status": {
+     "name": "Complete",
+     "abbr": "CMP",
+     "color": "",
+     "code": "C"
+    },
+    "match_state": "Complete",
+    "round_id": "9158e17d-077f-40f8-bcc5-2d2fe9543432",
+    "duration": "1:39",
+    "teams": [
+     {
+      "team_id": "259292",
+      "score": [
+       {
+        "set": 1,
+        "game": "6",
+        "winner": true
+       },
+       {
+        "set": 2,
+        "game": "6",
+        "winner": true
+       }
+      ],
+      "status": "Winner"
+     },
+     {
+      "team_id": "259293",
+      "score": [
+       {
+        "set": 1,
+        "game": "2",
+        "winner": false
+       },
+       {
+        "set": 2,
+        "game": "3",
+        "winner": false
+       }
+      ]
+     }
+    ],
+    "event_uuid": "8bda53a6-80ad-459d-9b7e-5e7415ca633a",
+    "court_id": "12"
+   }
+  ],
+  "events": [
+   {
+    "uuid": "c495773f-74c9-44aa-bd9f-99fb97119882",
+    "name": "Men's Singles"
+   },
+   {
+    "uuid": "8bda53a6-80ad-459d-9b7e-5e7415ca633a",
+    "name": "Women's Singles"
+   }
+  ],
+  "players": [
+   {
+    "uuid": "d36bef3a-e455-4180-bc58-b012c8c0b14a",
+    "player_id": "ATPMM58",
+    "tour_id": "ATPMM58",
+    "first_name": "First0",
+    "last_name": "Last0",
+    "full_name": "First0 Last0",
+    "gender": "M",
+    "nationality": {
+     "code": "RUS"
+    },
+    "dob": "1996-02-11"
+   },
+   {
+    "uuid": "408defd3-1f2a-46fc-bc5e-2562c5f24c09",
+    "player_id": "ATPAG37",
+    "tour_id": "ATPAG37",
+    "first_name": "First1",
+    "last_name": "Last1",
+    "full_name": "First1 Last1",
+    "gender": "M",
+    "nationality": {
+     "code": "CAN"
+    },
+    "dob": "2000-08-08"
+   },
+   {
+    "uuid": "dc29a12c-d476-4393-95f2-83acf4341fd3",
+    "player_id": "ATPBT72",
+    "tour_id": "ATPBT72",
+    "first_name": "First2",
+    "last_name": "Last2",
+    "full_name": "First2 Last2",
+    "gender": "M",
+    "nationality": {
+     "code": "POR"
+    },
+    "dob": "1997-02-19"
+   },
+   {
+    "uuid": "fdc0a435-4149-48ee-8795-174c416fdc89",
+    "player_id": "ATPDH58",
+    "tour_id": "ATPDH58",
+    "first_name": "First3",
+    "last_name": "Last3",
+    "full_name": "First3 Last3",
+    "gender": "M",
+    "nationality": {
+     "code": "AUS"
+    },
+    "dob": "1999-02-17"
+   },
+   {
+    "uuid": "c4ad20fb-35ad-4397-848f-cfc88e0fc24e",
+    "player_id": "ATPMK66",
+    "tour_id": "ATPMK66",
+    "first_name": "First4",
+    "last_name": "Last4",
+    "full_name": "First4 Last4",
+    "gender": "M",
+    "nationality": {
+     "code": "USA"
+    },
+    "dob": "1995-04-16"
+   },
+   {
+    "uuid": "03c555f0-3e23-42c8-92f7-4d21016ba8b1",
+    "player_id": "ATPD0C1",
+    "tour_id": "ATPD0C1",
+    "first_name": "First5",
+    "last_name": "Last5",
+    "full_name": "First5 Last5",
+    "gender": "M",
+    "nationality": {
+     "code": "NED"
+    },
+    "dob": "2000-05-31"
+   },
+   {
+    "uuid": "e0d7dc60-73ce-48a1-846e-aba4bab5e0a6",
+    "player_id": "WTA325936",
+    "tour_id": "WTA325936",
+    "first_name": "First6",
+    "last_name": "Last6",
+    "full_name": "First6 Last6",
+    "gender": "F",
+    "nationality": {
+     "code": "UZB"
+    },
+    "dob": "2001-08-28"
+   },
+   {
+    "uuid": "2435e580-912e-4239-92c7-5778a17a7190",
+    "player_id": "WTA328560",
+    "tour_id": "WTA328560",
+    "first_name": "First7",
+    "last_name": "Last7",
+    "full_name": "First7 Last7",
+    "gender": "F",
+    "nationality": {
+     "code": "USA"
+    },
+    "dob": "2004-03-13"
+   }
+  ],
+  "rounds": [
+   {
+    "uuid": "9158e17d-077f-40f8-bcc5-2d2fe9543432",
+    "name": "1st Round"
+   }
+  ],
+  "teams": [
+   {
+    "uuid": "259292",
+    "seed": "3",
+    "entry_status": null,
+    "players": [
+     "2435e580-912e-4239-92c7-5778a17a7190"
+    ]
+   },
+   {
+    "uuid": "259293",
+    "seed": "",
+    "entry_status": null,
+    "players": [
+     "e0d7dc60-73ce-48a1-846e-aba4bab5e0a6"
+    ]
+   },
+   {
+    "uuid": "259807",
+    "seed": "",
+    "entry_status": {
+     "name": "Lucky Loser",
+     "abbr": "LL"
+    },
+    "players": [
+     "c4ad20fb-35ad-4397-848f-cfc88e0fc24e"
+    ]
+   },
+   {
+    "uuid": "259224",
+    "seed": "6",
+    "entry_status": null,
+    "players": [
+     "fdc0a435-4149-48ee-8795-174c416fdc89"
+    ]
+   },
+   {
+    "uuid": "259191",
+    "seed": "11",
+    "entry_status": null,
+    "players": [
+     "d36bef3a-e455-4180-bc58-b012c8c0b14a"
+    ]
+   },
+   {
+    "uuid": "259192",
+    "seed": "",
+    "entry_status": null,
+    "players": [
+     "03c555f0-3e23-42c8-92f7-4d21016ba8b1"
+    ]
+   },
+   {
+    "uuid": "259154",
+    "seed": "",
+    "entry_status": null,
+    "players": [
+     "dc29a12c-d476-4393-95f2-83acf4341fd3"
+    ]
+   },
+   {
+    "uuid": "259155",
+    "seed": "7",
+    "entry_status": null,
+    "players": [
+     "408defd3-1f2a-46fc-bc5e-2562c5f24c09"
+    ]
+   }
+  ]
+ }
+}

@@ -152,7 +152,7 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
   }
   if (normalized.length) {
     const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
-    const keep = [];
+    let keep = [];
     const changes = [];
     for (const x of normalized) {
       const p = prev.get(x.id);
@@ -187,8 +187,26 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     });
     const wo = keep.filter((x) => x.n.match.status === 'walkover');
     const rest = keep.filter((x) => x.n.match.status !== 'walkover');
-    await store.upsert('tennis_matches', rest.map(matchRow), { onConflict: 'match_id' });
-    await store.upsert('tennis_matches', wo.map((x) => ({ ...matchRow(x), stats_status: 'not_applicable' })), { onConflict: 'match_id' });
+    const rejected = new Set();
+    // One malformed row must never fail the whole edition: on a data error, retry row by row and hold
+    // only the rows Postgres rejects.
+    const upsertMatches = async (list, row) => {
+      try {
+        await store.upsert('tennis_matches', list.map(row), { onConflict: 'match_id' });
+      } catch (e) {
+        if (e?.status !== 400) throw e;
+        for (const x of list) {
+          try { await store.upsert('tennis_matches', [row(x)], { onConflict: 'match_id' }); } catch (err) {
+            if (err?.status !== 400) throw err;
+            rejected.add(x.id);
+            holds.push({ provider: x.sm.provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [`db_rejected:${String(err.message).slice(0, 200)}`], payload: slim(x.sm), capture_id: captureId });
+          }
+        }
+      }
+    };
+    await upsertMatches(rest, matchRow);
+    await upsertMatches(wo, (x) => ({ ...matchRow(x), stats_status: 'not_applicable' }));
+    keep = keep.filter((x) => !rejected.has(x.id));
     await store.upsert('tennis_match_external_ids', keep.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
     await store.upsert('tennis_match_participants', keep.flatMap((x) => ['A', 'B'].map((side) => ({ match_id: x.id, side, participant_key: x.n.match.participants[side], seed: x.sm.seeds?.[side] ?? null, entry_type: x.sm.entry?.[side] || null }))), { onConflict: 'match_id,side' });
     const sets = keep.flatMap((x) => (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s) })));

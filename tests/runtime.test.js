@@ -145,3 +145,33 @@ test('clients call fetch detached (Workers throw "Illegal invocation" otherwise)
   const c = new SourceClient({ fetch: strictFetch, sleep: async () => {}, jitter: () => 0 });
   assert.equal((await c.get('https://a.test/')).status, 200);
 });
+
+test('writer: a row Postgres rejects is held; the rest of the edition is still written', async () => {
+  const { writeMatches } = await import('../workers/tennis-ingest/src/writer.js');
+  const wtaP = await import('../workers/providers/wta.js');
+  const fsm = await import('node:fs');
+  const body = JSON.parse(fsm.readFileSync(new URL('./fixtures/wta/matches-1152.json', import.meta.url), 'utf8')).payload;
+  const rows = wtaP.matches.parse(JSON.stringify(body)).filter((m) => m.status === 'completed').slice(0, 3);
+  rows[1].source_updated_at = 'BAD'; // Postgres will reject this timestamp
+  const holds = [];
+  let written = 0;
+  const store = {
+    select: async () => [],
+    insert: async () => [],
+    del: async () => null,
+    req: async () => null,
+    upsert: async (table, list) => {
+      if (table === 'tennis_ingest_holds') holds.push(...list);
+      if (table === 'tennis_matches') {
+        if (list.some((r) => r.source_updated_at === 'BAD')) { const e = new Error('postgrest 400 invalid timestamp'); e.status = 400; throw e; }
+        written += list.length;
+      }
+      return [];
+    }
+  };
+  const r = await writeMatches(store, rows, { edition_id: '00000000-0000-4000-8000-000000000001' });
+  assert.equal(written, 2);
+  assert.equal(r.written, 2);
+  assert.equal(r.held, 1);
+  assert.ok(holds.some((h) => h.problems[0].startsWith('db_rejected')));
+});

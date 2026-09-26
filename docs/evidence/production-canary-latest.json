@@ -1,5 +1,5 @@
 {
-  "run_at": "2026-09-26T14:32:31.067Z",
+  "run_at": "2026-09-26T14:42:38.152Z",
   "api": "https://tennis-api.propbetedge.ai",
   "summary": {
     "PASS": 28,
@@ -7,20 +7,20 @@
   },
   "totals": {
     "matches": 270,
-    "players": 1292,
-    "stats_rows": 80,
-    "complete_ranking_snapshots": 0,
-    "observed_changes": 15,
-    "raw_captures": 60,
-    "players_with_wikidata": 810,
+    "players": 2089,
+    "stats_rows": 168,
+    "complete_ranking_snapshots": 2,
+    "observed_changes": 18,
+    "raw_captures": 155,
+    "players_with_wikidata": 1090,
     "wimbledon_rows_linked_to_atp_ids": 0
   },
   "backfill": {
     "calendar": {
-      "from": "2025-01-29",
+      "from": "2025-03-26",
       "done": false
     },
-    "events_remaining": 9,
+    "events_remaining": 22,
     "ranking_history": null
   },
   "checks": [
@@ -67,22 +67,24 @@
       "name": "ingest ran within 10 min",
       "result": "PASS",
       "detail": {
-        "finished_at": "2026-09-26T14:30:54.276Z",
-        "age_s": 90
+        "finished_at": "2026-09-26T14:41:52.895Z",
+        "age_s": 36
       }
     },
     {
       "name": "ingest steps all ok",
-      "result": "PASS",
+      "result": "FAIL",
       "detail": {
-        "failed": []
+        "failed": [
+          "matches: postgrest 400 POST tennis_matches: {\"code\":\"22007\",\"details\":null,\"hint\":null,\"message\":\"invalid input syntax for type timestamp with time zone: \\\"15:00+0300\\\"\"}"
+        ]
       }
     },
     {
       "name": "ingest upstream never blocked",
       "result": "PASS",
       "detail": {
-        "requests": 27,
+        "requests": 14,
         "not_modified": 0,
         "retries": 0,
         "blocked": 0
@@ -90,9 +92,11 @@
     },
     {
       "name": "tennis-live cycled within 3 min",
-      "result": "FAIL",
+      "result": "PASS",
       "detail": {
-        "age_s": null
+        "started_at": "2026-09-26T14:41:55.513Z",
+        "editions": 2,
+        "age_s": -24
       }
     },
     {
@@ -101,7 +105,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 253
+        "ms": 214
       }
     },
     {
@@ -110,7 +114,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 95
+        "ms": 77
       }
     },
     {
@@ -119,7 +123,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 85
+        "ms": 65
       }
     },
     {
@@ -128,7 +132,7 @@
       "detail": {
         "status": 200,
         "freshness": "UNAVAILABLE",
-        "ms": 75
+        "ms": 34
       }
     },
     {
@@ -137,7 +141,7 @@
       "detail": {
         "status": 200,
         "freshness": "UNAVAILABLE",
-        "ms": 75
+        "ms": 43
       }
     },
     {
@@ -146,7 +150,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 89
+        "ms": 66
       }
     },
     {
@@ -155,7 +159,7 @@
       "detail": {
         "status": 200,
         "freshness": "CACHED",
-        "ms": 40
+        "ms": 37
       }
     },
     {
@@ -177,7 +181,7 @@
       "name": "API player DNA contract",
       "result": "PASS",
       "detail": {
-        "matches_considered": 0
+        "matches_considered": 1
       }
     },
     {
@@ -228,7 +232,7 @@
     {
       "name": "raw captures archived (R2 lineage rows present)",
       "result": "PASS",
-      "detail": 60
+      "detail": 155
     },
     {
       "name": "open ingest holds are few (reviewable)",

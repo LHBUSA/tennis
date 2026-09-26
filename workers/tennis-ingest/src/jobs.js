@@ -120,6 +120,20 @@ export async function wimbledonMen(ctx, year) {
   return { state: 'PASS', ...w };
 }
 
+// ---- Australian Open match days (men's + mixed; women's come from the WTA API) -------------------------
+export async function ausopenDayMatches(ctx, year, day) {
+  const r = await fetchRun(ctx, slams.ausopenMatches, { year, day });
+  if (r.state === 'DEGRADED' && r.error === 'zero_records') return { state: 'PASS', written: 0, note: 'no men/mixed matches that day' };
+  if (r.state !== 'PASS') return { state: r.state, error: r.error };
+  const tid = await tournamentId('slam:australian-open');
+  const eid = await editionId(tid, year);
+  await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'australian-open', name: 'Australian Open', competition_key: 'grand_slam', country: 'AUS', city: 'Melbourne' }], { onConflict: 'tournament_id', ignore: true });
+  await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year, competition_key: 'grand_slam', surface: 'hard', indoor: false, source_family: 'ausopen', name: `Australian Open ${year}`, level: 'Grand Slam', city: 'Melbourne', country: 'AUS' }], { onConflict: 'edition_id', ignore: true });
+  const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null });
+  await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.ausopen&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
+  return { state: 'PASS', ...w };
+}
+
 // ---- Australian Open player registry (identity evidence: tour ids, DOB, gender) ------------------------
 export async function ausopenPlayers(ctx, year) {
   const r = await fetchRun(ctx, slams.ausopenDay, { year, day: 1 });

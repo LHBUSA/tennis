@@ -17,7 +17,7 @@ import { storeFromEnv } from '../../shared/store/postgrest.js';
 import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
-import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, ausopenPlayers, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
+import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, ausopenPlayers, ausopenDayMatches, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
@@ -154,6 +154,12 @@ async function tickInner(env, store, kv, force) {
       const r = await wimbledonMen(ctx, y);
       if (r.state === 'PASS') await kv.put(`bf:wim:${y}`, iso(new Date()));
       return { wimbledon_ms: y, ...r };
+    }
+    const ao = (await kv.get('bf:ao', 'json')) || { year: 2026, day: 1 };
+    if (ao.day <= 15) {
+      const r = await ausopenDayMatches(ctx, ao.year, ao.day);
+      if (r.state === 'PASS') await kv.put('bf:ao', JSON.stringify({ year: ao.year, day: ao.day + 1 }));
+      return { ausopen: `${ao.year} day ${ao.day}`, ...r };
     }
     const rk = (await kv.get('bf:rank', 'json')) || { date: addDays(wta.rankingMonday(started), -7) };
     if (rk.date < RANK_HISTORY_FLOOR) return 'rank_history_complete';

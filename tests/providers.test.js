@@ -95,6 +95,11 @@ test('WTA order-of-play row (MatchState U) is a scheduled match; placeholder tim
   assert.equal(u.format_key, 'DOUBLES_TOUR');
   assert.equal(u.scheduled_at, null);
   assert.equal(u.schedule_note, 'Followed By');
+  const t = wta.parseWtaMatch({ MatchState: 'U', DrawMatchType: 'S', DrawLevelType: 'M', EventID: '1', EventYear: 2026, MatchID: 'LS001', NotBefore: 'Not Before', NotBeforeISOTime: '15:00+0300', PlayerIDA: '1', PlayerIDB: '2' }, { level: 'WTA 500' });
+  assert.equal(t.scheduled_at, null, 'a time without a date is not a timestamp');
+  assert.equal(t.schedule_note, 'Not Before · not before 15:00+0300');
+  const f = wta.parseWtaMatch({ MatchState: 'U', DrawMatchType: 'S', DrawLevelType: 'M', EventID: '1', EventYear: 2026, MatchID: 'LS002', NotBeforeISOTime: '2026-09-27T12:00:00+08:00', PlayerIDA: '1', PlayerIDB: '2' }, { level: 'WTA 500' });
+  assert.equal(f.scheduled_at, '2026-09-27T12:00:00+08:00');
   assert.deepEqual(u.warnings, []);
 });
 
@@ -184,4 +189,22 @@ test('ProTennisLive placeholder PDFs are not accepted as draws', () => {
   assert.deepEqual(open.protennisliveDraw.shape('%PDF-1.4 tiny -Tournament Information Not Yet Available-'), ['placeholder_pdf']);
   assert.deepEqual(open.protennisliveDraw.shape('<html>'), ['not_a_pdf']);
   assert.deepEqual(open.protennisliveDraw.shape(`%PDF-1.7${'x'.repeat(20000)}`), []);
+});
+
+test('Australian Open day results: men only, full tiebreak points, retirement, embedded ATP ids', async () => {
+  const body = fx('ausopen/day2-2026.json');
+  assert.deepEqual(slams.ausopenMatches.shape(body), []);
+  const rows = slams.ausopenMatches.parse(body);
+  assert.ok(rows.every((r) => r.event_type === 'MS'), "women's AO matches come from the WTA API, never twice");
+  const by = Object.fromEntries(rows.map((r) => [r.provider_match_id, r]));
+  assert.deepEqual(by['2026-MS125'].sets[2].tiebreak, { A: 7, B: by['2026-MS125'].sets[2].tiebreak.B, winner_points_derived: false });
+  const ret = by['2026-MS132'];
+  assert.equal(ret.status, 'retired');
+  assert.equal(ret.winner_side, 'A');
+  assert.equal(ret.retired_side, 'B');
+  for (const r of rows) {
+    assert.equal(r.sides.A[0].tour_id.provider, 'atp');
+    const n = await normalizeMatch(r);
+    assert.equal(n.canonical, true, `${r.provider_match_id}: ${n.problems.join()}`);
+  }
 });

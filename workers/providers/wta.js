@@ -103,6 +103,7 @@ export const calendar = {
 const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', end: 'completed' }, 4: { side: 'A', end: 'retirement', retired: 'B' }, 5: { side: 'B', end: 'retirement', retired: 'A' }, 6: { side: 'A', end: 'walkover', withdrawn: 'B' } };
 const STATE = { F: 'final', P: 'in_progress', U: 'scheduled' };
 export const SCORE_SYS = { 1: 'BO3_TB7', 9: 'DOUBLES_TOUR' };
+const FULL_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
 // Grand Slams play a 10-point tiebreak at 6-6 in the deciding set (all events, since 2022). The WTA
 // API reports those matches as ScoreSys 1, so the event level decides the format, not the code alone.
 export function formatFor(scoreSys, { level = null, year = null } = {}) {
@@ -185,8 +186,10 @@ export function parseWtaMatch(m, ctx = {}) {
     entry: { A: m.EntryTypeA || null, B: m.EntryTypeB || null },
     court_id: m.CourtID ?? null,
     court_name: m.CourtName || null,
-    scheduled_at: state === 'scheduled' && m.NotBeforeISOTime ? m.NotBeforeISOTime : null,
-    schedule_note: state === 'scheduled' ? [m.NotBefore, m.NotBeforeText].filter(Boolean).join(' · ') || null : null,
+    // NotBeforeISOTime is sometimes a full timestamp, sometimes time-only ("15:00+0300"). Only a full
+    // timestamp becomes scheduled_at; a bare time stays source text (the date is never assumed).
+    scheduled_at: state === 'scheduled' && FULL_ISO.test(m.NotBeforeISOTime || '') ? m.NotBeforeISOTime : null,
+    schedule_note: state === 'scheduled' ? [m.NotBefore, m.NotBeforeText, m.NotBeforeISOTime && !FULL_ISO.test(m.NotBeforeISOTime) ? `not before ${m.NotBeforeISOTime}` : null].filter(Boolean).join(' · ') || null : null,
     duration_s: hms(m.MatchTimeTotal),
     source_updated_at: m.LastUpdated || null,
     source_text: m.ResultString || null,
