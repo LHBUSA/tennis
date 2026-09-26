@@ -18,6 +18,7 @@ import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import { buildDnaSnapshots } from './dna-job.js';
+import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
@@ -140,76 +141,83 @@ async function tickInner(env, store, kv, force) {
   // 5. backfill — one unit per tick, only with budget left
   await step(ctx, 'backfill', async () => {
     if (ctx.upstream >= UPSTREAM_BUDGET) return 'budget_spent';
-    // Two lanes alternate by tick so neither starves the other: official ranking history (point-in-time
-    // lists) and match history (Slam jobs, then the calendar queue).
-    if (Math.floor(started.getTime() / 120000) % 2 === 1) {
-      const lane = await rankingHistoryStep();
-      if (lane !== 'rank_history_complete') return lane;
-    }
-    // Men's history first: the Wimbledon draws archive (MS, MD, QS; 2025 -> 1979), one draw or identity batch per tick.
-    // ...interleaved with the AO match-centre (stats + point-by-point) so neither blocks the other for hours
-    if (Math.floor(started.getTime() / 240000) % 2 === 0) {
-      const wa = await wimbledonArchiveStep(ctx);
-      if (!wa.done) return { wimbledon_archive: wa };
-    }
-    // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue.
-    // A source that refuses us (403 / challenge) is recorded and skipped for a week — never worked around.
-    for (const y of WIMBLEDON_YEARS) {
-      if (await kv.get(`bf:wim:${y}`)) continue;
-      const r = await wimbledonMen(ctx, y);
-      if (r.state === 'PASS') await kv.put(`bf:wim:${y}`, iso(new Date()));
-      else if (r.state === 'BLOCKED_BY_ACCESS_CONTROL') { await kv.put(`bf:wim:${y}`, `blocked:${iso(new Date())}`, { expirationTtl: 7 * 86400 }); continue; }
-      return { wimbledon_ms: y, ...r };
-    }
-    const ao = (await kv.get('bf:ao', 'json')) || { year: 2026, day: 1 };
-    if (ao.day <= 15) {
-      const r = await ausopenDayMatches(ctx, ao.year, ao.day);
-      if (r.state === 'PASS') await kv.put('bf:ao', JSON.stringify({ year: ao.year, day: ao.day + 1 }));
-      return { ausopen: `${ao.year} day ${ao.day}`, ...r };
-    }
-    // AO qualifying (period Q, days 1-4): same parser, men's + mixed only (women come from the WTA feed)
-    const aoq = (await kv.get('bf:aoq', 'json')) || { year: 2026, day: 1 };
-    if (aoq.day <= 4) {
-      const r = await ausopenDayMatches(ctx, aoq.year, aoq.day, 'Q');
-      if (r.state === 'PASS') await kv.put('bf:aoq', JSON.stringify({ year: aoq.year, day: aoq.day + 1 }));
-      return { ausopen_qualifying: `${aoq.year} day ${aoq.day}`, ...r };
-    }
-    const pbp = await ausopenPointStep(ctx, 8);
-    if (!pbp.done) return { ausopen_point_by_point: pbp };
-    let calKey = 'bf:cal';
-    let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
-    let ceiling = today;
-    if (cal.done) {
-      calKey = 'bf:cal:a';
-      cal = (await kv.get(calKey, 'json')) || { from: HISTORY_PHASE_A.from, done: false };
-      ceiling = HISTORY_PHASE_A.to;
-    }
-    if (!cal.done && ((await kv.get('bf:events', 'json')) || []).length < 40) {
-      const to = addDays(cal.from, 13);
-      const { ok, editions: eds } = await calendarWindow(ctx, cal.from, to < ceiling ? to : ceiling);
-      if (!ok) return { calendar_window: cal.from, state: 'fetch_failed_will_retry' };
-      const past = await Promise.all(eds.filter((e) => e.live_scoring_id && TOUR_LEVELS.test(e.level || '') && e.end_date < addDays(today, -1)).map(editionContext));
-      const queue = (await kv.get('bf:events', 'json')) || [];
-      const seen = new Set(queue.map((q) => q.edition_id));
-      for (const p of past) if (!seen.has(p.edition_id)) queue.push(p);
-      await kv.put('bf:events', JSON.stringify(queue));
-      const next = addDays(cal.from, 14);
-      await kv.put(calKey, JSON.stringify(next > ceiling ? { from: next, done: true } : { from: next, done: false }));
-      return { calendar_window: cal.from, phase: calKey, queued: queue.length };
-    }
-    const queue = (await kv.get('bf:events', 'json')) || [];
-    if (queue.length) {
-      const done = [];
-      for (let k = 0; k < 2 && queue.length; k += 1) {
-        const ed = queue.shift();
-        const r = await editionMatches(ctx, ed);
-        if (r.state !== 'PASS') { ed.attempts = (ed.attempts || 0) + 1; if (ed.attempts < 4) queue.push(ed); }
-        done.push({ edition: `${ed.name} ${ed.year}`, state: r.state, written: r.written, held: r.held });
+    // Lane scheduler (lanes.js): current AO work first every tick, then ONE rotating history lane round-robin.
+    // Each lane owns its state + backoff in KV `lane:<name>`; no lane can hold another lane's slot.
+    const LANES = {
+      async ao_current() {
+        const ao = (await kv.get('bf:ao', 'json')) || { year: 2026, day: 1 };
+        if (ao.day <= 15) {
+          const r = await ausopenDayMatches(ctx, ao.year, ao.day);
+          if (r.state === 'PASS') await kv.put('bf:ao', JSON.stringify({ year: ao.year, day: ao.day + 1 }));
+          return { ok: r.state === 'PASS', out: { ausopen: `${ao.year} day ${ao.day}`, ...r } };
+        }
+        const aoq = (await kv.get('bf:aoq', 'json')) || { year: 2026, day: 1 };
+        if (aoq.day <= 4) {
+          const r = await ausopenDayMatches(ctx, aoq.year, aoq.day, 'Q');
+          if (r.state === 'PASS') await kv.put('bf:aoq', JSON.stringify({ year: aoq.year, day: aoq.day + 1 }));
+          return { ok: r.state === 'PASS', out: { ausopen_qualifying: `${aoq.year} day ${aoq.day}`, ...r } };
+        }
+        const pbp = await ausopenPointStep(ctx, 10);
+        const failed = (pbp.results || []).filter((x) => !['PASS', 'EMPTY', 'HELD'].includes(x.state)).length;
+        return { ok: failed < (pbp.results || []).length || !(pbp.results || []).length, done: !!pbp.done, out: { ausopen_match_centre: pbp } };
+      },
+      async rank_history() {
+        const r = await rankingHistoryStep();
+        return { ok: true, done: r === 'rank_history_complete', out: r };
+      },
+      async wimbledon_archive() {
+        const r = await wimbledonArchiveStep(ctx);
+        return { ok: !r.error || r.state === 'NOT_AVAILABLE', done: !!r.done, out: r };
+      },
+      async wta_calendar() {
+        let calKey = 'bf:cal';
+        let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
+        let ceiling = today;
+        if (cal.done) {
+          calKey = 'bf:cal:a';
+          cal = (await kv.get(calKey, 'json')) || { from: HISTORY_PHASE_A.from, done: false };
+          ceiling = HISTORY_PHASE_A.to;
+        }
+        const queue = (await kv.get('bf:events', 'json')) || [];
+        if (!cal.done && queue.length < 40) {
+          const to = addDays(cal.from, 13);
+          const { ok, editions: eds } = await calendarWindow(ctx, cal.from, to < ceiling ? to : ceiling);
+          if (!ok) return { ok: false, out: { calendar_window: cal.from, state: 'fetch_failed_will_retry' } };
+          const past = await Promise.all(eds.filter((e) => e.live_scoring_id && TOUR_LEVELS.test(e.level || '') && e.end_date < addDays(today, -1)).map(editionContext));
+          const seen = new Set(queue.map((q) => q.edition_id));
+          for (const p of past) if (!seen.has(p.edition_id)) queue.push(p);
+          await kv.put('bf:events', JSON.stringify(queue));
+          const next = addDays(cal.from, 14);
+          await kv.put(calKey, JSON.stringify(next > ceiling ? { from: next, done: true } : { from: next, done: false }));
+          return { ok: true, out: { calendar_window: cal.from, phase: calKey, queued: queue.length } };
+        }
+        if (!queue.length) return { ok: true, done: cal.done, out: 'calendar_backfill_complete' };
+        const done = [];
+        let passed = 0;
+        for (let k = 0; k < 2 && queue.length; k += 1) {
+          const ed = queue.shift();
+          const r = await editionMatches(ctx, ed);
+          if (r.state === 'PASS') passed += 1; else { ed.attempts = (ed.attempts || 0) + 1; if (ed.attempts < 4) queue.push(ed); }
+          done.push({ edition: `${ed.name} ${ed.year}`, state: r.state, written: r.written, held: r.held });
+        }
+        await kv.put('bf:events', JSON.stringify(queue));
+        return { ok: passed > 0 || !done.length, out: { editions: done, remaining: queue.length } };
       }
-      await kv.put('bf:events', JSON.stringify(queue));
-      return { editions: done, remaining: queue.length };
+    };
+    const DECL = [['ao_current', true], ['rank_history', false], ['wimbledon_archive', false], ['wta_calendar', false]];
+    const states = Object.fromEntries(await Promise.all(DECL.map(async ([n]) => [n, (await kv.get(LANE_STATE_KEY(n), 'json')) || {}])));
+    const rr = Number(await kv.get('lanes:rr')) || 0;
+    const plan = planTick({ now: Date.now(), lanes: DECL.map(([name, priority]) => ({ name, priority, ...states[name] })), rr });
+    await kv.put('lanes:rr', String(plan.rr));
+    const out = {};
+    for (const name of plan.run) {
+      if (name !== 'ao_current' && ctx.upstream >= UPSTREAM_BUDGET) { out[name] = 'budget_spent'; continue; }
+      let r;
+      try { r = await LANES[name](); } catch (e) { r = { ok: false, out: { error: String(e?.message || e).slice(0, 200) } }; }
+      await kv.put(LANE_STATE_KEY(name), JSON.stringify(afterRun(states[name], { ok: r.ok, done: r.done, now: Date.now() })));
+      out[name] = r.out;
     }
-    return rankingHistoryStep();
+    return { lanes: plan.run, ...out };
   });
 
   // 5b. daily Tennis DNA snapshots (stored values the API / PBEcast read)
