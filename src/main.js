@@ -13,7 +13,7 @@ import { routeMeta } from './seo/meta.js';
 import { shellHtml, markActiveNav, wireDrawer } from './ui/shell.js';
 import { wireCopy } from './ui/share.js';
 import { wireImageFallback } from './ui/avatar.js';
-import { initAnalytics, trackPageView, track } from './analytics.js';
+import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
 
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
@@ -68,8 +68,15 @@ async function go(pathname) {
   markActiveNav(app, r.id);
   closeDrawer(false);
   unmount = mod.mount(main, r);
-  // allow the page to set a data-derived title before the page_view is sent
-  setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600);
+  if (initial) { initial = false; setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600); }
+}
+let initial = true;
+
+/** Before pushState: route title + GA route context, so GA's history page_view records this route. */
+function prepareNavigation(pathname) {
+  const r = resolveRoute(pathname);
+  document.title = routeMeta(r).title;
+  setRouteContext({ routeId: r.id, path: r.route.path });
 }
 
 document.addEventListener('click', (e) => {
@@ -79,6 +86,7 @@ document.addEventListener('click', (e) => {
   if (url.origin !== location.origin || /^\/(brand|media|fonts|assets)\//.test(url.pathname)) return;
   if (url.pathname === location.pathname && url.search === location.search && url.hash) return;
   e.preventDefault();
+  prepareNavigation(url.pathname);
   history.pushState({}, '', url.pathname + url.search + url.hash);
   go(url.pathname).then(() => { window.scrollTo(0, 0); if (url.hash) document.getElementById(url.hash.slice(1))?.scrollIntoView(); });
 });
@@ -87,8 +95,10 @@ document.addEventListener('submit', (e) => {
   if (!f) return;
   e.preventDefault();
   const q = new FormData(f).get('q');
+  prepareNavigation('/search');
   history.pushState({}, '', `/search?q=${encodeURIComponent(q)}`);
   go('/search');
 });
 window.addEventListener('popstate', () => go(location.pathname));
+// (popstate: GA's history listener records the page_view; the title updates when the route mounts)
 go(location.pathname);

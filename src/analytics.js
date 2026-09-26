@@ -58,7 +58,20 @@ export function initAnalytics({ win = window, doc = document } = {}) {
   return true;
 }
 
-/** Router hook: one page_view per distinct path+title. Query strings are never sent. */
+/**
+ * SPA navigations: the network GA4 property has Enhanced Measurement "page changes based on browser
+ * history events" ON, so GA itself sends one page_view per pushState/popstate. Sending our own as well
+ * double-counts (measured live 2026-09-26). The router therefore calls trackPageView() only for the
+ * initial load and calls setRouteContext() BEFORE pushState, so GA's history page_view carries the new
+ * route's title and our route dimensions.
+ */
+export function setRouteContext({ routeId = null, path = null, win = window } = {}) {
+  if (!enabled || !isProductionHost(win?.location?.hostname)) return false;
+  gtag(win, 'set', { pbe_surface: GA_SURFACE, pbe_route_id: routeId, pbe_route_path: path });
+  return true;
+}
+
+/** Initial-load page_view (send_page_view is off in config). Query strings are never sent. */
 export function trackPageView({ routeId = null, path = null, win = window, doc = document } = {}) {
   if (!enabled || !isProductionHost(win?.location?.hostname)) return false;
   const pagePath = win.location.pathname;
