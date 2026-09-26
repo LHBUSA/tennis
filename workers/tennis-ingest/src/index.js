@@ -147,8 +147,11 @@ async function tickInner(env, store, kv, force) {
       if (lane !== 'rank_history_complete') return lane;
     }
     // Men's history first: the Wimbledon draws archive (MS, MD, QS; 2025 -> 1979), one draw or identity batch per tick.
-    const wa = await wimbledonArchiveStep(ctx);
-    if (!wa.done) return { wimbledon_archive: wa };
+    // ...interleaved with the AO match-centre (stats + point-by-point) so neither blocks the other for hours
+    if (Math.floor(started.getTime() / 240000) % 2 === 0) {
+      const wa = await wimbledonArchiveStep(ctx);
+      if (!wa.done) return { wimbledon_archive: wa };
+    }
     // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue.
     // A source that refuses us (403 / challenge) is recorded and skipped for a week — never worked around.
     for (const y of WIMBLEDON_YEARS) {
