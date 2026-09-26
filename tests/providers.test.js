@@ -281,3 +281,27 @@ test('holds fixes: WTA winner code 7 = side B walkover; AO mixed deciding match 
   const sets = [{ games: { A: 4, B: 6 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 1, B: 0 }, tiebreak: { A: 10, B: 8 }, is_match_tiebreak: true }];
   assert.equal(validateScore({ sets, end_reason: 'completed' }, 'DOUBLES_TOUR').ok, true);
 });
+
+test('Roland-Garros: era formats, retirement from the end-cause side, DOB card parse; identity = exact name+DOB unique or held', async () => {
+  const rg = await import('../workers/providers/rolandgarros.js');
+  const { resolveIdentity } = await import('../workers/shared/canonical/identity.js');
+  const set = (score, winner, tieBreak = null) => ({ score, tieBreak, winner, inProgress: false, isMatchTieBreak: null });
+  const team = (id, last, sets, winner, endCause = '') => ({ players: [{ id, firstName: 'X', lastName: last.toUpperCase(), lastNameLowercase: last, country: 'AAA' }], sets, winner, seed: null, endCause, entryStatus: null });
+  const json = { tournamentEvent: { roundResults: [{ roundNumber: 1, matches: [
+    { id: 'SM001', matchData: { round: 1, status: 'FINISHED' }, teamA: team(1, 'One', [set(6, true), set(6, true), set(6, true)], true), teamB: team(2, 'Two', [set(3, false), set(4, false), set(2, false)], false) },
+    { id: 'SM002', matchData: { round: 1, status: 'FINISHED' }, teamA: team(3, 'Three', [set(6, true), set(2, false)], true), teamB: team(4, 'Four', [set(3, false), set(1, false)], false, 'r.') }
+  ] }] } };
+  const [a, b] = rg.parseRgResults(json, { year: 2019, event: 'SM', idMap: { 1: 'A0B1' } });
+  assert.equal(a.format_key, 'BO5_FINAL_ADV');
+  assert.equal(a.status, 'completed');
+  assert.deepEqual(a.sides.A[0].tour_id, { provider: 'atp', provider_id: 'A0B1' });
+  assert.equal(a.sides.B[0].tour_id, null, 'no exact identity -> held');
+  assert.equal(b.status, 'retired');
+  assert.equal(b.retired_side, 'B');
+  assert.equal(rg.rgFormat(5, 2023), 'BO5_FINAL_TB10');
+  assert.equal(rg.parseRgBirthDate('(16 August 2001)'), '2001-08-16');
+  const index = { byExternal: new Map(), players: [{ pbe_player_id: 'p1', full_name: 'Jannik Sinner', dob: '2001-08-16', nationality: 'ITA' }, { pbe_player_id: 'p2', full_name: 'Andres Gomez', dob: '1960-02-27', nationality: 'ECU' }, { pbe_player_id: 'p3', full_name: 'Andres Gomez', dob: '1960-02-27', nationality: 'ECU' }] };
+  assert.equal(resolveIdentity({ full_name: 'Jannik Sinner', dob: '2001-08-16', nationality: 'ITA' }, index).pbe_player_id, 'p1');
+  assert.equal(resolveIdentity({ full_name: 'Andres Gomez', dob: '1960-02-27', nationality: 'ECU' }, index).status, 'ambiguous', 'two identical candidates are held');
+  assert.equal(resolveIdentity({ full_name: 'Jannik Sinner', dob: null, nationality: 'ITA' }, index).status, 'unresolved', 'name only is never identity');
+});

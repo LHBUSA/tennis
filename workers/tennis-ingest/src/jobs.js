@@ -8,9 +8,10 @@ import { inList } from '../../shared/store/postgrest.js';
 import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
+import * as rg from '../../providers/rolandgarros.js';
 import { editionId, tournamentId, tournamentKey } from '../../shared/canonical/ids.js';
 import { aoPointEvents, eventId, CONTRACT } from '../../shared/canonical/events.js';
-import { normalizeName } from '../../shared/canonical/identity.js';
+import { normalizeName, resolveIdentity } from '../../shared/canonical/identity.js';
 import { hold } from './writer.js';
 import { recordCapture, recordRun, writeRankingPage, finalizeSnapshot, writeEditions, writeMatches, writeMatchStats, writeCrosswalk, upsertPlayersFull } from './writer.js';
 
@@ -203,7 +204,7 @@ export async function ausopenPlayers(ctx, year) {
 
 // ---- Wikidata crosswalk --------------------------------------------------------------------------------
 export async function wikidataPage(ctx, prop, offset, limit = 1500) {
-  const query = `SELECT ?h ?hLabel ?atp ?wta ?itf ?dc ?bjk ?img WHERE { ?h wdt:${prop} ?x . OPTIONAL { ?h wdt:P536 ?atp } OPTIONAL { ?h wdt:P597 ?wta } OPTIONAL { ?h wdt:P599 ?itf } OPTIONAL { ?h wdt:P2641 ?dc } OPTIONAL { ?h wdt:P2642 ?bjk } OPTIONAL { ?h wdt:P18 ?img } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } ORDER BY ?h LIMIT ${limit} OFFSET ${offset}`;
+  const query = `SELECT ?h ?hLabel ?atp ?wta ?itf ?dc ?bjk ?dob ?img WHERE { ?h wdt:${prop} ?x . OPTIONAL { ?h wdt:P536 ?atp } OPTIONAL { ?h wdt:P597 ?wta } OPTIONAL { ?h wdt:P599 ?itf } OPTIONAL { ?h wdt:P2641 ?dc } OPTIONAL { ?h wdt:P2642 ?bjk } OPTIONAL { ?h wdt:P569 ?dob } OPTIONAL { ?h wdt:P18 ?img } SERVICE wikibase:label { bd:serviceParam wikibase:language "en". } } ORDER BY ?h LIMIT ${limit} OFFSET ${offset}`;
   const adapter = { ...open.wikidataCrosswalk, request: () => ({ url: `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(query)}`, headers: { accept: 'application/sparql-results+json' } }) };
   const r = await fetchRun(ctx, adapter, {});
   if (r.state !== 'PASS') return { state: r.state, rows: 0 };
@@ -295,4 +296,69 @@ export async function wimbledonArchiveStep(ctx, { lookups = 15 } = {}) {
   const next = st.year - 1 < WIMA_FLOOR ? { e: st.e + 1, year: 2025 } : { e: st.e, year: st.year - 1 };
   await ctx.kv.put('bf:wima', JSON.stringify(next));
   return { event, year: st.year, players: uuids.length, mapped: Object.keys(idMap).length, ...w };
+}
+
+// ---- Roland-Garros results backfill (men: SM, DM, QM; 2026 -> 2018) ---------------------------------------
+// FFT player ids carry no ATP id. Identity uses identity.js resolveIdentity(): exact stored external id first,
+// then EXACT normalized name + date of birth (+ nationality) against canonical ATP-id players — unique or held.
+// Player DOBs come from the player card (a few per tick, cached in KV 'rg:dob': {fftId: 'YYYY-MM-DD' | 0}).
+const RG_EVENTS = ['SM', 'DM', 'QM'];
+const RG_FLOOR = 2018;
+
+async function rgIdentityIndex(ctx) {
+  const players = [];
+  for (let off = 0; ; off += 1000) {
+    const rows = await ctx.store.select('tennis_players', `select=pbe_player_id,full_name,dob,nationality&gender=eq.M&dob=not.is.null&status=eq.active&limit=1000&offset=${off}`);
+    players.push(...rows);
+    if (rows.length < 1000) break;
+  }
+  const atp = new Map();
+  const byExternal = new Map();
+  for (let i = 0; i < players.length; i += 150) {
+    for (const x of await ctx.store.select('tennis_player_external_ids', `select=provider,external_id,pbe_player_id&provider=in.(atp,rolandgarros)&pbe_player_id=${inList(players.slice(i, i + 150).map((p) => p.pbe_player_id))}`)) {
+      if (x.provider === 'atp') atp.set(x.pbe_player_id, x.external_id);
+      else byExternal.set(`rolandgarros:${x.external_id}`, x.pbe_player_id);
+    }
+  }
+  return { index: { byExternal, players: players.filter((p) => atp.has(p.pbe_player_id)) }, atp };
+}
+
+export async function rolandGarrosStep(ctx, { lookups = 12 } = {}) {
+  const st = (await ctx.kv.get('bf:rg', 'json')) || { e: 0, year: 2026 };
+  if (st.e >= RG_EVENTS.length) return { done: true };
+  const event = RG_EVENTS[st.e];
+  const nextState = () => (st.year - 1 < RG_FLOOR ? { e: st.e + 1, year: 2026 } : { e: st.e, year: st.year - 1 });
+  const res = await fetchRun(ctx, rg.rgResults, { event, year: st.year });
+  if (res.state !== 'PASS' || !res.records[0]) {
+    await ctx.kv.put('bf:rg', JSON.stringify(nextState()));
+    return { event, year: st.year, state: res.state, error: res.error || 'no_payload' };
+  }
+  const json = res.records[0];
+  const people = rg.rgPlayers(json);
+  const dobs = (await ctx.kv.get('rg:dob', 'json')) || {};
+  const unknown = people.filter((p) => !(p.id in dobs) && p.path);
+  let looked = 0;
+  for (const p of unknown.slice(0, lookups)) {
+    const r = await fetchRun(ctx, rg.rgPlayer, { path: p.path });
+    dobs[p.id] = r.state === 'PASS' && r.records[0]?.dob ? r.records[0].dob : 0;
+    looked += 1;
+  }
+  await ctx.kv.put('rg:dob', JSON.stringify(dobs));
+  if (unknown.length > looked) return { event, year: st.year, identity: { players: people.length, dob_known: people.filter((p) => dobs[p.id]).length, looked_up: looked, remaining: unknown.length - looked } };
+  const { index, atp } = await rgIdentityIndex(ctx);
+  const idMap = {};
+  const outcomes = { resolved: 0, ambiguous: 0, unresolved: 0 };
+  for (const p of people) {
+    const r = resolveIdentity({ provider: 'rolandgarros', provider_id: p.id, full_name: p.name, dob: dobs[p.id] || null, nationality: p.country }, index);
+    if (r.status === 'resolved' && atp.get(r.pbe_player_id)) { idMap[p.id] = atp.get(r.pbe_player_id); outcomes.resolved += 1; } else outcomes[r.status === 'ambiguous' ? 'ambiguous' : 'unresolved'] += 1;
+  }
+  const records = rg.parseRgResults(json, { year: st.year, event, idMap });
+  const tid = await tournamentId('slam:roland-garros');
+  const eid = await editionId(tid, st.year);
+  await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'roland-garros', name: 'Roland-Garros', competition_key: 'grand_slam', country: 'FRA', city: 'Paris' }], { onConflict: 'tournament_id', ignore: true });
+  await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: st.year, competition_key: 'grand_slam', surface: 'clay', indoor: false, source_family: 'rolandgarros', name: `Roland-Garros ${st.year}`, level: 'Grand Slam', city: 'Paris', country: 'FRA' }], { onConflict: 'edition_id', ignore: true });
+  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'clay', indoor: false }, { captureId: res.capture?.capture_id || null });
+  await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.rolandgarros&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
+  await ctx.kv.put('bf:rg', JSON.stringify(nextState()));
+  return { event, year: st.year, players: people.length, identity: outcomes, ...w };
 }

@@ -19,7 +19,7 @@ import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
-import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
+import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
@@ -169,6 +169,10 @@ async function tickInner(env, store, kv, force) {
         const r = await wimbledonArchiveStep(ctx);
         return { ok: !r.error || r.state === 'NOT_AVAILABLE', done: !!r.done, out: r };
       },
+      async rolandgarros() {
+        const r = await rolandGarrosStep(ctx);
+        return { ok: !r.error, done: !!r.done, out: r };
+      },
       async wta_calendar() {
         let calKey = 'bf:cal';
         let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
@@ -204,7 +208,7 @@ async function tickInner(env, store, kv, force) {
         return { ok: passed > 0 || !done.length, out: { editions: done, remaining: queue.length } };
       }
     };
-    const DECL = [['ao_current', true], ['rank_history', false], ['wimbledon_archive', false], ['wta_calendar', false]];
+    const DECL = [['ao_current', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false]];
     const states = Object.fromEntries(await Promise.all(DECL.map(async ([n]) => [n, (await kv.get(LANE_STATE_KEY(n), 'json')) || {}])));
     const rr = Number(await kv.get('lanes:rr')) || 0;
     const plan = planTick({ now: Date.now(), lanes: DECL.map(([name, priority]) => ({ name, priority, ...states[name] })), rr });

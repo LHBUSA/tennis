@@ -70,7 +70,7 @@ async function ensurePlayersFromIdentities(store, identities) {
     });
     const [p, e] = splitExt(i.external);
     ext.push({ provider: p, external_id: e, pbe_player_id: i.pbe_player_id, method: 'founding', evidence: [i.external] });
-    if (m.provider !== p) ext.push({ provider: m.provider, external_id: String(m.provider_id), pbe_player_id: i.pbe_player_id, method: 'external_id', evidence: [`${m.provider}:${m.provider_id} embeds ${i.external}`] });
+    if (m.provider !== p) ext.push({ provider: m.provider, external_id: String(m.provider_id), pbe_player_id: i.pbe_player_id, method: m.tour_id_evidence ? 'name_dob' : 'external_id', evidence: [m.tour_id_evidence || `${m.provider}:${m.provider_id} embeds ${i.external}`] });
   }
   await store.upsert('tennis_players', [...rows.values()], { onConflict: 'pbe_player_id', ignore: true });
   const dedup = [...new Map(ext.map((x) => [`${x.provider}:${x.external_id}`, x])).values()];
@@ -320,6 +320,13 @@ export async function writeCrosswalk(store, rows) {
       }
       await store.upsert('tennis_player_external_ids', dedupe(ext, (x) => `${x.provider}:${x.external_id}`), { onConflict: 'provider,external_id', ignore: true });
       attached += new Set(ext.map((x) => x.pbe_player_id)).size;
+      // date of birth from Wikidata (CC0) for players matched by EXACT tour id, only where none is stored:
+      // identity evidence for name+DOB corroboration elsewhere; an existing DOB is never overwritten
+      const dobs = new Map(part.map((r) => [map.get(String(r.external[provider]).toUpperCase()), /^\d{4}-\d{2}-\d{2}$/.test(r.dob || '') ? r.dob : null]).filter(([pid, d]) => pid && d));
+      if (dobs.size) {
+        const missing = await store.select('tennis_players', `select=pbe_player_id,founding_external_key,full_name&dob=is.null&pbe_player_id=${inList([...dobs.keys()])}`);
+        if (missing.length) await store.upsert('tennis_players', missing.map((x) => ({ ...x, dob: dobs.get(x.pbe_player_id) })), { onConflict: 'pbe_player_id' });
+      }
     }
   }
   return attached;
