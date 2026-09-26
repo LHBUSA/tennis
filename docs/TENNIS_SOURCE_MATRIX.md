@@ -71,7 +71,7 @@ Wimbledon + AO archives for men's Slam results keyed by embedded ATP ids.
 ## Generated tables
 
 <!-- generated:start (npm run matrix) -->
-Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
+Registry 2026-09-26 · canary run 2026-09-26T20:17:24.418Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
 
 | Source | Verdict | Capabilities | Canary (latest) | Terms | Production status |
 |---|---|---|---|---|---|
@@ -79,14 +79,14 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 | `wta.rankings.singles` WTA API — singles rankings (dated lists, historical) | PASS | rankings_singles, player_identity, player_bio, history | PASS · HTTP 200 · 5 rec · 1265 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.rankings.doubles` WTA API — doubles rankings | PASS | rankings_doubles, player_identity | PASS · HTTP 200 · 5 rec · 1294 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.race` WTA API — Race rankings | UNVERIFIED | race | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
-| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14069 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
-| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 51 rec · 59294 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14093 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 53 rec · 60767 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.match_stats` WTA API — match statistics (per set + totals) | PASS | match_stats, serve_stats, return_stats | PASS · HTTP 200 · 1 rec · 2191 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
 | **ATP** | | | | | |
 | `atp.site` atptour.com — rankings, calendar, scores, stats, players (incl. Challenger) | BLOCKED_BY_ACCESS_CONTROL | rankings_singles, rankings_doubles, race, calendar, draws, live_state, match_stats, player_bio, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 403 | RESTRICTS_AUTOMATED_ACCESS | NOT_USED — Cloudflare challenge on every request; not evaded |
 | `atp.infosys` ATP stats platform (Infosys) | BLOCKED_BY_ACCESS_CONTROL | point_by_point, match_stats | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_USED |
-| `protennislive.draw_pdf` ProTennisLive — ATP official draw / order-of-play PDFs | DEGRADED | draws | PASS · HTTP 200 · 1 rec · 139642 B | NOT_RETRIEVED | NOT_ADAPTED — availability proven, PDF text extraction not built |
+| `protennislive.draw_pdf` ProTennisLive — ATP Tour + Challenger official draw / order-of-play PDFs | DEGRADED | draws | PASS · HTTP 200 · 1 rec · 139642 B | NOT_RETRIEVED | NOT CANONICAL — draw context only; names alone are never identity (no PDF text extraction into canonical rows) |
 | **ITF** | | | | | |
 | `itf.site` itftennis.com — World Tennis Tour calendar, results, rankings, players | BLOCKED_BY_ACCESS_CONTROL | calendar, draws, schedule, rankings_singles, player_bio, match_history, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 200 | NOT_RETRIEVED | NOT_USED — Incapsula JS challenge (served with HTTP 200); not evaded |
 | **Grand Slams** | | | | | |
@@ -95,13 +95,14 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 | `wimbledon.pbp` Wimbledon — point-by-point / match detail | UNVERIFIED | point_by_point, match_stats | — | RESTRICTS_COMMERCIAL_USE | NOT_ADAPTED |
 | `ausopen.results` Australian Open — scores API (day results/schedule, players) | PASS | schedule, set_game_scoring, player_identity, player_bio | PASS · HTTP 200 · 64 rec · 209058 B | NOT_RETRIEVED | INGEST (player registry → identity) — owner-approved 2026-09-26; match rows not parsed yet |
 | `ausopen.matchcentre` Australian Open — match centre (key stats + point-by-point) | PASS | point_by_point, match_stats | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
-| `usopen.feeds` US Open — score feeds | UNVERIFIED | draws, set_game_scoring | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
-| `rolandgarros.results` Roland-Garros — results pages (Nuxt payload) | DEGRADED | set_game_scoring, history | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `rolandgarros.results` Roland-Garros results API (rolandgarros.com) | PASS | draws, set_game_scoring, withdrawals_ret_wo, history, qualifying, doubles | PASS · HTTP 200 · 127 rec · 403738 B | NOT_RETRIEVED | INGESTING (lane rolandgarros) — source/parser PASS; canonical rows only after the identity phase resolves players |
+| `wimbledon.archive` Wimbledon draws archive (da.wimbledon.com) | DEGRADED | draws, set_game_scoring, withdrawals_ret_wo, history, player_identity, qualifying, doubles | PASS · HTTP 200 · 127 rec · 108677 B | RESTRICTS_COMMERCIAL_USE | INGESTING (lane wimbledon_archive, 1979+) — bad rows held, never corrected by guess |
 | **Team events** | | | | | |
 | `daviscup.draws` Davis Cup — draws & results pages | DEGRADED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
 | `bjkcup.draws` Billie Jean King Cup — draws & results pages | DEGRADED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
 | `unitedcup.site` United Cup | DEGRADED | schedule | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
 | `olympics.tennis` Olympics — tennis results | UNVERIFIED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `daviscup.stadion` Davis Cup (ITF Stadion API) | DEGRADED | draws, set_game_scoring, history, doubles | audit request (private archive) | — | NOT INGESTED — every rubber would be an unresolved identity; no name-only merges |
 | **Wikidata** | | | | | |
 | `wikidata.crosswalk` Wikidata — identity crosswalk (ATP P536, WTA P597, ITF P599, Davis Cup P2641, BJK Cup P2642, image P18) | PASS | player_identity, player_media | PASS · HTTP 200 · 5 rec · 2915 B | OPEN_LICENSE | INGEST — weekly crosswalk (P597 + P536) |
 | `commons.license` Wikimedia Commons — per-file license & author metadata | PASS | player_media | PASS · HTTP 200 · 1 rec · 1163 B | PER_FILE_LICENSE | READY — rights-ledger input |
@@ -120,6 +121,7 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 | `commercial.sportsdataio` SportsDataIO | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.api-tennis.com` api-tennis.com | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.rapidapi` RapidAPI tennis APIs | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
+| `espn.tennis.core` ESPN tennis (core + site.web APIs, undocumented) | COMMERCIAL_REFERENCE_ONLY | schedule, set_game_scoring, rankings_singles, player_bio, history | — | RESTRICTED | INTERNAL REFERENCE / GAP-CHECKING ONLY (owner approved 2026-09-26): never canonical, never a production dependency, never republished, never customer-facing; skipped where an official source answers |
 
 ### Endpoint templates and notes
 
@@ -148,8 +150,8 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
   robots: User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-re
 - **`atp.infosys`** — `https://itp-atp-sls.infosys-platforms.com/prod/api/...`  
   CloudFront 403.
-- **`protennislive.draw_pdf`** — `https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf (op.pdf = order of play)` · ids: tournament = ATP tournament id (e.g. 7581 Chengdu)  
-  Names only, no player ids. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.  
+- **`protennislive.draw_pdf`** — `https://www.protennislive.com/posting/{year}/{atpTournamentId}/{mds|mdd|qs|op}.pdf` · ids: tournament = ATP tournament id (e.g. 7581 Chengdu)  
+  Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.  
   robots: robots.txt -> 404 (none published)
 - **`itf.site`** — `https://www.itftennis.com/tennis/api/TournamentApi/... ; /PlayerRankApi/...` · ids: player = 9-digit integer (e.g. 100241350)  
   ITF ids are available through Wikidata P599 (7,417 humans) for identity only.  
@@ -182,7 +184,7 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 - **`usopen.feeds`** — `https://www.usopen.org/en_US/scores/feeds/{year}/draws/MS.json`  
   Every request (including robots.txt) hung with 0 bytes: edge drop or outage. Recheck once; do not work around it.  
   robots: robots.txt timed out
-- **`rolandgarros.results`** — `https://www.rolandgarros.com/en-us/results/{SM|SD|...}?round={n}&year={y}` · ids: player = FFT-internal integer (e.g. 39723)  
+- **`rolandgarros.results`** — `https://www.rolandgarros.com/api/en-us/results/{year}/{SM|DM|QM}` · ids: player = FFT-internal integer (e.g. 39723)  
   Data only inside the SSR payload; FFT ids need their own crosswalk.  
   robots: Disallow: /admin, /maintenance
 - **`wikidata.crosswalk`** — `https://query.wikidata.org/sparql` · ids: entity = QID  
@@ -195,6 +197,11 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
   robots: Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)
 - **`odds.tennis_data_co_uk`** — `http://www.tennis-data.co.uk/{year}/{year}.xlsx`  
   Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.
+- **`wimbledon.archive`** — `https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}` · ids: player = archive UUID (tourid on the player record for some players)  
+  DEGRADED for source quality: the archive reports some deciding-set tiebreak scores that are impossible under the edition rule (e.g. 2022 QF Nadal d. Fritz 10-4 appears as 7-4); every such match is held. Identity: archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held. The ingest Worker (Cloudflare egress) has also received intermittent HTTP 403 from this host; the lane backs off and never retries around it.  
+  robots: not retrieved for da.wimbledon.com
+- **`daviscup.stadion`** — `https://api.itf-production.sports-data.stadion.io/custom/tieCentre/{tieId}` · ids: player = ITF tennisId (e.g. GOM1041959) — matches no Wikidata P536/P599/P2641  
+  Reachable with ties, nominations and rubbers 1900+. person.tennisId has no deterministic crosswalk to tour ids and person records carry no date of birth, so rubbers are not canonicalized.
 
 ### Terms of use — verbatim
 
@@ -204,4 +211,5 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 - **Wikidata** (https://www.wikidata.org/wiki/Wikidata:Licensing): “Structured data is CC0.”
 - **Wikidata** (https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia): “Each file carries its own license; only CC0 / PD / CC BY / CC BY-SA are accepted (docs/MEDIA.md).”
 - **Open data** (https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/README.md): “... is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. ... In other words: Attribution is required. Non-commercial use only.”
+- **Commercial (reference only)** (https://disneytermsofuse.com/english/): “§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path.”
 <!-- generated:end -->

@@ -307,9 +307,9 @@
     {
       "key": "protennislive.draw_pdf",
       "family": "atp",
-      "name": "ProTennisLive — ATP official draw / order-of-play PDFs",
+      "name": "ProTennisLive — ATP Tour + Challenger official draw / order-of-play PDFs",
       "tier": "official_tour",
-      "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf (op.pdf = order of play)",
+      "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/{mds|mdd|qs|op}.pdf",
       "capabilities": [
         "draws"
       ],
@@ -326,8 +326,8 @@
         "status": "NOT_RETRIEVED",
         "quote": null
       },
-      "production_status": "NOT_ADAPTED — availability proven, PDF text extraction not built",
-      "notes": "Names only, no player ids. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.",
+      "production_status": "NOT CANONICAL — draw context only; names alone are never identity (no PDF text extraction into canonical rows)",
+      "notes": "Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     },
@@ -634,18 +634,32 @@
     },
     {
       "key": "rolandgarros.results",
-      "family": "rolandgarros",
+      "family": "slams",
       "name": "Roland-Garros results API (rolandgarros.com)",
       "tier": "official_slam",
       "url": "https://www.rolandgarros.com/api/en-us/results/{year}/{SM|DM|QM}",
       "capabilities": [
+        "draws",
         "set_game_scoring",
-        "history"
+        "withdrawals_ret_wo",
+        "history",
+        "qualifying",
+        "doubles"
       ],
       "verdict": "PASS",
       "evidence": {
-        "checked": "2026-09-26",
-        "depth": "2018-2026",
+        "canary_key": "rolandgarros.results",
+        "historical_canary_keys": [
+          "rolandgarros.results@2018",
+          "rolandgarros.results@2019",
+          "rolandgarros.results@2020",
+          "rolandgarros.results@2021",
+          "rolandgarros.results@2022",
+          "rolandgarros.results@2023",
+          "rolandgarros.results@2024",
+          "rolandgarros.results@2025"
+        ],
+        "depth": "2018-2026 men's singles: every edition canaried (127 parsed main-draw matches each)",
         "identity": "FFT ids only; exact name + DOB (player card) + nationality unique vs ATP-id players, else held"
       },
       "native_ids": {
@@ -657,7 +671,7 @@
         "status": "NOT_RETRIEVED",
         "quote": null
       },
-      "production_status": "INGESTING (lane rolandgarros)",
+      "production_status": "INGESTING (lane rolandgarros) — source/parser PASS; canonical rows only after the identity phase resolves players",
       "notes": "Data only inside the SSR payload; FFT ids need their own crosswalk.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
@@ -1047,65 +1061,62 @@
     },
     {
       "key": "wimbledon.archive",
-      "family": "wimbledon",
+      "family": "slams",
       "name": "Wimbledon draws archive (da.wimbledon.com)",
       "tier": "official_slam",
       "url": "https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}",
-      "capabilities": null,
-      "verdict": "PASS",
+      "capabilities": [
+        "draws",
+        "set_game_scoring",
+        "withdrawals_ret_wo",
+        "history",
+        "player_identity",
+        "qualifying",
+        "doubles"
+      ],
+      "verdict": "DEGRADED",
       "evidence": {
-        "checked": "2026-09-26",
-        "depth": "1877-2025 (ingested 1979+)",
-        "identity": "archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held"
+        "canary_key": "wimbledon.archive",
+        "file": "docs/evidence/wimbledon-archive-latest.json"
       },
-      "native_ids": null,
-      "robots": null,
-      "terms": null,
-      "production_status": "INGESTING (lane wimbledon_archive)",
-      "notes": null,
-      "storage_policy": null,
+      "native_ids": {
+        "player": "archive UUID (tourid on the player record for some players)"
+      },
+      "robots": "not retrieved for da.wimbledon.com",
+      "terms": {
+        "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+        "status": "RESTRICTS_COMMERCIAL_USE",
+        "quote": null
+      },
+      "production_status": "INGESTING (lane wimbledon_archive, 1979+) — bad rows held, never corrected by guess",
+      "notes": "DEGRADED for source quality: the archive reports some deciding-set tiebreak scores that are impossible under the edition rule (e.g. 2022 QF Nadal d. Fritz 10-4 appears as 7-4); every such match is held. Identity: archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held. The ingest Worker (Cloudflare egress) has also received intermittent HTTP 403 from this host; the lane backs off and never retries around it.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     },
     {
       "key": "daviscup.stadion",
-      "family": "daviscup",
+      "family": "team",
       "name": "Davis Cup (ITF Stadion API)",
       "tier": "official_team",
       "url": "https://api.itf-production.sports-data.stadion.io/custom/tieCentre/{tieId}",
-      "capabilities": null,
+      "capabilities": [
+        "draws",
+        "set_game_scoring",
+        "history",
+        "doubles"
+      ],
       "verdict": "DEGRADED",
       "evidence": {
-        "checked": "2026-09-26",
-        "depth": "1900-2026",
-        "identity_gap": "person.tennisId (e.g. GOM1041959) matches neither Wikidata P599 nor P2641; no DOB in person records"
+        "file": "docs/evidence/daviscup-stadion-latest.json"
       },
-      "native_ids": null,
+      "native_ids": {
+        "player": "ITF tennisId (e.g. GOM1041959) — matches no Wikidata P536/P599/P2641"
+      },
       "robots": null,
       "terms": null,
       "production_status": "NOT INGESTED — every rubber would be an unresolved identity; no name-only merges",
-      "notes": null,
-      "storage_policy": null,
-      "attribution": null
-    },
-    {
-      "key": "protennislive.pdfs",
-      "family": "protennislive",
-      "name": "ProTennisLive draw / order-of-play PDFs",
-      "tier": "official_tour",
-      "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/{mds|mdd|qs|op}.pdf",
-      "capabilities": null,
-      "verdict": "DEGRADED",
-      "evidence": {
-        "checked": "2026-09-26",
-        "coverage": "ATP Tour + Challenger",
-        "identity_gap": "names + countries only (no ids, no DOB)"
-      },
-      "native_ids": null,
-      "robots": null,
-      "terms": null,
-      "production_status": "NOT CANONICAL — names alone are never identity; draw context only",
-      "notes": null,
-      "storage_policy": null,
+      "notes": "Reachable with ties, nominations and rubbers 1900+. person.tennisId has no deterministic crosswalk to tour ids and person records carry no date of birth, so rubbers are not canonicalized.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     }
   ],

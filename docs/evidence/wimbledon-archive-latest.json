@@ -1,0 +1,185 @@
+{
+  "source_key": "wimbledon.archive",
+  "endpoint_family": "https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}",
+  "checked_at": "2026-09-26T20:18:28.035Z",
+  "runner": "scripts/evidence/wimbledon-archive.mjs (local workstation egress)",
+  "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
+  "parser_version": "1",
+  "years_probed": [
+    1979,
+    2019,
+    2022,
+    2025
+  ],
+  "result": "REACHABLE_AND_PARSING",
+  "probes": [
+    {
+      "url": "https://da.wimbledon.com/v1/draws_archive/draw/MS/1979",
+      "year": 1979,
+      "event": "MS",
+      "http_status": 200,
+      "state": "PASS",
+      "latency_ms": 1228,
+      "bytes": 108103,
+      "sha256": "f28c3672312fd7cbcb03acd42df72681076b2c79376e97379de27959b492809a",
+      "raw_rows": 127,
+      "parsed_matches": 127,
+      "drift": []
+    },
+    {
+      "url": "https://da.wimbledon.com/v1/draws_archive/draw/MS/2019",
+      "year": 2019,
+      "event": "MS",
+      "http_status": 200,
+      "state": "PASS",
+      "latency_ms": 37,
+      "bytes": 108702,
+      "sha256": "834db6c2a5ff1bb0ccccbe4469055654c9883838677545a49e9a6ebf9727e2a4",
+      "raw_rows": 127,
+      "parsed_matches": 127,
+      "drift": []
+    },
+    {
+      "url": "https://da.wimbledon.com/v1/draws_archive/draw/MS/2022",
+      "year": 2022,
+      "event": "MS",
+      "http_status": 200,
+      "state": "PASS",
+      "latency_ms": 27,
+      "bytes": 108677,
+      "sha256": "3b3e1fc8123c3ea4bcda03a6f01a00108851f23148ef621f3bff10b279c689b7",
+      "raw_rows": 127,
+      "parsed_matches": 127,
+      "drift": []
+    },
+    {
+      "url": "https://da.wimbledon.com/v1/draws_archive/draw/MS/2025",
+      "year": 2025,
+      "event": "MS",
+      "http_status": 200,
+      "state": "PASS",
+      "latency_ms": 41,
+      "bytes": 108848,
+      "sha256": "98c46794584a6392991a73b1a9b95f524bbabb3a169bf90ebb0dab9bad1e6a86",
+      "raw_rows": 127,
+      "parsed_matches": 127,
+      "drift": []
+    }
+  ],
+  "ingest": {
+    "written_by_year": {
+      "2017": 91,
+      "2018": 83,
+      "2019": 75,
+      "2021": 65,
+      "2022": 70,
+      "2023": 85,
+      "2024": 99,
+      "2025": 123
+    },
+    "held_open": 366,
+    "held_unresolved_identity": 358,
+    "held_deciding_tiebreak_discrepancy": 9,
+    "tiebreak_discrepancy_ids": [
+      {
+        "source_id": "arch-2025-MS-1-67f13699-7339-4e76-8189-a5b84fbc3fb5+8a529d64-d79f-4a70-ba41-e5d91f14de20",
+        "problem": "score_invalid:set 5: tiebreak 6-8 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 6,
+          "B": 8,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2025-MS-1-7b205430-01a9-47c1-a8fb-4dccf96d7770+c7432e5f-ef1e-404a-a488-4902a2ea23f5",
+        "problem": "score_invalid:set 5: tiebreak 7-3 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 7,
+          "B": 3,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2025-MS-2-2e2555b6-544b-493e-b0a8-4d565119d618+dd700752-36bc-4e26-a303-5ea35df17f6b",
+        "problem": "score_invalid:set 5: tiebreak 7-5 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 7,
+          "B": 5,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2025-MS-3-11c3f81d-731a-494d-8760-73f2452ed240+2ac76be0-2502-423c-a742-d9136c3708da",
+        "problem": "score_invalid:set 5: tiebreak 3-7 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 3,
+          "B": 7,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2024-MS-1-18c57314-ce14-4f90-a54b-b0c4a8343f96+dd700752-36bc-4e26-a303-5ea35df17f6b",
+        "problem": "score_invalid:set 5: tiebreak 5-7 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 5,
+          "B": 7,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2024-MS-2-7531fa88-ee80-414b-a064-f42268c1bd0a+d18613be-6ac2-4232-a8dd-e8fd4dc9108e",
+        "problem": "score_invalid:set 5: tiebreak 7-9 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 7,
+          "B": 9,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2022-MS-2-2a1a3282-9d7e-46ed-a1f2-0943eadf2a4f+fcf8c8c8-e4df-4f85-a8f9-6c6ebd62ba3d",
+        "problem": "unresolved_identity:wimbledon_archive:2a1a3282-9d7e-46ed-a1f2-0943eadf2a4f",
+        "reported_tiebreak": {
+          "A": 9,
+          "B": 7,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2022-MS-4-1f291806-c887-4729-92fc-272e7f3201fb+e4df48d1-98bf-4c7c-b7c6-830301c6cc08",
+        "problem": "score_invalid:set 5: tiebreak 8-6 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 8,
+          "B": 6,
+          "winner_points_derived": false
+        }
+      },
+      {
+        "source_id": "arch-2022-MS-Q-9269c7ca-86d2-4be8-877d-d8bf71dcd5dc+c4bc02f2-3251-4c21-a8af-dbace516cd74",
+        "problem": "score_invalid:set 5: tiebreak 4-7 is not finished (to 10)",
+        "reported_tiebreak": {
+          "A": 4,
+          "B": 7,
+          "winner_points_derived": false
+        }
+      }
+    ],
+    "unresolved_identity_examples": [
+      "arch-2017-MS-1-2a952943-c571-4e0d-b5bb-48f240ea82ef+6faceb3a-8a82-43d2-b48d-f269b956245b",
+      "arch-2017-MS-1-a6eecfc9-75bb-4d92-b41f-c40129bfc087+c4bc02f2-3251-4c21-a8af-dbace516cd74",
+      "arch-2017-MS-1-2a1a3282-9d7e-46ed-a1f2-0943eadf2a4f+30e08a30-1996-4cc1-ae89-832c6eba8c56",
+      "arch-2017-MS-1-c281aacf-036c-4370-9481-5ec9b5699839+d6c5e2b5-70e8-4df8-9edb-dd65efe124f5",
+      "arch-2017-MS-1-3aa1c4c1-18e1-4a46-b05e-cd164938b2b9+e4a0d556-cb74-4944-a7c0-d09aa608960b"
+    ]
+  },
+  "worker_lane": {
+    "failures": 1,
+    "backoff_until": "2026-09-26T20:20:30.365Z",
+    "last_ok": "2026-09-26T20:11:23.115Z",
+    "last_error_at": "2026-09-26T20:16:30.365Z"
+  },
+  "source_quality": {
+    "verdict": "DEGRADED",
+    "issue": "The archive reports some deciding-set tiebreak scores that are impossible under the edition rule (10-point tiebreak at 6-6 from 2022). Verified example: 2022 QF Nadal d. Fritz, fifth-set tiebreak 10-4; the archive reports 7-4.",
+    "containment": "Every such match fails canonical score validation and is held (never written); no correction is guessed."
+  }
+}

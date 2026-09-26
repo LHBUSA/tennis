@@ -1,0 +1,62 @@
+{
+  "source_key": "daviscup.stadion",
+  "endpoint_family": "https://api.itf-production.sports-data.stadion.io/custom/tieCentre/{tieId}",
+  "checked_at": "2026-09-26T20:17:07.824Z",
+  "runner": "scripts/evidence/daviscup-stadion.mjs (local workstation egress)",
+  "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
+  "parser_version": "evidence-1 (no production parser: not ingested)",
+  "result": "REACHABLE_DATA_PRESENT",
+  "ties": [
+    {
+      "url": "https://api.itf-production.sports-data.stadion.io/custom/tieCentre/2f278593-fd02-4495-a08d-4726852edab1",
+      "tie_id": "2f278593-fd02-4495-a08d-4726852edab1",
+      "tie_name": "M-DC-1985-WG-M-ARG-ECU-01",
+      "http_status": 200,
+      "bytes": 115354,
+      "sha256": "1e9ce32197d67923c597d502cff93c0d170ab95fec07c83d0878ef18fe43429b",
+      "rubbers": 5,
+      "nominated_persons": 6,
+      "persons_with_tennisId": 6,
+      "person_fields_matching_birth_or_dob": [],
+      "tennisId_examples": [
+        "GOM1041959",
+        "VIV1026857",
+        "YCA1026067"
+      ]
+    },
+    {
+      "url": "https://api.itf-production.sports-data.stadion.io/custom/tieCentre/c1a86d15-2d9e-49fa-a768-22d8b03a483e",
+      "tie_id": "c1a86d15-2d9e-49fa-a768-22d8b03a483e",
+      "tie_name": "M-DC-2025-FLS-M-ITA-AUT-01",
+      "http_status": 200,
+      "bytes": 148502,
+      "sha256": "e365b6f2c6eaca2569eeb027b1f17be9d5c2fbde3574609359eeb3b868313d0c",
+      "rubbers": 3,
+      "nominated_persons": 39,
+      "persons_with_tennisId": 39,
+      "person_fields_matching_birth_or_dob": [],
+      "tennisId_examples": [
+        "ZVE1260752",
+        "STR1177343",
+        "HAN1196431"
+      ]
+    }
+  ],
+  "identity": {
+    "tennisId_shape": "three letters of surname + 7 digits (e.g. GOM1041959) — ITF-internal",
+    "distinct_tennisIds_checked": 45,
+    "date_of_birth_in_person_records": "ABSENT",
+    "wikidata_crosswalk_query": {
+      "http_status": 200,
+      "properties": [
+        "P536 ATP",
+        "P599 ITF",
+        "P2641 Davis Cup"
+      ],
+      "matching_items": 0
+    },
+    "conclusion": "no deterministic crosswalk to tour ids; name-only matching is not identity -> NOT INGESTED"
+  },
+  "verdict": "DEGRADED",
+  "production_status": "NOT INGESTED"
+}

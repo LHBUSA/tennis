@@ -18,6 +18,7 @@ import { sha256Hex } from '../../workers/shared/archive.js';
 import * as wta from '../../workers/providers/wta.js';
 import * as slams from '../../workers/providers/slams.js';
 import * as open from '../../workers/providers/open.js';
+import * as rg from '../../workers/providers/rolandgarros.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
@@ -29,6 +30,11 @@ const probe = (key, family, url, capabilities) => ({
   shape: () => [], parse: () => []
 });
 
+// Roland-Garros: the canary counts parsed matches (not payloads), for every edition the lane claims. The
+// current edition keeps the bare registry key; earlier years are suffixed @year.
+const rgMatches = { ...rg.rgResults, parse: (body) => rg.rgResults.parse(body).flatMap((j) => (j.tournamentEvent?.roundResults || []).flatMap((r) => r.matches || [])) };
+const RG_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
+
 export const CANARIES = [
   { adapter: wta.rankingsSingles, params: { pageSize: 5 } },
   { adapter: wta.rankingsDoubles, params: { pageSize: 5 } },
@@ -37,9 +43,11 @@ export const CANARIES = [
   { adapter: wta.matchStats, params: { eventId: 1152, year: 2026, matchId: 'LS002' } },
   { adapter: slams.wimbledonDraw, params: { year: 2025, eventCode: 'MS' } },
   { adapter: slams.ausopenDay, params: { year: 2026, day: 1 } },
+  { adapter: slams.wimbledonArchiveRaw, params: { year: 2022, event: 'MS' } },
   { adapter: open.wikidataCrosswalk, params: { limit: 5 } },
   { adapter: open.commonsLicense, params: { file: 'Andre Agassi (2011).jpg' } },
   { adapter: open.protennisliveDraw, params: { year: 2026, tournamentId: 7581 } },
+  ...RG_YEARS.map((year) => ({ adapter: rgMatches, key: year === 2026 ? 'rolandgarros.results' : `rolandgarros.results@${year}`, params: { year, event: 'SM' } })),
   { adapter: probe('atp.rankings.page', 'atp', 'https://www.atptour.com/en/rankings/singles', ['rankings_singles']) },
   { adapter: probe('itf.api.calendar', 'itf', 'https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=', ['calendar']) }
 ];
@@ -49,7 +57,7 @@ async function main() {
   const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 } } });
   const runAt = new Date().toISOString();
   const results = [];
-  for (const { adapter, params = {} } of CANARIES.filter((c) => c.adapter.key.startsWith(filter))) {
+  for (const { adapter, params = {}, key = adapter.key } of CANARIES.filter((c) => (c.key || c.adapter.key).startsWith(filter))) {
     let captured = null;
     const r = await runAdapter(adapter, {
       client,
@@ -57,14 +65,14 @@ async function main() {
       archive: async ({ result }) => { captured = { sha256: await sha256Hex(result.body || ''), bytes: result.bytes, content_type: result.content_type, attempts: result.attempts }; return null; }
     });
     const out = {
-      key: adapter.key, family: adapter.family, state: r.state, url: r.url, http_status: r.http_status ?? null,
+      key, family: adapter.family, state: r.state, url: r.url, http_status: r.http_status ?? null,
       bytes: captured?.bytes ?? null, content_type: captured?.content_type ?? null, sha256: captured?.sha256 ?? null,
       attempts: captured?.attempts ?? null, latency_ms: r.latency_ms ?? null, record_count: r.record_count ?? (r.records ? r.records.length : null),
       error: r.error ?? null, drift: r.drift ?? null // no payload samples: this repo is public
     };
     if (adapter.parser_version === 'probe' && r.state === 'DEGRADED' && r.error === 'zero_records') { out.state = 'REACHABLE'; out.error = null; }
     results.push(out);
-    console.log(`${out.state.padEnd(26)} ${adapter.key.padEnd(26)} http=${out.http_status ?? '-'} bytes=${out.bytes ?? '-'} records=${out.record_count ?? '-'}${out.error ? ` err=${out.error}` : ''}`);
+    console.log(`${out.state.padEnd(26)} ${key.padEnd(26)} http=${out.http_status ?? '-'} bytes=${out.bytes ?? '-'} records=${out.record_count ?? '-'}${out.error ? ` err=${out.error}` : ''}`);
   }
   const file = path.join(ROOT, 'docs', 'evidence', 'source-canary-latest.json');
   let merged = results;
