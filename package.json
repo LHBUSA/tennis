@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build && node scripts/prerender.mjs",
     "preview": "vite preview --port 5194",
-    "guard": "node scripts/guard-truth.mjs",
+    "guard": "node scripts/guard-truth.mjs && node scripts/guard-source-brand.mjs",
     "test": "node --test \"tests/**/*.test.js\"",
     "check": "npm run guard && npm run test && npm run build",
     "vercel-build": "npm run check",
