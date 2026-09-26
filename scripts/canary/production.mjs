@@ -67,7 +67,9 @@ if (anyMatch) {
     const p = await get(`${API}/v1/players/${slug}`);
     add('API player profile', p.status === 200 && p.body?.data?.slug === slug, { slug });
     const d = await get(`${API}/v1/players/${slug}/dna`);
-    add('API player DNA contract', d.status === 200 && d.body?.data?.definition_version === 1, { matches_considered: d.body?.data?.matches_considered });
+    const dd = d.body?.data?.dna;
+    // v2 contract: stored snapshot under data.dna; percentiles are tour-scoped (ATP and WTA never pooled)
+    add('API player DNA contract', d.status === 200 && (dd === null || (dd?.definition_version === 1 && /^(ATP|WTA) singles players/.test(dd?.percentile_basis || ''))), { matches_considered: dd?.matches_considered ?? null, tour: dd?.tour ?? null });
   }
 }
 add('API unknown route 404', (await get(`${API}/v1/nope`)).status === 404, {});
