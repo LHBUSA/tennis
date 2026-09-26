@@ -1,0 +1,25 @@
+# tennis-web — edge heads (title/description/canonical/robots/OG/X/JSON-LD) + social cards + sitemap for
+# tennis.propbetedge.ai data routes. Vercel proxies those paths here (vercel.json rewrites).
+name = "tennis-web"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[vars]
+SITE_ORIGIN = "https://tennis.propbetedge.ai"
+
+[[services]]
+binding = "API"
+service = "tennis-api"
+
+[[r2_buckets]]
+binding = "TENNIS_MEDIA"
+bucket_name = "tennis-media"
+
+[[rules]]
+type = "Data"
+globs = ["**/*.ttf"]
+fallthrough = true

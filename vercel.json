@@ -8,7 +8,35 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "/sitemap-static.xml"
+      "destination": "https://tennis-web.sales-fd3.workers.dev/sitemap.xml"
+    },
+    {
+      "source": "/og/:path*",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/og/:path*"
+    },
+    {
+      "source": "/players/:slug",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/players/:slug"
+    },
+    {
+      "source": "/players/:slug/:tab",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/players/:slug/:tab"
+    },
+    {
+      "source": "/tournaments/:slug/:year",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/tournaments/:slug/:year"
+    },
+    {
+      "source": "/tournaments/:slug/:year/:event",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/tournaments/:slug/:year/:event"
+    },
+    {
+      "source": "/matches/:id",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/matches/:id"
+    },
+    {
+      "source": "/pbecast/:id",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/pbecast/:id"
     },
     {
       "source": "/(.*)",

@@ -49,7 +49,7 @@ test('JSON-LD: Organization sameAs x.com/PROPBETEDGE; Person and SportsEvent onl
 
 test('no stale or retired social handles anywhere in shipped code', () => {
   const files = ['index.html'];
-  const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = `${d}/${f.name}`; if (f.isDirectory()) walk(p); else if (/\.(js|css|html|json)$/.test(f.name)) files.push(p); } };
+  const walk = (d) => { for (const f of fs.readdirSync(d, { withFileTypes: true })) { const p = `${d}/${f.name}`; if (f.name.startsWith('.') || f.name === 'node_modules') continue; if (f.isDirectory()) walk(p); else if (/\.(js|css|html|json)$/.test(f.name)) files.push(p); } };
   walk('src');
   walk('workers');
   const retired = ['@MLBHRALERTSPBE', '@propbetedgeai', 'twitter.com/propbetedge', 'x.com/propbetedgeai', 'x.com/MLBHRALERTSPBE'];

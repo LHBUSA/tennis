@@ -1,0 +1,43 @@
+// tennis-web: data-backed heads index only real records; social cards never break on a missing photo.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { headFor } from '../workers/tennis-web/src/heads.js';
+import { playerCard, matchCard } from '../workers/tennis-web/src/cards.js';
+import { resolveRoute } from '../src/lib/routes.js';
+import { routeMeta, headHtml, INDEX_ROBOTS, NOINDEX_ROBOTS } from '../src/seo/meta.js';
+
+const envWith = (map) => ({ API: { fetch: async (req) => { const p = new URL(req.url).pathname + new URL(req.url).search; const d = map[p]; return d === undefined ? new Response('{}', { status: 404 }) : Response.json({ data: d }); } } });
+
+test('player head: real record -> index + Person + player card; unknown slug -> noindex', async () => {
+  const env = envWith({ '/v1/players/elena-rybakina': { slug: 'elena-rybakina', name: 'Elena Rybakina', nationality: 'KAZ', rankings: { wta_singles: { rank: 1, date: '2026-09-21' } }, recent_matches: [], photo: null } });
+  const o = await headFor(env, resolveRoute('/players/elena-rybakina'));
+  assert.equal(o.robots, INDEX_ROBOTS);
+  assert.match(o.title, /^Elena Rybakina/);
+  assert.match(o.image.url, /\/og\/player\/elena-rybakina\.png\?v=/);
+  assert.ok(o.jsonld.some((n) => n['@type'] === 'Person'));
+  const h = headHtml(routeMeta(resolveRoute('/players/elena-rybakina'), o));
+  assert.ok(h.includes('<link rel="canonical" href="https://tennis.propbetedge.ai/players/elena-rybakina" />'));
+  const miss = await headFor(env, resolveRoute('/players/nobody-here'));
+  assert.equal(miss.robots, NOINDEX_ROBOTS);
+});
+
+test('match head: indexes only with statistics; PBEcast stays noindex with its own card', async () => {
+  const m = { id: '00000000-0000-5000-8000-000000000001', status: 'completed', score: '6-4 6-3', round: 'F', event_type: 'WS', sides: { A: { players: [{ name: 'Ann Alpha', slug: 'a' }] }, B: { players: [{ name: 'Bea Beta', slug: 'b' }] } }, tournament: { tournament: 'Test Open', year: 2026, slug: 'test-open', start_date: '2026-09-20' }, statistics: { A: {}, B: {} } };
+  const env = envWith({ [`/v1/matches/${m.id}`]: m });
+  const o = await headFor(env, resolveRoute(`/matches/${m.id}`));
+  assert.equal(o.robots, INDEX_ROBOTS);
+  assert.match(o.description, /Ann Alpha vs Bea Beta.*Final.*6-4 6-3/);
+  const p = await headFor(env, resolveRoute(`/pbecast/${m.id}`));
+  assert.equal(p.robots, NOINDEX_ROBOTS);
+  assert.match(p.image.url, /\/og\/pbecast\//);
+  const noStats = await headFor(envWith({ [`/v1/matches/${m.id}`]: { ...m, statistics: null } }), resolveRoute(`/matches/${m.id}`));
+  assert.equal(noStats.robots, NOINDEX_ROBOTS);
+});
+
+test('cards: missing photo renders the monogram tile, never an external image', () => {
+  const s = playerCard({ name: 'Iga Swiatek', rank: 2, list: 'WTA SINGLES', nationality: 'POL', jpegB64: null });
+  assert.ok(s.includes('>IS<'));
+  assert.ok(!/href="https?:/.test(s), 'no remote fetches inside a card');
+  const mc = matchCard({ a: { name: 'Guiomar Maristany Zuleta de Reales' }, b: { name: 'B' }, tournament: 'T', round: 'Final', status: 'in_progress' });
+  assert.ok(mc.includes('>LIVE<'));
+});
