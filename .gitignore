@@ -8,3 +8,5 @@ dist/
 qa-artifacts/
 *.log
 .DS_Store
+.vercel
+.vercel/
