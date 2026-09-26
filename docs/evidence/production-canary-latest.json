@@ -1,0 +1,246 @@
+{
+  "run_at": "2026-09-26T14:32:31.067Z",
+  "api": "https://tennis-api.propbetedge.ai",
+  "summary": {
+    "PASS": 28,
+    "FAIL": 1
+  },
+  "totals": {
+    "matches": 270,
+    "players": 1292,
+    "stats_rows": 80,
+    "complete_ranking_snapshots": 0,
+    "observed_changes": 15,
+    "raw_captures": 60,
+    "players_with_wikidata": 810,
+    "wimbledon_rows_linked_to_atp_ids": 0
+  },
+  "backfill": {
+    "calendar": {
+      "from": "2025-01-29",
+      "done": false
+    },
+    "events_remaining": 9,
+    "ranking_history": null
+  },
+  "checks": [
+    {
+      "name": "tennis-api /health",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "deps": {
+          "TENNIS_MODEL_SUPABASE_URL": "configured",
+          "TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY": "configured",
+          "TENNIS_STATE": "configured"
+        }
+      }
+    },
+    {
+      "name": "tennis-ingest /health",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "deps": {
+          "TENNIS_STATE": "configured",
+          "TENNIS_SOURCE": "configured",
+          "TENNIS_MODEL_SUPABASE_URL": "configured",
+          "TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY": "configured",
+          "INGEST_ADMIN_TOKEN": "configured"
+        }
+      }
+    },
+    {
+      "name": "tennis-live /health",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "deps": {
+          "TENNIS_STATE": "configured",
+          "TENNIS_SOURCE": "configured",
+          "TENNIS_MODEL_SUPABASE_URL": "configured",
+          "TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY": "configured"
+        }
+      }
+    },
+    {
+      "name": "ingest ran within 10 min",
+      "result": "PASS",
+      "detail": {
+        "finished_at": "2026-09-26T14:30:54.276Z",
+        "age_s": 90
+      }
+    },
+    {
+      "name": "ingest steps all ok",
+      "result": "PASS",
+      "detail": {
+        "failed": []
+      }
+    },
+    {
+      "name": "ingest upstream never blocked",
+      "result": "PASS",
+      "detail": {
+        "requests": 27,
+        "not_modified": 0,
+        "retries": 0,
+        "blocked": 0
+      }
+    },
+    {
+      "name": "tennis-live cycled within 3 min",
+      "result": "FAIL",
+      "detail": {
+        "age_s": null
+      }
+    },
+    {
+      "name": "API /v1/today",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "CURRENT",
+        "ms": 253
+      }
+    },
+    {
+      "name": "API /v1/live",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "CURRENT",
+        "ms": 95
+      }
+    },
+    {
+      "name": "API /v1/tournaments",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "CURRENT",
+        "ms": 85
+      }
+    },
+    {
+      "name": "API /v1/rankings?tour=wta&type=singles&limit=5",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "UNAVAILABLE",
+        "ms": 75
+      }
+    },
+    {
+      "name": "API /v1/rankings?tour=wta&type=doubles&limit=5",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "UNAVAILABLE",
+        "ms": 75
+      }
+    },
+    {
+      "name": "API /v1/players?q=ryb",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "CURRENT",
+        "ms": 89
+      }
+    },
+    {
+      "name": "API /v1/sources",
+      "result": "PASS",
+      "detail": {
+        "status": 200,
+        "freshness": "CACHED",
+        "ms": 40
+      }
+    },
+    {
+      "name": "API match detail",
+      "result": "PASS",
+      "detail": {
+        "id": "0f49b208-57ff-5840-9eb8-ae088b5c8e1b",
+        "freshness": "CURRENT"
+      }
+    },
+    {
+      "name": "API player profile",
+      "result": "PASS",
+      "detail": {
+        "slug": "talia-gibson"
+      }
+    },
+    {
+      "name": "API player DNA contract",
+      "result": "PASS",
+      "detail": {
+        "matches_considered": 0
+      }
+    },
+    {
+      "name": "API unknown route 404",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "name": "API ATP rankings stated unavailable (not faked)",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "name": "API picks not fabricated",
+      "result": "PASS",
+      "detail": {}
+    },
+    {
+      "name": "no final match without a winner",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "every match has both sides",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "participant sizes match kind",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "singles events use singles participants, doubles use pairs",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "every player has a slug",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "no player carries two ids from the same tour",
+      "result": "PASS",
+      "detail": 0
+    },
+    {
+      "name": "raw captures archived (R2 lineage rows present)",
+      "result": "PASS",
+      "detail": 60
+    },
+    {
+      "name": "open ingest holds are few (reviewable)",
+      "result": "PASS",
+      "detail": 3
+    },
+    {
+      "name": "stored scores re-validate (267 sampled)",
+      "result": "PASS",
+      "detail": {
+        "invalid": 0
+      }
+    }
+  ]
+}

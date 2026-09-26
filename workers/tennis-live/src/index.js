@@ -56,6 +56,11 @@ export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname.replace(/\/+$/, '') || '/';
     if (path === '/health' || path === '/') return json(await health({ worker: 'tennis-live', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY'], extra: { cron: '* * * * *', cadence_s: GAP_MS / 1000 } }), { headers: { 'cache-control': 'no-store' } });
+    if (path === '/v1/live/runs' && request.method === 'POST') {
+      const auth = request.headers.get('authorization') || '';
+      if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      try { return json({ ok: true, data: await liveCycle(env, { rounds: 1 }) }, { headers: { 'cache-control': 'no-store' } }); } catch (e) { return json({ ok: false, error: String(e?.stack || e).slice(0, 800) }, { status: 500 }); }
+    }
     if (path === '/v1/live/runs') {
       const last = env.TENNIS_STATE ? await env.TENNIS_STATE.get('tennis-live:last_run', 'json') : null;
       return json({ ok: !!last, data: last, meta: { semantics: 'most recent live cycle' } }, { headers: { 'cache-control': 'no-store' } });
@@ -63,6 +68,8 @@ export default {
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
   async scheduled(_e, env, ctx) {
-    ctx.waitUntil(liveCycle(env));
+    ctx.waitUntil(liveCycle(env).catch(async (e) => {
+      if (env.TENNIS_STATE) await env.TENNIS_STATE.put('tennis-live:last_error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 800) }));
+    }));
   }
 };

@@ -1,8 +1,12 @@
 # TennisCast — live state contract
 
 `tournament → match → set → game → point`, one engine for live and replay
-(`workers/shared/canonical/scoring.js`). Status: engine built and tested; **no live source in
-production** (WTA API carries live point/server but is pending the rights decision).
+(`workers/shared/canonical/scoring.js`). Status: engine built and tested. **Live source in production:** `tennis-live` polls every WTA/WTA 125/
+Slam-women edition with a match in progress about every 18 s; each observation is written through the
+canonical writer and every observed change (score, status, winner) is recorded in `tennis_source_changes`
+— the observed-state stream a replay is built from. This is observation granularity, not point-by-point:
+points between two observations are never filled in. True point-by-point exists only in the AO match
+centre (not adapted yet).
 
 ## Rules
 

@@ -23,3 +23,13 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
+
+## Deploy log
+
+| Date (UTC) | Component | Version | Rollback | Note |
+|---|---|---|---|---|
+| 2026-09-26 | Supabase tkmln | migrations 0100, 0200, 0300 | forward fix only | rollback-only proof first (42 tables, 42 RLS, 17 competitions, zero residue) |
+| 2026-09-26 | tennis-api | f3046fad | 87efecc9 | detached-fetch fix; custom domain tennis-api.propbetedge.ai |
+| 2026-09-26 | tennis-ingest | 9da8c78a | 84f7009e / b5ca794e / d993c1c0 | cursor-on-failure fix; yields live-owned editions |
+| 2026-09-26 | tennis-live | c634e0ed | 4bc0aeeb (skeleton) | 18 s live polling |
+| 2026-09-26 | tennis-model / tennis-news | 8598487b / bca67020 | — | skeletons |

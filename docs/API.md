@@ -10,11 +10,23 @@ Every response:
 Freshness: `CURRENT | CACHED | STALE | UNAVAILABLE | ERROR | NOT_CONFIGURED`
 (`workers/shared/envelope.js`).
 
-| Route | Today |
+Base: `https://tennis-api.propbetedge.ai`. Edge-cached per route (live 15 s … rankings 15 min).
+
+| Route | Data |
 |---|---|
-| `GET /health` | live: version, build, dependency configured/not (never values), last run |
-| `GET /v1/sources` | real: registry + latest committed canary run (`CACHED`) |
-| `/v1/today` `/v1/live` `/v1/tournaments[/:id[/draws]]` `/v1/matches[/:id[/live\|points\|stats]]` `/v1/players[/:id[/matches\|dna\|rankings]]` `/v1/h2h/:a/:b` `/v1/rankings` `/v1/doubles/pairs/:id` `/v1/breakout-watch` `/v1/odds` `/v1/pbe-picks` `/v1/track-record` `/v1/news` | `NOT_CONFIGURED`, `data: null` |
+| `GET /health` | version, dependency configured/not (never values) |
+| `GET /v1/today` | editions in progress today + live, upcoming, latest results |
+| `GET /v1/live` | matches in progress with source point score + server |
+| `GET /v1/tournaments[?from&to&all=1]` | editions overlapping the window (tour levels unless `all=1`) |
+| `GET /v1/tournaments/:slug/:year` | edition + every observed match |
+| `GET /v1/matches/:id` | match + sets + statistics + observed changes |
+| `GET /v1/players[?q=]` | search, or the current WTA singles list |
+| `GET /v1/players/:slug` | identity crosswalk, ranking history, recent matches |
+| `GET /v1/players/:slug/dna[?as_of&surface]` | Tennis DNA v1 singles, computed from stored statistics |
+| `GET /v1/rankings?tour=wta&type=singles\|doubles[&date&limit&offset]` | official list as published + movement vs our previous archived list; ATP → `UNAVAILABLE` |
+| `GET /v1/h2h/:a/:b` | singles meetings in the store |
+| `GET /v1/sources` | registry + latest canary summary |
+| `/v1/pbe-picks` `/v1/track-record` `/v1/odds` `/v1/news` `/v1/breakout-watch` `/v1/doubles/pairs/:id` | `NOT_CONFIGURED`, `data: null` |
 
 Run ledgers: `tennis-ingest GET/POST /v1/runs` (POST needs `Bearer INGEST_ADMIN_TOKEN`),
-`tennis-live /v1/live/runs`, `tennis-model /v1/model/runs`, `tennis-news /v1/news/runs`.
+`tennis-live /v1/live/runs` (last live cycle), `tennis-model /v1/model/runs`, `tennis-news /v1/news/runs`.
