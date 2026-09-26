@@ -16,7 +16,7 @@ const when = (iso) => (iso ? new Date(iso).toLocaleString('en-US', { month: 'sho
 const previewQ = () => { const p = new URLSearchParams(location.search).get('preview'); return p && /^[0-9a-f]{16,64}$/.test(p) ? p : null; };
 const withPreview = (path) => (previewQ() ? `${path}${path.includes('?') ? '&' : '?'}preview=${previewQ()}` : path);
 
-function card(a, lead = false) {
+export function card(a, lead = false) {
   const href = `/news/${a.slug}${previewQ() ? `?preview=${previewQ()}` : ''}`;
   return html`<article class="nw-card${lead ? ' nw-lead' : ''}">
     <a class="nw-card-a" href="${href}">
@@ -44,7 +44,7 @@ export function hub(root, ctx) {
     if (!body) return;
     const list = res.data?.articles || [];
     if (!list.length) {
-      render(body, html`<div class="mod nw-empty"><p class="empty-h">No stories on this desk yet.</p><p class="note">${res.meta?.semantics || ''} Stories appear only when a real event in our data (an upset, a title, a ranking milestone…) passes every factual gate. ATP, Challenger and ITF desks fill as those sources come online.</p><p class="note"><a href="/schedule">Today’s schedule →</a> · <a href="/rankings/women">Rankings →</a></p></div>`);
+      render(body, html`<div class="mod nw-empty"><p class="empty-h">No stories on this desk yet.</p><p class="note">${res.meta?.semantics || ''} Stories appear only when a real event in our data (an upset, a title, a ranking milestone…) passes every factual gate. Men’s stories come from supported Grand Slam sources (ATP and Grand Slams desks); Challenger and ITF desks fill as those sources come online.</p><p class="note"><a href="/schedule">Today’s schedule →</a> · <a href="/men">Men’s tennis →</a> · <a href="/rankings">Rankings →</a></p></div>`);
       return;
     }
     const [lead, ...rest] = list;

@@ -16,7 +16,7 @@ export const DNA_DIMENSIONS = [
 ];
 const LOWER_IS_BETTER = new Set(['double_fault_rate']);
 
-async function allRows(store, table, query, cap = 5000) {
+export async function allRows(store, table, query, cap = 5000) {
   const out = [];
   for (let off = 0; off < cap; off += 1000) {
     const r = await store.select(table, `${query}&limit=1000&offset=${off}`);
@@ -38,7 +38,7 @@ async function latestAsOf(store) {
 const TOUR_OF = { F: 'WTA', M: 'ATP' };
 /** A tour's Tennis DNA is published only once its population is meaningful (owner rule 2026-09-26). */
 export const DNA_MIN_QUALIFIED = 30;
-async function tourDnaStatus(store, gender) {
+export async function tourDnaStatus(store, gender) {
   const asOf = await latestAsOf(store);
   if (!asOf) return { ready: false, qualified: 0, as_of: null };
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.all&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}`);
@@ -156,7 +156,11 @@ export async function schedule(store, url) {
   const statusF = url.searchParams.get('status');
   const statusQ = statusF === 'live' ? '&status=eq.in_progress' : statusF === 'scheduled' ? '&status=eq.scheduled' : statusF === 'completed' ? `&status=${inList(FINAL)}` : '';
   const eventF = url.searchParams.get('event');
-  const eventQ = eventF === 'singles' ? '&event_type=in.(MS,WS)' : eventF === 'doubles' ? '&event_type=in.(MD,WD,XD)' : '';
+  // gender filter on the canonical event type: men MS/MD, women WS/WD, mixed XD (never on ranking availability)
+  const G = { men: ['MS', 'MD'], women: ['WS', 'WD'], mixed: ['XD'] }[url.searchParams.get('gender')] || null;
+  const E = eventF === 'singles' ? ['MS', 'WS'] : eventF === 'doubles' ? ['MD', 'WD', 'XD'] : null;
+  const types = G && E ? G.filter((t) => E.includes(t)) : G || E;
+  const eventQ = types ? `&event_type=in.(${(types.length ? types : ['none']).join(',')})` : '';
   const includeMatches = view === 'today' || view === 'tomorrow' || statusF;
   const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=300`) : [];
   const surf = url.searchParams.get('surface');
@@ -164,8 +168,8 @@ export async function schedule(store, url) {
   const keepEd = (e) => (!surf || e.surface === surf) && (!tour || (tour === 'grand-slam' ? e.level === 'Grand Slam' : tour === 'wta-125' ? e.level === 'WTA 125' : tour === 'wta' ? /^WTA (1000|500|250|Finals)$/.test(e.level) : true));
   const shaped = matches.map(shapeMatch).filter((mm) => keepEd({ surface: mm.tournament?.surface, level: mm.tournament?.level }));
   const tournaments = eds.filter(keepEd).map((e) => ({ ...shapeEdition({ ...e }), status: e.source_status, venue: e.tennis_venues || null }));
-  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled'), completed: shaped.filter((x) => FINAL.includes(x.status)).slice(0, 60), completed_total: shaped.filter((x) => FINAL.includes(x.status)).length, filters: { tours: ['wta', 'wta-125', 'grand-slam'], surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'] } },
-    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): covered tours only (WTA Tour, WTA 125, Grand Slam women's events). Start times are shown only when the source publishes a full timestamp.`, degraded: ['ATP, Challenger and ITF schedules are not yet acquirable'] });
+  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled'), completed: shaped.filter((x) => FINAL.includes(x.status)).slice(0, 60), completed_total: shaped.filter((x) => FINAL.includes(x.status)).length, filters: { tours: ['wta', 'wta-125', 'grand-slam'], surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'], genders: ['men', 'women', 'mixed'] } },
+    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): covered sources only — women: WTA Tour, WTA 125 and Grand Slams; men and mixed: supported Grand Slam sources. Start times are shown only when the source publishes a full timestamp.`, degraded: ['ATP Tour, ATP Challenger and ITF schedules are not yet acquirable'] });
 }
 
 // ---- DNA ----------------------------------------------------------------------------------------------

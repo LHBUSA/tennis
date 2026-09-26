@@ -8,6 +8,7 @@ import { shareBar } from '../ui/share.js';
 import { matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
 import { track } from '../analytics.js';
 import { liveEntry } from '../lib/pbecast-live.js';
+import { editionRow, replayList } from './men.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -49,7 +50,7 @@ function mountWith(fn) {
 export const live = mountWith((root, _c, signal) => {
   track('tennis_live_open', { route: '/live' });
   shell(root, { eyebrow: 'Live', heading: 'Live Now', lede: 'Matches in progress, with set, game and point scores and the server exactly as the source last published them. Open PBEcast for the live analytical court.' });
-  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="sec"><span>${d.length} match${d.length === 1 ? '' : 'es'} live</span></p>${matchList(d)}` : html`<div class="mod"><p class="empty-h">No matches in progress right now.</p><p class="note">Covered live: WTA Tour, WTA 125 and Grand Slam women’s events. ATP, Challenger and ITF live data are not yet acquirable. <a href="/schedule">See the schedule →</a></p></div>`), 'Live data unavailable.', signal, { poll: 30 });
+  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="sec"><span>${d.length} match${d.length === 1 ? '' : 'es'} live</span></p>${matchList(d)}` : html`<div class="mod"><p class="empty-h">No matches in progress right now.</p><p class="note">Covered live: WTA Tour, WTA 125 and Grand Slam events from supported sources. ATP Tour, Challenger and ITF live data are not yet acquirable. <a href="/schedule">See the schedule →</a> · <a href="/men#replays">Men’s PBEcast replays →</a></p></div>`), 'Live data unavailable.', signal, { poll: 30 });
 });
 
 // ---- schedule -----------------------------------------------------------------------------------------
@@ -57,11 +58,12 @@ const VIEWS = [['today', 'Today'], ['tomorrow', 'Tomorrow'], ['week', 'This week
 export const schedule = mountWith((root, _c, signal) => {
   const q = new URLSearchParams(location.search);
   const view = VIEWS.some(([v]) => v === q.get('view')) ? q.get('view') : 'today';
-  const f = { status: q.get('status') || '', event: q.get('event') || '', surface: q.get('surface') || '', tour: q.get('tour') || '' };
+  const f = { gender: ['men', 'women', 'mixed'].includes(q.get('gender')) ? q.get('gender') : '', status: q.get('status') || '', event: q.get('event') || '', surface: q.get('surface') || '', tour: q.get('tour') || '' };
   track('tennis_schedule_open', { route: '/schedule' });
   const link = (patch) => { const p = new URLSearchParams({ view, ...f, ...patch }); for (const [k, v] of [...p]) if (!v) p.delete(k); return `/schedule?${p}`; };
-  shell(root, { eyebrow: 'Schedule', heading: 'Tennis Schedule', lede: `Covered tours only: WTA Tour, WTA 125 and Grand Slam women’s events. Start times appear in your time zone (${Intl.DateTimeFormat().resolvedOptions().timeZone}) when the source publishes a full timestamp.`, chips: VIEWS.map(([v, l]) => [link({ view: v }).replace(/view=[a-z]+/, `view=${v}`), l, v === view]) });
+  shell(root, { eyebrow: 'Schedule', heading: 'Tennis Schedule', lede: `Women: WTA Tour, WTA 125 and Grand Slams. Men and mixed: supported Grand Slam sources only — ATP Tour scheduling is not yet available. Start times appear in your time zone (${Intl.DateTimeFormat().resolvedOptions().timeZone}) when the source publishes a full timestamp.`, chips: VIEWS.map(([v, l]) => [link({ view: v }).replace(/view=[a-z]+/, `view=${v}`), l, v === view]) });
   root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Filters">
+    ${[['', 'All'], ['men', 'Men'], ['women', 'Women'], ['mixed', 'Mixed']].map(([v, l]) => html`<a class="chip${f.gender === v ? ' on' : ''}" href="${link({ gender: v })}" data-gender="${v || 'all'}">${l}</a>`)}
     ${[['', 'All tours'], ['wta', 'WTA'], ['wta-125', 'WTA 125'], ['grand-slam', 'Grand Slam']].map(([v, l]) => html`<a class="chip${f.tour === v ? ' on' : ''}" href="${link({ tour: v })}">${l}</a>`)}
     ${[['', 'Singles + doubles'], ['singles', 'Singles'], ['doubles', 'Doubles']].map(([v, l]) => html`<a class="chip${f.event === v ? ' on' : ''}" href="${link({ event: v })}">${l}</a>`)}
     ${[['', 'Any surface'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([v, l]) => html`<a class="chip${f.surface === v ? ' on' : ''}" href="${link({ surface: v })}">${l}</a>`)}
@@ -74,6 +76,7 @@ export const schedule = mountWith((root, _c, signal) => {
     ${d.live.length ? html`<h2 class="sec">Live</h2>${matchList(d.live)}` : ''}
     ${d.scheduled.length ? html`<h2 class="sec">Order of play <small>as published; a match without a time follows the one before it on that court</small></h2>${matchList(d.scheduled)}` : ''}
     ${d.completed.length ? html`<h2 class="sec">Completed</h2>${matchList(d.completed.slice(0, 60))}` : ''}
+    ${f.gender === 'men' && !d.live.length && !d.scheduled.length && !d.completed.length ? html`<div class="mod"><p class="empty-h">No men’s match in this window.</p><p class="note">Men’s coverage currently comes from supported Grand Slam sources (Australian Open, Wimbledon, Roland-Garros); ATP Tour scheduling is not yet available. <a href="/men">Men’s results, players and replays →</a></p></div>` : ''}
     ${view === 'week' || view === 'upcoming' ? html`<p class="note">Match-level order of play is published a day ahead; future days show tournaments only.</p>` : ''}
     <div class="mod"><header class="mod-h"><h2>Where to watch</h2></header><p class="note">Broadcast rights are territorial. PropBetEdge shows official broadcasters only when a verified official source is ingested — none is yet, so no watch links are shown.</p></div>`, 'Schedule unavailable.', signal, { poll: view === 'today' ? 60 : 0 });
 });
@@ -82,21 +85,28 @@ export const matches = schedule;
 
 // ---- tournaments --------------------------------------------------------------------------------------
 export const tournaments = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Tournaments', heading: 'Tournaments', lede: 'WTA Tour, WTA 125 and Grand Slam editions from the last week through the next two months — surface, dates and location.' });
-  return fill(root, '/v1/tournaments', (d) => (d.length ? html`<div class="trs">${d.map(tournamentRow)}</div>` : null), 'No tournaments stored for this window yet.', signal);
+  shell(root, { eyebrow: 'Tournaments', heading: 'Tournaments', lede: 'WTA Tour, WTA 125 and Grand Slam editions from the last week through the next two months — and every men’s Grand Slam edition PropBetEdge holds.' });
+  root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section class="mod" data-slams style="margin-top:18px"><header class="mod-h"><h2>Men’s Grand Slam editions</h2><span class="mod-k">results by round</span></header><p class="loading">Loading…</p></section>');
+  api('/v1/men', { signal }).then((r) => { const el = root.querySelector('[data-slams]'); if (el && r.data) render(el, html`<header class="mod-h"><h2>Men’s Grand Slam editions</h2><span class="mod-k">results by round</span></header><div class="trs">${r.data.editions.map(editionRow)}</div><p class="note">Men’s coverage comes from Grand Slam sources; ATP Tour events are not yet available. <a href="/men">Men’s tennis →</a></p>`); else if (el) el.remove(); }).catch(() => {});
+  return fill(root, '/v1/tournaments', (d) => (d.length ? html`<h2 class="sec">Current and upcoming</h2><div class="trs">${d.map(tournamentRow)}</div>` : null), 'No tournaments stored for this window yet.', signal);
 });
 
 const EVENT_SLUG = { MS: 'mens-singles', WS: 'womens-singles', MD: 'mens-doubles', WD: 'womens-doubles', XD: 'mixed-doubles' };
 export const tournament = mountWith((root, { params }, signal) => {
   track('tennis_tournament_open', { tournament_id: `${params.slug}-${params.year}` });
   shell(root, { eyebrow: `Tournament · ${params.year}`, heading: title(params.slug) });
+  const qual = params.event === 'qualifying';
   const want = Object.entries(EVENT_SLUG).find(([, s]) => s === params.event)?.[0];
   return fill(root, `/v1/tournaments/${params.slug}/${params.year}`, (d) => {
     const e = d.edition;
     const h = root.querySelector('.page-h h1');
     if (h && e.tournament) h.textContent = e.tournament;
-    const ms = want ? d.matches.filter((m) => m.event_type === want) : d.matches;
-    const events = [...new Set(d.matches.map((m) => m.event_type))];
+    const isQ = (m) => String(m.round || '').startsWith('Q-');
+    const ms = qual ? d.matches.filter(isQ) : want ? d.matches.filter((m) => m.event_type === want && !isQ(m)) : d.matches;
+    const present = new Set(d.matches.map((m) => m.event_type));
+    const events = ['MS', 'WS', 'MD', 'WD', 'XD'].filter((ev) => present.has(ev));
+    const hasQ = d.matches.some(isQ);
+    const count = (ev) => d.matches.filter((m) => m.event_type === ev && !isQ(m)).length;
     const order = (r) => { const [st, n] = String(r).split('-'); return (st === 'Q' ? 0 : 100) + ({ Q: 50, S: 60, F: 70 }[n] ?? (Number(n) || 0)); };
     const groups = new Map();
     for (const m of [...ms].sort((a, b) => order(b.round) - order(a.round))) { const k = `${m.event_type}|${m.round}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(m); }
@@ -108,7 +118,7 @@ export const tournament = mountWith((root, { params }, signal) => {
         <div><p class="eyebrow">Location</p><b>${where || '—'}</b>${e.venue?.slug ? html` <a href="/venues/${e.venue.slug}">venue page</a>` : ''}<br><small class="note">${e.venue?.precision === 'city' ? 'City from the source; the venue itself is not named by our source.' : ''}</small></div>
         <div><p class="eyebrow">Category</p><b>${e.level || '—'}</b></div>
       </div></div>
-      <nav class="chips" aria-label="Events"><a class="chip${!want ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}">All events</a>${events.map((ev) => html`<a class="chip${want === ev ? ' on' : ''}" href="/tournaments/${params.slug}/${params.year}/${EVENT_SLUG[ev]}">${eventLabel(ev)}</a>`)}</nav>
+      <nav class="tabs ev-tabs" aria-label="Events"><a href="/tournaments/${params.slug}/${params.year}" ${!want && !qual ? raw('aria-current="page"') : ''}>All events <small>${d.matches.length}</small></a>${events.map((ev) => html`<a href="/tournaments/${params.slug}/${params.year}/${EVENT_SLUG[ev]}" ${want === ev ? raw('aria-current="page"') : ''}>${eventLabel(ev)} <small>${count(ev)}</small></a>`)}${hasQ ? html`<a href="/tournaments/${params.slug}/${params.year}/qualifying" ${qual ? raw('aria-current="page"') : ''}>Qualifying <small>${d.matches.filter(isQ).length}</small></a>` : ''}</nav>
       ${live.length ? html`<h2 class="sec">Live now</h2>${matchList(live, { showTournament: false })}` : ''}
       ${ms.length ? [...groups].map(([k, list]) => html`<h2 class="sec">${eventLabel(k.split('|')[0])} · ${roundLabel(k.split('|')[1])} <small>${list.length} match${list.length === 1 ? '' : 'es'}</small></h2>${matchList(list, { showTournament: false })}`) : html`<p class="note">No matches stored for this event.</p>`}
       <p class="note">Draw positions and bracket lines are not published by our current source for this event; matches are grouped by round as observed. Where to watch: no verified broadcast source yet.</p>
@@ -153,16 +163,44 @@ export const rankings = mountWith((root, { params, route }, signal) => {
   const tour = params.tour === 'men' ? 'atp' : 'wta';
   const type = route?.doubles ? 'doubles' : 'singles';
   track('tennis_rankings_open', { tour, route: location.pathname });
-  const chips = [['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles']];
+  const chips = [['/rankings', 'All rankings', false], ['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles'], ['/rankings/men', 'ATP · not available', tour === 'atp']];
   shell(root, { eyebrow: 'Rankings', heading: `${tour.toUpperCase()} ${type === 'doubles' ? 'Doubles' : 'Singles'} Rankings`, lede: tour === 'atp' ? '' : 'The official list exactly as published, archived weekly so ranking history belongs to PropBetEdge. Movement compares with our previous archived list.', chips });
   return fill(root, `/v1/rankings?tour=${tour}&type=${type}&limit=200`, (d) => html`<p class="note">List dated ${fmtDate(d.ranking_date)} · ${d.total.toLocaleString('en-US')} ranked${d.previous_date ? ` · movement vs ${fmtDate(d.previous_date)}` : ''}</p>${rankingTable(d)}`, tour === 'atp' ? 'ATP rankings are not available yet: atptour.com refuses automated access and PropBetEdge does not evade it. Another legitimate path is being built.' : 'No complete ranking list archived yet.', signal);
 });
 
+export const rankingsHub = mountWith((root) => {
+  track('tennis_rankings_open', { tour: 'all', route: '/rankings' });
+  shell(root, { eyebrow: 'Rankings', heading: 'Tennis Rankings', lede: 'Official lists exactly as published, archived weekly. We never compute or estimate an official ranking.' });
+  render(root.querySelector('[data-body]'), html`<div class="rk-hub">
+    <a class="rk-card" href="/rankings/women"><span class="st-ok">WTA RANKINGS — AVAILABLE</span><b>WTA singles</b><span class="note">Official list, archived weekly, with movement.</span></a>
+    <a class="rk-card" href="/rankings/women/doubles"><span class="st-ok">WTA RANKINGS — AVAILABLE</span><b>WTA doubles</b><span class="note">Official doubles list, archived weekly.</span></a>
+    <div class="rk-card"><span class="st-no">ATP RANKINGS — SOURCE NOT YET AVAILABLE</span><b>ATP singles &amp; doubles</b><span class="note">atptour.com refuses automated access and PropBetEdge does not evade it. No ATP ranking is shown until a legitimate source exists. Men’s Grand Slam results, players and replays: <a href="/men">Men’s tennis →</a></span></div>
+  </div>`);
+  return () => {};
+});
+
 // ---- players + search --------------------------------------------------------------------------------
+const menTable = (d, limit = 500) => html`<p class="note">Men’s singles players in the newest Grand Slam main draws we hold (${d.basis.join(', ')}), by furthest round reached — not a ranking. Official ATP rankings are not yet available.</p>
+  <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Best result</th><th class="n hide-s">Draws</th></tr></thead><tbody>${d.rows.slice(0, limit).map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.best.stage} <small class="note">· ${r.best.edition}</small></td><td class="n hide-s">${r.draws.length}</td></tr>`)}</tbody></table></div>`;
 export const players = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Players', heading: 'Players', lede: 'One canonical identity per player across every source. Search, or browse by the current WTA singles ranking.' });
+  const gq = new URLSearchParams(location.search).get('gender');
+  const g = ['men', 'women'].includes(gq) ? gq : 'all';
+  track('tennis_players_open', { gender: g });
+  shell(root, { eyebrow: 'Players', heading: 'Players', lede: 'One canonical identity per player across every source — men and women. Search, or browse below.', chips: [['/players', 'All', g === 'all'], ['/players?gender=men', 'Men', g === 'men'], ['/players?gender=women', 'Women', g === 'women']] });
   root.querySelector('.page-h').insertAdjacentHTML('beforeend', '<form class="search" role="search" action="/search"><label class="sr" for="q">Search players and tournaments</label><input id="q" name="q" type="search" placeholder="Search players or tournaments" autocomplete="off" minlength="2" maxlength="60"><button class="btn green" type="submit">Search</button></form>');
-  return fill(root, '/v1/players', (d) => html`<p class="note">WTA singles · list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`, 'No ranking list archived yet.', signal);
+  const women = (d) => html`<p class="note">WTA singles · official list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`;
+  if (g === 'men') return fill(root, '/v1/men/players', (d) => (d.rows.length ? menTable(d) : null), 'No men’s players stored yet.', signal);
+  if (g === 'women') return fill(root, '/v1/players', women, 'No ranking list archived yet.', signal);
+  render(root.querySelector('[data-body]'), html`<div class="split-2"><section><div class="split-h"><h2 class="sec">Men</h2><a href="/players?gender=men">All men →</a></div><div data-men><p class="loading">Loading…</p></div></section><section><div class="split-h"><h2 class="sec">Women</h2><a href="/players?gender=women">All women →</a></div><div data-women><p class="loading">Loading…</p></div></section></div>`);
+  Promise.all([api('/v1/men/players', { signal }), api('/v1/players', { signal })]).then(([m, w]) => {
+    const mEl = root.querySelector('[data-men]');
+    const wEl = root.querySelector('[data-women]');
+    if (mEl) render(mEl, m.data?.rows?.length ? menTable(m.data, 40) : emptyModule(m.meta, 'No men’s players stored yet.'));
+    if (wEl) render(wEl, w.data ? html`<p class="note">WTA singles · official list dated ${fmtDate(w.data.ranking_date)}</p>${rankingTable({ ...w.data, rows: (w.data.rows || []).slice(0, 40) })}` : emptyModule(w.meta, 'No ranking list archived yet.'));
+    const meta = root.querySelector('[data-meta]');
+    if (meta) render(meta, html`${freshnessBadge(w.meta)} <span>men: Grand Slam draws · women: official WTA list</span>`);
+  }).catch(() => {});
+  return () => {};
 });
 
 export const search = mountWith((root, _c, signal) => {
@@ -184,7 +222,7 @@ function playerHero(p, meta, tab) {
   return html`<div class="ph-band"><div class="page"><div class="ph">
       <div class="ph-photo">${avatar(p, { size: 'portrait', px: 240, eager: true, cls: 'ph-img' })}</div>
       <div>
-        <p class="eyebrow">${p.gender === 'F' ? 'WTA' : p.gender === 'M' ? 'ATP' : 'Player'}${p.nationality ? ` · ${p.nationality}` : ''}</p>
+        <p class="eyebrow">${p.gender === 'F' ? 'Women · WTA' : p.gender === 'M' ? 'Men' : 'Player'}${p.nationality ? ` · ${p.nationality}` : ''}</p>
         <h1>${p.name}</h1>
         <dl class="ph-f">
           ${r.wta_singles ? html`<div><dt>WTA singles</dt><dd>No. ${r.wta_singles.rank}<small>${r.wta_singles.points?.toLocaleString('en-US')} pts · ${fmtDate(r.wta_singles.date)}</small></dd></div>` : ''}
@@ -219,12 +257,15 @@ export const player = mountWith(async (root, { params }, signal) => {
     return;
   }
   const surf = f?.surface_record || {};
+  // men's DNA is gated by population size; the gate never hides the rest of the profile
+  const dnaGate = p.gender === 'M' ? (await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null))?.data?.dna : null;
   render(root, html`${playerHero(p, pr.meta, null)}<div class="page" style="padding-top:0">
+    ${dnaGate?.published === false ? html`<p class="note dna-gate">Tennis DNA not published yet · ${dnaGate.qualified}/${dnaGate.threshold} qualified. <a href="/methodology">Why →</a></p>` : ''}
     <div class="grid-2">
       <section class="mod"><header class="mod-h"><h2>Recent form</h2><span class="mod-k">last ${f?.form?.length || 0}</span></header><div class="mod-b">${f?.form?.length ? html`<div class="form">${f.form.map((x) => html`<a class="${x.result}" href="/matches/${x.id}" title="${x.result} ${x.score || ''} · ${x.tournament || ''} ${x.year || ''}">${x.result}</a>`)}</div>` : html`<p class="note">No completed singles matches in the store yet — history is backfilling.</p>`}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>
       <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
     </div>
-    <section class="mod"><header class="mod-h"><h2>Ranking history</h2></header><div class="mod-b">${rankSpark(p.ranking_history || [], p.gender === 'M' ? 'atp_singles' : 'wta_singles')}</div></section>
+    ${p.gender === 'M' ? '' : html`<section class="mod"><header class="mod-h"><h2>Ranking history</h2></header><div class="mod-b">${rankSpark(p.ranking_history || [], 'wta_singles')}</div></section>`}
     <section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>
     ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
     <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
@@ -272,7 +313,13 @@ export const pbecastHub = mountWith(async (root, _c, signal) => {
     const { mount } = await import('./pbecast.js');
     return mount(root, { params: { id: entry.id }, live: live.data });
   }
+  const menBox = () => {
+    // outside the polled body so the 60 s refresh never blanks it
+    root.querySelector('[data-body]')?.insertAdjacentHTML('afterend', '<section class="mod" data-men-replays style="margin-top:18px"><header class="mod-h"><h2>Men’s replays</h2><span class="mod-k">point-by-point</span></header><p class="loading">Loading…</p></section>');
+    api('/v1/men', { signal }).then((r) => { const el = root.querySelector('[data-men-replays]'); if (el && r.data?.replays?.length) render(el, html`<header class="mod-h"><h2>Men’s replays</h2><span class="mod-k">${r.data.replay_edition.tournament} ${r.data.replay_edition.year} · point-by-point</span></header>${replayList(r.data.replays)}<p class="note"><a href="/men#replays">More men’s coverage →</a></p>`); else if (el) el.remove(); }).catch(() => {});
+  };
   shell(root, { eyebrow: 'PBEcast', heading: 'PBEcast', lede: 'The live analytical court: score, server, key moments, serve and return, Tennis DNA and head-to-head — and replays of completed matches. Observed-live coverage updates about every 18 seconds; point-by-point appears only where a source publishes it.' });
+  menBox();
   return fill(root, '/v1/today', (d) => html`<div class="mod"><p class="empty-h">No PBEcast live right now.</p><p class="note">When a covered match goes live, PBEcast opens straight onto its court. <a href="/schedule">See today’s schedule →</a></p></div>
     ${d.latest_results.length ? html`<h2 class="sec">Replays <small>matches finished at tournaments in progress</small></h2>${matchList(d.latest_results.filter((m) => ['completed', 'retired'].includes(m.status)).slice(0, 12))}` : ''}`, 'PBEcast unavailable.', signal, { poll: 60 });
 });

@@ -9,7 +9,7 @@ import registry from '../data/source-registry/sources.json' with { type: 'json' 
 
 test('every brief route resolves', () => {
   const cases = {
-    '/': 'today', '/live': 'live', '/matches': 'matches', '/matches/00000000-0000-4000-8000-000000000001': 'match', '/pbecast': 'pbecast-hub', '/pbecast/00000000-0000-4000-8000-000000000001': 'pbecast', '/schedule': 'schedule', '/dna': 'dna', '/search': 'search', '/credits': 'credits', '/venues/paris-fra': 'venue', '/rankings': 'rankings', '/players': 'players', '/players/jannik-sinner': 'player',
+    '/': 'today', '/live': 'live', '/matches': 'matches', '/matches/00000000-0000-4000-8000-000000000001': 'match', '/pbecast': 'pbecast-hub', '/pbecast/00000000-0000-4000-8000-000000000001': 'pbecast', '/schedule': 'schedule', '/dna': 'dna', '/search': 'search', '/credits': 'credits', '/venues/paris-fra': 'venue', '/rankings': 'rankings', '/men': 'men', '/tournaments/australian-open/2026/qualifying': 'tournament-sub', '/players': 'players', '/players/jannik-sinner': 'player',
     '/players/jannik-sinner/dna': 'player-sub', '/players/x/matches': 'player-sub', '/players/x/surfaces': 'player-sub', '/players/x/rankings': 'player-sub',
     '/h2h/a/b': 'h2h', '/tournaments': 'tournaments', '/tournaments/wimbledon/2025': 'tournament', '/tournaments/wimbledon/2025/draw': 'tournament-sub',
     '/tournaments/wimbledon/2025/mens-singles': 'tournament-sub', '/tournaments/x/2025/womens-singles': 'tournament-sub', '/tournaments/x/2025/mens-doubles': 'tournament-sub',
@@ -39,7 +39,7 @@ test('canonical: trailing slash and duplicate slashes normalized; query/hash dro
 
 test('only substantive routes are indexable today; data routes and 404 are noindex', () => {
   const indexable = STATIC_ROUTES.filter((r) => r.index).map((r) => r.path).sort();
-  assert.deepEqual(indexable, ['/', '/dna', '/live', '/methodology', '/pbecast', '/players', '/rankings/women', '/rankings/women/doubles', '/schedule', '/sources', '/tournaments']);
+  assert.deepEqual(indexable, ['/', '/dna', '/live', '/men', '/methodology', '/pbecast', '/players', '/rankings', '/rankings/women', '/rankings/women/doubles', '/schedule', '/sources', '/tournaments']);
   for (const p of ['/search', '/coverage', '/credits', '/pbe-picks', '/news', '/rankings/men']) assert.equal(routeMeta(resolveRoute(p)).robots, NOINDEX_ROBOTS, p);
   assert.equal(routeMeta(resolveRoute('/live')).robots, INDEX_ROBOTS);
   assert.equal(routeMeta(resolveRoute('/players/x')).robots, NOINDEX_ROBOTS);

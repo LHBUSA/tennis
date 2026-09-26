@@ -6,22 +6,24 @@ import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
 
 export const PRIMARY_NAV = [
   { href: '/', label: 'Today', id: 'today' },
-  { href: '/schedule', label: 'Schedule', id: 'schedule' },
   { href: '/live', label: 'Live', id: 'live' },
-  { href: '/tournaments', label: 'Tournaments', id: 'tournaments' },
+  { href: '/pbecast', label: 'PBEcast', id: 'pbecast' },
+  { href: '/men', label: 'Men', id: 'men' },
+  { href: '/news', label: 'News', id: 'news' },
   { href: '/players', label: 'Players', id: 'players' },
-  { href: '/rankings/women', label: 'Rankings', id: 'rankings' },
-  { href: '/dna', label: 'Tennis DNA', id: 'dna' },
-  { href: '/pbecast', label: 'PBEcast', id: 'pbecast' }
+  { href: '/tournaments', label: 'Tournaments', id: 'tournaments' },
+  { href: '/dna', label: 'Tennis DNA', id: 'dna' }
 ];
 
 export const MORE_NAV = [
+  { href: '/schedule', label: 'Schedule', note: 'Today, tomorrow and this week — men, women and mixed', id: 'schedule' },
+  { href: '/rankings', label: 'Rankings', note: 'Official WTA lists, archived weekly; ATP status', id: 'rankings' },
   { href: '/methodology', label: 'Methodology', note: 'Tennis DNA formulas, samples, as-of rules' },
   { href: '/sources', label: 'Sources', note: 'Where every number comes from' },
   { href: '/credits', label: 'Photo credits', note: 'Every player photo, its author and license' }
 ];
 
-const NAV_GROUP = { 'player-sub': 'players', player: 'players', match: 'schedule', matches: 'schedule', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'rankings-list': 'rankings', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
+const NAV_GROUP = { 'player-sub': 'players', player: 'players', match: 'more', matches: 'more', schedule: 'more', rankings: 'more', 'rankings-list': 'more', labs: 'more', 'news-desk': 'news', 'news-article': 'news', 'pbecast-hub': 'pbecast', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
 
 export function shellHtml() {
   return html`
@@ -34,6 +36,7 @@ export function shellHtml() {
       </a>
       <nav class="nav" aria-label="Primary">
         ${PRIMARY_NAV.map((n) => html`<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
+        <a href="/labs" data-nav="more">More</a>
       </nav>
       <a class="hdr-search" href="/search" aria-label="Search players and tournaments"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" data-menu><span></span><span></span><span></span><em class="sr">Menu</em></button>

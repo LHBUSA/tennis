@@ -317,3 +317,54 @@
   .nw-hero.has-img .nw-hero-t { margin-top: -60px; }
 }
 .h2h-p { display: inline-flex; align-items: center; gap: 8px; }
+
+/* ---- men's tennis (/men, homepage module, players filter) ---------------------------------------------- */
+.men-hero { background: var(--night); color: var(--on-dark); }
+.men-hero .page { padding-top: clamp(32px, 6vw, 72px); padding-bottom: clamp(28px, 4vw, 48px); }
+.men-hero .eyebrow { color: var(--gold-bright); }
+.men-hero h1 { color: var(--on-dark); font-size: clamp(44px, 8vw, 96px); letter-spacing: 0.01em; }
+.men-hero .lede { color: var(--on-dark-2); max-width: 60ch; }
+.men-totals { margin: 10px 0 18px; color: var(--on-dark-2); font-size: 14px; }
+.men-totals b { color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+.men-pbp { font-style: normal; color: var(--court-700); font-weight: 700; }
+.men-feat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); }
+.men-feat a { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--white); color: var(--ink); min-width: 0; }
+.men-feat a:hover { text-decoration: none; border-color: var(--court-500); }
+.men-feat span { display: grid; min-width: 0; }
+.men-feat b { font-weight: 800; overflow-wrap: anywhere; }
+.men-feat small { color: var(--muted); font-size: 12px; }
+.men-rp { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.men-rp a { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; padding: 9px 12px; border: 1px solid var(--rule); border-radius: var(--r); background: var(--white); color: var(--ink); }
+.men-rp a:hover { text-decoration: none; border-color: var(--court-500); }
+.men-rp-k { grid-column: 1 / -1; font: 800 10.5px/1.2 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); }
+.men-rp-p { min-width: 0; overflow-wrap: anywhere; }
+.men-rp-p b { font-weight: 600; } .men-rp-p b.won { font-weight: 800; }
+.men-rp-s { grid-column: 1; color: var(--muted); font-size: 12.5px; }
+.men-rp-cta { grid-column: 2; grid-row: 2 / span 2; align-self: center; font-weight: 800; color: var(--court-700); white-space: nowrap; }
+.men-ao { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.men-ao a { display: grid; gap: 4px; padding: 14px; border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--white); color: var(--ink); }
+.men-ao a:hover { text-decoration: none; border-color: var(--court-500); }
+.men-ao b { font: 800 30px/1 var(--f-display); color: var(--court-700); }
+.men-ao span { color: var(--muted); font-size: 13px; font-weight: 600; }
+.men-cov-l { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.men-cov-l li { display: grid; grid-template-columns: 14px minmax(0, 220px) minmax(0, 1fr); gap: 4px 12px; align-items: baseline; }
+.men-cov-l li::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--rule-2); transform: translateY(1px); }
+.men-cov-l li.ok::before { background: var(--court-600); } .men-cov-l li.wait::before { background: var(--gold-bright); } .men-cov-l li.no::before { background: var(--rule-2); border: 1px solid var(--muted); }
+.men-cov-l span { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 600px) { .men-cov-l li { grid-template-columns: 14px minmax(0, 1fr); } .men-cov-l span { grid-column: 2; } }
+.split-2 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.split-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 0 0 10px; }
+.split-h h2 { margin: 0; }
+.rk-hub { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.rk-card { display: grid; gap: 6px; padding: 18px; border: 1px solid var(--rule); border-radius: var(--r-lg); background: var(--white); color: var(--ink); box-shadow: var(--shadow); }
+a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
+.rk-card b { font: 800 22px/1.05 var(--f-display); text-transform: uppercase; }
+.rk-card .st-ok { color: var(--court-700); font-weight: 800; font-size: 13px; }
+.rk-card .st-no { color: var(--muted); font-weight: 800; font-size: 13px; }
+.ev-tabs { flex-wrap: wrap; margin: 14px 0 6px; }
+.ev-tabs a small { color: var(--muted); font-weight: 600; margin-left: 4px; }
+.dna-gate { margin: 4px 0 14px; padding: 10px 14px; border: 1px dashed var(--rule-2); border-radius: var(--r); background: var(--white); }
+.sub-h { margin: 16px 0 8px; font: 800 13px/1.2 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); }
+.sub-h small { letter-spacing: 0; text-transform: none; font-weight: 500; }
+.home-men-t b { color: var(--court-700); font-variant-numeric: tabular-nums; }
+.home-mw { margin: 18px 0; }

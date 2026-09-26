@@ -20,6 +20,7 @@ import { initAnalytics, trackPageView, setRouteContext, track } from './analytic
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
   today: () => import('./pages/today.js'),
+  men: () => import('./pages/men.js'),
   sources: () => import('./pages/sources.js'),
   methodology: () => import('./pages/methodology.js'),
   labs: () => import('./pages/labs.js'),
@@ -28,7 +29,7 @@ const PAGES = {
   news: () => import('./pages/news.js').then((x) => ({ mount: x.hub })), 'news-desk': () => import('./pages/news.js').then((x) => ({ mount: x.hub })), 'news-article': () => import('./pages/news.js').then((x) => ({ mount: x.article })),
   live: lp('live'), schedule: lp('schedule'), matches: lp('schedule'), match: lp('match'),
   tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'), venue: lp('venue'),
-  'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
+  rankings: lp('rankingsHub'), 'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
   dna: lp('dna'), 'pbecast-hub': lp('pbecastHub'), search: lp('search'), credits: lp('credits'), coverage: lp('coverage')
 };
 const dataPage = () => import('./pages/data-page.js');

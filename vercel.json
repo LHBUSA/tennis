@@ -115,11 +115,6 @@
       "source": "/tenniscast",
       "destination": "/pbecast",
       "permanent": true
-    },
-    {
-      "source": "/rankings",
-      "destination": "/rankings/women",
-      "permanent": false
     }
   ]
 }
