@@ -76,8 +76,8 @@ async function tickInner(env, store, kv, force) {
   await step(ctx, 'calendar', async () => {
     const last = await kv.get('cal:last');
     if (!force.calendar && last && Date.now() - Date.parse(last) < 3 * hour) return 'fresh';
-    const eds = await calendarWindow(ctx, addDays(today, -4), addDays(today, 45));
-    if (!eds.length) return 'no_rows';
+    const { ok, editions: eds } = await calendarWindow(ctx, addDays(today, -4), addDays(today, 45));
+    if (!ok || !eds.length) return 'calendar_fetch_failed (keeping previous active list)';
     const active = await Promise.all(eds.filter((e) => isActive(e, today)).map(editionContext));
     await kv.put('cal:active', JSON.stringify(active));
     await kv.put('cal:last', started.toISOString());
@@ -89,7 +89,12 @@ async function tickInner(env, store, kv, force) {
   const live = [];
   await step(ctx, 'matches', async () => {
     const out = [];
+    // editions tennis-live is actively polling are its to write while its heartbeat is fresh
+    const hb = await kv.get('live:heartbeat');
+    const owned = hb && Date.now() - Date.parse(hb) < 150 * 1000 ? new Set((await kv.get('live:owned', 'json')) || []) : new Set();
+    const prevLive = new Map(((await kv.get('live:editions', 'json')) || []).map((e) => [e.edition_id, e]));
     for (const ed of active.slice(0, 12)) {
+      if (owned.has(ed.edition_id)) { out.push({ event: `${ed.event_id}-${ed.year}`, state: 'OWNED_BY_LIVE' }); if (prevLive.has(ed.edition_id)) live.push(prevLive.get(ed.edition_id)); continue; }
       const r = await editionMatches(ctx, ed);
       out.push({ event: `${ed.event_id}-${ed.year}`, ...r });
       if (r.live) live.push({ ...ed, live: r.live });
@@ -125,7 +130,8 @@ async function tickInner(env, store, kv, force) {
     const cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
     if (!cal.done) {
       const to = addDays(cal.from, 13);
-      const eds = await calendarWindow(ctx, cal.from, to < today ? to : today);
+      const { ok, editions: eds } = await calendarWindow(ctx, cal.from, to < today ? to : today);
+      if (!ok) return { calendar_window: cal.from, state: 'fetch_failed_will_retry' };
       const past = await Promise.all(eds.filter((e) => e.live_scoring_id && TOUR_LEVELS.test(e.level || '') && e.end_date < addDays(today, -1)).map(editionContext));
       const queue = (await kv.get('bf:events', 'json')) || [];
       const seen = new Set(queue.map((q) => q.edition_id));

@@ -12,4 +12,11 @@ enabled = true
 binding = "TENNIS_STATE"
 id = "a117d7b3846c4a39a27ee74c49574c99"
 
-# No cron triggers until this Worker has real work.
+[[r2_buckets]]
+binding = "TENNIS_SOURCE"
+bucket_name = "tennis-source"
+
+[triggers]
+crons = ["* * * * *"]
+
+# Secrets: TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY

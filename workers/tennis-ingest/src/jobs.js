@@ -37,17 +37,20 @@ async function fetchRun(ctx, adapter, params) {
 }
 
 // ---- calendar ------------------------------------------------------------------------------------------
+/** Returns { ok, editions }. ok=false when any page failed — callers must not advance cursors then. */
 export async function calendarWindow(ctx, from, to) {
   const editions = [];
+  let ok = false;
   for (let page = 0; page < 10; page += 1) {
     const adapter = { ...wta.calendar, request: () => ({ url: `https://api.wtatennis.com/tennis/tournaments/?page=${page}&pageSize=100&from=${from}&to=${to}` }) };
     const r = await fetchRun(ctx, adapter, {});
-    if (r.state !== 'PASS') break;
-    editions.push(...r.records);
-    if (r.records.length < 100) break;
+    if (r.state !== 'PASS' && !(r.state === 'DEGRADED' && r.error === 'zero_records' && page === 0)) { ok = false; break; }
+    ok = true;
+    editions.push(...(r.records || []));
+    if ((r.records || []).length < 100) break;
   }
   if (editions.length) await writeEditions(ctx.store, editions, 'wta');
-  return editions;
+  return { ok, editions };
 }
 
 export async function editionContext(e) {

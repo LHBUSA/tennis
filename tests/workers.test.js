@@ -50,3 +50,14 @@ test('tennis-ingest runs are admin-gated and its canary plan is valid', async ()
   assert.equal((await get(ingest, '/v1/runs', { method: 'POST' }, {})).status, 401, 'no token configured => closed');
   for (const a of canaryPlan()) assert.deepEqual(validateAdapter(a), [], a.key);
 });
+
+test('tennis-live polls only live editions, stops an edition once nothing is live, and hands ownership to ingest', async () => {
+  const { liveCycle } = await import('../workers/tennis-live/src/index.js');
+  const mem = new Map([['live:editions', JSON.stringify([])]]);
+  const kv = { get: async (k, t) => (mem.has(k) ? (t === 'json' ? JSON.parse(mem.get(k)) : mem.get(k)) : null), put: async (k, v) => { mem.set(k, v); }, delete: async (k) => mem.delete(k) };
+  const env = { TENNIS_STATE: kv, TENNIS_MODEL_SUPABASE_URL: 'https://tkmlnhmylqnttmnsnief.supabase.co', TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY: 'k' };
+  const r = await liveCycle(env, { sleep: async () => {} });
+  assert.equal(r.editions, 0);
+  assert.ok(mem.get('live:heartbeat'));
+  assert.deepEqual(JSON.parse(mem.get('live:owned')), []);
+});
