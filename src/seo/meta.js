@@ -1,6 +1,8 @@
 // One function decides title / description / canonical / robots for every route. The prerender step
 // writes it into each static HTML file; the browser router applies the same result on navigation.
 
+import { PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
+
 export const SITE = 'https://tennis.propbetedge.ai';
 export const BRAND = 'PropBetEdge Tennis';
 export const INDEX_ROBOTS = 'index, follow, max-image-preview:large, max-snippet:-1';
@@ -28,7 +30,7 @@ export function siteJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@graph': [
-      { '@type': 'Organization', '@id': `${SITE}/#org`, name: 'PropBetEdge', url: 'https://propbetedge.ai/' },
+      { '@type': 'Organization', '@id': `${SITE}/#org`, name: 'PropBetEdge', url: 'https://propbetedge.ai/', sameAs: [PROPBETEDGE_X_URL] },
       { '@type': 'WebSite', '@id': `${SITE}/#site`, name: BRAND, url: `${SITE}/`, publisher: { '@id': `${SITE}/#org` } }
     ]
   };
@@ -46,6 +48,7 @@ export function headHtml(m) {
     `<meta property="og:url" content="${e(m.canonical)}" />`,
     `<meta property="og:title" content="${e(m.title)}" />`,
     `<meta property="og:description" content="${e(m.description)}" />`,
-    `<meta name="twitter:card" content="summary" />`
+    `<meta name="twitter:card" content="summary" />`,
+    `<meta name="twitter:site" content="${PROPBETEDGE_X_HANDLE}" />`
   ].join('\n    ');
 }

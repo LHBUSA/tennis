@@ -77,6 +77,7 @@ export function footerHtml() {
         <a href="${NETWORK.learn.href}">${NETWORK.learn.label}</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
         <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
+        <a class="ftr-x" href="${NETWORK.x.href}" target="_blank" rel="noopener noreferrer" aria-label="${NETWORK.x.title} (${NETWORK.x.label})" title="${NETWORK.x.title}"><span aria-hidden="true">&#x1D54F;</span> ${NETWORK.x.label}</a>
         <a href="/sources">Sources</a>
         <a href="/methodology">Methodology</a>
       </nav>
