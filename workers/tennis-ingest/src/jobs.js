@@ -249,12 +249,11 @@ async function wimaSeed(ctx, ids) {
         const s2 = members(a.team2);
         const m = byKey.get(key(String(a.round), [...s1, ...s2].map((x) => x.last)));
         if (!m) continue;
-        for (const [arr, side] of [[s1, 'A'], [s2, 'B'], [s1, 'B'], [s2, 'A']]) {
-          const feed = m.sides[side];
-          if (arr.length !== feed.length || !arr.every((x, i) => foldName(x.last) === foldName(feed[i].last_name))) continue;
-          arr.forEach((x, i) => { const t = feed[i].tour_id; if (t?.provider === 'atp' && !ids[x.id]) ids[x.id] = t.provider_id; });
-          break;
-        }
+        // both archive teams must match the feed's two sides (either orientation) by identical surnames
+        const same = (arr, feed) => arr.length === feed.length && arr.every((x, i) => foldName(x.last) === foldName(feed[i].last_name));
+        const orient = same(s1, m.sides.A) && same(s2, m.sides.B) ? [[s1, m.sides.A], [s2, m.sides.B]] : same(s1, m.sides.B) && same(s2, m.sides.A) ? [[s1, m.sides.B], [s2, m.sides.A]] : null;
+        if (!orient) continue;
+        for (const [arr, feed] of orient) arr.forEach((x, i) => { const t = feed[i].tour_id; if (t?.provider === 'atp' && !ids[x.id]) ids[x.id] = t.provider_id; });
       }
     }
     await ctx.kv.put('wima:join2025', iso(new Date()), { expirationTtl: 30 * 86400 });

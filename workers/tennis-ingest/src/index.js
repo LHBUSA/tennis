@@ -226,7 +226,8 @@ async function tickInner(env, store, kv, force) {
 
   // 6. weekly identity jobs
   await step(ctx, 'identity', async () => {
-    if (ctx.upstream >= UPSTREAM_BUDGET) return 'budget_spent';
+    // one Wikidata page per tick: a small reserved allowance so history backfill can never starve identity
+    if (ctx.upstream >= UPSTREAM_BUDGET + 5) return 'budget_spent';
     const st = (await kv.get('wd:state', 'json')) || { props: ['P597', 'P536'], i: 0, offset: 0, next_at: null };
     if (st.next_at && Date.now() < Date.parse(st.next_at)) return 'fresh';
     const prop = st.props[st.i];
