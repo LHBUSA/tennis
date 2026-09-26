@@ -40,7 +40,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/app-shell.html"
+      "destination": "/app-shell"
     }
   ],
   "headers": [
