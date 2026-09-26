@@ -18,13 +18,15 @@ import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import { buildDnaSnapshots } from './dna-job.js';
-import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
+import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
 const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
 const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
-const WIMBLEDON_YEARS = [2022, 2023, 2024, 2025];
+// Wimbledon matches come ONLY from the draws archive (wimbledonArchiveStep) so one real match is one row; the
+// current-edition feed is used for identity (2025 join) and, later, 2025 stats/point-by-point enrichment.
+const WIMBLEDON_YEARS = [];
 const UPSTREAM_BUDGET = 40;
 
 /** Kept for the canary endpoint + tests: one bounded request per adapter. */
@@ -144,6 +146,9 @@ async function tickInner(env, store, kv, force) {
       const lane = await rankingHistoryStep();
       if (lane !== 'rank_history_complete') return lane;
     }
+    // Men's history first: the Wimbledon draws archive (MS, MD, QS; 2025 -> 1979), one draw or identity batch per tick.
+    const wa = await wimbledonArchiveStep(ctx);
+    if (!wa.done) return { wimbledon_archive: wa };
     // bounded Slam jobs first (men's Slam results + genuine point-by-point), then the long history queue.
     // A source that refuses us (403 / challenge) is recorded and skipped for a week — never worked around.
     for (const y of WIMBLEDON_YEARS) {

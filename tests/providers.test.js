@@ -247,3 +247,26 @@ test('AO qualifying: stage qualifying, rounds Q-1..Q-3 (never confused with an A
   assert.ok(out.length > 0);
   for (const m of out) { assert.equal(m.round_code, 'Q-2'); assert.equal(m.format_key, 'BO3_FINAL_TB10'); assert.equal(m.event_type, 'MS'); }
 });
+
+test('Wimbledon archive: stable order-free keys, era formats, retirements from incomplete sets, ids only via mapping', () => {
+  const t = (id, last, s, tb, won) => ({ playerA_id: id, playerA_first_name: 'X', playerA_last_name: last, playerA_nat: 'AAA', playerB_id: '', ...Object.fromEntries([1, 2, 3, 4, 5].flatMap((i) => [[`s${i}`, s[i - 1] ?? ''], [`t${i}`, tb[i - 1] ?? '']])), won, seed: '' });
+  const u1 = '11111111-1111-4111-8111-111111111111';
+  const u2 = '22222222-2222-4222-8222-222222222222';
+  const draw = [
+    { id: '1000', round: '1', team1: t(u1, 'One', [6, 6, 6], [], true), team2: t(u2, 'Two', [3, 4, 2], [], false) },
+    { id: '1000', round: '2', team1: t(u2, 'Two', [6, 3, 6, 6], ['', '', '5', ''], false), team2: t(u1, 'One', [4, 6, 7, 1], [], true) }
+  ];
+  const r = slams.parseWimbledonArchive(draw, { event: 'MS', year: 2010, idMap: { [u1]: 'A0B1' } });
+  assert.equal(r.length, 2);
+  assert.notEqual(r[0].provider_match_id, r[1].provider_match_id, 'the constant archive id is never the key');
+  assert.equal(r[0].status, 'completed');
+  assert.equal(r[0].format_key, 'BO5_FINAL_ADV', 'advantage deciding set before 2019');
+  assert.deepEqual(r[0].sides.A[0].tour_id, { provider: 'atp', provider_id: 'A0B1' });
+  assert.equal(r[0].sides.B[0].tour_id, null, 'no mapping -> no tour id (held, never guessed)');
+  assert.equal(r[1].status, 'retired', 'winner recorded with an incomplete fourth set');
+  assert.equal(r[1].retired_side, 'A');
+  assert.deepEqual(r[1].sets[2].tiebreak, { A: 5, B: 7, winner_points_derived: true }, 'only the loser tiebreak points given: winner total derived and flagged');
+  assert.equal(slams.wimArchiveFormat(5, 2020), 'BO5_FINAL_TB7_AT12');
+  assert.equal(slams.wimArchiveFormat(5, 2024), 'BO5_FINAL_TB10');
+  assert.equal(slams.wimArchiveFormat(5, 1970), null, 'pre-1979 eras are not mapped until audited');
+});

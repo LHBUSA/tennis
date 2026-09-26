@@ -27,6 +27,9 @@ export const FORMATS = Object.freeze({
   BO3_FINAL_TB10: fmt({ best_of: 3, final_set: { mode: 'tiebreak', tiebreak_to: 10 } }),
   // Historical advantage deciding set.
   BO5_FINAL_ADV: fmt({ best_of: 5, final_set: { mode: 'advantage' } }),
+  // Wimbledon 2019-2021: deciding set tiebreak (to 7) at 12-12
+  BO5_FINAL_TB7_AT12: fmt({ best_of: 5, final_set: { mode: 'tiebreak', tiebreak_to: 7, tiebreak_at: 12 } }),
+  BO3_FINAL_TB7_AT12: fmt({ best_of: 3, final_set: { mode: 'tiebreak', tiebreak_to: 7, tiebreak_at: 12 } }),
   BO3_FINAL_ADV: fmt({ best_of: 3, final_set: { mode: 'advantage' } }),
   // ATP/WTA tour doubles: no-ad, match tiebreak to 10 in lieu of a third set.
   DOUBLES_TOUR: fmt({ best_of: 3, no_ad: true, final_set: { mode: 'match_tiebreak', tiebreak_to: 10 } }),
@@ -41,7 +44,7 @@ function fmt(f) {
     tiebreak_at: f.tiebreak_at ?? 6,
     tiebreak_to: f.tiebreak_to ?? 7,
     no_ad: !!f.no_ad,
-    final_set: Object.freeze({ mode: f.final_set.mode, tiebreak_to: f.final_set.tiebreak_to ?? 7 })
+    final_set: Object.freeze({ mode: f.final_set.mode, tiebreak_to: f.final_set.tiebreak_to ?? 7, tiebreak_at: f.final_set.tiebreak_at ?? null })
   });
 }
 
@@ -64,6 +67,8 @@ export class ScoringError extends Error {
 
 export const setsToWin = (format) => Math.ceil(format.best_of / 2);
 const isFinalSet = (format, idx) => idx === format.best_of - 1;
+/** Games-all at which a set's tiebreak is played (a deciding set may differ, e.g. 12-12 at Wimbledon 2019-21). */
+const tbAt = (format, idx) => (isFinalSet(format, idx) && format.final_set.tiebreak_at ? format.final_set.tiebreak_at : format.tiebreak_at);
 
 function newSet(format, idx, server) {
   const matchTb = isFinalSet(format, idx) && format.final_set.mode === 'match_tiebreak';
@@ -111,7 +116,7 @@ function setIsWon(format, idx, games) {
   const lead = Math.abs(games.A - games.B);
   const mode = isFinalSet(format, idx) ? format.final_set.mode : 'tiebreak';
   if (mode === 'advantage') return hi >= format.games_per_set && lead >= 2;
-  return hi >= format.games_per_set && lead >= 2 && hi <= format.tiebreak_at + 1;
+  return hi >= format.games_per_set && lead >= 2 && hi <= tbAt(format, idx) + 1;
 }
 
 function finishSet(s, winner, nextServer) {
@@ -168,7 +173,7 @@ export function applyPoint(state, side) {
     return s;
   }
   const mode = isFinalSet(s.format, idx) ? s.format.final_set.mode : 'tiebreak';
-  if (mode !== 'advantage' && set.games.A === s.format.tiebreak_at && set.games.B === s.format.tiebreak_at) {
+  if (mode !== 'advantage' && set.games.A === tbAt(s.format, idx) && set.games.B === tbAt(s.format, idx)) {
     set.tiebreak = { A: 0, B: 0, first_server: nextServer };
   }
   s.server = nextServer;
@@ -375,7 +380,7 @@ export function validateScore(parsed, formatInput) {
       return;
     }
     const mode = isFinalSet(format, idx) ? format.final_set.mode : 'tiebreak';
-    const needsTb = mode !== 'advantage' && Math.max(A, B) === format.tiebreak_at + 1 && Math.min(A, B) === format.tiebreak_at;
+    const needsTb = mode !== 'advantage' && Math.max(A, B) === tbAt(format, idx) + 1 && Math.min(A, B) === tbAt(format, idx);
     if (needsTb && set.tiebreak) {
       const to = tiebreakTarget(format, idx);
       const tb = set.tiebreak;
@@ -400,7 +405,7 @@ function isTiebreakSet(format, idx, set) {
   const mode = isFinalSet(format, idx) ? format.final_set.mode : 'tiebreak';
   if (mode === 'advantage') return false;
   const { A, B } = set.games;
-  return Math.max(A, B) === format.tiebreak_at + 1 && Math.min(A, B) === format.tiebreak_at;
+  return Math.max(A, B) === tbAt(format, idx) + 1 && Math.min(A, B) === tbAt(format, idx);
 }
 
 /** Canonical display string, winner-agnostic (A-B as stored): "6-4 7-6(5) [10-8]". */

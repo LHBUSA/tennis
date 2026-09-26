@@ -241,3 +241,14 @@ test('situation: set point and match point', () => {
   assert.deepEqual(situation(s).match_point, ['A']);
   assert.deepEqual(situation(s).set_point, []);
 });
+
+test('deciding-set tiebreak at 12-12 (Wimbledon 2019-2021): 13-12 with a tiebreak is valid, 7-6 in the fifth is not a tiebreak set', async () => {
+  const { parseScore, validateScore } = await import('../workers/shared/canonical/scoring.js');
+  const ok = validateScore(parseScore('6-4 3-6 6-3 3-6 13-12(3)', 'BO5_FINAL_TB7_AT12'), 'BO5_FINAL_TB7_AT12');
+  assert.equal(ok.ok, true, JSON.stringify(ok.errors));
+  assert.equal(ok.winner, 'A');
+  const bad = validateScore(parseScore('6-4 3-6 6-3 3-6 7-6(3)', 'BO5_FINAL_TB7_AT12'), 'BO5_FINAL_TB7_AT12');
+  assert.equal(bad.ok, false, 'a 7-6 deciding set is not finished under 12-12 rules');
+  const normal = validateScore(parseScore('7-6(3) 6-4 6-4', 'BO5_FINAL_TB7_AT12'), 'BO5_FINAL_TB7_AT12');
+  assert.equal(normal.ok, true, 'earlier sets still tiebreak at 6-6');
+});

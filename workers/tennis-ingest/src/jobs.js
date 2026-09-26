@@ -212,3 +212,88 @@ export async function wikidataPage(ctx, prop, offset, limit = 1500) {
 }
 
 export { iso, addDays };
+
+// ---- Wimbledon draws archive backfill (men: MS, then MD, then QS; 2025 -> 1979) ---------------------------
+// Identity: archive UUID -> ATP id only through exact mappings, cached in KV 'wima:ids' ({uuid: 'S0AG' | 0}):
+//   1. Wikidata P4503 (Wimbledon player id) with P536 (ATP id) — CC0, loaded once;
+//   2. the SAME match in Wimbledon's 2025 current-edition feed (same publisher, same round, identical
+//      surnames on the same side) whose players carry ATP ids;
+//   3. the archive player record's own `tourid`.
+// A UUID with none of these stays unmapped (0): its matches are held as unresolved identities, never guessed.
+const WIMA_EVENTS = ['MS', 'MD', 'QS'];
+const WIMA_FLOOR = 1979;
+const foldName = (s) => String(s || '').normalize('NFKD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z]/g, '');
+
+async function wimaIds(ctx) {
+  return (await ctx.kv.get('wima:ids', 'json')) || {};
+}
+
+async function wimaSeed(ctx, ids) {
+  if (!(await ctx.kv.get('wima:p4503'))) {
+    const query = 'SELECT ?w ?atp WHERE { ?h wdt:P4503 ?w . ?h wdt:P536 ?atp }';
+    const adapter = { ...open.wikidataCrosswalk, key: 'wikidata.p4503', request: () => ({ url: `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(query)}`, headers: { accept: 'application/sparql-results+json' } }), parse: (body) => (JSON.parse(body).results?.bindings || []).map((b) => ({ uuid: b.w.value, atp: String(b.atp.value).toUpperCase() })) };
+    const r = await fetchRun(ctx, adapter, {});
+    if (r.state === 'PASS') { for (const x of r.records) if (/^[0-9a-f-]{36}$/.test(x.uuid) && /^[A-Z0-9]{4}$/.test(x.atp)) ids[x.uuid] = x.atp; await ctx.kv.put('wima:p4503', iso(new Date()), { expirationTtl: 30 * 86400 }); }
+  }
+  if (!(await ctx.kv.get('wima:join2025'))) {
+    for (const ev of WIMA_EVENTS) {
+      const cur = await fetchRun(ctx, slams.wimbledonDraw, { year: 2025, eventCode: ev });
+      const arch = await fetchRun(ctx, slams.wimbledonArchiveRaw, { event: ev, year: 2025 });
+      if (cur.state !== 'PASS' || arch.state !== 'PASS') continue;
+      const key = (round, names) => `${round}|${names.map(foldName).sort().join('+')}`;
+      const byKey = new Map();
+      for (const m of cur.records) byKey.set(key(String(m.round_code).replace(/^.*-/, ''), [...m.sides.A, ...m.sides.B].map((p) => p.last_name)), m);
+      for (const a of arch.records) {
+        const members = (t) => ['A', 'B'].map((k) => ({ id: t[`player${k}_id`], last: t[`player${k}_last_name`] })).filter((x) => x.id);
+        const s1 = members(a.team1);
+        const s2 = members(a.team2);
+        const m = byKey.get(key(String(a.round), [...s1, ...s2].map((x) => x.last)));
+        if (!m) continue;
+        for (const [arr, side] of [[s1, 'A'], [s2, 'B'], [s1, 'B'], [s2, 'A']]) {
+          const feed = m.sides[side];
+          if (arr.length !== feed.length || !arr.every((x, i) => foldName(x.last) === foldName(feed[i].last_name))) continue;
+          arr.forEach((x, i) => { const t = feed[i].tour_id; if (t?.provider === 'atp' && !ids[x.id]) ids[x.id] = t.provider_id; });
+          break;
+        }
+      }
+    }
+    await ctx.kv.put('wima:join2025', iso(new Date()), { expirationTtl: 30 * 86400 });
+  }
+  await ctx.kv.put('wima:ids', JSON.stringify(ids));
+}
+
+export async function wimbledonArchiveStep(ctx, { lookups = 15 } = {}) {
+  const st = (await ctx.kv.get('bf:wima', 'json')) || { e: 0, year: 2025 };
+  if (st.e >= WIMA_EVENTS.length) return { done: true };
+  const event = WIMA_EVENTS[st.e];
+  const ids = await wimaIds(ctx);
+  await wimaSeed(ctx, ids);
+  const raw = await fetchRun(ctx, slams.wimbledonArchiveRaw, { event, year: st.year });
+  if (raw.state !== 'PASS') {
+    // an event/year the archive does not hold: move on (recorded in the run ledger)
+    const next = st.year - 1 < WIMA_FLOOR ? { e: st.e + 1, year: 2025 } : { e: st.e, year: st.year - 1 };
+    await ctx.kv.put('bf:wima', JSON.stringify(next));
+    return { event, year: st.year, state: raw.state, error: raw.error };
+  }
+  const uuids = [...new Set(raw.records.flatMap((m) => [m.team1, m.team2].flatMap((t) => [t?.playerA_id, t?.playerB_id])).filter(Boolean))];
+  const unknown = uuids.filter((u) => !(u in ids));
+  let looked = 0;
+  for (const u of unknown.slice(0, lookups)) {
+    const r = await fetchRun(ctx, slams.wimbledonArchivePlayer, { uuid: u });
+    ids[u] = r.state === 'PASS' && r.records[0]?.atp ? r.records[0].atp : 0;
+    looked += 1;
+  }
+  await ctx.kv.put('wima:ids', JSON.stringify(ids));
+  if (unknown.length > looked) return { event, year: st.year, identity: { players: uuids.length, mapped: uuids.filter((u) => ids[u]).length, looked_up: looked, remaining: unknown.length - looked } };
+  const idMap = Object.fromEntries(uuids.filter((u) => ids[u]).map((u) => [u, ids[u]]));
+  const records = slams.parseWimbledonArchive(raw.records, { event, year: st.year, idMap });
+  const tid = await tournamentId('slam:wimbledon');
+  const eid = await editionId(tid, st.year);
+  await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'wimbledon', name: 'Wimbledon', competition_key: 'grand_slam', country: 'GBR', city: 'London' }], { onConflict: 'tournament_id', ignore: true });
+  await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: st.year, competition_key: 'grand_slam', surface: 'grass', indoor: false, source_family: 'wimbledon', name: `Wimbledon ${st.year}`, level: 'Grand Slam', city: 'London', country: 'GBR' }], { onConflict: 'edition_id', ignore: true });
+  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'grass', indoor: false }, { captureId: raw.capture?.capture_id || null });
+  await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.wimbledon&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
+  const next = st.year - 1 < WIMA_FLOOR ? { e: st.e + 1, year: 2025 } : { e: st.e, year: st.year - 1 };
+  await ctx.kv.put('bf:wima', JSON.stringify(next));
+  return { event, year: st.year, players: uuids.length, mapped: Object.keys(idMap).length, ...w };
+}

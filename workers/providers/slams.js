@@ -251,3 +251,123 @@ export function parseAusopenStats(mc) {
   const per_set = key.sets.filter((s) => /^\d+$/.test(String(s.set))).map((s) => { const x = aoSetStats(s.stats); return x ? { set_no: Number(s.set), A: x.A, B: x.B } : null; }).filter(Boolean);
   return { provider: 'ausopen', sides: total, per_set };
 }
+
+// ---- Wimbledon draws archive (da.wimbledon.com) — men's history 1979+ -------------------------------------
+// Each draw is a flat array of matches: team{1,2}.playerA/B_id (archive UUID), s1..s5 games, t1..t5 tiebreak
+// points, won. No explicit retirement marker: an incomplete final set with a recorded winner = retired
+// (never a cause). No scores + a winner = walkover. Player identity: archive UUID -> ATP id only through an
+// exact mapping supplied by the caller (params.idMap); a player without one stays unresolved (held).
+const ARCH_EVENTS = { MS: { event_type: 'MS', stage: 'main', gender: 'M' }, MD: { event_type: 'MD', stage: 'main', gender: 'M' }, QS: { event_type: 'MS', stage: 'qualifying', gender: 'M' } };
+const ARCH_ROUND = { 1: '1', 2: '2', 3: '3', 4: '4', 5: '5', Q: 'Q', S: 'S', F: 'F' };
+
+/** Deciding-set rule at Wimbledon by year (men): advantage to 2018, 12-12 tiebreak 2019-21, 10-point from 2022. */
+export function wimArchiveFormat(bestOf, year) {
+  if (![3, 5].includes(bestOf) || !(year >= 1979)) return null;
+  if (year >= 2022) return bestOf === 5 ? 'BO5_FINAL_TB10' : 'BO3_FINAL_TB10';
+  if (year >= 2019) return bestOf === 5 ? 'BO5_FINAL_TB7_AT12' : 'BO3_FINAL_TB7_AT12';
+  return bestOf === 5 ? 'BO5_FINAL_ADV' : 'BO3_FINAL_ADV';
+}
+
+export function parseWimbledonArchive(arr, { event, year, idMap = {} } = {}) {
+  const ev = ARCH_EVENTS[event];
+  if (!ev || !Array.isArray(arr)) return [];
+  const out = [];
+  for (const m of arr) {
+    const warnings = [];
+    const t1 = m.team1 || {};
+    const t2 = m.team2 || {};
+    const member = (t, k) => {
+      const id = t[`player${k}_id`];
+      if (!id) return null;
+      const atp = idMap[id] || null;
+      return { provider: 'wimbledon_archive', provider_id: String(id), tour_id: atp ? { provider: 'atp', provider_id: String(atp).toUpperCase() } : null, first_name: t[`player${k}_first_name`] || null, last_name: t[`player${k}_last_name`] || null, country: t[`player${k}_nat`] || null, gender: 'M' };
+    };
+    const side = (t) => ['A', 'B'].map((k) => member(t, k)).filter(Boolean);
+    const A = side(t1);
+    const B = side(t2);
+    if (!A.length || !B.length) continue; // byes / empty slots
+    const winner = t1.won === true ? 'A' : t2.won === true ? 'B' : null;
+    const sets = [];
+    for (let i = 1; i <= 5; i += 1) {
+      const a = t1[`s${i}`];
+      const b = t2[`s${i}`];
+      if (a === '' || a == null || b === '' || b == null) break;
+      const ga = Number(a);
+      const gb = Number(b);
+      if (!Number.isInteger(ga) || !Number.isInteger(gb)) { warnings.push(`bad_set_${i}`); break; }
+      const ta = t1[`t${i}`] === '' || t1[`t${i}`] == null ? null : Number(t1[`t${i}`]);
+      const tb = t2[`t${i}`] === '' || t2[`t${i}`] == null ? null : Number(t2[`t${i}`]);
+      let tiebreak = null;
+      if (ta != null && tb != null) tiebreak = { A: ta, B: tb, winner_points_derived: false };
+      else if (ta != null || tb != null) {
+        // only one side's tiebreak points: derive the set winner's total (to 7, by two) and flag it as derived
+        const loserPts = ga > gb ? tb : ta;
+        if (loserPts != null) { const w = Math.max(7, loserPts + 2); tiebreak = ga > gb ? { A: w, B: loserPts, winner_points_derived: true } : { A: loserPts, B: w, winner_points_derived: true }; }
+        else warnings.push(`tiebreak_loser_points_missing:set${i}`);
+      }
+      sets.push({ games: { A: ga, B: gb }, tiebreak, is_match_tiebreak: false });
+    }
+    const setWon = (s) => { const hi = Math.max(s.games.A, s.games.B); const lo = Math.min(s.games.A, s.games.B); return hi >= 6 && (hi - lo >= 2 || (hi === 7 && lo === 6) || (hi === 13 && lo === 12)); };
+    const wonBy = { A: 0, B: 0 };
+    for (const s of sets) if (setWon(s)) wonBy[s.games.A > s.games.B ? 'A' : 'B'] += 1;
+    let status = null;
+    let bestOf = null;
+    if (!sets.length && winner) status = 'walkover';
+    else if (winner && (wonBy[winner] === 3 || wonBy[winner] === 2) && sets.every(setWon) && wonBy[winner] > wonBy[winner === 'A' ? 'B' : 'A']) {
+      status = 'completed';
+      bestOf = wonBy[winner] === 3 ? 5 : 3;
+    } else if (winner) {
+      status = 'retired';
+      // best of five is provable when the match reached a fourth set or either side had two sets
+      bestOf = sets.length >= 4 || wonBy.A >= 2 || wonBy.B >= 2 ? 5 : event === 'MS' ? 5 : null;
+    } else warnings.push('no_winner');
+    if (status === 'completed' && bestOf === 3 && event === 'MS') warnings.push('men_main_draw_best_of_three');
+    const format_key = status === 'walkover' ? wimArchiveFormat(event === 'QS' ? 3 : 5, year) : wimArchiveFormat(bestOf, year);
+    // a derived tiebreak total in the deciding set follows that set's rule: 10-point from 2022
+    if (bestOf && year >= 2022) {
+      const last = sets[bestOf - 1];
+      if (last?.tiebreak?.winner_points_derived) { const lo = Math.min(last.tiebreak.A, last.tiebreak.B); const w = Math.max(10, lo + 2); last.tiebreak = last.games.A > last.games.B ? { A: w, B: lo, winner_points_derived: true } : { A: lo, B: w, winner_points_derived: true }; }
+    }
+    if (!format_key) warnings.push('format_unprovable');
+    const roundRaw = String(m.round || '');
+    const round_code = ev.stage === 'qualifying' ? (/^\d$/.test(roundRaw) ? `Q-${roundRaw}` : null) : ARCH_ROUND[roundRaw] || null;
+    if (!round_code) warnings.push(`unmapped_round:${roundRaw}`);
+    out.push({
+      // the archive 'id' is a constant placeholder; two players meet at most once per event, so year + event +
+      // round + the sorted archive UUIDs is a stable, order-independent key
+      type: 'match', provider: 'wimbledon', provider_match_id: `arch-${year}-${event}-${roundRaw}-${[...A, ...B].map((x) => x.provider_id).sort().join('+')}`, provider_event: { id: event, year },
+      event_type: ev.event_type, stage: ev.stage, round_code, format_key, status, winner_side: winner,
+      end_reason: status === 'retired' ? 'retirement' : status === 'walkover' ? 'walkover' : status === 'completed' ? 'completed' : null,
+      retired_side: status === 'retired' ? (winner === 'A' ? 'B' : 'A') : null, withdrawn_side: status === 'walkover' ? (winner === 'A' ? 'B' : 'A') : null,
+      sets: status === 'walkover' ? [] : sets, live: null, sides: { A, B },
+      seeds: { A: Number(t1.seed) || null, B: Number(t2.seed) || null }, entry: { A: null, B: null },
+      court_name: m.crt || null, duration_s: null, source_updated_at: null, warnings
+    });
+  }
+  return out;
+}
+
+export const wimbledonArchive = {
+  key: 'wimbledon.archive',
+  family: 'wimbledon',
+  capabilities: ['draws', 'set_game_scoring', 'withdrawals_ret_wo', 'history', 'player_identity'],
+  parser_version: PARSER,
+  cadence: { class: 'history', idle_s: 86400 * 30 },
+  request: ({ event, year }) => ({ url: `https://da.wimbledon.com/v1/draws_archive/draw/${event}/${year}` }),
+  shape: (body) => { const j = safeJson(body); return Array.isArray(j) ? (j.length ? requirePaths(j[0], ['id', 'round', 'team1', 'team2']) : ['empty_draw']) : ['not_array']; },
+  parse: (body, meta = {}) => parseWimbledonArchive(safeJson(body), { event: meta.params?.event, year: Number(meta.params?.year), idMap: meta.params?.idMap || {} })
+};
+
+export const wimbledonArchivePlayer = {
+  key: 'wimbledon.archive_player',
+  family: 'wimbledon',
+  capabilities: ['player_identity'],
+  parser_version: PARSER,
+  cadence: { class: 'history', idle_s: 86400 * 30 },
+  request: ({ uuid }) => ({ url: `https://da.wimbledon.com/v1/draws_archive/player/${uuid}` }),
+  shape: (body) => { const j = safeJson(body); return j?.id ? [] : ['no_player']; },
+  parse: (body) => { const j = safeJson(body); const t = tourIdFromSlamId(j.tourid); return [{ uuid: j.id, atp: t?.provider === 'atp' ? t.provider_id : null, name: [j.firstname, j.lastname].filter(Boolean).join(' '), country: j.country || null }]; }
+};
+
+/** Raw archive draw (identity mapping needs every UUID before parsing). */
+export const wimbledonArchiveRaw = { ...wimbledonArchive, key: 'wimbledon.archive', parse: (body) => safeJson(body) || [] };
