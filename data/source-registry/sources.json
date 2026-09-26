@@ -1,1019 +1,1050 @@
 {
- "registry_version": 1,
- "updated_at": "2026-09-26",
- "cost_target": "$0 data licensing / API cost",
- "directive": "docs/TENNIS_SOURCE_MATRIX.md (owner directive 2026-09-26: we build the data layer, we do not rent it)",
- "families": [
-  {
-   "key": "wta",
-   "label": "WTA"
-  },
-  {
-   "key": "atp",
-   "label": "ATP"
-  },
-  {
-   "key": "itf",
-   "label": "ITF"
-  },
-  {
-   "key": "slams",
-   "label": "Grand Slams"
-  },
-  {
-   "key": "team",
-   "label": "Team events"
-  },
-  {
-   "key": "wikidata",
-   "label": "Wikidata"
-  },
-  {
-   "key": "open-data",
-   "label": "Open data"
-  },
-  {
-   "key": "odds",
-   "label": "Odds"
-  },
-  {
-   "key": "commercial",
-   "label": "Commercial (reference only)"
+  "registry_version": 1,
+  "updated_at": "2026-09-26",
+  "cost_target": "$0 data licensing / API cost",
+  "directive": "docs/TENNIS_SOURCE_MATRIX.md (owner directive 2026-09-26: we build the data layer, we do not rent it)",
+  "families": [
+    {
+      "key": "wta",
+      "label": "WTA"
+    },
+    {
+      "key": "atp",
+      "label": "ATP"
+    },
+    {
+      "key": "itf",
+      "label": "ITF"
+    },
+    {
+      "key": "slams",
+      "label": "Grand Slams"
+    },
+    {
+      "key": "team",
+      "label": "Team events"
+    },
+    {
+      "key": "wikidata",
+      "label": "Wikidata"
+    },
+    {
+      "key": "open-data",
+      "label": "Open data"
+    },
+    {
+      "key": "odds",
+      "label": "Odds"
+    },
+    {
+      "key": "commercial",
+      "label": "Commercial (reference only)"
+    }
+  ],
+  "sources": [
+    {
+      "key": "wta.rankings.singles",
+      "family": "wta",
+      "name": "WTA API — singles rankings (dated lists, historical)",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/players/ranked?page={p}&pageSize={n}&type=rankSingles&sort=asc&metric=SINGLES&at={YYYY-MM-DD}",
+      "capabilities": [
+        "rankings_singles",
+        "player_identity",
+        "player_bio",
+        "history"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.rankings.singles",
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "player": "integer (e.g. 324166)"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
+      "notes": "Historical lists by date (at=2015-01-05 returned that week). ~40-50% of connections reset and succeed on retry; the adapter retries patiently at 1 request per 1.5 s.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wta.rankings.doubles",
+      "family": "wta",
+      "name": "WTA API — doubles rankings",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/players/ranked?page={p}&pageSize={n}&type=rankDoubles&sort=asc&metric=DOUBLES&at={YYYY-MM-DD}",
+      "capabilities": [
+        "rankings_doubles",
+        "player_identity"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.rankings.doubles"
+      },
+      "native_ids": {
+        "player": "integer"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "notes": null
+    },
+    {
+      "key": "wta.race",
+      "family": "wta",
+      "name": "WTA API — Race rankings",
+      "tier": "official_tour",
+      "url": null,
+      "capabilities": [
+        "race"
+      ],
+      "verdict": "UNVERIFIED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Guessed parameters returned a list that is not the Race. Needs the parameters the site itself uses.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "wta.calendar",
+      "family": "wta",
+      "name": "WTA API — tournament calendar (WTA 1000/500/250/125)",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/tournaments/?page=0&pageSize={n}&from={date}&to={date}",
+      "capabilities": [
+        "calendar"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.calendar"
+      },
+      "native_ids": {
+        "tournament": "tournamentGroup.id + year"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
+      "notes": "Surface, indoor/outdoor, draw sizes and level. WTA 125 events included.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wta.matches",
+      "family": "wta",
+      "name": "WTA API — tournament matches (results + live state)",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches",
+      "capabilities": [
+        "schedule",
+        "live_state",
+        "set_game_scoring",
+        "doubles",
+        "qualifying",
+        "withdrawals_ret_wo"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.matches"
+      },
+      "native_ids": {
+        "match": "{EventID}-{year}-{MatchID}, e.g. LS002 / RS014 / LD003"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
+      "notes": "Live rows carry point score and server. 2026-09-26 end-to-end run: 103 of 104 rows (Singapore + Ankara WTA 125) normalized canonical; 1 self-contradictory source row (1178-2026-LD013) was held by score validation. Winner codes 5/7 unobserved and unmapped.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wta.match_stats",
+      "family": "wta",
+      "name": "WTA API — match statistics (per set + totals)",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches/{matchId}/stats",
+      "capabilities": [
+        "match_stats",
+        "serve_stats",
+        "return_stats"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.match_stats"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
+      "notes": "Field semantics verified against set scores; a consistency check (service points = points won; per-set sums = totals) runs on every parse.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "wta.player",
+      "family": "wta",
+      "name": "WTA API — player identity, match history, season stats, records",
+      "tier": "official_tour",
+      "url": "https://api.wtatennis.com/tennis/players/{id} ; /players/{id}/matches/ ; /players/{id}/year/{y} ; /players/{id}/records",
+      "capabilities": [
+        "player_identity",
+        "player_bio",
+        "match_history",
+        "h2h"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "player": "integer"
+      },
+      "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+      "terms": {
+        "url": "https://www.wtatennis.com/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Proven by Phase 0 audit requests; adapter not built yet. No dedicated H2H endpoint (404); H2H derives from match history.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "atp.site",
+      "family": "atp",
+      "name": "atptour.com — rankings, calendar, scores, stats, players (incl. Challenger)",
+      "tier": "official_tour",
+      "url": "https://www.atptour.com/ and app.atptour.com (all paths probed)",
+      "capabilities": [
+        "rankings_singles",
+        "rankings_doubles",
+        "race",
+        "calendar",
+        "draws",
+        "live_state",
+        "match_stats",
+        "player_bio",
+        "history"
+      ],
+      "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+      "evidence": {
+        "canary_key": "atp.rankings.page",
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "player": "4-char alphanumeric (e.g. S0AG)"
+      },
+      "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+      "terms": {
+        "url": "https://www.atptour.com/en/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission."
+      },
+      "production_status": "NOT_USED — Cloudflare challenge on every request; not evaded",
+      "notes": "ATP player ids reach us legitimately through Slam feeds and Wikidata instead.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "atp.infosys",
+      "family": "atp",
+      "name": "ATP stats platform (Infosys)",
+      "tier": "official_tour",
+      "url": "https://itp-atp-sls.infosys-platforms.com/prod/api/...",
+      "capabilities": [
+        "point_by_point",
+        "match_stats"
+      ],
+      "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": "https://www.atptour.com/en/terms-and-conditions",
+        "status": "RESTRICTS_AUTOMATED_ACCESS",
+        "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission."
+      },
+      "production_status": "NOT_USED",
+      "notes": "CloudFront 403.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "protennislive.draw_pdf",
+      "family": "atp",
+      "name": "ProTennisLive — ATP official draw / order-of-play PDFs",
+      "tier": "official_tour",
+      "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf (op.pdf = order of play)",
+      "capabilities": [
+        "draws"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "canary_key": "protennislive.draw_pdf"
+      },
+      "native_ids": {
+        "tournament": "ATP tournament id (e.g. 7581 Chengdu)"
+      },
+      "robots": "robots.txt -> 404 (none published)",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED — availability proven, PDF text extraction not built",
+      "notes": "Names only, no player ids. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "itf.site",
+      "family": "itf",
+      "name": "itftennis.com — World Tennis Tour calendar, results, rankings, players",
+      "tier": "official_federation",
+      "url": "https://www.itftennis.com/tennis/api/TournamentApi/... ; /PlayerRankApi/...",
+      "capabilities": [
+        "calendar",
+        "draws",
+        "schedule",
+        "rankings_singles",
+        "player_bio",
+        "match_history",
+        "history"
+      ],
+      "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+      "evidence": {
+        "canary_key": "itf.api.calendar",
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "player": "9-digit integer (e.g. 100241350)"
+      },
+      "robots": "User-agent: * / Disallow: /umbraco/ / Allow: /",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_USED — Incapsula JS challenge (served with HTTP 200); not evaded",
+      "notes": "ITF ids are available through Wikidata P599 (7,417 humans) for identity only.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "daviscup.draws",
+      "family": "team",
+      "name": "Davis Cup — draws & results pages",
+      "tier": "official_federation",
+      "url": "https://www.daviscup.com/en/draws-results/{season}/{stage}",
+      "capabilities": [
+        "draws"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "User-Agent: * / Allow: /",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "No challenge; the server-rendered payload holds team and nomination metadata only. Tie results load client-side from an endpoint not yet found.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "bjkcup.draws",
+      "family": "team",
+      "name": "Billie Jean King Cup — draws & results pages",
+      "tier": "official_federation",
+      "url": "https://www.billiejeankingcup.com/en/draws-results/{season}/{stage}",
+      "capabilities": [
+        "draws"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "User-Agent: * / Allow: /",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Same platform and limitation as daviscup.com.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "unitedcup.site",
+      "family": "team",
+      "name": "United Cup",
+      "tier": "official_tournament",
+      "url": "https://www.unitedcup.com/en/scores",
+      "capabilities": [
+        "schedule"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "Identical to atptour.com robots (same Sitecore platform)",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Reachable, off-season (January event); no data endpoint identified yet.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "olympics.tennis",
+      "family": "team",
+      "name": "Olympics — tennis results",
+      "tier": "official_tournament",
+      "url": "https://www.olympics.com/en/olympic-games/{games}/results/tennis",
+      "capabilities": [
+        "draws"
+      ],
+      "verdict": "UNVERIFIED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Requests hung with 0 bytes; not bypassed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "wimbledon.draws",
+      "family": "slams",
+      "name": "Wimbledon — draw/score JSON feeds",
+      "tier": "official_tournament",
+      "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/draws/{MS|LS|...}.json",
+      "capabilities": [
+        "draws",
+        "set_game_scoring",
+        "withdrawals_ret_wo",
+        "history",
+        "player_identity"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wimbledon.draws"
+      },
+      "native_ids": {
+        "player": "atps0ag / wta324219 (embeds tour ids)",
+        "match": "4-digit match_id"
+      },
+      "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+      "terms": {
+        "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+        "status": "RESTRICTS_COMMERCIAL_USE",
+        "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
+      },
+      "production_status": "INGEST — gentlemen's singles 2022-2025 (women's Slam matches come from the WTA API to avoid duplicates)",
+      "notes": "2025 Gentlemen's + Ladies' singles: 254 of 254 matches normalized canonical. Embedded ATP/WTA ids give a crosswalk with zero name matching.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wimbledon.players",
+      "family": "slams",
+      "name": "Wimbledon — players feed",
+      "tier": "official_tournament",
+      "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/players/players.json",
+      "capabilities": [
+        "player_bio",
+        "player_identity"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+      "terms": {
+        "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+        "status": "RESTRICTS_COMMERCIAL_USE",
+        "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
+      },
+      "production_status": "NOT_ADAPTED",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {},
+      "notes": null
+    },
+    {
+      "key": "wimbledon.pbp",
+      "family": "slams",
+      "name": "Wimbledon — point-by-point / match detail",
+      "tier": "official_tournament",
+      "url": null,
+      "capabilities": [
+        "point_by_point",
+        "match_stats"
+      ],
+      "verdict": "UNVERIFIED",
+      "evidence": {},
+      "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+      "terms": {
+        "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+        "status": "RESTRICTS_COMMERCIAL_USE",
+        "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Guessed paths returned S3 AccessDenied (also what a missing key returns). Needs the path the site itself requests.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "ausopen.results",
+      "family": "slams",
+      "name": "Australian Open — scores API (day results/schedule, players)",
+      "tier": "official_tournament",
+      "url": "https://prod-scores-api.ausopen.com/year/{year}/period/MD/day/{day}/{results|schedule}",
+      "capabilities": [
+        "schedule",
+        "set_game_scoring",
+        "player_identity",
+        "player_bio"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "ausopen.results"
+      },
+      "native_ids": {
+        "player": "ATPBK92 / WTA317790 (embeds tour ids)",
+        "match": "WS116"
+      },
+      "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "INGEST (player registry → identity) — owner-approved 2026-09-26; match rows not parsed yet",
+      "notes": "Player registry parsed (tour ids, gender, DOB, nationality). Current edition only; archive depth unknown.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "ausopen.matchcentre",
+      "family": "slams",
+      "name": "Australian Open — match centre (key stats + point-by-point)",
+      "tier": "official_tournament",
+      "url": "https://prod-scores-api.ausopen.com/match-centre/{matchId}",
+      "capabilities": [
+        "point_by_point",
+        "match_stats"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "109 point rows with running score observed for WS116. Current edition only.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "usopen.feeds",
+      "family": "slams",
+      "name": "US Open — score feeds",
+      "tier": "official_tournament",
+      "url": "https://www.usopen.org/en_US/scores/feeds/{year}/draws/MS.json",
+      "capabilities": [
+        "draws",
+        "set_game_scoring"
+      ],
+      "verdict": "UNVERIFIED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "robots.txt timed out",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Every request (including robots.txt) hung with 0 bytes: edge drop or outage. Recheck once; do not work around it.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "rolandgarros.results",
+      "family": "slams",
+      "name": "Roland-Garros — results pages (Nuxt payload)",
+      "tier": "official_tournament",
+      "url": "https://www.rolandgarros.com/en-us/results/{SM|SD|...}?round={n}&year={y}",
+      "capabilities": [
+        "set_game_scoring",
+        "history"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "player": "FFT-internal integer (e.g. 39723)"
+      },
+      "robots": "Disallow: /admin, /maintenance",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_ADAPTED",
+      "notes": "Data only inside the SSR payload; FFT ids need their own crosswalk.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wikidata.crosswalk",
+      "family": "wikidata",
+      "name": "Wikidata — identity crosswalk (ATP P536, WTA P597, ITF P599, Davis Cup P2641, BJK Cup P2642, image P18)",
+      "tier": "open_data",
+      "url": "https://query.wikidata.org/sparql",
+      "capabilities": [
+        "player_identity",
+        "player_media"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wikidata.crosswalk",
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "native_ids": {
+        "entity": "QID"
+      },
+      "robots": null,
+      "terms": {
+        "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+        "status": "OPEN_LICENSE",
+        "quote": "Structured data is CC0."
+      },
+      "production_status": "INGEST — weekly crosswalk (P597 + P536)",
+      "notes": "Humans with ids: ATP 6,582 · WTA 5,405 · ITF 7,417 · Davis Cup 2,926 · BJK Cup 2,167. WTA ids match api.wtatennis.com exactly.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "commons.license",
+      "family": "wikidata",
+      "name": "Wikimedia Commons — per-file license & author metadata",
+      "tier": "open_data",
+      "url": "https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url|size|extmetadata",
+      "capabilities": [
+        "player_media"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "commons.license"
+      },
+      "robots": null,
+      "terms": {
+        "url": "https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia",
+        "status": "PER_FILE_LICENSE",
+        "quote": "Each file carries its own license; only CC0 / PD / CC BY / CC BY-SA are accepted (docs/MEDIA.md)."
+      },
+      "production_status": "READY — rights-ledger input",
+      "attribution": "Per file: author + license shown with every photo",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "native_ids": {},
+      "notes": null
+    },
+    {
+      "key": "sackmann.tour_datasets",
+      "family": "open-data",
+      "name": "Jeff Sackmann tennis_atp / tennis_wta / tennis_slam_pointbypoint",
+      "tier": "open_data",
+      "url": "https://github.com/JeffSackmann/",
+      "capabilities": [
+        "history",
+        "point_by_point",
+        "match_stats"
+      ],
+      "verdict": "NOT_AVAILABLE",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_USED",
+      "notes": "Repositories no longer public (404 via web and API) as of 2026-09-26.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "sackmann.match_charting",
+      "family": "open-data",
+      "name": "Match Charting Project",
+      "tier": "open_data",
+      "url": "https://github.com/JeffSackmann/tennis_MatchChartingProject",
+      "capabilities": [
+        "point_by_point",
+        "history"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": "https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/README.md",
+        "status": "NON_COMMERCIAL_LICENSE",
+        "quote": "... is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. ... In other words: Attribution is required. Non-commercial use only."
+      },
+      "production_status": "NOT_USED — CC BY-NC-SA conflicts with a commercial product",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {},
+      "notes": null
+    },
+    {
+      "key": "tennisabstract.site",
+      "family": "open-data",
+      "name": "Tennis Abstract",
+      "tier": "secondary",
+      "url": "https://www.tennisabstract.com/",
+      "capabilities": [
+        "history",
+        "match_stats"
+      ],
+      "verdict": "DEGRADED",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": "Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_USED — data paths are robots-disallowed",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {},
+      "notes": null
+    },
+    {
+      "key": "odds.tennis_data_co_uk",
+      "family": "odds",
+      "name": "tennis-data.co.uk",
+      "tier": "secondary",
+      "url": "http://www.tennis-data.co.uk/{year}/{year}.xlsx",
+      "capabilities": [
+        "odds",
+        "history"
+      ],
+      "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "NOT_USED",
+      "notes": "Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "odds.the_odds_api",
+      "family": "odds",
+      "name": "The Odds API (existing PropBetEdge network subscription)",
+      "tier": "commercial",
+      "url": "https://the-odds-api.com/",
+      "capabilities": [
+        "odds"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {
+        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+      },
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — not a Tennis dependency",
+      "notes": "Docs list per-tournament keys only (Slams, 1000s, some 500s); none for 250s, Challengers, ITF or WTA 125. Not called.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.sportradar",
+      "family": "commercial",
+      "name": "Sportradar",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.stats",
+      "family": "commercial",
+      "name": "Stats Perform (Opta)",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.genius",
+      "family": "commercial",
+      "name": "Genius Sports",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.infront",
+      "family": "commercial",
+      "name": "Infront / Tennis Data Innovations",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.sportsdataio",
+      "family": "commercial",
+      "name": "SportsDataIO",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.api-tennis.com",
+      "family": "commercial",
+      "name": "api-tennis.com",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "commercial.rapidapi",
+      "family": "commercial",
+      "name": "RapidAPI tennis APIs",
+      "tier": "commercial",
+      "url": null,
+      "capabilities": [
+        "live_state",
+        "match_stats"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {},
+      "robots": null,
+      "terms": {
+        "url": null,
+        "status": "NOT_REVIEWED",
+        "quote": null
+      },
+      "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
+      "notes": "Recorded for comparison only; not probed.",
+      "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null,
+      "native_ids": {}
+    },
+    {
+      "key": "espn.tennis.core",
+      "family": "commercial",
+      "name": "ESPN tennis (core + site.web APIs, undocumented)",
+      "tier": "commercial",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/{atp|wta}/events?dates={YYYY}",
+      "capabilities": [
+        "schedule",
+        "set_game_scoring",
+        "rankings_singles",
+        "player_bio",
+        "history"
+      ],
+      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "evidence": {
+        "audited": "2026-09-26",
+        "accessible": "core API + site.web.api 200; site.api.espn.com 403 (Akamai edge block, not bypassed); summary 400; match statistics 404; no point-by-point; no Challengers; competitions verified 2015+",
+        "crosscheck": "AO 2026 and Wimbledon 2025 men's finals identical to official Slam feeds"
+      },
+      "robots": "espn.com robots.txt not readable for our UA (connection reset); core API /robots.txt 403",
+      "terms": {
+        "url": "https://disneytermsofuse.com/english/",
+        "status": "RESTRICTED",
+        "quote": "§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path."
+      },
+      "production_status": "NOT A PRODUCTION SOURCE. Not wired. Even internal reconciliation (gap detection, schedule verification, score-match flags, tournament discovery) awaits an explicit tennis-scoped owner decision; the 2026-09-25 NBA ESPN acceptance does not extend to tennis. Never customer-facing (brand stays DATA SOURCE · PropSports).",
+      "notes": "Identity: ESPN athlete ids are internal ints; the CC0 path is Wikidata P11585 (ESPN tennis id) <-> P536 (ATP id), 1,317 players with both, usable without touching ESPN.",
+      "storage_policy": null,
+      "attribution": null,
+      "native_ids": null
+    }
+  ],
+  "rights_decision": {
+    "date": "2026-09-26",
+    "by": "owner",
+    "decision": "Use technically accessible official tennis sources commercially for PropBetEdge factual data, normalization and owned analytics. No bypass of authentication, CAPTCHAs, Cloudflare/Incapsula challenges or other access controls."
   }
- ],
- "sources": [
-  {
-   "key": "wta.rankings.singles",
-   "family": "wta",
-   "name": "WTA API — singles rankings (dated lists, historical)",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/players/ranked?page={p}&pageSize={n}&type=rankSingles&sort=asc&metric=SINGLES&at={YYYY-MM-DD}",
-   "capabilities": [
-    "rankings_singles",
-    "player_identity",
-    "player_bio",
-    "history"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wta.rankings.singles",
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "player": "integer (e.g. 324166)"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
-   "notes": "Historical lists by date (at=2015-01-05 returned that week). ~40-50% of connections reset and succeed on retry; the adapter retries patiently at 1 request per 1.5 s.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "wta.rankings.doubles",
-   "family": "wta",
-   "name": "WTA API — doubles rankings",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/players/ranked?page={p}&pageSize={n}&type=rankDoubles&sort=asc&metric=DOUBLES&at={YYYY-MM-DD}",
-   "capabilities": [
-    "rankings_doubles",
-    "player_identity"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wta.rankings.doubles"
-   },
-   "native_ids": {
-    "player": "integer"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "notes": null
-  },
-  {
-   "key": "wta.race",
-   "family": "wta",
-   "name": "WTA API — Race rankings",
-   "tier": "official_tour",
-   "url": null,
-   "capabilities": [
-    "race"
-   ],
-   "verdict": "UNVERIFIED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Guessed parameters returned a list that is not the Race. Needs the parameters the site itself uses.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "wta.calendar",
-   "family": "wta",
-   "name": "WTA API — tournament calendar (WTA 1000/500/250/125)",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/tournaments/?page=0&pageSize={n}&from={date}&to={date}",
-   "capabilities": [
-    "calendar"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wta.calendar"
-   },
-   "native_ids": {
-    "tournament": "tournamentGroup.id + year"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
-   "notes": "Surface, indoor/outdoor, draw sizes and level. WTA 125 events included.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "wta.matches",
-   "family": "wta",
-   "name": "WTA API — tournament matches (results + live state)",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches",
-   "capabilities": [
-    "schedule",
-    "live_state",
-    "set_game_scoring",
-    "doubles",
-    "qualifying",
-    "withdrawals_ret_wo"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wta.matches"
-   },
-   "native_ids": {
-    "match": "{EventID}-{year}-{MatchID}, e.g. LS002 / RS014 / LD003"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
-   "notes": "Live rows carry point score and server. 2026-09-26 end-to-end run: 103 of 104 rows (Singapore + Ankara WTA 125) normalized canonical; 1 self-contradictory source row (1178-2026-LD013) was held by score validation. Winner codes 5/7 unobserved and unmapped.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "wta.match_stats",
-   "family": "wta",
-   "name": "WTA API — match statistics (per set + totals)",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches/{matchId}/stats",
-   "capabilities": [
-    "match_stats",
-    "serve_stats",
-    "return_stats"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wta.match_stats"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
-   "notes": "Field semantics verified against set scores; a consistency check (service points = points won; per-set sums = totals) runs on every parse.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "wta.player",
-   "family": "wta",
-   "name": "WTA API — player identity, match history, season stats, records",
-   "tier": "official_tour",
-   "url": "https://api.wtatennis.com/tennis/players/{id} ; /players/{id}/matches/ ; /players/{id}/year/{y} ; /players/{id}/records",
-   "capabilities": [
-    "player_identity",
-    "player_bio",
-    "match_history",
-    "h2h"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "player": "integer"
-   },
-   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
-   "terms": {
-    "url": "https://www.wtatennis.com/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Proven by Phase 0 audit requests; adapter not built yet. No dedicated H2H endpoint (404); H2H derives from match history.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "atp.site",
-   "family": "atp",
-   "name": "atptour.com — rankings, calendar, scores, stats, players (incl. Challenger)",
-   "tier": "official_tour",
-   "url": "https://www.atptour.com/ and app.atptour.com (all paths probed)",
-   "capabilities": [
-    "rankings_singles",
-    "rankings_doubles",
-    "race",
-    "calendar",
-    "draws",
-    "live_state",
-    "match_stats",
-    "player_bio",
-    "history"
-   ],
-   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
-   "evidence": {
-    "canary_key": "atp.rankings.page",
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "player": "4-char alphanumeric (e.g. S0AG)"
-   },
-   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
-   "terms": {
-    "url": "https://www.atptour.com/en/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission."
-   },
-   "production_status": "NOT_USED — Cloudflare challenge on every request; not evaded",
-   "notes": "ATP player ids reach us legitimately through Slam feeds and Wikidata instead.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "atp.infosys",
-   "family": "atp",
-   "name": "ATP stats platform (Infosys)",
-   "tier": "official_tour",
-   "url": "https://itp-atp-sls.infosys-platforms.com/prod/api/...",
-   "capabilities": [
-    "point_by_point",
-    "match_stats"
-   ],
-   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": "https://www.atptour.com/en/terms-and-conditions",
-    "status": "RESTRICTS_AUTOMATED_ACCESS",
-    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission."
-   },
-   "production_status": "NOT_USED",
-   "notes": "CloudFront 403.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "protennislive.draw_pdf",
-   "family": "atp",
-   "name": "ProTennisLive — ATP official draw / order-of-play PDFs",
-   "tier": "official_tour",
-   "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf (op.pdf = order of play)",
-   "capabilities": [
-    "draws"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "canary_key": "protennislive.draw_pdf"
-   },
-   "native_ids": {
-    "tournament": "ATP tournament id (e.g. 7581 Chengdu)"
-   },
-   "robots": "robots.txt -> 404 (none published)",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED — availability proven, PDF text extraction not built",
-   "notes": "Names only, no player ids. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "itf.site",
-   "family": "itf",
-   "name": "itftennis.com — World Tennis Tour calendar, results, rankings, players",
-   "tier": "official_federation",
-   "url": "https://www.itftennis.com/tennis/api/TournamentApi/... ; /PlayerRankApi/...",
-   "capabilities": [
-    "calendar",
-    "draws",
-    "schedule",
-    "rankings_singles",
-    "player_bio",
-    "match_history",
-    "history"
-   ],
-   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
-   "evidence": {
-    "canary_key": "itf.api.calendar",
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "player": "9-digit integer (e.g. 100241350)"
-   },
-   "robots": "User-agent: * / Disallow: /umbraco/ / Allow: /",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_USED — Incapsula JS challenge (served with HTTP 200); not evaded",
-   "notes": "ITF ids are available through Wikidata P599 (7,417 humans) for identity only.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "daviscup.draws",
-   "family": "team",
-   "name": "Davis Cup — draws & results pages",
-   "tier": "official_federation",
-   "url": "https://www.daviscup.com/en/draws-results/{season}/{stage}",
-   "capabilities": [
-    "draws"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "User-Agent: * / Allow: /",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "No challenge; the server-rendered payload holds team and nomination metadata only. Tie results load client-side from an endpoint not yet found.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "bjkcup.draws",
-   "family": "team",
-   "name": "Billie Jean King Cup — draws & results pages",
-   "tier": "official_federation",
-   "url": "https://www.billiejeankingcup.com/en/draws-results/{season}/{stage}",
-   "capabilities": [
-    "draws"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "User-Agent: * / Allow: /",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Same platform and limitation as daviscup.com.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "unitedcup.site",
-   "family": "team",
-   "name": "United Cup",
-   "tier": "official_tournament",
-   "url": "https://www.unitedcup.com/en/scores",
-   "capabilities": [
-    "schedule"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "Identical to atptour.com robots (same Sitecore platform)",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Reachable, off-season (January event); no data endpoint identified yet.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "olympics.tennis",
-   "family": "team",
-   "name": "Olympics — tennis results",
-   "tier": "official_tournament",
-   "url": "https://www.olympics.com/en/olympic-games/{games}/results/tennis",
-   "capabilities": [
-    "draws"
-   ],
-   "verdict": "UNVERIFIED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Requests hung with 0 bytes; not bypassed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "wimbledon.draws",
-   "family": "slams",
-   "name": "Wimbledon — draw/score JSON feeds",
-   "tier": "official_tournament",
-   "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/draws/{MS|LS|...}.json",
-   "capabilities": [
-    "draws",
-    "set_game_scoring",
-    "withdrawals_ret_wo",
-    "history",
-    "player_identity"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wimbledon.draws"
-   },
-   "native_ids": {
-    "player": "atps0ag / wta324219 (embeds tour ids)",
-    "match": "4-digit match_id"
-   },
-   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
-   "terms": {
-    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
-    "status": "RESTRICTS_COMMERCIAL_USE",
-    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
-   },
-   "production_status": "INGEST — gentlemen's singles 2022-2025 (women's Slam matches come from the WTA API to avoid duplicates)",
-   "notes": "2025 Gentlemen's + Ladies' singles: 254 of 254 matches normalized canonical. Embedded ATP/WTA ids give a crosswalk with zero name matching.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "wimbledon.players",
-   "family": "slams",
-   "name": "Wimbledon — players feed",
-   "tier": "official_tournament",
-   "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/players/players.json",
-   "capabilities": [
-    "player_bio",
-    "player_identity"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
-   "terms": {
-    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
-    "status": "RESTRICTS_COMMERCIAL_USE",
-    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
-   },
-   "production_status": "NOT_ADAPTED",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {},
-   "notes": null
-  },
-  {
-   "key": "wimbledon.pbp",
-   "family": "slams",
-   "name": "Wimbledon — point-by-point / match detail",
-   "tier": "official_tournament",
-   "url": null,
-   "capabilities": [
-    "point_by_point",
-    "match_stats"
-   ],
-   "verdict": "UNVERIFIED",
-   "evidence": {},
-   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
-   "terms": {
-    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
-    "status": "RESTRICTS_COMMERCIAL_USE",
-    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Guessed paths returned S3 AccessDenied (also what a missing key returns). Needs the path the site itself requests.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "ausopen.results",
-   "family": "slams",
-   "name": "Australian Open — scores API (day results/schedule, players)",
-   "tier": "official_tournament",
-   "url": "https://prod-scores-api.ausopen.com/year/{year}/period/MD/day/{day}/{results|schedule}",
-   "capabilities": [
-    "schedule",
-    "set_game_scoring",
-    "player_identity",
-    "player_bio"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "ausopen.results"
-   },
-   "native_ids": {
-    "player": "ATPBK92 / WTA317790 (embeds tour ids)",
-    "match": "WS116"
-   },
-   "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "INGEST (player registry → identity) — owner-approved 2026-09-26; match rows not parsed yet",
-   "notes": "Player registry parsed (tour ids, gender, DOB, nationality). Current edition only; archive depth unknown.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "ausopen.matchcentre",
-   "family": "slams",
-   "name": "Australian Open — match centre (key stats + point-by-point)",
-   "tier": "official_tournament",
-   "url": "https://prod-scores-api.ausopen.com/match-centre/{matchId}",
-   "capabilities": [
-    "point_by_point",
-    "match_stats"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "109 point rows with running score observed for WS116. Current edition only.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "usopen.feeds",
-   "family": "slams",
-   "name": "US Open — score feeds",
-   "tier": "official_tournament",
-   "url": "https://www.usopen.org/en_US/scores/feeds/{year}/draws/MS.json",
-   "capabilities": [
-    "draws",
-    "set_game_scoring"
-   ],
-   "verdict": "UNVERIFIED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "robots.txt timed out",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Every request (including robots.txt) hung with 0 bytes: edge drop or outage. Recheck once; do not work around it.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "rolandgarros.results",
-   "family": "slams",
-   "name": "Roland-Garros — results pages (Nuxt payload)",
-   "tier": "official_tournament",
-   "url": "https://www.rolandgarros.com/en-us/results/{SM|SD|...}?round={n}&year={y}",
-   "capabilities": [
-    "set_game_scoring",
-    "history"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "player": "FFT-internal integer (e.g. 39723)"
-   },
-   "robots": "Disallow: /admin, /maintenance",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_ADAPTED",
-   "notes": "Data only inside the SSR payload; FFT ids need their own crosswalk.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "wikidata.crosswalk",
-   "family": "wikidata",
-   "name": "Wikidata — identity crosswalk (ATP P536, WTA P597, ITF P599, Davis Cup P2641, BJK Cup P2642, image P18)",
-   "tier": "open_data",
-   "url": "https://query.wikidata.org/sparql",
-   "capabilities": [
-    "player_identity",
-    "player_media"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "wikidata.crosswalk",
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "native_ids": {
-    "entity": "QID"
-   },
-   "robots": null,
-   "terms": {
-    "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
-    "status": "OPEN_LICENSE",
-    "quote": "Structured data is CC0."
-   },
-   "production_status": "INGEST — weekly crosswalk (P597 + P536)",
-   "notes": "Humans with ids: ATP 6,582 · WTA 5,405 · ITF 7,417 · Davis Cup 2,926 · BJK Cup 2,167. WTA ids match api.wtatennis.com exactly.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null
-  },
-  {
-   "key": "commons.license",
-   "family": "wikidata",
-   "name": "Wikimedia Commons — per-file license & author metadata",
-   "tier": "open_data",
-   "url": "https://commons.wikimedia.org/w/api.php?action=query&prop=imageinfo&iiprop=url|size|extmetadata",
-   "capabilities": [
-    "player_media"
-   ],
-   "verdict": "PASS",
-   "evidence": {
-    "canary_key": "commons.license"
-   },
-   "robots": null,
-   "terms": {
-    "url": "https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia",
-    "status": "PER_FILE_LICENSE",
-    "quote": "Each file carries its own license; only CC0 / PD / CC BY / CC BY-SA are accepted (docs/MEDIA.md)."
-   },
-   "production_status": "READY — rights-ledger input",
-   "attribution": "Per file: author + license shown with every photo",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "native_ids": {},
-   "notes": null
-  },
-  {
-   "key": "sackmann.tour_datasets",
-   "family": "open-data",
-   "name": "Jeff Sackmann tennis_atp / tennis_wta / tennis_slam_pointbypoint",
-   "tier": "open_data",
-   "url": "https://github.com/JeffSackmann/",
-   "capabilities": [
-    "history",
-    "point_by_point",
-    "match_stats"
-   ],
-   "verdict": "NOT_AVAILABLE",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_USED",
-   "notes": "Repositories no longer public (404 via web and API) as of 2026-09-26.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "sackmann.match_charting",
-   "family": "open-data",
-   "name": "Match Charting Project",
-   "tier": "open_data",
-   "url": "https://github.com/JeffSackmann/tennis_MatchChartingProject",
-   "capabilities": [
-    "point_by_point",
-    "history"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": "https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/README.md",
-    "status": "NON_COMMERCIAL_LICENSE",
-    "quote": "... is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. ... In other words: Attribution is required. Non-commercial use only."
-   },
-   "production_status": "NOT_USED — CC BY-NC-SA conflicts with a commercial product",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {},
-   "notes": null
-  },
-  {
-   "key": "tennisabstract.site",
-   "family": "open-data",
-   "name": "Tennis Abstract",
-   "tier": "secondary",
-   "url": "https://www.tennisabstract.com/",
-   "capabilities": [
-    "history",
-    "match_stats"
-   ],
-   "verdict": "DEGRADED",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": "Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)",
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_USED — data paths are robots-disallowed",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {},
-   "notes": null
-  },
-  {
-   "key": "odds.tennis_data_co_uk",
-   "family": "odds",
-   "name": "tennis-data.co.uk",
-   "tier": "secondary",
-   "url": "http://www.tennis-data.co.uk/{year}/{year}.xlsx",
-   "capabilities": [
-    "odds",
-    "history"
-   ],
-   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_RETRIEVED",
-    "quote": null
-   },
-   "production_status": "NOT_USED",
-   "notes": "Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "odds.the_odds_api",
-   "family": "odds",
-   "name": "The Odds API (existing PropBetEdge network subscription)",
-   "tier": "commercial",
-   "url": "https://the-odds-api.com/",
-   "capabilities": [
-    "odds"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {
-    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
-   },
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — not a Tennis dependency",
-   "notes": "Docs list per-tournament keys only (Slams, 1000s, some 500s); none for 250s, Challengers, ITF or WTA 125. Not called.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.sportradar",
-   "family": "commercial",
-   "name": "Sportradar",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.stats",
-   "family": "commercial",
-   "name": "Stats Perform (Opta)",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.genius",
-   "family": "commercial",
-   "name": "Genius Sports",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.infront",
-   "family": "commercial",
-   "name": "Infront / Tennis Data Innovations",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.sportsdataio",
-   "family": "commercial",
-   "name": "SportsDataIO",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.api-tennis.com",
-   "family": "commercial",
-   "name": "api-tennis.com",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  },
-  {
-   "key": "commercial.rapidapi",
-   "family": "commercial",
-   "name": "RapidAPI tennis APIs",
-   "tier": "commercial",
-   "url": null,
-   "capabilities": [
-    "live_state",
-    "match_stats"
-   ],
-   "verdict": "COMMERCIAL_REFERENCE_ONLY",
-   "evidence": {},
-   "robots": null,
-   "terms": {
-    "url": null,
-    "status": "NOT_REVIEWED",
-    "quote": null
-   },
-   "production_status": "REFERENCE_ONLY — owner directive: $0 data licensing",
-   "notes": "Recorded for comparison only; not probed.",
-   "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
-   "attribution": null,
-   "native_ids": {}
-  }
- ],
- "rights_decision": {
-  "date": "2026-09-26",
-  "by": "owner",
-  "decision": "Use technically accessible official tennis sources commercially for PropBetEdge factual data, normalization and owned analytics. No bypass of authentication, CAPTCHAs, Cloudflare/Incapsula challenges or other access controls."
- }
 }

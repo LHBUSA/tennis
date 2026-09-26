@@ -1,0 +1,52 @@
+{
+  "generated_at": "2026-09-26T12:39:47.126896-05:00",
+  "by_year": [
+    {
+      "year": 2026,
+      "level": "Grand Slam",
+      "event_type": "MD",
+      "source_family": "ausopen",
+      "matches": 63,
+      "q1_only": 0,
+      "q2": 63,
+      "q3": 5,
+      "q4": 5
+    },
+    {
+      "year": 2026,
+      "level": "Grand Slam",
+      "event_type": "MS",
+      "source_family": "ausopen",
+      "matches": 126,
+      "q1_only": 0,
+      "q2": 126,
+      "q3": 0,
+      "q4": 0
+    },
+    {
+      "year": 2026,
+      "level": "Grand Slam",
+      "event_type": "XD",
+      "source_family": "ausopen",
+      "matches": 14,
+      "q1_only": 0,
+      "q2": 14,
+      "q3": 0,
+      "q4": 0
+    }
+  ],
+  "atp_tour_matches": 0,
+  "atp_challenger_matches": 0,
+  "mens_slam_matches": 203,
+  "mens_live_matches": 0,
+  "mens_matches_with_stats": 5,
+  "mens_matches_with_pbp": 5,
+  "mens_point_events": 739,
+  "mens_players": 220,
+  "mens_players_with_matches": 220,
+  "mens_players_with_photo": 0,
+  "mens_players_with_wikidata": 0,
+  "mens_dna_players": 0,
+  "mens_dna_eligible": 0,
+  "atp_rankings_snapshots": 0
+}
