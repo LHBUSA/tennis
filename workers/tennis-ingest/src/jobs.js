@@ -139,10 +139,22 @@ export async function ausopenDayMatches(ctx, year, day, period = 'MD') {
 }
 
 // ---- AO point-by-point -> point_event rows ---------------------------------------------------------------
+// bump when the point parser changes so earlier point-feed holds are re-read once
+const AO_PBP_REV = 2;
 export async function ausopenPointStep(ctx, batch = 3) {
   const st = (await ctx.kv.get('bf:aopbp', 'json')) || { offset: 0 };
-  const ext = await ctx.store.select('tennis_match_external_ids', `select=match_id,external_id&provider=eq.ausopen&order=external_id.asc&limit=${batch}&offset=${st.offset}`);
-  if (!ext.length) return { done: true };
+  let ext = await ctx.store.select('tennis_match_external_ids', `select=match_id,external_id&provider=eq.ausopen&order=external_id.asc&limit=${batch}&offset=${st.offset}`);
+  let retry = false;
+  if (!ext.length) {
+    // queue finished: re-read each open point-feed hold once per parser revision (a parser fix must reach
+    // matches it held earlier); a pass resolves the hold, a repeat failure stays held
+    const tried = new Set(st.retried || []);
+    const open = (await ctx.store.select('tennis_ingest_holds', 'select=external_id&provider=eq.ausopen&entity_type=eq.point_feed&resolved_at=is.null&limit=200')).map((h) => h.external_id).filter((id) => !tried.has(`${AO_PBP_REV}:${id}`)).slice(0, batch);
+    if (!open.length) return { done: true, holds_retried: tried.size };
+    ext = await ctx.store.select('tennis_match_external_ids', `select=match_id,external_id&provider=eq.ausopen&external_id=in.(${open.map((id) => `"${id}"`).join(',')})`);
+    st.retried = [...tried, ...open.map((id) => `${AO_PBP_REV}:${id}`)];
+    retry = true;
+  }
   const out = [];
   for (const x of ext) {
     const code = x.external_id.split('-').pop();
@@ -179,13 +191,15 @@ export async function ausopenPointStep(ctx, batch = 3) {
         rows.push({ event_id: await eventId(x.match_id, 'point_event', e.source_event_id), match_id: x.match_id, contract: CONTRACT, quality: 'point_event', event_sequence: i, event_type: e.event_type, source: 'ausopen', source_event_id: e.source_event_id, observed_at: new Date().toISOString(), event_at: e.event_at, set_number: e.set_number, game_number: e.game_number, server_side: e.server_side, winner_side: e.winner_side, derivation: null, event_detail: e.event_detail, state: e.state, raw_source_ref: r.capture?.capture_id || null });
       }
       await ctx.store.upsert('tennis_match_events', rows, { onConflict: 'event_id', ignore: true, chunk: 200 });
+      await ctx.store.req('PATCH', `tennis_ingest_holds?provider=eq.ausopen&entity_type=eq.point_feed&resolved_at=is.null&external_id=eq.${encodeURIComponent(x.external_id)}`, { body: { resolved_at: new Date().toISOString() } });
       out.push({ match: code, state: 'PASS', points: rows.length, stats: statsState });
     } catch (e) {
       await hold(ctx.store, [{ provider: 'ausopen', entity_type: 'point_feed', external_id: x.external_id, problems: [String(e.message).slice(0, 300)], payload: null, capture_id: r.capture?.capture_id || null }]);
       out.push({ match: code, state: 'HELD', error: String(e.message).slice(0, 120), stats: statsState });
     }
   }
-  await ctx.kv.put('bf:aopbp', JSON.stringify({ offset: st.offset + ext.length }));
+  if (retry) { await ctx.kv.put('bf:aopbp', JSON.stringify(st)); return { retried_holds: out }; }
+  await ctx.kv.put('bf:aopbp', JSON.stringify({ ...st, offset: st.offset + ext.length }));
   return { offset: st.offset + ext.length, results: out };
 }
 

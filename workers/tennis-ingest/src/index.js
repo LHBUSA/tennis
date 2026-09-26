@@ -160,7 +160,7 @@ async function tickInner(env, store, kv, force) {
         // every expected main-draw slot exists (walkovers are absent from the day results)
         const gap = await ausopenGapStep(ctx, 2026);
         if (!gap.done || (gap.results || []).length) return { ok: true, out: { ausopen_gap_fill: gap } };
-        const pbp = await ausopenPointStep(ctx, 10);
+        const pbp = await ausopenPointStep(ctx, 20);
         const failed = (pbp.results || []).filter((x) => !['PASS', 'EMPTY', 'HELD'].includes(x.state)).length;
         return { ok: failed < (pbp.results || []).length || !(pbp.results || []).length, done: !!pbp.done, out: { ausopen_match_centre: pbp } };
       },

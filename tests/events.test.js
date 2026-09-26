@@ -116,3 +116,20 @@ test('key moments and match control only from carried facts; control is descript
   assert.match(c.definition, /not a win probability/);
   assert.equal(matchControl(evs.slice(0, 2)), null, 'too few known games');
 });
+
+test('AO feed missing the game-1 serve row: first server follows from the game-2 serve row (MQ206 shape)', () => {
+  const rows = feed([
+    { w: 2, text: 'A. Alpha loses the point with a Forehand Forced Error', score: '15 - 0' },
+    { w: 2, text: 'A. Alpha loses the point', score: '30 - 0' },
+    { w: 2, text: 'A. Alpha loses the point', score: '40 - 0' },
+    { w: 2, text: 'A. Alpha loses the point', score: 'Game', type: 'game' },
+    { newGame: 'A. Alpha' },
+    { w: 1, text: 'B. Beta loses the point', score: '15 - 0' }
+  ]).filter((r) => r.id !== 'X-001-001-000');
+  const ev = aoPointEvents(rows, opts);
+  assert.equal(ev[0].server_side, 'B');
+  assert.equal(ev[4].server_side, 'A');
+  // a first serve row outside set 1 cannot prove the opening server
+  const late = feed([{ w: 1, text: 'x', score: '15 - 0' }]).map((r) => (r.type === 'serve' ? { ...r, id: 'X-002-001-000' } : r));
+  assert.throws(() => aoPointEvents(late, opts), /first server/);
+});

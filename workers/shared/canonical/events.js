@@ -213,8 +213,13 @@ export function aoPointEvents(commentary, { formatKey, sideOfTeam, nameSide, fin
   const serveRows = rows.filter((r) => r.type === 'serve');
   const pointRows = rows.filter((r) => r.type === 'point' || ((r.type === 'game' || r.type === 'set' || r.type === 'match') && r.winner != null));
   if (!pointRows.length || !serveRows.length) throw new Error('no point rows');
-  const first = nameSide(String(serveRows[0].commentary).replace(/ is serving.*$/i, ''));
-  if (!first) throw new Error('first server not identifiable');
+  // The first serve row may belong to a later game (the feed sometimes omits game 1's). Service alternates
+  // every game of the first set, so a set-1 game-g server fixes the match's first server; anything else is
+  // not provable and the match is refused.
+  const named = nameSide(String(serveRows[0].commentary).replace(/ is serving.*$/i, ''));
+  const [, fSet, fGame] = serveRows[0].id.split('-').map(Number);
+  if (!named || fSet !== 1 || !(fGame >= 1)) throw new Error('first server not identifiable');
+  const first = fGame % 2 === 1 ? named : named === 'A' ? 'B' : 'A';
   let s = startMatch(formatKey, first);
   const servedBy = new Map(serveRows.map((r) => [r.id.split('-').slice(1, 3).join('-'), nameSide(String(r.commentary).replace(/ is serving.*$/i, ''))]));
   const out = [];
