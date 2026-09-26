@@ -121,10 +121,10 @@ test('Slam level switches the deciding set to a 10-point tiebreak', () => {
 
 test('WTA unmapped codes surface as warnings, never guesses', () => {
   const [m] = JSON.parse(fx('wta/matches-1152.json')).matches;
-  const odd = wta.parseWtaMatch({ ...m, Winner: '7', ScoreSys: '42', MatchState: 'X' });
+  const odd = wta.parseWtaMatch({ ...m, Winner: '9', ScoreSys: '42', MatchState: 'X' });
   assert.equal(odd.winner_side, null);
   assert.equal(odd.status, null);
-  assert.ok(odd.warnings.includes('unmapped_winner_code:7'));
+  assert.ok(odd.warnings.includes('unmapped_winner_code:9'));
   assert.ok(odd.warnings.includes('unmapped_score_system:42'));
   assert.ok(odd.warnings.includes('unmapped_match_state:X'));
 });
@@ -269,4 +269,15 @@ test('Wimbledon archive: stable order-free keys, era formats, retirements from i
   assert.equal(slams.wimArchiveFormat(5, 2020), 'BO5_FINAL_TB7_AT12');
   assert.equal(slams.wimArchiveFormat(5, 2024), 'BO5_FINAL_TB10');
   assert.equal(slams.wimArchiveFormat(5, 1970), null, 'pre-1979 eras are not mapped until audited');
+});
+
+test('holds fixes: WTA winner code 7 = side B walkover; AO mixed deciding match tiebreak validates', async () => {
+  const base = { EventID: '1', EventYear: 2025, MatchID: 'LD003', DrawLevelType: 'M', DrawMatchType: 'D', RoundID: '1', PlayerIDA: '1', PlayerIDB: '2', PlayerIDA2: '3', PlayerIDB2: '4', PlayerNameFirstA: 'H', PlayerNameLastA: 'Dart', PlayerNameFirstB: 'D', PlayerNameLastB: 'Krawczyk', ScoreSys: '9', MatchState: 'F', Winner: '7' };
+  const w = wta.parseWtaMatch(base, {});
+  assert.equal(w.status, 'walkover');
+  assert.equal(w.winner_side, 'B');
+  assert.equal(w.withdrawn_side, 'A');
+  const { validateScore } = await import('../workers/shared/canonical/scoring.js');
+  const sets = [{ games: { A: 4, B: 6 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 1, B: 0 }, tiebreak: { A: 10, B: 8 }, is_match_tiebreak: true }];
+  assert.equal(validateScore({ sets, end_reason: 'completed' }, 'DOUBLES_TOUR').ok, true);
 });

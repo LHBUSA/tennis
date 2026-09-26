@@ -97,10 +97,10 @@ export const calendar = {
 //               NotBefore/NotBeforeISOTime, Unscheduled; MatchTimeStamp is then a 23:59 placeholder)
 //   Winner:     0 = undecided, 2 = side A won, 3 = side B won, 4 = side A won, B retired ("Ret'd"),
 //               5 = side B won, A retired (observed Seoul 2026 LS002), 6 = side A won by walkover
-//               (B withdrew). 7 (presumably the B-side walkover) has NOT been observed and is not mapped.
+//               (B withdrew), 7 = side B won by walkover (A withdrew; observed 1096-2025-LD003, 0609-2025-RS021).
 //   ScoreSys:   1 = best of 3, tiebreak sets (singles); 9 = best of 3, no-ad, match tiebreak (doubles)
 //   DrawMatchType: S / D.  DrawLevelType: M = main draw, Q = qualifying.
-const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', end: 'completed' }, 4: { side: 'A', end: 'retirement', retired: 'B' }, 5: { side: 'B', end: 'retirement', retired: 'A' }, 6: { side: 'A', end: 'walkover', withdrawn: 'B' } };
+const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', end: 'completed' }, 4: { side: 'A', end: 'retirement', retired: 'B' }, 5: { side: 'B', end: 'retirement', retired: 'A' }, 6: { side: 'A', end: 'walkover', withdrawn: 'B' }, 7: { side: 'B', end: 'walkover', withdrawn: 'A' } }; // 7 verified 2026-09-26: 1096-2025-LD003 (B listed second won W/O)
 const STATE = { F: 'final', P: 'in_progress', U: 'scheduled' };
 export const SCORE_SYS = { 1: 'BO3_TB7', 9: 'DOUBLES_TOUR' };
 const FULL_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;

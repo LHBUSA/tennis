@@ -165,7 +165,10 @@ export function parseAusopenDay(j) {
       const b = tB.score[i];
       if (!a || !b) { warnings.push(`ragged_score:set${i + 1}`); break; }
       const tb = a.tie_break != null && b.tie_break != null ? { A: Number(a.tie_break), B: Number(b.tie_break), winner_points_derived: false } : null;
-      sets.push({ games: { A: Number(a.game), B: Number(b.game) }, tiebreak: tb, is_match_tiebreak: false });
+      // mixed doubles (DOUBLES_TOUR): the deciding set IS a 10-point match tiebreak, published as games 1-0 + the
+      // tiebreak points; flag it so it validates as a match tiebreak, never as an unfinished 1-0 set
+      const matchTb = ev.format === 'DOUBLES_TOUR' && i === 2 && tb && Math.max(Number(a.game), Number(b.game)) === 1 && Math.min(Number(a.game), Number(b.game)) === 0;
+      sets.push({ games: { A: Number(a.game), B: Number(b.game) }, tiebreak: tb, is_match_tiebreak: !!matchTb });
     }
     const winner = tA?.status === 'Winner' ? 'A' : tB?.status === 'Winner' ? 'B' : null;
     const rn = rounds.get(m.round_id);
