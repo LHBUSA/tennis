@@ -54,13 +54,14 @@ function portrait({ x, y, size, name, jpegB64 }) {
 const frame = (inner) => `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${backdrop()}${inner}
   <text x="60" y="${H - 44}" font-family="Barlow Condensed" font-weight="600" font-size="26" fill="${C.line}" opacity="0.72">tennis.propbetedge.ai</text></svg>`;
 
-export function playerCard({ name, rank, list, nationality, jpegB64 }) {
+export function playerCard({ name, rank, list, nationality, jpegB64, label = 'PLAYER', note = null }) {
   const size = 330;
   const nm = String(name || '').toUpperCase();
-  return frame(`${brand('PLAYER')}
+  return frame(`${brand(label)}
     ${portrait({ x: 60, y: 160, size, name, jpegB64 })}
     <text x="430" y="300" font-family="Barlow Condensed" font-weight="800" font-size="${fit(nm, 720, 96)}" fill="${C.line}">${esc(nm)}</text>
     ${rank ? `<text x="432" y="380" font-family="Barlow Condensed" font-weight="800" font-size="60" fill="${C.gold}">No. ${esc(rank)}</text><text x="432" y="420" font-family="Barlow Condensed" font-weight="600" font-size="28" letter-spacing="3" fill="${C.line}" opacity="0.8">${esc(list || '')}</text>` : ''}
+    ${note ? `<text x="432" y="530" font-family="Barlow Condensed" font-weight="600" font-size="30" fill="${C.gold}">${esc(note)}</text>` : ''}
     ${nationality ? `<text x="432" y="470" font-family="Barlow Condensed" font-weight="600" font-size="30" letter-spacing="4" fill="${C.line}" opacity="0.8">${esc(nationality)}</text>` : ''}`);
 }
 
@@ -92,4 +93,44 @@ export function rankingsCard({ tour, type, date }) {
     <text x="60" y="300" font-family="Barlow Condensed" font-weight="800" font-size="104" fill="${C.line}">${esc(`${tour} ${type}`.toUpperCase())}</text>
     <text x="62" y="370" font-family="Barlow Condensed" font-weight="800" font-size="44" letter-spacing="4" fill="${C.gold}">PROPBETEDGE TENNIS RANKINGS</text>
     ${date ? `<text x="62" y="430" font-family="Barlow Condensed" font-weight="600" font-size="34" fill="${C.line}" opacity="0.85">Official list dated ${esc(date)}</text>` : ''}`);
+}
+
+/** Greedy wrap into at most `maxLines`, shrinking the font until it fits. */
+function wrap(text, maxW, base, maxLines, min = 34) {
+  const words = String(text || '').split(/\s+/).filter(Boolean);
+  for (let size = base; size >= min; size -= 2) {
+    const lines = [];
+    let cur = '';
+    for (const w of words) {
+      const next = cur ? `${cur} ${w}` : w;
+      if (next.length * size * 0.47 <= maxW) cur = next;
+      else { if (cur) lines.push(cur); cur = w; }
+    }
+    if (cur) lines.push(cur);
+    if (lines.length <= maxLines) return { lines, size };
+  }
+  // still too long: keep maxLines and ellipsize the last one
+  const size = min;
+  const per = Math.floor(maxW / (size * 0.47));
+  const lines = [];
+  let rest = String(text);
+  for (let i = 0; i < maxLines; i += 1) { const cut = rest.length <= per ? rest.length : rest.lastIndexOf(' ', per) > 0 ? rest.lastIndexOf(' ', per) : per; lines.push(rest.slice(0, cut)); rest = rest.slice(cut).trim(); }
+  if (rest) lines[maxLines - 1] = `${lines[maxLines - 1].replace(/\s+\S*$/, '')}…`;
+  return { lines, size };
+}
+
+const KIND_LABEL = { upset: 'UPSET', seed_upset: 'SEED UPSET', title: 'TITLE', doubles_title: 'DOUBLES TITLE', retirement: 'RETIREMENT', walkover: 'WALKOVER', marathon: 'MARATHON', comeback: 'COMEBACK', deciding_tiebreak: 'DECIDING TIEBREAK', dominant: 'DOMINANT WIN', qualifier_run: 'QUALIFIER RUN', new_no1: 'NEW NO. 1', enters_top10: 'TOP 10', enters_top20: 'TOP 20', enters_top50: 'TOP 50', enters_top100: 'TOP 100' };
+
+export function newsCard({ headline, kind, context, stat, jpegB64, name }) {
+  const withPhoto = !!(jpegB64 || name);
+  const x = withPhoto ? 400 : 60;
+  const maxW = withPhoto ? 740 : 1080;
+  const { lines, size } = wrap(headline, maxW, 60, 3);
+  const top = 250 - ((lines.length - 1) * size) / 2;
+  return frame(`${brand('NEWS')}
+    ${withPhoto ? portrait({ x: 60, y: 170, size: 300, name, jpegB64 }) : ''}
+    <text x="${x + 2}" y="${top - size * 0.95}" font-family="Barlow Condensed" font-weight="800" font-size="26" letter-spacing="5" fill="${C.gold}">${esc(KIND_LABEL[kind] || 'STORY')}</text>
+    ${lines.map((l, i) => `<text x="${x}" y="${top + i * size * 1.04}" font-family="Barlow Condensed" font-weight="800" font-size="${size}" fill="${C.line}">${esc(l)}</text>`).join('')}
+    ${context ? `<text x="${x + 2}" y="${top + lines.length * size * 1.04 + 20}" font-family="Barlow Condensed" font-weight="600" font-size="28" fill="${C.line}" opacity="0.82">${esc(String(context).slice(0, 70))}</text>` : ''}
+    ${stat ? `<text x="${x + 2}" y="${Math.min(560, top + lines.length * size * 1.04 + 80)}" font-family="Barlow Condensed" font-weight="800" font-size="40" fill="${C.gold}">${esc(`${stat.label}: ${stat.value}`.toUpperCase().slice(0, 48))}</text>` : ''}`);
 }

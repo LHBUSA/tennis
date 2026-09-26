@@ -26,7 +26,8 @@ export function routeMeta(resolved, overrides = {}) {
     path: resolved.path,
     type: overrides.type || 'website',
     image: overrides.image || OG_DEFAULT,
-    jsonld: overrides.jsonld || null
+    jsonld: overrides.jsonld || null,
+    article: overrides.article || null
   };
 }
 
@@ -57,6 +58,11 @@ export function headHtml(m) {
     `<meta name="twitter:image" content="${esc(i.url)}" />`,
     `<meta name="twitter:image:alt" content="${esc(i.alt)}" />`
   ];
+  if (m.article) {
+    if (m.article.published_time) tags.push(`<meta property="article:published_time" content="${esc(m.article.published_time)}" />`);
+    if (m.article.modified_time) tags.push(`<meta property="article:modified_time" content="${esc(m.article.modified_time)}" />`);
+    if (m.article.section) tags.push(`<meta property="article:section" content="${esc(m.article.section)}" />`);
+  }
   const ld = jsonLdGraph(m);
   tags.push(`<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>`);
   return tags.join('\n    ');
@@ -106,4 +112,11 @@ export function sportsEventLd(m, canonical) {
 
 export function itemListLd(name, items) {
   return { '@type': 'ItemList', name, itemListElement: items.map(([label, path], i) => ({ '@type': 'ListItem', position: i + 1, name: label, url: canonicalUrl(path) })) };
+}
+
+/** NewsArticle — published stories only; headline/dates/image/author are the story's own stored fields. */
+export function newsArticleLd(a, canonical, image) {
+  const n = { '@type': 'NewsArticle', '@id': `${canonical}#article`, mainEntityOfPage: canonical, url: canonical, headline: String(a.headline).slice(0, 110), description: a.dek || undefined, datePublished: a.first_published_at || a.published_at, dateModified: a.updated_at || a.published_at, author: { '@type': 'Organization', name: 'PropBetEdge Tennis Desk', url: `${SITE}/news` }, publisher: { '@id': ORGANIZATION['@id'] }, isPartOf: { '@id': WEBSITE['@id'] }, articleSection: 'Tennis' };
+  if (image) n.image = [image];
+  return n;
 }

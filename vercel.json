@@ -39,6 +39,10 @@
       "destination": "https://tennis-web.sales-fd3.workers.dev/pbecast/:id"
     },
     {
+      "source": "/news/:slug",
+      "destination": "https://tennis-web.sales-fd3.workers.dev/news/:slug"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app-shell"
     }

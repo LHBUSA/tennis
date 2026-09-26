@@ -10,7 +10,7 @@ import fontXB from './fonts/BarlowCondensed-ExtraBold.ttf';
 import fontSB from './fonts/BarlowCondensed-SemiBold.ttf';
 import { resolveRoute } from '../../../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_DEFAULT, NOINDEX_ROBOTS, canonicalUrl } from '../../../src/seo/meta.js';
-import { playerCard, matchCard, tournamentCard, rankingsCard } from './cards.js';
+import { playerCard, matchCard, tournamentCard, rankingsCard, newsCard } from './cards.js';
 
 export const VERSION = '0.1.0';
 let wasmReady = null;
@@ -46,11 +46,11 @@ async function jpeg(env, url) {
 
 async function cardSvg(env, path) {
   let m;
-  if ((m = /^\/og\/player\/([a-z0-9-]+)\.png$/.exec(path))) {
+  if ((m = /^\/og\/player\/([a-z0-9-]+)(\/dna)?\.png$/.exec(path))) {
     const p = await apiGet(env, `/v1/players/${m[1]}`);
     if (!p) return null;
     const ws = p.rankings?.wta_singles;
-    return playerCard({ name: p.name, rank: ws?.rank, list: ws ? 'WTA SINGLES' : '', nationality: p.nationality, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square) });
+    return playerCard({ name: p.name, rank: ws?.rank, list: ws ? 'WTA SINGLES' : '', nationality: p.nationality, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square), label: m[2] ? 'TENNIS DNA' : 'PLAYER', note: m[2] ? 'Serve · Return · Pressure — measured, with samples' : null });
   }
   if ((m = /^\/og\/(match|pbecast)\/([0-9a-f-]{36})\.png$/.exec(path))) {
     const x = await apiGet(env, `/v1/matches/${m[2]}`);
@@ -63,6 +63,13 @@ async function cardSvg(env, path) {
     if (!d) return null;
     const e = d.edition;
     return tournamentCard({ name: e.tournament, year: e.year, surface: e.surface, level: e.level, location: [e.city, e.country].filter(Boolean).join(', '), dates: `${fmtD(e.start_date)} – ${fmtD(e.end_date)}` });
+  }
+  if ((m = /^\/og\/news\/([a-z0-9-]+)\.png$/.exec(path))) {
+    const a = await apiGet(env, `/v1/news/${m[1]}`);
+    if (!a) return null;
+    const ps = a.evidence?.participants ? ['A', 'B'].flatMap((x) => a.evidence.participants[x]?.players || []) : a.evidence?.player ? [a.evidence.player] : [];
+    const p = ps.find((x) => x.slug === a.player?.slug) || ps[0] || null;
+    return newsCard({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name, a.evidence?.match?.round_label].filter(Boolean).join(' · '), stat: a.key_stat, jpegB64: p ? await jpeg(env, p.photo?.square_jpg || p.photo?.square) : null, name: p?.name });
   }
   if ((m = /^\/og\/rankings\/wta-(singles|doubles)\.png$/.exec(path))) {
     const d = await apiGet(env, `/v1/rankings?tour=wta&type=${m[1]}&limit=1`);
@@ -91,6 +98,8 @@ async function sitemap(env) {
   const urls = staticUrls.map((p) => canonicalUrl(p));
   const r = await apiGet(env, '/v1/rankings?tour=wta&type=singles&limit=500');
   for (const x of r?.rows || []) urls.push(canonicalUrl(`/players/${x.player.slug}`));
+  const n = await apiGet(env, '/v1/news?limit=60');
+  for (const a of n?.articles || []) urls.push(canonicalUrl(`/news/${a.slug}`));
   const t = await apiGet(env, `/v1/tournaments?from=2020-01-01&to=${new Date(Date.now() + 60 * 86400e3).toISOString().slice(0, 10)}`);
   for (const e of t || []) urls.push(canonicalUrl(`/tournaments/${e.slug}/${e.year}`));
   const uniq = [...new Set(urls)];
@@ -106,7 +115,7 @@ export default {
     if (path === '/sitemap.xml') return new Response(await sitemap(env), { headers: { 'content-type': 'application/xml; charset=utf-8', 'cache-control': 'public, max-age=3600' } });
     const r = resolveRoute(path);
     let overrides = {};
-    try { overrides = await headFor(env, r); } catch { overrides = { robots: NOINDEX_ROBOTS }; }
+    try { overrides = await headFor(env, r, url); } catch { overrides = { robots: NOINDEX_ROBOTS }; }
     const meta = routeMeta(r, overrides);
     let tpl;
     try { tpl = await shellTemplate(env, ctx); } catch { return new Response('temporarily unavailable', { status: 503 }); }

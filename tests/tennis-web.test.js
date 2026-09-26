@@ -41,3 +41,19 @@ test('cards: missing photo renders the monogram tile, never an external image', 
   const mc = matchCard({ a: { name: 'Guiomar Maristany Zuleta de Reales' }, b: { name: 'B' }, tournament: 'T', round: 'Final', status: 'in_progress' });
   assert.ok(mc.includes('>LIVE<'));
 });
+
+test('news story head: published -> index + NewsArticle + article times; held -> noindex, no NewsArticle', async () => {
+  const a = { slug: 'alpha-beats-no-6-beta-abc123', status: 'published', headline: 'Alpha beats No. 6 Beta in the Test Open quarterfinal', dek: 'Alpha won 4-6, 7-6(5), 6-3.', published_at: '2026-09-26T10:00:00Z', first_published_at: '2026-09-26T10:00:00Z', updated_at: '2026-09-26T10:05:00Z' };
+  const env = envWith({ [`/v1/news/${a.slug}`]: a });
+  const o = await headFor(env, resolveRoute(`/news/${a.slug}`));
+  assert.equal(o.robots, INDEX_ROBOTS);
+  assert.equal(o.type, 'article');
+  const ld = o.jsonld.find((n) => n['@type'] === 'NewsArticle');
+  assert.equal(ld.datePublished, a.first_published_at);
+  assert.match(o.image.url, /\/og\/news\/alpha-beats-no-6-beta-abc123\.png/);
+  const h = headHtml(routeMeta(resolveRoute(`/news/${a.slug}`), o));
+  assert.ok(h.includes('article:published_time') && h.includes('name="twitter:site" content="@PROPBETEDGE"'));
+  const held = await headFor(envWith({ [`/v1/news/${a.slug}`]: { ...a, status: 'held' } }), resolveRoute(`/news/${a.slug}`));
+  assert.equal(held.robots, NOINDEX_ROBOTS);
+  assert.ok(!held.jsonld.some((n) => n['@type'] === 'NewsArticle'));
+});

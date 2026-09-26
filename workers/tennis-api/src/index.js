@@ -15,6 +15,7 @@ export const VERSION = '0.2.0';
 
 import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
+import { newsRoute, isPreview } from './news.js';
 export { shapeMatch };
 
 function ok(data, { rows = [], source = null, updated = null, policy, semantics, degraded = [] }) {
@@ -204,13 +205,14 @@ const NOT_YET = {
   '/v1/odds': 'MARKET UNAVAILABLE: no legitimate tennis market source is captured',
   '/v1/pbe-picks': 'PBE Picks: the Tennis model is not validated; no picks exist',
   '/v1/track-record': 'Track Record: no picks have been locked, nothing graded',
-  '/v1/news': 'Newsroom: evidence graph gates not built; nothing published'
 };
 
-const TTL = [[/^\/v1\/pbecast/, 15], [/^\/v1\/schedule/, 60], [/^\/v1\/(dna|credits)/, 3600], [/^\/v1\/players\/[^/]+\/(dna|profile)/, 1800], [/^\/v1\/coverage/, 600], [/^\/v1\/search/, 300], [/^\/v1\/venues/, 3600], [/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300]];
+const TTL = [[/^\/v1\/news/, 60], [/^\/v1\/pbecast/, 15], [/^\/v1\/schedule/, 60], [/^\/v1\/(dna|credits)/, 3600], [/^\/v1\/players\/[^/]+\/(dna|profile)/, 1800], [/^\/v1\/coverage/, 600], [/^\/v1\/search/, 300], [/^\/v1\/venues/, 3600], [/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300]];
 
 export async function route(path, url, store, env) {
   if (path === '/v1/sources') return sources();
+  const news = await newsRoute(path, url, store, env);
+  if (news !== undefined) return news;
   const v2 = await v2Route(path, url, store, env);
   if (v2 !== undefined) return v2;
   if (NOT_YET[path]) return notConfigured(NOT_YET[path]);
@@ -254,7 +256,8 @@ export default {
     }
     const cache = ctx && globalThis.caches?.default;
     const ttl = (TTL.find(([re]) => re.test(path)) || [null, 30])[1];
-    if (cache) {
+    const bypass = isPreview(url, env);
+    if (cache && !bypass) {
       const hit = await cache.match(request);
       if (hit) return hit;
     }
@@ -266,8 +269,8 @@ export default {
     }
     if (body === undefined) return json({ ok: false, error: 'not_found' }, { status: 404 });
     if (body === null) return json(envelope(null, { freshness: 'UNAVAILABLE', semantics: 'not found in the canonical store' }), { status: 404 });
-    const res = json(body, { headers: { 'cache-control': `public, max-age=${ttl}` } });
-    if (cache && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(request, res.clone()));
+    const res = json(body, { headers: { 'cache-control': bypass ? 'no-store' : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
+    if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(request, res.clone()));
     return res;
   }
 };

@@ -17,7 +17,7 @@ test('every brief route resolves', () => {
     '/rankings/men': 'rankings-list', '/rankings/women': 'rankings-list', '/rankings/men/doubles': 'rankings-list', '/rankings/women/doubles': 'rankings-list',
     '/breakout-watch': 'breakout-watch', '/doubles': 'doubles', '/pbe-picks': 'pbe-picks', '/track-record': 'track-record', '/news': 'news',
     '/news/atp': 'news-desk', '/news/wta': 'news-desk', '/news/challenger': 'news-desk', '/news/itf': 'news-desk', '/news/doubles': 'news-desk',
-    '/news/some-story': 'not-found', '/sources': 'sources', '/methodology': 'methodology', '/labs': 'labs', '/tenniscast': 'tenniscast', '/matches/not-a-uuid': 'not-found'
+    '/news/some-story': 'news-article', '/news/wta': 'news-desk', '/news/grand-slams': 'news-desk', '/sources': 'sources', '/methodology': 'methodology', '/labs': 'labs', '/tenniscast': 'tenniscast', '/matches/not-a-uuid': 'not-found'
   };
   for (const [p, id] of Object.entries(cases)) assert.equal(resolveRoute(p).id, id, p);
 });

@@ -1,5 +1,5 @@
 // Data-backed heads for tennis-web — PURE apart from the injected API fetch (testable in node).
-import { SITE, INDEX_ROBOTS, NOINDEX_ROBOTS, breadcrumb, personLd, sportsEventLd, itemListLd, canonicalUrl } from '../../../src/seo/meta.js';
+import { SITE, INDEX_ROBOTS, NOINDEX_ROBOTS, breadcrumb, personLd, sportsEventLd, itemListLd, canonicalUrl, newsArticleLd } from '../../../src/seo/meta.js';
 
 export const ROUND = (code) => { const [st, r] = String(code || '').includes('-') ? String(code).split('-') : ['M', String(code || '')]; const b = { Q: 'Quarterfinal', S: 'Semifinal', F: 'Final' }[r] || (/^\d+$/.test(r) ? `Round ${r}` : r); return st === 'Q' ? `Qualifying ${b}` : b; };
 const EVENT = { MS: "Men's singles", WS: "Women's singles", MD: "Men's doubles", WD: "Women's doubles", XD: 'Mixed doubles' };
@@ -16,8 +16,25 @@ const card = (path, v) => ({ url: `${SITE}/og/${path}.png${v ? `?v=${encodeURICo
 const names = (m, s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
 
 /** Data-backed head for a resolved route. Returns meta overrides (or {} to keep the route default). */
-export async function headFor(env, r) {
+export async function headFor(env, r, url = null) {
   const { id, params } = r;
+  if (id === 'news-article') {
+    const pv = url?.searchParams.get('preview');
+    const a = await apiGet(env, `/v1/news/${params.slug}${pv && /^[0-9a-f]{16,64}$/.test(pv) ? `?preview=${pv}` : ''}`);
+    if (!a) return { robots: NOINDEX_ROBOTS, title: 'Story not found | PropBetEdge Tennis' };
+    const canonical = canonicalUrl(`/news/${a.slug}`);
+    const image = { ...card(`news/${a.slug}`, a.updated_at ? String(Date.parse(a.updated_at)) : ''), alt: a.headline };
+    const published = a.status === 'published';
+    return {
+      title: `${a.headline} | PropBetEdge Tennis`,
+      description: a.dek || a.headline,
+      robots: published ? INDEX_ROBOTS : NOINDEX_ROBOTS,
+      type: 'article',
+      image,
+      article: published ? { published_time: a.first_published_at || a.published_at, modified_time: a.updated_at, section: 'Tennis' } : null,
+      jsonld: [published ? newsArticleLd(a, canonical, image.url) : null, breadcrumb([['PropBetEdge Tennis', '/'], ['News', '/news'], [a.headline, `/news/${a.slug}`]])].filter(Boolean)
+    };
+  }
   if (id === 'player' || id === 'player-sub') {
     const p = await apiGet(env, `/v1/players/${params.slug}`);
     if (!p) return { robots: NOINDEX_ROBOTS, title: 'Player not found | PropBetEdge Tennis' };
@@ -31,7 +48,7 @@ export async function headFor(env, r) {
       description: `${p.name}${facts ? ` — ${facts}` : ''}. ${dna ? 'Serve, return and pressure metrics with samples and confidence.' : 'Ranking history, recent results, surface record, head-to-head and Tennis DNA.'}`,
       robots: ws || p.recent_matches?.length ? INDEX_ROBOTS : NOINDEX_ROBOTS,
       type: 'profile',
-      image: { ...card(`player/${p.slug}`, `${ws?.date || ''}${p.photo ? 'p' : 'm'}`), alt: `${p.name} — PropBetEdge Tennis player card` },
+      image: { ...card(dna ? `player/${p.slug}/dna` : `player/${p.slug}`, `${ws?.date || ''}${p.photo ? 'p' : 'm'}`), alt: `${p.name} — PropBetEdge Tennis ${dna ? 'Tennis DNA' : 'player'} card` },
       jsonld: [personLd(p, canonicalUrl(`/players/${p.slug}`)), breadcrumb([['PropBetEdge Tennis', '/'], ['Players', '/players'], [p.name, `/players/${p.slug}`]])]
     };
   }

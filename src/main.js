@@ -23,6 +23,7 @@ const PAGES = {
   labs: () => import('./pages/labs.js'),
   pbecast: () => import('./pages/pbecast.js'),
   'not-found': () => import('./pages/not-found.js'),
+  news: () => import('./pages/news.js').then((x) => ({ mount: x.hub })), 'news-desk': () => import('./pages/news.js').then((x) => ({ mount: x.hub })), 'news-article': () => import('./pages/news.js').then((x) => ({ mount: x.article })),
   live: lp('live'), schedule: lp('schedule'), matches: lp('schedule'), match: lp('match'),
   tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'), venue: lp('venue'),
   'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),

@@ -14,7 +14,7 @@ export const PROD_HOST = 'tennis.propbetedge.ai';
 export const EVENTS = Object.freeze([
   'tennis_match_open', 'tennis_live_open', 'tennis_player_open', 'tennis_tournament_open', 'tennis_rankings_open',
   'tennis_pbecast_open', 'tennis_pbecast_replay_open', 'tennis_broadcast_click', 'tennis_share', 'tennis_search',
-  'tennis_dna_open', 'tennis_schedule_open', 'tennis_watch_click',
+  'tennis_dna_open', 'tennis_schedule_open', 'tennis_watch_click', 'tennis_news_open',
   'pbecast_fullscreen', 'pbecast_key_moment_jump', 'pbecast_replay_speed'
 ]);
 const ALLOWED_PARAMS = new Set(['tour', 'tournament_id', 'match_id', 'player_id', 'surface', 'match_status', 'pbecast_mode', 'broadcast_provider', 'provider', 'territory', 'distribution_type', 'route', 'method', 'speed', 'moment', 'event_type', 'results']);
