@@ -1,0 +1,32 @@
+{
+  "checked_at": "2026-09-26T17:19:06.878Z",
+  "endpoints": [
+    "/v1/live",
+    "/v1/today",
+    "/v1/schedule?view=today",
+    "/v1/rankings?tour=wta&type=singles&limit=200",
+    "/v1/dna/leaders?metric=service_points_won&limit=50",
+    "/v1/search?q=an",
+    "/v1/players?q=ova",
+    "/v1/pbecast/6343ae97-23b6-505d-9837-62c5075d6517",
+    "/v1/matches/6343ae97-23b6-505d-9837-62c5075d6517",
+    "/v1/h2h/elena-rybakina/aryna-sabalenka",
+    "/v1/players/elena-rybakina/dna"
+  ],
+  "player_objects": 547,
+  "distinct_players": 310,
+  "approved_but_monogram": 0,
+  "photo_without_approval": 0,
+  "live_players": [
+    {
+      "slug": "julia-grabher",
+      "approved": true
+    },
+    {
+      "slug": "oksana-selekhmeteva",
+      "approved": true
+    }
+  ],
+  "violations": [],
+  "result": "PASS"
+}

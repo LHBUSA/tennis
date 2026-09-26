@@ -25,6 +25,8 @@ const MODE_LABEL = {
 };
 const REASON = { ace: 'Ace', double_fault: 'Double fault', winner: 'Winner', forced_error: 'Forced error', unforced_error: 'Unforced error', service_winner: 'Service winner', point: 'Point' };
 const SPEEDS = [0.5, 1, 2, 4];
+// observed transition -> court motion (no ball, no rally, no player movement: none of that is in the feed)
+const ANIM = { game_won: 'game', break: 'game', set_won: 'set', tiebreak: 'game', match_end: 'end', retired: 'end', walkover: 'end', suspended: 'pause', resumed: 'point', score_update: 'point', point: 'point', ace: 'point', double_fault: 'point', winner: 'point', unforced_error: 'point', forced_error: 'point' };
 
 const surname = (p) => (p?.name || '').split(' ').slice(-1)[0];
 const sideName = (m, s) => (m.players?.[s] || m.sides?.[s]?.players || []).map(surname).join(' / ') || s;
@@ -62,7 +64,9 @@ export function eventText(e, m) {
   return { tag, line: `${line}${hold}${multi}`, quality: 'snapshot' };
 }
 
-function scoreboard(m, state, mode) {
+function scoreboard(m, state, mode, prev = null) {
+  const chg = (s, i) => (prev && prev.sets?.[i]?.[s] !== state?.sets?.[i]?.[s] ? 'chg' : '');
+  const chgPt = (s) => (prev && prev.point?.[s] !== state?.point?.[s] ? 'chg' : '');
   const sets = state?.sets || [];
   const point = state?.point;
   const server = state?.server;
@@ -73,8 +77,8 @@ function scoreboard(m, state, mode) {
       <span class="sb-av">${ps.map((p) => avatar(p, { px: 40, eager: true }))}</span>
       <span class="sb-name">${ps.map((p, i) => html`${i ? ' / ' : ''}<a href="/players/${p.slug}">${p.name}</a>`)}<small>${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
       <span class="sb-srv">${server === s && !final ? html`<i class="srv" title="Serving"></i><span class="sr">serving</span>` : ''}</span>
-      <span class="sb-sets tabnum">${sets.map((x) => html`<b class="${(x.A > x.B ? 'A' : 'B') === s && Math.max(x.A, x.B) >= 6 ? 'w' : ''}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`)}</span>
-      <span class="sb-pt tabnum">${!final && point ? point[s] : ''}</span>
+      <span class="sb-sets tabnum">${sets.map((x, i) => html`<b class="${(x.A > x.B ? 'A' : 'B') === s && Math.max(x.A, x.B) >= 6 ? 'w' : ''} ${chg(s, i)}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`)}</span>
+      <span class="sb-pt tabnum ${chgPt(s)}">${!final && point ? point[s] : ''}</span>
     </div>`;
   };
   const t = m.tournament || {};
@@ -143,7 +147,7 @@ function liveSwitcher(items) {
 export function mount(root, { params, live = null }) {
   const ctl = new AbortController();
   const q = new URLSearchParams(location.search);
-  const st = { data: null, pos: 0, playing: false, speed: 1, timer: null, poll: null, lastEvent: null, following: true };
+  const st = { data: null, pos: 0, playing: false, speed: 1, timer: null, poll: null, lastEvent: null, following: true, animate: false, prevState: null };
   render(root, html`<div data-switch></div><div class="pbc" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   // live switcher: separate container so the court's redraws never reset it; polls the canonical live list
   const drawSwitch = (list) => { const el = root.querySelector('[data-switch]'); if (el) render(el, liveSwitcher(switcherItems(list, params.id))); };
@@ -164,14 +168,17 @@ export function mount(root, { params, live = null }) {
     const url = `${location.origin}/pbecast/${m.id}${cur ? `?t=${cur.event_id}` : ''}`;
     const title = `${sideName(m, 'A')} vs ${sideName(m, 'B')}`;
     const replay = d.mode.includes('replay');
+    // Level-1 motion: only a REAL observed transition animates (a new live event or one forward step).
+    const anim = st.animate && cur ? ANIM[cur.event_type] || 'point' : null;
+    st.animate = false;
     render(root.querySelector('[data-pbc]'), html`
       <div class="pbc-top page">
-        ${scoreboard(m, state, d.mode)}
+        ${scoreboard(m, state, d.mode, anim ? st.prevState : null)}
         <p class="pbc-note">${freshnessBadge(d.meta)} <b>${MODE_LABEL[d.mode]}</b> — ${d.cadence_note}${isPoint ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'}</p>
       </div>
       <div class="pbc-grid page">
         <section class="pbc-court" aria-label="Court">
-          <div class="court-wrap">
+          <div class="court-wrap${d.mode.includes('live') && !['completed', 'retired'].includes(state.status) ? ' is-live' : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''}>
             ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: ['completed', 'retired'].includes(state.status) ? null : state.server, point: state.point, tiebreak: tb, highlight: isPoint && cur ? cur.winner_side : null, ball: cur?.coordinates || null })}
             ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'}">${banner}</span>` : ''}
           </div>
@@ -215,6 +222,7 @@ export function mount(root, { params, live = null }) {
     const lastId = d.events.at(-1)?.event_id || null;
     if (!first && lastId === st.lastEvent) return;
     st.lastEvent = lastId;
+    const prevData = st.data;
     st.data = d;
     if (first) {
       const t = q.get('t');
@@ -223,13 +231,13 @@ export function mount(root, { params, live = null }) {
       st.following = !(i >= 0) && !d.mode.includes('replay');
       track(d.mode.includes('replay') ? 'tennis_pbecast_replay_open' : 'tennis_pbecast_open', { match_id: d.match.id, pbecast_mode: d.mode, match_status: d.match.status, surface: d.match.tournament?.surface });
       document.title = `${sideName(d.match, 'A')} vs ${sideName(d.match, 'B')} ${d.mode.includes('live') ? 'Live PBEcast' : 'PBEcast Replay'} | PropBetEdge Tennis`;
-    } else if (st.following) st.pos = d.events.length - 1;
+    } else if (st.following) { st.prevState = prevData?.events?.[st.pos]?.state || null; st.pos = d.events.length - 1; st.animate = true; }
     draw();
     if (d.mode.includes('live') && !st.poll) st.poll = setInterval(() => load(false), 15000);
   };
 
   const stopPlay = () => { st.playing = false; clearInterval(st.timer); st.timer = null; };
-  const step = (n) => { const max = st.data.events.length - 1; st.pos = Math.max(0, Math.min(max, st.pos + n)); st.following = st.pos === max; draw(); };
+  const step = (n) => { const max = st.data.events.length - 1; const from = st.pos; st.pos = Math.max(0, Math.min(max, st.pos + n)); st.following = st.pos === max; if (n === 1 && st.pos === from + 1) { st.prevState = st.data.events[from]?.state || null; st.animate = true; } draw(); };
   const onClick = (e) => {
     const b = e.target.closest('[data-rp],[data-jump],[data-fs]');
     if (!b || !st.data) return;

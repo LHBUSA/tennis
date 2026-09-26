@@ -91,7 +91,7 @@
 
 /* live matches switcher */
 .pbc-switch { padding-top: 14px; padding-bottom: 0; }
-.pbc-switch-h { display: flex; align-items: center; gap: 8px; font: 800 12px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--on-dark-2, var(--muted)); margin: 0 0 8px; }
+.pbc-switch-h { display: flex; align-items: center; gap: 8px; font: 800 12px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink-2); margin: 0 0 8px; }
 .pbc-switch-h small { color: var(--gold); letter-spacing: 0; }
 .pbc-switch .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--live); box-shadow: 0 0 0 3px var(--live-soft); }
 .pbc-switch ul { list-style: none; margin: 0; padding: 0 0 4px; display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; }
@@ -105,3 +105,21 @@
 .sw-row .av + .av { margin-left: -8px; box-shadow: 0 0 0 2px var(--white); }
 .sw-row b { font: 600 13.5px/1.2 var(--f-ui); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sw-t { grid-area: t; font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Level-1 OBSERVED LIVE motion: real transitions only (see ANIM in pbecast.js) */
+.court-wrap { position: relative; overflow: hidden; }
+.court-wrap::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.court-wrap[data-anim="game"]::after { background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.16) 50%, transparent 70%); animation: sweep 1.1s ease-out; }
+.court-wrap[data-anim="set"]::after { background: radial-gradient(60% 50% at 50% 50%, rgba(226, 187, 92, 0.34), transparent 70%); animation: glow 1.8s ease-out; }
+.court-wrap[data-anim="end"]::after { box-shadow: inset 0 0 0 3px var(--gold); background: radial-gradient(70% 60% at 50% 50%, rgba(226, 187, 92, 0.28), transparent 72%); animation: glow 2.4s ease-out forwards; }
+.court-wrap[data-anim="point"] .c-srv circle:first-child { animation: srvPop 0.6s ease-out; transform-box: fill-box; transform-origin: center; }
+.court-wrap.is-live .c-srv-ring { animation: breathe 2.6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.sb .chg { animation: chg 1.4s ease-out; border-radius: 4px; }
+@keyframes sweep { 0% { opacity: 1; transform: translateX(-100%); } 100% { opacity: 1; transform: translateX(100%); } }
+@keyframes glow { 0% { opacity: 0; } 25% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes srvPop { 0% { transform: scale(1); } 40% { transform: scale(1.45); } 100% { transform: scale(1); } }
+@keyframes breathe { 0%, 100% { opacity: 0.35; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.18); } }
+@keyframes chg { 0% { background: rgba(226, 187, 92, 0.55); } 100% { background: transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .court-wrap::after, .court-wrap .c-srv circle, .court-wrap .c-srv-ring, .sb .chg { animation: none !important; }
+}
