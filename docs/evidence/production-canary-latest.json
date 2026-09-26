@@ -1,26 +1,25 @@
 {
-  "run_at": "2026-09-26T14:42:38.152Z",
+  "run_at": "2026-09-26T14:51:19.005Z",
   "api": "https://tennis-api.propbetedge.ai",
   "summary": {
-    "PASS": 28,
-    "FAIL": 1
+    "PASS": 29
   },
   "totals": {
-    "matches": 270,
-    "players": 2089,
-    "stats_rows": 168,
+    "matches": 274,
+    "players": 2121,
+    "stats_rows": 260,
     "complete_ranking_snapshots": 2,
-    "observed_changes": 18,
-    "raw_captures": 155,
+    "observed_changes": 23,
+    "raw_captures": 266,
     "players_with_wikidata": 1090,
     "wimbledon_rows_linked_to_atp_ids": 0
   },
   "backfill": {
     "calendar": {
-      "from": "2025-03-26",
+      "from": "2025-06-04",
       "done": false
     },
-    "events_remaining": 22,
+    "events_remaining": 41,
     "ranking_history": null
   },
   "checks": [
@@ -67,17 +66,15 @@
       "name": "ingest ran within 10 min",
       "result": "PASS",
       "detail": {
-        "finished_at": "2026-09-26T14:41:52.895Z",
-        "age_s": 36
+        "finished_at": "2026-09-26T14:51:36.105Z",
+        "age_s": -24
       }
     },
     {
       "name": "ingest steps all ok",
-      "result": "FAIL",
+      "result": "PASS",
       "detail": {
-        "failed": [
-          "matches: postgrest 400 POST tennis_matches: {\"code\":\"22007\",\"details\":null,\"hint\":null,\"message\":\"invalid input syntax for type timestamp with time zone: \\\"15:00+0300\\\"\"}"
-        ]
+        "failed": []
       }
     },
     {
@@ -94,9 +91,9 @@
       "name": "tennis-live cycled within 3 min",
       "result": "PASS",
       "detail": {
-        "started_at": "2026-09-26T14:41:55.513Z",
+        "started_at": "2026-09-26T14:49:55.807Z",
         "editions": 2,
-        "age_s": -24
+        "age_s": 10
       }
     },
     {
@@ -105,7 +102,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 214
+        "ms": 222
       }
     },
     {
@@ -114,7 +111,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 77
+        "ms": 84
       }
     },
     {
@@ -123,7 +120,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 65
+        "ms": 73
       }
     },
     {
@@ -131,8 +128,8 @@
       "result": "PASS",
       "detail": {
         "status": 200,
-        "freshness": "UNAVAILABLE",
-        "ms": 34
+        "freshness": "CURRENT",
+        "ms": 138
       }
     },
     {
@@ -140,8 +137,8 @@
       "result": "PASS",
       "detail": {
         "status": 200,
-        "freshness": "UNAVAILABLE",
-        "ms": 43
+        "freshness": "CURRENT",
+        "ms": 124
       }
     },
     {
@@ -150,7 +147,7 @@
       "detail": {
         "status": 200,
         "freshness": "CURRENT",
-        "ms": 66
+        "ms": 67
       }
     },
     {
@@ -159,7 +156,7 @@
       "detail": {
         "status": 200,
         "freshness": "CACHED",
-        "ms": 37
+        "ms": 39
       }
     },
     {
@@ -232,12 +229,12 @@
     {
       "name": "raw captures archived (R2 lineage rows present)",
       "result": "PASS",
-      "detail": 155
+      "detail": 266
     },
     {
       "name": "open ingest holds are few (reviewable)",
       "result": "PASS",
-      "detail": 3
+      "detail": 4
     },
     {
       "name": "stored scores re-validate (267 sampled)",

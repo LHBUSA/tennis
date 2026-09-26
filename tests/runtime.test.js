@@ -160,6 +160,7 @@ test('writer: a row Postgres rejects is held; the rest of the edition is still w
     insert: async () => [],
     del: async () => null,
     req: async () => null,
+    count: async () => 0,
     upsert: async (table, list) => {
       if (table === 'tennis_ingest_holds') holds.push(...list);
       if (table === 'tennis_matches') {
@@ -174,4 +175,10 @@ test('writer: a row Postgres rejects is held; the rest of the edition is still w
   assert.equal(r.written, 2);
   assert.equal(r.held, 1);
   assert.ok(holds.some((h) => h.problems[0].startsWith('db_rejected')));
+});
+
+test('store.count reads the exact total from Content-Range, not a capped select', async () => {
+  const { Store } = await import('../workers/shared/store/postgrest.js');
+  const f = async (url, init) => { assert.equal(init.method, 'HEAD'); assert.equal(init.headers.prefer, 'count=exact'); return new Response(null, { status: 206, headers: { 'content-range': '0-0/1437' } }); };
+  assert.equal(await new Store('https://tkmlnhmylqnttmnsnief.supabase.co', 'k', f).count('tennis_rankings', 'snapshot_id=eq.x'), 1437);
 });

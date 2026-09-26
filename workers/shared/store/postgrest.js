@@ -65,6 +65,18 @@ export class Store {
     return (await this.req('GET', `${table}?${query}`)) || [];
   }
 
+  /** Exact row count (PostgREST caps plain selects at the project's max-rows, 1000 on Supabase). */
+  async count(table, query = '') {
+    this.requests += 1;
+    const call = this.f;
+    const res = await call(`${this.base}/${table}?select=*${query ? `&${query}` : ''}`, { method: 'HEAD', headers: this.headers({ prefer: 'count=exact', range: '0-0' }) });
+    if (!res.ok && res.status !== 206) throw new StoreError(res.status, '', `HEAD ${table}`);
+    const cr = res.headers.get('content-range') || '';
+    const n = Number(cr.split('/')[1]);
+    if (!Number.isFinite(n)) throw new StoreError(res.status, cr, `count ${table}`);
+    return n;
+  }
+
   async del(table, query) {
     return this.req('DELETE', `${table}?${query}`);
   }

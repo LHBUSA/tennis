@@ -33,3 +33,5 @@ forward-only fixes.
 | 2026-09-26 | tennis-ingest | 9da8c78a | 84f7009e / b5ca794e / d993c1c0 | cursor-on-failure fix; yields live-owned editions |
 | 2026-09-26 | tennis-live | c634e0ed | 4bc0aeeb (skeleton) | 18 s live polling |
 | 2026-09-26 | tennis-model / tennis-news | 8598487b / bca67020 | — | skeletons |
+| 2026-09-26 | tennis-ingest | e44a5264 | 2a9e0b60 | exact ranking counts, hold resolution, AO men, row-level fallback |
+| 2026-09-26 | tennis-live | 59e89b03 | 3eb569df | shared writer changes |

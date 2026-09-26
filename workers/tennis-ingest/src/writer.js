@@ -91,9 +91,9 @@ export async function writeRankingPage(store, rows, { captureId = null } = {}) {
 }
 
 export async function finalizeSnapshot(store, sid) {
-  const c = await store.select('tennis_rankings', `select=rank&snapshot_id=eq.${sid}&limit=5000`);
-  await store.req('PATCH', `tennis_ranking_snapshots?snapshot_id=eq.${sid}`, { body: { row_count: c.length } });
-  return c.length;
+  const n = await store.count('tennis_rankings', `snapshot_id=eq.${sid}`);
+  await store.req('PATCH', `tennis_ranking_snapshots?snapshot_id=eq.${sid}`, { body: { row_count: n } });
+  return n;
 }
 
 // ---- calendar ------------------------------------------------------------------------------------------
@@ -216,6 +216,12 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     if (changes.length) await store.insert('tennis_source_changes', changes.map((c) => ({ entity_type: c.entity_type, entity_id: c.entity_id, field: c.field, kind: c.kind, from_value: c.from_value, to_value: c.to_value, source_family: c.source_family, capture_id: c.capture_id })));
     result.written = keep.length;
     result.changes = changes.length;
+    // a later clean observation resolves an earlier hold for the same source row
+    const resolvedIds = keep.map((x) => x.sm.provider_match_id);
+    for (let i = 0; i < resolvedIds.length; i += 150) {
+      const part = resolvedIds.slice(i, i + 150);
+      await store.req('PATCH', `tennis_ingest_holds?entity_type=eq.match&provider=eq.${keep[0].sm.provider}&resolved_at=is.null&external_id=${inList(part)}`, { body: { resolved_at: now() } });
+    }
   }
   await hold(store, dedupe(holds, (h) => `${h.provider}:${h.external_id}`));
   result.held = holds.length;
