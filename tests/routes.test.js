@@ -39,8 +39,8 @@ test('canonical: trailing slash and duplicate slashes normalized; query/hash dro
 
 test('only substantive routes are indexable today; data routes and 404 are noindex', () => {
   const indexable = STATIC_ROUTES.filter((r) => r.index).map((r) => r.path).sort();
-  assert.deepEqual(indexable, ['/', '/dna', '/live', '/men', '/methodology', '/pbecast', '/players', '/rankings', '/rankings/women', '/rankings/women/doubles', '/schedule', '/sources', '/tournaments']);
-  for (const p of ['/search', '/coverage', '/credits', '/pbe-picks', '/news', '/rankings/men']) assert.equal(routeMeta(resolveRoute(p)).robots, NOINDEX_ROBOTS, p);
+  assert.deepEqual(indexable, ['/', '/dna', '/live', '/men', '/methodology', '/news', '/pbecast', '/players', '/rankings', '/rankings/women', '/rankings/women/doubles', '/schedule', '/sources', '/tournaments']);
+  for (const p of ['/search', '/coverage', '/credits', '/pbe-picks', '/rankings/men']) assert.equal(routeMeta(resolveRoute(p)).robots, NOINDEX_ROBOTS, p);
   assert.equal(routeMeta(resolveRoute('/live')).robots, INDEX_ROBOTS);
   assert.equal(routeMeta(resolveRoute('/players/x')).robots, NOINDEX_ROBOTS);
   assert.equal(routeMeta(resolveRoute('/nope')).robots, NOINDEX_ROBOTS);

@@ -368,3 +368,4 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .sub-h small { letter-spacing: 0; text-transform: none; font-weight: 500; }
 .home-men-t b { color: var(--court-700); font-variant-numeric: tabular-nums; }
 .home-mw { margin: 18px 0; }
+.sec-sub { margin: 14px 0 8px; font: 800 12px/1.2 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }

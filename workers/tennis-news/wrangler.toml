@@ -17,8 +17,8 @@ cpu_ms = 120000
 crons = ["*/2 * * * *"]
 
 [vars]
-# SHADOW until the canary set passes review: every story is written as HOLD ("shadow").
-NEWS_PUBLISH_ENABLED = "false"
+# PUBLISH — owner-approved 2026-09-26 after the model canary passed (3/3 gpt-5.6-sol, 0 gate failures). "false" = SHADOW.
+NEWS_PUBLISH_ENABLED = "true"
 TENNIS_EDITORIAL_OPENAI_MODEL = "gpt-5.6-sol"
 
 [[kv_namespaces]]

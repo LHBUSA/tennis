@@ -12,7 +12,7 @@ const NEWS = 'https://tennis-news.sales-fd3.workers.dev';
 const checks = [];
 const add = (name, pass, detail = {}) => { checks.push({ name, result: pass ? 'PASS' : 'FAIL', ...detail }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}`, Object.keys(detail).length ? JSON.stringify(detail).slice(0, 200) : ''); };
 const get = async (u, opts = {}) => { const r = await fetch(u, { headers: { 'cache-control': 'no-cache' }, ...opts }); const text = await r.text(); let body = null; try { body = JSON.parse(text); } catch { /* html */ } return { status: r.status, body, text, headers: r.headers }; };
-const sql = (q) => { const out = execFileSync('pwsh', ['-NoProfile', '-File', 'scripts/db/run_sql.ps1', '-Query', q], { encoding: 'utf8' }); const i = Math.min(...['[', '{'].map((c) => out.indexOf(c)).filter((x) => x >= 0)); const v = JSON.parse(out.slice(i)); return Array.isArray(v) ? v : [v]; };
+const sql = (q) => { const out = execFileSync('pwsh', ['-NoProfile', '-File', 'scripts/db/run_sql.ps1', '-Query', q], { encoding: 'utf8' }); const at = ['[', '{'].map((c) => out.indexOf(c)).filter((x) => x >= 0); if (!at.length) return []; /* no rows */ const v = JSON.parse(out.slice(Math.min(...at))); return Array.isArray(v) ? v : [v]; };
 
 const h = (await get(`${NEWS}/health`)).body?.data || (await get(`${NEWS}/health`)).body;
 add('tennis-news health', !!h?.ok, { mode: h?.mode, editorial: h?.editorial });

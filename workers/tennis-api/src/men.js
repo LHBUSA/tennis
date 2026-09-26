@@ -19,6 +19,8 @@ const SLAM_ORDER = { 'australian-open': 1, 'roland-garros': 2, wimbledon: 3, 'us
 const ROUND_DEPTH = { F: 7, S: 6, Q: 5, 4: 4, 3: 3, 2: 2, 1: 1 };
 export const STAGE_LABEL = { 8: 'Champion', 7: 'Finalist', 6: 'Semifinalist', 5: 'Quarterfinalist', 4: 'Fourth round', 3: 'Third round', 2: 'Second round', 1: 'First round' };
 const isMain = (r) => !String(r || '').startsWith('Q-');
+// WTA-sourced Slam rounds carry a stage prefix (M-F, M-S, ...); the Slam sources use F, S, ...
+const rnd = (r) => String(r || '').replace(/^M-/, '');
 
 /** Every edition holding men's or mixed matches, newest first, with per-event counts. */
 async function menEditions(store) {
@@ -45,16 +47,16 @@ async function menEditions(store) {
 
 const sideOf = (m, s) => m.sides?.[s]?.players || [];
 
-/** Stage reached by each men's singles player in one edition (8 = champion). */
-export function stages(matches) {
+/** Stage reached by each singles player of one event (MS or WS) in one edition (8 = champion). */
+export function stages(matches, event = 'MS') {
   const best = new Map();
   for (const m of matches) {
-    if (m.event_type !== 'MS' || !isMain(m.round)) continue;
-    const d = ROUND_DEPTH[m.round];
+    if (m.event_type !== event || !isMain(m.round)) continue;
+    const d = ROUND_DEPTH[rnd(m.round)];
     if (!d) continue;
     for (const s of ['A', 'B']) for (const p of sideOf(m, s)) {
       const won = FINAL.includes(m.status) && m.winner_side === s;
-      const v = m.round === 'F' && won ? 8 : d;
+      const v = rnd(m.round) === 'F' && won ? 8 : d;
       const cur = best.get(p.id);
       if (!cur || v > cur.depth) best.set(p.id, { player: p, depth: v });
     }
@@ -119,8 +121,56 @@ export async function menPlayers(store) {
     { rows: raw, source: ['ausopen', 'wimbledon', 'rolandgarros'], policy: ARCHIVE, semantics: "men's singles players in the newest Grand Slam main draws PropBetEdge holds, ordered by furthest round reached — not a ranking", degraded: [NOT_ATP] });
 }
 
+// ---- /v1/slams: tournament-first Grand Slam coverage across all five events ------------------------------
+const EVENTS = ['MS', 'WS', 'MD', 'WD', 'XD'];
+
+export async function slams(store) {
+  const eds = await store.select('tennis_tournament_editions', 'select=edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_family,updated_at,tennis_tournaments(slug,name)&level=eq.Grand Slam&limit=200');
+  const ids = eds.map((e) => e.edition_id);
+  const rows = ids.length ? await allRows(store, 'tennis_matches', `select=match_id,edition_id,event_type,round,status&edition_id=${inList(ids)}&order=match_id.asc`, 20000) : [];
+  const pbp = new Set((await allRows(store, 'tennis_match_events', 'select=match_id&quality=eq.point_event&event_sequence=eq.0&order=match_id.asc', 10000)).map((r) => r.match_id));
+  const editions = eds.map((e) => {
+    const ms = rows.filter((r) => r.edition_id === e.edition_id);
+    const counts = Object.fromEntries(EVENTS.map((ev) => [ev, ms.filter((r) => r.event_type === ev && isMain(r.round)).length]));
+    counts.qualifying = ms.filter((r) => !isMain(r.round)).length;
+    counts.point_by_point = ms.filter((r) => pbp.has(r.match_id)).length;
+    counts.total = ms.length;
+    return { edition_id: e.edition_id, ...shapeEdition(e), counts };
+  }).filter((e) => e.counts.total > 0);
+  editions.sort((a, b) => b.year - a.year || (SLAM_ORDER[b.slug] || 0) - (SLAM_ORDER[a.slug] || 0));
+  // finals of the two newest editions, every event, with event labels as context
+  const finals = [];
+  for (const e of editions.slice(0, 2)) {
+    const ms = await editionMatches(store, e.edition_id, '&round=in.(F,M-F)');
+    finals.push(...ms.filter((m) => FINAL.includes(m.status)).sort((a, b) => EVENTS.indexOf(a.event_type) - EVENTS.indexOf(b.event_type)));
+  }
+  // featured: champions + finalists of the newest editions holding each singles event
+  const featured = [];
+  const seen = new Set();
+  for (const ev of ['MS', 'WS']) {
+    for (const e of editions.filter((x) => x.counts[ev] > 0).slice(0, 2)) {
+      const ms = await editionMatches(store, e.edition_id, `&event_type=eq.${ev}&round=in.(F,M-F)`);
+      for (const st of stages(ms, ev).sort((a, b) => b.depth - a.depth)) {
+        if (seen.has(st.player.id)) continue;
+        seen.add(st.player.id);
+        featured.push({ player: st.player, note: `${STAGE_LABEL[st.depth]} · ${e.tournament} ${e.year}`, event: ev, depth: st.depth, year: e.year, order: SLAM_ORDER[e.slug] || 0 });
+      }
+    }
+  }
+  featured.sort((a, b) => b.year - a.year || b.order - a.order || b.depth - a.depth);
+  // PBEcast replays with genuine point-by-point (closing rounds, every event)
+  const pbpEdition = editions.find((e) => e.counts.point_by_point > 0) || null;
+  let replays = [];
+  if (pbpEdition) {
+    const ms = await editionMatches(store, pbpEdition.edition_id, '&round=in.(F,S,M-F,M-S)');
+    replays = ms.filter((m) => pbp.has(m.id) && ['completed', 'retired'].includes(m.status)).sort((a, b) => (ROUND_DEPTH[rnd(b.round)] || 0) - (ROUND_DEPTH[rnd(a.round)] || 0) || EVENTS.indexOf(a.event_type) - EVENTS.indexOf(b.event_type)).slice(0, 8);
+  }
+  return ok({ editions, finals, featured: featured.slice(0, 8), replays, replay_edition: pbpEdition },
+    { rows: eds, source: ['ausopen', 'wimbledon', 'rolandgarros', 'wta'], policy: ARCHIVE, semantics: 'Grand Slam editions in the canonical store with per-event counts (MS, WS, MD, WD, XD, qualifying), finals, champions and point-by-point replays', degraded: [NOT_ATP] });
+}
+
 export async function menRoute(path, url, store) {
-  if (path !== '/v1/men' && path !== '/v1/men/players') return undefined;
+  if (path !== '/v1/men' && path !== '/v1/men/players' && path !== '/v1/slams') return undefined;
   if (!store) return notConfigured('canonical store not connected to this Worker');
-  return path === '/v1/men' ? men(store) : menPlayers(store);
+  return path === '/v1/men' ? men(store) : path === '/v1/slams' ? slams(store) : menPlayers(store);
 }

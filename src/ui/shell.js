@@ -8,7 +8,6 @@ export const PRIMARY_NAV = [
   { href: '/', label: 'Today', id: 'today' },
   { href: '/live', label: 'Live', id: 'live' },
   { href: '/pbecast', label: 'PBEcast', id: 'pbecast' },
-  { href: '/men', label: 'Men', id: 'men' },
   { href: '/news', label: 'News', id: 'news' },
   { href: '/players', label: 'Players', id: 'players' },
   { href: '/tournaments', label: 'Tournaments', id: 'tournaments' },
@@ -23,7 +22,7 @@ export const MORE_NAV = [
   { href: '/credits', label: 'Photo credits', note: 'Every player photo, its author and license' }
 ];
 
-const NAV_GROUP = { 'player-sub': 'players', player: 'players', match: 'more', matches: 'more', schedule: 'more', rankings: 'more', 'rankings-list': 'more', labs: 'more', 'news-desk': 'news', 'news-article': 'news', 'pbecast-hub': 'pbecast', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
+const NAV_GROUP = { men: 'players', 'player-sub': 'players', player: 'players', match: 'more', matches: 'more', schedule: 'more', rankings: 'more', 'rankings-list': 'more', labs: 'more', 'news-desk': 'news', 'news-article': 'news', 'pbecast-hub': 'pbecast', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
 
 export function shellHtml() {
   return html`

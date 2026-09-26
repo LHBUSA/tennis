@@ -132,3 +132,15 @@ export function dnaRadar(dims, other = null) {
 export function dnaBars(dims) {
   return html`<div class="bars">${dims.map((d) => html`<div class="bar"><span>${d.label}</span><i><b style="width:${d.percentile ?? 0}%"></b></i><span class="v">${d.percentile == null ? html`<span class="conf c-${d.confidence}">${d.confidence}</span>` : `${d.percentile}th`}</span></div>`)}</div>`;
 }
+
+/** Grand Slam edition row, tournament first; the five events are context, never separate products. */
+const SLAM_EVENTS = [['MS', 'men’s singles', 'mens-singles'], ['WS', 'women’s singles', 'womens-singles'], ['MD', 'men’s doubles', 'mens-doubles'], ['WD', 'women’s doubles', 'womens-doubles'], ['XD', 'mixed', 'mixed-doubles'], ['qualifying', 'qualifying', 'qualifying']];
+export function slamRow(e) {
+  const c = e.counts || {};
+  const parts = SLAM_EVENTS.filter(([k]) => c[k]).map(([k, l]) => `${Number(c[k]).toLocaleString('en-US')} ${l}`).join(' · ');
+  return html`<a class="tr ${surfaceClass(e.surface)}" href="/tournaments/${e.slug}/${e.year}">
+    <span class="tr-l">Grand Slam${e.surface ? ` · ${e.surface}` : ''}</span>
+    <b>${e.tournament} ${e.year}</b>
+    <span class="tr-d">${parts}${c.point_by_point ? html` · <em class="men-pbp">${Number(c.point_by_point).toLocaleString('en-US')} with point-by-point</em>` : ''}</span>
+  </a>`;
+}
