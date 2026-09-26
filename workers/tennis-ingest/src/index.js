@@ -19,7 +19,7 @@ import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
-import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
+import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.2.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
@@ -157,6 +157,9 @@ async function tickInner(env, store, kv, force) {
           if (r.state === 'PASS') await kv.put('bf:aoq', JSON.stringify({ year: aoq.year, day: aoq.day + 1 }));
           return { ok: r.state === 'PASS', out: { ausopen_qualifying: `${aoq.year} day ${aoq.day}`, ...r } };
         }
+        // every expected main-draw slot exists (walkovers are absent from the day results)
+        const gap = await ausopenGapStep(ctx, 2026);
+        if (!gap.done || (gap.results || []).length) return { ok: true, out: { ausopen_gap_fill: gap } };
         const pbp = await ausopenPointStep(ctx, 10);
         const failed = (pbp.results || []).filter((x) => !['PASS', 'EMPTY', 'HELD'].includes(x.state)).length;
         return { ok: failed < (pbp.results || []).length || !(pbp.results || []).length, done: !!pbp.done, out: { ausopen_match_centre: pbp } };
@@ -284,6 +287,25 @@ export default {
       const ct = key.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
       await env.TENNIS_MEDIA.put(key, await request.arrayBuffer(), { httpMetadata: { contentType: ct, cacheControl: 'public, max-age=31536000, immutable' } });
       return json({ ok: true, key });
+    }
+    // admin: one honest request to an allow-listed source URL from Cloudflare egress (access research only:
+    // no retries, no alternate user agents, no bypass). Reports status, size, latency and challenge markers.
+    if (path === '/v1/probe' && request.method === 'POST') {
+      const auth = request.headers.get('authorization') || '';
+      if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      const PROBES = { usopen_robots: 'https://www.usopen.org/robots.txt', usopen_ms_2025: 'https://www.usopen.org/en_US/scores/feeds/2025/draws/MS.json', usopen_home: 'https://www.usopen.org/' };
+      const target = PROBES[url.searchParams.get('target')];
+      if (!target) return json({ ok: false, error: 'unknown target', targets: Object.keys(PROBES) }, { status: 400 });
+      const t0 = Date.now();
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 20000);
+      try {
+        const r = await fetch(target, { headers: { 'user-agent': 'PropBetEdge-Tennis/0.2 (+https://tennis.propbetedge.ai/sources)', accept: '*/*' }, signal: ctl.signal });
+        const body = await r.text();
+        return json({ ok: true, data: { target, status: r.status, bytes: body.length, ms: Date.now() - t0, server: r.headers.get('server'), challenge: /challenge|captcha|akamai|access denied|cf-chl/i.test(body.slice(0, 4000)), content_type: r.headers.get('content-type') } }, { headers: { 'cache-control': 'no-store' } });
+      } catch (e) {
+        return json({ ok: true, data: { target, status: null, ms: Date.now() - t0, error: ctl.signal.aborted ? 'timeout_20s' : String(e.message).slice(0, 200) } }, { headers: { 'cache-control': 'no-store' } });
+      } finally { clearTimeout(timer); }
     }
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';

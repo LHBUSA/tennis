@@ -362,3 +362,25 @@ export async function rolandGarrosStep(ctx, { lookups = 12 } = {}) {
   await ctx.kv.put('bf:rg', JSON.stringify(nextState()));
   return { event, year: st.year, players: people.length, identity: outcomes, ...w };
 }
+
+// ---- AO gap fill: every expected main-draw slot must exist; missing ones are read from the match centre -----
+export async function ausopenGapStep(ctx, year, batch = 8) {
+  const state = (await ctx.kv.get(`bf:aogap:${year}`, 'json')) || { checked: [] };
+  if (state.done) return { done: true };
+  const have = new Set((await ctx.store.select('tennis_match_external_ids', `select=external_id&provider=eq.ausopen&external_id=like.${year}-M*&limit=2000`)).map((r) => r.external_id.split('-').pop()));
+  const checked = new Set(state.checked);
+  const missing = ['MS', 'MD'].flatMap(slams.ausopenSlotIds).filter((id) => !have.has(id) && !checked.has(id));
+  const out = [];
+  const tid = await tournamentId('slam:australian-open');
+  const eid = await editionId(tid, year);
+  for (const id of missing.slice(0, batch)) {
+    const r = await fetchRun(ctx, slams.ausopenMatchCentre, { matchId: id });
+    const rec = r.state === 'PASS' && r.records[0] ? slams.parseAusopenWalkover(r.records[0], year) : null;
+    if (rec) { const w = await writeMatches(ctx.store, [rec], { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null }); out.push({ id, state: 'walkover_written', ...w }); }
+    else out.push({ id, state: r.state === 'PASS' ? 'not_a_walkover' : r.state });
+    checked.add(id);
+  }
+  const done = missing.length <= batch;
+  await ctx.kv.put(`bf:aogap:${year}`, JSON.stringify({ checked: [...checked], done }));
+  return { missing: missing.length, results: out, done };
+}

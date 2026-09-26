@@ -606,17 +606,19 @@
     },
     {
       "key": "usopen.feeds",
-      "family": "slams",
-      "name": "US Open — score feeds",
-      "tier": "official_tournament",
+      "family": "usopen",
+      "name": "US Open official feeds (usopen.org)",
+      "tier": "official_slam",
       "url": "https://www.usopen.org/en_US/scores/feeds/{year}/draws/MS.json",
       "capabilities": [
         "draws",
         "set_game_scoring"
       ],
-      "verdict": "UNVERIFIED",
+      "verdict": "BLOCKED_BY_ACCESS_CONTROL",
       "evidence": {
-        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+        "checked": "2026-09-26",
+        "cloudflare_egress": "robots.txt 520, feeds 520, homepage 403 with challenge markers",
+        "workstation": "0-byte hang until timeout (edge tarpit)"
       },
       "robots": "robots.txt timed out",
       "terms": {
@@ -624,7 +626,7 @@
         "status": "NOT_RETRIEVED",
         "quote": null
       },
-      "production_status": "NOT_ADAPTED",
+      "production_status": "NOT INGESTED — access control is not bypassed; recheck periodically",
       "notes": "Every request (including robots.txt) hung with 0 bytes: edge drop or outage. Recheck once; do not work around it.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null,
@@ -632,17 +634,19 @@
     },
     {
       "key": "rolandgarros.results",
-      "family": "slams",
-      "name": "Roland-Garros — results pages (Nuxt payload)",
-      "tier": "official_tournament",
-      "url": "https://www.rolandgarros.com/en-us/results/{SM|SD|...}?round={n}&year={y}",
+      "family": "rolandgarros",
+      "name": "Roland-Garros results API (rolandgarros.com)",
+      "tier": "official_slam",
+      "url": "https://www.rolandgarros.com/api/en-us/results/{year}/{SM|DM|QM}",
       "capabilities": [
         "set_game_scoring",
         "history"
       ],
-      "verdict": "DEGRADED",
+      "verdict": "PASS",
       "evidence": {
-        "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
+        "checked": "2026-09-26",
+        "depth": "2018-2026",
+        "identity": "FFT ids only; exact name + DOB (player card) + nationality unique vs ATP-id players, else held"
       },
       "native_ids": {
         "player": "FFT-internal integer (e.g. 39723)"
@@ -653,7 +657,7 @@
         "status": "NOT_RETRIEVED",
         "quote": null
       },
-      "production_status": "NOT_ADAPTED",
+      "production_status": "INGESTING (lane rolandgarros)",
       "notes": "Data only inside the SSR payload; FFT ids need their own crosswalk.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
@@ -1035,11 +1039,74 @@
         "status": "RESTRICTED",
         "quote": "§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path."
       },
-      "production_status": "NOT A PRODUCTION SOURCE. Not wired. Even internal reconciliation (gap detection, schedule verification, score-match flags, tournament discovery) awaits an explicit tennis-scoped owner decision; the 2026-09-25 NBA ESPN acceptance does not extend to tennis. Never customer-facing (brand stays DATA SOURCE · PropSports).",
+      "production_status": "INTERNAL REFERENCE / GAP-CHECKING ONLY (owner approved 2026-09-26): never canonical, never a production dependency, never republished, never customer-facing; skipped where an official source answers",
       "notes": "Identity: ESPN athlete ids are internal ints; the CC0 path is Wikidata P11585 (ESPN tennis id) <-> P536 (ATP id), 1,317 players with both, usable without touching ESPN.",
       "storage_policy": null,
       "attribution": null,
       "native_ids": null
+    },
+    {
+      "key": "wimbledon.archive",
+      "family": "wimbledon",
+      "name": "Wimbledon draws archive (da.wimbledon.com)",
+      "tier": "official_slam",
+      "url": "https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}",
+      "capabilities": null,
+      "verdict": "PASS",
+      "evidence": {
+        "checked": "2026-09-26",
+        "depth": "1877-2025 (ingested 1979+)",
+        "identity": "archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held"
+      },
+      "native_ids": null,
+      "robots": null,
+      "terms": null,
+      "production_status": "INGESTING (lane wimbledon_archive)",
+      "notes": null,
+      "storage_policy": null,
+      "attribution": null
+    },
+    {
+      "key": "daviscup.stadion",
+      "family": "daviscup",
+      "name": "Davis Cup (ITF Stadion API)",
+      "tier": "official_team",
+      "url": "https://api.itf-production.sports-data.stadion.io/custom/tieCentre/{tieId}",
+      "capabilities": null,
+      "verdict": "DEGRADED",
+      "evidence": {
+        "checked": "2026-09-26",
+        "depth": "1900-2026",
+        "identity_gap": "person.tennisId (e.g. GOM1041959) matches neither Wikidata P599 nor P2641; no DOB in person records"
+      },
+      "native_ids": null,
+      "robots": null,
+      "terms": null,
+      "production_status": "NOT INGESTED — every rubber would be an unresolved identity; no name-only merges",
+      "notes": null,
+      "storage_policy": null,
+      "attribution": null
+    },
+    {
+      "key": "protennislive.pdfs",
+      "family": "protennislive",
+      "name": "ProTennisLive draw / order-of-play PDFs",
+      "tier": "official_tour",
+      "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/{mds|mdd|qs|op}.pdf",
+      "capabilities": null,
+      "verdict": "DEGRADED",
+      "evidence": {
+        "checked": "2026-09-26",
+        "coverage": "ATP Tour + Challenger",
+        "identity_gap": "names + countries only (no ids, no DOB)"
+      },
+      "native_ids": null,
+      "robots": null,
+      "terms": null,
+      "production_status": "NOT CANONICAL — names alone are never identity; draw context only",
+      "notes": null,
+      "storage_policy": null,
+      "attribution": null
     }
   ],
   "rights_decision": {

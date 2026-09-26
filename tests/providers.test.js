@@ -305,3 +305,25 @@ test('Roland-Garros: era formats, retirement from the end-cause side, DOB card p
   assert.equal(resolveIdentity({ full_name: 'Andres Gomez', dob: '1960-02-27', nationality: 'ECU' }, index).status, 'ambiguous', 'two identical candidates are held');
   assert.equal(resolveIdentity({ full_name: 'Jannik Sinner', dob: null, nationality: 'ITA' }, index).status, 'unresolved', 'name only is never identity');
 });
+
+test('AO qualifying Final Round -> Q-3 and the format survives', () => {
+  const j = JSON.parse(fs.readFileSync('tests/fixtures/ausopen/day2-2026.json', 'utf8'));
+  const body = j.payload || j;
+  const ms = (body.events || []).find((e) => e.name === "Men's Singles");
+  ms.name = "Men's Qualifying Singles";
+  for (const r of body.rounds || []) r.name = 'Final Round';
+  const out = slams.parseAusopenDay(body).filter((m) => m.stage === 'qualifying');
+  assert.ok(out.length > 0);
+  for (const m of out) { assert.equal(m.round_code, 'Q-3'); assert.equal(m.format_key, 'BO3_FINAL_TB10'); }
+});
+
+test('AO gap fill: slot ids cover the whole main draw; only an official walkover is written', () => {
+  assert.equal(slams.ausopenSlotIds('MS').length, 127);
+  assert.ok(slams.ausopenSlotIds('MS').includes('MS406') && slams.ausopenSlotIds('MS').includes('MS701'));
+  assert.equal(slams.ausopenSlotIds('MD').length, 63);
+  const team = (last, status, tour) => ({ status, seed: null, players: [{ uuid: `u-${last}`, first_name: 'X', last_name: last, tour_id: tour, nationality: { code: 'AAA' } }] });
+  const wo = slams.parseAusopenWalkover({ match_id: 'MS406', match_status: { name: 'Walk-Over' }, teams: [team('Mensik', null, 'ATPM0NI'), team('Djokovic', 'Winner', 'ATPD643')] }, 2026);
+  assert.deepEqual([wo.status, wo.winner_side, wo.withdrawn_side, wo.round_code, wo.sets.length], ['walkover', 'B', 'A', '4', 0]);
+  assert.deepEqual(wo.sides.B[0].tour_id, { provider: 'atp', provider_id: 'D643' });
+  assert.equal(slams.parseAusopenWalkover({ match_id: 'MS406', match_status: { name: 'Complete' }, teams: [] }, 2026), null, 'a played match never comes from here');
+});

@@ -139,6 +139,7 @@ const AO_EVENTS = { "Men's Singles": { event_type: 'MS', gender: 'M', format: 'B
 const AO_STATUS = { C: 'completed', R: 'retired' };
 const AO_ROUNDS = { '1st Round': '1', '2nd Round': '2', '3rd Round': '3', '4th Round': '4', Quarterfinals: 'Q', 'Quarter-finals': 'Q', Semifinals: 'S', 'Semi-finals': 'S', Final: 'F' };
 
+// Slam qualifying has 3 rounds; AO names the last one 'Final Round' (-> Q-3).
 export function parseAusopenDay(j) {
   const events = new Map((j.events || []).map((e) => [e.uuid, e.name]));
   const rounds = new Map((j.rounds || []).map((r) => [r.uuid, r.name]));
@@ -174,7 +175,7 @@ export function parseAusopenDay(j) {
     const rn = rounds.get(m.round_id);
     out.push({
       type: 'match', provider: 'ausopen', provider_match_id: `${year}-${m.match_id}`, provider_event: { id: 'australian-open', year },
-      event_type: ev.event_type, stage: ev.stage || 'main', round_code: ev.stage === 'qualifying' ? (/^(\d)(st|nd|rd|th) Round$/.test(rn || '') ? `Q-${rn[0]}` : null) : AO_ROUNDS[rn] || rn || null, format_key: ev.format,
+      event_type: ev.event_type, stage: ev.stage || 'main', round_code: ev.stage === 'qualifying' ? (/^(\d)(st|nd|rd|th) Round$/.test(rn || '') ? `Q-${rn[0]}` : rn === 'Final Round' ? 'Q-3' : null) : AO_ROUNDS[rn] || rn || null, format_key: ev.format,
       status, winner_side: winner, end_reason: status === 'retired' ? 'retirement' : status === 'completed' ? 'completed' : null,
       retired_side: status === 'retired' && winner ? (winner === 'A' ? 'B' : 'A') : null, sets, live: null,
       sides: { A: side(tA), B: side(tB) }, seeds: { A: Number(teams.get(tA?.team_id)?.seed) || null, B: Number(teams.get(tB?.team_id)?.seed) || null },
@@ -374,3 +375,30 @@ export const wimbledonArchivePlayer = {
 
 /** Raw archive draw (identity mapping needs every UUID before parsing). */
 export const wimbledonArchiveRaw = { ...wimbledonArchive, key: 'wimbledon.archive', parse: (body) => safeJson(body) || [] };
+
+// ---- AO match-centre record for a main-draw slot the day results never listed (e.g. a walkover) ----------
+// Only official walkovers are written from here (status 'Walk-Over' + one team marked Winner); a played match
+// always comes from the day results. Round comes from the official match id (MS401 -> 4th round).
+const AO_SLOT = { MS: { event_type: 'MS', format: 'BO5_FINAL_TB10', gender: 'M', rounds: { 1: '1', 2: '2', 3: '3', 4: '4', 5: 'Q', 6: 'S', 7: 'F' } }, MD: { event_type: 'MD', format: 'BO3_FINAL_TB10', gender: 'M', rounds: { 1: '1', 2: '2', 3: '3', 4: 'Q', 5: 'S', 6: 'F' } } };
+export const AO_EXPECTED = { MS: [64, 32, 16, 8, 4, 2, 1], MD: [32, 16, 8, 4, 2, 1] };
+
+export function ausopenSlotIds(event) {
+  return (AO_EXPECTED[event] || []).flatMap((n, r) => Array.from({ length: n }, (_, k) => `${event}${r + 1}${String(k + 1).padStart(2, '0')}`));
+}
+
+export function parseAusopenWalkover(mc, year) {
+  const m = /^(MS|MD)(\d)(\d{2})$/.exec(String(mc?.match_id || ''));
+  const status = String(mc?.match_status?.name || mc?.match_status || '');
+  if (!m || !/walk.?over/i.test(status)) return null;
+  const ev = AO_SLOT[m[1]];
+  const [tA, tB] = mc.teams || [];
+  const side = (t) => (t?.players || []).map((p) => ({ provider: 'ausopen', provider_id: String(p.uuid || p.nid), tour_id: tourIdFromSlamId(p.tour_id || p.player_id), first_name: p.first_name || null, last_name: p.last_name || null, country: p.nationality?.code || null, gender: ev.gender }));
+  const winner = tA?.status === 'Winner' ? 'A' : tB?.status === 'Winner' ? 'B' : null;
+  if (!winner || !side(tA).length || !side(tB).length) return null;
+  return {
+    type: 'match', provider: 'ausopen', provider_match_id: `${year}-${mc.match_id}`, provider_event: { id: 'australian-open', year },
+    event_type: ev.event_type, stage: 'main', round_code: ev.rounds[m[2]] || null, format_key: ev.format, status: 'walkover', winner_side: winner,
+    end_reason: 'walkover', retired_side: null, withdrawn_side: winner === 'A' ? 'B' : 'A', sets: [], live: null, sides: { A: side(tA), B: side(tB) },
+    seeds: { A: Number(tA?.seed) || null, B: Number(tB?.seed) || null }, entry: { A: null, B: null }, court_name: null, duration_s: null, source_updated_at: null, warnings: []
+  };
+}
