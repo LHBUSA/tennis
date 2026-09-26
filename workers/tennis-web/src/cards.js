@@ -140,3 +140,22 @@ export function newsCard({ headline, kind, context, stat, jpegB64, name, faces =
     ${context ? `<text x="${x + 2}" y="${top + lines.length * size * 1.04 + 20}" font-family="Barlow Condensed" font-weight="600" font-size="28" fill="${C.line}" opacity="0.82">${esc(String(context).slice(0, 60))}</text>` : ''}
     ${stat ? `<text x="${x + 2}" y="${Math.min(560, top + lines.length * size * 1.04 + 80)}" font-family="Barlow Condensed" font-weight="800" font-size="40" fill="${C.gold}">${esc(`${stat.label}: ${stat.value}`.toUpperCase().slice(0, 40))}</text>` : ''}`);
 }
+
+/** News V3 share card: the story's editorial photo full-bleed (or its court graphic), restrained brand,
+ *  kicker, headline, event context and the evidence key stat. No faces-in-boxes, no betting framing. */
+export function newsCardV3({ headline, kind, context, stat, bgB64 = null, courtSvg = null }) {
+  const { lines, size } = wrap(headline, 700, 62, 3);
+  const top = 360 - ((lines.length - 1) * size) / 2;
+  const bg = bgB64
+    ? `<image href="data:image/jpeg;base64,${bgB64}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="xMidYMid slice"/>`
+    : courtSvg ? courtSvg.replace(/^<svg /, `<svg x="0" y="0" `) : backdrop();
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+  <defs><linearGradient id="nshade" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#041009" stop-opacity="${bgB64 ? 0.94 : 0.82}"/><stop offset="0.55" stop-color="#041009" stop-opacity="${bgB64 ? 0.72 : 0.3}"/><stop offset="1" stop-color="#041009" stop-opacity="${bgB64 ? 0.05 : 0}"/></linearGradient></defs>
+  ${bg}<rect width="${W}" height="${H}" fill="url(#nshade)"/>
+  ${brand('NEWS')}
+  <text x="62" y="${top - size * 0.95}" font-family="Barlow Condensed" font-weight="800" font-size="26" letter-spacing="5" fill="${C.gold}">${esc(KIND_LABEL[kind] || 'STORY')}</text>
+  ${lines.map((l, i) => `<text x="60" y="${top + i * size * 1.04}" font-family="Barlow Condensed" font-weight="800" font-size="${size}" fill="${C.line}">${esc(l)}</text>`).join('')}
+  ${context ? `<text x="62" y="${top + lines.length * size * 1.04 + 16}" font-family="Barlow Condensed" font-weight="600" font-size="28" fill="${C.line}" opacity="0.86">${esc(String(context).slice(0, 60))}</text>` : ''}
+  ${stat ? `<text x="62" y="${Math.min(590, top + lines.length * size * 1.04 + 70)}" font-family="Barlow Condensed" font-weight="800" font-size="38" fill="${C.gold}">${esc(`${stat.label}: ${stat.value}`.toUpperCase().slice(0, 40))}</text>` : ''}
+  <text x="${W - 40}" y="${H - 30}" text-anchor="end" font-family="Barlow Condensed" font-weight="600" font-size="24" fill="${C.line}" opacity="0.72">tennis.propbetedge.ai</text></svg>`;
+}

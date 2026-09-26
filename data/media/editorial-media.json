@@ -1,0 +1,655 @@
+{
+  "version": 1,
+  "generated_at": "2026-09-26T23:19:08.319Z",
+  "policy": "docs/MEDIA.md — editorial media: licensed Commons files, human visual review, identity only via the exact Wikidata crosswalk",
+  "items": [
+    {
+      "id": "carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb",
+      "type": "edition_action",
+      "title": "Carlos Alcaraz serving while playing Jan-Lennard Struff (Wimbledon 2025).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACarlos_Alcaraz_serving_while_playing_Jan-Lennard_Struff_(Wimbledon_2025).jpg",
+      "author": "12121343A",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "12121343A / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2025-07-04 17:06:37",
+      "width": 3840,
+      "height": 2161,
+      "shows": "serve on grass at the 2025 Championships",
+      "caption": "Carlos Alcaraz — serve on grass at the 2025 Championships",
+      "player_ids": [
+        "c76a1e3b-baef-591f-b2e6-8c11aec677c5"
+      ],
+      "player_slugs": [
+        "carlos-alcaraz"
+      ],
+      "depicts_wikidata": [
+        "Q85518537"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2025
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.55,
+        "y": 0.45
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/wide-2400.webp?v=274a74bb68",
+          "bytes": 821404
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/wide-1600.webp?v=b89a5b37d7",
+          "bytes": 303964
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/wide-1200.webp?v=8dea66a36e",
+          "bytes": 144404
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/wide-800.webp?v=66c4a032d9",
+          "bytes": 46160
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/wide-480.webp?v=7481c575bf",
+          "bytes": 12274
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/std-1200.webp?v=87843d2f3e",
+          "bytes": 229006
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/std-800.webp?v=023388de1d",
+          "bytes": 77594
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb/card.jpg?v=83dcaefcfa",
+          "bytes": 117902
+        }
+      },
+      "reviewed": "visual review 2026-09-26: action, grass, single player serving; landscape 5472x3080",
+      "verified_at": "2026-09-26T23:18:14.771Z"
+    },
+    {
+      "id": "far-shot-of-wimbledon-centre-court",
+      "type": "venue",
+      "title": "Far shot of Wimbledon Centre Court.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AFar_shot_of_Wimbledon_Centre_Court.jpg",
+      "author": "Bonoahx",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Bonoahx / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-19 11:48:22",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Centre Court, Wimbledon",
+      "caption": "Centre Court, Wimbledon",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q41520",
+        "Q847",
+        "Q741118",
+        "Q483110",
+        "Q84",
+        "Q2603183",
+        "Q2306600",
+        "Q349"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": null,
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/wide-2400.webp?v=c6b4e2dfa4",
+          "bytes": 424026
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/wide-1600.webp?v=eb5b8e7ca6",
+          "bytes": 212548
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/wide-1200.webp?v=8f4ce8a42b",
+          "bytes": 125380
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/wide-800.webp?v=32ed9ae315",
+          "bytes": 57902
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/wide-480.webp?v=6ccadf2b62",
+          "bytes": 21876
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/std-1200.webp?v=e1eb6a3923",
+          "bytes": 135030
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/std-800.webp?v=70016c6c13",
+          "bytes": 64064
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/far-shot-of-wimbledon-centre-court/card.jpg?v=9d6b338417",
+          "bytes": 129455
+        }
+      },
+      "reviewed": "visual review 2026-09-26: empty Centre Court, grass, roof, stands",
+      "verified_at": "2026-09-26T23:18:22.018Z"
+    },
+    {
+      "id": "right-side-of-centre-court-wimbledon",
+      "type": "venue",
+      "title": "Right side of Centre Court, Wimbledon.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ARight_side_of_Centre_Court%2C_Wimbledon.jpg",
+      "author": "Bonoahx",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Bonoahx / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-19 11:41:59",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Centre Court, Wimbledon",
+      "caption": "Centre Court, Wimbledon",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q41520",
+        "Q847",
+        "Q741118",
+        "Q483110",
+        "Q84",
+        "Q2603183",
+        "Q2306600",
+        "Q349"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": null,
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.45,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/wide-2400.webp?v=ad4ed76f83",
+          "bytes": 361338
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/wide-1600.webp?v=fd5047d2b4",
+          "bytes": 186254
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/wide-1200.webp?v=9e387b2aab",
+          "bytes": 114552
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/wide-800.webp?v=4fe241b0a8",
+          "bytes": 55516
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/wide-480.webp?v=e7e60af2d0",
+          "bytes": 22096
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/std-1200.webp?v=47658fdc24",
+          "bytes": 115418
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/std-800.webp?v=5aff8c4ce8",
+          "bytes": 57860
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/right-side-of-centre-court-wimbledon/card.jpg?v=e1afd36701",
+          "bytes": 128454
+        }
+      },
+      "reviewed": "visual review 2026-09-26: Centre Court stands + grass",
+      "verified_at": "2026-09-26T23:18:29.289Z"
+    },
+    {
+      "id": "australian-open-2015-15779711323",
+      "type": "venue",
+      "title": "Australian Open 2015 (15779711323).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(15779711323).jpg",
+      "author": "Tourism Victoria from Australia",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "Tourism Victoria from Australia / CC BY 2.0 / Wikimedia Commons",
+      "date": "2015-01-29 20:24",
+      "width": 2992,
+      "height": 2000,
+      "shows": "Rod Laver Arena during the 2015 Australian Open",
+      "caption": "Rod Laver Arena during the 2015 Australian Open (Tomas Berdych on court)",
+      "player_ids": [
+        "d6b7ff29-683d-5a19-baea-ff9f515792d1"
+      ],
+      "player_slugs": [
+        "tomas-berdych"
+      ],
+      "depicts_wikidata": [
+        "Q222878",
+        "Q193665"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.55,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/wide-2400.webp?v=dec13acc23",
+          "bytes": 353630
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/wide-1600.webp?v=b2f3342ede",
+          "bytes": 221116
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/wide-1200.webp?v=996873b571",
+          "bytes": 152664
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/wide-800.webp?v=6a237c036a",
+          "bytes": 84224
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/wide-480.webp?v=c0f84958e2",
+          "bytes": 35666
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/std-1200.webp?v=1a8dac703d",
+          "bytes": 166800
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/std-800.webp?v=e781eb4c1b",
+          "bytes": 95396
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15779711323/card.jpg?v=35533c7c8e",
+          "bytes": 171855
+        }
+      },
+      "reviewed": "visual review 2026-09-26: full Rod Laver Arena, blue court, match in play (players not identifiable)",
+      "verified_at": "2026-09-26T23:18:35.561Z"
+    },
+    {
+      "id": "australian-open-2015-16373759976",
+      "type": "venue",
+      "title": "Australian Open 2015 (16373759976).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(16373759976).jpg",
+      "author": "Tourism Victoria from Australia",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "Tourism Victoria from Australia / CC BY 2.0 / Wikimedia Commons",
+      "date": "2015-01-29 20:24",
+      "width": 2992,
+      "height": 2000,
+      "shows": "Rod Laver Arena during the 2015 Australian Open",
+      "caption": "Rod Laver Arena during the 2015 Australian Open (Tomas Berdych on court)",
+      "player_ids": [
+        "d6b7ff29-683d-5a19-baea-ff9f515792d1"
+      ],
+      "player_slugs": [
+        "tomas-berdych"
+      ],
+      "depicts_wikidata": [
+        "Q222878",
+        "Q193665"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.62
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-2400.webp?v=0b64c6b7f0",
+          "bytes": 383714
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-1600.webp?v=f0bb41cced",
+          "bytes": 247678
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-1200.webp?v=d7d98b9f63",
+          "bytes": 174088
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-800.webp?v=3d9791ab61",
+          "bytes": 97128
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-480.webp?v=e77576ca8c",
+          "bytes": 40392
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/std-1200.webp?v=11f05768ba",
+          "bytes": 185836
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/std-800.webp?v=535f6a0348",
+          "bytes": 107320
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/card.jpg?v=1a42cf30f7",
+          "bytes": 188158
+        }
+      },
+      "reviewed": "visual review 2026-09-26: Rod Laver Arena, blue court, crowd",
+      "verified_at": "2026-09-26T23:18:42.252Z"
+    },
+    {
+      "id": "2017-01-rod-laver-arena",
+      "type": "venue",
+      "title": "2017-01 Rod Laver Arena.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2017-01_Rod_Laver_Arena.jpg",
+      "author": "Pulv",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": "Pulv / CC BY-SA 3.0 / Wikimedia Commons",
+      "date": "2017-01-18 11:49:32",
+      "width": 3840,
+      "height": 2560,
+      "shows": "Rod Laver Arena, Melbourne",
+      "caption": "Rod Laver Arena, Melbourne",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q222878"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/wide-2400.webp?v=e6efe2ac2a",
+          "bytes": 531976
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/wide-1600.webp?v=fb5b775048",
+          "bytes": 304760
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/wide-1200.webp?v=710684df83",
+          "bytes": 194254
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/wide-800.webp?v=5be59f2951",
+          "bytes": 98136
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/wide-480.webp?v=5ce0dee52b",
+          "bytes": 39426
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/std-1200.webp?v=8b1f0ae01a",
+          "bytes": 211988
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/std-800.webp?v=1ea7198e4e",
+          "bytes": 108924
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-01-rod-laver-arena/card.jpg?v=9d06964824",
+          "bytes": 198127
+        }
+      },
+      "reviewed": "visual review 2026-09-26: Rod Laver Arena, blue court, crowd",
+      "verified_at": "2026-09-26T23:18:48.371Z"
+    },
+    {
+      "id": "2017-citi-open-tennis-skylar-morton-alana-smith-36167836851",
+      "type": "player_action",
+      "title": "2017 Citi Open Tennis Skylar Morton, Alana Smith (36167836851).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2017_Citi_Open_Tennis_Skylar_Morton%2C_Alana_Smith_(36167836851).jpg",
+      "author": "Keith Allison from Hanover, MD, USA",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "Keith Allison from Hanover, MD, USA / CC BY-SA 2.0 / Wikimedia Commons",
+      "date": "2017-07-31 18:57",
+      "width": 3840,
+      "height": 2392,
+      "shows": "handshake at the net after a doubles match, 2017 Citi Open",
+      "caption": "Alana Smith — handshake at the net after a doubles match, 2017 Citi Open",
+      "player_ids": [
+        "821b2dab-e905-5749-8029-d2e749227e93"
+      ],
+      "player_slugs": [
+        "alana-smith"
+      ],
+      "depicts_wikidata": [
+        "Q34247253",
+        "Q4054628",
+        "Q19632335"
+      ],
+      "tournaments": [],
+      "edition": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.6,
+        "y": 0.22
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/wide-2400.webp?v=b3e7de5efb",
+          "bytes": 353818
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/wide-1600.webp?v=bb54b3393a",
+          "bytes": 126472
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/wide-1200.webp?v=9006ea652e",
+          "bytes": 78960
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/wide-800.webp?v=09df7ac2d1",
+          "bytes": 43096
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/wide-480.webp?v=56044081b5",
+          "bytes": 19440
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/std-1200.webp?v=955081583a",
+          "bytes": 99856
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/std-800.webp?v=6be7a37dbf",
+          "bytes": 55818
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2017-citi-open-tennis-skylar-morton-alana-smith-36167836851/card.jpg?v=cd8861ff1f",
+          "bytes": 95278
+        }
+      },
+      "reviewed": "visual review 2026-09-26: four players at the net, hard court; landscape 5234x3260",
+      "verified_at": "2026-09-26T23:18:55.826Z"
+    },
+    {
+      "id": "wimbledon-doubles-final-2019",
+      "type": "player_action",
+      "title": "Wimbledon doubles final 2019.png",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AWimbledon_doubles_final_2019.png",
+      "author": "LHC88",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "credit": "LHC88 / CC BY 4.0 / Wikimedia Commons",
+      "date": "2019-07-14",
+      "width": 2042,
+      "height": 1520,
+      "shows": "the 2019 Wimbledon women’s doubles final on Centre Court",
+      "caption": "Yifan Xu, Su-Wei Hsieh, Gabriela Dabrowski — the 2019 Wimbledon women’s doubles final on Centre Court",
+      "player_ids": [
+        "8c2ffa09-e414-5b1f-9cbb-dc96cb194d98",
+        "b213fedb-23ff-5946-96d3-15b1954d057e",
+        "f53a9c5f-7892-5aea-8e8d-6f73fe25a922"
+      ],
+      "player_slugs": [
+        "yifan-xu",
+        "su-wei-hsieh",
+        "gabriela-dabrowski"
+      ],
+      "depicts_wikidata": [
+        "Q232566",
+        "Q230353",
+        "Q5515953",
+        "Q4845400"
+      ],
+      "tournaments": [],
+      "edition": null,
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": true,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1600.webp?v=f0a319b6ae",
+          "bytes": 289614
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1200.webp?v=666b815a9f",
+          "bytes": 189530
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-800.webp?v=c20603a05e",
+          "bytes": 96874
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-480.webp?v=5d53d171d3",
+          "bytes": 38838
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-1200.webp?v=dbe1b45da3",
+          "bytes": 211934
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-800.webp?v=18bcaf0665",
+          "bytes": 109362
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/card.jpg?v=95f5384409",
+          "bytes": 198640
+        }
+      },
+      "reviewed": "visual review 2026-09-26: wide Centre Court shot, players small — venue dominates",
+      "verified_at": "2026-09-26T23:19:02.308Z"
+    },
+    {
+      "id": "ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07",
+      "type": "player_action",
+      "title": "Ellen Perez and Nicole Melichar-Martinez (2023 DC Open) 07.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AEllen_Perez_and_Nicole_Melichar-Martinez_(2023_DC_Open)_07.jpg",
+      "author": "Hameltion",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Hameltion / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-01 14:09:04",
+      "width": 3840,
+      "height": 2560,
+      "shows": "celebrating on court at the 2023 DC Open",
+      "caption": "Nicole Melichar-Martinez, Ellen Perez — celebrating on court at the 2023 DC Open",
+      "player_ids": [
+        "25f7afa6-f73f-502d-8a14-c28d4555e50c",
+        "55d590e3-2dc5-5775-bb31-47b74e3fe5c5"
+      ],
+      "player_slugs": [
+        "nicole-melichar-martinez",
+        "ellen-perez"
+      ],
+      "depicts_wikidata": [
+        "Q22086227",
+        "Q2216368"
+      ],
+      "tournaments": [],
+      "edition": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.45
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/wide-2400.webp?v=b83b4b6246",
+          "bytes": 152618
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/wide-1600.webp?v=0e0928bba8",
+          "bytes": 81792
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/wide-1200.webp?v=82860991c3",
+          "bytes": 53510
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/wide-800.webp?v=5a6eee29ea",
+          "bytes": 28530
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/wide-480.webp?v=29fbe3def6",
+          "bytes": 13240
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/std-1200.webp?v=ba48cd37ca",
+          "bytes": 65130
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/std-800.webp?v=e134fc60e0",
+          "bytes": 34938
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07/card.jpg?v=947586d0db",
+          "bytes": 78482
+        }
+      },
+      "reviewed": "visual review 2026-09-26: doubles pair celebrating on a blue hard court",
+      "verified_at": "2026-09-26T23:19:08.319Z"
+    }
+  ]
+}

@@ -10,7 +10,8 @@ import fontXB from './fonts/BarlowCondensed-ExtraBold.ttf';
 import fontSB from './fonts/BarlowCondensed-SemiBold.ttf';
 import { resolveRoute, STATIC_ROUTES } from '../../../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_DEFAULT, NOINDEX_ROBOTS, canonicalUrl } from '../../../src/seo/meta.js';
-import { playerCard, matchCard, tournamentCard, rankingsCard, newsCard } from './cards.js';
+import { playerCard, matchCard, tournamentCard, rankingsCard, newsCard, newsCardV3 } from './cards.js';
+import { courtVisualSvg, courtFromStory } from '../../shared/court-visual.js';
 
 export const VERSION = '0.1.0';
 let wasmReady = null;
@@ -28,6 +29,16 @@ async function shellTemplate(env) {
 }
 
 // ---- social cards ------------------------------------------------------------------------------------
+async function r2Jpeg(env, key) {
+  if (!env.TENNIS_MEDIA || !/^editorial\/[a-z0-9-]{1,60}\/card\.jpg$/.test(key)) return null;
+  const obj = await env.TENNIS_MEDIA.get(key);
+  if (!obj) return null;
+  const bytes = new Uint8Array(await obj.arrayBuffer());
+  let s = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(s);
+}
+
 async function jpeg(env, url) {
   if (!url) return null;
   const m = /\/media\/players\/([0-9a-f-]{36})\//.exec(url);
@@ -63,11 +74,12 @@ async function cardSvg(env, path) {
   if ((m = /^\/og\/news\/([a-z0-9-]+)\.png$/.exec(path))) {
     const a = await apiGet(env, `/v1/news/${m[1]}`);
     if (!a) return null;
-    // the featured side from the frozen evidence (winners of a match story; the subject of a ranking story)
-    const { featured } = newsEntities(a);
-    const faces = await Promise.all(featured.slice(0, 2).map(async (p) => ({ name: p.name, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square) })));
+    // editorial hierarchy (same resolver as the article): licensed photo full-bleed, else the court graphic
     const round = a.evidence?.match?.round_label ? a.evidence.match.round_label.replace(/^\w/, (c) => c.toUpperCase()) : null;
-    return newsCard({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), round].filter(Boolean).join(' · '), stat: a.key_stat, faces });
+    const hero = a.media?.hero;
+    const bgB64 = hero?.id && hero.type !== 'data_visual' ? await r2Jpeg(env, `editorial/${hero.id}/card.jpg`) : null;
+    const court = bgB64 ? null : courtFromStory(a);
+    return newsCardV3({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), round].filter(Boolean).join(' · '), stat: a.key_stat, bgB64, courtSvg: court ? courtVisualSvg({ ...court, width: 1200, height: 630, text: false, label: false }) : null });
   }
   if ((m = /^\/og\/rankings\/wta-(singles|doubles)\.png$/.exec(path))) {
     const d = await apiGet(env, `/v1/rankings?tour=wta&type=${m[1]}&limit=1`);

@@ -283,7 +283,8 @@ export default {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
       const key = url.searchParams.get('key') || '';
-      if (!/^players\/[0-9a-f-]{36}\/(portrait|square|thumb|wide)\.(webp|jpg)$/.test(key) || !env.TENNIS_MEDIA) return json({ ok: false, error: 'bad_key' }, { status: 400 });
+      // player identity derivatives, or editorial derivatives (scripts/media/editorial.mjs)
+      if (!(/^players\/[0-9a-f-]{36}\/(portrait|square|thumb|wide)\.(webp|jpg)$/.test(key) || /^editorial\/[a-z0-9-]{1,60}\/(wide-(2400|1600|1200|800|480)|std-(1200|800)|card)\.(webp|jpg)$/.test(key)) || !env.TENNIS_MEDIA) return json({ ok: false, error: 'bad_key' }, { status: 400 });
       const ct = key.endsWith('.jpg') ? 'image/jpeg' : 'image/webp';
       await env.TENNIS_MEDIA.put(key, await request.arrayBuffer(), { httpMetadata: { contentType: ct, cacheControl: 'public, max-age=31536000, immutable' } });
       return json({ ok: true, key });

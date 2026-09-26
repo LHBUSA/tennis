@@ -8,6 +8,7 @@ import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
+import { courtVisualSvg, courtFromStory } from '../../workers/shared/court-visual.js';
 
 export const DESKS = [['all', 'All'], ['wta', 'WTA'], ['atp', 'ATP'], ['grand-slams', 'Grand Slams'], ['challenger', 'Challenger'], ['itf', 'ITF'], ['doubles', 'Doubles'], ['rankings', 'Rankings']];
 const KIND = { upset: 'Upset', seed_upset: 'Seed upset', title: 'Title', doubles_title: 'Doubles title', retirement: 'Retirement', walkover: 'Walkover', marathon: 'Marathon', comeback: 'Comeback', deciding_tiebreak: 'Deciding tiebreak', dominant: 'Dominant win', qualifier_run: 'Qualifier run', new_no1: 'New No. 1', enters_top10: 'Top 10', enters_top20: 'Top 20', enters_top50: 'Top 50', enters_top100: 'Top 100' };
@@ -16,19 +17,39 @@ const when = (iso) => (iso ? new Date(iso).toLocaleString('en-US', { month: 'sho
 const previewQ = () => { const p = new URLSearchParams(location.search).get('preview'); return p && /^[0-9a-f]{16,64}$/.test(p) ? p : null; };
 const withPreview = (path) => (previewQ() ? `${path}${path.includes('?') ? '&' : '?'}preview=${previewQ()}` : path);
 
-/** Card lead visual: the story's featured side (approved photos; monogram tile for anyone without one), or
- *  a branded data tile built from the story's own key stat when no player is featured. */
+// ---- editorial media (V3): landscape photos from the approved catalog, else the court graphic -----------------
+const isPhoto = (m) => m && m.type && m.type !== 'data_visual' && m.wide;
+const srcset = (d, names) => names.filter((n) => d?.[n]?.url).map((n) => `${d[n].url} ${n.split('-')[1]}w`).join(', ');
+/** Responsive editorial <picture>: 16:9 on wide screens, 4:3 crop on phones; eager only for the hero. */
+export function editorialPicture(m, { hero = false, sizes = '100vw', alt = '' } = {}) {
+  const d = m.wide;
+  const wideSet = srcset(d, ['wide-480', 'wide-800', 'wide-1200', 'wide-1600', 'wide-2400']);
+  const stdSet = srcset(d, ['std-800', 'std-1200']);
+  const src = d['wide-1600']?.url || d['wide-1200']?.url || d['wide-800']?.url;
+  // when the viewport crops further (max-height), keep the reviewed focal point in frame
+  const pos = m.focal ? raw(`style="object-position:${Math.round(m.focal.x * 100)}% ${Math.round(m.focal.y * 100)}%"`) : '';
+  return html`<picture>${hero && stdSet ? html`<source media="(max-width: 700px)" type="image/webp" srcset="${stdSet}" sizes="100vw">` : ''}<img src="${src}" srcset="${wideSet}" sizes="${sizes}" width="1600" height="900" alt="${alt || m.caption || ''}" loading="${hero ? 'eager' : 'lazy'}" ${hero ? raw('fetchpriority="high"') : ''} decoding="async" ${pos}></picture>`;
+}
+const credit = (m) => html`<a href="${m.source_page}" rel="noopener nofollow" target="_blank">${m.author || 'Author'} / ${m.license}</a>`;
+function figure(m) {
+  return html`<figure class="nwx-fig">${editorialPicture(m, { sizes: '(max-width: 900px) 100vw, 860px' })}<figcaption>${m.file_photo ? html`<b>File photo.</b> ` : ''}${m.caption}. <span class="nwx-cr">Photo: ${credit(m)}</span></figcaption></figure>`;
+}
+function courtFigure(c, kicker = '') {
+  return c ? html`<figure class="nwx-fig nwx-cvfig"><div class="nwx-cv">${raw(courtVisualSvg({ ...c, kicker }))}</div><figcaption>PropBetEdge court graphic built from the match data.</figcaption></figure>` : '';
+}
+
+/** Card visual: the story's editorial photo (landscape) or its court graphic; faces are not the visual system. */
 function cardArt(a, lead) {
-  const team = (a.team && a.team.length ? a.team : a.player ? [a.player] : []).slice(0, 2);
-  if (!team.length) return html`<div class="nw-art nw-art-brand"><span>${KIND[a.story_type] || 'Story'}</span>${a.key_stat ? html`<b>${a.key_stat.value}</b>` : ''}</div>`;
-  const px = lead ? (team.length > 1 ? 150 : 200) : (team.length > 1 ? 64 : 88);
-  return html`<div class="nw-art${team.length > 1 ? ' duo' : ''}">${team.map((p) => avatar({ name: p.name, photo: p.photo }, { size: 'square', px, eager: lead }))}</div>`;
+  const m = a.media?.hero;
+  if (isPhoto(m)) return html`<div class="nwx-thumb">${editorialPicture(m, { hero: lead, sizes: lead ? '(max-width: 900px) 100vw, 900px' : '(max-width: 700px) 100vw, 420px', alt: '' })}</div>`;
+  if (a.court) return html`<div class="nwx-thumb nwx-cv">${raw(courtVisualSvg({ ...a.court, label: false, kicker: '' }))}</div>`;
+  return html`<div class="nwx-thumb nw-art-brand"><span>${KIND[a.story_type] || 'Story'}</span>${a.key_stat ? html`<b>${a.key_stat.value}</b>` : ''}</div>`;
 }
 
 export function card(a, lead = false) {
   const href = `/news/${a.slug}${previewQ() ? `?preview=${previewQ()}` : ''}`;
   const who = (a.team && a.team.length ? a.team : a.player ? [a.player] : []).map((p) => p.name).join(' / ');
-  return html`<article class="nw-card${lead ? ' nw-lead' : ''}">
+  return html`<article class="nw-card nwx-card${lead ? ' nw-lead' : ''}">
     <a class="nw-card-a" href="${href}">
       ${cardArt(a, lead)}
       <div class="nw-card-t">
@@ -137,19 +158,10 @@ export function linkParts(text, entities, linked) {
   return out;
 }
 
-function heroArt(team, opp) {
-  if (!team.length) return '';
-  const big = team.length > 1 ? 176 : 240;
-  return html`<div class="nwv-art${team.length > 1 ? ' duo' : ''}">
-    <div class="nwv-faces">${team.map((p) => html`<a class="nwv-face" href="/players/${p.slug}">${avatar(p, { size: 'square', px: big, eager: true })}<span><b>${p.name}</b>${p.nationality ? html`<small>${p.nationality}</small>` : ''}</span></a>`)}</div>
-    ${opp.length ? html`<p class="nwv-def"><span>def.</span>${opp.map((p) => html`<a href="/players/${p.slug}">${avatar(p, { px: 30, eager: true })}${p.name}</a>`)}</p>` : ''}
-  </div>`;
-}
-
 function photoCredits(people) {
   const ph = people.filter((p) => p.photo?.source_page);
   if (!ph.length) return '';
-  return html`<p class="nwv-credit">Photos: ${ph.map((p, i) => html`${i ? ' · ' : ''}${p.name} — <a href="${p.photo.source_page}" rel="noopener nofollow" target="_blank">${p.photo.author || 'author'} / ${p.photo.license}</a>`)}</p>`;
+  return html`<p class="nwv-credit">Player photos: ${ph.map((p, i) => html`${i ? ' · ' : ''}${p.name} — <a href="${p.photo.source_page}" rel="noopener nofollow" target="_blank">${p.photo.author || 'author'} / ${p.photo.license}</a>`)}</p>`;
 }
 
 function facts(a, sb, t, replay) {
@@ -223,25 +235,32 @@ export function article(root, ctx) {
     const leftovers = Object.entries(inserts).filter(([id]) => !placed.has(id)).flatMap(([, v]) => v);
     const url = `https://tennis.propbetedge.ai/news/${a.slug}`;
     const sections = a.sections;
-    render(body, html`<article class="nw-story nwv">
-      <header class="nwv-hero"><div class="page nwv-hero-in">
+    const hero = a.media?.hero;
+    const court = courtFromStory(a);
+    const inline = (a.media?.inline || []).filter(isPhoto);
+    // visual rhythm: story -> visual -> data -> story -> visual. Inline photos after the 1st and 3rd sections;
+    // if the hero is a photo and no second photo exists, the court graphic takes the later slot.
+    const slots = [inline[0] ? figure(inline[0]) : '', inline[1] ? figure(inline[1]) : isPhoto(hero) && court ? courtFigure(court) : ''];
+    render(body, html`<article class="nw-story nwv nwx">
+      <div class="nwx-hero">${isPhoto(hero) ? editorialPicture(hero, { hero: true, alt: hero.caption }) : court ? html`<div class="nwx-cv">${raw(courtVisualSvg({ ...court, kicker: KIND[a.story_type] || '' }))}</div>` : ''}</div>
+      <header class="nwv-hero nwx-head"><div class="page nwv-hero-in">
         <div class="nwv-hero-t">
           <nav class="nwv-crumbs" aria-label="Breadcrumb"><a href="/">Tennis</a><span>›</span><a href="/news">News</a>${t?.slug ? html`<span>›</span><a href="/tournaments/${t.slug}/${t.year}">${t.name} ${t.year}</a>` : ''}</nav>
           <p class="nw-kick"><span>${KIND[a.story_type] || 'Story'}</span>${t?.slug ? html` · <a href="/tournaments/${t.slug}/${t.year}">${t.name} ${t.year}</a>` : ''}${a.evidence?.match?.round_label ? ` · ${ROUND_TITLE(a.evidence.match.round_label)}` : ''}</p>
           <h1>${a.headline}</h1>${a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
           <p class="nwv-by"><b>PropBetEdge Tennis Desk</b> · <time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time>${a.status !== 'published' ? html` · <b class="nw-held">HELD DRAFT (not public): ${a.hold_reason || ''}</b>` : ''}</p>
         </div>
-        ${heroArt(team, opp)}
       </div></header>
       <div class="page nwv-main">
-        ${photoCredits([...team, ...opp])}
+        <p class="nwx-heroCap">${isPhoto(hero) ? html`${hero.file_photo ? html`<b>File photo.</b> ` : ''}${hero.caption}. Photo: ${credit(hero)}` : court ? 'Illustration: PropBetEdge court graphic built from the match data — not a photograph.' : ''}</p>
         ${facts(a, sb, t, a.replay)}
         ${chips(people)}
         <div class="nw-body">
-          ${sections.map((s) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>`)}
+          ${sections.map((s, i) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>${i === 0 ? slots[0] : i === 2 ? slots[1] : ''}`)}
           ${leftovers.filter(Boolean)}
           ${get('form') ? formMod(get('form'), names) : ''}
           ${methodMod(a)}
+          ${photoCredits([...team, ...opp])}
         </div>
         ${shareBar({ url, text: `${a.headline} — PropBetEdge Tennis` })}
         ${related(a, people, t, a.replay, singles)}
