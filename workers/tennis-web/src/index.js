@@ -18,16 +18,12 @@ const ready = () => (wasmReady ||= initWasm(wasm));
 
 import { headFor, apiGet, ROUND, fmtD } from './heads.js';
 
-async function shellTemplate(env, ctx) {
-  const cache = caches.default;
-  const key = new Request(`${env.SITE_ORIGIN || SITE}/app-shell-template.html`);
-  let res = await cache.match(key);
-  if (!res) {
-    res = await fetch(key, { cf: { cacheTtl: 300 } });
-    if (!res.ok) throw new Error(`shell template ${res.status}`);
-    res = new Response(await res.text(), { headers: { 'cache-control': 'public, max-age=300' } });
-    ctx.waitUntil(cache.put(key, res.clone()));
-  }
+async function shellTemplate(env) {
+  // The shell names the deployment's hashed entry script. A long-lived copy outlives the Vercel deployment
+  // whose assets it points at (old hashes are not served after a deploy -> the page loads no JS), so the
+  // only cache is Cloudflare's 30 s fetch cache: a fresh deploy reaches edge-rendered pages within 30 s.
+  const res = await fetch(`${env.SITE_ORIGIN || SITE}/app-shell-template.html`, { cf: { cacheTtl: 30 } });
+  if (!res.ok) throw new Error(`shell template ${res.status}`);
   return res.text();
 }
 
@@ -123,7 +119,7 @@ export default {
     try { overrides = await headFor(env, r, url); } catch { overrides = { robots: NOINDEX_ROBOTS }; }
     const meta = routeMeta(r, overrides);
     let tpl;
-    try { tpl = await shellTemplate(env, ctx); } catch { return new Response('temporarily unavailable', { status: 503 }); }
+    try { tpl = await shellTemplate(env); } catch { return new Response('temporarily unavailable', { status: 503 }); }
     const html = tpl.replace(/<!--seo:start-->[\s\S]*?<!--seo:end-->/, `<!--seo:start-->\n    ${headHtml(meta)}\n    <!--seo:end-->`).replace('<!--preload-->', '');
     const status = r.id === 'not-found' || /not found/i.test(meta.title) ? 404 : 200;
     return new Response(html, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60, s-maxage=300', 'x-robots-tag': meta.robots.startsWith('noindex') ? 'noindex' : 'all', 'x-content-type-options': 'nosniff' } });
