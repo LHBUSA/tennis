@@ -102,6 +102,7 @@ test('GA: network ID, production host only, one script, one page_view per route,
   assert.equal(win.dataLayer.filter((a) => a[0] === 'event' && a[1] === 'page_view').length, 1, 'route context never sends a page_view itself (GA history events count SPA navigations)');
   const main = fs.readFileSync('src/main.js', 'utf8');
   assert.match(main, /if \(initial\)/, 'explicit page_view only on the initial load');
+  assert.match(main, /if \(!\(initial && r\.route\.ssr\)\) setMeta/, 'the edge-rendered head is never overwritten on a first load of an ssr route');
   assert.ok(main.indexOf('prepareNavigation(url.pathname)') < main.indexOf("history.pushState({}, '', url.pathname"), 'route context is set before pushState');
   assert.equal(track('tennis_simulation_run', {}, { win }), false, 'simulator events are not registered before the simulator ships');
   assert.ok(EVENTS.includes('tennis_pbecast_open') && EVENTS.includes('tennis_broadcast_click'));

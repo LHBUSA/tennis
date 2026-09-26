@@ -68,7 +68,9 @@ async function go(pathname) {
   const mod = await (PAGES[r.id] || dataPage)();
   if (mine !== seq) return;
   if (unmount) unmount();
-  setMeta(routeMeta(r));
+  // edge-rendered routes (ssr) arrive with a data-backed head from tennis-web: on the first load that head is
+  // authoritative (title, canonical, robots, OG) — overwriting it with route defaults would noindex real pages
+  if (!(initial && r.route.ssr)) setMeta(routeMeta(r));
   markActiveNav(app, r.id);
   closeDrawer(false);
   unmount = mod.mount(main, r);

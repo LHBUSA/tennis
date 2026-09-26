@@ -3,7 +3,7 @@
 // modules and charts are rendered from the story's deterministic content plan — no value here is computed
 // or invented in the browser.
 
-import { html, render, raw } from '../lib/dom.js';
+import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
@@ -112,6 +112,7 @@ export function article(root, ctx) {
     const a = res.data;
     if (!a) { render(body, html`<div class="mod"><p class="empty-h">Story not found.</p><p class="note"><a href="/news">All tennis news →</a></p></div>`); return; }
     document.title = `${a.headline} | PropBetEdge Tennis`;
+    setIndexable(a.status === 'published' && !previewQ());
     track('tennis_news_open', { route: '/news/:slug', event_type: a.story_type });
     const mods = a.plan?.modules || [];
     const get = (id) => mods.find((m) => m.id === id)?.data;

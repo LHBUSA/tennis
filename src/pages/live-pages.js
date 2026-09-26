@@ -1,6 +1,6 @@
 // Data-backed pages. Every page fetches tennis-api routes, renders real rows, or says exactly why not.
 
-import { html, render, raw } from '../lib/dom.js';
+import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, freshnessBadge } from '../ui/state.js';
 import { avatar, nat } from '../ui/avatar.js';
@@ -250,6 +250,8 @@ export const player = mountWith(async (root, { params }, signal) => {
   const f = prof?.data || null;
   track(params.tab === 'dna' ? 'tennis_dna_open' : 'tennis_player_open', { player_id: p.id });
   document.title = `${p.name} — ${params.tab === 'dna' ? 'Tennis DNA' : p.gender === 'M' ? 'Profile, Grand Slam Results & Matches' : 'Profile, Rankings & Matches'} | PropBetEdge Tennis`;
+  // same rule as the tennis-web head: indexable once the player has a ranking or stored matches (overview only)
+  if (!params.tab) setIndexable(!!(p.rankings?.wta_singles || p.recent_matches?.length));
   if (params.tab === 'dna' || params.tab === 'surfaces') {
     const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
     const d = dr?.data?.dna;

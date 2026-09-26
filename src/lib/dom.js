@@ -41,3 +41,9 @@ export function on(root, event, selector, fn) {
   root.addEventListener(event, h);
   return () => root.removeEventListener(event, h);
 }
+
+/** A page that proves its data is public (a published story, a stored player) upgrades robots after an
+ *  in-app navigation; the edge head already carries the same answer on a first load. */
+export function setIndexable(on) {
+  document.querySelector('meta[name="robots"]')?.setAttribute('content', on ? 'index, follow, max-image-preview:large, max-snippet:-1' : 'noindex, follow');
+}
