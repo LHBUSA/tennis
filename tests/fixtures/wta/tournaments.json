@@ -1,0 +1,211 @@
+{
+ "_capture": {
+  "url": "https://api.wtatennis.com/tennis/tournaments/?page=0&pageSize=30&from=2026-09-20&to=2026-10-12",
+  "captured_at": "2026-09-26",
+  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+ },
+ "payload": {
+  "pageInfo": {
+   "page": 0,
+   "numPages": 0,
+   "pageSize": 30,
+   "numEntries": 18
+  },
+  "content": [
+   {
+    "tournamentGroup": {
+     "id": 2061,
+     "name": "VALENCIA 125",
+     "level": "WTA 125",
+     "metadata": {}
+    },
+    "year": 2026,
+    "title": "BBVA Open Internacional de Valencia - Valencia, ESP",
+    "startDate": "2026-09-14",
+    "endDate": "2026-09-20",
+    "surface": "Clay",
+    "inOutdoor": "O",
+    "city": "VALENCIA",
+    "country": "ESP",
+    "singlesDrawSize": 32,
+    "doublesDrawSize": 8,
+    "prizeMoney": 115000,
+    "prizeMoneyCurrency": "USD",
+    "liveScoringId": "2061",
+    "winners": [
+     {
+      "tournament": {
+       "tournamentGroup": {
+        "id": 2061,
+        "name": "VALENCIA 125",
+        "level": "WTA 125",
+        "metadata": {}
+       },
+       "year": 2026,
+       "title": "BBVA Open Internacional de Valencia - Valencia, ESP",
+       "startDate": "2026-09-14",
+       "endDate": "2026-09-20",
+       "surface": "Clay",
+       "inOutdoor": "O",
+       "city": "VALENCIA",
+       "country": "ESP",
+       "singlesDrawSize": 32,
+       "doublesDrawSize": 8,
+       "prizeMoney": 115000,
+       "prizeMoneyCurrency": "USD",
+       "liveScoringId": "2061",
+       "winners": [],
+       "status": null,
+       "level": "WTA 125",
+       "announcements": {
+        "players": null,
+        "draws": null
+       }
+      },
+      "singles": {
+       "player": {
+        "id": 325320,
+        "firstName": "Clara",
+        "lastName": "Burel",
+        "fullName": "Clara Burel",
+        "countryCode": "FRA",
+        "dateOfBirth": "2001-03-24",
+        "metadata": {}
+       },
+       "seed": 0
+      },
+      "doubles": [
+       {
+        "player": {
+         "id": 315294,
+         "firstName": "Dalila",
+         "lastName": "Jakupovic",
+         "fullName": "Dalila Jakupovic",
+         "countryCode": "SLO",
+         "dateOfBirth": "1991-03-24",
+         "metadata": {}
+        },
+        "seed": 1
+       },
+       {
+        "player": {
+         "id": 320986,
+         "firstName": "Naima",
+         "lastName": "Karamoko",
+         "fullName": "Naima Karamoko",
+         "countryCode": "SUI",
+         "dateOfBirth": "1997-09-30",
+         "metadata": {}
+        },
+        "seed": 1
+       }
+      ]
+     }
+    ],
+    "status": "past",
+    "level": "WTA 125",
+    "announcements": {
+     "players": null,
+     "draws": null
+    }
+   },
+   {
+    "tournamentGroup": {
+     "id": 2044,
+     "name": "LJUBLJANA 125",
+     "level": "WTA 125",
+     "metadata": {}
+    },
+    "year": 2026,
+    "title": "Zavarovalnica Triglav Ljubljana - Ljubljana, SLO",
+    "startDate": "2026-09-14",
+    "endDate": "2026-09-20",
+    "surface": "Clay",
+    "inOutdoor": "O",
+    "city": "LJUBLJANA",
+    "country": "SLO",
+    "singlesDrawSize": 32,
+    "doublesDrawSize": 16,
+    "prizeMoney": 115000,
+    "prizeMoneyCurrency": "USD",
+    "liveScoringId": "2044",
+    "winners": [
+     {
+      "tournament": {
+       "tournamentGroup": {
+        "id": 2044,
+        "name": "LJUBLJANA 125",
+        "level": "WTA 125",
+        "metadata": {}
+       },
+       "year": 2026,
+       "title": "Zavarovalnica Triglav Ljubljana - Ljubljana, SLO",
+       "startDate": "2026-09-14",
+       "endDate": "2026-09-20",
+       "surface": "Clay",
+       "inOutdoor": "O",
+       "city": "LJUBLJANA",
+       "country": "SLO",
+       "singlesDrawSize": 32,
+       "doublesDrawSize": 16,
+       "prizeMoney": 115000,
+       "prizeMoneyCurrency": "USD",
+       "liveScoringId": "2044",
+       "winners": [],
+       "status": null,
+       "level": "WTA 125",
+       "announcements": {
+        "players": null,
+        "draws": null
+       }
+      },
+      "singles": {
+       "player": {
+        "id": 331491,
+        "firstName": "Samira",
+        "lastName": "De Stefano",
+        "fullName": "Samira De Stefano",
+        "countryCode": "ITA",
+        "dateOfBirth": "2004-05-06",
+        "metadata": {}
+       },
+       "seed": 0
+      },
+      "doubles": [
+       {
+        "player": {
+         "id": 318112,
+         "firstName": "Angelica",
+         "lastName": "Moratelli",
+         "fullName": "Angelica Moratelli",
+         "countryCode": "ITA",
+         "dateOfBirth": "1994-08-17",
+         "metadata": {}
+        },
+        "seed": 3
+       },
+       {
+        "player": {
+         "id": 330894,
+         "firstName": "Lucija",
+         "lastName": "Ciric Bagaric",
+         "fullName": "Lucija Ciric Bagaric",
+         "countryCode": "CRO",
+         "dateOfBirth": "2004-01-09",
+         "metadata": {}
+        },
+        "seed": 3
+       }
+      ]
+     }
+    ],
+    "status": "past",
+    "level": "WTA 125",
+    "announcements": {
+     "players": null,
+     "draws": null
+    }
+   }
+  ]
+ }
+}

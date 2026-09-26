@@ -1,0 +1,91 @@
+{
+ "_capture": {
+  "url": "https://query.wikidata.org/sparql (tennis id sample query)",
+  "captured_at": "2026-09-26",
+  "note": "Wikidata is CC0."
+ },
+ "payload": {
+  "head": {
+   "vars": [
+    "h",
+    "hLabel",
+    "atp",
+    "wta",
+    "itf",
+    "img"
+   ]
+  },
+  "results": {
+   "bindings": [
+    {
+     "h": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q1426"
+     },
+     "atp": {
+      "type": "literal",
+      "value": "F324"
+     },
+     "itf": {
+      "type": "literal",
+      "value": "10019424"
+     },
+     "img": {
+      "type": "uri",
+      "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Federer%20WM16%20%2837%29%20%2828136155830%29.jpg"
+     },
+     "hLabel": {
+      "type": "literal",
+      "value": "Q1426"
+     }
+    },
+    {
+     "h": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q7407"
+     },
+     "atp": {
+      "type": "literal",
+      "value": "A092"
+     },
+     "itf": {
+      "type": "literal",
+      "value": "10000009"
+     },
+     "img": {
+      "type": "uri",
+      "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Andre%20Agassi%20%282011%29.jpg"
+     },
+     "hLabel": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "Andre Agassi"
+     }
+    },
+    {
+     "h": {
+      "type": "uri",
+      "value": "http://www.wikidata.org/entity/Q11459"
+     },
+     "itf": {
+      "type": "literal",
+      "value": "20007765"
+     },
+     "img": {
+      "type": "uri",
+      "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Serena%20Williams%20at%202013%20US%20Open.jpg"
+     },
+     "hLabel": {
+      "xml:lang": "en",
+      "type": "literal",
+      "value": "Serena Williams"
+     },
+     "wta": {
+      "type": "literal",
+      "value": "230234"
+     }
+    }
+   ]
+  }
+ }
+}

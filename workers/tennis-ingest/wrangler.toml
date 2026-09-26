@@ -1,0 +1,15 @@
+# tennis-ingest — NOT DEPLOYED. First deploy: docs/RELEASE.md (versions upload -> canary -> versions deploy).
+name = "tennis-ingest"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# Declared when the resources exist (docs/ARCHITECTURE.md §Cloudflare resources):
+# [[kv_namespaces]]  binding = "TENNIS_STATE"   id = "<created at first deploy>"
+# [[r2_buckets]]     binding = "TENNIS_SOURCE"  bucket_name = "tennis-source"
+# Secret (wrangler secret put): INGEST_ADMIN_TOKEN
+#
+# No [triggers] crons: production cadence is added only after the owner's source-rights decision.

@@ -1,0 +1,27 @@
+{
+  "name": "propbetedge-tennis",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "PropBetEdge Tennis \u00e2\u20ac\u201d tennis.propbetedge.ai. Vercel static frontend + Cloudflare Workers runtime + Supabase system of record.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build && node scripts/prerender.mjs",
+    "preview": "vite preview --port 5194",
+    "guard": "node scripts/guard-truth.mjs",
+    "test": "node --test \"tests/**/*.test.js\"",
+    "check": "npm run guard && npm run test && npm run build",
+    "vercel-build": "npm run check",
+    "canary": "node scripts/canary/run.mjs",
+    "qa": "node scripts/qa/screens.mjs",
+    "matrix": "node scripts/canary/matrix.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "playwright-core": "^1.63.0",
+    "vite": "^5.4.21"
+  }
+}

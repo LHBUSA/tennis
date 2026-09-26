@@ -1,0 +1,57 @@
+{
+ "_capture": {
+  "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize=5&type=rankSingles&sort=asc&metric=SINGLES&at=2026-09-21",
+  "captured_at": "2026-09-26",
+  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+ },
+ "payload": [
+  {
+   "player": {
+    "id": 324166,
+    "firstName": "Elena",
+    "lastName": "Rybakina",
+    "fullName": "Elena Rybakina",
+    "countryCode": "KAZ",
+    "dateOfBirth": "1999-06-17",
+    "metadata": null
+   },
+   "ranking": 1,
+   "points": 9901,
+   "tournamentsPlayed": 21,
+   "movement": 0,
+   "rankedAt": "2026-09-21T00:00:00Z"
+  },
+  {
+   "player": {
+    "id": 320760,
+    "firstName": "Aryna",
+    "lastName": "Sabalenka",
+    "fullName": "Aryna Sabalenka",
+    "countryCode": "BLR",
+    "dateOfBirth": "1998-05-05",
+    "metadata": null
+   },
+   "ranking": 2,
+   "points": 7875,
+   "tournamentsPlayed": 19,
+   "movement": 0,
+   "rankedAt": "2026-09-21T00:00:00Z"
+  },
+  {
+   "player": {
+    "id": 316956,
+    "firstName": "Jessica",
+    "lastName": "Pegula",
+    "fullName": "Jessica Pegula",
+    "countryCode": "USA",
+    "dateOfBirth": "1994-02-24",
+    "metadata": null
+   },
+   "ranking": 3,
+   "points": 7265,
+   "tournamentsPlayed": 19,
+   "movement": 0,
+   "rankedAt": "2026-09-21T00:00:00Z"
+  }
+ ]
+}

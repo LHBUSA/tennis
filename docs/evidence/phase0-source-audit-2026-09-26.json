@@ -1,0 +1,1474 @@
+{
+ "probed_at": "2026-09-26T13:10:00Z",
+ "user_agent": "PropBetEdge-Tennis-SourceAudit/0.1 (+https://tennis.propbetedge.ai)",
+ "request_budget_note": "~102 distinct URLs + ~30 automatic retries (mostly api.wtatennis.com connection resets) + a few WebFetch/WebSearch lookups; <=1 req/s/host",
+ "bytes_note": "bytes = decompressed body size on disk; latency_ms = curl time_total of the successful attempt",
+ "sources": [
+  {
+   "key": "atp.rankings.singles",
+   "family": "atp",
+   "url": "https://www.atptour.com/en/rankings/singles",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5612,
+   "latency_ms": 79,
+   "probe_key": "atp.rankings.singles.html",
+   "native_ids": {
+    "atp_player_id": "4-char alnum e.g. S0AG (Sinner), A0E2 (Alcaraz) - observed via Wikidata/Wimbledon/AO feeds, not from ATP itself"
+   },
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": {
+    "title": "Just a moment..."
+   },
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary."
+  },
+  {
+   "key": "atp.rankings.json.sglroll",
+   "family": "atp",
+   "url": "https://www.atptour.com/-/www/rank/sglroll/250?v=1",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5648,
+   "latency_ms": 84,
+   "probe_key": "atp.www.rank.sglroll",
+   "native_ids": {},
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": null,
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary."
+  },
+  {
+   "key": "atp.app.gateway.rankings",
+   "family": "atp",
+   "url": "https://app.atptour.com/api/gateway/rankings.ranksglrollrange?fromRank=1&toRank=5",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5799,
+   "latency_ms": 136,
+   "probe_key": "atp.app.rankings.gateway",
+   "native_ids": {},
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": null,
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary."
+  },
+  {
+   "key": "atp.app.livematches",
+   "family": "atp",
+   "url": "https://app.atptour.com/api/v2/gateway/livematches/website?scoringTournamentLevel=tour",
+   "method": "GET",
+   "capabilities": [
+    "live_state",
+    "set_game_scoring"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5820,
+   "latency_ms": 107,
+   "probe_key": "atp.app.livematches",
+   "native_ids": {},
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": null,
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary."
+  },
+  {
+   "key": "atp.www.livematches",
+   "family": "atp",
+   "url": "https://www.atptour.com/en/-/www/LiveMatches/{year}/{tournamentId}",
+   "method": "GET",
+   "capabilities": [
+    "live_state"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5663,
+   "latency_ms": 89,
+   "probe_key": "atp.www.livematches",
+   "native_ids": {},
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": null,
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary."
+  },
+  {
+   "key": "atp.players.hero",
+   "family": "atp",
+   "url": "https://www.atptour.com/en/-/www/players/hero/{atpId}?v=1",
+   "method": "GET",
+   "capabilities": [
+    "player_bio",
+    "player_identity"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 5681,
+   "latency_ms": 94,
+   "probe_key": "atp.www.players.hero",
+   "native_ids": {},
+   "robots": "User-Agent: * / Disallow: /sitecore/, */ajax/*, /*/scores/archive/*, /*/scores/match-stats, /*/stats/player-tendencies, /*/scores/second-screen, /*/search-results, /*/photos/photo-filter-results, /*/video/video-filter-results",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": null,
+   "notes": "Cloudflare managed challenge ('Just a moment...') returned 403 to plain curl on every atptour.com / app.atptour.com path tried (HTML and JSON). Not bypassed per access boundary. Calendar, draws, results, match stats, Challenger pages and historical-ranking dates live on the same host and are presumed equally blocked (not individually probed)."
+  },
+  {
+   "key": "atp.infosys.matchbeats",
+   "family": "atp",
+   "url": "https://itp-atp-sls.infosys-platforms.com/prod/api/match-beats/data/year/{y}/eventId/{e}/matchId/{m}",
+   "method": "GET",
+   "capabilities": [
+    "point_by_point",
+    "match_stats"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html",
+   "bytes": 919,
+   "latency_ms": 1711,
+   "probe_key": "infosys.matchbeats.2025.747",
+   "native_ids": {},
+   "robots": "not checked",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": {
+    "body": "CloudFront 403 'Request blocked.'"
+   },
+   "notes": "Infosys (ATP digital partner) stats host. CloudFront WAF 403 to a plain request (likely Referer/Origin gating). Not bypassed. Same for /stroke-analysis/v2/nonStrokeData/."
+  },
+  {
+   "key": "atp.protennislive.draw_pdf",
+   "family": "atp",
+   "url": "https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf  (op.pdf = order of play; qs/mdd by convention, not probed)",
+   "method": "GET",
+   "capabilities": [
+    "draws",
+    "set_game_scoring",
+    "qualifying",
+    "withdrawals_ret_wo",
+    "calendar"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/pdf",
+   "bytes": 142803,
+   "latency_ms": 221,
+   "probe_key": "ptl.2026.mds.7581",
+   "native_ids": {
+    "atp_tournament_id": "numeric e.g. 7581 Chengdu, 747 Beijing, 329 Tokyo, 580 AO"
+   },
+   "robots": "robots.txt -> 404 (none published)",
+   "terms": {
+    "url": null,
+    "quote": null,
+    "how_obtained": "protennislive.com/terms and home return 503; no ToS page found. Content is ATP's - ATP terms presumably govern."
+   },
+   "sample": {
+    "pdf_text_first_rows": "Chengdu Open | Chengdu, China | 23 September - 29 September 2026 | USD 1 210 115 | Hard | Main Draw Singles | 1 1 VACHEROT, Valentin MON ... 3 Q HARRIS, Lloyd RSA L. Harris 64 765 | 4 KOVACEVIC, Aleksandar USA 63 64"
+   },
+   "notes": "Official ATP draw PDFs via Cloudflare cache, no challenge. 2026 Chengdu (7581) = current draw with scores. 2026 Beijing 747 / Tokyo 329 (mds + op) returned a 2.6KB placeholder PDF '-Tournament Information Not Yet Available-' WITH HTTP 200 - canary must check size/text, not status. 2025/747 returned the full 163KB draw. 7580 (Hangzhou guess) = 404. Parse with pdfplumber. Names only, no ATP player ids in PDF. Challenger ids not tested."
+  },
+  {
+   "key": "atp.protennislive.home",
+   "family": "atp",
+   "url": "https://www.protennislive.com/",
+   "method": "GET",
+   "capabilities": [
+    "live_state"
+   ],
+   "verdict": "NOT_AVAILABLE",
+   "http_status": 503,
+   "content_type": "text/html; charset=us-ascii",
+   "bytes": 326,
+   "latency_ms": 278,
+   "probe_key": "ptl.home",
+   "native_ids": {},
+   "robots": "robots.txt -> 404 (none published)",
+   "terms": null,
+   "sample": {
+    "body": "HTTP Error 503. The service is unavailable."
+   },
+   "notes": "PTL web/live-score front end 503 (IIS). Only /posting/ PDFs usable."
+  },
+  {
+   "key": "wta.rankings.singles",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize={n}&type=rankSingles&sort=asc&metric=SINGLES&at={YYYY-MM-DD}",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles",
+    "player_identity",
+    "history"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 1265,
+   "latency_ms": 272,
+   "probe_key": "wta.api.rankings.singles",
+   "native_ids": {
+    "wta_player_id": "integer e.g. 324166 (Rybakina), 230234 (Serena Williams)"
+   },
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "rows": [
+     {
+      "id": 324166,
+      "name": "Elena Rybakina",
+      "cc": "KAZ",
+      "ranking": 1,
+      "points": 9901,
+      "rankedAt": "2026-09-21"
+     },
+     {
+      "id": 320760,
+      "name": "Aryna Sabalenka",
+      "ranking": 2,
+      "points": 7875
+     }
+    ]
+   },
+   "notes": "api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.rankings.singles.historical",
+   "family": "wta",
+   "url": "same template with at=2015-01-05",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles",
+    "history"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 760,
+   "latency_ms": 214,
+   "probe_key": "wta.api.rankings.singles.hist",
+   "native_ids": {
+    "wta_player_id": "integer e.g. 324166 (Rybakina), 230234 (Serena Williams)"
+   },
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "rows": [
+     {
+      "id": 230234,
+      "name": "Serena Williams",
+      "ranking": 1,
+      "points": 8016,
+      "rankedAt": "2015-01-05"
+     },
+     {
+      "id": 310137,
+      "name": "Maria Sharapova",
+      "ranking": 2,
+      "points": 6865
+     }
+    ]
+   },
+   "notes": "Historical ranking dates work via at=."
+  },
+  {
+   "key": "wta.rankings.doubles",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize={n}&type=rankDoubles&sort=asc&metric=DOUBLES&at={YYYY-MM-DD}",
+   "method": "GET",
+   "capabilities": [
+    "rankings_doubles",
+    "doubles"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 772,
+   "latency_ms": 1794,
+   "probe_key": "wta.api.rankings.doubles",
+   "native_ids": {
+    "wta_player_id": "integer e.g. 324166 (Rybakina), 230234 (Serena Williams)"
+   },
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "rows": [
+     {
+      "id": 320301,
+      "name": "Katerina Siniakova",
+      "ranking": 1,
+      "points": 11350
+     },
+     {
+      "id": 318609,
+      "name": "Taylor Townsend",
+      "ranking": 2,
+      "points": 9545
+     }
+    ]
+   },
+   "notes": "api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.race",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/ranked?...&type=PointsSingles&sort=desc&name=race (guess)",
+   "method": "GET",
+   "capabilities": [
+    "race"
+   ],
+   "verdict": "UNVERIFIED",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 504,
+   "latency_ms": 1214,
+   "probe_key": "wta.api.race",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "first_row": {
+     "name": "Cadence Brace",
+     "ranking": 245
+    }
+   },
+   "notes": "200 but ordering is clearly not the Race - correct race parameters not found."
+  },
+  {
+   "key": "wta.calendar",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/tournaments/?page=0&pageSize={n}&from={YYYY-MM-DD}&to={YYYY-MM-DD}",
+   "method": "GET",
+   "capabilities": [
+    "calendar",
+    "history"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 12539,
+   "latency_ms": 288,
+   "probe_key": "wta.api.tournaments",
+   "native_ids": {
+    "wta_tournament_id": "tournamentGroup.id integer (= liveScoringId) + year, e.g. 1152/2026 Singapore, 1020 Beijing, 1178 Ankara 125"
+   },
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "rows": [
+     {
+      "id": 1152,
+      "title": "Singapore Tennis Open",
+      "level": "WTA 500",
+      "start": "2026-09-21",
+      "status": "live",
+      "surface": "Hard"
+     },
+     {
+      "id": 1020,
+      "title": "China Open - Beijing",
+      "level": "WTA 1000",
+      "start": "2026-09-30",
+      "status": "future"
+     }
+    ]
+   },
+   "notes": "Includes WTA 125 events, surface, draw sizes, prize money, past winners with WTA ids. api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.tournament",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}",
+   "method": "GET",
+   "capabilities": [
+    "calendar"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 566,
+   "latency_ms": 171,
+   "probe_key": "wta.api.tournament.1152",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "title": "Singapore Tennis Open presented by BNP Paribas",
+    "singlesDrawSize": 28,
+    "status": "inProgress",
+    "inOutdoor": "I"
+   },
+   "notes": "api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.matches",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches",
+   "method": "GET",
+   "capabilities": [
+    "schedule",
+    "live_state",
+    "set_game_scoring",
+    "draws",
+    "qualifying",
+    "doubles",
+    "withdrawals_ret_wo"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 59287,
+   "latency_ms": 158,
+   "probe_key": "wta.api.matches.1152.all",
+   "native_ids": {
+    "wta_match_id": "MatchID e.g. LS002 (main singles), RS014 (qualifying), LD003 (main doubles)",
+    "wta_player_id": "PlayerIDA/B/A2/B2 (string)"
+   },
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "lastUpdated": "2026-09-26T13:00:57Z",
+    "finished": {
+     "MatchID": "LS002",
+     "ResultString": "[6]L. Fernandez d [5]M. Chwalinska 1-6,6-4,6-2",
+     "MatchState": "F"
+    },
+    "live": {
+     "MatchID": "LD003",
+     "MatchState": "P",
+     "ScoreString": "3-2",
+     "PointA": "0",
+     "PointB": "0",
+     "Serve": "B"
+    }
+   },
+   "notes": "Live point score + server (MatchState P = in progress). 51 matches (M/Q x S/D). The ?states=L,C variant failed 4x on resets - use unfiltered. withdrawals_ret_wo inferred from Message/ResultString fields, not directly observed. api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.matches.wta125",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/tournaments/1178/2026/matches",
+   "method": "GET",
+   "capabilities": [
+    "live_state",
+    "set_game_scoring"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 61400,
+   "latency_ms": 192,
+   "probe_key": "wta.api.matches.1178",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "live": {
+     "MatchID": "LS002",
+     "players": "D. Dilek v B. Cengiz",
+     "ScoreString": "1-3",
+     "PointA": "15",
+     "PointB": "15",
+     "Serve": "A"
+    }
+   },
+   "notes": "WTA 125 (Ankara) live data on same endpoint."
+  },
+  {
+   "key": "wta.match.stats",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/tournaments/{id}/{year}/matches/{matchId}/stats",
+   "method": "GET",
+   "capabilities": [
+    "serve_stats",
+    "return_stats",
+    "match_stats"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 2191,
+   "latency_ms": 116,
+   "probe_key": "wta.api.matchstats.LS002",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "setnum0": {
+     "acesa": 2,
+     "acesb": 0,
+     "dblflta": 4,
+     "ptswon1stserva": 30,
+     "ptsplayed1stserva": 47,
+     "breakptsconva": 5,
+     "breakptsplayeda": 8,
+     "totptswona": 72,
+     "totptswonb": 69
+    }
+   },
+   "notes": "Per-set rows (setnum 0 = whole match). api.wtatennis.com: no auth, no key, no challenge; plain JSON. RELIABILITY: roughly 40-50% of TLS connections were reset (curl 35 'Recv failure: Connection was reset') and succeeded on retry - canaries need 3-4 retries with backoff."
+  },
+  {
+   "key": "wta.player",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/{id}",
+   "method": "GET",
+   "capabilities": [
+    "player_identity"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 146,
+   "latency_ms": 108,
+   "probe_key": "wta.api.player.324166",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "id": 324166,
+    "fullName": "Elena Rybakina",
+    "countryCode": "KAZ",
+    "dateOfBirth": "1999-06-17"
+   },
+   "notes": "Minimal identity only (no height/plays)."
+  },
+  {
+   "key": "wta.player.matches",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/{id}/matches/?page=0&pageSize={n}&sort=desc",
+   "method": "GET",
+   "capabilities": [
+    "match_history",
+    "h2h"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 8109,
+   "latency_ms": 406,
+   "probe_key": "wta.api.player.324166.matches",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "row": {
+     "TournamentName": "US OPEN",
+     "round_name": "F",
+     "opponent": "Aryna Sabalenka (320760)",
+     "scores": "6-4  5-7  6-2",
+     "rank_1": 2,
+     "rank_2": 1,
+     "reason_code": "W"
+    }
+   },
+   "notes": "Match history with ranks at the time; H2H derivable. Dedicated /players/{a}/h2h/{b} = 404."
+  },
+  {
+   "key": "wta.player.stats",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/{id}/year/{year}",
+   "method": "GET",
+   "capabilities": [
+    "serve_stats",
+    "return_stats"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 3755,
+   "latency_ms": 131,
+   "probe_key": "wta.api.player.stats",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "Aces": 411,
+    "AverageFirstServePercent": 62.32
+   },
+   "notes": ""
+  },
+  {
+   "key": "wta.player.records",
+   "family": "wta",
+   "url": "https://api.wtatennis.com/tennis/players/{id}/records",
+   "method": "GET",
+   "capabilities": [
+    "history",
+    "match_history"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 125817,
+   "latency_ms": 392,
+   "probe_key": "wta.api.player.records",
+   "native_ids": {},
+   "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
+   "terms": {
+    "url": "https://www.wtatennis.com/terms-and-conditions",
+    "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes.",
+    "how_obtained": "curl 200, extracted verbatim from HTML"
+   },
+   "sample": {
+    "byTournamentLevel[0]": {
+     "level": "WTA 125",
+     "matchesPlayed": 6,
+     "wins": 3
+    }
+   },
+   "notes": "Career W/L by level."
+  },
+  {
+   "key": "itf.site",
+   "family": "itf",
+   "url": "https://www.itftennis.com/en/",
+   "method": "GET",
+   "capabilities": [
+    "calendar",
+    "player_identity"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 200,
+   "content_type": "text/html",
+   "bytes": 1157,
+   "latency_ms": 198,
+   "probe_key": "itf.home",
+   "native_ids": {
+    "itf_player_id": "numeric 9-digit e.g. 100241350 (Sinner), 100202015 (Rybakina); Davis Cup id 800405198 (Sinner) - both observed via Wikidata"
+   },
+   "robots": "User-agent: * / Disallow: /umbraco/ / Allow: /",
+   "terms": {
+    "url": "https://www.itftennis.com/en/terms-and-conditions/",
+    "quote": null,
+    "how_obtained": "BLOCKED - Incapsula challenge page (curl and WebFetch both got no content)"
+   },
+   "sample": null,
+   "notes": "Imperva/Incapsula JS challenge (NOINDEX + /_Incapsula_Resource script) served with HTTP 200 to plain curl for every itftennis.com path incl. /tennis/api/*. Not bypassed. Canaries must detect the challenge body, not rely on status 200."
+  },
+  {
+   "key": "itf.api.calendar",
+   "family": "itf",
+   "url": "https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&...",
+   "method": "GET",
+   "capabilities": [
+    "calendar"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 200,
+   "content_type": "text/html",
+   "bytes": 1050,
+   "latency_ms": 259,
+   "probe_key": "itf.api.calendar",
+   "native_ids": {},
+   "robots": "User-agent: * / Disallow: /umbraco/ / Allow: /",
+   "terms": {
+    "url": "https://www.itftennis.com/en/terms-and-conditions/",
+    "quote": null,
+    "how_obtained": "BLOCKED - Incapsula challenge page (curl and WebFetch both got no content)"
+   },
+   "sample": null,
+   "notes": "Imperva/Incapsula JS challenge (NOINDEX + /_Incapsula_Resource script) served with HTTP 200 to plain curl for every itftennis.com path incl. /tennis/api/*. Not bypassed. Canaries must detect the challenge body, not rely on status 200."
+  },
+  {
+   "key": "itf.api.rankings",
+   "family": "itf",
+   "url": "https://www.itftennis.com/tennis/api/PlayerRankApi/GetPlayerRankings?circuitCode=MT&playerTypeCode=S&...",
+   "method": "GET",
+   "capabilities": [
+    "rankings_singles"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 200,
+   "content_type": "text/html",
+   "bytes": 1050,
+   "latency_ms": 129,
+   "probe_key": "itf.api.rankings",
+   "native_ids": {},
+   "robots": "User-agent: * / Disallow: /umbraco/ / Allow: /",
+   "terms": {
+    "url": "https://www.itftennis.com/en/terms-and-conditions/",
+    "quote": null,
+    "how_obtained": "BLOCKED - Incapsula challenge page (curl and WebFetch both got no content)"
+   },
+   "sample": null,
+   "notes": "Imperva/Incapsula JS challenge (NOINDEX + /_Incapsula_Resource script) served with HTTP 200 to plain curl for every itftennis.com path incl. /tennis/api/*. Not bypassed. Canaries must detect the challenge body, not rely on status 200."
+  },
+  {
+   "key": "daviscup.draws",
+   "family": "itf",
+   "url": "https://www.daviscup.com/en/draws-results/{season}/{stage}  (stage e.g. world-group-i)",
+   "method": "GET",
+   "capabilities": [
+    "calendar",
+    "draws"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "text/html; charset=utf-8",
+   "bytes": 531535,
+   "latency_ms": 183,
+   "probe_key": "davis.draws.wg1.2026",
+   "native_ids": {
+    "team_nomination_id": "UUID"
+   },
+   "robots": "User-Agent: * / Allow: /",
+   "terms": {
+    "url": "https://www.daviscup.com/en/terms-and-conditions",
+    "quote": null,
+    "how_obtained": "guessed URL 404; not retrieved (ITF-owned property)"
+   },
+   "sample": {
+    "eventTeamNominations[0]": {
+     "teamName": "Austria",
+     "eventName": "Finals",
+     "players": []
+    }
+   },
+   "notes": "Next.js RSC page, no challenge. SSR payload has team/nomination metadata and labels only; tie results load client-side from an undiscovered endpoint (assets from assetbank.itf-production.sports-data.stadion.io). Results/scores UNVERIFIED."
+  },
+  {
+   "key": "bjkcup.draws",
+   "family": "itf",
+   "url": "https://www.billiejeankingcup.com/en/draws-results/{season}/{stage}",
+   "method": "GET",
+   "capabilities": [
+    "calendar",
+    "draws"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "text/html; charset=utf-8",
+   "bytes": 462927,
+   "latency_ms": 196,
+   "probe_key": "bjk.draws.finals.2026",
+   "native_ids": {},
+   "robots": "User-Agent: * / Allow: /",
+   "terms": {
+    "url": "https://www.daviscup.com/en/terms-and-conditions",
+    "quote": null,
+    "how_obtained": "guessed URL 404; not retrieved (ITF-owned property)"
+   },
+   "sample": null,
+   "notes": "Same platform as daviscup.com; same limitation."
+  },
+  {
+   "key": "wimbledon.draws",
+   "family": "slams",
+   "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/draws/{eventCode}.json  (MS confirmed)",
+   "method": "GET",
+   "capabilities": [
+    "draws",
+    "set_game_scoring",
+    "history"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 357838,
+   "latency_ms": 668,
+   "probe_key": "wim.draws.MS.2025",
+   "native_ids": {
+    "slam_player_id": "'atp'+lowercase ATP id e.g. atps0ag, atpa0e2; 'wta'+WTA id e.g. wta324219",
+    "match_id": "4-digit e.g. 1701 = MS final"
+   },
+   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+   "terms": {
+    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable).",
+    "how_obtained": "curl 200, decoded verbatim from Next.js RSC payload"
+   },
+   "sample": {
+    "match_id": "1701",
+    "roundName": "Final",
+    "team1": "J. Sinner (atps0ag) seed 1 won",
+    "team2": "C. Alcaraz (atpa0e2) seed 2",
+    "duration": "3:04",
+    "sets": "4-6 6-4 6-4 6-4"
+   },
+   "notes": "IBM-hosted static JSON, no auth. Carries ATP/WTA ids -> free crosswalk."
+  },
+  {
+   "key": "wimbledon.players",
+   "family": "slams",
+   "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/players/players.json",
+   "method": "GET",
+   "capabilities": [
+    "player_identity",
+    "player_bio"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 1391719,
+   "latency_ms": 447,
+   "probe_key": "wim.players.2025",
+   "native_ids": {
+    "slam_player_id": "wta324219 / atpXXXX"
+   },
+   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+   "terms": {
+    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable).",
+    "how_obtained": "curl 200, decoded verbatim from Next.js RSC payload"
+   },
+   "sample": {
+    "first": {
+     "id": "wta324219",
+     "name": "Destanee Aiava",
+     "country": "AUS"
+    }
+   },
+   "notes": "1.39 MB"
+  },
+  {
+   "key": "wimbledon.matchdetail_pbp",
+   "family": "slams",
+   "url": "https://www.wimbledon.com/en_GB/scores/feeds/{year}/slamtracker/history/{matchId}.json ; .../matches/details/{matchId}.json",
+   "method": "GET",
+   "capabilities": [
+    "point_by_point",
+    "match_stats"
+   ],
+   "verdict": "UNVERIFIED",
+   "http_status": 403,
+   "content_type": "application/xml",
+   "bytes": 111,
+   "latency_ms": 586,
+   "probe_key": "wim.slamtracker.history.1701",
+   "native_ids": {},
+   "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
+   "terms": {
+    "url": "https://www.wimbledon.com/en_GB/terms_of_use",
+    "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable).",
+    "how_obtained": "curl 200, decoded verbatim from Next.js RSC payload"
+   },
+   "sample": {
+    "body": "S3 AccessDenied XML"
+   },
+   "notes": "S3 AccessDenied is also what a missing key returns, so the path guess may simply be wrong."
+  },
+  {
+   "key": "ausopen.results",
+   "family": "slams",
+   "url": "https://prod-scores-api.ausopen.com/year/{year}/period/MD/day/{day}/results  (schedule: .../day/{day}/schedule)",
+   "method": "GET",
+   "capabilities": [
+    "schedule",
+    "set_game_scoring",
+    "player_identity",
+    "history",
+    "draws"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 209065,
+   "latency_ms": 756,
+   "probe_key": "ao.results.2026.day1",
+   "native_ids": {
+    "ao_match_id": "e.g. WS116",
+    "tour_id": "ATPBK92 / WTA317790 (uppercase ATP/WTA prefix + tour id)"
+   },
+   "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
+   "terms": {
+    "url": "https://www.tennis.com.au/about-us/reports-publications-national-policies/conditions-of-use",
+    "quote": null,
+    "how_obtained": "ausopen.com/legal 'Conditions of use' links here; tennis.com.au returned Cloudflare 403. Not retrieved."
+   },
+   "sample": {
+    "match": {
+     "match_id": "WS116",
+     "date": "2026-01-18",
+     "state": "Complete",
+     "score": "Paolini d. Sasnovich 6-1 6-2"
+    },
+    "player": {
+     "tour_id": "ATPBK92",
+     "full_name": "Alexander Bublik"
+    }
+   },
+   "notes": "No auth. Template found in ausopen.com page source. Response header says tournament 'AusOpen 2027', period Pre-tournament."
+  },
+  {
+   "key": "ausopen.matchcentre",
+   "family": "slams",
+   "url": "https://prod-scores-api.ausopen.com/match-centre/{matchId}",
+   "method": "GET",
+   "capabilities": [
+    "point_by_point",
+    "match_stats",
+    "serve_stats",
+    "return_stats"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json",
+   "bytes": 62593,
+   "latency_ms": 393,
+   "probe_key": "ao.matchcentre.WS116",
+   "native_ids": {},
+   "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
+   "terms": {
+    "url": "https://www.tennis.com.au/about-us/reports-publications-national-policies/conditions-of-use",
+    "quote": null,
+    "how_obtained": "ausopen.com/legal 'Conditions of use' links here; tennis.com.au returned Cloudflare 403. Not retrieved."
+   },
+   "sample": {
+    "stats.key_stats[set1]": {
+     "Aces": "1-1",
+     "1st serve in": "67% (12/18) vs 86% (19/22)"
+    },
+    "commentary[0..1]": [
+     {
+      "id": "WS116-002-008-005",
+      "commentary": "A. Sasnovich loses the point with a Forehand Unforced Error",
+      "score": "Game",
+      "games_score": "2 - 6"
+     },
+     {
+      "id": "WS116-002-008-004",
+      "score": "40 - 15"
+     }
+    ]
+   },
+   "notes": "109 point-level rows with running score. Current edition only (no year in path); archive depth unknown."
+  },
+  {
+   "key": "usopen.feeds",
+   "family": "slams",
+   "url": "https://www.usopen.org/en_US/scores/feeds/{year}/draws/MS.json",
+   "method": "GET",
+   "capabilities": [
+    "draws"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": null,
+   "content_type": null,
+   "bytes": null,
+   "latency_ms": 20013,
+   "probe_key": "uso.draws.MS.2025",
+   "native_ids": {},
+   "robots": "robots.txt request timed out (25s, 0 bytes) - could not read",
+   "terms": {
+    "url": null,
+    "quote": null,
+    "how_obtained": "site unreachable"
+   },
+   "sample": null,
+   "notes": "Every usopen.org request (incl. robots.txt) hung with 0 bytes until timeout (20-25s) - consistent with the edge silently dropping non-browser clients; could also be an outage. Recheck. Not bypassed."
+  },
+  {
+   "key": "rolandgarros.results",
+   "family": "slams",
+   "url": "https://www.rolandgarros.com/en-us/results/{eventCode}?round={n}&year={year}",
+   "method": "GET",
+   "capabilities": [
+    "draws",
+    "set_game_scoring",
+    "player_identity",
+    "history"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "text/html; charset=utf-8",
+   "bytes": 887159,
+   "latency_ms": 1552,
+   "probe_key": "rg.results.page",
+   "native_ids": {
+    "fft_player_id": "numeric e.g. 39723 (Sinner), 44408 (Alcaraz) - FFT-internal"
+   },
+   "robots": "Disallow: /admin, /maintenance",
+   "terms": {
+    "url": "https://www.rolandgarros.com/en-us/page/legal-notice",
+    "quote": null,
+    "how_obtained": "guessed URL returned 408; not retrieved"
+   },
+   "sample": {
+    "embedded": "Nuxt devalue payload: ...39723,'Jannik','SINNER','J.SINNER'... '/en-us/players/39723-j.sinner'"
+   },
+   "notes": "887 KB HTML; data only in Nuxt SSR payload (devalue-encoded) - brittle parse. Guessed /api/en-us/draws = 404."
+  },
+  {
+   "key": "unitedcup.site",
+   "family": "united_cup",
+   "url": "https://www.unitedcup.com/en/scores",
+   "method": "GET",
+   "capabilities": [
+    "calendar"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "text/html; charset=utf-8",
+   "bytes": 29525,
+   "latency_ms": 620,
+   "probe_key": "unitedcup.scores",
+   "native_ids": {},
+   "robots": "Identical to atptour.com robots (same Sitecore platform)",
+   "terms": {
+    "url": "https://www.atptour.com/en/terms-and-conditions",
+    "quote": "Systematic retrieval of data or other Content from the Website, including but not limited to scores, statistics, and/or rankings, whether to create or compile, directly or indirectly, a collection, compilation, database, or directory, is prohibited absent prior express written permission from ATP. ... You may use the Website and/or Content solely for your own individual non-commercial, entertainment and informational purposes. Any other use, including for any commercial, gambling or wagering purposes, is strictly prohibited without ATP's express prior written permission.",
+    "how_obtained": "curl got the Cloudflare challenge; quote obtained via WebFetch (model-summarized fetch) - re-verify verbatim in a browser before relying on it"
+   },
+   "sample": {
+    "title": "Scores | United Cup | Tennis"
+   },
+   "notes": "ATP-run Sitecore site (same robots as atptour.com) but NOT challenged. Off-season (event is January). No data endpoint identified."
+  },
+  {
+   "key": "olympics.tennis",
+   "family": "olympics",
+   "url": "https://www.olympics.com/en/olympic-games/paris-2024/results/tennis",
+   "method": "GET",
+   "capabilities": [
+    "history"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": null,
+   "content_type": null,
+   "bytes": null,
+   "latency_ms": 20005,
+   "probe_key": "olympics.tennis",
+   "native_ids": {},
+   "robots": "not read",
+   "terms": null,
+   "sample": null,
+   "notes": "Hung with 0 bytes until 20s timeout (x4). Treated as edge drop; not bypassed."
+  },
+  {
+   "key": "wikidata.identity.counts",
+   "family": "wikidata",
+   "url": "https://query.wikidata.org/sparql?format=json&query=SELECT (COUNT(DISTINCT ?h) AS ?n) (COUNT(DISTINCT ?img) AS ?withImg) WHERE { ?h wdt:{P} ?id ; wdt:P31 wd:Q5 . OPTIONAL { ?h wdt:P18 ?img } }",
+   "method": "GET",
+   "capabilities": [
+    "player_identity"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/sparql-results+json;charset=utf-8",
+   "bytes": 389,
+   "latency_ms": 1673,
+   "probe_key": "wikidata.count.P536",
+   "native_ids": {
+    "P536_atp": "S0AG",
+    "P597_wta": "324166",
+    "P599_itf": "100241350",
+    "P2641_davis": "800405198"
+   },
+   "robots": "n/a (Wikimedia API; UA policy requires descriptive UA - satisfied)",
+   "terms": {
+    "url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+    "quote": null,
+    "how_obtained": "not fetched this run; Wikidata data is published under CC0 (known policy - verify)"
+   },
+   "sample": {
+    "counts": {
+     "P536_ATP": {
+      "humans": 6582,
+      "distinct_P18_images": 2146
+     },
+     "P597_WTA": {
+      "humans": 5405,
+      "distinct_images": 1487
+     },
+     "P599_ITF": {
+      "humans": 7417,
+      "distinct_images": 2949
+     },
+     "P2641_DavisCup": {
+      "humans": 2926,
+      "distinct_images": 1333
+     },
+     "P2642_BJKCup": {
+      "humans": 2167,
+      "distinct_images": 882
+     }
+    }
+   },
+   "notes": "Image counts are DISTINCT images (approx humans-with-image)."
+  },
+  {
+   "key": "wikidata.identity.lookup",
+   "family": "wikidata",
+   "url": "https://query.wikidata.org/sparql?format=json&query=... { ?h wdt:P536 \"S0AG\" } UNION { ?h wdt:P597 \"324166\" } ...",
+   "method": "GET",
+   "capabilities": [
+    "player_identity",
+    "player_bio"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/sparql-results+json;charset=utf-8",
+   "bytes": 1906,
+   "latency_ms": 167,
+   "probe_key": "wikidata.current",
+   "native_ids": {},
+   "robots": "n/a (Wikimedia API; UA policy requires descriptive UA - satisfied)",
+   "terms": null,
+   "sample": {
+    "rows": [
+     {
+      "qid": "Q54812588",
+      "name": "Jannik Sinner",
+      "atp": "S0AG",
+      "itf": "100241350",
+      "davis": "800405198"
+     },
+     {
+      "qid": "Q42055714",
+      "name": "Elena Rybakina",
+      "wta": "324166",
+      "itf": "100202015"
+     },
+     {
+      "qid": "Q85518537",
+      "atp": "A0E2",
+      "davis": "800446486"
+     }
+    ]
+   },
+   "notes": "WTA ids match api.wtatennis.com exactly (324166, 230234) - crosswalk confirmed."
+  },
+  {
+   "key": "commons.image_license",
+   "family": "wikidata",
+   "url": "https://commons.wikimedia.org/w/api.php?action=query&titles=File:{name}&prop=imageinfo&iiprop=url|extmetadata&iiextmetadatafilter=LicenseShortName|Artist|LicenseUrl|Credit&format=json",
+   "method": "GET",
+   "capabilities": [
+    "player_bio"
+   ],
+   "verdict": "PASS",
+   "http_status": 200,
+   "content_type": "application/json; charset=utf-8",
+   "bytes": 1045,
+   "latency_ms": 233,
+   "probe_key": "commons.extmetadata",
+   "native_ids": {},
+   "robots": "n/a (Wikimedia API; UA policy requires descriptive UA - satisfied)",
+   "terms": null,
+   "sample": {
+    "file": "Andre Agassi (2011).jpg",
+    "LicenseShortName": "CC BY 2.0",
+    "Artist": "Shinya Suzuki (Flickr)",
+    "LicenseUrl": "https://creativecommons.org/licenses/by/2.0"
+   },
+   "notes": ""
+  },
+  {
+   "key": "sackmann.tennis_atp",
+   "family": "open_data",
+   "url": "https://github.com/JeffSackmann/tennis_atp",
+   "method": "GET",
+   "capabilities": [
+    "match_history",
+    "rankings_singles",
+    "history"
+   ],
+   "verdict": "NOT_AVAILABLE",
+   "http_status": 404,
+   "content_type": "application/json; charset=utf-8",
+   "bytes": 118,
+   "latency_ms": 251,
+   "probe_key": "gh.tennis_atp",
+   "native_ids": {},
+   "robots": "n/a (GitHub API)",
+   "terms": null,
+   "sample": {
+    "api": "404 Not Found",
+    "html": "404"
+   },
+   "notes": "Repo no longer public: API /repos 404, /commits 404, github.com page 404. JeffSackmann now lists exactly 1 public repo (tennis_MatchChartingProject). Same for tennis_wta and tennis_slam_pointbypoint."
+  },
+  {
+   "key": "sackmann.tennis_wta",
+   "family": "open_data",
+   "url": "https://github.com/JeffSackmann/tennis_wta",
+   "method": "GET",
+   "capabilities": [
+    "match_history",
+    "history"
+   ],
+   "verdict": "NOT_AVAILABLE",
+   "http_status": 404,
+   "content_type": "application/json; charset=utf-8",
+   "bytes": 118,
+   "latency_ms": 213,
+   "probe_key": "gh.tennis_wta",
+   "native_ids": {},
+   "robots": "n/a (GitHub API)",
+   "terms": null,
+   "sample": null,
+   "notes": "404 via GitHub API."
+  },
+  {
+   "key": "sackmann.tennis_slam_pointbypoint",
+   "family": "open_data",
+   "url": "https://github.com/JeffSackmann/tennis_slam_pointbypoint",
+   "method": "GET",
+   "capabilities": [
+    "point_by_point",
+    "history"
+   ],
+   "verdict": "NOT_AVAILABLE",
+   "http_status": 404,
+   "content_type": "application/json; charset=utf-8",
+   "bytes": 118,
+   "latency_ms": 247,
+   "probe_key": "gh.tennis_slam_pbp",
+   "native_ids": {},
+   "robots": "n/a (GitHub API)",
+   "terms": null,
+   "sample": null,
+   "notes": "404 via GitHub API."
+  },
+  {
+   "key": "sackmann.tennis_MatchChartingProject",
+   "family": "open_data",
+   "url": "https://github.com/JeffSackmann/tennis_MatchChartingProject",
+   "method": "GET",
+   "capabilities": [
+    "point_by_point",
+    "history"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "application/json; charset=utf-8",
+   "bytes": 6118,
+   "latency_ms": 284,
+   "probe_key": "gh.tennis_mcp",
+   "native_ids": {},
+   "robots": "n/a (GitHub API)",
+   "terms": {
+    "url": "https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/README.md",
+    "quote": "... is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. ... In other words: Attribution is required. Non-commercial use only.",
+    "how_obtained": "curl 200"
+   },
+   "sample": {
+    "pushed_at": "2026-09-18T08:36:17Z",
+    "last_commit": "2026-09-18T08:35:54Z",
+    "size_kb": 744048,
+    "github_license_field": null,
+    "readme": "over 5,000 matches, shot-by-shot"
+   },
+   "notes": "Live and updated, but CC BY-NC-SA 4.0 (README) - NonCommercial conflicts with a commercial product. DEGRADED = rights, not access. Owner decision."
+  },
+  {
+   "key": "tennisabstract.site",
+   "family": "open_data",
+   "url": "https://www.tennisabstract.com/",
+   "method": "GET",
+   "capabilities": [
+    "match_history",
+    "player_bio",
+    "h2h"
+   ],
+   "verdict": "DEGRADED",
+   "http_status": 200,
+   "content_type": "text/html",
+   "bytes": 68340,
+   "latency_ms": 169,
+   "probe_key": "tennisabstract.home",
+   "native_ids": {},
+   "robots": "Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)",
+   "terms": {
+    "url": null,
+    "quote": null,
+    "how_obtained": "no ToS page found"
+   },
+   "sample": null,
+   "notes": "HTML 200 via Cloudflare, no challenge. Data paths are robots-disallowed; data derives from the Sackmann datasets."
+  },
+  {
+   "key": "odds.tennis_data_co_uk",
+   "family": "odds",
+   "url": "http://www.tennis-data.co.uk/{year}/{year}.xlsx",
+   "method": "GET",
+   "capabilities": [
+    "odds",
+    "match_history"
+   ],
+   "verdict": "BLOCKED_BY_ACCESS_CONTROL",
+   "http_status": 403,
+   "content_type": "text/html; charset=UTF-8",
+   "bytes": 4576,
+   "latency_ms": 67,
+   "probe_key": "tennisdata.2026.xlsx",
+   "native_ids": {},
+   "robots": "not read",
+   "terms": null,
+   "sample": {
+    "title": "Attention Required! | Cloudflare"
+   },
+   "notes": "Historically the free closing-odds source (no key). Now Cloudflare block page (403) to plain curl. No free, key-less, ToS-clean odds source identified."
+  },
+  {
+   "key": "odds.the_odds_api",
+   "family": "odds",
+   "url": "https://the-odds-api.com/sports-odds-data/sports-apis.html (docs only; API NOT called)",
+   "method": null,
+   "capabilities": [
+    "odds"
+   ],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "native_ids": {
+    "sport_keys": "tournament-scoped e.g. tennis_atp_china_open, tennis_atp_shanghai_masters, tennis_wta_china_open, tennis_wta_wuhan_open, tennis_wta_singapore_open (22 ATP + 24 WTA keys listed)"
+   },
+   "notes": "Existing PropBetEdge subscription elsewhere. Docs (read via WebFetch) list tennis keys per tournament only (Slams, 1000s, selected 500s) - no ATP 250/Challenger/ITF/WTA 125; keys active only during the event window."
+  },
+  {
+   "key": "commercial.sportradar",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "Sportradar: recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.stats",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "Stats Perform (Opta): recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.genius",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "Genius Sports: recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.infront",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "Infront / Tennis Data Innovations (TDI, ATP/WTA official data): recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.sportsdataio",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "SportsDataIO: recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.api-tennis.com",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "api-tennis.com: recorded only, not probed, per $0 directive."
+  },
+  {
+   "key": "commercial.rapidapi",
+   "family": "commercial",
+   "url": null,
+   "method": null,
+   "capabilities": [],
+   "verdict": "COMMERCIAL_REFERENCE_ONLY",
+   "notes": "RapidAPI tennis APIs: recorded only, not probed, per $0 directive."
+  }
+ ]
+}

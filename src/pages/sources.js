@@ -1,0 +1,37 @@
+// /sources — the audited source registry + the latest committed canary run. Real content today.
+
+import { html, render } from '../lib/dom.js';
+import registry from '../../data/source-registry/sources.json';
+import canary from '../../docs/evidence/source-canary-latest.json';
+import { coverageMatrix } from './coverage.js';
+
+const VERDICT_LABEL = { PASS: 'Pass', DEGRADED: 'Degraded', NOT_AVAILABLE: 'Not available', BLOCKED_BY_ACCESS_CONTROL: 'Blocked (not evaded)', UNVERIFIED: 'Unverified', COMMERCIAL_REFERENCE_ONLY: 'Commercial — reference only' };
+
+export function mount(root) {
+  const results = new Map((canary.results || []).map((r) => [r.key, r]));
+  const fam = Object.fromEntries((registry.families || []).map((f) => [f.key, f.label]));
+  const groups = [...new Set(registry.sources.map((s) => s.family))];
+  render(root, html`<div class="page">
+    <header class="page-h">
+      <p class="eyebrow">Sources</p>
+      <h1>Where the data comes from</h1>
+      <p class="lede">PropBetEdge Tennis builds its own data layer from public, first-party tennis sources — no paid sports-data feed. Every source below was probed with real requests; nothing is marked PASS because documentation says it exists. Sources that refuse automated access are recorded and left alone.</p>
+      <p class="note">Registry ${registry.updated_at} · Canary run ${canary.run_at || 'not yet run'}${canary.runner ? ` · ${canary.runner}` : ''}</p>
+    </header>
+    <section class="mod"><header class="mod-h"><h2>Coverage</h2></header><div class="mod-b">${coverageMatrix(registry)}</div></section>
+    ${groups.map((g) => html`<section class="mod src-group">
+      <header class="mod-h"><h2>${fam[g] || g}</h2></header>
+      <div class="mod-b"><ul class="src-list">${registry.sources.filter((s) => s.family === g).map((s) => {
+        const r = results.get(s.key);
+        return html`<li class="src">
+          <div class="src-top"><b>${s.name}</b><span class="verdict v-${s.verdict.toLowerCase()}">${VERDICT_LABEL[s.verdict] || s.verdict}</span></div>
+          <p class="src-caps">${(s.capabilities || []).join(' · ')}</p>
+          ${s.notes ? html`<p class="src-notes">${s.notes}</p>` : ''}
+          ${r ? html`<p class="src-canary">Canary: <b>${r.state}</b>${r.http_status ? ` · HTTP ${r.http_status}` : ''}${r.record_count != null ? ` · ${r.record_count} records` : ''}${r.latency_ms != null ? ` · ${r.latency_ms} ms` : ''}</p>` : ''}
+          ${s.terms?.status ? html`<p class="src-terms">Terms: ${s.terms.status.replace(/_/g, ' ').toLowerCase()}${s.terms.url ? html` · <a href="${s.terms.url}" rel="noopener nofollow">terms</a>` : ''}</p>` : ''}
+        </li>`;
+      })}</ul></div>
+    </section>`)}
+  </div>`);
+  return () => {};
+}

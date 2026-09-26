@@ -1,0 +1,11 @@
+# tennis-model — NOT DEPLOYED. First deploy: docs/RELEASE.md (versions upload -> canary -> versions deploy).
+name = "tennis-model"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# Bindings are declared when the resource exists (docs/ARCHITECTURE.md). No cron triggers until the
+# Worker has real work; schedules are Cloudflare Cron, never GitHub Actions.

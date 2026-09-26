@@ -1,0 +1,5 @@
+{
+  "policy": "docs/NEWS_SOURCE_POLICY.md",
+  "note": "Empty until each feed is verified with a real request and its terms recorded. Our own data graph is the primary news source.",
+  "sources": []
+}

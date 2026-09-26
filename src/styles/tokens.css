@@ -1,0 +1,55 @@
+/* PropBetEdge Tennis design tokens.
+   Shared PBE near-black/gold intelligence identity + a light editorial surface for long-form reading,
+   with restrained surface accents (hard / clay / grass). Generic court geometry only; no tour or
+   tournament trade dress. */
+
+:root {
+  color-scheme: dark;
+
+  --ink: #0f0d0a;
+  --ink-1: #15120e;
+  --ink-2: #1c1813;
+  --ink-3: #26211a;
+  --ink-4: #332c23;
+
+  --paper: #f5f1eb;
+  --paper-2: #e3dccf;
+  --dim: #b8b2a6;
+  --faint: #9a9489;
+
+  --gold: #d4af37;
+  --gold-bright: #ecc95c;
+  --gold-soft: rgba(212, 175, 55, 0.14);
+  --gold-line: rgba(212, 175, 55, 0.35);
+
+  /* surface accents — used sparingly, only where a surface is a fact of the data */
+  --hard: #4f8fd6;
+  --clay: #d0703f;
+  --grass: #5fa35a;
+  --indoor: #9a86d1;
+
+  --live: #ff4d5e;
+  --pos: #52b57f;
+  --neg: #e05a5a;
+  --warn: #e0a83e;
+  --model: #7aa9ff;
+  --market: #b99cff;
+
+  --line: rgba(255, 245, 220, 0.09);
+  --line-2: rgba(255, 245, 220, 0.16);
+
+  /* light editorial surface (articles, methodology) */
+  --sheet: #fbf9f5;
+  --sheet-ink: #1a1712;
+  --sheet-dim: #5b554b;
+  --sheet-line: #e6e0d4;
+
+  --f-ui: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --f-display: 'Barlow Condensed', 'Arial Narrow', 'Roboto Condensed', system-ui, sans-serif;
+  --f-data: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+  --r: 10px;
+  --r-lg: 16px;
+  --gutter: clamp(16px, 4vw, 40px);
+  --max: 1240px;
+}

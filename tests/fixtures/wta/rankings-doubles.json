@@ -1,0 +1,41 @@
+{
+ "_capture": {
+  "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize=3&type=rankDoubles&sort=asc&metric=DOUBLES&at=2026-09-21",
+  "captured_at": "2026-09-26",
+  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+ },
+ "payload": [
+  {
+   "player": {
+    "id": 320301,
+    "firstName": "Katerina",
+    "lastName": "Siniakova",
+    "fullName": "Katerina Siniakova",
+    "countryCode": "CZE",
+    "dateOfBirth": "1996-05-10",
+    "metadata": null
+   },
+   "ranking": 1,
+   "points": 11350,
+   "tournamentsPlayed": 16,
+   "movement": 0,
+   "rankedAt": "2026-09-21T00:00:00Z"
+  },
+  {
+   "player": {
+    "id": 318609,
+    "firstName": "Taylor",
+    "lastName": "Townsend",
+    "fullName": "Taylor Townsend",
+    "countryCode": "USA",
+    "dateOfBirth": "1996-04-16",
+    "metadata": null
+   },
+   "ranking": 2,
+   "points": 9545,
+   "tournamentsPlayed": 13,
+   "movement": 0,
+   "rankedAt": "2026-09-21T00:00:00Z"
+  }
+ ]
+}

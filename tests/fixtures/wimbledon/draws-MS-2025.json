@@ -1,0 +1,373 @@
+{
+ "_capture": {
+  "url": "https://www.wimbledon.com/en_GB/scores/feeds/2025/draws/MS.json",
+  "captured_at": "2026-09-26",
+  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+ },
+ "payload": {
+  "eventName": "Gentlemen's Singles",
+  "drawSize": "128",
+  "drawFormat": "bracket",
+  "totalRounds": 7,
+  "prizeMoney": [],
+  "matches": [
+   {
+    "match_id": "1101",
+    "eventName": "Gentlemen's Singles",
+    "shortEventName": "Gentlemen's Singles",
+    "eventCode": "MS",
+    "courtName": "No.1 Court",
+    "shortCourtName": "No.1 Court",
+    "courtId": "AB",
+    "roundCode": "1",
+    "roundName": "First Round",
+    "roundNameShort": "R1",
+    "eventDay": 9,
+    "duration": "1:48",
+    "statsLevel": "H",
+    "status": "Completed",
+    "statusCode": "D",
+    "winner": "1",
+    "epoch": 1751378186000,
+    "team1": {
+     "firstNameA": "Jannik",
+     "lastNameA": "Sinner",
+     "displayNameA": "J. Sinner",
+     "idA": "atps0ag",
+     "nationA": "ITA",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": 1,
+     "entryStatus": null,
+     "totalSetsWon": 3,
+     "won": true,
+     "serve": false
+    },
+    "team2": {
+     "firstNameA": "Luca",
+     "lastNameA": "Nardi",
+     "displayNameA": "L. Nardi",
+     "idA": "atpn0bg",
+     "nationA": "ITA",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": null,
+     "entryStatus": null,
+     "totalSetsWon": 0,
+     "won": false,
+     "serve": false
+    },
+    "flags": {
+     "upset": false
+    },
+    "scores": {
+     "setsWon": [
+      1,
+      1,
+      1,
+      1,
+      0,
+      0
+     ],
+     "setDurations": [
+      "46",
+      "39",
+      "23"
+     ],
+     "sets": [
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 4,
+        "scoreDisplay": "4",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ],
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 3,
+        "scoreDisplay": "3",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ],
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 0,
+        "scoreDisplay": "0",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ]
+     ],
+     "gameScore": [
+      null,
+      null
+     ]
+    }
+   },
+   {
+    "match_id": "1107",
+    "eventName": "Gentlemen's Singles",
+    "shortEventName": "Gentlemen's Singles",
+    "eventCode": "MS",
+    "courtName": "Court 8",
+    "shortCourtName": "Court 8",
+    "courtId": "AK",
+    "roundCode": "1",
+    "roundName": "First Round",
+    "roundNameShort": "R1",
+    "eventDay": 9,
+    "duration": "1:27",
+    "statsLevel": "H",
+    "status": "Retired",
+    "statusCode": "E",
+    "winner": "1",
+    "epoch": 1751376921000,
+    "team1": {
+     "firstNameA": "Sebastian",
+     "lastNameA": "Ofner",
+     "displayNameA": "S. Ofner",
+     "idA": "atpo513",
+     "nationA": "AUT",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": null,
+     "entryStatus": null,
+     "totalSetsWon": 1,
+     "won": true,
+     "serve": false
+    },
+    "team2": {
+     "firstNameA": "Hamad",
+     "lastNameA": "Medjedovic",
+     "displayNameA": "H. Medjedovic",
+     "idA": "atpm0jf",
+     "nationA": "SRB",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": null,
+     "entryStatus": null,
+     "totalSetsWon": 0,
+     "won": false,
+     "serve": false
+    },
+    "flags": {
+     "upset": false
+    },
+    "scores": {
+     "setsWon": [
+      1,
+      1,
+      0,
+      0,
+      0,
+      0
+     ],
+     "setDurations": [
+      "59",
+      "28"
+     ],
+     "sets": [
+      [
+       {
+        "score": 7,
+        "scoreDisplay": "7",
+        "tiebreak": 10,
+        "tiebreakDisplay": "10"
+       },
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": 8,
+        "tiebreakDisplay": "8"
+       }
+      ],
+      [
+       {
+        "score": 3,
+        "scoreDisplay": "3",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 1,
+        "scoreDisplay": "1",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ]
+     ],
+     "gameScore": [
+      "30",
+      "0"
+     ]
+    }
+   },
+   {
+    "match_id": "1701",
+    "eventName": "Gentlemen's Singles",
+    "shortEventName": "Gentlemen's Singles",
+    "eventCode": "MS",
+    "courtName": "Centre Court",
+    "shortCourtName": "Centre Court",
+    "courtId": "AA",
+    "roundCode": "F",
+    "roundName": "Final",
+    "roundNameShort": "F",
+    "eventDay": 21,
+    "duration": "3:04",
+    "statsLevel": "H",
+    "status": "Completed",
+    "statusCode": "D",
+    "winner": "1",
+    "epoch": 1752431037000,
+    "team1": {
+     "firstNameA": "Jannik",
+     "lastNameA": "Sinner",
+     "displayNameA": "J. Sinner",
+     "idA": "atps0ag",
+     "nationA": "ITA",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": 1,
+     "entryStatus": null,
+     "totalSetsWon": 3,
+     "won": true,
+     "serve": false
+    },
+    "team2": {
+     "firstNameA": "Carlos",
+     "lastNameA": "Alcaraz",
+     "displayNameA": "C. Alcaraz",
+     "idA": "atpa0e2",
+     "nationA": "ESP",
+     "firstNameB": null,
+     "lastNameB": null,
+     "displayNameB": null,
+     "idB": null,
+     "nationB": null,
+     "seed": 2,
+     "entryStatus": null,
+     "totalSetsWon": 1,
+     "won": false,
+     "serve": false
+    },
+    "flags": {
+     "upset": false
+    },
+    "scores": {
+     "setsWon": [
+      1,
+      2,
+      1,
+      1,
+      1,
+      0
+     ],
+     "setDurations": [
+      "44",
+      "48",
+      "46",
+      "46"
+     ],
+     "sets": [
+      [
+       {
+        "score": 4,
+        "scoreDisplay": "4",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ],
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 4,
+        "scoreDisplay": "4",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ],
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 4,
+        "scoreDisplay": "4",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ],
+      [
+       {
+        "score": 6,
+        "scoreDisplay": "6",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       },
+       {
+        "score": 4,
+        "scoreDisplay": "4",
+        "tiebreak": null,
+        "tiebreakDisplay": null
+       }
+      ]
+     ],
+     "gameScore": [
+      null,
+      null
+     ]
+    }
+   }
+  ]
+ }
+}
