@@ -1,5 +1,7 @@
-# tennis-news — evidence-grounded newsroom (gates not built).
-# Deploy: docs/RELEASE.md. Secrets (wrangler secret put) are listed per Worker; values never in Git.
+# tennis-news — evidence-grounded newsroom (docs/NEWSROOM.md).
+# Deterministic detection/evidence/charts/gates; GPT-5.6 Sol prose (OPENAI_API_KEY secret) with the
+# deterministic writer as fact-safe fallback. Secrets (wrangler secret put, never in Git):
+#   TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY, NEWS_ADMIN_TOKEN, OPENAI_API_KEY
 name = "tennis-news"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
@@ -8,8 +10,17 @@ workers_dev = true
 [observability]
 enabled = true
 
+[limits]
+cpu_ms = 120000
+
+[triggers]
+crons = ["*/2 * * * *"]
+
+[vars]
+# SHADOW until the canary set passes review: every story is written as HOLD ("shadow").
+NEWS_PUBLISH_ENABLED = "false"
+TENNIS_EDITORIAL_OPENAI_MODEL = "gpt-5.6-sol"
+
 [[kv_namespaces]]
 binding = "TENNIS_STATE"
 id = "a117d7b3846c4a39a27ee74c49574c99"
-
-# No cron triggers until this Worker has real work.

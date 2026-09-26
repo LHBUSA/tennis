@@ -193,6 +193,9 @@ export function parseWtaMatch(m, ctx = {}) {
     // its prefix. The bare time is used only when no phrase exists.
     schedule_note: state === 'scheduled' ? m.NotBefore || m.NotBeforeText || (m.NotBeforeISOTime && !FULL_ISO.test(m.NotBeforeISOTime) ? `Not before ${m.NotBeforeISOTime}` : null) || null : null,
     duration_s: hms(m.MatchTimeTotal),
+    // MatchTimeStamp is the start of play once a match has begun; for order-of-play entries it is a 23:59
+    // placeholder, so it is only trusted for started/finished matches.
+    started_at: (state === 'final' || state === 'in_progress') && FULL_ISO.test(m.MatchTimeStamp || '') && status !== 'walkover' ? m.MatchTimeStamp : null,
     source_updated_at: m.LastUpdated || null,
     source_text: m.ResultString || null,
     warnings

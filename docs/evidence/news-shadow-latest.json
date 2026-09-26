@@ -1,0 +1,1597 @@
+{
+  "generated_at": "2026-09-26T16:54:05.655Z",
+  "mode": "shadow-readonly",
+  "window_h": 240,
+  "scanned": 400,
+  "fresh": 32,
+  "candidates_total": 18,
+  "evaluated": 14,
+  "pass": 14,
+  "results": [
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 37,
+      "state": "below_threshold",
+      "headline": "Tang/Xu edge Kato/Perez in a deciding-set tiebreak at Singapore",
+      "dek": "Tang/Xu won 6-0, 3-6, [10-6] in 1 hour 11 minutes in the semifinal of Singapore.",
+      "words": 199,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Tang/Xu edge Kato/Perez in a deciding-set tiebreak at Singapore",
+        "dek": "Tang/Xu won 6-0, 3-6, [10-6] in 1 hour 11 minutes in the semifinal of Singapore.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Qianhui Tang and Yifan Xu beat Miyu Kato and Ellen Perez 6-0, 3-6, [10-6] in the semifinal of Singapore (WTA 500, indoor hard).",
+              "The match lasted 1 hour 11 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Tang/Xu won 63.2% of first-serve points (24 of 38), 29.4% behind the second serve (5 of 17), converted 4 of 6 break points.",
+              "Kato/Perez won 41.4% of first-serve points (12 of 29), 46.7% behind the second serve (7 of 15), converted 3 of 6 break points.",
+              "On return, Tang/Xu won 56.8% of points against serve (25 of 44); Kato/Perez won 47.3% (26 of 55).",
+              "Across the match Tang/Xu won 54 points to Kato/Perez's 45."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Tang/Xu won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-0, 3-6, [10-6]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "6739e5e7-7df7-5b2c-b969-6b8422ffdbf0",
+        "player_ids": [
+          "6739e5e7-7df7-5b2c-b969-6b8422ffdbf0",
+          "8c2ffa09-e414-5b1f-9cbb-dc96cb194d98",
+          "12584f86-7bd3-5953-98d0-8ceb16640ca0",
+          "55d590e3-2dc5-5775-bb31-47b74e3fe5c5"
+        ],
+        "match_id": "74d84d49-df9a-59ef-9ef7-af6e824f9093",
+        "tournament": {
+          "slug": "singapore",
+          "year": 2026,
+          "name": "Singapore"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "doubles_title",
+      "materiality": 36,
+      "state": "below_threshold",
+      "headline": "Falkowska/Smith win the Ankara 125 doubles title",
+      "dek": "Falkowska/Smith won 6-2, 7-6(2) in 1 hour 44 minutes in the final of Ankara 125.",
+      "words": 195,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Falkowska/Smith win the Ankara 125 doubles title",
+        "dek": "Falkowska/Smith won 6-2, 7-6(2) in 1 hour 44 minutes in the final of Ankara 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Weronika Falkowska and Alana Smith beat Dalila Jakupovic and Naima Karamoko 6-2, 7-6(2) in the final of Ankara 125 (WTA 125, hard).",
+              "The match lasted 1 hour 44 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Falkowska/Smith won 74.4% of first-serve points (32 of 43), 58.8% behind the second serve (10 of 17), converted 4 of 11 break points.",
+              "Jakupovic/Karamoko won 60.5% of first-serve points (23 of 38), 48.3% behind the second serve (14 of 29), converted 2 of 6 break points.",
+              "On return, Falkowska/Smith won 44.8% of points against serve (30 of 67); Jakupovic/Karamoko won 30% (18 of 60).",
+              "Across the match Falkowska/Smith won 72 points to Jakupovic/Karamoko's 55."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The final was the last match of Ankara 125 2026."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-2, 7-6(2)"
+        },
+        "story_type": "doubles_title",
+        "desk": "doubles",
+        "primary_player_id": "57f693ff-bd54-533f-a9f0-b2613663f103",
+        "player_ids": [
+          "57f693ff-bd54-533f-a9f0-b2613663f103",
+          "821b2dab-e905-5749-8029-d2e749227e93",
+          "20bb8289-2f68-5d33-b465-28f64463fda7",
+          "44de041e-4e10-5155-a737-626fcdf45b40"
+        ],
+        "match_id": "8041ab89-839f-5af3-8a2c-c6681ea26f1f",
+        "tournament": {
+          "slug": "ankara-125",
+          "year": 2026,
+          "name": "Ankara 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "doubles_title",
+      "materiality": 36,
+      "state": "below_threshold",
+      "headline": "Jorge/Jorge win the Porto 125 doubles title",
+      "dek": "Jorge/Jorge won 6-3, 3-6, [10-3] in 1 hour 32 minutes in the final of Porto 125.",
+      "words": 197,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Jorge/Jorge win the Porto 125 doubles title",
+        "dek": "Jorge/Jorge won 6-3, 3-6, [10-3] in 1 hour 32 minutes in the final of Porto 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Francisca Jorge and Matilde Jorge beat Ariana Arseneault and Raphaelle Lacasse 6-3, 3-6, [10-3] in the final of Porto 125 (WTA 125, hard).",
+              "The match lasted 1 hour 32 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Jorge/Jorge won 68.4% of first-serve points (26 of 38), 47.4% behind the second serve (9 of 19), converted 3 of 5 break points.",
+              "Arseneault/Lacasse won 60.5% of first-serve points (23 of 38), 36.8% behind the second serve (7 of 19), converted 3 of 4 break points.",
+              "On return, Jorge/Jorge won 47.4% of points against serve (27 of 57); Arseneault/Lacasse won 38.6% (22 of 57).",
+              "Across the match Jorge/Jorge won 62 points to Arseneault/Lacasse's 52."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The final was the last match of Porto 125 2026."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-3, 3-6, [10-3]"
+        },
+        "story_type": "doubles_title",
+        "desk": "doubles",
+        "primary_player_id": "bfc04058-e691-57e7-8361-714e139233fc",
+        "player_ids": [
+          "bfc04058-e691-57e7-8361-714e139233fc",
+          "d063d0e9-f288-529a-a5bc-10a856126a85",
+          "24ea587d-2fb9-56cf-aa65-35c45056824a",
+          "51bc31df-3f78-5e27-a098-3c7b14b7578b"
+        ],
+        "match_id": "2ae34baa-de9b-570d-b483-6af75d4ebb09",
+        "tournament": {
+          "slug": "porto-125",
+          "year": 2026,
+          "name": "Porto 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "comeback",
+      "materiality": 35,
+      "state": "below_threshold",
+      "headline": "Fernandez recovers from a set down to beat Chwalinska at Singapore",
+      "dek": "Fernandez won 1-6, 6-4, 6-2 in 2 hours 8 minutes in the semifinal of Singapore.",
+      "words": 232,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "recent_form",
+        "draw_path",
+        "h2h",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "path",
+        "form",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Fernandez recovers from a set down to beat Chwalinska at Singapore",
+        "dek": "Fernandez won 1-6, 6-4, 6-2 in 2 hours 8 minutes in the semifinal of Singapore.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Leylah Fernandez, ranked No. 31, beat Maja Chwalinska (No. 25) 1-6, 6-4, 6-2 in the semifinal of Singapore (WTA 500, indoor hard).",
+              "The match lasted 2 hours 8 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Fernandez won 63.8% of first-serve points (30 of 47), 44.4% behind the second serve (12 of 27), converted 5 of 8 break points.",
+              "Chwalinska won 63.3% of first-serve points (31 of 49), 33.3% behind the second serve (6 of 18), converted 5 of 8 break points.",
+              "On return, Fernandez won 44.8% of points against serve (30 of 67); Chwalinska won 43.2% (32 of 74).",
+              "Across the match Fernandez won 72 points to Chwalinska's 69."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "Fernandez lost the first set 1-6 and still won the match.",
+              "It was Fernandez's 4th win of the tournament."
+            ]
+          },
+          {
+            "id": "path",
+            "heading": "Path through the draw",
+            "paragraphs": [
+              "Round 1: beat Kyoka Okamura 6-2 6-3. Round 2: beat Alycia Parks 6-4 6-3. Quarterfinal: beat Mirra Andreeva 6-2 7-5."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "1-6, 6-4, 6-2"
+        },
+        "story_type": "comeback",
+        "desk": "wta",
+        "primary_player_id": "f2a28a32-9a7f-56bf-87cf-a4d64c18038f",
+        "player_ids": [
+          "f2a28a32-9a7f-56bf-87cf-a4d64c18038f",
+          "f8a8dfb3-5217-54cd-9b8c-eab5ffe3ff7e"
+        ],
+        "match_id": "6fcf1262-fd86-5539-b268-d6d35361e77b",
+        "tournament": {
+          "slug": "singapore",
+          "year": 2026,
+          "name": "Singapore"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 28,
+      "state": "below_threshold",
+      "headline": "Falkowska/Smith edge Kostovic/Micic in a deciding-set tiebreak at Ankara 125",
+      "dek": "Falkowska/Smith won 5-7, 6-4, [10-8] in 1 hour 35 minutes in the semifinal of Ankara 125.",
+      "words": 201,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Falkowska/Smith edge Kostovic/Micic in a deciding-set tiebreak at Ankara 125",
+        "dek": "Falkowska/Smith won 5-7, 6-4, [10-8] in 1 hour 35 minutes in the semifinal of Ankara 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Weronika Falkowska and Alana Smith beat Teodora Kostovic and Elena Micic 5-7, 6-4, [10-8] in the semifinal of Ankara 125 (WTA 125, hard).",
+              "The match lasted 1 hour 35 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Falkowska/Smith won 67.4% of first-serve points (31 of 46), 51.9% behind the second serve (14 of 27), converted 3 of 6 break points.",
+              "Kostovic/Micic won 72.7% of first-serve points (32 of 44), 45.8% behind the second serve (11 of 24), converted 3 of 11 break points.",
+              "On return, Falkowska/Smith won 36.8% of points against serve (25 of 68); Kostovic/Micic won 38.4% (28 of 73).",
+              "Across the match Falkowska/Smith won 70 points to Kostovic/Micic's 71."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Falkowska/Smith won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "5-7, 6-4, [10-8]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "57f693ff-bd54-533f-a9f0-b2613663f103",
+        "player_ids": [
+          "57f693ff-bd54-533f-a9f0-b2613663f103",
+          "821b2dab-e905-5749-8029-d2e749227e93",
+          "20d988a4-b469-5c92-9092-238b79a421d9",
+          "d645243b-cb31-5734-a3e0-c8794c908870"
+        ],
+        "match_id": "3f556be1-e538-5a72-a15f-026f31e1f7f9",
+        "tournament": {
+          "slug": "ankara-125",
+          "year": 2026,
+          "name": "Ankara 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 28,
+      "state": "below_threshold",
+      "headline": "Arseneault/Lacasse edge Bains/Yamalapalli in a deciding-set tiebreak at Porto 125",
+      "dek": "Arseneault/Lacasse won 6-3, 6-7(4), [10-6] in 1 hour 44 minutes in the semifinal of Porto 125.",
+      "words": 201,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Arseneault/Lacasse edge Bains/Yamalapalli in a deciding-set tiebreak at Porto 125",
+        "dek": "Arseneault/Lacasse won 6-3, 6-7(4), [10-6] in 1 hour 44 minutes in the semifinal of Porto 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Ariana Arseneault and Raphaelle Lacasse beat Naiktha Bains and Sahaja  Yamalapalli 6-3, 6-7(4), [10-6] in the semifinal of Porto 125 (WTA 125, hard).",
+              "The match lasted 1 hour 44 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Arseneault/Lacasse won 61.2% of first-serve points (30 of 49), 54.2% behind the second serve (13 of 24), converted 5 of 8 break points.",
+              "Bains/Yamalapalli won 55.6% of first-serve points (30 of 54), 31.3% behind the second serve (5 of 16), converted 4 of 8 break points.",
+              "On return, Arseneault/Lacasse won 50% of points against serve (35 of 70); Bains/Yamalapalli won 41.1% (30 of 73).",
+              "Across the match Arseneault/Lacasse won 78 points to Bains/Yamalapalli's 65."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Arseneault/Lacasse won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-3, 6-7(4), [10-6]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "24ea587d-2fb9-56cf-aa65-35c45056824a",
+        "player_ids": [
+          "24ea587d-2fb9-56cf-aa65-35c45056824a",
+          "51bc31df-3f78-5e27-a098-3c7b14b7578b",
+          "83afc196-465f-59fd-9518-ff1a343ed2ba",
+          "f12d899f-91c3-508c-8a52-d1cfbb5af696"
+        ],
+        "match_id": "e429f178-4e74-59cf-b3fa-5eb3ec52fd02",
+        "tournament": {
+          "slug": "porto-125",
+          "year": 2026,
+          "name": "Porto 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 24,
+      "state": "below_threshold",
+      "headline": "Jakupovic/Karamoko edge Riera/Monnet in a deciding-set tiebreak at Ankara 125",
+      "dek": "Jakupovic/Karamoko won 6-4, 2-6, [10-8] in 1 hour 29 minutes in the quarterfinal of Ankara 125.",
+      "words": 201,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Jakupovic/Karamoko edge Riera/Monnet in a deciding-set tiebreak at Ankara 125",
+        "dek": "Jakupovic/Karamoko won 6-4, 2-6, [10-8] in 1 hour 29 minutes in the quarterfinal of Ankara 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Dalila Jakupovic and Naima Karamoko beat Julia Riera and Carole Monnet 6-4, 2-6, [10-8] in the quarterfinal of Ankara 125 (WTA 125, hard).",
+              "The match lasted 1 hour 29 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Jakupovic/Karamoko won 64.9% of first-serve points (24 of 37), 33.3% behind the second serve (7 of 21), converted 4 of 13 break points.",
+              "Riera/Monnet won 54.1% of first-serve points (20 of 37), 48.3% behind the second serve (14 of 29), converted 5 of 11 break points.",
+              "On return, Jakupovic/Karamoko won 48.5% of points against serve (32 of 66); Riera/Monnet won 46.6% (27 of 58).",
+              "Across the match Jakupovic/Karamoko won 63 points to Riera/Monnet's 61."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Jakupovic/Karamoko won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-4, 2-6, [10-8]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "20bb8289-2f68-5d33-b465-28f64463fda7",
+        "player_ids": [
+          "20bb8289-2f68-5d33-b465-28f64463fda7",
+          "44de041e-4e10-5155-a737-626fcdf45b40",
+          "478d1ecd-5a07-5400-a075-e558455a045a",
+          "567a43c5-b4d4-59c3-8f6e-6db3785c1e3e"
+        ],
+        "match_id": "94a939de-83f4-5efc-9576-87e1ef3f39ae",
+        "tournament": {
+          "slug": "ankara-125",
+          "year": 2026,
+          "name": "Ankara 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 24,
+      "state": "below_threshold",
+      "headline": "Kubka/Haverlag edge Daniel/Crawley in a deciding-set tiebreak at Ankara 125",
+      "dek": "Kubka/Haverlag won 5-7, 6-2, [10-5] in 1 hour 35 minutes in the quarterfinal of Ankara 125.",
+      "words": 201,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Kubka/Haverlag edge Daniel/Crawley in a deciding-set tiebreak at Ankara 125",
+        "dek": "Kubka/Haverlag won 5-7, 6-2, [10-5] in 1 hour 35 minutes in the quarterfinal of Ankara 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Martyna Kubka and Isabelle Haverlag beat Jaeda Daniel and Fiona Crawley 5-7, 6-2, [10-5] in the quarterfinal of Ankara 125 (WTA 125, hard).",
+              "The match lasted 1 hour 35 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Kubka/Haverlag won 65.1% of first-serve points (28 of 43), 32% behind the second serve (8 of 25), converted 5 of 6 break points.",
+              "Daniel/Crawley won 51.1% of first-serve points (24 of 47), 47.8% behind the second serve (11 of 23), converted 4 of 14 break points.",
+              "On return, Kubka/Haverlag won 50% of points against serve (35 of 70); Daniel/Crawley won 47.1% (32 of 68).",
+              "Across the match Kubka/Haverlag won 71 points to Daniel/Crawley's 67."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Kubka/Haverlag won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "5-7, 6-2, [10-5]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "4f938066-9e66-5f56-bb76-5db5aa35e502",
+        "player_ids": [
+          "4f938066-9e66-5f56-bb76-5db5aa35e502",
+          "6356aeda-c70c-5b1d-8149-6645e64628e3",
+          "317db732-4144-55aa-973c-5a3977b12888",
+          "d7f707df-e2c2-5768-bc1a-1d0bc82beef3"
+        ],
+        "match_id": "7f1fb127-aeb9-52be-beca-932b7ae6167f",
+        "tournament": {
+          "slug": "ankara-125",
+          "year": 2026,
+          "name": "Ankara 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 24,
+      "state": "below_threshold",
+      "headline": "Gorgodze/Papamichail edge Herrero Linana/Fossa Huergo in a deciding-set tiebreak at Tolentino 125",
+      "dek": "Gorgodze/Papamichail won 4-6, 7-6(5), [10-8] in 1 hour 44 minutes in the quarterfinal of Tolentino 125.",
+      "words": 211,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Gorgodze/Papamichail edge Herrero Linana/Fossa Huergo in a deciding-set tiebreak at Tolentino 125",
+        "dek": "Gorgodze/Papamichail won 4-6, 7-6(5), [10-8] in 1 hour 44 minutes in the quarterfinal of Tolentino 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Ekaterine Gorgodze and Despina Papamichail beat Alicia Herrero Linana and Nicole Fossa Huergo 4-6, 7-6(5), [10-8] in the quarterfinal of Tolentino 125 (WTA 125, clay).",
+              "The match lasted 1 hour 44 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Gorgodze/Papamichail won 64.5% of first-serve points (40 of 62), 15.4% behind the second serve (2 of 13), converted 3 of 8 break points.",
+              "Herrero Linana/Fossa Huergo won 58.3% of first-serve points (35 of 60), 47.8% behind the second serve (11 of 23), converted 4 of 7 break points.",
+              "On return, Gorgodze/Papamichail won 44.6% of points against serve (37 of 83); Herrero Linana/Fossa Huergo won 44% (33 of 75).",
+              "Across the match Gorgodze/Papamichail won 79 points to Herrero Linana/Fossa Huergo's 79."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Gorgodze/Papamichail won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "4-6, 7-6(5), [10-8]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "42899a93-ac8f-5aa3-8740-04631ad9f85b",
+        "player_ids": [
+          "42899a93-ac8f-5aa3-8740-04631ad9f85b",
+          "d00770b5-1e6d-5da0-8f22-ec510ed89cbe",
+          "39cf3061-148d-514a-b464-d4d0c60c5eea",
+          "87a9bd28-14d7-55c7-81c8-ddc80d9ae94d"
+        ],
+        "match_id": "298f7b31-c79a-5839-9d08-7bdc8c4f4f62",
+        "tournament": {
+          "slug": "tolentino-125",
+          "year": 2026,
+          "name": "Tolentino 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "deciding_tiebreak",
+      "materiality": 24,
+      "state": "below_threshold",
+      "headline": "Chiesa/Tubello edge Ciric Bagaric/Pigossi in a deciding-set tiebreak at Tolentino 125",
+      "dek": "Chiesa/Tubello won 6-3, 2-6, [10-6] in 1 hour 16 minutes in the quarterfinal of Tolentino 125.",
+      "words": 206,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "path",
+          "reason": "no earlier rounds stored for this tournament"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Chiesa/Tubello edge Ciric Bagaric/Pigossi in a deciding-set tiebreak at Tolentino 125",
+        "dek": "Chiesa/Tubello won 6-3, 2-6, [10-6] in 1 hour 16 minutes in the quarterfinal of Tolentino 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Enola Chiesa and Alice Tubello beat Lucija Ciric Bagaric and Laura Pigossi 6-3, 2-6, [10-6] in the quarterfinal of Tolentino 125 (WTA 125, clay).",
+              "The match lasted 1 hour 16 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Chiesa/Tubello won 54.3% of first-serve points (25 of 46), 26.7% behind the second serve (4 of 15), converted 4 of 5 break points.",
+              "Ciric Bagaric/Pigossi won 62.5% of first-serve points (25 of 40), 33.3% behind the second serve (6 of 18), converted 5 of 8 break points.",
+              "On return, Chiesa/Tubello won 46.6% of points against serve (27 of 58); Ciric Bagaric/Pigossi won 52.5% (32 of 61).",
+              "Across the match Chiesa/Tubello won 56 points to Ciric Bagaric/Pigossi's 63."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "The deciding set went to a tiebreak, and Chiesa/Tubello won it."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "6-3, 2-6, [10-6]"
+        },
+        "story_type": "deciding_tiebreak",
+        "desk": "doubles",
+        "primary_player_id": "769744e7-bbbf-5a2a-8d29-3c50f08eb410",
+        "player_ids": [
+          "769744e7-bbbf-5a2a-8d29-3c50f08eb410",
+          "ae756816-cb6b-5d1e-9e9b-d3941b7d6f8a",
+          "cee89f16-8026-5d32-bccd-ef5a9069d30a",
+          "f20a96ae-b1a0-5fc4-9e79-9f734a752669"
+        ],
+        "match_id": "d56bbb66-f0f0-5eb3-a225-f74fe8bb8106",
+        "tournament": {
+          "slug": "tolentino-125",
+          "year": 2026,
+          "name": "Tolentino 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "comeback",
+      "materiality": 22,
+      "state": "below_threshold",
+      "headline": "Dilek recovers from a set down to beat Gasanova at Ankara 125",
+      "dek": "Dilek won 4-6, 6-2, 7-5 in 2 hours 53 minutes in the quarterfinal of Ankara 125.",
+      "words": 229,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "recent_form",
+        "draw_path",
+        "h2h",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "path",
+        "form",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Dilek recovers from a set down to beat Gasanova at Ankara 125",
+        "dek": "Dilek won 4-6, 6-2, 7-5 in 2 hours 53 minutes in the quarterfinal of Ankara 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Deniz Dilek, ranked No. 786, beat Anastasia Gasanova (No. 195) 4-6, 6-2, 7-5 in the quarterfinal of Ankara 125 (WTA 125, hard).",
+              "The match lasted 2 hours 53 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Dilek won 58.5% of first-serve points (38 of 65), 47.5% behind the second serve (28 of 59), converted 7 of 11 break points.",
+              "Gasanova won 55.2% of first-serve points (32 of 58), 42.4% behind the second serve (14 of 33), converted 5 of 14 break points.",
+              "On return, Dilek won 49.5% of points against serve (45 of 91); Gasanova won 46.8% (58 of 124).",
+              "Across the match Dilek won 111 points to Gasanova's 104."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "Dilek lost the first set 4-6 and still won the match.",
+              "It was Dilek's 3rd win of the tournament."
+            ]
+          },
+          {
+            "id": "path",
+            "heading": "Path through the draw",
+            "paragraphs": [
+              "Round 1: beat Solana Sierra 6-3 6-3. Round 2: beat Cagla Buyukakcay 6-1 2-6 6-2."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "4-6, 6-2, 7-5"
+        },
+        "story_type": "comeback",
+        "desk": "wta",
+        "primary_player_id": "94882ff4-580a-5635-aade-3689195f6e9d",
+        "player_ids": [
+          "94882ff4-580a-5635-aade-3689195f6e9d",
+          "1cde6f31-ad97-579a-8bc5-80f3dd0f7ea2"
+        ],
+        "match_id": "d586c794-b282-5493-ad16-5778116abe69",
+        "tournament": {
+          "slug": "ankara-125",
+          "year": 2026,
+          "name": "Ankara 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "comeback",
+      "materiality": 22,
+      "state": "below_threshold",
+      "headline": "Pohankova recovers from a set down to beat Swan at Porto 125",
+      "dek": "Pohankova won 3-6, 7-5, 6-1 in 2 hours 19 minutes in the quarterfinal of Porto 125.",
+      "words": 228,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "draw_path",
+        "h2h",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "path",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "form",
+          "reason": "no earlier results stored"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Pohankova recovers from a set down to beat Swan at Porto 125",
+        "dek": "Pohankova won 3-6, 7-5, 6-1 in 2 hours 19 minutes in the quarterfinal of Porto 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Mia Pohankova, ranked No. 212, beat Katie Swan (No. 208) 3-6, 7-5, 6-1 in the quarterfinal of Porto 125 (WTA 125, hard).",
+              "The match lasted 2 hours 19 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Pohankova won 71.9% of first-serve points (41 of 57), 43.6% behind the second serve (17 of 39), converted 6 of 9 break points.",
+              "Swan won 58% of first-serve points (29 of 50), 48.6% behind the second serve (17 of 35), converted 4 of 12 break points.",
+              "On return, Pohankova won 45.9% of points against serve (39 of 85); Swan won 39.6% (38 of 96).",
+              "Across the match Pohankova won 97 points to Swan's 84."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "Pohankova lost the first set 3-6 and still won the match.",
+              "It was Pohankova's 3rd win of the tournament."
+            ]
+          },
+          {
+            "id": "path",
+            "heading": "Path through the draw",
+            "paragraphs": [
+              "Round 1: beat Francisca Jorge 6-2 6-1. Round 2: beat Veronika Podrez 6-3 6-4."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "3-6, 7-5, 6-1"
+        },
+        "story_type": "comeback",
+        "desk": "wta",
+        "primary_player_id": "5774625f-1978-534a-a1b9-e82a11d35a40",
+        "player_ids": [
+          "5774625f-1978-534a-a1b9-e82a11d35a40",
+          "ad8aefaa-746b-5c09-a703-4f59b997a7c0"
+        ],
+        "match_id": "e76f71bf-6323-5689-b834-482a75d77d01",
+        "tournament": {
+          "slug": "porto-125",
+          "year": 2026,
+          "name": "Porto 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "comeback",
+      "materiality": 14,
+      "state": "below_threshold",
+      "headline": "Grabher recovers from a set down to beat Tubello at Tolentino 125",
+      "dek": "Grabher won 3-6, 6-3, 6-4 in 2 hours 13 minutes in the round 2 of Tolentino 125.",
+      "words": 224,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "recent_form",
+        "draw_path",
+        "h2h",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "path",
+        "form",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Grabher recovers from a set down to beat Tubello at Tolentino 125",
+        "dek": "Grabher won 3-6, 6-3, 6-4 in 2 hours 13 minutes in the round 2 of Tolentino 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Julia Grabher, ranked No. 111, beat Alice Tubello (No. 230) 3-6, 6-3, 6-4 in the round 2 of Tolentino 125 (WTA 125, clay).",
+              "The match lasted 2 hours 13 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Grabher won 64.8% of first-serve points (46 of 71), 42.9% behind the second serve (12 of 28), converted 4 of 7 break points.",
+              "Tubello won 67.2% of first-serve points (41 of 61), 52.6% behind the second serve (10 of 19), converted 3 of 11 break points.",
+              "On return, Grabher won 36.3% of points against serve (29 of 80); Tubello won 41.4% (41 of 99).",
+              "Across the match Grabher won 87 points to Tubello's 92."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "Grabher lost the first set 3-6 and still won the match.",
+              "It was Grabher's 2nd win of the tournament."
+            ]
+          },
+          {
+            "id": "path",
+            "heading": "Path through the draw",
+            "paragraphs": [
+              "Round 1: beat Jennifer Ruggeri 4-6 7-5 6-3."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "3-6, 6-3, 6-4"
+        },
+        "story_type": "comeback",
+        "desk": "wta",
+        "primary_player_id": "4dde2f5a-d546-5b18-b6aa-7b9f3b8168ef",
+        "player_ids": [
+          "4dde2f5a-d546-5b18-b6aa-7b9f3b8168ef",
+          "ae756816-cb6b-5d1e-9e9b-d3941b7d6f8a"
+        ],
+        "match_id": "f540332d-7459-55a6-9a51-70a3dfb31d59",
+        "tournament": {
+          "slug": "tolentino-125",
+          "year": 2026,
+          "name": "Tolentino 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    },
+    {
+      "kind": "comeback",
+      "materiality": 14,
+      "state": "below_threshold",
+      "headline": "Selekhmeteva recovers from a set down to beat De Stefano at Tolentino 125",
+      "dek": "Selekhmeteva won 5-7, 6-1, 6-2 in 2 hours 11 minutes in the round 2 of Tolentino 125.",
+      "words": 229,
+      "families": [
+        "version",
+        "built_at",
+        "event",
+        "provenance",
+        "match",
+        "participants",
+        "tournament",
+        "rankings_note",
+        "stats",
+        "recent_form",
+        "draw_path",
+        "h2h",
+        "canonical_signature"
+      ],
+      "modules": [
+        "scoreboard",
+        "path",
+        "form",
+        "charts",
+        "method"
+      ],
+      "charts": [
+        "serve_comparison",
+        "return_comparison",
+        "serve_counts",
+        "match_flow"
+      ],
+      "omitted": [
+        {
+          "id": "dna_comparison",
+          "reason": "no pre-match DNA snapshot with at least two medium/high-confidence shared metrics"
+        },
+        {
+          "id": "h2h",
+          "reason": "no earlier meeting in our archive"
+        },
+        {
+          "id": "next",
+          "reason": "the next match is not in the draw yet"
+        }
+      ],
+      "gates": "PASS",
+      "article": {
+        "headline": "Selekhmeteva recovers from a set down to beat De Stefano at Tolentino 125",
+        "dek": "Selekhmeteva won 5-7, 6-1, 6-2 in 2 hours 11 minutes in the round 2 of Tolentino 125.",
+        "sections": [
+          {
+            "id": "what_happened",
+            "heading": "What happened",
+            "paragraphs": [
+              "Oksana Selekhmeteva, ranked No. 101, beat Samira De Stefano (No. 193) 5-7, 6-1, 6-2 in the round 2 of Tolentino 125 (WTA 125, clay).",
+              "The match lasted 2 hours 11 minutes."
+            ]
+          },
+          {
+            "id": "match_data",
+            "heading": "Match data",
+            "paragraphs": [
+              "Selekhmeteva won 63.8% of first-serve points (37 of 58), 38.9% behind the second serve (14 of 36), converted 9 of 14 break points.",
+              "De Stefano won 46.4% of first-serve points (26 of 56), 37.5% behind the second serve (12 of 32), converted 5 of 14 break points.",
+              "On return, Selekhmeteva won 56.8% of points against serve (50 of 88); De Stefano won 45.7% (43 of 94).",
+              "Across the match Selekhmeteva won 101 points to De Stefano's 81."
+            ]
+          },
+          {
+            "id": "why_it_mattered",
+            "heading": "Why it mattered",
+            "paragraphs": [
+              "Selekhmeteva lost the first set 5-7 and still won the match.",
+              "It was Selekhmeteva's 2nd win of the tournament."
+            ]
+          },
+          {
+            "id": "path",
+            "heading": "Path through the draw",
+            "paragraphs": [
+              "Round 1: beat Federica Urgesi 7-5 0-6 7-5."
+            ]
+          },
+          {
+            "id": "method",
+            "heading": "Evidence & method",
+            "paragraphs": [
+              "Result, set scores and match statistics come from the official WTA feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred."
+            ]
+          }
+        ],
+        "key_stat": {
+          "label": "Score",
+          "value": "5-7, 6-1, 6-2"
+        },
+        "story_type": "comeback",
+        "desk": "wta",
+        "primary_player_id": "5d4b10ad-afb9-54f6-9407-99beb01d467c",
+        "player_ids": [
+          "5d4b10ad-afb9-54f6-9407-99beb01d467c",
+          "6fbbf337-1285-5ebd-b791-c5fbebb5afcb"
+        ],
+        "match_id": "7ea0b011-a09d-5073-9f70-2ff64a0b2498",
+        "tournament": {
+          "slug": "tolentino-125",
+          "year": 2026,
+          "name": "Tolentino 125"
+        },
+        "compose_version": "tennis-compose/1.0.0"
+      }
+    }
+  ]
+}

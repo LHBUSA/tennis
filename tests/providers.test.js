@@ -210,3 +210,11 @@ test('Australian Open day results: men only, full tiebreak points, retirement, e
     assert.equal(n.canonical, true, `${r.provider_match_id}: ${n.problems.join()}`);
   }
 });
+
+test('WTA start time: trusted only once play has started (order-of-play 23:59 placeholder ignored)', () => {
+  const base = { EventID: '1', EventYear: 2026, MatchID: 'LS001', DrawLevelType: 'M', DrawMatchType: 'S', RoundID: '1', PlayerIDA: '1', PlayerIDB: '2', PlayerNameFirstA: 'A', PlayerNameLastA: 'A', PlayerNameFirstB: 'B', PlayerNameLastB: 'B', ScoreSys: '1', MatchTimeStamp: '2026-09-19T02:47:24.373+00:00', MatchTimeTotal: '01:19:07' };
+  const done = wta.parseWtaMatch({ ...base, MatchState: 'F', Winner: '2', ScoreSet1A: '6', ScoreSet1B: '2', ScoreSet2A: '6', ScoreSet2B: '1' }, {});
+  assert.equal(done.started_at, '2026-09-19T02:47:24.373+00:00');
+  const oop = wta.parseWtaMatch({ ...base, MatchState: 'U', MatchTimeStamp: '2026-09-20T23:59:00+00:00' }, {});
+  assert.equal(oop.started_at, null);
+});
