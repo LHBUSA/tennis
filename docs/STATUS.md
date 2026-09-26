@@ -1,4 +1,4 @@
-# Status — 2026-09-26 21:00 UTC (production snapshot)
+# Status — 2026-09-26 22:30 UTC (production snapshot)
 
 **FULL OWNER BAR: NOT YET MET.** Live and real: the Tennis frontend, the WTA core product, Australian Open
 2026 men's coverage with genuine point-by-point, Wimbledon archive (degraded source) and Roland-Garros
@@ -16,7 +16,7 @@ Current versions and rollback targets: `docs/RELEASE.md` → *Current production
 | `tennis-api` | public read API; tour-scoped DNA with the ATP publication gate; `/v1/news` published-only |
 | `tennis-ingest` | cron */2; lane scheduler: `ao_current` every tick + one rotating lane (rank_history, wimbledon_archive, rolandgarros, wta_calendar) with per-lane backoff. Backfill cursors advance only on a proven-absent edition, never on a block |
 | `tennis-live` | cron every minute; ~18 s observed-live polling |
-| `tennis-news` | cron */2; **SHADOW** (`NEWS_PUBLISH_ENABLED=false`, `OPENAI_API_KEY` not set). Canary PASS 11/11: 0 published, held stories 404 + noindex + not in sitemap |
+| `tennis-news` | cron */2; **SHADOW** (`NEWS_PUBLISH_ENABLED=false`). `OPENAI_API_KEY` set; model canary PASS (3/3 gpt-5.6-sol, 0 gate failures, 84 numbers checked on one story). Publishing switch awaits owner action. Canary PASS 11/11: 0 published, held stories 404 + noindex + not in sitemap |
 | Supabase (tkmln) | migrations applied with ledger rows |
 
 ## Women (WTA API)
@@ -27,6 +27,9 @@ WTA singles + doubles rankings (weekly history from 2026-07-27, backfilling). Te
 94/100, doubles 86/100.
 
 ## Men
+
+Product: `/men` landing, Men + News in primary nav, homepage men/women modules, players ALL/MEN/WOMEN, schedule ALL/MEN/WOMEN/MIXED, tournament event tabs (+ qualifying), rankings hub (WTA available / ATP not available), men's PBEcast replays on /men, /pbecast and the homepage.
+
 
 - **Australian Open 2026 — COMPLETE.** 333 canonical matches: MS main 127/127, qualifying 112/112,
   MD 63/63, XD 31/31; 1 walkover, 10 retirements, 0 unknown rounds. 332 with statistics (the walkover has
