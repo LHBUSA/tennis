@@ -35,9 +35,10 @@ async function latestAsOf(store) {
   return (await store.select('tennis_dna_snapshots', 'select=as_of&order=as_of.desc&limit=1'))[0]?.as_of || null;
 }
 
-/** Population for percentiles: same as_of + surface, metric confidence medium/high. */
-async function population(store, asOf, surface) {
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}`);
+const TOUR_OF = { F: 'WTA', M: 'ATP' };
+/** Population for percentiles: same as_of + surface + TOUR (ATP and WTA are never pooled), confidence medium/high. */
+async function population(store, asOf, surface, gender) {
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}`);
   const pop = {};
   for (const [k] of Object.entries(DEFINITIONS)) pop[k] = rows.map((r) => r.metrics?.[k]).filter((m) => m && m.value != null && ['medium', 'high'].includes(m.confidence)).map((m) => m.value).sort((a, b) => a - b);
   return { pop, players: rows.length };
@@ -58,13 +59,14 @@ async function storedDna(store, pid, surface = 'all') {
 async function dnaWithPercentiles(store, pid, surface = 'all') {
   const snap = await storedDna(store, pid, surface);
   if (!snap) return null;
-  const { pop, players } = await population(store, snap.as_of, surface);
+  const gender = (await store.select('tennis_players', `select=gender&pbe_player_id=eq.${pid}`))[0]?.gender === 'M' ? 'M' : 'F';
+  const { pop, players } = await population(store, snap.as_of, surface, gender);
   const dims = DNA_DIMENSIONS.map(([k, label]) => {
     const m = snap.metrics[k];
     const usable = m && m.value != null && ['medium', 'high'].includes(m.confidence);
     return { key: k, label, value: m?.value ?? null, confidence: m?.confidence ?? 'insufficient', sample_matches: m?.sample_matches ?? 0, percentile: usable ? percentile(pop[k], m.value, k) : null, population: pop[k].length };
   });
-  return { as_of: snap.as_of, surface, definition_version: snap.definition_version, metrics: snap.metrics, dimensions: dims, population_players: players, matches_considered: snap.provenance?.matches_considered ?? null, percentile_basis: `players with a stored v${snap.definition_version} snapshot on ${snap.as_of} (${surface}) whose metric confidence is medium or high` };
+  return { as_of: snap.as_of, surface, definition_version: snap.definition_version, metrics: snap.metrics, dimensions: dims, population_players: players, matches_considered: snap.provenance?.matches_considered ?? null, tour: TOUR_OF[gender], percentile_basis: `${TOUR_OF[gender]} singles players with a stored v${snap.definition_version} snapshot on ${snap.as_of} (${surface}) whose metric confidence is medium or high` };
 }
 
 async function rankAt(store, pid, date) {
@@ -165,12 +167,13 @@ async function dnaLeaders(store, url) {
   const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
   const asOf = await latestAsOf(store);
   if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players(pbe_player_id,slug,full_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}`);
+  const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}`);
   const list = rows.map((r) => ({ player: shapePlayer(r.tennis_players), m: r.metrics?.[metric] })).filter((x) => x.m && x.m.value != null && ['medium', 'high'].includes(x.m.confidence));
   list.sort((a, b) => (LOWER_IS_BETTER.has(metric) ? a.m.value - b.m.value : b.m.value - a.m.value));
   const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);
-  return ok({ metric, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: list.length, rows: list.slice(0, limit).map((x, i) => ({ rank: i + 1, player: x.player, value: x.m.value, numerator: x.m.numerator, denominator: x.m.denominator, sample_matches: x.m.sample_matches, confidence: x.m.confidence })) },
-    { rows: [], source: ['pbe_derived'], updated: `${asOf}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: 'leaders among players whose metric confidence is medium or high (small samples excluded)' });
+  return ok({ metric, tour, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: list.length, rows: list.slice(0, limit).map((x, i) => ({ rank: i + 1, player: x.player, value: x.m.value, numerator: x.m.numerator, denominator: x.m.denominator, sample_matches: x.m.sample_matches, confidence: x.m.confidence })) },
+    { rows: [], source: ['pbe_derived'], updated: `${asOf}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: `${tour.toUpperCase()} singles leaders among players whose metric confidence is medium or high (small samples excluded; ATP and WTA are separate populations)` });
 }
 
 // ---- player profile (form, surface record, opponents, current tournament) ------------------------------

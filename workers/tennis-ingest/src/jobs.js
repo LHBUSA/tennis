@@ -148,6 +148,7 @@ export async function ausopenPointStep(ctx, batch = 3) {
     const r = await fetchRun(ctx, slams.ausopenMatchCentre, { matchId: code });
     if (r.state !== 'PASS') { out.push({ match: code, state: r.state, error: r.error }); continue; }
     const mc = r.records[0];
+    if (!mc) { out.push({ match: code, state: 'EMPTY' }); continue; }
     const [m] = await ctx.store.select('tennis_matches', `select=match_id,format_key,status,tennis_sets(set_no,games_a,games_b,winner_side),tennis_match_participants(side,tennis_participants(tennis_participant_members(tennis_players(last_name,full_name))))&match_id=eq.${x.match_id}`);
     const lastNames = {};
     for (const p of m.tennis_match_participants) lastNames[p.side] = p.tennis_participants.tennis_participant_members.map((mm) => normalizeName(mm.tennis_players.last_name || mm.tennis_players.full_name.split(' ').slice(-1)[0]));
@@ -157,7 +158,19 @@ export async function ausopenPointStep(ctx, batch = 3) {
       return hits.length === 1 ? hits[0] : null;
     };
     const finalSets = (m.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ A: t.games_a, B: t.games_b, winner: t.winner_side }));
+    // match statistics from the same payload — only when teams[0]/teams[1] provably ARE our sides A/B by name
+    let statsState = 'no_stats';
     try {
+      const teamSide = (t) => { const hits = new Set((t?.players || []).map((pl) => nameSide(pl.last_name || pl.full_name || ''))); return hits.size === 1 ? [...hits][0] : null; };
+      const rec = m.status === 'completed' || m.status === 'retired' ? slams.parseAusopenStats(mc) : null;
+      if (rec && teamSide(mc.teams?.[0]) === 'A' && teamSide(mc.teams?.[1]) === 'B') statsState = await writeMatchStats(ctx.store, x.match_id, { ...rec, provider_match_id: x.external_id }, { captureId: r.capture?.capture_id || null });
+      else if (rec) statsState = 'side_mapping_unproven';
+    } catch (e) {
+      statsState = 'held';
+      await hold(ctx.store, [{ provider: 'ausopen', entity_type: 'match_stats', external_id: x.external_id, problems: [String(e.message).slice(0, 300)], payload: null, capture_id: r.capture?.capture_id || null }]);
+    }
+    try {
+      if (!mc.commentary?.length) { out.push({ match: code, state: 'PASS', points: 0, stats: statsState }); continue; }
       const evs = aoPointEvents(mc.commentary, { formatKey: m.format_key, sideOfTeam: (t) => (t === 1 ? 'A' : t === 2 ? 'B' : null), nameSide, finalSets: m.status === 'completed' ? finalSets : null });
       const rows = [];
       for (let i = 0; i < evs.length; i += 1) {
@@ -165,10 +178,10 @@ export async function ausopenPointStep(ctx, batch = 3) {
         rows.push({ event_id: await eventId(x.match_id, 'point_event', e.source_event_id), match_id: x.match_id, contract: CONTRACT, quality: 'point_event', event_sequence: i, event_type: e.event_type, source: 'ausopen', source_event_id: e.source_event_id, observed_at: new Date().toISOString(), event_at: e.event_at, set_number: e.set_number, game_number: e.game_number, server_side: e.server_side, winner_side: e.winner_side, derivation: null, event_detail: e.event_detail, state: e.state, raw_source_ref: r.capture?.capture_id || null });
       }
       await ctx.store.upsert('tennis_match_events', rows, { onConflict: 'event_id', ignore: true, chunk: 200 });
-      out.push({ match: code, state: 'PASS', points: rows.length });
+      out.push({ match: code, state: 'PASS', points: rows.length, stats: statsState });
     } catch (e) {
       await hold(ctx.store, [{ provider: 'ausopen', entity_type: 'point_feed', external_id: x.external_id, problems: [String(e.message).slice(0, 300)], payload: null, capture_id: r.capture?.capture_id || null }]);
-      out.push({ match: code, state: 'HELD', error: String(e.message).slice(0, 120) });
+      out.push({ match: code, state: 'HELD', error: String(e.message).slice(0, 120), stats: statsState });
     }
   }
   await ctx.kv.put('bf:aopbp', JSON.stringify({ offset: st.offset + ext.length }));

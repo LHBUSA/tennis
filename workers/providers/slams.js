@@ -200,8 +200,51 @@ export const ausopenMatchCentre = {
   parser_version: PARSER,
   cadence: { class: 'on_final' },
   request: ({ matchId }) => ({ url: `https://prod-scores-api.ausopen.com/match-centre/${matchId}` }),
-  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['match_id', 'teams', 'commentary']) : ['not_json']; },
-  parse: (body) => { const j = safeJson(body); return j.commentary?.length ? [j] : []; }
+  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['match_id', 'teams']) : ['not_json']; },
+  // keep every payload: statistics can exist without commentary; point events are built only from commentary
+  parse: (body) => { const j = safeJson(body); return j?.match_id ? [j] : []; }
 };
 
 export const ADAPTERS = [wimbledonDraw, ausopenDay, ausopenMatches, ausopenMatchCentre];
+
+// ---- AO match-centre statistics -> canonical stat keys ------------------------------------------------------
+// Every value is a source count ("56/83" = n/d); nothing is derived except the opponent's break points
+// faced/saved, which are exactly the other side's "Break points won" n/d. A set whose second-serve
+// denominator disagrees with service points - first serves in is inconsistent: the whole match is rejected.
+const aoInt = (v) => (v === undefined || v === null || v === '' ? null : Number.isFinite(Number(v)) ? Number(v) : null);
+const aoFrac = (x) => { const m = /^(\d+)\/(\d+)$/.exec(String(x?.secondary || '')); return m ? { n: Number(m[1]), d: Number(m[2]) } : null; };
+
+function aoSetStats(stats) {
+  const by = new Map(stats.map((s) => [String(s.name).toLowerCase(), s]));
+  const side = (k, o) => {
+    const g = (name) => by.get(name)?.[k];
+    const fsIn = aoFrac(g('1st serve in'));
+    const w1 = aoFrac(g('win 1st serve'));
+    const w2 = aoFrac(g('win 2nd serve'));
+    const bpOpp = aoFrac(by.get('break points won')?.[o]);
+    const net = aoFrac(g('net points won'));
+    if (!fsIn || !w1 || !w2) return null;
+    if (w1.d !== fsIn.n || w2.d !== fsIn.d - fsIn.n) throw new Error(`ao_stats_inconsistent: ${fsIn.n}/${fsIn.d} vs ${w1.d} / ${w2.d}`);
+    return {
+      aces: aoInt(g('aces')?.primary), double_faults: aoInt(g('double faults')?.primary),
+      service_points: fsIn.d, first_serves_in: fsIn.n, first_serve_points_won: w1.n, second_serve_points_won: w2.n,
+      break_points_faced: bpOpp ? bpOpp.d : null, break_points_saved: bpOpp ? bpOpp.d - bpOpp.n : null,
+      total_points_won: aoInt(g('total points won')?.primary), winners: aoInt(g('winners')?.primary), unforced_errors: aoInt(g('unforced errors')?.primary),
+      net_points: net ? net.d : null, net_points_won: net ? net.n : null
+    };
+  };
+  const A = side('teamA', 'teamB');
+  const B = side('teamB', 'teamA');
+  return A && B ? { A, B } : null;
+}
+
+/** { sides: {A,B}, per_set: [{set_no, A, B}] } or null when the feed has no usable serve stats. teamA = side A. */
+export function parseAusopenStats(mc) {
+  const key = (mc?.stats?.key_stats || []).find((g) => /key/i.test(g.name)) || mc?.stats?.key_stats?.[0];
+  if (!key?.sets?.length) return null;
+  const all = key.sets.find((s) => /^all$/i.test(String(s.set)));
+  const total = all ? aoSetStats(all.stats) : null;
+  if (!total) return null;
+  const per_set = key.sets.filter((s) => /^\d+$/.test(String(s.set))).map((s) => { const x = aoSetStats(s.stats); return x ? { set_no: Number(s.set), A: x.A, B: x.B } : null; }).filter(Boolean);
+  return { provider: 'ausopen', sides: total, per_set };
+}

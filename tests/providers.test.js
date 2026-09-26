@@ -218,3 +218,20 @@ test('WTA start time: trusted only once play has started (order-of-play 23:59 pl
   const oop = wta.parseWtaMatch({ ...base, MatchState: 'U', MatchTimeStamp: '2026-09-20T23:59:00+00:00' }, {});
   assert.equal(oop.started_at, null);
 });
+
+test('AO match-centre stats -> canonical counts; opponent break points; inconsistent denominators rejected', () => {
+  const t = (a, b) => ({ teamA: a, teamB: b });
+  const stats = [
+    { name: 'Aces', ...t({ primary: '8' }, { primary: '4' }) }, { name: 'Double faults', ...t({ primary: '1' }, { primary: '4' }) },
+    { name: '1st serve in', ...t({ secondary: '56/83' }, { secondary: '66/91' }) }, { name: 'Win 1st serve', ...t({ secondary: '43/56' }, { secondary: '40/66' }) },
+    { name: 'Win 2nd serve', ...t({ secondary: '18/27' }, { secondary: '11/25' }) }, { name: 'Break points won', ...t({ secondary: '4/10' }, { secondary: '1/1' }) },
+    { name: 'Total points won', ...t({ primary: '101' }, { primary: '73' }) }
+  ];
+  const r = slams.parseAusopenStats({ stats: { key_stats: [{ name: 'Key', sets: [{ set: 'All', stats }] }] } });
+  assert.deepEqual([r.sides.A.service_points, r.sides.A.first_serves_in, r.sides.A.first_serve_points_won, r.sides.A.second_serve_points_won], [83, 56, 43, 18]);
+  assert.deepEqual([r.sides.B.break_points_faced, r.sides.B.break_points_saved], [10, 6], "B faced A's 10 break points, saved 6");
+  assert.deepEqual([r.sides.A.break_points_faced, r.sides.A.break_points_saved], [1, 0]);
+  const bad = stats.map((s) => (s.name === 'Win 2nd serve' ? { ...s, teamA: { secondary: '18/30' } } : s));
+  assert.throws(() => slams.parseAusopenStats({ stats: { key_stats: [{ name: 'Key', sets: [{ set: 'All', stats: bad }] }] } }), /inconsistent/);
+  assert.equal(slams.parseAusopenStats({ stats: {} }), null);
+});
