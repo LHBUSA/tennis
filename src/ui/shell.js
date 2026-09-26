@@ -57,7 +57,7 @@ export function footerHtml() {
         <img src="/brand/pbe-mark-80.webp" width="110" height="60" alt="PropBetEdge" loading="lazy">
         <p class="ftr-net-name"><b>PropBetEdge</b> Sports Intelligence Network</p>
         <p>PropBetEdge Tennis is independent tennis intelligence built on PropBetEdge’s own data graph. Not affiliated with, endorsed by or licensed by the ATP, WTA, ITF, any Grand Slam or any tournament.</p>
-        <a class="ftr-x" href="${PROPBETEDGE_X_URL}" target="_blank" rel="noopener noreferrer" aria-label="Follow PropBetEdge on X"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.9 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg><span>${PROPBETEDGE_X_HANDLE}</span></a>
+        <a class="ftr-x" href="${PROPBETEDGE_X_URL}" target="_blank" rel="noopener noreferrer" aria-label="Follow PropBetEdge on X (${PROPBETEDGE_X_HANDLE})"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M17.8 3h3.1l-6.8 7.8L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.9 3h6.4l4.4 5.8L17.8 3Zm-1.1 16.2h1.7L7.4 4.7H5.6l11.1 14.5Z"/></svg>${PROPBETEDGE_X_HANDLE}</a>
       </div>
       <nav class="ftr-sports" aria-label="PropBetEdge network">
         <p>Network</p>

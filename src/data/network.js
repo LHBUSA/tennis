@@ -13,6 +13,7 @@ export const NETWORK = Object.freeze({
   store: { label: 'Store', href: 'https://ufc.propbetedge.ai/store' },
   learn: { label: 'Learn', href: 'https://learn.propbetedge.ai/' },
   discord: { label: 'Discord', href: PROPBETEDGE_DISCORD_URL },
+  x: { label: PROPBETEDGE_X_HANDLE, href: PROPBETEDGE_X_URL, title: 'Follow PropBetEdge on X' },
   sports: [
     { key: 'mlb', label: 'MLB', name: 'Baseball Intelligence', href: 'https://mlb.propbetedge.ai/' },
     { key: 'nfl', label: 'NFL', name: 'Football Intelligence', href: 'https://nfl.propbetedge.ai/' },

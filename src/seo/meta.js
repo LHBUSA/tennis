@@ -4,8 +4,10 @@
 
 export const SITE = 'https://tennis.propbetedge.ai';
 export const BRAND = 'PropBetEdge Tennis';
-export const X_HANDLE = '@PROPBETEDGE';
-export const X_URL = 'https://x.com/PROPBETEDGE';
+import { PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
+
+export const X_HANDLE = PROPBETEDGE_X_HANDLE;
+export const X_URL = PROPBETEDGE_X_URL;
 export const OG_VERSION = '20260926';
 export const OG_DEFAULT = { url: `${SITE}/brand/propbetedge-tennis-1200x630.png?v=${OG_VERSION}`, type: 'image/png', width: 1200, height: 630, alt: 'PropBetEdge Tennis — live tennis intelligence: match data, player DNA, rankings and head-to-head' };
 export const INDEX_ROBOTS = 'index, follow, max-image-preview:large, max-snippet:-1';
@@ -66,6 +68,11 @@ export const WEBSITE = { '@type': 'WebSite', '@id': `${SITE}/#site`, name: BRAND
 
 export function breadcrumb(items) {
   return { '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: canonicalUrl(path) })) };
+}
+
+/** Site-level graph (network identity convention: Organization sameAs the canonical X profile). */
+export function siteJsonLd() {
+  return { '@context': 'https://schema.org', '@graph': [ORGANIZATION, WEBSITE] };
 }
 
 /** The page's graph: Organization + WebSite + WebPage (+ route-specific nodes passed in m.jsonld). */
