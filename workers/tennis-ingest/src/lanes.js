@@ -36,3 +36,13 @@ export function afterRun(state = {}, { ok, done = false, now }) {
   const failures = (state.failures || 0) + 1;
   return { ...state, failures, backoff_until: new Date(now + backoffMs(failures)).toISOString(), last_error_at: new Date(now).toISOString() };
 }
+
+/**
+ * A backfill cursor may move past an edition only when the source proves it holds nothing there (404, an
+ * empty draw, zero records). A block (403/challenge) or any transient failure must NOT advance the cursor:
+ * the caller throws, the lane backs off, and the same edition is retried later — never silently skipped.
+ */
+export function sourceAbsent(r) {
+  if (!r || r.state !== 'DEGRADED') return false;
+  return r.error === 'http_404' || r.error === 'zero_records' || (r.error === 'shape_drift' && (r.drift || []).includes('empty_draw'));
+}

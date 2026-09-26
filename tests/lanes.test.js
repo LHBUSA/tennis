@@ -49,3 +49,13 @@ test('finished lanes retire; AO backing off does not stop history, and vice vers
   assert.deepEqual(allHistoryDone.run, ['ao_current']);
   assert.equal(backoffMs(20), 6 * 3600e3, 'capped at 6 hours');
 });
+
+test('a blocked or failing edition never advances a backfill cursor; only a proven-absent one does', async () => {
+  const { sourceAbsent } = await import('../workers/tennis-ingest/src/lanes.js');
+  assert.equal(sourceAbsent({ state: 'BLOCKED_BY_ACCESS_CONTROL', error: 'blocked 403 forbidden' }), false);
+  assert.equal(sourceAbsent({ state: 'DEGRADED', error: 'http_503' }), false);
+  assert.equal(sourceAbsent({ state: 'DEGRADED', error: 'shape_drift', drift: ['not_array'] }), false);
+  assert.equal(sourceAbsent({ state: 'DEGRADED', error: 'http_404' }), true);
+  assert.equal(sourceAbsent({ state: 'DEGRADED', error: 'zero_records' }), true);
+  assert.equal(sourceAbsent({ state: 'DEGRADED', error: 'shape_drift', drift: ['empty_draw'] }), true);
+});

@@ -1,3 +1,4 @@
+import { sourceAbsent } from './lanes.js';
 // Ingest jobs. Each job is bounded (a small number of upstream requests), idempotent, and records its
 // runs + captures. The scheduler composes them into one polite tick.
 
@@ -284,6 +285,7 @@ export async function wimbledonArchiveStep(ctx, { lookups = 15 } = {}) {
   await wimaSeed(ctx, ids);
   const raw = await fetchRun(ctx, slams.wimbledonArchiveRaw, { event, year: st.year });
   if (raw.state !== 'PASS') {
+    if (!sourceAbsent(raw)) throw new Error(`wimbledon archive ${event} ${st.year}: ${raw.state} ${raw.error || ''}`.trim());
     // an event/year the archive does not hold: move on (recorded in the run ledger)
     const next = st.year - 1 < WIMA_FLOOR ? { e: st.e + 1, year: 2025 } : { e: st.e, year: st.year - 1 };
     await ctx.kv.put('bf:wima', JSON.stringify(next));
@@ -344,6 +346,7 @@ export async function rolandGarrosStep(ctx, { lookups = 60 } = {}) {
   const nextState = () => (st.year - 1 < RG_FLOOR ? { e: st.e + 1, year: 2026 } : { e: st.e, year: st.year - 1 });
   const res = await fetchRun(ctx, rg.rgResults, { event, year: st.year });
   if (res.state !== 'PASS' || !res.records[0]) {
+    if (!sourceAbsent(res)) throw new Error(`roland-garros ${event} ${st.year}: ${res.state} ${res.error || ''}`.trim());
     await ctx.kv.put('bf:rg', JSON.stringify(nextState()));
     return { event, year: st.year, state: res.state, error: res.error || 'no_payload' };
   }
