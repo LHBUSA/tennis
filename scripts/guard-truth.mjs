@@ -102,7 +102,9 @@ for (const s of reg.sources || []) {
     const ev = s.evidence || {};
     const byCanary = ev.canary_key && ['PASS', 'DEGRADED'].includes(canaryState.get(ev.canary_key));
     const byFile = ev.file && fs.existsSync(path.join(ROOT, ev.file));
-    if (!byCanary && !byFile) fail('registry-claim-without-evidence', `${where} is ${s.verdict} but has no passing canary or evidence file`);
+    // raw third-party captures live in private R2, not in this public repo
+    const byArchive = typeof ev.r2_key === 'string' && /^tennis-source\/audit\/[\w.-]+\.json$/.test(ev.r2_key);
+    if (!byCanary && !byFile && !byArchive) fail('registry-claim-without-evidence', `${where} is ${s.verdict} but has no passing canary or evidence file`);
     if (s.verdict === 'PASS' && ev.canary_key && canaryState.get(ev.canary_key) && canaryState.get(ev.canary_key) !== 'PASS') fail('registry-pass-contradicted-by-canary', `${where}: canary ${canaryState.get(ev.canary_key)}`);
   }
   if (/PENDING_PURCHASE|BUY|SUBSCRIBE/i.test(JSON.stringify(s.production_status || ''))) fail('no-purchase-dependency', where);

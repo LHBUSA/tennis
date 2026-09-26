@@ -6,12 +6,15 @@ import fs from 'node:fs';
 import { PGlite } from '@electric-sql/pglite';
 import { participantKey } from '../workers/shared/canonical/participant.js';
 
-const SQL = fs.readFileSync(new URL('../supabase/migrations/20260926000100_tennis_core.sql', import.meta.url), 'utf8');
+// the full chain, in order — exactly what the target ledger replays
+const DIR = new URL('../supabase/migrations/', import.meta.url);
+const SQL = fs.readdirSync(DIR).filter((f) => f.endsWith('.sql')).sort().map((f) => fs.readFileSync(new URL(f, DIR), 'utf8')).join(String.fromCharCode(10));
 const U = (n) => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
 
 async function db() {
   const pg = new PGlite();
-  // Supabase roles the migration may reference
+  // the target guard requires the sports-project markers
+  await pg.exec('create table ufc_bouts (id int); create table ufc_model_versions (id int);');
   await pg.exec(SQL);
   return pg;
 }
@@ -19,6 +22,13 @@ async function db() {
 const rejects = async (pg, sql, re) => {
   await assert.rejects(pg.query(sql), (e) => (re ? re.test(e.message) : true));
 };
+
+test('target guard refuses a project without the sports markers, or with identity tables', async () => {
+  await assert.rejects(new PGlite().exec(SQL), /sports project/);
+  const pg = new PGlite();
+  await pg.exec('create table ufc_bouts (id int); create table ufc_model_versions (id int); create table pbe_sport_entitlements (id int);');
+  await assert.rejects(pg.exec(SQL), /identity/);
+});
 
 test('migration applies; RLS enabled on every tennis table', async () => {
   const pg = await db();
@@ -77,4 +87,14 @@ test('media: only rights-safe licenses; one approved photo per player; approved 
   await rejects(pg, row('CC BY 2.0', 'approved', false), /check/i);
   await pg.query(row('CC BY 2.0', 'approved', true));
   await rejects(pg, row('CC0', 'approved', true), /unique|duplicate/i);
+});
+
+test('player slugs: readable, accent-folded, collision-safe, never rewritten', async () => {
+  const pg = await db();
+  await pg.query(`insert into tennis_players (pbe_player_id, founding_external_key, full_name) values ('${U(1)}', 'wta:1', 'Iga Świątek'), ('${U(2)}', 'wta:2', 'Maria Sample')`);
+  await pg.query(`insert into tennis_players (pbe_player_id, founding_external_key, full_name) values ('${U(3)}', 'wta:3', 'Maria Sample')`);
+  const r = await pg.query('select pbe_player_id, slug from tennis_players order by pbe_player_id');
+  assert.deepEqual(r.rows.map((x) => x.slug), ['iga-swiatek', 'maria-sample', 'maria-sample-000000']);
+  await pg.query(`update tennis_players set full_name = 'Renamed' where pbe_player_id = '${U(1)}'`);
+  assert.equal((await pg.query(`select slug from tennis_players where pbe_player_id = '${U(1)}'`)).rows[0].slug, 'iga-swiatek');
 });

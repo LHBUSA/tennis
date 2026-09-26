@@ -9,30 +9,23 @@
   "drawSize": "128",
   "drawFormat": "bracket",
   "totalRounds": 7,
-  "prizeMoney": [],
   "matches": [
    {
     "match_id": "1101",
     "eventName": "Gentlemen's Singles",
-    "shortEventName": "Gentlemen's Singles",
     "eventCode": "MS",
-    "courtName": "No.1 Court",
-    "shortCourtName": "No.1 Court",
-    "courtId": "AB",
     "roundCode": "1",
     "roundName": "First Round",
     "roundNameShort": "R1",
-    "eventDay": 9,
     "duration": "1:48",
-    "statsLevel": "H",
     "status": "Completed",
     "statusCode": "D",
     "winner": "1",
     "epoch": 1751378186000,
     "team1": {
-     "firstNameA": "Jannik",
-     "lastNameA": "Sinner",
-     "displayNameA": "J. Sinner",
+     "firstNameA": "First1A",
+     "lastNameA": "Last1A",
+     "displayNameA": null,
      "idA": "atps0ag",
      "nationA": "ITA",
      "firstNameB": null,
@@ -47,9 +40,9 @@
      "serve": false
     },
     "team2": {
-     "firstNameA": "Luca",
-     "lastNameA": "Nardi",
-     "displayNameA": "L. Nardi",
+     "firstNameA": "First2A",
+     "lastNameA": "Last2A",
+     "displayNameA": null,
      "idA": "atpn0bg",
      "nationA": "ITA",
      "firstNameB": null,
@@ -62,9 +55,6 @@
      "totalSetsWon": 0,
      "won": false,
      "serve": false
-    },
-    "flags": {
-     "upset": false
     },
     "scores": {
      "setsWon": [
@@ -133,25 +123,19 @@
    {
     "match_id": "1107",
     "eventName": "Gentlemen's Singles",
-    "shortEventName": "Gentlemen's Singles",
     "eventCode": "MS",
-    "courtName": "Court 8",
-    "shortCourtName": "Court 8",
-    "courtId": "AK",
     "roundCode": "1",
     "roundName": "First Round",
     "roundNameShort": "R1",
-    "eventDay": 9,
     "duration": "1:27",
-    "statsLevel": "H",
     "status": "Retired",
     "statusCode": "E",
     "winner": "1",
     "epoch": 1751376921000,
     "team1": {
-     "firstNameA": "Sebastian",
-     "lastNameA": "Ofner",
-     "displayNameA": "S. Ofner",
+     "firstNameA": "First1A",
+     "lastNameA": "Last1A",
+     "displayNameA": null,
      "idA": "atpo513",
      "nationA": "AUT",
      "firstNameB": null,
@@ -166,9 +150,9 @@
      "serve": false
     },
     "team2": {
-     "firstNameA": "Hamad",
-     "lastNameA": "Medjedovic",
-     "displayNameA": "H. Medjedovic",
+     "firstNameA": "First2A",
+     "lastNameA": "Last2A",
+     "displayNameA": null,
      "idA": "atpm0jf",
      "nationA": "SRB",
      "firstNameB": null,
@@ -181,9 +165,6 @@
      "totalSetsWon": 0,
      "won": false,
      "serve": false
-    },
-    "flags": {
-     "upset": false
     },
     "scores": {
      "setsWon": [
@@ -237,25 +218,19 @@
    {
     "match_id": "1701",
     "eventName": "Gentlemen's Singles",
-    "shortEventName": "Gentlemen's Singles",
     "eventCode": "MS",
-    "courtName": "Centre Court",
-    "shortCourtName": "Centre Court",
-    "courtId": "AA",
     "roundCode": "F",
     "roundName": "Final",
     "roundNameShort": "F",
-    "eventDay": 21,
     "duration": "3:04",
-    "statsLevel": "H",
     "status": "Completed",
     "statusCode": "D",
     "winner": "1",
     "epoch": 1752431037000,
     "team1": {
-     "firstNameA": "Jannik",
-     "lastNameA": "Sinner",
-     "displayNameA": "J. Sinner",
+     "firstNameA": "First1A",
+     "lastNameA": "Last1A",
+     "displayNameA": null,
      "idA": "atps0ag",
      "nationA": "ITA",
      "firstNameB": null,
@@ -270,9 +245,9 @@
      "serve": false
     },
     "team2": {
-     "firstNameA": "Carlos",
-     "lastNameA": "Alcaraz",
-     "displayNameA": "C. Alcaraz",
+     "firstNameA": "First2A",
+     "lastNameA": "Last2A",
+     "displayNameA": null,
      "idA": "atpa0e2",
      "nationA": "ESP",
      "firstNameB": null,
@@ -285,9 +260,6 @@
      "totalSetsWon": 1,
      "won": false,
      "serve": false
-    },
-    "flags": {
-     "upset": false
     },
     "scores": {
      "setsWon": [

@@ -44,11 +44,6 @@ export const CANARIES = [
   { adapter: probe('itf.api.calendar', 'itf', 'https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=', ['calendar']) }
 ];
 
-const trim = (rec) => {
-  const s = JSON.stringify(rec);
-  return s.length <= 700 ? rec : { truncated: true, preview: `${s.slice(0, 700)}…` };
-};
-
 async function main() {
   const filter = process.argv[2] || '';
   const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 } } });
@@ -65,7 +60,7 @@ async function main() {
       key: adapter.key, family: adapter.family, state: r.state, url: r.url, http_status: r.http_status ?? null,
       bytes: captured?.bytes ?? null, content_type: captured?.content_type ?? null, sha256: captured?.sha256 ?? null,
       attempts: captured?.attempts ?? null, latency_ms: r.latency_ms ?? null, record_count: r.record_count ?? (r.records ? r.records.length : null),
-      error: r.error ?? null, drift: r.drift ?? null, sample: r.records?.length ? trim(r.records[0]) : null
+      error: r.error ?? null, drift: r.drift ?? null // no payload samples: this repo is public
     };
     if (adapter.parser_version === 'probe' && r.state === 'DEGRADED' && r.error === 'zero_records') { out.state = 'REACHABLE'; out.error = null; }
     results.push(out);

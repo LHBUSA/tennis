@@ -23,7 +23,7 @@ test('every worker answers /health without leaking secret values', async () => {
 });
 
 test('tennis-api data routes are NOT_CONFIGURED with null data — never a sample', async () => {
-  for (const p of ['/v1/today', '/v1/live', '/v1/players', '/v1/players/x/dna', '/v1/matches/abc/points', '/v1/h2h/a/b', '/v1/rankings', '/v1/pbe-picks', '/v1/news']) {
+  for (const p of ['/v1/today', '/v1/live', '/v1/players', '/v1/players/x/dna', '/v1/h2h/a/b', '/v1/rankings', '/v1/tournaments/wimbledon/2025', '/v1/pbe-picks', '/v1/news', '/v1/odds']) {
     const r = await get(api, p);
     assert.equal(r.status, 200, p);
     assert.equal(r.body.data, null, p);
@@ -38,6 +38,11 @@ test('tennis-api /v1/sources serves the committed registry + canary evidence', a
   const r = await get(api, '/v1/sources');
   assert.ok(r.body.data.registry.sources.length > 10);
   assert.ok(Array.isArray(r.body.data.canary.results));
+});
+
+test('tennis-api refuses a store URL that is not the sports project', async () => {
+  const r = await get(api, '/v1/live', {}, { TENNIS_MODEL_SUPABASE_URL: 'https://rlfyavnhbngwbldebrid.supabase.co', TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY: 'x' });
+  assert.equal(r.body.meta.freshness, 'ERROR');
 });
 
 test('tennis-ingest runs are admin-gated and its canary plan is valid', async () => {

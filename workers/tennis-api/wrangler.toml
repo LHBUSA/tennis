@@ -1,12 +1,16 @@
-# tennis-api — NOT DEPLOYED. First deploy: docs/RELEASE.md (versions upload -> canary -> versions deploy).
+# tennis-api — public read API (tennis-api.propbetedge.ai).
+# Deploy: docs/RELEASE.md. Secrets (wrangler secret put) are listed per Worker; values never in Git.
 name = "tennis-api"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
 workers_dev = true
+routes = [{ pattern = "tennis-api.propbetedge.ai", custom_domain = true }]
 
 [observability]
 enabled = true
 
-# Declared when the resources exist:
-# [[kv_namespaces]] binding = "TENNIS_STATE" id = "<created at first deploy>"
-# Secrets (wrangler secret put): SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
+[[kv_namespaces]]
+binding = "TENNIS_STATE"
+id = "a117d7b3846c4a39a27ee74c49574c99"
+
+# Secrets: TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY (sports project only)

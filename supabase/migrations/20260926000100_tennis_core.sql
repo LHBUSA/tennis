@@ -12,6 +12,17 @@
 
 begin;
 
+-- ---------- target guard: sports project only (never the identity/billing project) ------------------
+do $$
+begin
+  if to_regclass('public.ufc_bouts') is null or to_regclass('public.ufc_model_versions') is null then
+    raise exception 'tennis core must target the sports project (ufc_bouts + ufc_model_versions required)';
+  end if;
+  if to_regclass('public.pbe_sport_entitlements') is not null then
+    raise exception 'tennis core refused: identity/billing project detected';
+  end if;
+end $$;
+
 -- ---------- reference ------------------------------------------------------------------------------
 create table public.tennis_tours (
   tour_key text primary key check (tour_key ~ '^[a-z0-9_]+$'),
@@ -507,6 +518,66 @@ create table public.tennis_coverage (
   notes text
 );
 create unique index tennis_coverage_key on public.tennis_coverage (tour_key, season, event_type, coalesce(tournament_id, '00000000-0000-0000-0000-000000000000'::uuid));
+
+-- ---------- crosswalks for tournaments/editions + live state + quarantine ----------------------------
+create table public.tennis_tournament_external_ids (
+  provider text not null,
+  external_id text not null,
+  tournament_id uuid not null references public.tennis_tournaments (tournament_id),
+  primary key (provider, external_id)
+);
+
+create table public.tennis_edition_external_ids (
+  provider text not null,
+  external_id text not null,
+  edition_id uuid not null references public.tennis_tournament_editions (edition_id),
+  primary key (provider, external_id)
+);
+
+alter table public.tennis_tournament_editions
+  add column name text,
+  add column level text,
+  add column city text,
+  add column country char(3),
+  add column singles_draw_size smallint,
+  add column doubles_draw_size smallint,
+  add column source_status text,
+  add column updated_at timestamptz not null default now();
+
+alter table public.tennis_matches
+  add column live_state jsonb,                    -- last observed point score + server (source fact)
+  add column source_updated_at timestamptz,
+  add column stats_status text not null default 'pending' check (stats_status in ('pending', 'stored', 'unavailable', 'held', 'not_applicable'));
+create index tennis_matches_status on public.tennis_matches (status) where status in ('in_progress', 'suspended');
+create index tennis_matches_stats_pending on public.tennis_matches (stats_status) where stats_status = 'pending';
+
+-- Source rows that failed validation. Never written to canonical tables; kept for review/reparse.
+create table public.tennis_ingest_holds (
+  provider text not null,
+  external_id text not null,
+  entity_type text not null,
+  problems jsonb not null,
+  payload jsonb,
+  capture_id text,
+  first_seen_at timestamptz not null default now(),
+  last_seen_at timestamptz not null default now(),
+  resolved_at timestamptz,
+  primary key (provider, entity_type, external_id)
+);
+
+-- ---------- reference seeds ---------------------------------------------------------------------------
+insert into public.tennis_tours (tour_key, label, gender_scope) values
+  ('atp', 'ATP Tour', 'men'), ('atp_challenger', 'ATP Challenger Tour', 'men'), ('itf_men', 'ITF World Tennis Tour (men)', 'men'),
+  ('wta', 'WTA Tour', 'women'), ('wta_125', 'WTA 125', 'women'), ('itf_women', 'ITF World Tennis Tour (women)', 'women'),
+  ('grand_slam', 'Grand Slams', 'mixed'), ('team', 'Team competitions', 'mixed');
+
+insert into public.tennis_competitions (competition_key, tour_key, level, label) values
+  ('grand_slam', 'grand_slam', 'grand_slam', 'Grand Slam'),
+  ('atp_finals', 'atp', 'finals', 'ATP Finals'), ('atp_1000', 'atp', '1000', 'ATP Masters 1000'), ('atp_500', 'atp', '500', 'ATP 500'), ('atp_250', 'atp', '250', 'ATP 250'),
+  ('atp_challenger', 'atp_challenger', 'challenger', 'ATP Challenger'), ('itf_men', 'itf_men', 'itf', 'ITF Men'),
+  ('wta_finals', 'wta', 'finals', 'WTA Finals'), ('wta_1000', 'wta', '1000', 'WTA 1000'), ('wta_500', 'wta', '500', 'WTA 500'), ('wta_250', 'wta', '250', 'WTA 250'),
+  ('wta_125', 'wta_125', '125', 'WTA 125'), ('itf_women', 'itf_women', 'itf', 'ITF Women'),
+  ('davis_cup', 'team', 'team', 'Davis Cup'), ('bjk_cup', 'team', 'team', 'Billie Jean King Cup'), ('united_cup', 'team', 'team', 'United Cup'), ('olympics', 'team', 'olympics', 'Olympics');
 
 -- ---------- RLS: on everywhere, no client policies ---------------------------------------------------
 do $$

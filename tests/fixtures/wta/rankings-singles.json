@@ -2,15 +2,15 @@
  "_capture": {
   "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize=5&type=rankSingles&sort=asc&metric=SINGLES&at=2026-09-21",
   "captured_at": "2026-09-26",
-  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+  "note": "Minimal subset of a real response (names replaced by tokens) for parser tests."
  },
  "payload": [
   {
    "player": {
     "id": 324166,
-    "firstName": "Elena",
-    "lastName": "Rybakina",
-    "fullName": "Elena Rybakina",
+    "firstName": "First0",
+    "lastName": "Last0",
+    "fullName": "First0 Last0",
     "countryCode": "KAZ",
     "dateOfBirth": "1999-06-17",
     "metadata": null
@@ -24,9 +24,9 @@
   {
    "player": {
     "id": 320760,
-    "firstName": "Aryna",
-    "lastName": "Sabalenka",
-    "fullName": "Aryna Sabalenka",
+    "firstName": "First1",
+    "lastName": "Last1",
+    "fullName": "First1 Last1",
     "countryCode": "BLR",
     "dateOfBirth": "1998-05-05",
     "metadata": null
@@ -40,9 +40,9 @@
   {
    "player": {
     "id": 316956,
-    "firstName": "Jessica",
-    "lastName": "Pegula",
-    "fullName": "Jessica Pegula",
+    "firstName": "First2",
+    "lastName": "Last2",
+    "fullName": "First2 Last2",
     "countryCode": "USA",
     "dateOfBirth": "1994-02-24",
     "metadata": null

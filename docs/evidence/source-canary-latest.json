@@ -22,26 +22,7 @@
       "latency_ms": 111,
       "record_count": 5,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "ranking_row",
-        "list_key": "wta_singles",
-        "ranking_date": "2026-09-21",
-        "rank": 1,
-        "points": 9901,
-        "tournaments_played": 21,
-        "movement": 0,
-        "player": {
-          "provider": "wta",
-          "provider_id": "324166",
-          "first_name": "Elena",
-          "last_name": "Rybakina",
-          "full_name": "Elena Rybakina",
-          "country": "KAZ",
-          "dob": "1999-06-17",
-          "gender": "F"
-        }
-      }
+      "drift": null
     },
     {
       "key": "wta.rankings.doubles",
@@ -56,26 +37,7 @@
       "latency_ms": 86,
       "record_count": 5,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "ranking_row",
-        "list_key": "wta_doubles",
-        "ranking_date": "2026-09-21",
-        "rank": 1,
-        "points": 11350,
-        "tournaments_played": 16,
-        "movement": 0,
-        "player": {
-          "provider": "wta",
-          "provider_id": "320301",
-          "first_name": "Katerina",
-          "last_name": "Siniakova",
-          "full_name": "Katerina Siniakova",
-          "country": "CZE",
-          "dob": "1996-05-10",
-          "gender": "F"
-        }
-      }
+      "drift": null
     },
     {
       "key": "wta.calendar",
@@ -90,27 +52,7 @@
       "latency_ms": 210,
       "record_count": 19,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "tournament_edition",
-        "provider": "wta",
-        "provider_tournament_id": "2075",
-        "live_scoring_id": "2075",
-        "year": 2026,
-        "name": "GUADALAJARA 500",
-        "title": "Guadalajara Open presentado por Santander - Guadalajara, MEX",
-        "level": "WTA 500",
-        "start_date": "2026-09-13",
-        "end_date": "2026-09-19",
-        "surface": "hard",
-        "surface_raw": "Hard",
-        "indoor": false,
-        "city": "GUADALAJARA",
-        "country": "MEX",
-        "singles_draw_size": 28,
-        "doubles_draw_size": 16,
-        "status": "past"
-      }
+      "drift": null
     },
     {
       "key": "wta.matches",
@@ -125,11 +67,7 @@
       "latency_ms": 40,
       "record_count": 51,
       "error": null,
-      "drift": null,
-      "sample": {
-        "truncated": true,
-        "preview": "{\"type\":\"match\",\"provider\":\"wta\",\"provider_match_id\":\"1152-2026-RS014\",\"provider_event\":{\"id\":\"1152\",\"year\":2026},\"event_type\":\"WS\",\"stage\":\"qualifying\",\"round_code\":\"Q-1\",\"format_key\":\"BO3_TB7\",\"status\":\"completed\",\"winner_side\":\"A\",\"end_reason\":\"completed\",\"retired_side\":null,\"withdrawn_side\":null,\"sets\":[{\"games\":{\"A\":6,\"B\":3},\"tiebreak\":null,\"is_match_tiebreak\":false},{\"games\":{\"A\":6,\"B\":4},\"tiebreak\":null,\"is_match_tiebreak\":false}],\"live\":null,\"sides\":{\"A\":[{\"provider\":\"wta\",\"provider_id\":\"319091\",\"first_name\":\"Anna-Lena\",\"last_name\":\"Friedsam\",\"country\":\"GER\",\"gender\":\"F\"}],\"B\":[{\"provider\":\"wta\",\"provider_id\":\"317888\",\"first_name\":\"Desirae\",\"last_name\":\"Krawczyk\",\"country\":\"USA\",\"gen…"
-      }
+      "drift": null
     },
     {
       "key": "wta.match_stats",
@@ -144,11 +82,7 @@
       "latency_ms": 63,
       "record_count": 1,
       "error": null,
-      "drift": null,
-      "sample": {
-        "truncated": true,
-        "preview": "{\"type\":\"match_stats\",\"provider\":\"wta\",\"provider_match_id\":\"1152-2026-LS002\",\"sides\":{\"A\":{\"service_points\":74,\"aces\":2,\"double_faults\":4,\"first_serves_in\":47,\"first_serve_points_won\":30,\"second_serve_points_won\":12,\"service_games\":13,\"break_points_faced\":8,\"break_points_saved\":3,\"total_points_won\":72},\"B\":{\"service_points\":67,\"aces\":0,\"double_faults\":1,\"first_serves_in\":49,\"first_serve_points_won\":31,\"second_serve_points_won\":6,\"service_games\":12,\"break_points_faced\":8,\"break_points_saved\":3,\"total_points_won\":69}},\"per_set\":[{\"set_no\":1,\"A\":{\"service_points\":22,\"aces\":0,\"double_faults\":3,\"first_serves_in\":15,\"first_serve_points_won\":6,\"second_serve_points_won\":0,\"service_games\":4,\"break_po…"
-      }
+      "drift": null
     },
     {
       "key": "wimbledon.draws",
@@ -163,11 +97,7 @@
       "latency_ms": 354,
       "record_count": 127,
       "error": null,
-      "drift": null,
-      "sample": {
-        "truncated": true,
-        "preview": "{\"type\":\"match\",\"provider\":\"wimbledon\",\"provider_match_id\":\"2025-1101\",\"provider_event\":{\"id\":\"MS\",\"year\":2025},\"event_type\":\"MS\",\"stage\":\"main\",\"round_code\":\"1\",\"format_key\":\"BO5_FINAL_TB10\",\"status\":\"completed\",\"winner_side\":\"A\",\"end_reason\":\"completed\",\"retired_side\":null,\"sets\":[{\"games\":{\"A\":6,\"B\":4},\"tiebreak\":null,\"is_match_tiebreak\":false},{\"games\":{\"A\":6,\"B\":3},\"tiebreak\":null,\"is_match_tiebreak\":false},{\"games\":{\"A\":6,\"B\":0},\"tiebreak\":null,\"is_match_tiebreak\":false}],\"final_game_score\":null,\"live\":null,\"sides\":{\"A\":[{\"provider\":\"wimbledon\",\"provider_id\":\"atps0ag\",\"tour_id\":{\"provider\":\"atp\",\"provider_id\":\"S0AG\"},\"first_name\":\"Jannik\",\"last_name\":\"Sinner\",\"country\":\"ITA\",\"gender\":\"…"
-      }
+      "drift": null
     },
     {
       "key": "ausopen.results",
@@ -182,22 +112,7 @@
       "latency_ms": 522,
       "record_count": 64,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "player_identity",
-        "provider": "ausopen",
-        "provider_id": "b80c20ae-e16d-4b7c-9875-c549798e4210",
-        "tour_id": {
-          "provider": "atp",
-          "provider_id": "BK92"
-        },
-        "full_name": "Alexander Bublik",
-        "first_name": "Alexander",
-        "last_name": "Bublik",
-        "gender": "M",
-        "dob": "1997-06-17",
-        "nationality": "KAZ"
-      }
+      "drift": null
     },
     {
       "key": "wikidata.crosswalk",
@@ -212,22 +127,7 @@
       "latency_ms": 4853,
       "record_count": 5,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "identity_crosswalk",
-        "provider": "wikidata",
-        "provider_id": "Q100016969",
-        "label": "Nikos Rovas",
-        "external": {
-          "atp": "R365",
-          "wta": null,
-          "itf": null,
-          "daviscup": "800193348",
-          "bjkcup": null
-        },
-        "dob": "1977-09-20",
-        "commons_file": null
-      }
+      "drift": null
     },
     {
       "key": "commons.license",
@@ -242,20 +142,7 @@
       "latency_ms": 199,
       "record_count": 1,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "media_license",
-        "provider": "commons",
-        "title": "File:Andre Agassi (2011).jpg",
-        "original_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Andre_Agassi_%282011%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=original",
-        "description_url": "https://commons.wikimedia.org/wiki/File:Andre_Agassi_(2011).jpg",
-        "width": 412,
-        "height": 520,
-        "license": "CC BY 2.0",
-        "license_url": "https://creativecommons.org/licenses/by/2.0",
-        "author": "Shinya Suzuki from New York, U.S.A.",
-        "credit": "Andre Agassi"
-      }
+      "drift": null
     },
     {
       "key": "protennislive.draw_pdf",
@@ -270,14 +157,7 @@
       "latency_ms": 151,
       "record_count": 1,
       "error": null,
-      "drift": null,
-      "sample": {
-        "type": "artifact",
-        "provider": "protennislive",
-        "url": "https://www.protennislive.com/posting/2026/7581/mds.pdf",
-        "bytes": 139642,
-        "parsed": false
-      }
+      "drift": null
     },
     {
       "key": "atp.rankings.page",
@@ -292,8 +172,7 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 403 forbidden https://www.atptour.com/en/rankings/singles",
-      "drift": null,
-      "sample": null
+      "drift": null
     },
     {
       "key": "itf.api.calendar",
@@ -308,8 +187,7 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 200 challenge_page https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=",
-      "drift": null,
-      "sample": null
+      "drift": null
     }
   ]
 }

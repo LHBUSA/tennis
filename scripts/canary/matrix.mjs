@@ -24,7 +24,7 @@ for (const f of reg.families) {
   lines.push(`| **${cell(fam[f.key])}** | | | | | |`);
   for (const s of rows) {
     const r = s.evidence?.canary_key ? res.get(s.evidence.canary_key) : null;
-    const c = r ? `${r.state} · HTTP ${r.http_status ?? '-'}${r.record_count != null ? ` · ${r.record_count} rec` : ''}${r.bytes != null ? ` · ${r.bytes} B` : ''}` : (s.evidence?.file ? 'audit request (see evidence file)' : '—');
+    const c = r ? `${r.state} · HTTP ${r.http_status ?? '-'}${r.record_count != null ? ` · ${r.record_count} rec` : ''}${r.bytes != null ? ` · ${r.bytes} B` : ''}` : (s.evidence?.file || s.evidence?.r2_key ? 'audit request (private archive)' : '—');
     lines.push(`| \`${s.key}\` ${cell(s.name)} | ${s.verdict} | ${cell((s.capabilities || []).join(', '))} | ${cell(c)} | ${cell(s.terms?.status || '—')} | ${cell(s.production_status)} |`);
   }
 }

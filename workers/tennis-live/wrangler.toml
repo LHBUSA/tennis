@@ -1,4 +1,5 @@
-# tennis-live — NOT DEPLOYED. First deploy: docs/RELEASE.md (versions upload -> canary -> versions deploy).
+# tennis-live — live match state runtime (TennisCast).
+# Deploy: docs/RELEASE.md. Secrets (wrangler secret put) are listed per Worker; values never in Git.
 name = "tennis-live"
 main = "src/index.js"
 compatibility_date = "2026-09-01"
@@ -7,5 +8,8 @@ workers_dev = true
 [observability]
 enabled = true
 
-# Bindings are declared when the resource exists (docs/ARCHITECTURE.md). No cron triggers until the
-# Worker has real work; schedules are Cloudflare Cron, never GitHub Actions.
+[[kv_namespaces]]
+binding = "TENNIS_STATE"
+id = "a117d7b3846c4a39a27ee74c49574c99"
+
+# No cron triggers until this Worker has real work.

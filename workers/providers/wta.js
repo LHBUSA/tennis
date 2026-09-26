@@ -93,15 +93,23 @@ export const calendar = {
 
 // ---- matches (results + live state) -------------------------------------------------------------------
 // Observed code tables (tests/fixtures/wta/matches-1152.json):
-//   MatchState: F = final, P = in progress
+//   MatchState: F = final, P = in progress, U = order-of-play entry not yet started (CourtName,
+//               NotBefore/NotBeforeISOTime, Unscheduled; MatchTimeStamp is then a 23:59 placeholder)
 //   Winner:     0 = undecided, 2 = side A won, 3 = side B won, 4 = side A won, B retired ("Ret'd"),
-//               6 = side A won by walkover (B withdrew). 5 / 7 (presumably the B-side mirrors) have NOT
-//               been observed and are therefore not mapped.
+//               5 = side B won, A retired (observed Seoul 2026 LS002), 6 = side A won by walkover
+//               (B withdrew). 7 (presumably the B-side walkover) has NOT been observed and is not mapped.
 //   ScoreSys:   1 = best of 3, tiebreak sets (singles); 9 = best of 3, no-ad, match tiebreak (doubles)
 //   DrawMatchType: S / D.  DrawLevelType: M = main draw, Q = qualifying.
-const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', end: 'completed' }, 4: { side: 'A', end: 'retirement', retired: 'B' }, 6: { side: 'A', end: 'walkover', withdrawn: 'B' } };
-const STATE = { F: 'final', P: 'in_progress' };
+const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', end: 'completed' }, 4: { side: 'A', end: 'retirement', retired: 'B' }, 5: { side: 'B', end: 'retirement', retired: 'A' }, 6: { side: 'A', end: 'walkover', withdrawn: 'B' } };
+const STATE = { F: 'final', P: 'in_progress', U: 'scheduled' };
 export const SCORE_SYS = { 1: 'BO3_TB7', 9: 'DOUBLES_TOUR' };
+// Grand Slams play a 10-point tiebreak at 6-6 in the deciding set (all events, since 2022). The WTA
+// API reports those matches as ScoreSys 1, so the event level decides the format, not the code alone.
+export function formatFor(scoreSys, { level = null, year = null } = {}) {
+  const base = SCORE_SYS[scoreSys] || null;
+  if (base === 'BO3_TB7' && /grand slam/i.test(String(level || '')) && Number(year) >= 2022) return 'BO3_FINAL_TB10';
+  return base;
+}
 
 const hms = (s) => {
   const m = /^(\d+):(\d{2}):(\d{2})$/.exec(String(s || ''));
@@ -109,7 +117,7 @@ const hms = (s) => {
 };
 const num = (v) => (v === '' || v === null || v === undefined ? null : Number(v));
 
-export function parseWtaMatch(m) {
+export function parseWtaMatch(m, ctx = {}) {
   const warnings = [];
   const doubles = m.DrawMatchType === 'D';
   const sideMembers = (s) => {
@@ -117,7 +125,9 @@ export function parseWtaMatch(m) {
     if (!doubles) return [one];
     return [one, { provider: 'wta', provider_id: String(m[`PlayerID${s}2`]), first_name: m[`PlayerNameFirst${s}2`] || null, last_name: m[`PlayerNameLast${s}2`] || null, country: m[`PlayerCountry${s}2`] || null, gender: 'F' }];
   };
-  const format_key = SCORE_SYS[m.ScoreSys] || null;
+  let format_key = formatFor(m.ScoreSys, { level: ctx.level, year: m.EventYear });
+  // Order-of-play rows carry no ScoreSys; the format is the competition's rule for that event type.
+  if (!format_key && m.MatchState === 'U' && m.ScoreSys === undefined) format_key = formatFor(doubles && !/grand slam/i.test(String(ctx.level || '')) ? '9' : '1', { level: ctx.level, year: m.EventYear });
   if (!format_key) warnings.push(`unmapped_score_system:${m.ScoreSys}`);
   const sets = [];
   // NumSets bounds the set fields: rows have been observed carrying stale ScoreSet fields beyond it
@@ -133,10 +143,10 @@ export function parseWtaMatch(m) {
     const b = num(m[`ScoreSet${i}B`]);
     if (a === null || b === null) continue;
     const tbLoser = num(m[`ScoreTbSet${i}`]);
-    const matchTb = format_key === 'DOUBLES_TOUR' && i === 3 && a + b === 1;
+    const matchTb = /MATCH_TB|DOUBLES_TOUR/.test(format_key || '') && i === 3 && a + b === 1;
     let tiebreak = null;
     if (tbLoser !== null && (matchTb || Math.max(a, b) === 7 && Math.min(a, b) === 6)) {
-      const to = matchTb ? 10 : 7;
+      const to = matchTb ? 10 : i === 3 && format_key === 'BO3_FINAL_TB10' ? 10 : 7;
       const win = Math.max(to, tbLoser + 2);
       tiebreak = a > b ? { A: win, B: tbLoser, winner_points_derived: true } : { A: tbLoser, B: win, winner_points_derived: true };
     } else if (matchTb) {
@@ -146,10 +156,11 @@ export function parseWtaMatch(m) {
   }
   const state = STATE[m.MatchState];
   if (!state) warnings.push(`unmapped_match_state:${m.MatchState}`);
-  const w = Object.prototype.hasOwnProperty.call(WINNER, Number(m.Winner)) ? WINNER[Number(m.Winner)] : undefined;
+  const w = state === 'scheduled' && m.Winner === undefined ? null : Object.prototype.hasOwnProperty.call(WINNER, Number(m.Winner)) ? WINNER[Number(m.Winner)] : undefined;
   if (w === undefined) warnings.push(`unmapped_winner_code:${m.Winner}`);
   let status = null;
   if (state === 'in_progress') status = 'in_progress';
+  if (state === 'scheduled') status = 'scheduled';
   if (state === 'final' && w) status = w.end === 'retirement' ? 'retired' : w.end === 'walkover' ? 'walkover' : 'completed';
   if (state === 'final' && !w) warnings.push('final_without_mapped_winner');
   const live = state === 'in_progress' ? { point: { A: m.PointA || null, B: m.PointB || null }, server: m.Serve === 'A' || m.Serve === 'B' ? m.Serve : null } : null;
@@ -173,6 +184,9 @@ export function parseWtaMatch(m) {
     seeds: { A: num(m.SeedA), B: num(m.SeedB) },
     entry: { A: m.EntryTypeA || null, B: m.EntryTypeB || null },
     court_id: m.CourtID ?? null,
+    court_name: m.CourtName || null,
+    scheduled_at: state === 'scheduled' && m.NotBeforeISOTime ? m.NotBeforeISOTime : null,
+    schedule_note: state === 'scheduled' ? [m.NotBefore, m.NotBeforeText].filter(Boolean).join(' · ') || null : null,
     duration_s: hms(m.MatchTimeTotal),
     source_updated_at: m.LastUpdated || null,
     source_text: m.ResultString || null,
@@ -192,7 +206,7 @@ export const matches = {
     if (!j || !Array.isArray(j.matches)) return ['missing_matches'];
     return j.matches.length ? requirePaths(j.matches[0], ['MatchID', 'MatchState', 'DrawMatchType', 'PlayerIDA', 'PlayerIDB', 'Winner', 'ScoreSys']) : [];
   },
-  parse: (body) => safeJson(body).matches.map(parseWtaMatch)
+  parse: (body, meta = {}) => safeJson(body).matches.map((m) => parseWtaMatch(m, { level: meta.params?.level }))
 };
 
 // ---- match statistics --------------------------------------------------------------------------------

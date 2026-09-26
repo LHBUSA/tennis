@@ -1,8 +1,9 @@
 # Tennis source matrix
 
 Phase 0 source audit for PropBetEdge Tennis. The registry is `data/source-registry/sources.json`, the
-latest canary run is `docs/evidence/source-canary-latest.json`, and the raw audit (every probe, robots
-line and terms quote, 2026-09-26) is `docs/evidence/phase0-source-audit-2026-09-26.json`. The tables
+latest canary run is `docs/evidence/source-canary-latest.json` (counts and hashes only), and the raw audit
+(every probe, robots line and terms quote, 2026-09-26) is kept out of this public repo in private R2 at
+`tennis-source/audit/phase0-source-audit-2026-09-26.json`. The tables
 below are generated: edit the registry and run `npm run canary && npm run matrix`.
 
 ## Owner directive (2026-09-26): we build the data layer, we do not rent it
@@ -36,22 +37,19 @@ below are generated: edit the registry and run `npm run canary && npm run matrix
 self-contradictory WTA row (`1178-2026-LD013`: 11 minutes, score "0-3", coded as a normal win) — held by
 score validation, exactly as designed.
 
-## Rights — OWNER DECISION REQUIRED (not a purchase blocker)
+## Rights — owner decision (2026-09-26): APPROVED
 
-Every official source that is technically open has terms restricting automated collection or commercial
-use (verbatim quotes below). This is the same class of exposure as ESPN in the other PropBetEdge sports
-(`espn-nba-data-rights-exposure`), where the owner accepted ESPN for NBA on 2026-09-25. For Tennis the
-decision has **not** been made, so:
+The owner reviewed the terms quoted below and approved using the technically accessible official tennis
+sources (WTA, Wimbledon, Australian Open, ATP/Challenger, ITF, Davis Cup, BJK Cup and other legitimate
+sources) for PropBetEdge's own normalized data layer, analytics, Tennis DNA, models, predictions and
+product. Conditions that remain binding:
 
-- adapters, parsers and canaries are built and run **read-only** at audit scale (≈1 request/1.5 s,
-  a handful of requests per run);
-- **no production ingestion, no cron, no canonical writes** from WTA, Wimbledon, AO or ProTennisLive until
-  the owner chooses a path;
-- Wikidata (CC0) and Commons (per-file CC licenses) are rights-clear today.
-
-Options for the owner: (1) accept the exposure for WTA + Slam feeds as was done for ESPN/NBA; (2) request
-written permission from the WTA / AELTC / Tennis Australia (terms explicitly allow "separate written
-permission"); (3) run on Wikidata identity only until (2) lands.
+- no bypass of authentication, CAPTCHAs, Cloudflare/Incapsula challenges or other access controls —
+  a blocked source stays blocked and we find another legitimate path;
+- full provenance on every record; raw responses archived privately (R2), never in this public repo;
+- everything customer-facing passes through our own normalized contracts; every derived number is ours;
+- re-raise only for a materially different issue: auth bypass, credential misuse, a takedown request, or a
+  source that needs a paid/licensed credential we do not have.
 
 ## Technical blockers (not purchases)
 
@@ -65,7 +63,7 @@ permission"); (3) run on Wikidata identity only until (2) lands.
 
 ## Next ingest (highest value)
 
-**WTA API → canonical graph**, the moment rights are decided: weekly singles+doubles ranking snapshots
+**WTA API → canonical graph** (now rolling out): weekly singles+doubles ranking snapshots
 (with historical weeks backfilled), the calendar, and every match for every WTA/WTA 125 event, archived raw
 to R2 and normalized through the tested pipeline. Wikidata crosswalk in parallel (rights-clear now), then
 Wimbledon + AO archives for men's Slam results keyed by embedded ATP ids.
@@ -78,42 +76,42 @@ Registry 2026-09-26 · canary run 2026-09-26T13:21:00.135Z (scripts/canary/run.m
 | Source | Verdict | Capabilities | Canary (latest) | Terms | Production status |
 |---|---|---|---|---|---|
 | **WTA** | | | | | |
-| `wta.rankings.singles` WTA API — singles rankings (dated lists, historical) | PASS | rankings_singles, player_identity, player_bio, history | PASS · HTTP 200 · 5 rec · 1265 B | RESTRICTS_AUTOMATED_ACCESS | CANARY_ONLY — ingest awaits owner rights decision |
-| `wta.rankings.doubles` WTA API — doubles rankings | PASS | rankings_doubles, player_identity | PASS · HTTP 200 · 5 rec · 1294 B | RESTRICTS_AUTOMATED_ACCESS | CANARY_ONLY — ingest awaits owner rights decision |
-| `wta.race` WTA API — Race rankings | UNVERIFIED | race | audit request (see evidence file) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
-| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14069 B | RESTRICTS_AUTOMATED_ACCESS | CANARY_ONLY — ingest awaits owner rights decision |
-| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 51 rec · 59294 B | RESTRICTS_AUTOMATED_ACCESS | CANARY_ONLY — ingest awaits owner rights decision |
-| `wta.match_stats` WTA API — match statistics (per set + totals) | PASS | match_stats, serve_stats, return_stats | PASS · HTTP 200 · 1 rec · 2191 B | RESTRICTS_AUTOMATED_ACCESS | CANARY_ONLY — ingest awaits owner rights decision |
-| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | audit request (see evidence file) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
+| `wta.rankings.singles` WTA API — singles rankings (dated lists, historical) | PASS | rankings_singles, player_identity, player_bio, history | PASS · HTTP 200 · 5 rec · 1265 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.rankings.doubles` WTA API — doubles rankings | PASS | rankings_doubles, player_identity | PASS · HTTP 200 · 5 rec · 1294 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.race` WTA API — Race rankings | UNVERIFIED | race | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
+| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14069 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 51 rec · 59294 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.match_stats` WTA API — match statistics (per set + totals) | PASS | match_stats, serve_stats, return_stats | PASS · HTTP 200 · 1 rec · 2191 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
 | **ATP** | | | | | |
 | `atp.site` atptour.com — rankings, calendar, scores, stats, players (incl. Challenger) | BLOCKED_BY_ACCESS_CONTROL | rankings_singles, rankings_doubles, race, calendar, draws, live_state, match_stats, player_bio, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 403 | RESTRICTS_AUTOMATED_ACCESS | NOT_USED — Cloudflare challenge on every request; not evaded |
-| `atp.infosys` ATP stats platform (Infosys) | BLOCKED_BY_ACCESS_CONTROL | point_by_point, match_stats | audit request (see evidence file) | RESTRICTS_AUTOMATED_ACCESS | NOT_USED |
+| `atp.infosys` ATP stats platform (Infosys) | BLOCKED_BY_ACCESS_CONTROL | point_by_point, match_stats | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_USED |
 | `protennislive.draw_pdf` ProTennisLive — ATP official draw / order-of-play PDFs | DEGRADED | draws | PASS · HTTP 200 · 1 rec · 139642 B | NOT_RETRIEVED | NOT_ADAPTED — availability proven, PDF text extraction not built |
 | **ITF** | | | | | |
 | `itf.site` itftennis.com — World Tennis Tour calendar, results, rankings, players | BLOCKED_BY_ACCESS_CONTROL | calendar, draws, schedule, rankings_singles, player_bio, match_history, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 200 | NOT_RETRIEVED | NOT_USED — Incapsula JS challenge (served with HTTP 200); not evaded |
 | **Grand Slams** | | | | | |
-| `wimbledon.draws` Wimbledon — draw/score JSON feeds | PASS | draws, set_game_scoring, withdrawals_ret_wo, history, player_identity | PASS · HTTP 200 · 127 rec · 357838 B | RESTRICTS_COMMERCIAL_USE | CANARY_ONLY — ingest awaits owner rights decision |
-| `wimbledon.players` Wimbledon — players feed | PASS | player_bio, player_identity | audit request (see evidence file) | RESTRICTS_COMMERCIAL_USE | NOT_ADAPTED |
+| `wimbledon.draws` Wimbledon — draw/score JSON feeds | PASS | draws, set_game_scoring, withdrawals_ret_wo, history, player_identity | PASS · HTTP 200 · 127 rec · 357838 B | RESTRICTS_COMMERCIAL_USE | INGEST — gentlemen's singles 2022-2025 (women's Slam matches come from the WTA API to avoid duplicates) |
+| `wimbledon.players` Wimbledon — players feed | PASS | player_bio, player_identity | audit request (private archive) | RESTRICTS_COMMERCIAL_USE | NOT_ADAPTED |
 | `wimbledon.pbp` Wimbledon — point-by-point / match detail | UNVERIFIED | point_by_point, match_stats | — | RESTRICTS_COMMERCIAL_USE | NOT_ADAPTED |
-| `ausopen.results` Australian Open — scores API (day results/schedule, players) | PASS | schedule, set_game_scoring, player_identity, player_bio | PASS · HTTP 200 · 64 rec · 209058 B | NOT_RETRIEVED | CANARY_ONLY — match rows not parsed yet |
-| `ausopen.matchcentre` Australian Open — match centre (key stats + point-by-point) | PASS | point_by_point, match_stats | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
-| `usopen.feeds` US Open — score feeds | UNVERIFIED | draws, set_game_scoring | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
-| `rolandgarros.results` Roland-Garros — results pages (Nuxt payload) | DEGRADED | set_game_scoring, history | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
+| `ausopen.results` Australian Open — scores API (day results/schedule, players) | PASS | schedule, set_game_scoring, player_identity, player_bio | PASS · HTTP 200 · 64 rec · 209058 B | NOT_RETRIEVED | INGEST (player registry → identity) — owner-approved 2026-09-26; match rows not parsed yet |
+| `ausopen.matchcentre` Australian Open — match centre (key stats + point-by-point) | PASS | point_by_point, match_stats | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `usopen.feeds` US Open — score feeds | UNVERIFIED | draws, set_game_scoring | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `rolandgarros.results` Roland-Garros — results pages (Nuxt payload) | DEGRADED | set_game_scoring, history | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
 | **Team events** | | | | | |
-| `daviscup.draws` Davis Cup — draws & results pages | DEGRADED | draws | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
-| `bjkcup.draws` Billie Jean King Cup — draws & results pages | DEGRADED | draws | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
-| `unitedcup.site` United Cup | DEGRADED | schedule | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
-| `olympics.tennis` Olympics — tennis results | UNVERIFIED | draws | audit request (see evidence file) | NOT_RETRIEVED | NOT_ADAPTED |
+| `daviscup.draws` Davis Cup — draws & results pages | DEGRADED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `bjkcup.draws` Billie Jean King Cup — draws & results pages | DEGRADED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `unitedcup.site` United Cup | DEGRADED | schedule | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
+| `olympics.tennis` Olympics — tennis results | UNVERIFIED | draws | audit request (private archive) | NOT_RETRIEVED | NOT_ADAPTED |
 | **Wikidata** | | | | | |
-| `wikidata.crosswalk` Wikidata — identity crosswalk (ATP P536, WTA P597, ITF P599, Davis Cup P2641, BJK Cup P2642, image P18) | PASS | player_identity, player_media | PASS · HTTP 200 · 5 rec · 2915 B | OPEN_LICENSE | READY — rights-clear; adapter built |
+| `wikidata.crosswalk` Wikidata — identity crosswalk (ATP P536, WTA P597, ITF P599, Davis Cup P2641, BJK Cup P2642, image P18) | PASS | player_identity, player_media | PASS · HTTP 200 · 5 rec · 2915 B | OPEN_LICENSE | INGEST — weekly crosswalk (P597 + P536) |
 | `commons.license` Wikimedia Commons — per-file license & author metadata | PASS | player_media | PASS · HTTP 200 · 1 rec · 1163 B | PER_FILE_LICENSE | READY — rights-ledger input |
 | **Open data** | | | | | |
-| `sackmann.tour_datasets` Jeff Sackmann tennis_atp / tennis_wta / tennis_slam_pointbypoint | NOT_AVAILABLE | history, point_by_point, match_stats | audit request (see evidence file) | NOT_RETRIEVED | NOT_USED |
-| `sackmann.match_charting` Match Charting Project | DEGRADED | point_by_point, history | audit request (see evidence file) | NON_COMMERCIAL_LICENSE | NOT_USED — CC BY-NC-SA conflicts with a commercial product |
-| `tennisabstract.site` Tennis Abstract | DEGRADED | history, match_stats | audit request (see evidence file) | NOT_RETRIEVED | NOT_USED — data paths are robots-disallowed |
+| `sackmann.tour_datasets` Jeff Sackmann tennis_atp / tennis_wta / tennis_slam_pointbypoint | NOT_AVAILABLE | history, point_by_point, match_stats | audit request (private archive) | NOT_RETRIEVED | NOT_USED |
+| `sackmann.match_charting` Match Charting Project | DEGRADED | point_by_point, history | audit request (private archive) | NON_COMMERCIAL_LICENSE | NOT_USED — CC BY-NC-SA conflicts with a commercial product |
+| `tennisabstract.site` Tennis Abstract | DEGRADED | history, match_stats | audit request (private archive) | NOT_RETRIEVED | NOT_USED — data paths are robots-disallowed |
 | **Odds** | | | | | |
-| `odds.tennis_data_co_uk` tennis-data.co.uk | BLOCKED_BY_ACCESS_CONTROL | odds, history | audit request (see evidence file) | NOT_RETRIEVED | NOT_USED |
-| `odds.the_odds_api` The Odds API (existing PropBetEdge network subscription) | COMMERCIAL_REFERENCE_ONLY | odds | audit request (see evidence file) | NOT_REVIEWED | REFERENCE_ONLY — not a Tennis dependency |
+| `odds.tennis_data_co_uk` tennis-data.co.uk | BLOCKED_BY_ACCESS_CONTROL | odds, history | audit request (private archive) | NOT_RETRIEVED | NOT_USED |
+| `odds.the_odds_api` The Odds API (existing PropBetEdge network subscription) | COMMERCIAL_REFERENCE_ONLY | odds | audit request (private archive) | NOT_REVIEWED | REFERENCE_ONLY — not a Tennis dependency |
 | **Commercial (reference only)** | | | | | |
 | `commercial.sportradar` Sportradar | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.stats` Stats Perform (Opta) | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |

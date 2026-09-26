@@ -89,6 +89,29 @@ test('WTA matches: singles, doubles, qualifying, tiebreaks, match tiebreak, reti
   assert.equal(w.canonical, true, w.problems.join());
 });
 
+test('WTA order-of-play row (MatchState U) is a scheduled match; placeholder timestamp ignored', () => {
+  const u = wta.parseWtaMatch({ DrawLevelType: 'M', DrawMatchType: 'D', EventID: '1135', EventYear: 2026, MatchID: 'LD001', MatchState: 'U', MatchTimeStamp: '2026-09-26T23:59+01:00', CourtName: 'Centre court', NotBefore: 'Followed By', NotBeforeISOTime: '', PlayerIDA: '1', PlayerIDA2: '2', PlayerIDB: '3', PlayerIDB2: '4', RoundID: 1, Unscheduled: true }, { level: 'WTA 125' });
+  assert.equal(u.status, 'scheduled');
+  assert.equal(u.format_key, 'DOUBLES_TOUR');
+  assert.equal(u.scheduled_at, null);
+  assert.equal(u.schedule_note, 'Followed By');
+  assert.deepEqual(u.warnings, []);
+});
+
+test('Winner code 5 = side B won, A retired', () => {
+  const [m] = JSON.parse(fx('wta/matches-1152.json')).matches;
+  const r = wta.parseWtaMatch({ ...m, Winner: '5' });
+  assert.equal(r.status, 'retired');
+  assert.equal(r.winner_side, 'B');
+  assert.equal(r.retired_side, 'A');
+});
+
+test('Slam level switches the deciding set to a 10-point tiebreak', () => {
+  assert.equal(wta.formatFor('1', { level: 'Grand Slam', year: 2025 }), 'BO3_FINAL_TB10');
+  assert.equal(wta.formatFor('1', { level: 'WTA 500', year: 2025 }), 'BO3_TB7');
+  assert.equal(wta.formatFor('9', { level: 'Grand Slam', year: 2025 }), 'DOUBLES_TOUR');
+});
+
 test('WTA unmapped codes surface as warnings, never guesses', () => {
   const [m] = JSON.parse(fx('wta/matches-1152.json')).matches;
   const odd = wta.parseWtaMatch({ ...m, Winner: '7', ScoreSys: '42', MatchState: 'X' });

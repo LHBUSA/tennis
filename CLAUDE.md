@@ -44,7 +44,7 @@ Read before changing anything: `docs/STATUS.md` (what is real today), `docs/ARCH
 | `supabase/migrations/` | Staged schema, proven on PGlite by `tests/migration.test.js`; NOT applied |
 | `src/` | Vite shell: router (`src/lib/routes.js` is the route authority), pages, SEO, network registry |
 | `data/source-registry/sources.json` | Audited source registry (guarded: PASS needs evidence) |
-| `docs/evidence/` | Canary runs + raw Phase 0 audit |
+| `docs/evidence/` | Canary run summaries (counts/hashes only). Raw captures live in private R2, never in this public repo |
 
 ## Commands
 

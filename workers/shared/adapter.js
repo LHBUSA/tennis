@@ -48,7 +48,7 @@ export async function runAdapter(adapter, { client, params = {}, archive = null 
     if (!res.ok) return { ...base, state: 'DEGRADED', url: req.url, http_status: res.status, error: `http_${res.status}`, capture, ms: Date.now() - started };
     const drift = adapter.shape(res.body, res);
     if (drift.length) return { ...base, state: 'DEGRADED', url: req.url, http_status: res.status, error: 'shape_drift', drift, capture, ms: Date.now() - started };
-    const records = adapter.parse(res.body, { url: req.url, fetched_at: res.fetched_at });
+    const records = adapter.parse(res.body, { url: req.url, fetched_at: res.fetched_at, params });
     return { ...base, state: records.length ? 'PASS' : 'DEGRADED', url: req.url, http_status: res.status, records, record_count: records.length, bytes: res.bytes, latency_ms: res.latency_ms, not_modified: res.not_modified, capture, ms: Date.now() - started, ...(records.length ? {} : { error: 'zero_records' }) };
   } catch (err) {
     const blocked = err?.code === 'source_blocked';

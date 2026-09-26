@@ -1,58 +1,295 @@
 // tennis-api — the public read API behind tennis.propbetedge.ai. docs/API.md.
 //
-// Reads come from the canonical store (Supabase) and live state (KV) once those are wired. Until a
-// route's backing data is in production it answers NOT_CONFIGURED with data: null — never a sample,
-// never a placeholder. /v1/sources is real today: it serves the audited source registry and the most
-// recent canary evidence committed to Git.
+// Reads the canonical store (Supabase, service role — never exposed) and returns the envelope with
+// provenance + freshness on every response. Routes whose backing data does not exist yet (picks, odds,
+// news, Breakout Watch) answer NOT_CONFIGURED with data: null — never a sample.
 
 import { envelope, notConfigured, json } from '../../shared/envelope.js';
 import { health } from '../../shared/health.js';
+import { storeFromEnv, inList } from '../../shared/store/postgrest.js';
+import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 
-const DATA_ROUTES = [
-  ['/v1/today', 'today: live, scheduled and final matches across tours for the current date'],
-  ['/v1/live', 'matches currently in progress'],
-  ['/v1/tournaments', 'tournament editions calendar'],
-  ['/v1/matches', 'matches by date / tournament / player'],
-  ['/v1/players', 'canonical player directory'],
-  ['/v1/rankings', 'official ranking snapshots (ATP/WTA singles + doubles)'],
-  ['/v1/news', 'published newsroom stories (none: the evidence graph is not populated)'],
-  ['/v1/breakout-watch', 'Breakout Watch index (methodology unpublished)'],
-  ['/v1/odds', 'market snapshots (MARKET UNAVAILABLE until a legitimate source is captured)'],
-  ['/v1/pbe-picks', 'locked PBE picks (model not validated; none exist)'],
-  ['/v1/track-record', 'graded PBE picks (none exist)']
-];
-const PARAM_ROUTES = [
-  [/^\/v1\/tournaments\/[^/]+\/draws$/, 'tournament draws'],
-  [/^\/v1\/tournaments\/[^/]+$/, 'tournament edition'],
-  [/^\/v1\/matches\/[^/]+\/(live|points|stats)$/, 'match live state / point stream / stats'],
-  [/^\/v1\/matches\/[^/]+$/, 'match'],
-  [/^\/v1\/players\/[^/]+\/(matches|dna|rankings)$/, 'player history / Tennis DNA / ranking history'],
-  [/^\/v1\/players\/[^/]+$/, 'player profile'],
-  [/^\/v1\/h2h\/[^/]+\/[^/]+$/, 'head-to-head'],
-  [/^\/v1\/doubles\/pairs\/[^/]+$/, 'doubles pair profile']
-];
+const PLAYER = 'tennis_players(slug,full_name,nationality,gender)';
+const SIDES = `tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(kind,tennis_participant_members(slot,${PLAYER})))`;
+const EDITION = 'tennis_tournament_editions(year,name,level,surface,indoor,start_date,end_date,tennis_tournaments(slug,name))';
+const MATCH = `match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,scheduled_at,court,schedule_note,live_state,stats_status,source_family,source_updated_at,updated_at,edition_id,${EDITION},tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),${SIDES}`;
+const FINAL = ['completed', 'retired', 'walkover'];
+const TOUR_LEVELS = ['Grand Slam', 'WTA 1000', 'WTA 500', 'WTA 250', 'WTA 125', 'WTA Finals'];
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const SLUG = /^[a-z0-9-]{1,80}$/;
+const today = () => new Date().toISOString().slice(0, 10);
+const addDays = (d, n) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCDate(x.getUTCDate() + n); return x.toISOString().slice(0, 10); };
+
+// ---- shaping -------------------------------------------------------------------------------------------
+function shapeEdition(e) {
+  if (!e) return null;
+  return { slug: e.tennis_tournaments?.slug || null, tournament: e.tennis_tournaments?.name || null, name: e.name, year: e.year, level: e.level, surface: e.surface, indoor: e.indoor, start_date: e.start_date, end_date: e.end_date };
+}
+export function shapeMatch(m) {
+  const sides = {};
+  for (const p of m.tennis_match_participants || []) {
+    sides[p.side] = {
+      participant_key: p.participant_key, seed: p.seed, entry_type: p.entry_type,
+      players: (p.tennis_participants?.tennis_participant_members || []).sort((a, b) => a.slot - b.slot).map((x) => ({ slug: x.tennis_players?.slug, name: x.tennis_players?.full_name, nationality: x.tennis_players?.nationality }))
+    };
+  }
+  return {
+    id: m.match_id, event_type: m.event_type, round: m.round, format: m.format_key, status: m.status, winner_side: m.winner_side, end_reason: m.end_reason,
+    score: m.score_text, duration_s: m.duration_s, scheduled_at: m.scheduled_at, court: m.court, schedule_note: m.schedule_note,
+    live: m.status === 'in_progress' ? m.live_state : null,
+    sets: (m.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((s) => ({ A: s.games_a, B: s.games_b, tb: s.tb_a == null ? null : { A: s.tb_a, B: s.tb_b }, match_tiebreak: s.is_match_tiebreak, winner: s.winner_side })),
+    sides, tournament: shapeEdition(m.tennis_tournament_editions), stats: m.stats_status, source: m.source_family, source_updated_at: m.source_updated_at, updated_at: m.updated_at
+  };
+}
+const maxTime = (rows, k = 'updated_at') => rows.reduce((t, r) => (r[k] && (!t || r[k] > t) ? r[k] : t), null);
+const families = (rows) => [...new Set(rows.map((r) => r.source_family).filter(Boolean))];
+
+function ok(data, { rows = [], source = null, updated = null, policy, semantics, degraded = [] }) {
+  return envelope(data, { source: source || families(rows), source_updated_at: updated ?? maxTime(rows), policy, semantics, degraded });
+}
+
+// ---- handlers ------------------------------------------------------------------------------------------
+async function live(store) {
+  const rows = await store.select('tennis_matches', `select=${MATCH}&status=eq.in_progress&order=updated_at.desc&limit=200`);
+  return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress; point score + server as the source published them' });
+}
+
+async function editionsInWindow(store, from, to, all) {
+  const lv = all ? '' : `&level=${inList(TOUR_LEVELS)}`;
+  return store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,source_status,source_family,updated_at,tennis_tournaments(slug,name)&start_date=lte.${to}&end_date=gte.${from}${lv}&order=start_date.asc,name.asc&limit=300`);
+}
+
+async function todayView(store) {
+  const d = today();
+  const eds = await editionsInWindow(store, d, d, false);
+  const ids = eds.map((e) => e.edition_id);
+  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&order=source_updated_at.desc.nullslast&limit=400`) : [];
+  const shaped = matches.map(shapeMatch);
+  const data = {
+    date: d,
+    tournaments: eds.map((e) => ({ ...shapeEdition(e), status: e.source_status, matches: shaped.filter((m) => m.tournament?.slug === e.tennis_tournaments?.slug && m.tournament?.year === e.year).length })),
+    live: shaped.filter((m) => m.status === 'in_progress'),
+    upcoming: shaped.filter((m) => m.status === 'scheduled'),
+    latest_results: shaped.filter((m) => FINAL.includes(m.status)).slice(0, 30)
+  };
+  return ok(data, { rows: matches, policy: { currentS: 300, staleS: 1800 }, semantics: 'editions in progress today (WTA tour, WTA 125, Slams) and their observed matches', degraded: ['ATP, Challenger and ITF match data are not yet acquirable (see /v1/sources)'] });
+}
+
+async function tournaments(store, url) {
+  const d = today();
+  const from = url.searchParams.get('from') || addDays(d, -7);
+  const to = url.searchParams.get('to') || addDays(d, 60);
+  const eds = await editionsInWindow(store, from, to, url.searchParams.get('all') === '1');
+  return ok(eds.map((e) => ({ ...shapeEdition(e), status: e.source_status })), { rows: eds, policy: { currentS: 6 * 3600, staleS: 48 * 3600 }, semantics: `tournament editions overlapping ${from}..${to}` });
+}
+
+async function tournament(store, slug, year) {
+  const t = await store.select('tennis_tournaments', `select=tournament_id,slug,name&slug=eq.${slug}`);
+  if (!t.length) return null;
+  const e = await store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,source_status,source_family,updated_at,tennis_tournaments(slug,name)&tournament_id=eq.${t[0].tournament_id}&year=eq.${year}`);
+  if (!e.length) return null;
+  const matches = await store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&limit=1000`);
+  return ok({ edition: { ...shapeEdition(e[0]), status: e[0].source_status }, matches: matches.map(shapeMatch) }, { rows: [...e, ...matches], policy: { currentS: 300, staleS: 3600 }, semantics: 'one tournament edition with every observed match (all events and stages)' });
+}
+
+async function match(store, id) {
+  const rows = await store.select('tennis_matches', `select=${MATCH}&match_id=eq.${id}`);
+  if (!rows.length) return null;
+  const [stats, changes] = await Promise.all([
+    store.select('tennis_match_stats', `select=side,source_family,stats,captured_at&match_id=eq.${id}`),
+    store.select('tennis_source_changes', `select=kind,field,from_value,to_value,observed_at,source_family&entity_type=eq.match&entity_id=eq.${id}&order=observed_at.asc&limit=200`)
+  ]);
+  const m = shapeMatch(rows[0]);
+  m.statistics = stats.length ? Object.fromEntries(stats.map((s) => [s.side, s.stats])) : null;
+  m.observed_changes = changes;
+  return ok(m, { rows, policy: { currentS: 240, staleS: 1800 }, semantics: 'canonical match; statistics are the source totals mapped to PropBetEdge keys; observed_changes are upstream mutations we recorded' });
+}
+
+async function latestSnapshot(store, listKey, date) {
+  const q = date ? `&ranking_date=lte.${date}` : '';
+  const snaps = await store.select('tennis_ranking_snapshots', `select=snapshot_id,list_key,ranking_date,row_count,captured_at,source_family&list_key=eq.${listKey}${q}&row_count=gt.0&order=ranking_date.desc&limit=1`);
+  return snaps[0] || null;
+}
+
+async function rankings(store, url) {
+  const tour = url.searchParams.get('tour') || 'wta';
+  const type = url.searchParams.get('type') || 'singles';
+  if (!['wta', 'atp'].includes(tour) || !['singles', 'doubles'].includes(type)) return envelope(null, { freshness: 'ERROR', semantics: 'invalid tour/type' });
+  const listKey = `${tour}_${type}`;
+  const snap = await latestSnapshot(store, listKey, url.searchParams.get('date'));
+  if (!snap) return envelope(null, { freshness: 'UNAVAILABLE', semantics: `${listKey}: no complete snapshot stored`, degraded: tour === 'atp' ? ['ATP rankings: atptour.com refuses automated access; no legitimate path yet'] : [] });
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 100, 500);
+  const offset = Math.max(Number(url.searchParams.get('offset')) || 0, 0);
+  const rows = await store.select('tennis_rankings', `select=rank,points,tournaments_played,provider_player_id,${PLAYER}&snapshot_id=eq.${snap.snapshot_id}&order=rank.asc&limit=${limit}&offset=${offset}`);
+  const prev = await store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date&list_key=eq.${listKey}&ranking_date=lt.${snap.ranking_date}&row_count=gt.0&order=ranking_date.desc&limit=1`);
+  let prevRank = new Map();
+  if (prev.length && rows.length) {
+    const pr = await store.select('tennis_rankings', `select=provider_player_id,rank&snapshot_id=eq.${prev[0].snapshot_id}&provider_player_id=${inList(rows.map((r) => r.provider_player_id))}`);
+    prevRank = new Map(pr.map((r) => [r.provider_player_id, r.rank]));
+  }
+  const data = {
+    list: listKey, ranking_date: snap.ranking_date, previous_date: prev[0]?.ranking_date || null, total: snap.row_count,
+    rows: rows.map((r) => ({ rank: r.rank, points: r.points, tournaments: r.tournaments_played, previous_rank: prevRank.get(r.provider_player_id) ?? null, player: { slug: r.tennis_players?.slug, name: r.tennis_players?.full_name, nationality: r.tennis_players?.nationality } }))
+  };
+  return envelope(data, { source: [snap.source_family], source_updated_at: snap.captured_at, policy: { currentS: 8 * 86400, staleS: 15 * 86400 }, semantics: `official ${tour.toUpperCase()} ${type} list dated ${snap.ranking_date}, as published; movement compares with our archived previous list` });
+}
+
+async function playerBySlug(store, slug) {
+  const col = UUID.test(slug) ? 'pbe_player_id' : 'slug';
+  const p = await store.select('tennis_players', `select=pbe_player_id,slug,full_name,first_name,last_name,gender,dob,nationality,plays,height_cm,updated_at&${col}=eq.${slug}`);
+  return p[0] || null;
+}
+
+async function playerMatchIds(store, pid) {
+  const mem = await store.select('tennis_participant_members', `select=participant_key&pbe_player_id=eq.${pid}`);
+  if (!mem.length) return [];
+  return store.select('tennis_match_participants', `select=match_id,side,participant_key&participant_key=${inList(mem.map((m) => m.participant_key))}&limit=2000`);
+}
+
+async function player(store, slug) {
+  const p = await playerBySlug(store, slug);
+  if (!p) return null;
+  const [ext, ranks, mp] = await Promise.all([
+    store.select('tennis_player_external_ids', `select=provider,external_id,method&pbe_player_id=eq.${p.pbe_player_id}`),
+    store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date)&pbe_player_id=eq.${p.pbe_player_id}&limit=600`),
+    playerMatchIds(store, p.pbe_player_id)
+  ]);
+  const recent = mp.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(mp.map((x) => x.match_id).slice(0, 400))}&order=source_updated_at.desc.nullslast&limit=25`) : [];
+  const hist = ranks.map((r) => ({ list: r.tennis_ranking_snapshots.list_key, date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points })).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const latest = {};
+  for (const r of hist) if (!latest[r.list]) latest[r.list] = { rank: r.rank, points: r.points, date: r.date };
+  const data = {
+    id: p.pbe_player_id, slug: p.slug, name: p.full_name, first_name: p.first_name, last_name: p.last_name, gender: p.gender, dob: p.dob, nationality: p.nationality,
+    external_ids: ext.filter((e) => e.provider !== 'commons_image').map((e) => ({ provider: e.provider, id: e.external_id })),
+    rankings: latest, ranking_history: hist, recent_matches: recent.map(shapeMatch), photo: null
+  };
+  return ok(data, { rows: recent, source: [...new Set(['wta', ...families(recent)])], updated: p.updated_at, policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'canonical player: identity crosswalk, official ranking history we archived, recent observed matches' });
+}
+
+async function playerDna(store, slug, url) {
+  const p = await playerBySlug(store, slug);
+  if (!p) return null;
+  const asOf = url.searchParams.get('as_of') || addDays(today(), 1);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(asOf)) return envelope(null, { freshness: 'ERROR', semantics: 'as_of must be YYYY-MM-DD' });
+  const mp = (await playerMatchIds(store, p.pbe_player_id)).filter((x) => x.participant_key === `S:${p.pbe_player_id}`);
+  const surface = url.searchParams.get('surface');
+  const opts = { asOf, surface: ['hard', 'clay', 'grass'].includes(surface) ? surface : null };
+  if (!mp.length) return ok({ player: { slug: p.slug, name: p.full_name }, ...buildDna([], opts) }, { rows: [], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 (singles): no stored matches yet' });
+  const ids = mp.map((x) => x.match_id);
+  const side = new Map(mp.map((x) => [x.match_id, x.side]));
+  const [stats, ms] = await Promise.all([
+    store.select('tennis_match_stats', `select=match_id,side,source_family,stats&match_id=${inList(ids)}&limit=4000`),
+    store.select('tennis_matches', `select=match_id,source_updated_at,surface,status,tennis_sets(set_no,games_a,games_b)&match_id=${inList(ids)}&limit=2000`)
+  ]);
+  const meta = new Map(ms.map((m) => [m.match_id, m]));
+  const byMatch = new Map();
+  for (const s of stats) { if (!byMatch.has(s.match_id)) byMatch.set(s.match_id, {}); byMatch.get(s.match_id)[s.side] = s; }
+  const rows = [];
+  for (const [mid, sides] of byMatch) {
+    const me = side.get(mid);
+    const opp = me === 'A' ? 'B' : 'A';
+    const m = meta.get(mid);
+    if (!sides[me] || !sides[opp] || !m?.source_updated_at) continue;
+    const sets = m.tennis_sets || [];
+    rows.push({ match_id: mid, match_date: m.source_updated_at.slice(0, 10), surface: m.surface, sets_played: sets.length, games_played: sets.reduce((t, x) => t + x.games_a + x.games_b, 0), source_family: sides[me].source_family, side: sides[me].stats, opp: sides[opp].stats });
+  }
+  return ok({ player: { slug: p.slug, name: p.full_name }, ...buildDna(rows, opts) }, { rows: stats, updated: maxTime(ms, 'source_updated_at'), policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'Tennis DNA v1 singles metrics from stored source statistics; match date = date of the final source update; as_of exclusive', degraded: ['sample limited to matches whose statistics have been ingested so far'] });
+}
+
+async function h2h(store, a, b) {
+  const [pa, pb] = await Promise.all([playerBySlug(store, a), playerBySlug(store, b)]);
+  if (!pa || !pb) return null;
+  const ka = `S:${pa.pbe_player_id}`;
+  const kb = `S:${pb.pbe_player_id}`;
+  const mp = await store.select('tennis_match_participants', `select=match_id,side,participant_key&participant_key=${inList([ka, kb])}&limit=2000`);
+  const bySide = new Map();
+  for (const r of mp) { if (!bySide.has(r.match_id)) bySide.set(r.match_id, {}); bySide.get(r.match_id)[r.participant_key] = r.side; }
+  const ids = [...bySide].filter(([, v]) => v[ka] && v[kb]).map(([k]) => k);
+  const rows = ids.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(ids)}&order=source_updated_at.desc.nullslast`) : [];
+  const meetings = rows.map(shapeMatch);
+  const won = (m, key) => FINAL.includes(m.status) && m.winner_side === bySide.get(m.id)[key];
+  const record = { [pa.slug]: meetings.filter((m) => won(m, ka)).length, [pb.slug]: meetings.filter((m) => won(m, kb)).length };
+  return ok({ a: { slug: pa.slug, name: pa.full_name }, b: { slug: pb.slug, name: pb.full_name }, record, meetings }, { rows, policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: 'singles meetings present in the canonical store (coverage-limited while history backfills); descriptive, not a prediction' });
+}
+
+async function players(store, url) {
+  const q = (url.searchParams.get('q') || '').trim();
+  if (q) {
+    const safe = q.replace(/[^\p{L}\p{N} '-]/gu, '').slice(0, 60);
+    const rows = await store.select('tennis_players', `select=slug,full_name,nationality,gender,updated_at&full_name=ilike.*${encodeURIComponent(safe)}*&order=full_name.asc&limit=50`);
+    return ok(rows.map((r) => ({ slug: r.slug, name: r.full_name, nationality: r.nationality })), { rows, source: ['pbe_identity_graph'], policy: { currentS: 86400, staleS: 7 * 86400 }, semantics: `players matching "${safe}"` });
+  }
+  return rankings(store, new URL('https://x/?tour=wta&type=singles&limit=200'));
+}
+
+function sources() {
+  return envelope({ registry, canary }, { source: ['pbe_source_audit'], source_updated_at: canary.run_at || null, freshness: canary.run_at ? 'CACHED' : 'UNAVAILABLE', semantics: 'Audited source registry + latest committed canary run.' });
+}
+
+const NOT_YET = {
+  '/v1/breakout-watch': 'Breakout Watch index: methodology and backtest not published',
+  '/v1/odds': 'MARKET UNAVAILABLE: no legitimate tennis market source is captured',
+  '/v1/pbe-picks': 'PBE Picks: the Tennis model is not validated; no picks exist',
+  '/v1/track-record': 'Track Record: no picks have been locked, nothing graded',
+  '/v1/news': 'Newsroom: evidence graph gates not built; nothing published'
+};
+
+const TTL = [[/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300]];
+
+export async function route(path, url, store) {
+  if (path === '/v1/sources') return sources();
+  if (NOT_YET[path]) return notConfigured(NOT_YET[path]);
+  if (/^\/v1\/doubles\/pairs\//.test(path)) return notConfigured('Doubles Lab pair profiles: pair snapshots not built yet');
+  const known = /^\/v1\/(live|today|tournaments(\/[a-z0-9-]+\/\d{4})?|rankings|players(\/[a-z0-9-]+(\/dna)?)?|matches\/[0-9a-f-]{36}|h2h\/[a-z0-9-]+\/[a-z0-9-]+)$/.test(path);
+  if (!known) return undefined;
+  if (!store) return notConfigured('canonical store not connected to this Worker');
+  if (path === '/v1/live') return live(store);
+  if (path === '/v1/today') return todayView(store);
+  if (path === '/v1/tournaments') return tournaments(store, url);
+  let m = /^\/v1\/tournaments\/([a-z0-9-]+)\/(\d{4})$/.exec(path);
+  if (m) return tournament(store, m[1], Number(m[2]));
+  if (path === '/v1/rankings') return rankings(store, url);
+  if (path === '/v1/players') return players(store, url);
+  m = /^\/v1\/matches\/([0-9a-f-]{36})$/.exec(path);
+  if (m) return UUID.test(m[1]) ? match(store, m[1]) : null;
+  m = /^\/v1\/players\/([a-z0-9-]+)\/dna$/.exec(path);
+  if (m) return SLUG.test(m[1]) ? playerDna(store, m[1], url) : null;
+  m = /^\/v1\/players\/([a-z0-9-]+)$/.exec(path);
+  if (m) return SLUG.test(m[1]) ? player(store, m[1]) : null;
+  m = /^\/v1\/h2h\/([a-z0-9-]+)\/([a-z0-9-]+)$/.exec(path);
+  if (m) return h2h(store, m[1], m[2]);
+  return undefined;
+}
 
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS' } });
     if (request.method !== 'GET') return json({ ok: false, error: 'method_not_allowed' }, { status: 405 });
-
     if (path === '/health' || path === '/') {
-      return json(await health({ worker: 'tennis-api', version: VERSION, env, deps: ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'TENNIS_STATE'], extra: { routes: [...DATA_ROUTES.map((r) => r[0]), '/v1/sources'] } }), { headers: { 'cache-control': 'no-store' } });
+      return json(await health({ worker: 'tennis-api', version: VERSION, env, deps: ['TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY', 'TENNIS_STATE'], extra: { routes: ['/v1/today', '/v1/live', '/v1/tournaments', '/v1/tournaments/:slug/:year', '/v1/matches/:id', '/v1/players', '/v1/players/:slug', '/v1/players/:slug/dna', '/v1/rankings', '/v1/h2h/:a/:b', '/v1/sources'] } }), { headers: { 'cache-control': 'no-store' } });
     }
-    if (path === '/v1/sources') {
-      return json(envelope({ registry, canary }, { source: ['pbe_source_audit'], source_updated_at: canary.run_at || null, freshness: canary.run_at ? 'CACHED' : 'UNAVAILABLE', semantics: 'Audited source registry + latest committed canary run. Canary results are evidence from the run time shown, not live status.' }));
+    const cache = ctx && globalThis.caches?.default;
+    const ttl = (TTL.find(([re]) => re.test(path)) || [null, 30])[1];
+    if (cache) {
+      const hit = await cache.match(request);
+      if (hit) return hit;
     }
-    const exact = DATA_ROUTES.find(([p]) => p === path);
-    if (exact) return json(notConfigured(exact[1], ['canonical store not yet populated']));
-    const param = PARAM_ROUTES.find(([re]) => re.test(path));
-    if (param) return json(notConfigured(param[1], ['canonical store not yet populated']));
-    return json({ ok: false, error: 'not_found' }, { status: 404 });
+    let body;
+    try {
+      body = await route(path, url, storeFromEnv(env));
+    } catch (e) {
+      body = envelope(null, { freshness: 'ERROR', semantics: 'canonical store read failed', degraded: [String(e?.message || e).slice(0, 200)] });
+    }
+    if (body === undefined) return json({ ok: false, error: 'not_found' }, { status: 404 });
+    if (body === null) return json(envelope(null, { freshness: 'UNAVAILABLE', semantics: 'not found in the canonical store' }), { status: 404 });
+    const res = json(body, { headers: { 'cache-control': `public, max-age=${ttl}` } });
+    if (cache && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(request, res.clone()));
+    return res;
   }
 };

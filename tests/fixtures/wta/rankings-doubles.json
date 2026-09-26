@@ -2,15 +2,15 @@
  "_capture": {
   "url": "https://api.wtatennis.com/tennis/players/ranked?page=0&pageSize=3&type=rankDoubles&sort=asc&metric=DOUBLES&at=2026-09-21",
   "captured_at": "2026-09-26",
-  "note": "Trimmed excerpt of a real response captured by the Phase 0 source audit, kept minimal for parser tests."
+  "note": "Minimal subset of a real response (names replaced by tokens) for parser tests."
  },
  "payload": [
   {
    "player": {
     "id": 320301,
-    "firstName": "Katerina",
-    "lastName": "Siniakova",
-    "fullName": "Katerina Siniakova",
+    "firstName": "First0",
+    "lastName": "Last0",
+    "fullName": "First0 Last0",
     "countryCode": "CZE",
     "dateOfBirth": "1996-05-10",
     "metadata": null
@@ -24,9 +24,9 @@
   {
    "player": {
     "id": 318609,
-    "firstName": "Taylor",
-    "lastName": "Townsend",
-    "fullName": "Taylor Townsend",
+    "firstName": "First1",
+    "lastName": "Last1",
+    "fullName": "First1 Last1",
     "countryCode": "USA",
     "dateOfBirth": "1996-04-16",
     "metadata": null

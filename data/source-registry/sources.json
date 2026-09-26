@@ -57,7 +57,7 @@
    "verdict": "PASS",
    "evidence": {
     "canary_key": "wta.rankings.singles",
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "player": "integer (e.g. 324166)"
@@ -68,7 +68,7 @@
     "status": "RESTRICTS_AUTOMATED_ACCESS",
     "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
    "notes": "Historical lists by date (at=2015-01-05 returned that week). ~40-50% of connections reset and succeed on retry; the adapter retries patiently at 1 request per 1.5 s.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -96,7 +96,7 @@
     "status": "RESTRICTS_AUTOMATED_ACCESS",
     "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null,
    "notes": null
@@ -112,7 +112,7 @@
    ],
    "verdict": "UNVERIFIED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)",
    "terms": {
@@ -148,7 +148,7 @@
     "status": "RESTRICTS_AUTOMATED_ACCESS",
     "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
    "notes": "Surface, indoor/outdoor, draw sizes and level. WTA 125 events included.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -180,7 +180,7 @@
     "status": "RESTRICTS_AUTOMATED_ACCESS",
     "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
    "notes": "Live rows carry point score and server. 2026-09-26 end-to-end run: 103 of 104 rows (Singapore + Ankara WTA 125) normalized canonical; 1 self-contradictory source row (1178-2026-LD013) was held by score validation. Winner codes 5/7 unobserved and unmapped.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -206,7 +206,7 @@
     "status": "RESTRICTS_AUTOMATED_ACCESS",
     "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — owner-approved 2026-09-26 (tennis-ingest cron)",
    "notes": "Field semantics verified against set scores; a consistency check (service points = points won; per-set sums = totals) runs on every parse.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null,
@@ -226,7 +226,7 @@
    ],
    "verdict": "PASS",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "player": "integer"
@@ -262,7 +262,7 @@
    "verdict": "BLOCKED_BY_ACCESS_CONTROL",
    "evidence": {
     "canary_key": "atp.rankings.page",
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "player": "4-char alphanumeric (e.g. S0AG)"
@@ -290,7 +290,7 @@
    ],
    "verdict": "BLOCKED_BY_ACCESS_CONTROL",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -349,7 +349,7 @@
    "verdict": "BLOCKED_BY_ACCESS_CONTROL",
    "evidence": {
     "canary_key": "itf.api.calendar",
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "player": "9-digit integer (e.g. 100241350)"
@@ -376,7 +376,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "User-Agent: * / Allow: /",
    "terms": {
@@ -401,7 +401,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "User-Agent: * / Allow: /",
    "terms": {
@@ -426,7 +426,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "Identical to atptour.com robots (same Sitecore platform)",
    "terms": {
@@ -451,7 +451,7 @@
    ],
    "verdict": "UNVERIFIED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -492,7 +492,7 @@
     "status": "RESTRICTS_COMMERCIAL_USE",
     "quote": "6.2 You must not use any part of or any content obtained from an AELTC Digital Platform for commercial purposes without first obtaining a licence from AELTC or from AELTC's official licensors (as may be applicable)."
    },
-   "production_status": "CANARY_ONLY — ingest awaits owner rights decision",
+   "production_status": "INGEST — gentlemen's singles 2022-2025 (women's Slam matches come from the WTA API to avoid duplicates)",
    "notes": "2025 Gentlemen's + Ladies' singles: 254 of 254 matches normalized canonical. Embedded ATP/WTA ids give a crosswalk with zero name matching.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -509,7 +509,7 @@
    ],
    "verdict": "PASS",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "Disallow: /api/, /s/, /webview/, /matchvideo/, /mobile, /zh_CN, /author/, /en_GB/scores/2025/schedule/pdf/, /en_GB/mywimbledon/ ... (/en_GB/scores/feeds/ NOT disallowed)",
    "terms": {
@@ -573,7 +573,7 @@
     "status": "NOT_RETRIEVED",
     "quote": null
    },
-   "production_status": "CANARY_ONLY — match rows not parsed yet",
+   "production_status": "INGEST (player registry → identity) — owner-approved 2026-09-26; match rows not parsed yet",
    "notes": "Player registry parsed (tour ids, gender, DOB, nationality). Current edition only; archive depth unknown.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -590,7 +590,7 @@
    ],
    "verdict": "PASS",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "ausopen.com: Drupal default; Disallow /core/, /profiles/, /admin/, /search, /user/*, /media/oembed. prod-scores-api.ausopen.com robots not checked",
    "terms": {
@@ -616,7 +616,7 @@
    ],
    "verdict": "UNVERIFIED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "robots.txt timed out",
    "terms": {
@@ -642,7 +642,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "player": "FFT-internal integer (e.g. 39723)"
@@ -671,7 +671,7 @@
    "verdict": "PASS",
    "evidence": {
     "canary_key": "wikidata.crosswalk",
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "native_ids": {
     "entity": "QID"
@@ -682,7 +682,7 @@
     "status": "OPEN_LICENSE",
     "quote": "Structured data is CC0."
    },
-   "production_status": "READY — rights-clear; adapter built",
+   "production_status": "INGEST — weekly crosswalk (P597 + P536)",
    "notes": "Humans with ids: ATP 6,582 · WTA 5,405 · ITF 7,417 · Davis Cup 2,926 · BJK Cup 2,167. WTA ids match api.wtatennis.com exactly.",
    "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
    "attribution": null
@@ -725,7 +725,7 @@
    ],
    "verdict": "NOT_AVAILABLE",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -751,7 +751,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -777,7 +777,7 @@
    ],
    "verdict": "DEGRADED",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": "Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)",
    "terms": {
@@ -803,7 +803,7 @@
    ],
    "verdict": "BLOCKED_BY_ACCESS_CONTROL",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -828,7 +828,7 @@
    ],
    "verdict": "COMMERCIAL_REFERENCE_ONLY",
    "evidence": {
-    "file": "docs/evidence/phase0-source-audit-2026-09-26.json"
+    "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
    },
    "robots": null,
    "terms": {
@@ -1010,5 +1010,10 @@
    "attribution": null,
    "native_ids": {}
   }
- ]
+ ],
+ "rights_decision": {
+  "date": "2026-09-26",
+  "by": "owner",
+  "decision": "Use technically accessible official tennis sources commercially for PropBetEdge factual data, normalization and owned analytics. No bypass of authentication, CAPTCHAs, Cloudflare/Incapsula challenges or other access controls."
+ }
 }
