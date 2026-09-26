@@ -30,6 +30,13 @@ const REGULAR = new Set(['0', '15', '30', '40', 'AD', 'A', 'AV']);
  * false tiebreak classification; this read-time correction re-derives it with the current rule and says so.
  */
 export function normalizeStoredEvent(e) {
+  // point events stored before doubles phrasing ('win'/'lose') was recognised: the raw source text is kept, so
+  // the reason is re-derived from it with the current rule (never invented)
+  if (e?.quality === 'point_event' && e.event_type === 'point' && e.event_detail?.text) {
+    const r = classifyReason(e.event_detail.text);
+    if (r.type !== 'point') return { ...e, event_type: r.type, event_detail: { ...e.event_detail, stroke: e.event_detail.stroke ?? r.stroke, reclassified: 'point -> reason re-derived from the stored source text; stored event unchanged' } };
+    return e;
+  }
   if (e?.quality !== 'score_snapshot' || e.event_type !== 'tiebreak') return e;
   const d = e.event_detail || {};
   const to = e.state?.point;
@@ -169,13 +176,14 @@ export function diffSnapshots(prev, next, formatKey) {
 
 // ---- point-by-point (AO match centre) ------------------------------------------------------------------
 
+// 'wins'/'loses' in singles, 'win'/'lose' for a doubles pair ("Paul/Willis win the point with an Ace")
 const REASONS = [
-  [/wins the point with an Ace/i, 'ace', null],
-  [/loses the point with a Double Fault/i, 'double_fault', null],
-  [/wins the point with a Service Winner/i, 'service_winner', null],
-  [/wins the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob|Passing Shot)[\w ]* Winner/i, 'winner', 1],
-  [/loses the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob)[\w ]* Unforced Error/i, 'unforced_error', 1],
-  [/loses the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob)[\w ]* Forced Error/i, 'forced_error', 1]
+  [/wins? the point with an Ace/i, 'ace', null],
+  [/loses? the point with a Double Fault/i, 'double_fault', null],
+  [/wins? the point with a Service Winner/i, 'service_winner', null],
+  [/wins? the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob|Passing Shot)[\w ]* Winner/i, 'winner', 1],
+  [/loses? the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob)[\w ]* Unforced Error/i, 'unforced_error', 1],
+  [/loses? the point with an? (Forehand|Backhand|Volley|Overhead|Smash|Drop Shot|Lob)[\w ]* Forced Error/i, 'forced_error', 1]
 ];
 
 export function classifyReason(text) {

@@ -87,3 +87,14 @@ test('AO point-by-point maps deterministically; live -> replay yields the exact 
   assert.deepEqual(a.map((e) => e.winner_side).join(''), 'AAAABBBB');
   assert.ok(a.every((e) => e.coordinates == null && e.serve_speed_kmh == null), 'no spatial data or speed invented');
 });
+
+test('point reasons: doubles phrasing (win/lose) classified; stored plain points re-derived from source text only', async () => {
+  const { classifyReason } = await import('../workers/shared/canonical/events.js');
+  assert.equal(classifyReason('Paul/Willis win the point with an Ace').type, 'ace');
+  assert.equal(classifyReason('X/Y lose the point with a Double Fault').type, 'double_fault');
+  assert.deepEqual(classifyReason('C. Alcaraz wins the point with a Forehand Winner'), { type: 'winner', stroke: 'forehand' });
+  const stored = { quality: 'point_event', event_type: 'point', event_detail: { text: 'Paul/Willis win the point with an Ace', stroke: null } };
+  assert.equal(normalizeStoredEvent(stored).event_type, 'ace');
+  const noText = { quality: 'point_event', event_type: 'point', event_detail: { text: 'Point to Paul/Willis' } };
+  assert.equal(normalizeStoredEvent(noText).event_type, 'point', 'no reason is invented when the source text has none');
+});

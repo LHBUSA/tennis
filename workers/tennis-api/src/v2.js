@@ -87,7 +87,7 @@ export async function pbecast(store, id) {
   const hasPoints = points.length > 0;
   const live = m.status === 'in_progress' || m.status === 'suspended';
   const mode = hasPoints ? (live ? 'point_by_point_live' : 'point_by_point_replay') : live ? 'observed_live' : snaps.length ? 'observed_replay' : m.status === 'scheduled' ? 'scheduled' : 'result_only';
-  const events = hasPoints ? points : snaps.map(normalizeStoredEvent);
+  const events = (hasPoints ? points : snaps).map(normalizeStoredEvent);
   const date = (m.source_updated_at || new Date().toISOString()).slice(0, 10);
   const singles = m.sides.A?.players?.length === 1 && m.sides.B?.players?.length === 1;
   const players = {};

@@ -138,3 +138,4 @@
   .pbc-stage { grid-template-columns: minmax(180px, 260px) auto minmax(180px, 260px); justify-content: center; }
   .pbc-side-A { justify-self: end; width: 100%; }
 }
+.pbc:fullscreen .pbc-feed h2, .pbc.is-fs .pbc-feed h2 { color: var(--on-dark); }
