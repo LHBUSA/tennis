@@ -69,11 +69,12 @@ export function headHtml(m) {
 }
 
 // ---- JSON-LD ------------------------------------------------------------------------------------------
-export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#org', name: 'PropBetEdge', url: 'https://propbetedge.ai', sameAs: [X_URL] };
+export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#org', name: 'PropBetEdge', url: 'https://propbetedge.ai', logo: { '@type': 'ImageObject', url: `${SITE}/brand/icon-512.png`, width: 512, height: 512 }, sameAs: [X_URL] };
 export const WEBSITE = { '@type': 'WebSite', '@id': `${SITE}/#site`, name: BRAND, url: `${SITE}/`, publisher: { '@id': ORGANIZATION['@id'] } };
 
 export function breadcrumb(items) {
-  return { '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: canonicalUrl(path) })) };
+  // a path is site-relative; an absolute URL (the network root) is used as given
+  return { '@type': 'BreadcrumbList', itemListElement: items.map(([name, path], i) => ({ '@type': 'ListItem', position: i + 1, name, item: /^https?:/.test(path) ? path : canonicalUrl(path) })) };
 }
 
 /** Site-level graph (network identity convention: Organization sameAs the canonical X profile). */
@@ -115,8 +116,16 @@ export function itemListLd(name, items) {
 }
 
 /** NewsArticle — published stories only; headline/dates/image/author are the story's own stored fields. */
-export function newsArticleLd(a, canonical, image) {
-  const n = { '@type': 'NewsArticle', '@id': `${canonical}#article`, mainEntityOfPage: canonical, url: canonical, headline: String(a.headline).slice(0, 110), description: a.dek || undefined, datePublished: a.first_published_at || a.published_at, dateModified: a.updated_at || a.published_at, author: { '@type': 'Organization', name: 'PropBetEdge Tennis Desk', url: `${SITE}/news` }, publisher: { '@id': ORGANIZATION['@id'] }, isPartOf: { '@id': WEBSITE['@id'] }, articleSection: 'Tennis' };
-  if (image) n.image = [image];
+export function newsArticleLd(a, canonical, image, ctx = {}) {
+  const n = { '@type': 'NewsArticle', '@id': `${canonical}#article`, mainEntityOfPage: canonical, url: canonical, headline: String(a.headline).slice(0, 110), description: a.dek || undefined, datePublished: a.first_published_at || a.published_at, dateModified: a.updated_at || a.published_at, author: { '@type': 'Organization', name: 'PropBetEdge Tennis Desk', url: `${SITE}/news` }, publisher: { '@id': ORGANIZATION['@id'] }, isPartOf: { '@id': WEBSITE['@id'] }, articleSection: ctx.section || 'Tennis' };
+  const images = [image, ...(ctx.images || [])].filter(Boolean);
+  if (images.length) n.image = images;
+  // entities only from the frozen evidence: people by their canonical player page (the same #person @id the
+  // player pages publish), the match by its match page event, the edition by its tournament page
+  const person = (p) => ({ '@type': 'Person', '@id': `${canonicalUrl(`/players/${p.slug}`)}#person`, name: p.name, url: canonicalUrl(`/players/${p.slug}`) });
+  const about = [...(ctx.featured || []).map(person), ...(ctx.match_id ? [{ '@type': 'SportsEvent', '@id': `${canonicalUrl(`/matches/${ctx.match_id}`)}#event`, url: canonicalUrl(`/matches/${ctx.match_id}`) }] : [])];
+  const mentions = [...(ctx.people || []).map(person), ...(ctx.tournament?.slug ? [{ '@type': 'Event', name: `${ctx.tournament.name} ${ctx.tournament.year}`, url: canonicalUrl(`/tournaments/${ctx.tournament.slug}/${ctx.tournament.year}`) }] : [])];
+  if (about.length) n.about = about;
+  if (mentions.length) n.mentions = mentions;
   return n;
 }

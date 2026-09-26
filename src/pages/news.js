@@ -16,16 +16,26 @@ const when = (iso) => (iso ? new Date(iso).toLocaleString('en-US', { month: 'sho
 const previewQ = () => { const p = new URLSearchParams(location.search).get('preview'); return p && /^[0-9a-f]{16,64}$/.test(p) ? p : null; };
 const withPreview = (path) => (previewQ() ? `${path}${path.includes('?') ? '&' : '?'}preview=${previewQ()}` : path);
 
+/** Card lead visual: the story's featured side (approved photos; monogram tile for anyone without one), or
+ *  a branded data tile built from the story's own key stat when no player is featured. */
+function cardArt(a, lead) {
+  const team = (a.team && a.team.length ? a.team : a.player ? [a.player] : []).slice(0, 2);
+  if (!team.length) return html`<div class="nw-art nw-art-brand"><span>${KIND[a.story_type] || 'Story'}</span>${a.key_stat ? html`<b>${a.key_stat.value}</b>` : ''}</div>`;
+  const px = lead ? (team.length > 1 ? 150 : 200) : (team.length > 1 ? 64 : 88);
+  return html`<div class="nw-art${team.length > 1 ? ' duo' : ''}">${team.map((p) => avatar({ name: p.name, photo: p.photo }, { size: 'square', px, eager: lead }))}</div>`;
+}
+
 export function card(a, lead = false) {
   const href = `/news/${a.slug}${previewQ() ? `?preview=${previewQ()}` : ''}`;
+  const who = (a.team && a.team.length ? a.team : a.player ? [a.player] : []).map((p) => p.name).join(' / ');
   return html`<article class="nw-card${lead ? ' nw-lead' : ''}">
     <a class="nw-card-a" href="${href}">
-      <div class="nw-card-img">${a.player ? avatar({ name: a.player.name, photo: a.player.photo }, { size: 'square', px: lead ? 160 : 72, eager: lead }) : ''}</div>
+      ${cardArt(a, lead)}
       <div class="nw-card-t">
-        <p class="nw-kick"><span>${KIND[a.story_type] || 'Story'}</span>${a.tournament?.name ? html` · ${a.tournament.name}` : ''}${a.status !== 'published' ? html` · <b class="nw-held">HELD: ${a.hold_reason || ''}</b>` : ''}</p>
+        <p class="nw-kick"><span>${KIND[a.story_type] || 'Story'}</span>${a.tournament?.name ? html` · ${a.tournament.name}${a.tournament.year ? ` ${a.tournament.year}` : ''}` : ''}${a.status !== 'published' ? html` · <b class="nw-held">HELD: ${a.hold_reason || ''}</b>` : ''}</p>
         <h2>${a.headline}</h2>
-        ${lead && a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
-        <p class="nw-meta">${a.key_stat ? html`<span class="nw-stat"><em>${a.key_stat.label}</em> ${a.key_stat.value}</span>` : ''}<time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time></p>
+        ${a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
+        <p class="nw-meta">${who ? html`<span class="nw-who">${who}</span>` : ''}<time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time></p>
       </div>
     </a></article>`;
 }
@@ -84,7 +94,7 @@ function scoreboard(d) {
   const row = (s) => { const side = d.sides[s]; return html`<tr class="${s === W ? 'w' : ''}"><th scope="row">${joinH((side.players || []).map((p) => html`<a href="/players/${p.slug}">${p.name}</a>`))}${side.seed ? html` <small>[${side.seed}]</small>` : ''}${side.entry ? html` <small>(${side.entry})</small>` : ''}</th>${d.sets.map((x) => html`<td>${x.match_tiebreak && x.tb ? x.tb[s] : x[s]}${!x.match_tiebreak && x.tb ? html`<sup>${x.tb[s]}</sup>` : ''}</td>`)}</tr>`; };
   return html`<div class="mod nw-score"><p class="mod-k">${d.tournament?.name || ''} · ${d.round_label}${d.duration ? ` · ${d.duration.hours ? `${d.duration.hours}h ` : ''}${d.duration.minutes}m` : ''}</p>
     <table><tbody>${row('A')}${row('B')}</tbody></table>
-    <p class="nw-links"><a href="/matches/${d.match_id}">Match page →</a> <a href="/pbecast/${d.match_id}">PBEcast replay →</a></p></div>`;
+    <p class="nw-links"><a href="/matches/${d.match_id}">Match page →</a>${d.replay?.available ? html` <a href="/pbecast/${d.match_id}">PBEcast replay →</a>` : ''}</p></div>`;
 }
 function h2hMod(h) {
   return html`<div class="mod"><p class="mod-k">Head-to-head · our archive from ${h.coverage_from}</p><ul class="nw-list">${h.prior_meetings.map((r) => html`<li><span class="${r.result === 'W' ? 'win' : 'loss'}">${r.result}</span> ${r.tournament} ${r.year} · ${r.round_label} · ${r.score || ''}</li>`)}</ul></div>`;
@@ -102,47 +112,140 @@ function methodMod(a) {
     <p>Evidence frozen ${e?.frozen_at ? when(e.frozen_at) : ''} (${e?.packet_version || ''}); every number in this story was checked against it (${a.method?.gates || ''}). Prose: ${a.method?.prose === 'model' ? 'PropBetEdge editorial model, fact-checked' : 'PropBetEdge fact-safe writer'}. Charts are built by code from the same evidence.</p></aside>`;
 }
 
+// ---- linking: resolved entities only ------------------------------------------------------------------------
+const esc = (x) => String(x).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const ROUND_TITLE = (r) => String(r || '').replace(/^\w/, (c) => c.toUpperCase());
+
+/** Text -> parts with the FIRST mention of each resolved entity linked. Only exact canonical full names from
+ *  the frozen evidence packet (resolved ids) are linked; surnames, variants and anything ambiguous stay text. */
+export function linkParts(text, entities, linked) {
+  const live = entities.filter((e) => e.name && e.href && !linked.has(e.key));
+  if (!live.length) return [text];
+  const re = new RegExp(`(^|[^\\p{L}])(${live.map((e) => esc(e.name)).sort((x, y) => y.length - x.length).join('|')})(?![\\p{L}])`, 'gu');
+  const out = [];
+  let last = 0;
+  let m;
+  while ((m = re.exec(text))) {
+    const at = m.index + m[1].length;
+    const e = live.find((x) => x.name === m[2]);
+    if (!e || linked.has(e.key)) continue;
+    linked.add(e.key);
+    out.push(text.slice(last, at), html`<a class="nw-ent" href="${e.href}">${m[2]}</a>`);
+    last = at + m[2].length;
+  }
+  out.push(text.slice(last));
+  return out;
+}
+
+function heroArt(team, opp) {
+  if (!team.length) return '';
+  const big = team.length > 1 ? 176 : 240;
+  return html`<div class="nwv-art${team.length > 1 ? ' duo' : ''}">
+    <div class="nwv-faces">${team.map((p) => html`<a class="nwv-face" href="/players/${p.slug}">${avatar(p, { size: 'square', px: big, eager: true })}<span><b>${p.name}</b>${p.nationality ? html`<small>${p.nationality}</small>` : ''}</span></a>`)}</div>
+    ${opp.length ? html`<p class="nwv-def"><span>def.</span>${opp.map((p) => html`<a href="/players/${p.slug}">${avatar(p, { px: 30 })}${p.name}</a>`)}</p>` : ''}
+  </div>`;
+}
+
+function photoCredits(people) {
+  const ph = people.filter((p) => p.photo?.source_page);
+  if (!ph.length) return '';
+  return html`<p class="nwv-credit">Photos: ${ph.map((p, i) => html`${i ? ' · ' : ''}${p.name} — <a href="${p.photo.source_page}" rel="noopener nofollow" target="_blank">${p.photo.author || 'author'} / ${p.photo.license}</a>`)}</p>`;
+}
+
+function facts(a, sb, t, replay) {
+  const m = a.evidence?.match;
+  const items = [];
+  if (a.key_stat) items.push([a.key_stat.label, a.key_stat.value]);
+  if (m?.round_label) items.push(['Round', ROUND_TITLE(m.round_label)]);
+  if (sb?.duration) items.push(['Duration', `${sb.duration.hours ? `${sb.duration.hours}h ` : ''}${sb.duration.minutes}m`]);
+  if (m?.date) items.push(['Date', fmtDay(m.date)]);
+  if (t?.level || t?.surface) items.push(['Event', [t.level, t.surface ? `${t.surface}${t.indoor ? ' · indoor' : ''}` : null].filter(Boolean).join(' · ')]);
+  const seeds = sb ? ['A', 'B'].filter((s) => sb.sides?.[s]?.seed).map((s) => `${(sb.sides[s].players || []).map((p) => p.last_name || p.name).join('/')} [${sb.sides[s].seed}]`) : [];
+  if (seeds.length) items.push(['Seeds', seeds.join(' · ')]);
+  if (!items.length && !replay?.available) return '';
+  return html`<div class="nwv-facts">${items.map(([k, v]) => html`<div><span>${k}</span><b>${v}</b></div>`)}
+    ${replay?.available ? html`<a class="nwv-cta" href="/pbecast/${a.match_id}"><b>Watch PBEcast replay</b><small>${replay.quality === 'point_by_point' ? 'Point-by-point from the official feed' : 'Observed score changes — no point-by-point for this match'}</small></a>` : ''}</div>`;
+}
+const fmtDay = (d) => new Date(`${d}T12:00:00Z`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+function chips(people) {
+  return html`<nav class="nwv-chips" aria-label="Players in this story">${people.map((p) => html`<a class="nwv-chip" href="/players/${p.slug}">${avatar(p, { px: 28 })}<span><b>${p.name}</b>${p.rank ? html`<small>${p.rank.list === 'wta_doubles' ? 'WTA doubles' : p.rank.list === 'wta_singles' ? 'WTA singles' : ''} No. ${p.rank.rank}</small>` : ''}</span></a>`)}</nav>`;
+}
+
+function related(a, people, t, replay, singles) {
+  const links = [];
+  if (t?.slug) links.push([`/tournaments/${t.slug}/${t.year}`, `${t.name} ${t.year}`, 'Tournament · every match']);
+  if (a.match_id) links.push([`/matches/${a.match_id}`, 'Match page', 'Score, statistics, head-to-head']);
+  if (replay?.available) links.push([`/pbecast/${a.match_id}`, 'PBEcast replay', replay.quality === 'point_by_point' ? 'Point-by-point' : 'Observed score changes']);
+  const lists = [...new Set(people.map((p) => p.rank?.list).filter(Boolean))];
+  if (lists.includes('wta_doubles')) links.push(['/rankings/women/doubles', 'WTA doubles rankings', 'Official list, archived weekly']);
+  if (lists.includes('wta_singles')) links.push(['/rankings/women', 'WTA singles rankings', 'Official list, archived weekly']);
+  if (singles) links.push(['/dna', 'Tennis DNA', 'Serve, return and pressure leaders']);
+  return html`<section class="nwv-rel" aria-labelledby="rel-h"><h2 id="rel-h">Keep exploring</h2>
+    ${people.length ? html`<p class="sec-sub">Players</p><ul class="men-feat">${people.map((p) => html`<li><a href="/players/${p.slug}">${avatar(p, { size: 'square', px: 56 })}<span><b>${p.name}</b><small>${[p.nationality, p.rank ? `No. ${p.rank.rank} ${p.rank.list === 'wta_doubles' ? 'doubles' : 'singles'}` : null].filter(Boolean).join(' · ')}</small></span></a></li>`)}</ul>` : ''}
+    ${links.length ? html`<p class="sec-sub">Tournament, match and data</p><div class="nwv-links">${links.map(([h, l, n]) => html`<a href="${h}"><b>${l}</b><small>${n}</small></a>`)}</div>` : ''}
+    ${a.related?.length ? html`<p class="sec-sub">Latest tennis intelligence</p><div class="nw-grid">${a.related.map((r) => card(r))}</div>` : ''}
+    <p class="nw-back"><a href="/news">All tennis news →</a></p></section>`;
+}
+
 export function article(root, ctx) {
   const ctl = new AbortController();
   const slug = ctx?.params?.slug;
-  render(root, html`<div class="page nw"><div data-body><p class="loading">Loading…</p></div></div>`);
+  render(root, html`<div class="nw"><div data-body><div class="page"><p class="loading">Loading…</p></div></div></div>`);
   api(withPreview(`/v1/news/${slug}`), { signal: ctl.signal }).then((res) => {
     const body = root.querySelector('[data-body]');
     if (!body) return;
     const a = res.data;
-    if (!a) { render(body, html`<div class="mod"><p class="empty-h">Story not found.</p><p class="note"><a href="/news">All tennis news →</a></p></div>`); return; }
+    if (!a) { render(body, html`<div class="page"><div class="mod"><p class="empty-h">Story not found.</p><p class="note"><a href="/news">All tennis news →</a></p></div></div>`); return; }
     document.title = `${a.headline} | PropBetEdge Tennis`;
     setIndexable(a.status === 'published' && !previewQ());
     track('tennis_news_open', { route: '/news/:slug', event_type: a.story_type });
     const mods = a.plan?.modules || [];
     const get = (id) => mods.find((m) => m.id === id)?.data;
     const charts = get('charts')?.charts || [];
+    const sb = get('scoreboard') ? { ...get('scoreboard'), replay: a.replay } : null;
+    const parts = a.evidence?.participants;
+    const people = (parts ? ['A', 'B'].flatMap((s) => parts[s]?.players || []) : a.evidence?.player ? [a.evidence.player] : []).filter((p) => p?.slug);
+    const W = sb?.winner_side;
+    const team = W && parts?.[W] ? parts[W].players.filter((p) => p?.slug) : a.evidence?.player?.slug ? [a.evidence.player] : [];
+    const opp = W && parts ? (parts[W === 'A' ? 'B' : 'A']?.players || []).filter((p) => p?.slug) : [];
     const names = {};
-    for (const s of ['A', 'B']) for (const p of a.evidence?.participants?.[s]?.players || []) names[p.id] = p.name;
+    for (const p of people) names[p.id] = p.name;
+    const t = a.evidence?.tournament || a.tournament || null;
+    const singles = parts ? ['A', 'B'].every((s) => (parts[s]?.players || []).length === 1) : false;
+    // resolved entities for in-text links: canonical player pages + the tournament edition
+    const entities = [...people.map((p) => ({ key: `p:${p.id}`, name: p.name, href: `/players/${p.slug}` })), ...(t?.slug && t?.name ? [{ key: 't', name: t.name, href: `/tournaments/${t.slug}/${t.year}` }] : [])];
+    const linked = new Set();
     // modules interrupt the prose: scoreboard after the lead, charts after the match-data section, the
     // rest spread through the remaining sections (the UFC placement rule, deterministic)
-    const inserts = { what_happened: [get('scoreboard') ? scoreboard(get('scoreboard')) : ''], match_data: charts.filter((c) => c.id !== 'dna_comparison' && c.id !== 'ranking_trajectory').map(chart), dna: charts.filter((c) => c.id === 'dna_comparison').map(chart), h2h: [get('h2h') ? h2hMod(get('h2h')) : ''], path: [get('path') ? pathMod(get('path')) : ''], trajectory: charts.filter((c) => c.id === 'ranking_trajectory').map(chart) };
+    const inserts = { what_happened: [sb ? scoreboard(sb) : ''], match_data: charts.filter((c) => c.id !== 'dna_comparison' && c.id !== 'ranking_trajectory').map(chart), dna: charts.filter((c) => c.id === 'dna_comparison').map(chart), h2h: [get('h2h') ? h2hMod(get('h2h')) : ''], path: [get('path') ? pathMod(get('path')) : ''], trajectory: charts.filter((c) => c.id === 'ranking_trajectory').map(chart) };
     const placed = new Set(Object.entries(inserts).filter(([id]) => a.sections.some((s) => s.id === id)).map(([id]) => id));
     const leftovers = Object.entries(inserts).filter(([id]) => !placed.has(id)).flatMap(([, v]) => v);
-    const hero = a.player?.photo?.wide || a.player?.photo?.square;
     const url = `https://tennis.propbetedge.ai/news/${a.slug}`;
-    render(body, html`<article class="nw-story">
-      <header class="nw-hero${hero ? ' has-img' : ''}">
-        ${hero ? html`<img class="nw-hero-img" src="${hero}" alt="${a.player.name}" width="1200" height="675" fetchpriority="high">` : ''}
-        <div class="nw-hero-t"><p class="nw-kick"><span>${KIND[a.story_type] || 'Story'}</span>${a.tournament?.name ? html` · <a href="/tournaments/${a.tournament.slug}/${a.tournament.year}">${a.tournament.name} ${a.tournament.year}</a>` : ''}</p>
-        <h1>${a.headline}</h1>${a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
-        <p class="nw-byline">PropBetEdge Tennis Desk · <time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time>${a.status !== 'published' ? html` · <b class="nw-held">HELD DRAFT (not public): ${a.hold_reason || ''}</b>` : ''}</p>
-        ${a.key_stat ? html`<p class="nw-stat big"><em>${a.key_stat.label}</em> ${a.key_stat.value}</p>` : ''}</div>
-      </header>
-      <nav class="nw-chips" aria-label="People">${Object.entries(names).map(([, n]) => html`<span class="chip">${n}</span>`)}</nav>
-      <div class="nw-body">
-        ${a.sections.map((s) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${p}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>`)}
-        ${leftovers.filter(Boolean)}
-        ${get('form') ? formMod(get('form'), names) : ''}
-        ${methodMod(a)}
+    const sections = a.sections;
+    render(body, html`<article class="nw-story nwv">
+      <header class="nwv-hero"><div class="page nwv-hero-in">
+        <div class="nwv-hero-t">
+          <nav class="nwv-crumbs" aria-label="Breadcrumb"><a href="/">Tennis</a><span>›</span><a href="/news">News</a>${t?.slug ? html`<span>›</span><a href="/tournaments/${t.slug}/${t.year}">${t.name} ${t.year}</a>` : ''}</nav>
+          <p class="nw-kick"><span>${KIND[a.story_type] || 'Story'}</span>${t?.slug ? html` · <a href="/tournaments/${t.slug}/${t.year}">${t.name} ${t.year}</a>` : ''}${a.evidence?.match?.round_label ? ` · ${ROUND_TITLE(a.evidence.match.round_label)}` : ''}</p>
+          <h1>${a.headline}</h1>${a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
+          <p class="nwv-by"><b>PropBetEdge Tennis Desk</b> · <time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time>${a.status !== 'published' ? html` · <b class="nw-held">HELD DRAFT (not public): ${a.hold_reason || ''}</b>` : ''}</p>
+        </div>
+        ${heroArt(team, opp)}
+      </div></header>
+      <div class="page nwv-main">
+        ${photoCredits([...team, ...opp])}
+        ${facts(a, sb, t, a.replay)}
+        ${chips(people)}
+        <div class="nw-body">
+          ${sections.map((s) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>`)}
+          ${leftovers.filter(Boolean)}
+          ${get('form') ? formMod(get('form'), names) : ''}
+          ${methodMod(a)}
+        </div>
+        ${shareBar({ url, text: `${a.headline} — PropBetEdge Tennis` })}
+        ${related(a, people, t, a.replay, singles)}
       </div>
-      ${shareBar({ url, text: `${a.headline} — PropBetEdge Tennis` })}
-      <p class="nw-back"><a href="/news">← All tennis news</a></p>
     </article>`);
   }).catch(() => {});
   return () => ctl.abort();

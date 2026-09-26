@@ -16,6 +16,18 @@ const card = (path, v) => ({ url: `${SITE}/og/${path}.png${v ? `?v=${encodeURICo
 const names = (m, s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
 
 /** Data-backed head for a resolved route. Returns meta overrides (or {} to keep the route default). */
+const DESK_SECTION = { wta: 'WTA', atp: 'ATP', 'grand-slams': 'Grand Slams', challenger: 'Challenger', itf: 'ITF', doubles: 'Doubles', rankings: 'Rankings' };
+/** Schema context for a story, strictly from its frozen evidence (players with canonical slugs only). */
+export function newsEntities(a) {
+  const parts = a.evidence?.participants;
+  const sb = (a.plan?.modules || []).find((m) => m.id === 'scoreboard')?.data;
+  const people = parts ? ['A', 'B'].flatMap((s) => parts[s]?.players || []) : a.evidence?.player ? [a.evidence.player] : [];
+  const winners = sb?.winner_side && parts?.[sb.winner_side] ? parts[sb.winner_side].players : a.evidence?.player ? [a.evidence.player] : [];
+  const withSlug = (xs) => xs.filter((p) => p?.slug && p?.name);
+  const images = withSlug(winners).map((p) => p.photo?.square).filter(Boolean);
+  return { section: DESK_SECTION[a.desk] ? `Tennis · ${DESK_SECTION[a.desk]}` : 'Tennis', people: withSlug(people), featured: withSlug(winners), match_id: a.match_id || null, tournament: a.tournament || null, images };
+}
+
 export async function headFor(env, r, url = null) {
   const { id, params } = r;
   if (id === 'news-article') {
@@ -32,7 +44,7 @@ export async function headFor(env, r, url = null) {
       type: 'article',
       image,
       article: published ? { published_time: a.first_published_at || a.published_at, modified_time: a.updated_at, section: 'Tennis' } : null,
-      jsonld: [published ? newsArticleLd(a, canonical, image.url) : null, breadcrumb([['PropBetEdge Tennis', '/'], ['News', '/news'], [a.headline, `/news/${a.slug}`]])].filter(Boolean)
+      jsonld: [published ? newsArticleLd(a, canonical, image.url, newsEntities(a)) : null, breadcrumb([['PropBetEdge', 'https://propbetedge.ai/'], ['Tennis', '/'], ['News', '/news'], [a.headline, `/news/${a.slug}`]])].filter(Boolean)
     };
   }
   if (id === 'player' || id === 'player-sub') {

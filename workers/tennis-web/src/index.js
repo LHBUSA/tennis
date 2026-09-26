@@ -16,7 +16,7 @@ export const VERSION = '0.1.0';
 let wasmReady = null;
 const ready = () => (wasmReady ||= initWasm(wasm));
 
-import { headFor, apiGet, ROUND, fmtD } from './heads.js';
+import { headFor, apiGet, ROUND, fmtD, newsEntities } from './heads.js';
 
 async function shellTemplate(env) {
   // The shell names the deployment's hashed entry script. A long-lived copy outlives the Vercel deployment
@@ -63,9 +63,11 @@ async function cardSvg(env, path) {
   if ((m = /^\/og\/news\/([a-z0-9-]+)\.png$/.exec(path))) {
     const a = await apiGet(env, `/v1/news/${m[1]}`);
     if (!a) return null;
-    const ps = a.evidence?.participants ? ['A', 'B'].flatMap((x) => a.evidence.participants[x]?.players || []) : a.evidence?.player ? [a.evidence.player] : [];
-    const p = ps.find((x) => x.slug === a.player?.slug) || ps[0] || null;
-    return newsCard({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name, a.evidence?.match?.round_label].filter(Boolean).join(' · '), stat: a.key_stat, jpegB64: p ? await jpeg(env, p.photo?.square_jpg || p.photo?.square) : null, name: p?.name });
+    // the featured side from the frozen evidence (winners of a match story; the subject of a ranking story)
+    const { featured } = newsEntities(a);
+    const faces = await Promise.all(featured.slice(0, 2).map(async (p) => ({ name: p.name, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square) })));
+    const round = a.evidence?.match?.round_label ? a.evidence.match.round_label.replace(/^\w/, (c) => c.toUpperCase()) : null;
+    return newsCard({ headline: a.headline, kind: a.story_type, context: [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), round].filter(Boolean).join(' · '), stat: a.key_stat, faces });
   }
   if ((m = /^\/og\/rankings\/wta-(singles|doubles)\.png$/.exec(path))) {
     const d = await apiGet(env, `/v1/rankings?tour=wta&type=${m[1]}&limit=1`);
