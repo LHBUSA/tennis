@@ -243,7 +243,7 @@ export const player = mountWith(async (root, { params }, signal) => {
   const p = pr.data;
   const f = prof?.data || null;
   track(params.tab === 'dna' ? 'tennis_dna_open' : 'tennis_player_open', { player_id: p.id });
-  document.title = `${p.name} — ${params.tab === 'dna' ? 'Tennis DNA' : 'Profile, Rankings & Matches'} | PropBetEdge Tennis`;
+  document.title = `${p.name} — ${params.tab === 'dna' ? 'Tennis DNA' : p.gender === 'M' ? 'Profile, Grand Slam Results & Matches' : 'Profile, Rankings & Matches'} | PropBetEdge Tennis`;
   if (params.tab === 'dna' || params.tab === 'surfaces') {
     const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
     const d = dr?.data?.dna;

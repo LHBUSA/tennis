@@ -44,8 +44,9 @@ export async function headFor(env, r, url = null) {
     const facts = [rankTxt, p.nationality, p.dob ? `born ${fmtD(p.dob)}` : null].filter(Boolean).join(' · ');
     const canonical = canonicalUrl(dna ? `/players/${p.slug}/dna` : `/players/${p.slug}`);
     return {
-      title: `${p.name} — ${dna ? 'Tennis DNA' : 'Profile, Ranking & Matches'} | PropBetEdge Tennis`,
-      description: `${p.name}${facts ? ` — ${facts}` : ''}. ${dna ? 'Serve, return and pressure metrics with samples and confidence.' : 'Ranking history, recent results, surface record, head-to-head and Tennis DNA.'}`,
+      // men have no official ranking source: their heads never mention a ranking
+      title: `${p.name} — ${dna ? 'Tennis DNA' : p.gender === 'M' ? 'Profile, Grand Slam Results & Matches' : 'Profile, Ranking & Matches'} | PropBetEdge Tennis`,
+      description: `${p.name}${facts ? ` — ${facts}` : ''}. ${dna ? 'Serve, return and pressure metrics with samples and confidence.' : p.gender === 'M' ? 'Grand Slam results, recent matches, surface record, head-to-head and PBEcast replays.' : 'Ranking history, recent results, surface record, head-to-head and Tennis DNA.'}`,
       robots: ws || p.recent_matches?.length ? INDEX_ROBOTS : NOINDEX_ROBOTS,
       type: 'profile',
       image: { ...card(dna ? `player/${p.slug}/dna` : `player/${p.slug}`, `${ws?.date || ''}${p.photo ? 'p' : 'm'}`), alt: `${p.name} — PropBetEdge Tennis ${dna ? 'Tennis DNA' : 'player'} card` },

@@ -8,7 +8,7 @@ import { initWasm, Resvg } from '@resvg/resvg-wasm';
 import wasm from '@resvg/resvg-wasm/index_bg.wasm';
 import fontXB from './fonts/BarlowCondensed-ExtraBold.ttf';
 import fontSB from './fonts/BarlowCondensed-SemiBold.ttf';
-import { resolveRoute } from '../../../src/lib/routes.js';
+import { resolveRoute, STATIC_ROUTES } from '../../../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_DEFAULT, NOINDEX_ROBOTS, canonicalUrl } from '../../../src/seo/meta.js';
 import { playerCard, matchCard, tournamentCard, rankingsCard, newsCard } from './cards.js';
 
@@ -94,10 +94,15 @@ async function ogImage(env, ctx, request, path) {
 
 // ---- sitemap ------------------------------------------------------------------------------------------
 async function sitemap(env) {
-  const staticUrls = ['/', '/schedule', '/live', '/pbecast', '/tournaments', '/players', '/rankings/women', '/rankings/women/doubles', '/dna', '/methodology', '/sources'];
-  const urls = staticUrls.map((p) => canonicalUrl(p));
+  // every indexable static route from the one route table (so /men, /rankings, ... can never be forgotten)
+  const urls = STATIC_ROUTES.filter((r) => r.index).map((r) => canonicalUrl(r.path));
   const r = await apiGet(env, '/v1/rankings?tour=wta&type=singles&limit=500');
   for (const x of r?.rows || []) urls.push(canonicalUrl(`/players/${x.player.slug}`));
+  // men: players in the newest Grand Slam main draws + every men's Grand Slam edition we hold
+  const mp = await apiGet(env, '/v1/men/players');
+  for (const x of mp?.rows || []) urls.push(canonicalUrl(`/players/${x.player.slug}`));
+  const men = await apiGet(env, '/v1/men');
+  for (const e of men?.editions || []) urls.push(canonicalUrl(`/tournaments/${e.slug}/${e.year}`));
   const n = await apiGet(env, '/v1/news?limit=60');
   for (const a of n?.articles || []) urls.push(canonicalUrl(`/news/${a.slug}`));
   const t = await apiGet(env, `/v1/tournaments?from=2020-01-01&to=${new Date(Date.now() + 60 * 86400e3).toISOString().slice(0, 10)}`);
