@@ -23,7 +23,23 @@ export const CONTRACT = 'tennis_event/1.0.0';
 export const QUALITIES = Object.freeze(['point_event', 'score_snapshot']);
 export const POINT_TYPES = Object.freeze(['point', 'ace', 'double_fault', 'winner', 'forced_error', 'unforced_error', 'service_winner']);
 
-const REGULAR = new Set(['0', '15', '30', '40', 'AD', 'A']);
+// advantage is written AD, A or Av depending on the source (WTA uses 'Av')
+const REGULAR = new Set(['0', '15', '30', '40', 'AD', 'A', 'AV']);
+/**
+ * Stored events are append-only. Events written before the 'Av' advantage label was recognised can carry a
+ * false tiebreak classification; this read-time correction re-derives it with the current rule and says so.
+ */
+export function normalizeStoredEvent(e) {
+  if (e?.quality !== 'score_snapshot' || e.event_type !== 'tiebreak') return e;
+  const d = e.event_detail || {};
+  const to = e.state?.point;
+  if (to && !inTiebreakScore(to)) {
+    const { tiebreak_started, ...rest } = d;
+    return { ...e, event_type: 'score_update', event_detail: { ...rest, reclassified: 'tiebreak -> score_update: the source advantage label (Av) was misread as a tiebreak score; corrected on read, stored event unchanged' } };
+  }
+  return e;
+}
+
 export const inTiebreakScore = (p) => !!p && p.A != null && p.B != null && p.A !== '' && p.B !== '' && !(REGULAR.has(String(p.A).toUpperCase()) && REGULAR.has(String(p.B).toUpperCase()));
 
 /** Canonical observed state from a stored/API match (sets + live point + server + status). */
@@ -67,7 +83,7 @@ export function engineStateOf(st, formatKey) {
   } else {
     const map = { 0: 0, 15: 1, 30: 2, 40: 3 };
     const pa = String(st.point.A).toUpperCase(); const pb = String(st.point.B).toUpperCase();
-    if (pa === 'AD' || pa === 'A') game = { A: 4, B: 3 }; else if (pb === 'AD' || pb === 'A') game = { A: 3, B: 4 }; else if (map[pa] != null && map[pb] != null) game = { A: map[pa], B: map[pb] }; else return null;
+    if (['AD', 'A', 'AV'].includes(pa)) game = { A: 4, B: 3 }; else if (['AD', 'A', 'AV'].includes(pb)) game = { A: 3, B: 4 }; else if (map[pa] != null && map[pb] != null) game = { A: map[pa], B: map[pb] }; else return null;
   }
   return { format, status: 'in_progress', server: st.server, sets, game, sets_won: won, winner: null, end_reason: null, points_played: 0 };
 }

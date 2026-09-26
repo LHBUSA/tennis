@@ -18,6 +18,7 @@ import { eventLabel, roundLabel, fmtDuration, pct, cap, statusLabel } from '../u
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
+import { courtSituation, situationLine } from '../lib/pbecast-state.js';
 
 const MODE_LABEL = {
   point_by_point_live: 'Point-by-point live', point_by_point_replay: 'Replay · point-by-point',
@@ -144,6 +145,96 @@ function liveSwitcher(items) {
       <span class="sw-t">${m.tournament?.name || ''}${m.court ? ` · ${m.court}` : ''}</span></a></li>`)}</ul></nav>`;
 }
 
+
+// ---- PBEcast V2 building blocks ------------------------------------------------------------------------
+const MODE_BADGE = {
+  tracked_live: ['TRACKED LIVE', 'Ball and point positions from the source'],
+  point_by_point_live: ['POINT-BY-POINT LIVE', 'Every point from the official feed · no ball tracking'],
+  observed_live: ['OBSERVED LIVE', 'Score/server observations · no spatial tracking'],
+  point_by_point_replay: ['POINT-BY-POINT REPLAY', 'Every point from the official feed · no ball tracking'],
+  observed_replay: ['OBSERVED REPLAY', 'Score/server observations · no spatial tracking'],
+  scheduled: ['SCHEDULED', 'PBEcast starts when live coverage begins'],
+  result_only: ['RESULT ONLY', 'No stored events for this match']
+};
+function modeBadge(mode, evs) {
+  const tracked = evs.some((e) => e.coordinates);
+  const key = tracked && mode.includes('live') ? 'tracked_live' : mode;
+  const [label, sub] = MODE_BADGE[key] || [MODE_LABEL[mode] || mode, ''];
+  return html`<div class="pbc-mode k-${key}" role="status"><span class="pbc-mode-l">${mode.includes('live') ? html`<i class="dot"></i>` : ''}${label}</span><small>${sub}</small></div>`;
+}
+
+const lastName = (p) => (p?.name || '').split(' ').slice(-1)[0];
+function identity(m, s, state, final) {
+  const ps = m.players?.[s] || m.sides?.[s]?.players || [];
+  const serving = !final && state?.server === s;
+  return html`<div class="pid pid-${s}${serving ? ' is-srv' : ''}${final && m.winner_side === s ? ' is-win' : ''}">
+    <span class="pid-av">${ps.map((p) => avatar(p, { px: 52, eager: true }))}</span>
+    <span class="pid-t"><b>${ps.map(lastName).join(' / ')}</b><small>${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
+    ${serving ? html`<span class="pid-srv">SERVING</span>` : ''}${final && m.winner_side === s ? html`<span class="pid-srv win">WINNER</span>` : ''}
+  </div>`;
+}
+
+/** Observed/official game results for the strip: holds, breaks, recent games — only games with a provable winner. */
+function gamesFrom(evs, upto) {
+  const out = [];
+  for (const e of evs.slice(0, upto + 1)) {
+    const g = e.event_detail?.game_won;
+    if (g?.winner) out.push({ set: g.set, game: g.game, winner: g.winner, server: g.server || null, result: g.result || null });
+    else if (e.quality === 'point_event' && e.event_detail?.game_complete && e.winner_side) out.push({ set: e.set_number, game: e.game_number, winner: e.winner_side, server: e.server_side || null, result: e.server_side ? (e.server_side === e.winner_side ? 'hold' : 'break') : null });
+  }
+  return out;
+}
+
+function intelStrip(d, m, state, evs, pos) {
+  const cells = [];
+  const games = gamesFrom(evs, pos);
+  for (const s of ['A', 'B']) {
+    const served = games.filter((g) => g.server === s && g.result);
+    const returned = games.filter((g) => g.server && g.server !== s && g.result);
+    if (served.length) cells.push([`${sideName(m, s)} holds`, `${served.filter((g) => g.result === 'hold').length}/${served.length}`]);
+    if (returned.length) cells.push([`${sideName(m, s)} breaks`, `${returned.filter((g) => g.result === 'break').length}/${returned.length}`]);
+  }
+  const st = d.statistics;
+  if (st?.A && st?.B) {
+    const r = (n, dd) => (n == null || !dd ? null : `${Math.round((n / dd) * 100)}%`);
+    for (const s of ['A', 'B']) {
+      const x = st[s];
+      const one = r(x.first_serve_points_won, x.first_serves_in);
+      const two = r(x.second_serve_points_won, x.service_points - x.first_serves_in);
+      if (one) cells.push([`${sideName(m, s)} 1st-serve pts`, one]);
+      if (two) cells.push([`${sideName(m, s)} 2nd-serve pts`, two]);
+      if (x.break_points_faced) cells.push([`${sideName(m, s)} BP saved`, `${x.break_points_saved}/${x.break_points_faced}`]);
+    }
+  }
+  const cur = state?.sets?.at(-1);
+  if (cur && state.status === 'in_progress') cells.push(['Set differential', `${cur.A - cur.B > 0 ? '+' : ''}${cur.A - cur.B} ${sideName(m, 'A')}`]);
+  const recent = games.slice(-6);
+  if (!cells.length && !recent.length) return '';
+  return html`<section class="pbc-intel page" aria-label="Live intelligence">
+    ${cells.map(([k, v]) => html`<div class="pi-c"><span>${k}</span><b class="tabnum">${v}</b></div>`)}
+    ${recent.length ? html`<div class="pi-c pi-recent"><span>Recent games</span><b>${recent.map((g) => html`<i class="rg s-${g.winner} ${g.result === 'break' ? 'brk' : ''}" title="Set ${g.set} game ${g.game}: ${sideName(m, g.winner)}${g.result ? ` (${g.result})` : ''}">${sideName(m, g.winner).slice(0, 3).toUpperCase()}</i>`)}</b></div>` : ''}
+  </section>`;
+}
+
+const RAIL_TAGS = new Set(['ACE', 'DOUBLE FAULT', 'WINNER', 'BREAK', 'GAME', 'SET', 'TIEBREAK', 'FINAL', 'RETIRED', 'START', 'SUSPENDED', 'RESUMED']);
+function momentRail(evs, m, pos, isPoint) {
+  const list = evs.slice(0, pos + 1).slice(-60).reverse();
+  const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
+  return html`<ol class="rail">${list.map((e) => {
+    const t = eventText(e, m);
+    const sit = e.state ? situationLine(courtSituation(e.state, m.format), (x) => sideName(m, x)) : null;
+    const score = e.state ? `${(e.state.sets || []).map((x) => `${x.A}-${x.B}`).join(' ')}${e.state.point ? ` · ${e.state.point.A}–${e.state.point.B}` : ''}` : '';
+    const time = e.event_at || e.observed_at;
+    const major = RAIL_TAGS.has(t.tag);
+    return html`<li class="rl q-${t.quality}${major ? ' major' : ''}${e.event_id === evs[pos]?.event_id ? ' on' : ''}">
+      <span class="rl-av">${e.winner_side && photoOf(e.winner_side) ? avatar(photoOf(e.winner_side), { px: 30 }) : ''}</span>
+      <span class="rl-b"><span class="rl-top"><b class="rl-tag t-${t.tag.replace(/\s+/g, '-').toLowerCase()}">${t.tag}</b>${sit ? html`<b class="rl-sit k-${sit.kind}">${sit.text}</b>` : ''}<span class="rl-q">${t.quality === 'point' ? 'POINT' : 'OBSERVED'}</span></span>
+      <span class="rl-line">${t.line}</span>
+      <span class="rl-meta tabnum">${score}${time ? html` · <time datetime="${time}">${new Date(time).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</time>` : ''}</span></span>
+    </li>`;
+  })}</ol>`;
+}
+
 export function mount(root, { params, live = null }) {
   const ctl = new AbortController();
   const q = new URLSearchParams(location.search);
@@ -164,44 +255,58 @@ export function mount(root, { params, live = null }) {
     const state = cur?.state || { status: m.status, sets: (m.sets || []).map((x) => ({ A: x.A, B: x.B, tb: x.tb })), point: m.live?.point || null, server: m.live?.server || null };
     const tb = inTiebreakScore(state.point);
     const isPoint = d.quality === 'point_event';
-    const banner = cur && st.pos === evs.length - 1 && d.mode.includes('live') ? eventText(cur, m).tag : cur ? eventText(cur, m).tag : null;
+    // the court banner is for real moments only; plain observed score updates stay in the rail
+    const tagNow = cur ? eventText(cur, m).tag : null;
+    const banner = tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
     const url = `${location.origin}/pbecast/${m.id}${cur ? `?t=${cur.event_id}` : ''}`;
     const title = `${sideName(m, 'A')} vs ${sideName(m, 'B')}`;
     const replay = d.mode.includes('replay');
+    const final = ['completed', 'retired', 'walkover'].includes(state.status);
+    const sit = final ? null : situationLine(courtSituation(state, m.format), (x) => sideName(m, x));
     // Level-1 motion: only a REAL observed transition animates (a new live event or one forward step).
     const anim = st.animate && cur ? ANIM[cur.event_type] || 'point' : null;
     st.animate = false;
+    // the half of the court that won the observed/official change (never a rally position)
+    const hl = anim && cur?.winner_side && ['point', 'game', 'set', 'end'].includes(anim) ? cur.winner_side : isPoint && cur ? cur.winner_side : null;
     render(root.querySelector('[data-pbc]'), html`
       <div class="pbc-top page">
         ${scoreboard(m, state, d.mode, anim ? st.prevState : null)}
-        <p class="pbc-note">${freshnessBadge(d.meta)} <b>${MODE_LABEL[d.mode]}</b> — ${d.cadence_note}${isPoint ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'}</p>
       </div>
-      <div class="pbc-grid page">
-        <section class="pbc-court" aria-label="Court">
-          <div class="court-wrap${d.mode.includes('live') && !['completed', 'retired'].includes(state.status) ? ' is-live' : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''}>
-            ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: ['completed', 'retired'].includes(state.status) ? null : state.server, point: state.point, tiebreak: tb, highlight: isPoint && cur ? cur.winner_side : null, ball: cur?.coordinates || null })}
-            ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'}">${banner}</span>` : ''}
-          </div>
-          ${evs.length ? html`<div class="rp" role="group" aria-label="Replay controls">
-            <button type="button" data-rp="first" aria-label="First event">|◀</button>
-            <button type="button" data-rp="prev" aria-label="Previous event">◀</button>
-            <button type="button" data-rp="play" class="rp-play" aria-label="${st.playing ? 'Pause' : 'Play'}">${st.playing ? 'Pause' : 'Play'}</button>
-            <button type="button" data-rp="next" aria-label="Next event">▶</button>
-            <button type="button" data-rp="last" aria-label="Latest event">▶|</button>
-            <label class="rp-speed">Speed <select data-rp-speed>${SPEEDS.map((s) => html`<option value="${s}" ${s === st.speed ? 'selected' : ''}>${s}×</option>`)}</select></label>
-            <input type="range" min="0" max="${evs.length - 1}" value="${st.pos}" data-rp-range aria-label="Event position">
-            <span class="rp-pos tabnum">${st.pos + 1}/${evs.length}</span>
-          </div>` : ''}
-          <div class="pbc-actions">
-            <button type="button" class="btn line" data-fs>Fullscreen PBEcast</button>
-            ${shareBar({ url, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}
-          </div>
-        </section>
-        <aside class="pbc-feed" aria-label="${isPoint ? 'Points' : 'Observed updates'}">
-          <h2>${isPoint ? (replay ? 'Points' : 'Live points') : 'Observed updates'}</h2>
-          ${evs.length ? html`<ol class="feed">${evs.slice(0, st.pos + 1).slice(-60).reverse().map((e) => { const t = eventText(e, m); return html`<li class="fe q-${t.quality} ${e.event_id === cur?.event_id ? 'on' : ''}"><span class="fe-tag">${t.tag}</span><span class="fe-line">${t.line}</span>${e.state?.point ? html`<span class="fe-sc tabnum">${(e.state.sets || []).map((x) => `${x.A}-${x.B}`).join(' ')} · ${e.state.point.A}–${e.state.point.B}</span>` : ''}${t.quality === 'snapshot' ? html`<span class="fe-q">observed</span>` : ''}</li>`; })}</ol>` : emptyModule(d.meta, d.mode === 'scheduled' ? 'PBEcast starts when live coverage begins.' : 'No stored events for this match: it finished before live observation began.')}
-        </aside>
+      <div class="pbc-stage-wrap page">
+        ${modeBadge(d.mode, evs)}
+        <div class="pbc-stage${final ? ' is-final' : ''}">
+          <div class="pbc-side pbc-side-B">${identity(m, 'B', state, final)}</div>
+          <section class="pbc-court" aria-label="Court">
+            <div class="court-wrap${d.mode.includes('live') && !final ? ' is-live' : ''}${sit ? ` sit-${sit.kind}` : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''} ${hl ? raw(`data-hl="${hl}"`) : ''}>
+              ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: tb, highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null })}
+              ${sit ? html`<span class="court-sit k-${sit.kind}" role="status">${sit.text}${state.point && state.server ? html`<small class="tabnum">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}</small>` : ''}</span>` : !final && state.point && state.server ? html`<span class="court-pt tabnum" aria-label="Point score, server first">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}<small>server first</small></span>` : ''}
+              ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(banner).replace(/\s+/g, '-').toLowerCase()}">${banner}</span>` : ''}
+              ${!final && state.server ? html`<span class="court-key"><i class="k-serve"></i> Serve indicator — not tracked position</span>` : ''}
+            </div>
+          </section>
+          <div class="pbc-side pbc-side-A">${identity(m, 'A', state, final)}</div>
+        </div>
+        ${evs.length ? html`<div class="rp" role="group" aria-label="Replay controls">
+          <button type="button" data-rp="first" aria-label="First event">|◀</button>
+          <button type="button" data-rp="prev" aria-label="Previous event">◀</button>
+          <button type="button" data-rp="play" class="rp-play" aria-label="${st.playing ? 'Pause' : 'Play'}">${st.playing ? 'Pause' : 'Play'}</button>
+          <button type="button" data-rp="next" aria-label="Next event">▶</button>
+          <button type="button" data-rp="last" aria-label="Latest event">▶|</button>
+          <label class="rp-speed">Speed <select data-rp-speed>${SPEEDS.map((sp) => html`<option value="${sp}" ${sp === st.speed ? 'selected' : ''}>${sp}×</option>`)}</select></label>
+          <input type="range" min="0" max="${evs.length - 1}" value="${st.pos}" data-rp-range aria-label="Event position">
+          <span class="rp-pos tabnum">${st.pos + 1}/${evs.length}</span>
+        </div>` : ''}
+        <div class="pbc-actions">
+          <button type="button" class="btn line" data-fs>Fullscreen PBEcast</button>
+          ${shareBar({ url, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}
+        </div>
+        <p class="pbc-note">${freshnessBadge(d.meta)} ${d.cadence_note}${isPoint ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'}</p>
       </div>
+      ${intelStrip(d, m, state, evs, st.pos)}
+      <section class="pbc-feed page" aria-label="${isPoint ? 'Points' : 'Observed updates'}">
+        <h2>${isPoint ? (replay ? 'Every point' : 'Live points') : 'Match moments'} <small>${isPoint ? 'official point-by-point' : 'observed score changes'}</small></h2>
+        ${evs.length ? momentRail(evs, m, st.pos, isPoint) : emptyModule(d.meta, d.mode === 'scheduled' ? 'PBEcast starts when live coverage begins.' : 'No stored events for this match: it finished before live observation began.')}
+      </section>
       <div class="page pbc-panels">
         <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${d.moments.length ? html`<div class="km">${d.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
         <section class="mod"><header class="mod-h"><h2>Match progression</h2></header><div class="mod-b">${timeline(d, st.pos)}</div></section>
