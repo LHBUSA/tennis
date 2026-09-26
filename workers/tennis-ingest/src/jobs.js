@@ -67,8 +67,13 @@ export async function editionContext(e) {
 export async function editionMatches(ctx, ed) {
   const r = await fetchRun(ctx, wta.matches, { eventId: ed.event_id, year: ed.year, level: ed.level });
   if (r.state !== 'PASS') return { state: r.state, error: r.error };
-  const w = await writeMatches(ctx.store, r.records, ed, { captureId: r.capture?.capture_id || null });
-  return { state: 'PASS', ...w, live: r.records.filter((m) => m.status === 'in_progress').length };
+  // a finished edition cannot have a live match: the source left it 'in progress' and never finished it.
+  // Held as a source inconsistency (never written as live, never guessed complete).
+  const past = ed.end_date && ed.end_date < new Date(Date.now() - 2 * 86400e3).toISOString().slice(0, 10);
+  const stale = past ? r.records.filter((m) => m.status === 'in_progress') : [];
+  if (stale.length) await hold(ctx.store, stale.map((m) => ({ provider: 'wta', entity_type: 'match', external_id: m.provider_match_id, problems: ['stale_in_progress: finished edition, source never completed the match'], payload: null, capture_id: r.capture?.capture_id || null })));
+  const w = await writeMatches(ctx.store, r.records.filter((m) => !stale.includes(m)), ed, { captureId: r.capture?.capture_id || null });
+  return { state: 'PASS', ...w, stale_held: stale.length, live: r.records.filter((m) => m.status === 'in_progress' && !stale.includes(m)).length };
 }
 
 // ---- stats ---------------------------------------------------------------------------------------------

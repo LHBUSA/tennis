@@ -53,3 +53,11 @@ test('share card: real art only — event photo, or the featured players’ head
   assert.equal(imgs(none), 0);
   assert.ok(!/<text[^>]*>[A-Z]{2}<\/text>/.test(none), 'no initials tiles');
 });
+
+test('a finished edition\'s never-completed "in progress" match is not live', async () => {
+  const { isGenuinelyLive } = await import('../workers/tennis-api/src/index.js');
+  const now = Date.parse('2026-09-26T23:00:00Z');
+  assert.equal(isGenuinelyLive({ status: 'in_progress', tennis_tournament_editions: { end_date: '2025-09-14' }, source_updated_at: '2025-09-09T07:20:26Z' }, now), false);
+  assert.equal(isGenuinelyLive({ status: 'in_progress', tennis_tournament_editions: { end_date: '2026-09-27' }, source_updated_at: '2026-09-26T22:55:00Z' }, now), true);
+  assert.equal(isGenuinelyLive({ status: 'in_progress', tennis_tournament_editions: { end_date: '2026-09-27' }, source_updated_at: '2026-09-26T02:00:00Z' }, now), false, 'no source update for 21h');
+});

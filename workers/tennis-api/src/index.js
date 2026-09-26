@@ -26,8 +26,16 @@ function ok(data, { rows = [], source = null, updated = null, policy, semantics,
 }
 
 // ---- handlers ------------------------------------------------------------------------------------------
+/** Live only when the edition is current and the source spoke recently: a finished edition's 'in progress'
+ *  row (a source that never completed the match) is not live. */
+export function isGenuinelyLive(m, now = Date.now()) {
+  const end = m.tennis_tournament_editions?.end_date || m.tournament?.end_date;
+  const src = m.source_updated_at ? Date.parse(m.source_updated_at) : null;
+  return m.status === 'in_progress' && (!end || end >= new Date(now - 2 * 86400e3).toISOString().slice(0, 10)) && (src === null || now - src < 12 * 3600e3);
+}
+
 async function live(store) {
-  const rows = await store.select('tennis_matches', `select=${MATCH}&status=eq.in_progress&order=updated_at.desc&limit=200`);
+  const rows = (await store.select('tennis_matches', `select=${MATCH}&status=eq.in_progress&order=updated_at.desc&limit=200`)).filter((m) => isGenuinelyLive(m));
   return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress; point score + server as the source published them' });
 }
 

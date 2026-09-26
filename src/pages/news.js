@@ -239,8 +239,9 @@ export function article(root, ctx) {
     const charts = get('charts')?.charts || [];
     const sb = get('scoreboard') ? { ...get('scoreboard'), replay: a.replay } : null;
     const parts = a.evidence?.participants;
-    const people = (parts ? ['A', 'B'].flatMap((s) => parts[s]?.players || []) : a.evidence?.player ? [a.evidence.player] : []).filter((p) => p?.slug);
     const W = sb?.winner_side;
+    // winners first (chips, links, credits)
+    const people = (parts ? (W === 'B' ? ['B', 'A'] : ['A', 'B']).flatMap((s) => parts[s]?.players || []) : a.evidence?.player ? [a.evidence.player] : []).filter((p) => p?.slug);
     const names = {};
     for (const p of people) names[p.id] = p.name;
     const t = a.evidence?.tournament || a.tournament || null;
