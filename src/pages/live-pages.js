@@ -1,6 +1,6 @@
 // Data-backed pages. Every page fetches tennis-api routes, renders real rows, or says exactly why not.
 
-import { html, render } from '../lib/dom.js';
+import { html, render, raw } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, freshnessBadge } from '../ui/state.js';
 import { avatar, nat } from '../ui/avatar.js';
@@ -210,7 +210,7 @@ export const player = mountWith(async (root, { params }, signal) => {
     const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
     const d = dr?.data?.dna;
     render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page" style="padding-top:0">
-      ${d ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · singles · as of ${fmtDate(d.as_of)}</span></header>
+      ${d?.published === false ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">${d.tour} · not published yet</span></header><p class="empty-h">${d.tour} Tennis DNA opens once the sample is meaningful.</p><p class="note">${d.reason}. ATP and WTA are separate populations and are never compared.</p></section>` : d ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · singles · as of ${fmtDate(d.as_of)}</span></header>
         <div class="dna-wrap"><div>${dnaRadar(d.dimensions)}<p class="note">Percentile vs ${d.percentile_basis}. Dimensions whose sample is not yet medium confidence show n/a.</p></div>
         <div>${dnaBars(d.dimensions)}
           <table class="cmp2" style="margin-top:14px"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n">Sample</th></tr></thead><tbody>${Object.values(d.metrics).map((m) => html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${pct(m.value)}</td><td class="n">${m.numerator == null ? '—' : `${m.numerator}/${m.denominator}`} · ${m.sample_matches}m <span class="conf c-${m.confidence}">${m.confidence}</span></td></tr>`)}</tbody></table></div></div></section>
@@ -251,8 +251,10 @@ export const dna = mountWith((root, _c, signal) => {
   const dnaUrl = (o) => { const x = { metric, surface, tour, ...o }; return `/dna?metric=${x.metric}${x.surface !== 'all' ? `&surface=${x.surface}` : ''}${x.tour === 'atp' ? '&tour=atp' : ''}`; };
   track('tennis_dna_open', { route: '/dna', surface, tour });
   shell(root, { eyebrow: 'Tennis DNA', heading: 'Tennis DNA', lede: 'PropBetEdge’s serve, return and pressure metrics — summed over real match statistics, with numerator, denominator, sample and confidence on every number. Leaders include only medium- or high-confidence samples.', chips: DNA_METRICS.map(([k, l]) => [dnaUrl({ metric: k }), l, k === metric]) });
-  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Tour">${[['wta', 'WTA'], ['atp', 'ATP']].map(([t, l]) => html`<a class="chip${tour === t ? ' on' : ''}" href="${dnaUrl({ tour: t })}">${l}</a>`)}</div><div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="${dnaUrl({ surface: s })}">${l}</a>`)}</div>`));
-  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Tour" data-tour-chips>${[['wta', 'WTA'], ['atp', 'ATP']].map(([t, l]) => html`<a class="chip${tour === t ? ' on' : ''}" href="${dnaUrl({ tour: t })}" ${t === 'atp' && tour !== 'atp' ? raw('data-atp-chip hidden') : ''}>${l}</a>`)}</div><div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="${dnaUrl({ surface: s })}">${l}</a>`)}</div>`));
+  // the ATP switch appears only once ATP DNA is published (sample threshold)
+  api(`/v1/dna/leaders?metric=${metric}&tour=atp&limit=1`, { signal }).then((r) => { if (r?.data?.published !== false) root.querySelector('[data-atp-chip]')?.removeAttribute('hidden'); }).catch(() => {});
+  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => d.published === false ? html`<div class="mod"><p class="empty-h">${tour.toUpperCase()} Tennis DNA is not published yet.</p><p class="note">It opens once ${d.threshold} players have a medium-confidence sample (currently ${d.qualified}). ATP and WTA are separate populations and are never compared.</p></div>` : html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
     ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${pct(r.value)}</td><td class="n hide-s">${r.numerator}/${r.denominator} · ${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No player has a medium-confidence sample for this metric yet.</p><p class="note">Tennis DNA is built from stored match statistics; the historical backfill adds them every few minutes. Small samples are never ranked.</p></div>`}
     <p class="note"><a href="/methodology">Definitions and confidence rules →</a></p>`, 'Tennis DNA unavailable.', signal);
 });
