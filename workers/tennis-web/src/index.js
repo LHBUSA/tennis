@@ -76,8 +76,8 @@ async function cardSvg(env, path) {
     // same resolver as the article (workers/shared/editorial.js): real event photo, else the featured
     // players' approved headshots, else the branded treatment. Never a generated scene.
     const h = a.media?.hero;
-    const photoB64 = (h?.type === 'event_photo' || h?.type === 'venue_photo') && h.images?.[0]?.id ? await r2Jpeg(env, `editorial/${h.images[0].id}/card.jpg`) : null;
-    const heads = !photoB64 && h?.type === 'player_photos' ? await Promise.all(h.images.slice(0, 2).map((p) => jpeg(env, p.square_jpg || p.square))) : [];
+    const photoB64 = h?.images?.[0]?.kind === 'catalog' && h.images[0].id ? await r2Jpeg(env, `editorial/${h.images[0].id}/card.jpg`) : null;
+    const heads = !photoB64 && h?.type === 'portrait' ? await Promise.all(h.images.slice(0, 2).map((p) => jpeg(env, p.square_jpg || p.square))) : [];
     const league = a.desk === 'grand-slams' ? 'GRAND SLAMS' : a.desk === 'atp' ? 'ATP' : a.desk === 'doubles' ? 'DOUBLES' : 'TENNIS';
     const entity = [a.tournament?.name && `${a.tournament.name} ${a.tournament.year || ''}`.trim(), (a.team || []).map((p) => p.name).join(' / ')].filter(Boolean).join(' · ');
     return newsCardV4({ headline: a.headline, kind: a.story_type, league, entity, photoB64, heads });

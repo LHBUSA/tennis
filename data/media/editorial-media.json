@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generated_at": "2026-09-26T23:19:08.319Z",
+  "generated_at": "2026-09-27T01:00:26.144Z",
   "policy": "docs/MEDIA.md — editorial media: licensed Commons files, human visual review, identity only via the exact Wikidata crosswalk",
   "items": [
     {
       "id": "carlos-alcaraz-serving-while-playing-jan-lennard-struff-wimb",
-      "type": "edition_action",
+      "type": "match_action",
       "title": "Carlos Alcaraz serving while playing Jan-Lennard Struff (Wimbledon 2025).jpg",
       "source_page": "https://commons.wikimedia.org/wiki/File%3ACarlos_Alcaraz_serving_while_playing_Jan-Lennard_Struff_(Wimbledon_2025).jpg",
       "author": "12121343A",
@@ -15,8 +15,8 @@
       "date": "2025-07-04 17:06:37",
       "width": 3840,
       "height": 2161,
-      "shows": "serve on grass at the 2025 Championships",
-      "caption": "Carlos Alcaraz — serve on grass at the 2025 Championships",
+      "shows": "a serve on grass at the 2025 Championships",
+      "caption": "Carlos Alcaraz — a serve on grass at the 2025 Championships",
       "player_ids": [
         "c76a1e3b-baef-591f-b2e6-8c11aec677c5"
       ],
@@ -30,6 +30,10 @@
         "wimbledon"
       ],
       "edition": {
+        "slug": "wimbledon",
+        "year": 2025
+      },
+      "event": {
         "slug": "wimbledon",
         "year": 2025
       },
@@ -74,8 +78,475 @@
           "bytes": 117902
         }
       },
-      "reviewed": "visual review 2026-09-26: action, grass, single player serving; landscape 5472x3080",
-      "verified_at": "2026-09-26T23:18:14.771Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:55:53.583Z"
+    },
+    {
+      "id": "ballboys-and-girls-wimbledon-2025",
+      "type": "tournament_atmosphere",
+      "title": "Ballboys and girls Wimbledon 2025.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ABallboys_and_girls_Wimbledon_2025.jpg",
+      "author": "Partynia",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "credit": "Partynia / CC BY 4.0 / Wikimedia Commons",
+      "date": "2025-07-05 10:50:42",
+      "width": 3840,
+      "height": 2880,
+      "shows": "ball boys and girls on the grounds at the 2025 Championships",
+      "caption": "ball boys and girls on the grounds at the 2025 Championships",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2025
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2025
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/wide-2400.webp?v=281b242523",
+          "bytes": 340476
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/wide-1600.webp?v=411ad4ddfa",
+          "bytes": 208718
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/wide-1200.webp?v=24a60b6875",
+          "bytes": 148662
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/wide-800.webp?v=629147c138",
+          "bytes": 88290
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/wide-480.webp?v=669cd080be",
+          "bytes": 38842
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/std-1200.webp?v=891ffbbe40",
+          "bytes": 185302
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/std-800.webp?v=0eadad6489",
+          "bytes": 109710
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/ballboys-and-girls-wimbledon-2025/card.jpg?v=9fd09ca1f8",
+          "bytes": 168254
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:03.102Z"
+    },
+    {
+      "id": "leylah-fernandez-plays-a-doubles-match-with-ena-shibahara",
+      "type": "match_action",
+      "title": "Leylah Fernandez plays a doubles match with Ena Shibahara.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ALeylah_Fernandez_plays_a_doubles_match_with_Ena_Shibahara.jpg",
+      "author": "Bonoahx",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": "Bonoahx / CC0 / Wikimedia Commons",
+      "date": "2024-07-07 20:19:51",
+      "width": 3840,
+      "height": 2880,
+      "shows": "a doubles match at the 2024 Championships",
+      "caption": "Ena Shibahara, Leylah Fernandez — a doubles match at the 2024 Championships",
+      "player_ids": [
+        "bdf94ae4-9507-52ab-a7af-8505fe2ac671",
+        "f2a28a32-9a7f-56bf-87cf-a4d64c18038f"
+      ],
+      "player_slugs": [
+        "ena-shibahara",
+        "leylah-fernandez"
+      ],
+      "depicts_wikidata": [
+        "Q50329570",
+        "Q26721334"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2024
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2024
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.45,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/wide-2400.webp?v=f281f73866",
+          "bytes": 273544
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/wide-1600.webp?v=c1b6418e60",
+          "bytes": 148708
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/wide-1200.webp?v=18546dae2d",
+          "bytes": 100926
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/wide-800.webp?v=965c243e19",
+          "bytes": 56008
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/wide-480.webp?v=887f32a2cd",
+          "bytes": 24782
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/std-1200.webp?v=b641e640f1",
+          "bytes": 148602
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/std-800.webp?v=997b5caf8c",
+          "bytes": 81444
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/leylah-fernandez-plays-a-doubles-match-with-ena-shibahara/card.jpg?v=a04b798185",
+          "bytes": 121695
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:09.983Z"
+    },
+    {
+      "id": "wimbledon-geograph-org-uk-7811790",
+      "type": "tournament_atmosphere",
+      "title": "Wimbledon - geograph.org.uk - 7811790.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AWimbledon_-_geograph.org.uk_-_7811790.jpg",
+      "author": "Peter Trimming",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "Peter Trimming / CC BY-SA 2.0 / Wikimedia Commons",
+      "date": "2024-06-30",
+      "width": 3737,
+      "height": 2492,
+      "shows": "the grounds at the 2024 Championships",
+      "caption": "the grounds at the 2024 Championships",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q1468524",
+        "Q1311670",
+        "Q1656682",
+        "Q32504"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2024
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2024
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/wide-2400.webp?v=6a72086491",
+          "bytes": 461738
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/wide-1600.webp?v=23b3726bf0",
+          "bytes": 236214
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/wide-1200.webp?v=34d11082a3",
+          "bytes": 144052
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/wide-800.webp?v=8e9d836e7c",
+          "bytes": 68788
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/wide-480.webp?v=0400396d65",
+          "bytes": 27464
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/std-1200.webp?v=aa4c74db97",
+          "bytes": 168840
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/std-800.webp?v=a8c4f65bb5",
+          "bytes": 81156
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-geograph-org-uk-7811790/card.jpg?v=8ee9200f0a",
+          "bytes": 160605
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:16.401Z"
+    },
+    {
+      "id": "fed-backhand-in-the-2019-wimbledon-final",
+      "type": "match_action",
+      "title": "Fed backhand in the 2019 Wimbledon final.png",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AFed_backhand_in_the_2019_Wimbledon_final.png",
+      "author": "LHC88",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "credit": "LHC88 / CC BY 4.0 / Wikimedia Commons",
+      "date": "2019-07-14",
+      "width": 2020,
+      "height": 1506,
+      "shows": "the 2019 gentlemen’s singles final on Centre Court",
+      "caption": "Novak Djokovic, Roger Federer — the 2019 gentlemen’s singles final on Centre Court",
+      "player_ids": [
+        "7ae0e54a-2143-5570-82a5-896f0df8c350",
+        "d747ee6a-7c67-5e04-98a1-004efc4acadb"
+      ],
+      "player_slugs": [
+        "novak-djokovic",
+        "roger-federer"
+      ],
+      "depicts_wikidata": [
+        "Q1426",
+        "Q5812",
+        "Q815369"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/wide-1600.webp?v=6466574974",
+          "bytes": 271574
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/wide-1200.webp?v=fe8e71ea0d",
+          "bytes": 171734
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/wide-800.webp?v=caf361a0a9",
+          "bytes": 84214
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/wide-480.webp?v=d92b234444",
+          "bytes": 32486
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/std-1200.webp?v=4998456e49",
+          "bytes": 181426
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/std-800.webp?v=54315a069f",
+          "bytes": 89770
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/fed-backhand-in-the-2019-wimbledon-final/card.jpg?v=9bf818df1e",
+          "bytes": 183485
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:22.516Z"
+    },
+    {
+      "id": "djoko-humbert-2019",
+      "type": "match_action",
+      "title": "Djoko Humbert 2019.png",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ADjoko_Humbert_2019.png",
+      "author": "LHC88",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "credit": "LHC88 / CC BY 4.0 / Wikimedia Commons",
+      "date": "2019-07-08",
+      "width": 2018,
+      "height": 1508,
+      "shows": "a 2019 Championships match on Centre Court",
+      "caption": "Novak Djokovic, Ugo Humbert — a 2019 Championships match on Centre Court",
+      "player_ids": [
+        "7ae0e54a-2143-5570-82a5-896f0df8c350",
+        "968b2d04-e066-5b18-a331-51653413665b"
+      ],
+      "player_slugs": [
+        "novak-djokovic",
+        "ugo-humbert"
+      ],
+      "depicts_wikidata": [
+        "Q5812",
+        "Q54007306",
+        "Q2603183"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/wide-1600.webp?v=cef4d0c7ce",
+          "bytes": 247832
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/wide-1200.webp?v=f9cda79125",
+          "bytes": 149840
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/wide-800.webp?v=1505896952",
+          "bytes": 75404
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/wide-480.webp?v=c850ea9f67",
+          "bytes": 29812
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/std-1200.webp?v=fdbda306bf",
+          "bytes": 189016
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/std-800.webp?v=89a0b1fe55",
+          "bytes": 95446
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djoko-humbert-2019/card.jpg?v=d15ba39114",
+          "bytes": 156759
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:28.243Z"
+    },
+    {
+      "id": "wimbledon-doubles-final-2019",
+      "type": "match_action",
+      "title": "Wimbledon doubles final 2019.png",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AWimbledon_doubles_final_2019.png",
+      "author": "LHC88",
+      "license": "CC BY 4.0",
+      "license_url": "https://creativecommons.org/licenses/by/4.0",
+      "credit": "LHC88 / CC BY 4.0 / Wikimedia Commons",
+      "date": "2019-07-14",
+      "width": 2042,
+      "height": 1520,
+      "shows": "the 2019 ladies’ doubles final on Centre Court",
+      "caption": "Yifan Xu, Su-Wei Hsieh, Gabriela Dabrowski — the 2019 ladies’ doubles final on Centre Court",
+      "player_ids": [
+        "8c2ffa09-e414-5b1f-9cbb-dc96cb194d98",
+        "b213fedb-23ff-5946-96d3-15b1954d057e",
+        "f53a9c5f-7892-5aea-8e8d-6f73fe25a922"
+      ],
+      "player_slugs": [
+        "yifan-xu",
+        "su-wei-hsieh",
+        "gabriela-dabrowski"
+      ],
+      "depicts_wikidata": [
+        "Q232566",
+        "Q230353",
+        "Q5515953",
+        "Q4845400"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "event": {
+        "slug": "wimbledon",
+        "year": 2019
+      },
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1600.webp?v=7702242b8a",
+          "bytes": 276596
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1200.webp?v=4a6344372d",
+          "bytes": 182408
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-800.webp?v=34ddd0ae71",
+          "bytes": 93090
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-480.webp?v=ee80d18c9f",
+          "bytes": 37266
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-1200.webp?v=dbe1b45da3",
+          "bytes": 211934
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-800.webp?v=18bcaf0665",
+          "bytes": 109362
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/card.jpg?v=6e40ec2c91",
+          "bytes": 190265
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:34.408Z"
     },
     {
       "id": "far-shot-of-wimbledon-centre-court",
@@ -107,6 +578,7 @@
         "wimbledon"
       ],
       "edition": null,
+      "event": null,
       "match_id": null,
       "surface": "grass",
       "venue_dominant": false,
@@ -148,8 +620,8 @@
           "bytes": 129455
         }
       },
-      "reviewed": "visual review 2026-09-26: empty Centre Court, grass, roof, stands",
-      "verified_at": "2026-09-26T23:18:22.018Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:41.330Z"
     },
     {
       "id": "right-side-of-centre-court-wimbledon",
@@ -181,6 +653,7 @@
         "wimbledon"
       ],
       "edition": null,
+      "event": null,
       "match_id": null,
       "surface": "grass",
       "venue_dominant": false,
@@ -222,12 +695,1158 @@
           "bytes": 128454
         }
       },
-      "reviewed": "visual review 2026-09-26: Centre Court stands + grass",
-      "verified_at": "2026-09-26T23:18:29.289Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:48.071Z"
+    },
+    {
+      "id": "court-14-at-wimbledon",
+      "type": "court",
+      "title": "Court 14 at Wimbledon.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_14_at_Wimbledon.jpg",
+      "author": "Bonoahx",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Bonoahx / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-19 10:40:12",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Court 14, Wimbledon",
+      "caption": "Court 14, Wimbledon",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q41520",
+        "Q847",
+        "Q741118",
+        "Q483110",
+        "Q84",
+        "Q2603183",
+        "Q2306600",
+        "Q349"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/wide-2400.webp?v=3e23cbabbb",
+          "bytes": 360782
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/wide-1600.webp?v=e7c25fac01",
+          "bytes": 161208
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/wide-1200.webp?v=76defacc29",
+          "bytes": 92196
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/wide-800.webp?v=51a62240b5",
+          "bytes": 39752
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/wide-480.webp?v=83344f8b81",
+          "bytes": 14274
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/std-1200.webp?v=9330a4968e",
+          "bytes": 112096
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/std-800.webp?v=5ff3d5286a",
+          "bytes": 50704
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-14-at-wimbledon/card.jpg?v=52c7f9d221",
+          "bytes": 100143
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:56:54.850Z"
+    },
+    {
+      "id": "wimbledon-court-18",
+      "type": "court",
+      "title": "Wimbledon Court 18.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AWimbledon_Court_18.jpg",
+      "author": "Bonoahx",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Bonoahx / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-19",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Court 18, Wimbledon",
+      "caption": "Court 18, Wimbledon",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q41520",
+        "Q847",
+        "Q741118",
+        "Q483110",
+        "Q84",
+        "Q2603183",
+        "Q2306600",
+        "Q349"
+      ],
+      "tournaments": [
+        "wimbledon"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "grass",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/wide-2400.webp?v=d7a09c32e2",
+          "bytes": 757466
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/wide-1600.webp?v=000990fccf",
+          "bytes": 361042
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/wide-1200.webp?v=acb5ced3a8",
+          "bytes": 208548
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/wide-800.webp?v=910e2193a1",
+          "bytes": 91782
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/wide-480.webp?v=c074c35bed",
+          "bytes": 33652
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/std-1200.webp?v=deb0dc8bd5",
+          "bytes": 224674
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/std-800.webp?v=e6f404c109",
+          "bytes": 100320
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-court-18/card.jpg?v=b1018a7ac0",
+          "bytes": 186863
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:01.966Z"
+    },
+    {
+      "id": "court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni",
+      "type": "tournament_atmosphere",
+      "title": "Court Philippe Chatrier - 1er tour de Roland Garros 2010 - tennis french open.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_Philippe_Chatrier_-_1er_tour_de_Roland_Garros_2010_-_tennis_french_open.jpg",
+      "author": "Yann Caradec",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "Yann Caradec / CC BY-SA 2.0 / Wikimedia Commons",
+      "date": "2010-05-23 15:40:38",
+      "width": 3840,
+      "height": 950,
+      "shows": "Court Philippe-Chatrier during the first round of Roland-Garros 2010",
+      "caption": "Court Philippe-Chatrier during the first round of Roland-Garros 2010",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": {
+        "slug": "roland-garros",
+        "year": 2010
+      },
+      "event": {
+        "slug": "roland-garros",
+        "year": 2010
+      },
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/wide-2400.webp?v=53042c35c9",
+          "bytes": 390108
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/wide-1600.webp?v=6ba5e66c12",
+          "bytes": 348406
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/wide-1200.webp?v=56a800431b",
+          "bytes": 214710
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/wide-800.webp?v=401d510799",
+          "bytes": 100354
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/wide-480.webp?v=5819215935",
+          "bytes": 37454
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/std-1200.webp?v=81e3351d7e",
+          "bytes": 254930
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/std-800.webp?v=d141d56106",
+          "bytes": 126864
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-1er-tour-de-roland-garros-2010-tenni/card.jpg?v=aa5b731470",
+          "bytes": 210830
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:08.609Z"
+    },
+    {
+      "id": "court-philippe-chatrier-2011-roland-garros",
+      "type": "tournament_atmosphere",
+      "title": "Court Philippe Chatrier, 2011 Roland Garros.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_Philippe_Chatrier%2C_2011_Roland_Garros.jpg",
+      "author": "Yann Caradec from Paris, France",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "Yann Caradec from Paris, France / CC BY-SA 2.0 / Wikimedia Commons",
+      "date": "2011-05-24 15:23",
+      "width": 3840,
+      "height": 2160,
+      "shows": "Court Philippe-Chatrier during Roland-Garros 2011",
+      "caption": "Rafael Nadal — Court Philippe-Chatrier during Roland-Garros 2011",
+      "player_ids": [
+        "42349986-f9ec-5648-84e9-31a5f7fff3c6"
+      ],
+      "player_slugs": [
+        "rafael-nadal"
+      ],
+      "depicts_wikidata": [
+        "Q10132"
+      ],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": {
+        "slug": "roland-garros",
+        "year": 2011
+      },
+      "event": {
+        "slug": "roland-garros",
+        "year": 2011
+      },
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/wide-2400.webp?v=f64611f917",
+          "bytes": 654726
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/wide-1600.webp?v=6098a3786e",
+          "bytes": 332198
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/wide-1200.webp?v=8f9c51d2ea",
+          "bytes": 197642
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/wide-800.webp?v=e42b39235a",
+          "bytes": 91990
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/wide-480.webp?v=3a622e71bb",
+          "bytes": 34612
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/std-1200.webp?v=0423755e61",
+          "bytes": 260382
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/std-800.webp?v=ed8926adf2",
+          "bytes": 124046
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2011-roland-garros/card.jpg?v=f224828f21",
+          "bytes": 204788
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:15.893Z"
+    },
+    {
+      "id": "court-philippe-chatrier-2023-cropped",
+      "type": "court",
+      "title": "Court Philippe Chatrier 2023 cropped.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_Philippe_Chatrier_2023_cropped.jpg",
+      "author": "Remi Mathis",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Remi Mathis / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-06-01 22:09:42",
+      "width": 3840,
+      "height": 2236,
+      "shows": "Court Philippe-Chatrier",
+      "caption": "Court Philippe-Chatrier",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/wide-2400.webp?v=bb3e70734c",
+          "bytes": 617520
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/wide-1600.webp?v=6422372fb8",
+          "bytes": 334122
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/wide-1200.webp?v=ec103515c6",
+          "bytes": 209290
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/wide-800.webp?v=5be3303a75",
+          "bytes": 100860
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/wide-480.webp?v=850fdf55db",
+          "bytes": 38880
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/std-1200.webp?v=06d44b3085",
+          "bytes": 252696
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/std-800.webp?v=62f8f3cd6a",
+          "bytes": 127086
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2023-cropped/card.jpg?v=591cf28d09",
+          "bytes": 213871
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:21.856Z"
+    },
+    {
+      "id": "court-philippe-chatrier-2024",
+      "type": "court",
+      "title": "Court Philippe Chatrier 2024.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_Philippe_Chatrier_2024.jpg",
+      "author": "MFonzatti",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "MFonzatti / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2024-05-21 16:21:39",
+      "width": 3840,
+      "height": 2620,
+      "shows": "Court Philippe-Chatrier",
+      "caption": "Court Philippe-Chatrier",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q3026397"
+      ],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/wide-2400.webp?v=9126bc0831",
+          "bytes": 364762
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/wide-1600.webp?v=e4547c4e2c",
+          "bytes": 170392
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/wide-1200.webp?v=ed58df195d",
+          "bytes": 110408
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/wide-800.webp?v=58d8161211",
+          "bytes": 58824
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/wide-480.webp?v=4f6f1b1d82",
+          "bytes": 25172
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/std-1200.webp?v=ed72be109f",
+          "bytes": 132718
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/std-800.webp?v=e21674a6c2",
+          "bytes": 70170
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-2024/card.jpg?v=716191b75c",
+          "bytes": 131893
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:27.510Z"
+    },
+    {
+      "id": "court-philippe-chatrier-may-30th-2013",
+      "type": "court",
+      "title": "Court Philippe Chatrier May 30th 2013.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ACourt_Philippe_Chatrier_May_30th_2013.jpg",
+      "author": "Michael Frey (Michael Frey)",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": "Michael Frey (Michael Frey) / CC BY-SA 3.0 / Wikimedia Commons",
+      "date": "2013-05-30 14:35:25",
+      "width": 2048,
+      "height": 1536,
+      "shows": "Court Philippe-Chatrier",
+      "caption": "Court Philippe-Chatrier",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q547549"
+      ],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.62
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/wide-1600.webp?v=f5df4cecc9",
+          "bytes": 257246
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/wide-1200.webp?v=501b0fef61",
+          "bytes": 169620
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/wide-800.webp?v=20dea2feab",
+          "bytes": 91882
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/wide-480.webp?v=0c1beb3c30",
+          "bytes": 38940
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/std-1200.webp?v=199e9d084e",
+          "bytes": 173192
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/std-800.webp?v=eaa98758c2",
+          "bytes": 94294
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/court-philippe-chatrier-may-30th-2013/card.jpg?v=b8f9813e34",
+          "bytes": 179003
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:33.041Z"
+    },
+    {
+      "id": "chatriervide",
+      "type": "venue",
+      "title": "ChatrierVide.JPG",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AChatrierVide.JPG",
+      "author": "Mamiejeanjean",
+      "license": "CC BY-SA 3.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/3.0",
+      "credit": "Mamiejeanjean / CC BY-SA 3.0 / Wikimedia Commons",
+      "date": "2011-05-12",
+      "width": 2048,
+      "height": 1536,
+      "shows": "Court Philippe-Chatrier",
+      "caption": "Court Philippe-Chatrier",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "roland-garros"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "clay",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/wide-1600.webp?v=ef1346b71e",
+          "bytes": 239332
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/wide-1200.webp?v=f12e3fd5a8",
+          "bytes": 154826
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/wide-800.webp?v=6cb38e1372",
+          "bytes": 78122
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/wide-480.webp?v=ab94e09e98",
+          "bytes": 29340
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/std-1200.webp?v=5e182779be",
+          "bytes": 162862
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/std-800.webp?v=71ee91fab8",
+          "bytes": 81496
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/chatriervide/card.jpg?v=0cdf2940ce",
+          "bytes": 168119
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:38.021Z"
+    },
+    {
+      "id": "s-wia-tek-yuan-ao26-r1",
+      "type": "match_action",
+      "title": "Świątek Yuan AO26 R1.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A%C5%9Awi%C4%85tek_Yuan_AO26_R1.jpg",
+      "author": "QWisps",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "QWisps / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2026-01-19 19:17:42",
+      "width": 3840,
+      "height": 2880,
+      "shows": "a first-round match in Rod Laver Arena at the 2026 Australian Open",
+      "caption": "a first-round match in Rod Laver Arena at the 2026 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/wide-2400.webp?v=f9ec8c6fd4",
+          "bytes": 321238
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/wide-1600.webp?v=cad5197c31",
+          "bytes": 196476
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/wide-1200.webp?v=cd257f5a20",
+          "bytes": 131542
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/wide-800.webp?v=77330c4c11",
+          "bytes": 70970
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/wide-480.webp?v=4b0d3606f0",
+          "bytes": 30386
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/std-1200.webp?v=76bc3c187f",
+          "bytes": 195518
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/std-800.webp?v=a004699ae4",
+          "bytes": 103210
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/s-wia-tek-yuan-ao26-r1/card.jpg?v=51736cf875",
+          "bytes": 144054
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:44.859Z"
+    },
+    {
+      "id": "djokovic-ao26-r1-cropped",
+      "type": "match_action",
+      "title": "Djokovic AO26 R1 (cropped).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ADjokovic_AO26_R1_(cropped).jpg",
+      "author": "QWisps",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "QWisps / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2026-01-19 21:35:19",
+      "width": 2093,
+      "height": 1246,
+      "shows": "a first-round match at the 2026 Australian Open",
+      "caption": "a first-round match at the 2026 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.55,
+        "y": 0.45
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/wide-1600.webp?v=286383147e",
+          "bytes": 35228
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/wide-1200.webp?v=d545cc8e60",
+          "bytes": 24088
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/wide-800.webp?v=3faf33b74d",
+          "bytes": 14412
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/wide-480.webp?v=0f3bf1217b",
+          "bytes": 7692
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/std-1200.webp?v=382fe60552",
+          "bytes": 25956
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/std-800.webp?v=fb4c2ffee0",
+          "bytes": 15008
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/djokovic-ao26-r1-cropped/card.jpg?v=536541ad88",
+          "bytes": 44946
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:49.359Z"
+    },
+    {
+      "id": "marti-nez-ao26-r1",
+      "type": "match_action",
+      "title": "Martínez AO26 R1.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AMart%C3%ADnez_AO26_R1.jpg",
+      "author": "QWisps",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "QWisps / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2026-01-19 22:41:50",
+      "width": 3840,
+      "height": 2160,
+      "shows": "a first-round match at the 2026 Australian Open",
+      "caption": "a first-round match at the 2026 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2026
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.45
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/wide-2400.webp?v=8085ca32e8",
+          "bytes": 132264
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/wide-1600.webp?v=cf35e444ef",
+          "bytes": 80654
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/wide-1200.webp?v=4d580d51b0",
+          "bytes": 57008
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/wide-800.webp?v=6144a6f0db",
+          "bytes": 34394
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/wide-480.webp?v=f0566358da",
+          "bytes": 16578
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/std-1200.webp?v=ad80855b4f",
+          "bytes": 60250
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/std-800.webp?v=492b45fd0e",
+          "bytes": 37482
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/marti-nez-ao26-r1/card.jpg?v=2514ee2fc6",
+          "bytes": 81450
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:57:59.882Z"
+    },
+    {
+      "id": "rod-laver-arena-before-the-2025-australian-open-women-s-doub",
+      "type": "tournament_atmosphere",
+      "title": "Rod Laver Arena before the 2025 Australian Open Women's Doubles Final - 26 January 2025.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ARod_Laver_Arena_before_the_2025_Australian_Open_Women's_Doubles_Final_-_26_January_2025.jpg",
+      "author": "CityBoy777",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "CityBoy777 / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2025-01-26",
+      "width": 3840,
+      "height": 2160,
+      "shows": "Rod Laver Arena before the 2025 women’s doubles final",
+      "caption": "Rod Laver Arena before the 2025 women’s doubles final",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2025
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2025
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/wide-2400.webp?v=8f93e31fe6",
+          "bytes": 339382
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/wide-1600.webp?v=1cf5eacd14",
+          "bytes": 181170
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/wide-1200.webp?v=002fd4ba32",
+          "bytes": 110914
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/wide-800.webp?v=c4a970c96f",
+          "bytes": 51870
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/wide-480.webp?v=4acc880247",
+          "bytes": 18944
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/std-1200.webp?v=8ef0de7ea6",
+          "bytes": 133160
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/std-800.webp?v=28d8ede764",
+          "bytes": 65954
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/rod-laver-arena-before-the-2025-australian-open-women-s-doub/card.jpg?v=441765c6c1",
+          "bytes": 122991
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:06.027Z"
+    },
+    {
+      "id": "1573-arena-during-the-2025-australian-open-21-january-2025",
+      "type": "court",
+      "title": "1573 Arena during the 2025 Australian Open - 21 January 2025.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A1573_Arena_during_the_2025_Australian_Open_-_21_January_2025.jpg",
+      "author": "CityBoy777",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "CityBoy777 / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2025-01-21",
+      "width": 3840,
+      "height": 2160,
+      "shows": "1573 Arena during the 2025 Australian Open",
+      "caption": "1573 Arena during the 2025 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2025
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2025
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/wide-2400.webp?v=277a5bbdbc",
+          "bytes": 394504
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/wide-1600.webp?v=4927a8a1fd",
+          "bytes": 214208
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/wide-1200.webp?v=41e7d230b9",
+          "bytes": 133980
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/wide-800.webp?v=229161ced8",
+          "bytes": 66404
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/wide-480.webp?v=d534e3025e",
+          "bytes": 26926
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/std-1200.webp?v=5900aa8def",
+          "bytes": 154994
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/std-800.webp?v=50738af8b7",
+          "bytes": 79436
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/1573-arena-during-the-2025-australian-open-21-january-2025/card.jpg?v=87317029c2",
+          "bytes": 153676
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:13.461Z"
+    },
+    {
+      "id": "legends-doubles-final-at-margaret-court-arena-during-the-202",
+      "type": "tournament_atmosphere",
+      "title": "Legends Doubles Final at Margaret Court Arena during the 2023 Australian Open (52679820676).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3ALegends_Doubles_Final_at_Margaret_Court_Arena_during_the_2023_Australian_Open_(52679820676).jpg",
+      "author": "Philip Mallis from Melbourne",
+      "license": "CC BY-SA 2.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/2.0",
+      "credit": "Philip Mallis from Melbourne / CC BY-SA 2.0 / Wikimedia Commons",
+      "date": "Taken on 27 January 2023, 15:28",
+      "width": 3840,
+      "height": 2560,
+      "shows": "the legends doubles final in Margaret Court Arena, 2023 Australian Open",
+      "caption": "the legends doubles final in Margaret Court Arena, 2023 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q309395",
+        "Q732679",
+        "Q53340",
+        "Q53342"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2023
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2023
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/wide-2400.webp?v=b19f38abec",
+          "bytes": 487036
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/wide-1600.webp?v=1b8b9b0079",
+          "bytes": 224806
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/wide-1200.webp?v=eb2ab9d411",
+          "bytes": 140310
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/wide-800.webp?v=c3f48fc7bd",
+          "bytes": 70664
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/wide-480.webp?v=801a9fbf74",
+          "bytes": 29368
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/std-1200.webp?v=11e359bedb",
+          "bytes": 168814
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/std-800.webp?v=88baa0e78e",
+          "bytes": 84408
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/legends-doubles-final-at-margaret-court-arena-during-the-202/card.jpg?v=fb33e17edb",
+          "bytes": 158738
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:21.113Z"
+    },
+    {
+      "id": "margaret-court-arena-australian-open-2017",
+      "type": "court",
+      "title": "Margaret Court Arena (Australian Open 2017).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AMargaret_Court_Arena_(Australian_Open_2017).jpg",
+      "author": "DestinationAlan",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "DestinationAlan / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2017-01-24 15:06:51",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Margaret Court Arena at the 2017 Australian Open",
+      "caption": "Margaret Court Arena at the 2017 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q732679"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2017
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2017
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/wide-2400.webp?v=1af1883e33",
+          "bytes": 269108
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/wide-1600.webp?v=193f31f8e9",
+          "bytes": 151292
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/wide-1200.webp?v=d745bc02ab",
+          "bytes": 96948
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/wide-800.webp?v=32092a4531",
+          "bytes": 50158
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/wide-480.webp?v=00e7ac2ce7",
+          "bytes": 21058
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/std-1200.webp?v=83d5809dc0",
+          "bytes": 115234
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/std-800.webp?v=56275c394a",
+          "bytes": 60530
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/margaret-court-arena-australian-open-2017/card.jpg?v=ab32ffb5fb",
+          "bytes": 120043
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:26.553Z"
+    },
+    {
+      "id": "australian-open-2015-15804548103",
+      "type": "tournament_atmosphere",
+      "title": "Australian Open 2015 (15804548103).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(15804548103).jpg",
+      "author": "Tourism Victoria from Australia",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "Tourism Victoria from Australia / CC BY 2.0 / Wikimedia Commons",
+      "date": "2015-02-01 23:28",
+      "width": 2992,
+      "height": 2000,
+      "shows": "the trophy ceremony in Rod Laver Arena, 2015 Australian Open",
+      "caption": "Novak Djokovic — the trophy ceremony in Rod Laver Arena, 2015 Australian Open",
+      "player_ids": [
+        "7ae0e54a-2143-5570-82a5-896f0df8c350"
+      ],
+      "player_slugs": [
+        "novak-djokovic"
+      ],
+      "depicts_wikidata": [
+        "Q222878",
+        "Q5812"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2015
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2015
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/wide-2400.webp?v=073646b848",
+          "bytes": 290048
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/wide-1600.webp?v=d388459fc8",
+          "bytes": 178080
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/wide-1200.webp?v=be1bb1658d",
+          "bytes": 125642
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/wide-800.webp?v=f7e7a0d3ff",
+          "bytes": 71990
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/wide-480.webp?v=a5c44b8d4d",
+          "bytes": 32296
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/std-1200.webp?v=92a61c9fe5",
+          "bytes": 168356
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/std-800.webp?v=8f1e9ec096",
+          "bytes": 97146
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-15804548103/card.jpg?v=98cd61198c",
+          "bytes": 143488
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:32.771Z"
     },
     {
       "id": "australian-open-2015-15779711323",
-      "type": "venue",
+      "type": "tournament_atmosphere",
       "title": "Australian Open 2015 (15779711323).jpg",
       "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(15779711323).jpg",
       "author": "Tourism Victoria from Australia",
@@ -238,7 +1857,7 @@
       "width": 2992,
       "height": 2000,
       "shows": "Rod Laver Arena during the 2015 Australian Open",
-      "caption": "Rod Laver Arena during the 2015 Australian Open (Tomas Berdych on court)",
+      "caption": "Tomas Berdych — Rod Laver Arena during the 2015 Australian Open",
       "player_ids": [
         "d6b7ff29-683d-5a19-baea-ff9f515792d1"
       ],
@@ -252,7 +1871,14 @@
       "tournaments": [
         "australian-open"
       ],
-      "edition": null,
+      "edition": {
+        "slug": "australian-open",
+        "year": 2015
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2015
+      },
       "match_id": null,
       "surface": "hard",
       "venue_dominant": false,
@@ -294,80 +1920,152 @@
           "bytes": 171855
         }
       },
-      "reviewed": "visual review 2026-09-26: full Rod Laver Arena, blue court, match in play (players not identifiable)",
-      "verified_at": "2026-09-26T23:18:35.561Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:38.927Z"
     },
     {
-      "id": "australian-open-2015-16373759976",
-      "type": "venue",
-      "title": "Australian Open 2015 (16373759976).jpg",
-      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(16373759976).jpg",
+      "id": "australian-open-2015-16213838877",
+      "type": "tournament_atmosphere",
+      "title": "Australian Open 2015 (16213838877).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2015_(16213838877).jpg",
       "author": "Tourism Victoria from Australia",
       "license": "CC BY 2.0",
       "license_url": "https://creativecommons.org/licenses/by/2.0",
       "credit": "Tourism Victoria from Australia / CC BY 2.0 / Wikimedia Commons",
-      "date": "2015-01-29 20:24",
+      "date": "2015-01-29 23:20",
       "width": 2992,
       "height": 2000,
       "shows": "Rod Laver Arena during the 2015 Australian Open",
-      "caption": "Rod Laver Arena during the 2015 Australian Open (Tomas Berdych on court)",
-      "player_ids": [
-        "d6b7ff29-683d-5a19-baea-ff9f515792d1"
-      ],
-      "player_slugs": [
-        "tomas-berdych"
-      ],
+      "caption": "Rod Laver Arena during the 2015 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
       "depicts_wikidata": [
-        "Q222878",
-        "Q193665"
+        "Q222878"
       ],
       "tournaments": [
         "australian-open"
       ],
-      "edition": null,
+      "edition": {
+        "slug": "australian-open",
+        "year": 2015
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2015
+      },
       "match_id": null,
       "surface": "hard",
       "venue_dominant": false,
       "focal": {
         "x": 0.5,
-        "y": 0.62
+        "y": 0.65
       },
       "derivatives": {
         "wide-2400": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-2400.webp?v=0b64c6b7f0",
-          "bytes": 383714
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/wide-2400.webp?v=4f2c87264f",
+          "bytes": 252788
         },
         "wide-1600": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-1600.webp?v=f0bb41cced",
-          "bytes": 247678
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/wide-1600.webp?v=4c4e3479a0",
+          "bytes": 152990
         },
         "wide-1200": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-1200.webp?v=d7d98b9f63",
-          "bytes": 174088
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/wide-1200.webp?v=53a9ea93ac",
+          "bytes": 106056
         },
         "wide-800": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-800.webp?v=3d9791ab61",
-          "bytes": 97128
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/wide-800.webp?v=403221ea92",
+          "bytes": 59754
         },
         "wide-480": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/wide-480.webp?v=e77576ca8c",
-          "bytes": 40392
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/wide-480.webp?v=7b82ff6608",
+          "bytes": 26040
         },
         "std-1200": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/std-1200.webp?v=11f05768ba",
-          "bytes": 185836
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/std-1200.webp?v=4a0b799cb4",
+          "bytes": 118956
         },
         "std-800": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/std-800.webp?v=535f6a0348",
-          "bytes": 107320
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/std-800.webp?v=aec06c9f4e",
+          "bytes": 68562
         },
         "card": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16373759976/card.jpg?v=1a42cf30f7",
-          "bytes": 188158
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2015-16213838877/card.jpg?v=21438f4423",
+          "bytes": 130126
         }
       },
-      "reviewed": "visual review 2026-09-26: Rod Laver Arena, blue court, crowd",
-      "verified_at": "2026-09-26T23:18:42.252Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:45.003Z"
+    },
+    {
+      "id": "australian-open-2020-49837295546",
+      "type": "tournament_atmosphere",
+      "title": "Australian Open 2020 (49837295546).jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAustralian_Open_2020_(49837295546).jpg",
+      "author": "Rob Keating from Canberra, Australia, Australia",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "Rob Keating from Canberra, Australia, Australia / CC BY 2.0 / Wikimedia Commons",
+      "date": "2020-01-21 23:42",
+      "width": 1800,
+      "height": 1202,
+      "shows": "Rod Laver Arena during the 2020 Australian Open",
+      "caption": "Rod Laver Arena during the 2020 Australian Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q222878"
+      ],
+      "tournaments": [
+        "australian-open"
+      ],
+      "edition": {
+        "slug": "australian-open",
+        "year": 2020
+      },
+      "event": {
+        "slug": "australian-open",
+        "year": 2020
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/wide-1600.webp?v=b82bd08a64",
+          "bytes": 196152
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/wide-1200.webp?v=5f305b3034",
+          "bytes": 127452
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/wide-800.webp?v=7841204957",
+          "bytes": 65478
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/wide-480.webp?v=f194d3867e",
+          "bytes": 26980
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/std-1200.webp?v=03ff994c80",
+          "bytes": 146912
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/std-800.webp?v=49f9487e60",
+          "bytes": 77096
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/australian-open-2020-49837295546/card.jpg?v=ef5df4e600",
+          "bytes": 142685
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:49.982Z"
     },
     {
       "id": "2017-01-rod-laver-arena",
@@ -392,6 +2090,7 @@
         "australian-open"
       ],
       "edition": null,
+      "event": null,
       "match_id": null,
       "surface": "hard",
       "venue_dominant": false,
@@ -433,8 +2132,764 @@
           "bytes": 198127
         }
       },
-      "reviewed": "visual review 2026-09-26: Rod Laver Arena, blue court, crowd",
-      "verified_at": "2026-09-26T23:18:48.371Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:58:55.994Z"
+    },
+    {
+      "id": "aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20",
+      "type": "match_action",
+      "title": "Aryna Sabalenka vs. Qinwen Zheng in a quarterfinals of the 2024 US Open - 03.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAryna_Sabalenka_vs._Qinwen_Zheng_in_a_quarterfinals_of_the_2024_US_Open_-_03.jpg",
+      "author": "Oleg Yunakov",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Oleg Yunakov / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2024-09-03 19:53:21",
+      "width": 3840,
+      "height": 2880,
+      "shows": "a 2024 US Open quarterfinal",
+      "caption": "Aryna Sabalenka, Qinwen Zheng — a 2024 US Open quarterfinal",
+      "player_ids": [
+        "229980f1-a0a3-5386-96ca-b40c30e656ba",
+        "60e8acca-26a9-5b8e-aefe-869965777218"
+      ],
+      "player_slugs": [
+        "aryna-sabalenka",
+        "qinwen-zheng"
+      ],
+      "depicts_wikidata": [
+        "Q121872672",
+        "Q23448791",
+        "Q62096129"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2024
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2024
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/wide-2400.webp?v=ca6ce3fa93",
+          "bytes": 219272
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/wide-1600.webp?v=07872c06a7",
+          "bytes": 131794
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/wide-1200.webp?v=44d6721e8e",
+          "bytes": 88494
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/wide-800.webp?v=b0744880f5",
+          "bytes": 45674
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/wide-480.webp?v=c45a3392a5",
+          "bytes": 19648
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/std-1200.webp?v=83b9834f2d",
+          "bytes": 106042
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/std-800.webp?v=4f01649cfc",
+          "bytes": 56234
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-vs-qinwen-zheng-in-a-quarterfinals-of-the-20/card.jpg?v=ce23d77e41",
+          "bytes": 111587
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:09.554Z"
+    },
+    {
+      "id": "aryna-sabalenka-jessica-pegula-us-open-final-2024",
+      "type": "tournament_atmosphere",
+      "title": "Aryna Sabalenka & Jessica Pegula US Open Final 2024.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AAryna_Sabalenka_%26_Jessica_Pegula_US_Open_Final_2024.jpg",
+      "author": "Ocoudis",
+      "license": "CC0",
+      "license_url": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "credit": "Ocoudis / CC0 / Wikimedia Commons",
+      "date": "2024-09-07 18:21:17",
+      "width": 3481,
+      "height": 2611,
+      "shows": "the 2024 US Open women’s final ceremony",
+      "caption": "Aryna Sabalenka — the 2024 US Open women’s final ceremony",
+      "player_ids": [
+        "229980f1-a0a3-5386-96ca-b40c30e656ba"
+      ],
+      "player_slugs": [
+        "aryna-sabalenka"
+      ],
+      "depicts_wikidata": [
+        "Q121872672",
+        "Q23448791"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2024
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2024
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.35
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/wide-2400.webp?v=c137e9487d",
+          "bytes": 106628
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/wide-1600.webp?v=f107dbd1a9",
+          "bytes": 66902
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/wide-1200.webp?v=3d9c5e8b01",
+          "bytes": 48142
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/wide-800.webp?v=501c46d950",
+          "bytes": 29828
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/wide-480.webp?v=52f5959027",
+          "bytes": 15934
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/std-1200.webp?v=f1b0c98a2c",
+          "bytes": 65174
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/std-800.webp?v=320bfcbb4d",
+          "bytes": 40474
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/aryna-sabalenka-jessica-pegula-us-open-final-2024/card.jpg?v=b61542be5f",
+          "bytes": 76451
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:15.322Z"
+    },
+    {
+      "id": "jabeur-vs-osorio-2023-us-open-01",
+      "type": "match_action",
+      "title": "Jabeur vs. Osorio (2023 US Open) 01.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AJabeur_vs._Osorio_(2023_US_Open)_01.jpg",
+      "author": "Hameltion",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Hameltion / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2023-08-29 11:17:54",
+      "width": 3840,
+      "height": 2560,
+      "shows": "a 2023 US Open match in Louis Armstrong Stadium",
+      "caption": "Camila Osorio — a 2023 US Open match in Louis Armstrong Stadium",
+      "player_ids": [
+        "87968f4e-621d-5e2c-a5ec-4738b3c382b2"
+      ],
+      "player_slugs": [
+        "camila-osorio"
+      ],
+      "depicts_wikidata": [
+        "Q290212",
+        "Q29052147",
+        "Q1029132"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2023
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2023
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/wide-2400.webp?v=25bfb3f371",
+          "bytes": 323708
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/wide-1600.webp?v=ea0882da29",
+          "bytes": 169464
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/wide-1200.webp?v=d891a308f1",
+          "bytes": 105954
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/wide-800.webp?v=f838f4a654",
+          "bytes": 54332
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/wide-480.webp?v=690a9db986",
+          "bytes": 24068
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/std-1200.webp?v=4529d74a5c",
+          "bytes": 160698
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/std-800.webp?v=f37bce698f",
+          "bytes": 81080
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/jabeur-vs-osorio-2023-us-open-01/card.jpg?v=e6c7fc6c71",
+          "bytes": 116909
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:22.465Z"
+    },
+    {
+      "id": "2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far",
+      "type": "match_action",
+      "title": "2021 US Open Armstrong Sabalenka v. Krejčíková quarter far.JPG",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2021_US_Open_Armstrong_Sabalenka_v._Krej%C4%8D%C3%ADkov%C3%A1_quarter_far.JPG",
+      "author": "Beyond My Ken",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Beyond My Ken / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2021-09-07",
+      "width": 3840,
+      "height": 2880,
+      "shows": "a 2021 US Open quarterfinal in Louis Armstrong Stadium",
+      "caption": "Aryna Sabalenka — a 2021 US Open quarterfinal in Louis Armstrong Stadium",
+      "player_ids": [
+        "229980f1-a0a3-5386-96ca-b40c30e656ba"
+      ],
+      "player_slugs": [
+        "aryna-sabalenka"
+      ],
+      "depicts_wikidata": [
+        "Q609551",
+        "Q23448791"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/wide-2400.webp?v=b920985786",
+          "bytes": 740262
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/wide-1600.webp?v=48ed579416",
+          "bytes": 390876
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/wide-1200.webp?v=59b0637d08",
+          "bytes": 241234
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/wide-800.webp?v=31e33e4068",
+          "bytes": 119626
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/wide-480.webp?v=4277bea86a",
+          "bytes": 47708
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/std-1200.webp?v=b3f8d4b635",
+          "bytes": 314468
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/std-800.webp?v=5b904029be",
+          "bytes": 152406
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-far/card.jpg?v=ce5d31fd63",
+          "bytes": 233575
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:30.132Z"
+    },
+    {
+      "id": "2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near",
+      "type": "match_action",
+      "title": "2021 US Open Armstrong Sabalenka v. Krejčíková quarter near.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2021_US_Open_Armstrong_Sabalenka_v._Krej%C4%8D%C3%ADkov%C3%A1_quarter_near.jpg",
+      "author": "Beyond My Ken",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Beyond My Ken / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2021-09-07",
+      "width": 3840,
+      "height": 2727,
+      "shows": "a 2021 US Open quarterfinal in Louis Armstrong Stadium",
+      "caption": "Aryna Sabalenka — a 2021 US Open quarterfinal in Louis Armstrong Stadium",
+      "player_ids": [
+        "229980f1-a0a3-5386-96ca-b40c30e656ba"
+      ],
+      "player_slugs": [
+        "aryna-sabalenka"
+      ],
+      "depicts_wikidata": [
+        "Q609551",
+        "Q23448791"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/wide-2400.webp?v=a2360531d9",
+          "bytes": 248026
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/wide-1600.webp?v=d0600ae918",
+          "bytes": 161004
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/wide-1200.webp?v=2dcf6e8885",
+          "bytes": 115902
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/wide-800.webp?v=432f3e3fad",
+          "bytes": 66226
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/wide-480.webp?v=1d77694bfb",
+          "bytes": 29718
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/std-1200.webp?v=c664b7b470",
+          "bytes": 173114
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/std-800.webp?v=cdb953cdea",
+          "bytes": 100068
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-armstrong-sabalenka-v-krejc-i-kova-quarter-near/card.jpg?v=6eb3553fab",
+          "bytes": 126154
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:36.073Z"
+    },
+    {
+      "id": "2021-us-open-day-18",
+      "type": "tournament_atmosphere",
+      "title": "2021 US Open, Day 18.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2021_US_Open%2C_Day_18.jpg",
+      "author": "Curlyrnd",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Curlyrnd / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2021-08-30 12:52:42",
+      "width": 3840,
+      "height": 2880,
+      "shows": "Arthur Ashe Stadium during the 2021 US Open",
+      "caption": "Arthur Ashe Stadium during the 2021 US Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q847",
+        "Q123577",
+        "Q741118",
+        "Q609551"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/wide-2400.webp?v=5d62f99814",
+          "bytes": 565736
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/wide-1600.webp?v=a12ea2f1f9",
+          "bytes": 317412
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/wide-1200.webp?v=00a35e733c",
+          "bytes": 205014
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/wide-800.webp?v=ea1738bb62",
+          "bytes": 109522
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/wide-480.webp?v=ddb3314f53",
+          "bytes": 45152
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/std-1200.webp?v=c2b72fb05f",
+          "bytes": 255182
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/std-800.webp?v=cc10be77d9",
+          "bytes": 134758
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-18/card.jpg?v=dee4c00838",
+          "bytes": 210563
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:46.078Z"
+    },
+    {
+      "id": "2021-us-open-day-14",
+      "type": "tournament_atmosphere",
+      "title": "2021 US Open, Day 14.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2021_US_Open%2C_Day_14.jpg",
+      "author": "Curlyrnd",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Curlyrnd / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2021-08-30 12:29:48",
+      "width": 3840,
+      "height": 2880,
+      "shows": "the grounds during the 2021 US Open",
+      "caption": "the grounds during the 2021 US Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q609551"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2021
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/wide-2400.webp?v=2c60eb6400",
+          "bytes": 647330
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/wide-1600.webp?v=c2de38160c",
+          "bytes": 328252
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/wide-1200.webp?v=cbb23852da",
+          "bytes": 198106
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/wide-800.webp?v=9b9d20f827",
+          "bytes": 94514
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/wide-480.webp?v=073f70836b",
+          "bytes": 36262
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/std-1200.webp?v=6445ca4519",
+          "bytes": 227364
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/std-800.webp?v=c9955c4de8",
+          "bytes": 106080
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2021-us-open-day-14/card.jpg?v=821232c7e3",
+          "bytes": 200100
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T00:59:55.242Z"
+    },
+    {
+      "id": "arthur-ashe-stadium-us-open-2008",
+      "type": "tournament_atmosphere",
+      "title": "Arthur Ashe Stadium US Open 2008.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AArthur_Ashe_Stadium_US_Open_2008.jpg",
+      "author": "mukund76",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "mukund76 / CC BY 2.0 / Wikimedia Commons",
+      "date": "2008-08-31 17:53:35",
+      "width": 2272,
+      "height": 1704,
+      "shows": "Arthur Ashe Stadium during the 2008 US Open",
+      "caption": "Arthur Ashe Stadium during the 2008 US Open",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q609551"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": {
+        "slug": "us-open",
+        "year": 2008
+      },
+      "event": {
+        "slug": "us-open",
+        "year": 2008
+      },
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "derivatives": {
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/wide-1600.webp?v=6c7df69a5c",
+          "bytes": 326916
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/wide-1200.webp?v=2e37753e00",
+          "bytes": 205892
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/wide-800.webp?v=58b20afcfa",
+          "bytes": 105004
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/wide-480.webp?v=1280f6d36d",
+          "bytes": 43480
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/std-1200.webp?v=3b12b75c3b",
+          "bytes": 234724
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/std-800.webp?v=9de4346cb3",
+          "bytes": 119378
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-us-open-2008/card.jpg?v=3ad0ee2cc8",
+          "bytes": 200932
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T01:00:00.530Z"
+    },
+    {
+      "id": "arthur-ashe-stadium-2010",
+      "type": "court",
+      "title": "Arthur Ashe Stadium 2010.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3AArthur_Ashe_Stadium_2010.jpg",
+      "author": "manalahmadkhan",
+      "license": "CC BY 2.0",
+      "license_url": "https://creativecommons.org/licenses/by/2.0",
+      "credit": "manalahmadkhan / CC BY 2.0 / Wikimedia Commons",
+      "date": "2010-09-10",
+      "width": 3088,
+      "height": 2056,
+      "shows": "Arthur Ashe Stadium",
+      "caption": "Arthur Ashe Stadium",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q609551"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.6
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/wide-2400.webp?v=a7bbb2394b",
+          "bytes": 713030
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/wide-1600.webp?v=62fe5b926b",
+          "bytes": 404430
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/wide-1200.webp?v=89a8c39653",
+          "bytes": 252636
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/wide-800.webp?v=f55e854d9d",
+          "bytes": 127394
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/wide-480.webp?v=3a20974518",
+          "bytes": 49362
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/std-1200.webp?v=553bd502c3",
+          "bytes": 277472
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/std-800.webp?v=ab328e6a4c",
+          "bytes": 141272
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/arthur-ashe-stadium-2010/card.jpg?v=feb54fad5f",
+          "bytes": 247812
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T01:00:07.011Z"
+    },
+    {
+      "id": "2019-usta-ntc-court-4-and-ashe-at-sunset",
+      "type": "venue",
+      "title": "2019 USTA NTC Court 4 and Ashe at sunset.jpg",
+      "source_page": "https://commons.wikimedia.org/wiki/File%3A2019_USTA_NTC_Court_4_and_Ashe_at_sunset.jpg",
+      "author": "Beyond My Ken",
+      "license": "CC BY-SA 4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0",
+      "credit": "Beyond My Ken / CC BY-SA 4.0 / Wikimedia Commons",
+      "date": "2019-09-23",
+      "width": 3840,
+      "height": 2699,
+      "shows": "Arthur Ashe Stadium at sunset",
+      "caption": "Arthur Ashe Stadium at sunset",
+      "player_ids": [],
+      "player_slugs": [],
+      "depicts_wikidata": [
+        "Q609551"
+      ],
+      "tournaments": [
+        "us-open"
+      ],
+      "edition": null,
+      "event": null,
+      "match_id": null,
+      "surface": "hard",
+      "venue_dominant": false,
+      "focal": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "derivatives": {
+        "wide-2400": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/wide-2400.webp?v=bf959f9a89",
+          "bytes": 436322
+        },
+        "wide-1600": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/wide-1600.webp?v=a1a433bfac",
+          "bytes": 222626
+        },
+        "wide-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/wide-1200.webp?v=e4c422c5e5",
+          "bytes": 140182
+        },
+        "wide-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/wide-800.webp?v=278338eca3",
+          "bytes": 73260
+        },
+        "wide-480": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/wide-480.webp?v=9cf31e194c",
+          "bytes": 30498
+        },
+        "std-1200": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/std-1200.webp?v=a41260c216",
+          "bytes": 164476
+        },
+        "std-800": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/std-800.webp?v=4e9426c260",
+          "bytes": 84074
+        },
+        "card": {
+          "url": "https://tennis-api.propbetedge.ai/media/editorial/2019-usta-ntc-court-4-and-ashe-at-sunset/card.jpg?v=c1164e91b1",
+          "bytes": 154156
+        }
+      },
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T01:00:13.079Z"
     },
     {
       "id": "2017-citi-open-tennis-skylar-morton-alana-smith-36167836851",
@@ -463,6 +2918,10 @@
       ],
       "tournaments": [],
       "edition": null,
+      "event": {
+        "slug": "citi-open",
+        "year": 2017
+      },
       "match_id": null,
       "surface": "hard",
       "venue_dominant": false,
@@ -504,80 +2963,8 @@
           "bytes": 95278
         }
       },
-      "reviewed": "visual review 2026-09-26: four players at the net, hard court; landscape 5234x3260",
-      "verified_at": "2026-09-26T23:18:55.826Z"
-    },
-    {
-      "id": "wimbledon-doubles-final-2019",
-      "type": "player_action",
-      "title": "Wimbledon doubles final 2019.png",
-      "source_page": "https://commons.wikimedia.org/wiki/File%3AWimbledon_doubles_final_2019.png",
-      "author": "LHC88",
-      "license": "CC BY 4.0",
-      "license_url": "https://creativecommons.org/licenses/by/4.0",
-      "credit": "LHC88 / CC BY 4.0 / Wikimedia Commons",
-      "date": "2019-07-14",
-      "width": 2042,
-      "height": 1520,
-      "shows": "the 2019 Wimbledon women’s doubles final on Centre Court",
-      "caption": "Yifan Xu, Su-Wei Hsieh, Gabriela Dabrowski — the 2019 Wimbledon women’s doubles final on Centre Court",
-      "player_ids": [
-        "8c2ffa09-e414-5b1f-9cbb-dc96cb194d98",
-        "b213fedb-23ff-5946-96d3-15b1954d057e",
-        "f53a9c5f-7892-5aea-8e8d-6f73fe25a922"
-      ],
-      "player_slugs": [
-        "yifan-xu",
-        "su-wei-hsieh",
-        "gabriela-dabrowski"
-      ],
-      "depicts_wikidata": [
-        "Q232566",
-        "Q230353",
-        "Q5515953",
-        "Q4845400"
-      ],
-      "tournaments": [],
-      "edition": null,
-      "match_id": null,
-      "surface": "grass",
-      "venue_dominant": true,
-      "focal": {
-        "x": 0.5,
-        "y": 0.55
-      },
-      "derivatives": {
-        "wide-1600": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1600.webp?v=f0a319b6ae",
-          "bytes": 289614
-        },
-        "wide-1200": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-1200.webp?v=666b815a9f",
-          "bytes": 189530
-        },
-        "wide-800": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-800.webp?v=c20603a05e",
-          "bytes": 96874
-        },
-        "wide-480": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/wide-480.webp?v=5d53d171d3",
-          "bytes": 38838
-        },
-        "std-1200": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-1200.webp?v=dbe1b45da3",
-          "bytes": 211934
-        },
-        "std-800": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/std-800.webp?v=18bcaf0665",
-          "bytes": 109362
-        },
-        "card": {
-          "url": "https://tennis-api.propbetedge.ai/media/editorial/wimbledon-doubles-final-2019/card.jpg?v=95f5384409",
-          "bytes": 198640
-        }
-      },
-      "reviewed": "visual review 2026-09-26: wide Centre Court shot, players small — venue dominates",
-      "verified_at": "2026-09-26T23:19:02.308Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T01:00:20.111Z"
     },
     {
       "id": "ellen-perez-and-nicole-melichar-martinez-2023-dc-open-07",
@@ -607,6 +2994,10 @@
       ],
       "tournaments": [],
       "edition": null,
+      "event": {
+        "slug": "citi-open",
+        "year": 2023
+      },
       "match_id": null,
       "surface": "hard",
       "venue_dominant": false,
@@ -648,8 +3039,8 @@
           "bytes": 78482
         }
       },
-      "reviewed": "visual review 2026-09-26: doubles pair celebrating on a blue hard court",
-      "verified_at": "2026-09-26T23:19:08.319Z"
+      "reviewed": "visual review 2026-09-27",
+      "verified_at": "2026-09-27T01:00:26.144Z"
     }
   ]
 }

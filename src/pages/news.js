@@ -37,7 +37,7 @@ function playerImg(p, { eager = false, wideOk = true } = {}) {
 /** The hero/card visual for a resolved hero. Returns '' for the fallback on article pages. */
 function heroVisual(h, { hero = false, card = false } = {}) {
   if (!h || !h.images?.length) return '';
-  if (h.type === 'player_photos') {
+  if (h.type === 'portrait') {
     const ps = h.images;
     if (ps.length === 1) return html`<div class="nwm-ph one${ps[0].wide ? ' wide' : ''}">${playerImg(ps[0], { eager: hero })}</div>`;
     return html`<div class="nwm-ph duo">${ps.map((p) => html`<div>${playerImg(p, { eager: hero, wideOk: false })}</div>`)}</div>`;
@@ -48,7 +48,7 @@ function heroVisual(h, { hero = false, card = false } = {}) {
 function heroCaption(h) {
   if (!h?.images?.length) return '';
   const cr = (i) => (i.source_page ? html`<a href="${i.source_page}" rel="noopener nofollow" target="_blank">${i.author || 'Author'} / ${i.license}</a>` : html`${i.credit || ''}`);
-  if (h.type === 'player_photos') return html`${h.images.map((i, k) => html`${k ? ' · ' : ''}<b>${i.name}</b> — photo: ${cr(i)}`)}`;
+  if (h.type === 'portrait') return html`${h.images.map((i, k) => html`${k ? ' · ' : ''}<b>${i.name}</b> — photo: ${cr(i)}`)}`;
   const i = h.images[0];
   return html`${i.caption}. Photo: ${cr(i)}`;
 }
