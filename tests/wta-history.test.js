@@ -126,3 +126,36 @@ test('self-heal: a row found by its own id that duplicates an official row in th
   assert.equal(s.rows('tennis_match_external_ids').find((x) => x.provider === 'espn').match_id, s.rows('tennis_matches')[0].match_id);
   assert.ok(s.rows('tennis_source_changes').some((c) => c.kind === 'duplicate_merged'));
 });
+
+test('history backfill: completion ledger skips finished players across shard layouts; resume page; deadlock retry; cron yields to admin', async () => {
+  const { wtaHistoryStep, ADMIN_FLAG } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV } = await import('./helpers/memstore.js');
+  const kv = new MemKV();
+  const built = new Date().toISOString();
+  await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c', 'd', 'e', 'f']));
+  await kv.put('wh:done:b', '{"rows":3}');
+  await kv.put('wh:page:c', '2');
+  await kv.put('wh:state:0/2', JSON.stringify({ i: 0, page: 0, built_at: built, players_done: 0 }));
+  await kv.put('wh:state:1/2', JSON.stringify({ i: 1, page: 0, built_at: built, players_done: 0 }));
+  const calls = [];
+  let deadlocked = false;
+  const pageFn = async (ctx, id, page) => {
+    calls.push(`${id}:${page}`);
+    if (id === 'e' && !deadlocked) { deadlocked = true; throw new Error('postgrest 500 {"code":"40P01"} deadlock detected'); }
+    return { state: id === 'a' && page === 0 ? 'MORE' : 'END', rows: 10, written: 7, attached: 2, held: 1 };
+  };
+  const ctx = { kv };
+  const s0 = await wtaHistoryStep(ctx, { pages: 8, shard: 0, shards: 2, admin: true, pageFn });
+  const s1 = await wtaHistoryStep(ctx, { pages: 8, shard: 1, shards: 2, admin: true, pageFn });
+  assert.deepEqual(calls, ['a:0', 'a:1', 'c:2', 'e:0', 'e:0', 'd:0', 'f:0']);
+  assert.equal(s0.done, true); assert.equal(s1.done, true); assert.equal(s1.skipped_done, 1);
+  assert.deepEqual(JSON.parse(await kv.get('wh:done:a')).pages, 2);
+  assert.equal(JSON.parse(await kv.get('wh:done:a')).written, 14);
+  assert.equal(await kv.get('wh:page:c'), null);
+  // the cron (unsharded) stands aside while an admin backfill is active, then finds every player done
+  assert.deepEqual(await wtaHistoryStep(ctx, { pages: 2, pageFn }), { skipped: 'admin_backfill_active' });
+  await kv.delete(ADMIN_FLAG);
+  await kv.put('wh:state', JSON.stringify({ i: 0, page: 0, built_at: built, players_done: 0 }));
+  const cron = await wtaHistoryStep(ctx, { pages: 2, pageFn });
+  assert.equal(cron.skipped_done, 6); assert.equal(cron.done, true); assert.equal(calls.length, 7);
+});

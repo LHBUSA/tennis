@@ -129,10 +129,22 @@ export async function historyPage(ctx, wtaId, page) {
   return { state: rows.length < PAGE ? 'END' : 'MORE', ...out };
 }
 
-/** Bounded unit: up to `pages` history pages across the queue. */
-export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1 } = {}) {
-  // shard k of n walks queue positions k, k+n, k+2n ... (a match two players share gets one deterministic id)
+const DONE = (id) => `wh:done:${id}`; // completion ledger: one key per player, value = that player's totals
+const PAGE_AT = (id) => `wh:page:${id}`; // resume page of a player in progress (written only while MORE)
+export const ADMIN_FLAG = 'wh:admin_active'; // an admin sharded backfill is running: the cron lane stands aside
+const SUMS = ['rows', 'written', 'attached', 'taken_over', 'held', 'duplicate_candidates', 'cross_edition'];
+const isDeadlock = (e) => /40P01|deadlock/i.test(String(e?.message || e));
+
+/**
+ * Bounded unit: up to `pages` history pages across the queue. Shard k of n walks positions k, k+n, k+2n ...
+ * (a match two players share gets one deterministic id, so overlapping players are safe, only wasteful). A player
+ * with a completion key is skipped by every runner (cron or any shard layout), so re-sharding never re-fetches
+ * finished history; a player in progress resumes at its recorded page.
+ */
+export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, admin = false, pageFn = historyPage } = {}) {
   const SK = shards > 1 ? `${S}:${shard}/${shards}` : S;
+  if (admin) await ctx.kv.put(ADMIN_FLAG, new Date().toISOString(), { expirationTtl: 900 });
+  else if (await ctx.kv.get(ADMIN_FLAG)) return { skipped: 'admin_backfill_active' };
   let st = (await ctx.kv.get(SK, 'json')) || { i: shard, page: 0, built_at: null, players_done: 0 };
   let queue = (await ctx.kv.get(Q, 'json')) || [];
   if (!queue.length || !st.built_at || Date.now() - Date.parse(st.built_at) > 30 * 86400e3) {
@@ -140,13 +152,37 @@ export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1 } =
     await ctx.kv.put(Q, JSON.stringify(queue));
     st = { ...st, built_at: new Date().toISOString(), i: st.i >= queue.length ? shard : st.i };
   }
-  const out = { runs: [] };
-  for (let n = 0; n < pages && st.i < queue.length; n += 1) {
+  const out = { runs: [], skipped_done: 0 };
+  let n = 0;
+  let guard = 0;
+  while (n < pages && st.i < queue.length && guard < 400) {
+    guard += 1;
     const id = queue[st.i];
-    const r = await historyPage(ctx, id, st.page);
+    if (!st.acc) {
+      // entering a player: skip a finished one, resume one another runner left mid-history
+      if (await ctx.kv.get(DONE(id))) { out.skipped_done += 1; st.i += shards; st.page = 0; continue; }
+      st.page = Math.max(st.page || 0, Number(await ctx.kv.get(PAGE_AT(id))) || 0);
+      st.acc = { pages: 0 };
+    }
+    let r;
+    try { r = await pageFn(ctx, id, st.page); } catch (e) {
+      if (!isDeadlock(e)) { await ctx.kv.put(SK, JSON.stringify(st)); throw e; }
+      r = await pageFn(ctx, id, st.page); // concurrent shards upsert the same people: retry the page once
+    }
+    n += 1;
     out.runs.push({ player: id, page: st.page, ...r });
-    if (r.state === 'END') { st.i += shards; st.page = 0; st.players_done += 1; } else st.page += 1;
+    for (const k of SUMS) st.acc[k] = (st.acc[k] || 0) + (r[k] || 0);
+    st.acc.pages += 1;
+    if (r.state === 'END') {
+      await ctx.kv.put(DONE(id), JSON.stringify({ ...st.acc, at: new Date().toISOString(), by: SK }));
+      await ctx.kv.delete(PAGE_AT(id));
+      st.i += shards; st.page = 0; st.players_done += 1; st.acc = null;
+    } else {
+      st.page += 1;
+      await ctx.kv.put(PAGE_AT(id), String(st.page));
+    }
     await ctx.kv.put(SK, JSON.stringify(st));
   }
+  if (guard >= 400) await ctx.kv.put(SK, JSON.stringify(st));
   return { ...out, queue: queue.length, position: st.i, players_done: st.players_done, done: st.i >= queue.length };
 }
