@@ -21,6 +21,7 @@ import * as espn from '../../providers/espn.js';
 import { espnAtpStep, espnWtaStep, espnRankingStep } from './espn-jobs.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { buildDnaV2 } from './dna-v2-job.js';
+import { wtaHistoryStep } from './wta-history-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
@@ -192,6 +193,10 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         const r = await espnWtaStep(ctx, { budget: 20 });
         return { ok: true, out: r };
       },
+      async wta_history() {
+        const r = await wtaHistoryStep(ctx, { pages: 2 });
+        return { ok: true, done: false, out: r };
+      },
       async espn_wta_rankings() {
         const r = await espnRankingStep(ctx, { weeks: 8, league: 'wta' });
         return { ok: true, done: false, out: r };
@@ -235,7 +240,7 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         return { ok: passed > 0 || !done.length, out: { editions: done, remaining: queue.length } };
       }
     };
-    const DECL = [['ao_current', true], ['espn_atp', true], ['espn_wta', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false], ['espn_rankings', false], ['espn_wta_rankings', false]];
+    const DECL = [['ao_current', true], ['espn_atp', true], ['espn_wta', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false], ['espn_rankings', false], ['espn_wta_rankings', false], ['wta_history', false]];
     const states = Object.fromEntries(await Promise.all(DECL.map(async ([n]) => [n, (await kv.get(LANE_STATE_KEY(n), 'json')) || {}])));
     const rr = Number(await kv.get('lanes:rr')) || 0;
     const plan = planTick({ now: Date.now(), lanes: DECL.map(([name, priority]) => ({ name, priority, ...states[name] })), rr });
@@ -308,7 +313,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { pages: Math.min(b, 8) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;

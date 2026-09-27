@@ -169,7 +169,7 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     result.duplicate_candidates = cs.duplicates;
     result.taken_over = cs.write.filter((x) => x.takeover).length;
     // a takeover may orient sides differently: the owner's participant rows are replaced, not merged
-    for (const x of cs.write.filter((w) => w.takeover)) await store.del('tennis_match_participants', `match_id=eq.${x.id}`);
+    for (const x of cs.write.filter((w) => w.takeover || w.reorient)) await store.del('tennis_match_participants', `match_id=eq.${x.id}`);
   }
   if (attach.length) {
     // the same real-world match already owned by a higher-precedence source: link the external id only
@@ -278,8 +278,9 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
 // an official row attaches its external id only (a result disagreement is recorded for review, the owner's
 // row stands); an official row that finds a secondary-owned row takes it over (same match_id, official
 // fields). Several candidates, a same-source collision or a round conflict is held — never merged.
-export const SOURCE_PRIORITY = Object.freeze({ espn: 1 });
-export const sourcePriority = (p) => SOURCE_PRIORITY[p] ?? 2;
+// espn (secondary) < wta_history (official player-history rows: no ids, no stats, no times) < every per-match official feed
+export const SOURCE_PRIORITY = Object.freeze({ espn: 1, wta_history: 2 });
+export const sourcePriority = (p) => SOURCE_PRIORITY[p] ?? 3;
 const stageOfRound = (round) => (round === 'RR' ? 'round_robin' : /^Q-/.test(String(round || '')) ? 'qualifying' : 'main');
 export function naturalKey(eventType, round, a, b) {
   return `${eventType}|${stageOfRound(round)}|${[a, b].sort().join('~')}`;
@@ -341,7 +342,8 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
     }
     seen.set(key, x);
     // 1. this external id is already linked (idempotent re-ingest, including earlier attachments)
-    let target = extMap.get(x.sm.provider_match_id) || (byId.has(x.id) ? x.id : null);
+    // (a caller may prove the same match in ANOTHER edition, e.g. an ESPN row filed under ESPN's edition)
+    let target = extMap.get(x.sm.provider_match_id) || x.sm.existing_match_id || (byId.has(x.id) ? x.id : null);
     // 2. the same match from another source, by natural key
     if (!target) {
       const cands = (byKey.get(key) || []).filter((c) => c.match_id !== x.id);
@@ -357,7 +359,9 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
     }
     if (!target) { write.push(x); continue; }
     x.id = target;
-    const owner = byId.get(target);
+    const owner = byId.get(target) || (x.sm.existing_owner ? { source_family: x.sm.existing_owner, parts: {}, status: null, score_text: null } : null);
+    // a re-listing with the sides the other way round: participant rows are replaced, not merged
+    if (owner?.parts?.A && owner.parts.A !== x.n.match.participants.A) x.reorient = true;
     if (!owner || owner.source_family === provider) { write.push(x); continue; }
     if (sourcePriority(provider) > sourcePriority(owner.source_family)) { x.takeover = owner.source_family; write.push(x); continue; }
     attach.push(x);
