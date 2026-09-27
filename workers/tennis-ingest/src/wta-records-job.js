@@ -34,11 +34,11 @@ export async function wtaRecordsStep(ctx, { budget = 20 } = {}) {
     if (!player) { st.i += 1; continue; } // not in the canonical graph: nothing to attach to (never minted here)
     const have = new Map((await ctx.store.select('tennis_player_source_records', `select=kind,period,observed_at&pbe_player_id=eq.${pid}&provider=eq.wta`)).map((r) => [`${r.kind}|${r.period}`, r.observed_at]));
     const fresh = (k) => have.has(k) && Date.now() - Date.parse(have.get(k)) < 7 * 86400e3;
-    const todo = [];
-    if (!fresh('career_records|career')) todo.push(['career_records', 'career', rec.playerRecords, { id: wid }]);
-    for (let y = FIRST_SEASON; y <= year; y += 1) if (y === year ? !fresh(`season_stats|${y}`) : !have.has(`season_stats|${y}`) && !have.has(`season_stats|${y}:absent`)) todo.push(['season_stats', String(y), rec.playerYear, { id: wid, year: y }]);
+    const pending = [];
+    if (!fresh('career_records|career')) pending.push(['career_records', 'career', rec.playerRecords, { id: wid }]);
+    for (let y = FIRST_SEASON; y <= year; y += 1) if (y === year ? !fresh(`season_stats|${y}`) : !have.has(`season_stats|${y}`) && !have.has(`season_stats|${y}:absent`)) pending.push(['season_stats', String(y), rec.playerYear, { id: wid, year: y }]);
     const done = { player: wid, fetched: 0, stored: 0, absent: 0 };
-    for (const [kind, period, adapter, params] of todo) {
+    for (const [kind, period, adapter, params] of pending) {
       if (out.requests >= budget) break;
       const r = await fetchRun(ctx, adapter, params);
       out.requests += 1; done.fetched += 1;
@@ -50,7 +50,7 @@ export async function wtaRecordsStep(ctx, { budget = 20 } = {}) {
       } else if (r.state !== 'PASS') throw new Error(`wta records ${wid} ${kind} ${period}: ${r.state} ${r.error || ''}`.trim());
     }
     out.players.push(done);
-    if (done.fetched === todo.length) st.i += 1; // all of this player's items handled
+    if (done.fetched === pending.length) st.i += 1; // all of this player's items handled
     await ctx.kv.put(ST, JSON.stringify(st));
   }
   return { ...out, position: st.i, queue: st.q.length, done: st.i >= st.q.length };

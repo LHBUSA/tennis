@@ -18,6 +18,30 @@ export async function latestV2(store, pid) {
   return (await store.select('tennis_dna_snapshots', `select=as_of,metrics,provenance&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.2&order=as_of.desc&limit=1`))[0] || null;
 }
 
+const SURFACE_KEYS = ['match_win_rate', 'set_win_rate', 'game_win_rate', 'tiebreak_win_rate', 'deciding_set_win_rate', 'top10_win_rate', 'top25_win_rate', 'top50_win_rate', 'wins_above_expectation'];
+const statusOf = (m) => (m.value == null ? 'missing' : !m.comparable ? 'descriptive' : !['medium', 'high'].includes(m.confidence) ? 'player_sample_low' : !m.comparative_published ? 'population_building' : m.percentile == null ? 'peer_sample_not_mature' : 'published');
+
+/**
+ * Surface Match DNA (additive, 2026-09-28): the latest hard / clay / grass v2 snapshots — the same definitions over
+ * the player's matches on that sourced surface, compared within the tour x surface population.
+ */
+export async function surfaceDna(store, pid) {
+  const rows = await store.select('tennis_dna_snapshots', `select=as_of,surface,metrics,provenance&pbe_player_id=eq.${pid}&surface=in.(hard,clay,grass)&definition_version=eq.2&order=as_of.desc&limit=9`);
+  const latest = new Map();
+  for (const r of rows) if (!latest.has(r.surface)) latest.set(r.surface, r);
+  return ['hard', 'clay', 'grass'].filter((s) => latest.has(s)).map((sf) => {
+    const r = latest.get(sf);
+    const M = r.metrics || {};
+    const rt = M._rating;
+    return {
+      surface: sf, as_of: r.as_of, sample: r.provenance?.sample || null, wae_basis: r.provenance?.wae_basis || null,
+      rating: rt ? { value: rt.value, rated_matches: rt.rated_matches, provisional: rt.provisional, percentile: rt.percentile ?? null, established: !!rt.established, status: !rt.published ? 'not_validated' : rt.provisional ? 'provisional' : 'published' } : null,
+      form: M._form ? { last10: M._form.last10, current_streak: M._form.current_streak, career: M._form.career } : null,
+      metrics: SURFACE_KEYS.map((k) => { const m = M[k] || {}; const d = MATCH_DEFINITIONS[k]; return { key: k, label: d.label, unit: d.unit, value: m.value ?? null, confidence: m.confidence || 'insufficient', sample_matches: m.sample_matches ?? 0, record: m.record || null, percentile: m.comparative_published ? m.percentile ?? null : null, population_qualified: m.population_qualified ?? 0, status: statusOf(m) }; })
+    };
+  });
+}
+
 /** Match DNA block for one player (null when no v2 snapshot). Opponent names and tournaments are joined for the recent list. */
 export async function matchDna(store, player) {
   const snap = await latestV2(store, player.pbe_player_id);
@@ -42,7 +66,7 @@ export async function matchDna(store, player) {
   const rating = M._rating ? { ...M._rating, status: !M._rating.published ? 'not_validated' : M._rating.provisional ? 'provisional' : 'published' } : null;
   return {
     definition_version: 2, as_of: snap.as_of, tour: M._tour || tourOf(player.gender), sample: snap.provenance?.sample || null,
-    rating, form: M._form || null, surface_record: M._surface_record || null, families,
+    rating, form: M._form || null, surface_record: M._surface_record || null, families, by_surface: await surfaceDna(store, player.pbe_player_id),
     recent: recent.map((r) => { const e = E.get(r.match_id); return { ...r, opponent: P.get(r.opponent) || null, tournament: e ? { name: e.tennis_tournaments?.name || e.name, slug: e.tennis_tournaments?.slug || null, year: e.year } : null }; }),
     gates: { percentile_min_peers: PERCENTILE_MIN_PEERS, comparative_min: COMPARATIVE_MIN, basis: `${M._tour || tourOf(player.gender)} singles players with a stored v2 snapshot on ${snap.as_of}; a metric's comparison publishes on its own once ${COMPARATIVE_MIN} players qualify (medium/high confidence)` }
   };

@@ -87,18 +87,23 @@ async function run(root, label) {
   clearInterval(timer);
   peak = Math.max(peak, process.memoryUsage().heapUsed);
   const lines = (f) => fs.readFileSync(f, 'utf8').split('\n').filter(Boolean);
-  const snaps = lines(store.files.tennis_dna_snapshots).map((s) => JSON.parse(s)).map(canon).sort((a, b) => (a.pbe_player_id + a.as_of < b.pbe_player_id + b.as_of ? -1 : 1));
+  const key = (x) => `${x.pbe_player_id}|${x.as_of}|${x.surface}`;
+  const all = lines(store.files.tennis_dna_snapshots).map((s) => JSON.parse(s)).map(canon);
+  // rows of surfaces the baseline never wrote are reported as additions, not compared
+  const snaps = all.filter((x) => x.surface === 'all').sort((a, b) => (key(a) < key(b) ? -1 : 1));
+  const extra = {};
+  for (const x of all) if (x.surface !== 'all') extra[x.surface] = (extra[x.surface] || 0) + 1;
   const rats = lines(store.files.tennis_surface_ratings).map((s) => JSON.parse(s)).map(canon).sort((a, b) => (`${a.pbe_player_id}|${a.surface}|${a.as_of}` < `${b.pbe_player_id}|${b.surface}|${b.as_of}` ? -1 : 1));
   const h = (x) => crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
   const tours = canon(Object.fromEntries(Object.entries(summary.tours).map(([t, x]) => [t, { ...x }])));
   console.log(`${label}: ${Date.now() - t0} ms, live set max +${(live / 1048576).toFixed(0)} MB (sampled after GC at each store call; peak at ${where}), store requests ${store.requests}, snapshots ${snaps.length}, ratings ${rats.length}`);
-  return { snaps, rats, tours, hs: h(snaps), hr: h(rats), ht: h(tours), summary };
+  return { snaps, rats, tours, hs: h(snaps), hr: h(rats), ht: h(tours), summary, extra };
 }
 const a = await run(baseRoot, 'baseline ');
 const b = await run(candRoot, 'candidate');
 let diff = 0;
-const bm = new Map(b.snaps.map((s) => [`${s.pbe_player_id}|${s.as_of}`, s]));
-for (const s of a.snaps) { const o = bm.get(`${s.pbe_player_id}|${s.as_of}`); if (!o || JSON.stringify(o) !== JSON.stringify(s)) { if (diff < 3) console.log('DIFF', s.pbe_player_id, s.as_of, JSON.stringify(s).slice(0, 300), '\n     ', JSON.stringify(o || null).slice(0, 300)); diff += 1; } }
-const out = { as_ofs: asOfs, inputs: { matches: D.matches.length, rankings: D.rankings.length, players: D.players.length }, snapshots: { baseline: a.snaps.length, candidate: b.snaps.length, differing: diff, sha256_equal: a.hs === b.hs, sha256: a.hs }, ratings: { baseline: a.rats.length, candidate: b.rats.length, sha256_equal: a.hr === b.hr }, summary_tours_equal: a.ht === b.ht, summary_tours_equal_on_baseline_fields: JSON.stringify(a.tours) === JSON.stringify(canon(Object.fromEntries(Object.entries(b.tours).map(([t, x]) => [t, Object.fromEntries(Object.keys(a.tours[t] || {}).map((k) => [k, x[k]]))])))), summary_fields_added: [...new Set(Object.entries(b.tours).flatMap(([t, x]) => Object.keys(x).filter((k) => !(k in (a.tours[t] || {})))))] };
+const bm = new Map(b.snaps.map((s) => [`${s.pbe_player_id}|${s.as_of}|${s.surface}`, s]));
+for (const s of a.snaps) { const o = bm.get(`${s.pbe_player_id}|${s.as_of}|${s.surface}`); if (!o || JSON.stringify(o) !== JSON.stringify(s)) { if (diff < 3) console.log('DIFF', s.pbe_player_id, s.as_of, JSON.stringify(s).slice(0, 300), '\n     ', JSON.stringify(o || null).slice(0, 300)); diff += 1; } }
+const out = { as_ofs: asOfs, inputs: { matches: D.matches.length, rankings: D.rankings.length, players: D.players.length }, snapshots_added_by_candidate: b.extra, snapshots: { baseline: a.snaps.length, candidate: b.snaps.length, differing: diff, sha256_equal: a.hs === b.hs, sha256: a.hs }, ratings: { baseline: a.rats.length, candidate: b.rats.length, sha256_equal: a.hr === b.hr }, summary_tours_equal: a.ht === b.ht, summary_tours_equal_on_baseline_fields: JSON.stringify(a.tours) === JSON.stringify(canon(Object.fromEntries(Object.entries(b.tours).map(([t, x]) => [t, Object.fromEntries(Object.keys(a.tours[t] || {}).map((k) => [k, x[k]]))])))), summary_fields_added: [...new Set(Object.entries(b.tours).flatMap(([t, x]) => Object.keys(x).filter((k) => !(k in (a.tours[t] || {})))))] };
 console.log(JSON.stringify(out, null, 1));
 if (!out.snapshots.sha256_equal || !out.ratings.sha256_equal || !out.summary_tours_equal_on_baseline_fields) process.exitCode = 1;

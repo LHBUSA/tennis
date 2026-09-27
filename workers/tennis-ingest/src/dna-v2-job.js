@@ -11,6 +11,9 @@ const BUILDER = 'tennis-ingest dna-v2-job 1.0';
 // burn-in seasons before evaluation starts (ATP ledger from 2007; WTA from 2020)
 const BACKTEST_FROM = { ATP: '2012-01-01', WTA: '2023-01-01' };
 const MIN_EVAL = 500;
+// surface Match DNA (as_of = the build's first date only): a player needs >= 5 matches on the surface
+export const SURFACES = ['hard', 'clay', 'grass'];
+const SURFACE_MIN_MATCHES = 5;
 
 async function all(store, table, query, page = 1000) {
   const out = [];
@@ -159,6 +162,41 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         if (batch.length >= 200) await flush();
       }
       await flush();
+    }
+    // surface Match DNA: the same definitions over the player's matches on ONE sourced surface (a match's surface
+    // is its edition's, never inferred); own tour x surface population and gates; the surface PBE Rating with
+    // the surface model's own publication status; wins above expectation against the surface-blend prediction
+    // only where that model is published for the tour, else against the overall rating
+    if (write && asOfs.length) {
+      const asOf = asOfs[0];
+      const surfPre = surfacePublished ? { get: (e) => { const x = run.pre.get(e); return x && x.ps != null && x.nsa >= 5 && x.nsb >= 5 ? { ...x, p: x.ps } : x; } } : run.pre;
+      for (const sf of SURFACES) {
+        const surfaceSnap = (pid, entries) => {
+          const se = entries.filter((e) => e.surface === sf);
+          if (se.filter((e) => e.day < asOf).length < SURFACE_MIN_MATCHES) return null;
+          const r = run.surface.get(`${pid}|${sf}`);
+          const rating = r?.n ? { value: Math.round(r.r), rated_matches: r.n, method_version: RATING_METHOD_VERSION, variant, published: surfacePublished, provisional: r.n < 20, surface: sf } : null;
+          const dna = buildMatchDna(pid, se, asOf, { rankAt, pre: surfPre, rating });
+          if (!dna.sample.matches) return null;
+          return { se, snap: { pbe_player_id: pid, as_of: asOf, surface: sf, definition_version: MATCH_DNA_VERSION, metrics: { ...dna.metrics, _form: dna.form, _rating: rating, _tour: tour, _surface: sf }, provenance: { builder: BUILDER, ledger_rule: `singles completed+retired, dated, same tour, edition surface = ${sf}`, sample: dna.sample, rank_lists: lists[tour].length, wae_basis: surfacePublished ? 'surface_blend' : 'overall_rating' } } };
+        };
+        const slim = [];
+        for (const [pid, entries] of byPlayer) { const x = surfaceSnap(pid, entries); if (x) slim.push(slimForPopulation(x.snap)); }
+        const idx = populationIndex(slim, { asOf });
+        summary.tours[tour].surfaces = { ...(summary.tours[tour].surfaces || {}), [sf]: { players: slim.length, population: idx.counts } };
+        snapshotCount += slim.length;
+        let batch = [];
+        const flush = async () => { if (batch.length) await store.upsert('tennis_dna_snapshots', batch, { onConflict: 'pbe_player_id,as_of,surface,definition_version' }); batch = []; };
+        for (const [pid, entries] of byPlayer) {
+          const x = surfaceSnap(pid, entries);
+          if (!x) continue;
+          applyPopulationOne(x.snap, idx, { ratingPublished: surfacePublished });
+          x.snap.metrics._recent = recentMatches(pid, x.se, asOf, { rankAt, limit: 20 });
+          batch.push(x.snap);
+          if (batch.length >= 200) await flush();
+        }
+        await flush();
+      }
     }
     lists[tour] = null; // this tour's rank maps are no longer needed
   }
