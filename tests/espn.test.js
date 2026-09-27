@@ -154,6 +154,16 @@ test('an athlete id that resolves to someone not printed in the result is held (
   assert.equal(espn.parseEspnEvent({ ...j, competitions: [fin] }, { idMap: right }).matches[0].status, 'completed');
 });
 
+test('a round-robin label inside a Slam is refused (ESPN calls AO 2024 qualifying round 1 "Group Stage")', () => {
+  const j = fx('event-154-2026.json');
+  const c = structuredClone(j.competitions.find((x) => x.id === '171004'));
+  c.round = { roundType: 15, description: 'Group Stage', abbreviation: 'GS' };
+  const m = espn.parseEspnEvent({ ...j, competitions: [c] }, { idMap: allResolve() }).matches[0];
+  assert.equal(m.status, null);
+  assert.ok(m.warnings.includes('unmapped_round:Group Stage'));
+  assert.equal(espn.parseEspnEvent({ ...j, id: '339-2024', name: 'Nitto ATP Finals', competitions: [c] }, { idMap: allResolve() }).matches[0].round_code, 'RR');
+});
+
 test('exhibitions and a Slam id carrying another name are skipped', () => {
   const j = fx('event-20-2015.json');
   assert.equal(espn.parseEspnEvent({ ...j, name: 'Laver Cup' }).skipped[0].reason, 'exhibition');

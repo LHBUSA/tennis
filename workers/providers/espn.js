@@ -231,7 +231,9 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
       const lIds = ids[winner === 'A' ? 1 : 0];
       if (!printed(wIds, wt) || !printed(lIds, lt)) warnings.push('resolved_player_not_in_result_line');
     }
-    const rd = espnRound(c.round, qual[et] || 0);
+    let rd = espnRound(c.round, qual[et] || 0);
+    // Slams have no group stage: ESPN labels AO 2024 qualifying round 1 'Group Stage' — refused, never guessed
+    if (rd?.stage === 'round_robin' && slam) rd = null;
     if (!rd) warnings.push(`unmapped_round:${c.round?.description || 'none'}`);
     let status = null;
     let end = null;
