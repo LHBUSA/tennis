@@ -179,7 +179,7 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     // claims), so men's singles measurements are usable too. ATP and WTA are never compared.
     const dna = {};
     for (const pid of m.event_type === 'WS' || m.event_type === 'MS' ? [wid, lid] : []) {
-      const snap = (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics&pbe_player_id=eq.${pid}&surface=eq.all&as_of=lte.${date}&order=as_of.desc&limit=1`))[0];
+      const snap = (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.1&as_of=lte.${date}&order=as_of.desc&limit=1`))[0];
       if (!snap) continue;
       const metrics = Object.fromEntries(Object.entries(snap.metrics || {}).filter(([, v]) => v && ['medium', 'high'].includes(v.confidence) && Number.isFinite(v.value)).map(([k, v]) => [k, { value: v.value, pct: Math.round(v.value * 1000) / 10, sample_matches: v.sample_matches, confidence: v.confidence }]));
       if (Object.keys(metrics).length) dna[pid] = { as_of: snap.as_of, definition_version: snap.definition_version, metrics };

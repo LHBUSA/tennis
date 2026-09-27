@@ -14,11 +14,11 @@ const get = async (p) => (await fetch(`${API}${p}${p.includes('?') ? '&' : '?'}t
 const checks = [];
 const add = (name, pass, detail) => { checks.push({ name, result: pass ? 'PASS' : 'FAIL', ...detail }); console.log(`${pass ? 'PASS' : 'FAIL'}  ${name}`, JSON.stringify(detail)); };
 for (const [tour, g] of [['atp', 'M'], ['wta', 'F']]) {
-  const [db] = sql(`with l as (select max(s.as_of) d from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}') select (select d from l) as_of, count(*) filter (where s.metrics->'service_points_won'->>'confidence' in ('medium','high')) qualified from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}' and s.surface='all' and s.as_of=(select d from l)`);
+  const [db] = sql(`with l as (select max(s.as_of) d from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}' and s.definition_version=1) select (select d from l) as_of, count(*) filter (where s.metrics->'service_points_won'->>'confidence' in ('medium','high')) qualified from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}' and s.surface='all' and s.definition_version=1 and s.as_of=(select d from l)`);
   const lb = (await get(`/v1/dna/leaders?tour=${tour}&limit=1`)).data;
   const expected = Number(db.qualified) >= THRESHOLD;
   add(`${tour} leaderboard gate matches the store`, lb && lb.as_of === db.as_of && (lb.published !== false) === expected && (lb.published === false ? Number(lb.qualified) === Number(db.qualified) : true), { db_as_of: db.as_of, db_qualified: Number(db.qualified), api_as_of: lb?.as_of, api_published: lb?.published !== false, api_qualified: lb?.qualified, threshold: THRESHOLD });
-  const [pl] = sql(`select p.slug from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}' and s.surface='all' and s.as_of='${db.as_of}' and s.metrics->'service_points_won'->>'confidence' in ('medium','high') limit 1`);
+  const [pl] = sql(`select p.slug from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where p.gender='${g}' and s.surface='all' and s.definition_version=1 and s.as_of='${db.as_of}' and s.metrics->'service_points_won'->>'confidence' in ('medium','high') limit 1`);
   if (pl) {
     const c = (await get(`/v1/players/${pl.slug}/dna`)).data?.dna?.comparative;
     add(`${tour} player comparative status matches the gate`, c && c.published === expected && c.as_of === db.as_of, { player: pl.slug, api: c });

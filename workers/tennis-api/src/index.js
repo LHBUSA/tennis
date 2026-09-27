@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.3.2';
+export const VERSION = '0.4.0';
 
 import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
@@ -128,7 +128,8 @@ async function playerBySlug(store, slug) {
 async function playerMatchIds(store, pid) {
   const mem = await store.select('tennis_participant_members', `select=participant_key&pbe_player_id=eq.${pid}`);
   if (!mem.length) return [];
-  return store.select('tennis_match_participants', `select=match_id,side,participant_key&participant_key=${inList(mem.map((m) => m.participant_key))}&limit=2000`);
+  // newest first (scheduled date, then last source update) so a long career never truncates the recent end
+  return store.select('tennis_match_participants', `select=match_id,side,participant_key,tennis_matches!inner(scheduled_at,source_updated_at)&participant_key=${inList(mem.map((m) => m.participant_key))}&order=tennis_matches(scheduled_at).desc.nullslast&limit=2000`);
 }
 
 async function player(store, slug) {
@@ -136,13 +137,13 @@ async function player(store, slug) {
   if (!p) return null;
   const [ext, ranks, mp] = await Promise.all([
     store.select('tennis_player_external_ids', `select=provider,external_id,method&pbe_player_id=eq.${p.pbe_player_id}`),
-    store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date)&pbe_player_id=eq.${p.pbe_player_id}&limit=600`),
+    store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date,source_family)&pbe_player_id=eq.${p.pbe_player_id}&order=tennis_ranking_snapshots(ranking_date).desc&limit=1000`),
     playerMatchIds(store, p.pbe_player_id)
   ]);
-  const recent = mp.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(mp.map((x) => x.match_id).slice(0, 400))}&order=source_updated_at.desc.nullslast&limit=25`) : [];
-  const hist = ranks.map((r) => ({ list: r.tennis_ranking_snapshots.list_key, date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points })).sort((a, b) => (a.date < b.date ? 1 : -1));
+  const recent = mp.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(mp.map((x) => x.match_id).slice(0, 60))}&order=scheduled_at.desc.nullslast,source_updated_at.desc.nullslast&limit=25`) : [];
+  const hist = ranks.map((r) => ({ list: r.tennis_ranking_snapshots.list_key, date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points, source: r.tennis_ranking_snapshots.source_family })).sort((a, b) => (a.date < b.date ? 1 : -1));
   const latest = {};
-  for (const r of hist) if (!latest[r.list]) latest[r.list] = { rank: r.rank, points: r.points, date: r.date };
+  for (const r of hist) if (!latest[r.list]) latest[r.list] = { rank: r.rank, points: r.points, date: r.date, secondary_source: r.source === 'espn' };
   const data = {
     id: p.pbe_player_id, slug: p.slug, name: p.full_name, first_name: p.first_name, last_name: p.last_name, gender: p.gender, dob: p.dob, nationality: p.nationality,
     external_ids: ext.filter((e) => e.provider !== 'commons_image').map((e) => ({ provider: e.provider, id: e.external_id })),

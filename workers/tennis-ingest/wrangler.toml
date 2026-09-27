@@ -24,3 +24,7 @@ crons = ["*/2 * * * *"]
 [[r2_buckets]]
 binding = "TENNIS_MEDIA"
 bucket_name = "tennis-media"
+
+# DNA v2 builds read the whole singles ledger (~60k rows) once a day
+[limits]
+cpu_ms = 300000

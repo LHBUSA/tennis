@@ -306,7 +306,8 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
       retired_side: status === 'retired' ? (winner === 'A' ? 'B' : 'A') : null, withdrawn_side: status === 'walkover' ? (winner === 'A' ? 'B' : 'A') : null,
       sets: status === 'walkover' ? [] : outSets, live: null, sides: { A: side(0), B: side(1) },
       seeds: { A: Number.isInteger(cs[0].tournamentSeed) ? cs[0].tournamentSeed : null, B: Number.isInteger(cs[1].tournamentSeed) ? cs[1].tournamentSeed : null }, entry: { A: null, B: null },
-      court_name: c.court?.description || null, scheduled_at: c.date ? new Date(Date.parse(c.date)).toISOString() : null,
+      // ESPN prints placeholder dates on some rows (1900-01-03, 2050-01-03): a timestamp outside the edition year +-1 is dropped
+      court_name: c.court?.description || null, scheduled_at: c.date && Math.abs(Number(String(c.date).slice(0, 4)) - ev.year) <= 1 ? new Date(Date.parse(c.date)).toISOString() : null,
       match_day: c.date ? espnDay(c.date) : null, started_at: null, source_updated_at: null, warnings
     });
   }

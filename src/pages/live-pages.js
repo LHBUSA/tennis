@@ -3,6 +3,7 @@
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
+import { matchDnaSummary, familyTable, formBlock, historyTable, ratingLine } from '../ui/match-dna.js';
 import { avatar, nat } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
@@ -238,7 +239,7 @@ export const search = mountWith((root, _c, signal) => {
 });
 
 // ---- player -------------------------------------------------------------------------------------------
-function playerHero(p, meta, tab) {
+function playerHero(p, meta, tab, md = null) {
   const age = p.dob ? Math.floor((Date.now() - Date.parse(`${p.dob}T00:00:00Z`)) / (365.2425 * 86400000)) : null;
   const r = p.rankings || {};
   return html`<div class="ph-band"><div class="page"><div class="ph">
@@ -249,6 +250,8 @@ function playerHero(p, meta, tab) {
         <dl class="ph-f">
           ${r.wta_singles ? html`<div><dt>WTA singles</dt><dd>No. ${r.wta_singles.rank}<small>${r.wta_singles.points?.toLocaleString('en-US')} pts · ${fmtDate(r.wta_singles.date)}</small></dd></div>` : ''}
           ${r.wta_doubles ? html`<div><dt>WTA doubles</dt><dd>No. ${r.wta_doubles.rank}<small>${fmtDate(r.wta_doubles.date)}</small></dd></div>` : ''}
+          ${r.atp_singles ? (() => { const prev = (p.ranking_history || []).filter((h) => h.list === 'atp_singles')[1]; const mv = prev ? prev.rank - r.atp_singles.rank : null; return html`<div><dt>ATP singles</dt><dd>No. ${r.atp_singles.rank}<small>${r.atp_singles.points?.toLocaleString('en-US')} pts · ${fmtDate(r.atp_singles.date)}${mv ? ` · ${mv > 0 ? '▲' : '▼'}${Math.abs(mv)}` : ''} · secondary source, not an official ATP feed</small></dd></div>`; })() : ''}
+          ${md?.rating && md.rating.status !== 'not_validated' ? html`<div><dt>PBE Rating</dt><dd>${ratingLine(md.rating)}</dd></div>` : ''}
           ${age != null ? html`<div><dt>Age</dt><dd>${age}<small>born ${fmtDate(p.dob)}</small></dd></div>` : ''}
         </dl>
         ${p.photo ? html`<p class="ph-credit">Photo: ${p.photo.author || 'unknown'} · ${p.photo.license} · <a href="${p.photo.source_page}" rel="noopener nofollow" target="_blank">Wikimedia Commons</a></p>` : html`<p class="ph-credit">No licensed photo approved yet — identity card shown.</p>`}
@@ -287,25 +290,36 @@ export const player = mountWith(async (root, { params }, signal) => {
   if (!params.tab) setIndexable(!!(p.rankings?.wta_singles || p.recent_matches?.length));
   if (params.tab === 'dna' || params.tab === 'surfaces') {
     const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
+    if (resultState(dr) === 'error') { render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page">${errorModule(dr?.meta, 'Tennis DNA could not be loaded.')}</div>`); return; }
     const d = dr?.data?.dna;
-    render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page" style="padding-top:0">
-      ${d ? dnaSection(d) : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
+    const md = dr?.data?.match_dna;
+    render(root, html`${playerHero(p, pr.meta, 'dna', md)}<div class="page" style="padding-top:0">
+      ${md ? html`<p class="dna-status"><b>MATCH DNA — LIVE.</b> Built from ${md.sample.matches} singles results in the canonical match record (${md.tour} population, as of ${fmtDate(md.as_of)}). Each metric publishes its ${md.tour} comparison on its own once ${md.gates.comparative_min} players qualify. <b>TECHNICAL DNA — ${d?.comparative?.published ? 'PUBLISHED' : 'COVERAGE BUILDING'}</b>: serve/return numbers exist only where detailed match statistics were published.</p>
+        ${md.rating ? html`<section class="mod"><header class="mod-h"><h2>PBE Rating</h2><span class="mod-k">chronological Elo · method v${md.rating.method_version}</span></header><div class="mod-b"><p class="ph-rating">${ratingLine(md.rating)}</p><p class="note">Pre-match ratings only ever use earlier results; validated against a ranking model out of sample before publication (see methodology).</p></div></section>` : ''}
+        <section class="mod"><header class="mod-h"><h2>Form</h2><span class="mod-k">as of ${fmtDate(md.as_of)}</span></header><div class="mod-b">${formBlock(md.form)}</div></section>
+        ${md.families.map((f) => familyTable(f, md.tour))}` : ''}
+      <h2 class="sec">Technical DNA <small>serve · return · pressure from match statistics</small></h2>
+      ${d ? dnaSection(d) : emptyModule(dr?.meta || pr.meta, 'No technical DNA yet: it needs matches with published serve/return statistics.')}
       ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}
       <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
     return;
   }
   const surf = f?.surface_record || {};
   // men's DNA is gated by population size; the gate never hides the rest of the profile
-  const dnaGate = p.gender === 'M' ? (await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null))?.data?.dna : null;
-  render(root, html`${playerHero(p, pr.meta, null)}<div class="page" style="padding-top:0">
-    ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Tennis DNA measurements →</a> · ${dnaGate.tour} comparative DNA is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold}).</p>` : ''}
-    <div class="grid-2">
+  const dres = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
+  const dnaGate = dres?.data?.dna || null;
+  const md = dres?.data?.match_dna || null;
+  render(root, html`${playerHero(p, pr.meta, null, md)}<div class="page" style="padding-top:0">
+    ${md ? matchDnaSummary(md, p.slug) : ''}
+    ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Technical DNA →</a> · ${dnaGate.tour} serve/return comparison is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold} players with enough match statistics).</p>` : ''}
+    ${md ? html`<section class="mod"><header class="mod-h"><h2>Form</h2></header><div class="mod-b">${formBlock(md.form)}</div></section>` : ''}
+    ${md ? html`<section class="mod"><header class="mod-h"><h2>Surface record</h2><span class="mod-k">singles · where the surface is recorded</span></header><div class="mod-b"><div class="surfrec">${Object.entries(md.surface_record || {}).filter(([k]) => k !== 'unknown').map(([k, r]) => html`<div class="${k}"><span>${k}</span><b>${r.W}–${r.L}</b></div>`)}</div>${md.surface_record?.unknown ? html`<p class="note">${md.surface_record.unknown.W + md.surface_record.unknown.L} matches have no recorded surface (their source does not publish it) and are not assigned one.</p>` : ''}</div></section>` : html`<div class="grid-2">
       <section class="mod"><header class="mod-h"><h2>Recent form</h2><span class="mod-k">last ${f?.form?.length || 0}</span></header><div class="mod-b">${f?.form?.length ? html`<div class="form">${f.form.map((x) => html`<a class="${x.result}" href="/matches/${x.id}" title="${x.result} ${x.score || ''} · ${x.tournament || ''} ${x.year || ''}">${x.result}</a>`)}</div>` : html`<p class="note">No completed singles matches in the store yet — history is backfilling.</p>`}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>
       <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
-    </div>
-    ${p.gender === 'M' ? '' : html`<section class="mod"><header class="mod-h"><h2>Ranking history</h2></header><div class="mod-b">${rankSpark(p.ranking_history || [], 'wta_singles')}</div></section>`}
+    </div>`}
+    <section class="mod"><header class="mod-h"><h2>Ranking history</h2>${p.gender === 'M' ? html`<span class="mod-k">ATP singles · secondary source</span>` : ''}</header><div class="mod-b">${rankSpark(p.ranking_history || [], p.gender === 'M' ? 'atp_singles' : 'wta_singles')}</div></section>
     <section class="mod" data-stories hidden><header class="mod-h"><h2>Tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header><div class="nw-grid" data-stories-list></div></section>
-    <section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>
+    ${md?.recent?.length ? html`<section class="mod"><header class="mod-h"><h2>Match history</h2><span class="mod-k">singles · last ${md.recent.length}</span></header>${historyTable(md)}</section>` : html`<section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>`}
     ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
     <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
   </div>`);
@@ -333,21 +347,25 @@ export const h2h = mountWith((root, { params }, signal) => {
 });
 
 // ---- Tennis DNA hub -----------------------------------------------------------------------------------
+const MATCH_METRICS = [['pbe_rating', 'PBE Rating'], ['match_win_rate', 'Match win %'], ['set_win_rate', 'Set win %'], ['game_win_rate', 'Games won %'], ['deciding_set_win_rate', 'Deciding sets'], ['tiebreak_win_rate', 'Tiebreaks'], ['comeback_win_rate', 'Comebacks'], ['top10_win_rate', 'vs top 10'], ['wins_above_expectation', 'Wins above expectation']];
 const DNA_METRICS = [['hold_rate', 'Hold rate'], ['service_points_won', 'Service points won'], ['first_serve_won', '1st serve points won'], ['second_serve_won', '2nd serve points won'], ['return_points_won', 'Return points won'], ['return_games_won', 'Break rate'], ['break_points_saved', 'Break points saved'], ['break_points_converted', 'Break points converted'], ['ace_rate', 'Ace rate']];
 export const dna = mountWith((root, _c, signal) => {
   const q = new URLSearchParams(location.search);
-  const metric = DNA_METRICS.some(([k]) => k === q.get('metric')) ? q.get('metric') : 'hold_rate';
+  const isMatch = MATCH_METRICS.some(([k]) => k === q.get('metric'));
+  const metric = isMatch || DNA_METRICS.some(([k]) => k === q.get('metric')) ? q.get('metric') : 'hold_rate';
   const surface = ['hard', 'clay', 'grass'].includes(q.get('surface')) ? q.get('surface') : 'all';
   // ATP and WTA are separate populations (never pooled); WTA is the default until men's samples mature
-  const tour = q.get('tour') === 'atp' ? 'atp' : 'wta';
+  const tour = q.get('tour') === 'atp' || (isMatch && q.get('tour') !== 'wta') ? 'atp' : 'wta';
   const dnaUrl = (o) => { const x = { metric, surface, tour, ...o }; return `/dna?metric=${x.metric}${x.surface !== 'all' ? `&surface=${x.surface}` : ''}${x.tour === 'atp' ? '&tour=atp' : ''}`; };
   track('tennis_dna_open', { route: '/dna', surface, tour });
-  shell(root, { eyebrow: 'Tennis DNA', heading: 'Tennis DNA', lede: 'PropBetEdge’s serve, return and pressure metrics — summed over real match statistics, with numerator, denominator, sample and confidence on every number. Leaders include only medium- or high-confidence samples.', chips: DNA_METRICS.map(([k, l]) => [dnaUrl({ metric: k }), l, k === metric]) });
-  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Tour" data-tour-chips>${[['wta', 'WTA'], ['atp', 'ATP']].map(([t, l]) => html`<a class="chip${tour === t ? ' on' : ''}" href="${dnaUrl({ tour: t })}" ${t === 'atp' && tour !== 'atp' ? raw('data-atp-chip hidden') : ''}>${l}</a>`)}</div><div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="${dnaUrl({ surface: s })}">${l}</a>`)}</div>`));
+  shell(root, { eyebrow: 'Tennis DNA', heading: 'Tennis DNA', lede: 'Match DNA from the canonical results record (live) and technical serve/return DNA from match statistics (coverage building) — numerator, denominator, sample and confidence on every number. Leaders include only medium- or high-confidence samples; ATP and WTA are never pooled.', chips: [...MATCH_METRICS.map(([k, l]) => [dnaUrl({ metric: k, surface: 'all' }), l, k === metric]), ...DNA_METRICS.map(([k, l]) => [dnaUrl({ metric: k }), `${l} (technical)`, k === metric])] });
+  root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Tour" data-tour-chips>${[['wta', 'WTA'], ['atp', 'ATP']].map(([t, l]) => html`<a class="chip${tour === t ? ' on' : ''}" href="${dnaUrl({ tour: t })}" ${t === 'atp' && tour !== 'atp' ? raw('data-atp-chip hidden') : ''}>${l}</a>`)}</div>${isMatch ? '' : html`<div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="${dnaUrl({ surface: s })}">${l}</a>`)}</div>`}`));
   // the ATP switch appears only once ATP DNA is published (sample threshold)
-  api(`/v1/dna/leaders?metric=${metric}&tour=atp&limit=1`, { signal }).then((r) => { if (r?.data?.published !== false) root.querySelector('[data-atp-chip]')?.removeAttribute('hidden'); }).catch(() => {});
-  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => d.published === false ? html`<div class="mod"><p class="empty-h">${tour.toUpperCase()} comparative DNA is still building.</p><p class="note">The ${tour.toUpperCase()} leaderboard opens once ${d.threshold} players meet the full comparative-DNA standard (currently ${d.qualified}). Each player's own measurements are already on their Tennis DNA page. ATP and WTA are separate populations and are never compared.</p></div>` : html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
-    ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${pct(r.value)}</td><td class="n hide-s">${r.numerator}/${r.denominator} · ${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No player has a medium-confidence sample for this metric yet.</p><p class="note">Tennis DNA is built from stored match statistics; the historical backfill adds them every few minutes. Small samples are never ranked.</p></div>`}
+  if (isMatch) root.querySelector('[data-atp-chip]')?.removeAttribute('hidden');
+  else api(`/v1/dna/leaders?metric=${metric}&tour=atp&limit=1`, { signal }).then((r) => { if (r?.data?.published !== false) root.querySelector('[data-atp-chip]')?.removeAttribute('hidden'); }).catch(() => {});
+  const val = (r) => (metric === 'pbe_rating' ? r.value : metric === 'wins_above_expectation' ? `${r.value >= 0 ? '+' : ''}${Number(r.value).toFixed(3)}` : pct(r.value));
+  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => d.published === false ? html`<div class="mod"><p class="empty-h">${tour.toUpperCase()} comparison for this metric is still building.</p><p class="note">This leaderboard opens once ${d.threshold} ${tour.toUpperCase()} players qualify for this metric (currently ${d.qualified})${metric === 'pbe_rating' ? ' and the rating has passed its backtest for this tour' : ''}. Each player's own measurements are already on their Tennis DNA page. ATP and WTA are separate populations and are never compared.</p></div>` : html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
+    ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${val(r)}</td><td class="n hide-s">${r.numerator != null && metric !== 'wins_above_expectation' ? `${r.numerator}/${r.denominator} · ` : ''}${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No player has a medium-confidence sample for this metric yet.</p><p class="note">Tennis DNA is built from stored match statistics; the historical backfill adds them every few minutes. Small samples are never ranked.</p></div>`}
     <p class="note"><a href="/methodology">Definitions and confidence rules →</a></p>`, 'Tennis DNA unavailable.', signal);
 });
 

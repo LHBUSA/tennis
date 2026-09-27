@@ -20,6 +20,7 @@ import * as open from '../../providers/open.js';
 import * as espn from '../../providers/espn.js';
 import { espnAtpStep, espnRankingStep } from './espn-jobs.js';
 import { buildDnaSnapshots } from './dna-job.js';
+import { buildDnaV2 } from './dna-v2-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
@@ -60,7 +61,7 @@ async function step(ctx, name, fn) {
   }
 }
 
-export async function tick(env, { force = {}, only = null, budget = null } = {}) {
+export async function tick(env, { force = {}, only = null, budget = null, params = {} } = {}) {
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured', store: !!store, kv: !!kv };
@@ -69,16 +70,16 @@ export async function tick(env, { force = {}, only = null, budget = null } = {})
   if (lock && Date.now() - Date.parse(lock) < 170 * 1000) return { ok: false, error: 'tick_in_progress', since: lock };
   await kv.put('tick:lock', new Date().toISOString(), { expirationTtl: 180 });
   try {
-    return await tickInner(env, store, kv, force, { only, budget });
+    return await tickInner(env, store, kv, force, { only, budget, params });
   } finally {
     await kv.delete('tick:lock');
   }
 }
 
-async function tickInner(env, store, kv, force, { only = null, budget = null } = {}) {
+async function tickInner(env, store, kv, force, { only = null, budget = null, params = {} } = {}) {
   const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 } } }), log: [], steps: [], upstream: 0 };
   // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
-  if (only) return laneOnly(ctx, only, budget);
+  if (only) return laneOnly(ctx, only, budget, params);
   const started = new Date();
   const today = iso(started);
   const hour = 3600 * 1000;
@@ -257,6 +258,18 @@ async function tickInner(env, store, kv, force, { only = null, budget = null } =
     return r;
   });
 
+  // 5c. daily Tennis DNA v2 (Match DNA + PBE Rating): today + one historical month-start per day, back to 2008
+  await step(ctx, 'dna_v2', async () => {
+    const day = iso(started);
+    if (!force.dna && (await kv.get('dna2:last')) === day) return 'fresh';
+    const hist = (await kv.get('dna2:hist')) || `${day.slice(0, 7)}-01`;
+    const asOfs = [day, ...(hist >= '2008-01-01' && hist !== day ? [hist] : [])];
+    const r = await buildDnaV2(ctx, { asOfs });
+    await kv.put('dna2:last', day);
+    if (asOfs.length > 1) { const d = new Date(`${hist}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); await kv.put('dna2:hist', d.toISOString().slice(0, 10)); }
+    return { as_of: r.as_of, snapshots: r.snapshots, ratings: r.ratings, ms: r.ms, published: Object.fromEntries(Object.entries(r.tours).map(([t, x]) => [t, x.published])) };
+  });
+
   // 6. weekly identity jobs
   await step(ctx, 'identity', async () => {
     // one Wikidata page per tick: a small reserved allowance so history backfill can never starve identity
@@ -283,9 +296,11 @@ async function tickInner(env, store, kv, force, { only = null, budget = null } =
 
 /** Run ONE ESPN lane with an explicit request budget (POST /v1/runs?lane=espn_atp&budget=N). Same code,
  *  same lane state + backoff as the cron; used to accelerate a backfill without widening every tick. */
-async function laneOnly(ctx, lane, budget) {
+async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }) };
+  const day = /^\d{4}-\d{2}-\d{2}$/;
+  const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -340,7 +355,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget') }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
