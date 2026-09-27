@@ -35,6 +35,7 @@ const ADMIN = fs.readFileSync('D:/Workers/secrets/tennis-ingest-admin-token', 'u
 // type: match_action | player_action | court | venue | tournament_atmosphere (portraits live in the identity store).
 // tournaments: tournament slugs the image represents. edition { slug, year }: ONLY when the file title/category names
 // that edition. event: where a file photo of a player was taken (never shown for another tournament).
+// prefer: reviewer's visual preference inside a tier (e.g. the wide arena shot over a tight single-player crop).
 export const APPROVED = [
   { file: 'Carlos Alcaraz serving while playing Jan-Lennard Struff (Wimbledon 2025).jpg', type: 'match_action', tournaments: ['wimbledon'], edition: { slug: 'wimbledon', year: 2025 }, surface: 'grass', focal: { x: 0.55, y: 0.45 }, shows: 'a serve on grass at the 2025 Championships', reviewed: 'visual review 2026-09-27' },
   { file: 'Ballboys and girls Wimbledon 2025.jpg', type: 'tournament_atmosphere', tournaments: ['wimbledon'], edition: { slug: 'wimbledon', year: 2025 }, surface: 'grass', focal: { x: 0.5, y: 0.5 }, shows: 'ball boys and girls on the grounds at the 2025 Championships', reviewed: 'visual review 2026-09-27' },
@@ -53,8 +54,7 @@ export const APPROVED = [
   { file: 'Court Philippe Chatrier 2024.jpg', type: 'court', tournaments: ['roland-garros'], surface: 'clay', focal: { x: 0.5, y: 0.6 }, shows: 'Court Philippe-Chatrier', reviewed: 'visual review 2026-09-27' },
   { file: 'Court Philippe Chatrier May 30th 2013.jpg', type: 'court', tournaments: ['roland-garros'], surface: 'clay', focal: { x: 0.5, y: 0.62 }, shows: 'Court Philippe-Chatrier', reviewed: 'visual review 2026-09-27' },
   { file: 'ChatrierVide.JPG', type: 'venue', tournaments: ['roland-garros'], surface: 'clay', focal: { x: 0.5, y: 0.6 }, shows: 'Court Philippe-Chatrier', reviewed: 'visual review 2026-09-27' },
-  { file: 'Świątek Yuan AO26 R1.jpg', type: 'match_action', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2026 }, surface: 'hard', focal: { x: 0.5, y: 0.55 }, shows: 'a first-round match in Rod Laver Arena at the 2026 Australian Open', reviewed: 'visual review 2026-09-27' },
-  { file: 'Djokovic AO26 R1 (cropped).jpg', type: 'match_action', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2026 }, surface: 'hard', focal: { x: 0.55, y: 0.45 }, shows: 'a first-round match at the 2026 Australian Open', reviewed: 'visual review 2026-09-27' },
+  { file: 'Świątek Yuan AO26 R1.jpg', type: 'match_action', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2026 }, surface: 'hard', focal: { x: 0.5, y: 0.55 }, prefer: 1, shows: 'a first-round match in Rod Laver Arena at the 2026 Australian Open', reviewed: 'visual review 2026-09-27' },
   { file: 'Martínez AO26 R1.jpg', type: 'match_action', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2026 }, surface: 'hard', focal: { x: 0.5, y: 0.45 }, shows: 'a first-round match at the 2026 Australian Open', reviewed: 'visual review 2026-09-27' },
   { file: 'Rod Laver Arena before the 2025 Australian Open Women\'s Doubles Final - 26 January 2025.jpg', type: 'tournament_atmosphere', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2025 }, surface: 'hard', focal: { x: 0.5, y: 0.6 }, shows: 'Rod Laver Arena before the 2025 women’s doubles final', reviewed: 'visual review 2026-09-27' },
   { file: '1573 Arena during the 2025 Australian Open - 21 January 2025.jpg', type: 'court', tournaments: ['australian-open'], edition: { slug: 'australian-open', year: 2025 }, surface: 'hard', focal: { x: 0.5, y: 0.6 }, shows: '1573 Arena during the 2025 Australian Open', reviewed: 'visual review 2026-09-27' },
@@ -145,7 +145,7 @@ for (const a of APPROVED) {
     shows: a.shows, caption: names.length ? (a.type === 'venue' ? `${a.shows} (${names.join(', ')} on court)` : `${names.join(', ')} — ${a.shows}`) : a.shows,
     player_ids: pr.map((p) => p.pbe_player_id), player_slugs: pr.map((p) => p.slug), depicts_wikidata: depictsQ,
     tournaments: a.tournaments, edition: a.edition || null, event: a.event || a.edition || null, match_id: null, surface: a.surface, venue_dominant: !!a.venue_dominant,
-    focal: a.focal, derivatives, reviewed: a.reviewed, verified_at: new Date().toISOString()
+    focal: a.focal, prefer: a.prefer || 0, derivatives, reviewed: a.reviewed, verified_at: new Date().toISOString()
   });
   console.log('OK', id, a.type, license, `${meta.width}x${meta.height}`, names.join(', ') || '(no canonical person)');
 }

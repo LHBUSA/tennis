@@ -2,7 +2,7 @@
 // tournament pages. Real imagery only — a generated graphic is never a hero, card or social image.
 //
 // Priority (owner rule 2026-09-27: tennis journalism first, player-profile imagery last):
-// Within a tier the newest imagery wins (edition year, else capture year).
+// Within a tier the newest imagery wins (edition year, else capture year), then action before places, then the reviewer's visual preference.
 //   1. same-match action photo
 //   2. same-edition action photo                      (match_action | player_action from this edition)
 //   3. same-edition court / venue / atmosphere        (court | venue | tournament_atmosphere from this edition)
@@ -54,7 +54,7 @@ const WHY = { 1: 'same match', 2: 'same edition, action', 3: 'same edition, cour
 export function resolveHero(story, catalog, photos = new Map()) {
   const ranked = (catalog?.items || []).map((item) => ({ item, t: tierOf(item, story) })).filter((x) => x.t > 0)
     // within a tier: the newest edition, then a stable id order
-    .sort((a, b) => a.t - b.t || yearOf(b.item) - yearOf(a.item) || a.item.id.localeCompare(b.item.id));
+    .sort((a, b) => a.t - b.t || yearOf(b.item) - yearOf(a.item) || (ACTION.has(b.item.type) - ACTION.has(a.item.type)) || ((b.item.prefer || 0) - (a.item.prefer || 0)) || a.item.id.localeCompare(b.item.id));
   const pick = ranked[0];
   if (pick) return { type: pick.item.type, tier: pick.t, why: WHY[pick.t], images: [catalogImage(pick.item)], confidence: CONF[pick.t], fallback_reason: null, subjects: pick.item.player_ids || [] };
   const withPhoto = (story.featured_ids || []).filter((id) => photos.get(id)).map((id) => ({ id, ...photos.get(id) }));
