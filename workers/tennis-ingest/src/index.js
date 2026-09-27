@@ -66,7 +66,15 @@ export async function tick(env, { force = {}, only = null, budget = null, params
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured', store: !!store, kv: !!kv };
-  // one tick at a time: a slow tick must not overlap the next cron firing
+  // sharded history runs take their own per-shard lock (they never touch another lane's state); everything
+  // else is one tick at a time: a slow tick must not overlap the next cron firing
+  if (only === 'wta_history' && Number(params.shards) > 1) {
+    const lk = `tick:lock:wta_history:${params.shard}/${params.shards}`;
+    const held = await kv.get(lk);
+    if (held && Date.now() - Date.parse(held) < 290 * 1000) return { ok: false, error: 'tick_in_progress', since: held };
+    await kv.put(lk, new Date().toISOString(), { expirationTtl: 300 });
+    try { return await tickInner(env, store, kv, force, { only, budget, params }); } finally { await kv.delete(lk); }
+  }
   const lock = await kv.get('tick:lock');
   if (lock && Date.now() - Date.parse(lock) < 170 * 1000) return { ok: false, error: 'tick_in_progress', since: lock };
   await kv.put('tick:lock', new Date().toISOString(), { expirationTtl: 180 });
@@ -313,7 +321,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { pages: Math.min(b, 8) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -368,7 +376,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write') } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },

@@ -38,8 +38,11 @@ export async function loadLedger(store, tourOf, editions) {
 }
 
 async function loadRankLists(store, listKey) {
-  const snaps = await all(store, 'tennis_ranking_snapshots', `select=snapshot_id,ranking_date,row_count&list_key=eq.${listKey}&row_count=gt.0&order=ranking_date.asc`);
-  const byId = new Map(snaps.map((s) => [s.snapshot_id, { date: s.ranking_date, size: s.row_count, ranks: new Map() }]));
+  const snaps = await all(store, 'tennis_ranking_snapshots', `select=snapshot_id,ranking_date,row_count,source_family&list_key=eq.${listKey}&row_count=gt.0&order=ranking_date.asc`);
+  // an official list within 6 days of a secondary (espn) list replaces it: official precedence at match time
+  const official = snaps.filter((s) => s.source_family !== 'espn').map((s) => Date.parse(s.ranking_date));
+  const keep = snaps.filter((s) => s.source_family !== 'espn' || !official.some((d) => Math.abs(d - Date.parse(s.ranking_date)) <= 6 * 86400e3));
+  const byId = new Map(keep.map((s) => [s.snapshot_id, { date: s.ranking_date, size: s.row_count, ranks: new Map(), source: s.source_family }]));
   const ids = [...byId.keys()];
   for (let i = 0; i < ids.length; i += 6) {
     for (const r of await store.select('tennis_rankings', `select=snapshot_id,pbe_player_id,rank&snapshot_id=${inList(ids.slice(i, i + 6))}&pbe_player_id=not.is.null&limit=1000`)) byId.get(r.snapshot_id).ranks.set(r.pbe_player_id, r.rank);
@@ -60,6 +63,8 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   const editions = new Map((await all(store, 'tennis_tournament_editions', 'select=edition_id,start_date,end_date,competition_key,level,year&order=edition_id.asc')).map((e) => [e.edition_id, e]));
   const ledger = await loadLedger(store, tourOf, editions);
   const lists = { ATP: await loadRankLists(store, 'atp_singles'), WTA: await loadRankLists(store, 'wta_singles') };
+  const peaks = new Map();
+  for (const [tour, ls] of Object.entries(lists)) for (const l of ls) for (const [pid, rank] of l.ranks) { if (!peaks.has(pid)) peaks.set(pid, []); peaks.get(pid).push({ rank, date: l.date, source: l.source, tour }); }
   const summary = { builder: BUILDER, definition_version: MATCH_DNA_VERSION, rating_method_version: RATING_METHOD_VERSION, as_of: asOfs, ledger: ledger.length, tours: {} };
   const snapshots = [];
   const ratingRows = [];
@@ -93,6 +98,9 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         if (!n) { /* unrated before asOf */ }
         const rating = n ? { value: Math.round(value), rated_matches: n, method_version: RATING_METHOD_VERSION, variant, published, provisional: n < 20 } : null;
         const dna = buildMatchDna(pid, entries, asOf, { rankAt, pre: run.pre, rating });
+        // best (lowest) rank on any list dated before as_of, with its date and source family
+        const pk = peaks.get(pid);
+        dna.form.rank_peak = pk ? pk.filter((x) => x.date < asOf).reduce((b, x) => (!b || x.rank < b.rank || (x.rank === b.rank && x.date < b.date) ? x : b), null) : null;
         if (!dna.sample.matches) continue;
         const snap = { pbe_player_id: pid, as_of: asOf, surface: 'all', definition_version: MATCH_DNA_VERSION, metrics: { ...dna.metrics, _form: dna.form, _surface_record: dna.surface_record, _rating: rating, _tour: tour, _recent: recentMatches(pid, entries, asOf, { rankAt, limit: 40 }) }, provenance: { builder: BUILDER, ledger_rule: 'singles completed+retired, dated, same tour', sample: dna.sample, rank_lists: lists[tour].length } };
         snapshots.push(snap);

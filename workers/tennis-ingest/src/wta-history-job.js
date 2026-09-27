@@ -127,21 +127,23 @@ export async function historyPage(ctx, wtaId, page) {
 }
 
 /** Bounded unit: up to `pages` history pages across the queue. */
-export async function wtaHistoryStep(ctx, { pages = 2 } = {}) {
-  let st = (await ctx.kv.get(S, 'json')) || { i: 0, page: 0, built_at: null, players_done: 0 };
+export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1 } = {}) {
+  // shard k of n walks queue positions k, k+n, k+2n ... (a match two players share gets one deterministic id)
+  const SK = shards > 1 ? `${S}:${shard}/${shards}` : S;
+  let st = (await ctx.kv.get(SK, 'json')) || { i: shard, page: 0, built_at: null, players_done: 0 };
   let queue = (await ctx.kv.get(Q, 'json')) || [];
   if (!queue.length || !st.built_at || Date.now() - Date.parse(st.built_at) > 30 * 86400e3) {
     queue = await buildQueue(ctx);
     await ctx.kv.put(Q, JSON.stringify(queue));
-    st = { ...st, built_at: new Date().toISOString(), i: st.i >= queue.length ? 0 : st.i };
+    st = { ...st, built_at: new Date().toISOString(), i: st.i >= queue.length ? shard : st.i };
   }
   const out = { runs: [] };
   for (let n = 0; n < pages && st.i < queue.length; n += 1) {
     const id = queue[st.i];
     const r = await historyPage(ctx, id, st.page);
     out.runs.push({ player: id, page: st.page, ...r });
-    if (r.state === 'END') { st.i += 1; st.page = 0; st.players_done += 1; } else st.page += 1;
-    await ctx.kv.put(S, JSON.stringify(st));
+    if (r.state === 'END') { st.i += shards; st.page = 0; st.players_done += 1; } else st.page += 1;
+    await ctx.kv.put(SK, JSON.stringify(st));
   }
   return { ...out, queue: queue.length, position: st.i, players_done: st.players_done, done: st.i >= queue.length };
 }

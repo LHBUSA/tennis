@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-09-27T16:18:30.340Z",
+  "question": "A legitimate source for tournament identity -> surface -> tour level for the ESPN ATP matches that carry no surface/level",
+  "rule": "no surface or level is inferred from tournament names, cities or calendar months; only an explicitly sourced, versioned registry may assign them",
+  "candidates": [
+    {
+      "source": "ProTennisLive draw sheets (official ATP/Challenger draw PDFs): https://www.protennislive.com/posting/{year}/{atpTournamentId}/mds.pdf",
+      "access": "HTTP 200 (registry key protennislive.draw_pdf, canary PASS); no index (/posting/{year}/ returns an empty body)",
+      "facts": "per EDITION header: city, country, dates, surface ('Red Clay', 'Outdoor Hard', '| Hard'), prize money; 2025 layout also prints the ranking-points table (champion 250 pts -> ATP 250)",
+      "depth": "Rome (id 416): 2008, 2010, 2014, 2016, 2018 present; header surface extractable 2014+ (2008/2010 pages carry the draw only). Chengdu (7581): 2019, 2025; 2012 404 (event did not exist)",
+      "blocker": "no crosswalk ESPN tournament id <-> ATP tournament id: Wikidata has no ATP tournament id property; atptour.com (which lists ids) is Cloudflare-challenged",
+      "proposal": "a REVIEWED, versioned registry: ESPN tid -> ATP id, each pair proven by the draw sheet's city + dates matching the ESPN event's for >= 2 editions; surface and level then read per edition from the official PDF",
+      "verdict": "most promising; one reviewed crosswalk build (~160 ATP tournaments) unlocks 2014+ surfaces"
+    },
+    {
+      "source": "Official WTA editions of the same ESPN event (combined events share one ESPN event id)",
+      "facts": "the WTA edition mapped by espn_wta (edition_external_ids provider espn_wta) carries official WTA surface + indoor",
+      "caveat": "valid only for the same event at the same venue (same ESPN id AND same city); the Canadian Open splits Toronto/Montreal",
+      "verdict": "usable as a derived, provenance-tagged fill for combined events only; not implemented yet"
+    },
+    {
+      "source": "Wikidata tournament items (P765)",
+      "verdict": "insufficient: surface per tournament, not per edition (surfaces change)"
+    },
+    {
+      "source": "ESPN core API",
+      "verdict": "no surface, no level (only the Slam flag)"
+    }
+  ]
+}

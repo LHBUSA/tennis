@@ -300,6 +300,11 @@ export function buildMatchDna(pid, entries, asOf, { rankAt = () => null, pre = n
   };
   const surfaces = {};
   for (const v of ms) { const s = v.e.surface || 'unknown'; surfaces[s] = surfaces[s] || { W: 0, L: 0 }; surfaces[s][v.won ? 'W' : 'L'] += 1; }
+  // yearly singles records (by the match day's year) and the career record in the stored ledger
+  const years = {};
+  for (const v of ms) { const y = v.e.day.slice(0, 4); years[y] = years[y] || { W: 0, L: 0 }; years[y][v.won ? 'W' : 'L'] += 1; }
+  form.years = years;
+  form.career = { W: ms.filter((v) => v.won).length, L: ms.filter((v) => !v.won).length, from: ms[0]?.e.day ?? null, to: ms.at(-1)?.e.day ?? null };
   return {
     definition_version: MATCH_DNA_VERSION, as_of: asOf, metrics: m, form, surface_record: surfaces, rating,
     sample: { matches: ms.length, completed: done.length, first_day: ms[0]?.e.day ?? null, last_day: ms.at(-1)?.e.day ?? null, sources: [...new Set(ms.map((v) => v.e.source))].sort(), with_opponent_rank: rankN }

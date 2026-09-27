@@ -1,0 +1,632 @@
+{
+  "generated_at": "2026-09-27T16:18:30.337Z",
+  "role": "ESPN core WTA league discovery (secondary source, owner decision 2026-09-27); honest UA, >= 1.1 s spacing",
+  "league": {
+    "id": "900",
+    "slug": "wta",
+    "seasons": "2002-2026 listed; competitions only 2007+"
+  },
+  "endpoints": [
+    {
+      "pattern": "/leagues/wta/events?dates={YYYY}&limit=200",
+      "status": 200,
+      "notes": "28-106 events per season (2020: 28). Event ids share ONE namespace with the ATP league: a combined event (413-2025 Mutua Madrid Open, 411-2025 BNP Paribas Open) has the same id in both leagues and each league returns only its own gender's competitions"
+    },
+    {
+      "pattern": "/leagues/wta/events/{tid}-{YYYY}",
+      "status": 200,
+      "fields": [
+        "same structure as ATP: competitions inline with type Women's Singles | Women's Doubles | Mixed Doubles | Girls*, round, date, court, competitors (athlete or athleteA-athleteB), notes[0] result line"
+      ],
+      "notes": "Mixed doubles competitions are the SAME objects (same competition ids) as in the ATP league (31 of 31 shared at AO 2026) -> ingested once, from the ATP league"
+    },
+    {
+      "pattern": "/leagues/wta/seasons/{Y}/rankings",
+      "status": 200,
+      "fields": [
+        "items: rankings/2 (WTA singles)"
+      ]
+    },
+    {
+      "pattern": "/leagues/wta/seasons/{Y}/types/2/weeks/{W}/rankings/2",
+      "status": 200,
+      "fields": [
+        "ranks[]{current,previous,points,trend,athlete}",
+        "lastUpdated"
+      ],
+      "notes": "top 100 (2007-2018), 149-150 (2019+); 2006 and earlier 404; ranking list id 2 (ATP uses 1)"
+    },
+    {
+      "pattern": "/sports/tennis/athletes/{id}",
+      "status": 200,
+      "notes": "athlete ids are sport-wide (shared by both leagues)"
+    }
+  ],
+  "earliest_reliable_year": 2007,
+  "earliest_reliable_year_basis": "sweep 2002-2026 (AO + one other event per season): 2002-2006 editions list 0 competitions; 2007+ full; weekly rankings 2007+",
+  "result_line_tails_seen": {
+    "score": 6259,
+    "ret": 83,
+    "w/o": 43
+  },
+  "sweep_by_year": {
+    "2002": {
+      "events_listed": 64,
+      "ao": {
+        "competitions": 0,
+        "by_type": {}
+      },
+      "sample_event": {
+        "id": "587-2002",
+        "name": "Wien Energie Grand Prix",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2003": {
+      "events_listed": 56,
+      "ao": {
+        "competitions": 0,
+        "by_type": {}
+      },
+      "sample_event": {
+        "id": "587-2003",
+        "name": "Wien Energie Grand Prix",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2004": {
+      "events_listed": 37,
+      "ao": {
+        "competitions": 0,
+        "by_type": {}
+      },
+      "sample_event": {
+        "id": "239-2004",
+        "name": "J-s Cup",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2005": {
+      "events_listed": 59,
+      "ao": {
+        "competitions": 0,
+        "by_type": {}
+      },
+      "sample_event": {
+        "id": "202-2005",
+        "name": "Internazionali Di Modena",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2006": {
+      "events_listed": 58,
+      "ao": {
+        "competitions": 0,
+        "by_type": {}
+      },
+      "sample_event": {
+        "id": "238-2006",
+        "name": "Internazionali Femminili Di Palermo",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2007": {
+      "events_listed": 64,
+      "ao": {
+        "competitions": 218,
+        "by_type": {
+          "Women's Singles": 127,
+          "Women's Doubles": 60,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "238-2007",
+        "name": "WTA Tour Internazionali Femminili di Palermo",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2007-03-05T08:00Z"
+      }
+    },
+    "2008": {
+      "events_listed": 58,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Women's Singles": 128,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "234-2008",
+        "name": "WTA Tour The International Women's Open",
+        "competitions": 27,
+        "by_type": {
+          "Women's Singles": 27
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 103,
+        "lastUpdated": "2008-03-03T08:00Z"
+      }
+    },
+    "2009": {
+      "events_listed": 57,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Women's Singles": 128,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "250-2009",
+        "name": "WTA Tour Ordina Open",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2009-03-02T08:00Z"
+      }
+    },
+    "2010": {
+      "events_listed": 56,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Women's Singles": 128,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "192-2010",
+        "name": "WTA GDF SUEZ Grand Prix",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2010-03-01T08:00Z"
+      }
+    },
+    "2011": {
+      "events_listed": 59,
+      "ao": {
+        "competitions": 223,
+        "by_type": {
+          "Women's Singles": 129,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "234-2011",
+        "name": "WTA AEGON International",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 99,
+        "lastUpdated": "2011-02-28T08:00Z"
+      }
+    },
+    "2012": {
+      "events_listed": 61,
+      "ao": {
+        "competitions": 225,
+        "by_type": {
+          "Women's Singles": 131,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "250-2012",
+        "name": "WTA UNICEF Open",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2012-02-27T08:00Z"
+      }
+    },
+    "2013": {
+      "events_listed": 64,
+      "ao": {
+        "competitions": 223,
+        "by_type": {
+          "Women's Singles": 129,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "234-2013",
+        "name": "WTA AEGON International",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2013-03-05T08:00Z"
+      }
+    },
+    "2014": {
+      "events_listed": 64,
+      "ao": {
+        "competitions": 317,
+        "by_type": {
+          "Women's Singles": 128,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 32,
+          "Girls Singles": 63,
+          "Girls Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "192-2014",
+        "name": "WTA Hungarian Grand Prix",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2014-03-03T08:00Z"
+      }
+    },
+    "2015": {
+      "events_listed": 86,
+      "ao": {
+        "competitions": 319,
+        "by_type": {
+          "Women's Singles": 131,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31,
+          "Girls Singles": 63,
+          "Girls Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "394-2015",
+        "name": "WTA Aegon Nottingham Open",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2015-03-02T08:00Z"
+      }
+    },
+    "2016": {
+      "events_listed": 69,
+      "ao": {
+        "competitions": 320,
+        "by_type": {
+          "Women's Singles": 130,
+          "Women's Doubles": 65,
+          "Mixed Doubles": 31,
+          "Girls Singles": 63,
+          "Girls Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "397-2016",
+        "name": "WTA Aegon International Eastbourne",
+        "competitions": 47,
+        "by_type": {
+          "Women's Singles": 47
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2016-02-29T08:00Z"
+      }
+    },
+    "2017": {
+      "events_listed": 60,
+      "ao": {
+        "competitions": 232,
+        "by_type": {
+          "Women's Doubles": 70,
+          "Women's Singles": 131,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "420-2017",
+        "name": "WTA Mallorca Open",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2017-03-05T08:00Z"
+      }
+    },
+    "2018": {
+      "events_listed": 74,
+      "ao": {
+        "competitions": 234,
+        "by_type": {
+          "Women's Singles": 134,
+          "Women's Doubles": 68,
+          "Mixed Doubles": 32
+        }
+      },
+      "sample_event": {
+        "id": "444-2018",
+        "name": "Nature Valley International",
+        "competitions": 49,
+        "by_type": {
+          "Women's Singles": 49
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2018-03-05T08:00Z"
+      }
+    },
+    "2019": {
+      "events_listed": 67,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Women's Singles": 128,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "420-2019",
+        "name": "Mallorca Open",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 149,
+        "lastUpdated": "2019-03-05T08:00Z"
+      }
+    },
+    "2020": {
+      "events_listed": 28,
+      "ao": {
+        "competitions": 238,
+        "by_type": {
+          "Women's Singles": 139,
+          "Women's Doubles": 65,
+          "Mixed Doubles": 34
+        }
+      },
+      "sample_event": {
+        "id": "401-2020",
+        "name": "Prague Open",
+        "competitions": 60,
+        "by_type": {
+          "Women's Singles": 60
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 150,
+        "lastUpdated": "2020-03-06T08:00Z"
+      }
+    },
+    "2021": {
+      "events_listed": 77,
+      "ao": {
+        "competitions": 233,
+        "by_type": {
+          "Women's Singles": 133,
+          "Women's Doubles": 67,
+          "Mixed Doubles": 33
+        }
+      },
+      "sample_event": {
+        "id": "439-2021",
+        "name": "Ladies Open Lausanne",
+        "competitions": 31,
+        "by_type": {
+          "Women's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 150,
+        "lastUpdated": "2021-03-07T08:00Z"
+      }
+    },
+    "2022": {
+      "events_listed": 89,
+      "ao": {
+        "competitions": 667,
+        "by_type": {
+          "Women's Singles": 479,
+          "Women's Doubles": 126,
+          "Mixed Doubles": 62
+        }
+      },
+      "sample_event": {
+        "id": "873-2022",
+        "name": "Grand Est Open 88",
+        "competitions": 42,
+        "by_type": {
+          "Women's Singles": 35,
+          "Women's Doubles": 7
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 149,
+        "lastUpdated": "2022-03-06T08:00Z"
+      }
+    },
+    "2023": {
+      "events_listed": 101,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Women's Singles": 239,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "774-2023",
+        "name": "BNP Paribas Warsaw Open",
+        "competitions": 58,
+        "by_type": {
+          "Women's Singles": 43,
+          "Women's Doubles": 15
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 150,
+        "lastUpdated": "2023-03-05T08:00Z"
+      }
+    },
+    "2024": {
+      "events_listed": 97,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Women's Singles": 239,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "873-2024",
+        "name": "Grand Est Open 88",
+        "competitions": 46,
+        "by_type": {
+          "Women's Singles": 39,
+          "Women's Doubles": 7
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2025": {
+      "events_listed": 106,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Women's Singles": 239,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "1002-2025",
+        "name": "MSC Hamburg Ladies Open",
+        "competitions": 64,
+        "by_type": {
+          "Women's Singles": 49,
+          "Women's Doubles": 15
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2026": {
+      "events_listed": 125,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Women's Singles": 239,
+          "Women's Doubles": 63,
+          "Mixed Doubles": 31
+        }
+      },
+      "sample_event": {
+        "id": "306-2026",
+        "name": "Nordea Open",
+        "competitions": 46,
+        "by_type": {
+          "Women's Singles": 31,
+          "Women's Doubles": 15
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    }
+  },
+  "omissions": [
+    "surface",
+    "tier/level",
+    "match statistics",
+    "point-by-point",
+    "doubles rankings"
+  ]
+}

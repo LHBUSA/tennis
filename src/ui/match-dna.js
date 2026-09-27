@@ -53,3 +53,16 @@ export function historyTable(md) {
     ${md.recent.map((r) => html`<tr><td class="tabnum">${fmtDate(r.day)}</td><td><span class="rk-p"><b class="${r.won ? 'won' : 'lost'}">${r.won ? 'W' : 'L'}</b> ${r.opponent ? html`${avatar(r.opponent, { px: 24 })}<a href="/players/${r.opponent.slug}">${r.opponent.name}</a>` : 'Unknown'}</span></td><td class="hide-s">${r.tournament ? html`${r.tournament.slug ? html`<a href="/tournaments/${r.tournament.slug}/${r.tournament.year}">${r.tournament.name} ${r.tournament.year}</a>` : `${r.tournament.name} ${r.tournament.year}`}` : '—'}</td><td>${r.round}</td><td class="tabnum"><a href="/matches/${r.match_id}">${r.score}</a></td><td class="n hide-s tabnum">${rankTxt(r.opponent_rank)}</td></tr>`)}
     </tbody></table></div><p class="note">Opponent rank = the list in force when the tournament began (at most 28 days old); “>150” means outside a list of that length; “—” = no list in force.</p>`;
 }
+
+/** Career record, ranking peak and yearly singles records from the stored Match DNA (absent facts are not shown). */
+export function careerBlock(md) {
+  const f = md.form || {};
+  const years = Object.entries(f.years || {}).sort((a, b) => (a[0] < b[0] ? 1 : -1));
+  const pk = f.rank_peak;
+  if (!f.career && !years.length) return '';
+  return html`<section class="mod"><header class="mod-h"><h2>Career</h2><span class="mod-k">singles in the PropBetEdge record</span></header>
+    <div class="surfrec">${f.career ? html`<div><span>Career</span><b class="tabnum">${f.career.W}–${f.career.L}</b><small class="note">${fmtDate(f.career.from)} – ${fmtDate(f.career.to)}</small></div>` : ''}
+    ${pk ? html`<div><span>Best ranking</span><b class="tabnum">No. ${pk.rank}</b><small class="note">${fmtDate(pk.date)}${pk.source === 'espn' ? ' · secondary-source list' : ''}</small></div>` : ''}</div>
+    ${years.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Year</th><th class="n">W–L</th><th class="n">Win %</th></tr></thead><tbody>${years.map(([y, r]) => html`<tr><td>${y}</td><td class="n tabnum">${r.W}–${r.L}</td><td class="n tabnum">${r.W + r.L ? `${((r.W / (r.W + r.L)) * 100).toFixed(0)}%` : '—'}</td></tr>`)}</tbody></table></div>` : ''}
+    <p class="note">Counts only matches stored in the canonical record (official feeds, official WTA player history and a secondary source); earlier or unsourced matches are not included, and a best ranking covers only the lists archived.</p></section>`;
+}

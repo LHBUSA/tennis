@@ -3,7 +3,7 @@
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
-import { matchDnaSummary, familyTable, formBlock, historyTable, ratingLine } from '../ui/match-dna.js';
+import { matchDnaSummary, familyTable, formBlock, historyTable, ratingLine, careerBlock } from '../ui/match-dna.js';
 import { avatar, nat } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
@@ -313,6 +313,7 @@ export const player = mountWith(async (root, { params }, signal) => {
     ${md ? matchDnaSummary(md, p.slug) : ''}
     ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Technical DNA →</a> · ${dnaGate.tour} serve/return comparison is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold} players with enough match statistics).</p>` : ''}
     ${md ? html`<section class="mod"><header class="mod-h"><h2>Form</h2></header><div class="mod-b">${formBlock(md.form)}</div></section>` : ''}
+    ${md ? careerBlock(md) : ''}
     ${md ? html`<section class="mod"><header class="mod-h"><h2>Surface record</h2><span class="mod-k">singles · where the surface is recorded</span></header><div class="mod-b"><div class="surfrec">${Object.entries(md.surface_record || {}).filter(([k]) => k !== 'unknown').map(([k, r]) => html`<div class="${k}"><span>${k}</span><b>${r.W}–${r.L}</b></div>`)}</div>${md.surface_record?.unknown ? html`<p class="note">${md.surface_record.unknown.W + md.surface_record.unknown.L} matches have no recorded surface (their source does not publish it) and are not assigned one.</p>` : ''}</div></section>` : html`<div class="grid-2">
       <section class="mod"><header class="mod-h"><h2>Recent form</h2><span class="mod-k">last ${f?.form?.length || 0}</span></header><div class="mod-b">${f?.form?.length ? html`<div class="form">${f.form.map((x) => html`<a class="${x.result}" href="/matches/${x.id}" title="${x.result} ${x.score || ''} · ${x.tournament || ''} ${x.year || ''}">${x.result}</a>`)}</div>` : html`<p class="note">No completed singles matches in the store yet — history is backfilling.</p>`}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>
       <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
