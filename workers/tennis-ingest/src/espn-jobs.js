@@ -15,6 +15,12 @@ import { resolveEspnIdentity, wikidataEspnMap, wikidataNameIndex } from '../../s
 
 const now = () => new Date().toISOString();
 const K = { state: 'bf:espn', ath: 'espn:ath', wd: 'espn:wd', status: 'espn:status', rank: 'bf:espnrank', held: 'espn:held' };
+// per-league state keys (the ATP keys predate the WTA lane and are kept as they are)
+const LK = {
+  atp: { state: 'bf:espn', rank: 'bf:espnrank', held: 'espn:held', reheld: 'espn:reheld', status: '' },
+  wta: { state: 'bf:espn:wta', rank: 'bf:espnrank:wta', held: 'espn:wta:held', reheld: 'espn:wta:reheld', status: 'wta:' }
+};
+const ADA = (league) => (league === 'wta' ? espn.WTA : espn.ATP);
 const WD_TTL_DAYS = 7;
 const CURRENT_REFRESH_MS = 3 * 3600 * 1000;
 
@@ -159,22 +165,24 @@ async function fillPlayerFacts(store, idMap) {
 
 // ---- one event ----------------------------------------------------------------------------------------
 /** Returns { state: 'PASS'|'IDENTITY_PENDING'|'ABSENT'|'SKIPPED', final: bool, ... }. Throws on a block. */
-export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups = 4 } = {}) {
-  const res = await fetchRun(ctx, espn.espnEvent, { id: eventId });
+export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups = 4, league = 'atp' } = {}) {
+  const A = ADA(league);
+  const lk = LK[league];
+  const res = await fetchRun(ctx, A.event, { id: eventId });
   if (res.state !== 'PASS') {
     if (res.state === 'DEGRADED' && (res.http_status === 404 || res.error === 'zero_records')) return { event: eventId, state: 'ABSENT', error: res.error };
     throw new Error(`espn event ${eventId}: ${res.state} ${res.error || ''}`.trim());
   }
   const json = res.records[0];
   const final = json.status?.type?.completed === true || json.status?.type?.name === 'STATUS_FINAL';
-  let parsed = espn.parseEspnEvent(json, {});
+  let parsed = espn.parseEspnEvent(json, { league });
   if (!parsed.edition || parsed.edition.exhibition || parsed.edition.slam_mismatch) return { event: eventId, state: 'SKIPPED', final: true, reason: parsed.skipped[0]?.reason || 'bad_event' };
   const statuses = (await ctx.kv.get(K.status, 'json')) || {};
-  const pendingStatus = parsed.needsStatus.filter((c) => !(`${eventId}:${c}` in statuses));
+  const pendingStatus = parsed.needsStatus.filter((c) => !(`${lk.status}${eventId}:${c}` in statuses));
   for (const c of pendingStatus.slice(0, statusLookups)) {
-    const r = await fetchRun(ctx, espn.espnCompetitionStatus, { eventId, compId: c });
+    const r = await fetchRun(ctx, A.status, { eventId, compId: c });
     if (r.state !== 'PASS') throw new Error(`espn status ${eventId}:${c}: ${r.state} ${r.error || ''}`.trim());
-    statuses[`${eventId}:${c}`] = r.records[0].name;
+    statuses[`${lk.status}${eventId}:${c}`] = r.records[0].name;
   }
   if (pendingStatus.length) await ctx.kv.put(K.status, JSON.stringify(statuses));
   const ath = await athletes(ctx, parsed.athletes, lookups);
@@ -183,31 +191,33 @@ export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups 
   const observed = {};
   for (const c of json.competitions || []) for (const x of c.competitors || []) { const ids = espn.competitorAthletes(x) || []; const names = String(x.name || '').split('/'); ids.forEach((id, i) => { if (names[i]) observed[id] = names[i].trim(); }); }
   const { idMap, outcomes, queue } = buildIdMap(parsed.athletes, idc, ath.get, observed);
-  const statusById = Object.fromEntries(Object.entries(statuses).filter(([k]) => k.startsWith(`${eventId}:`)).map(([k, v]) => [k.split(':')[1], v]));
-  parsed = espn.parseEspnEvent(json, { idMap, statusById });
+  const statusById = Object.fromEntries(Object.entries(statuses).filter(([k]) => k.startsWith(`${lk.status}${eventId}:`)).map(([k, v]) => [k.split(':').at(-1), v]));
+  parsed = espn.parseEspnEvent(json, { idMap, statusById, league });
   const skipped = {};
   for (const s of parsed.skipped) skipped[s.reason.split(':')[0]] = (skipped[s.reason.split(':')[0]] || 0) + 1;
   if (queue.length) await ctx.store.upsert('tennis_identity_queue', queue, { onConflict: 'provider,external_id' });
   const resolvedNow = Object.keys(idMap);
   for (let i = 0; i < resolvedNow.length; i += 150) await ctx.store.req('PATCH', `tennis_identity_queue?provider=eq.espn&status=in.(unresolved,ambiguous)&external_id=${inList(resolvedNow.slice(i, i + 150))}`, { body: { status: 'resolved', reason: 'resolved by a later crosswalk' } });
   if (!parsed.matches.length) return { event: eventId, state: 'PASS', final, start_date: parsed.edition.start_date, name: parsed.edition.name, matches: 0, skipped, identity: outcomes };
-  const ed = await writeEspnEdition(ctx.store, parsed.edition);
+  // WTA: the official WTA edition of the same event (proven by shared player pairs) owns the rows; else ESPN's
+  const mapped = league === 'wta' ? await mapOfficialEdition(ctx.store, parsed, idMap) : null;
+  const ed = mapped || await writeEspnEdition(ctx.store, parsed.edition);
   const w = await writeMatches(ctx.store, parsed.matches, ed, { captureId: res.capture?.capture_id || null, dedupe: true });
   // ESPN carries no match statistics
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${ed.edition_id}&source_family=eq.espn&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   const facts = await fillPlayerFacts(ctx.store, idMap);
   const unresolvedHeld = w.held > 0;
-  const heldSet = new Set((await ctx.kv.get(K.held, 'json')) || []);
+  const heldSet = new Set((await ctx.kv.get(lk.held, 'json')) || []);
   if (unresolvedHeld) heldSet.add(eventId); else heldSet.delete(eventId);
-  await ctx.kv.put(K.held, JSON.stringify([...heldSet]));
-  return { event: eventId, state: 'PASS', final, start_date: parsed.edition.start_date, name: parsed.edition.name, year: parsed.edition.year, slam: parsed.edition.slam, matches: parsed.matches.length, ...w, skipped, identity: outcomes, player_facts_filled: facts };
+  await ctx.kv.put(lk.held, JSON.stringify([...heldSet]));
+  return { event: eventId, league, state: 'PASS', final, start_date: parsed.edition.start_date, name: parsed.edition.name, year: parsed.edition.year, slam: parsed.edition.slam, edition_mapping: mapped ? mapped.evidence : null, matches: parsed.matches.length, ...w, skipped, identity: outcomes, player_facts_filled: facts };
 }
 
 // ---- lane: current season first, then history back to the floor year ---------------------------------
-async function seasonEvents(ctx, year) {
+async function seasonEvents(ctx, year, league = 'atp') {
   const ids = [];
   for (let page = 1; page <= 5; page += 1) {
-    const r = await fetchRun(ctx, espn.espnSeasonEvents, { year, page });
+    const r = await fetchRun(ctx, ADA(league).seasonEvents, { year, page });
     if (r.state !== 'PASS') {
       if (r.state === 'DEGRADED' && r.error === 'zero_records' && page === 1) return [];
       throw new Error(`espn events ${year} p${page}: ${r.state} ${r.error || ''}`.trim());
@@ -224,16 +234,20 @@ async function seasonEvents(ctx, year) {
  * The current season is re-listed every 3 h and its unfinished events are re-read; history walks
  * year -> floor, one queue per year. `budget` caps ESPN requests (events + statuses + athletes).
  */
-export async function espnAtpStep(ctx, { budget = 20, today = iso(new Date()) } = {}) {
+export const espnAtpStep = (ctx, o = {}) => espnLaneStep(ctx, { ...o, league: 'atp' });
+export const espnWtaStep = (ctx, o = {}) => espnLaneStep(ctx, { ...o, league: 'wta' });
+
+export async function espnLaneStep(ctx, { budget = 20, today = iso(new Date()), league = 'atp' } = {}) {
+  const lk = LK[league];
   const season = Number(today.slice(0, 4));
-  const st = (await ctx.kv.get(K.state, 'json')) || { year: season - 1, queue: null, cur: { listed_at: null, queue: [], done: [] } };
+  const st = (await ctx.kv.get(lk.state, 'json')) || { year: season - 1, queue: null, cur: { listed_at: null, queue: [], done: [] } };
   const start = ctx.upstream;
   const spent = () => ctx.upstream - start;
   const out = { runs: [] };
-  const save = () => ctx.kv.put(K.state, JSON.stringify(st));
+  const save = () => ctx.kv.put(lk.state, JSON.stringify(st));
   // 1. current season
   if (!st.cur.listed_at || Date.now() - Date.parse(st.cur.listed_at) > CURRENT_REFRESH_MS) {
-    const ids = await seasonEvents(ctx, season);
+    const ids = await seasonEvents(ctx, season, league);
     const done = new Set(st.cur.done);
     const future = st.cur.future || {};
     // events that have not started are re-read only once their start date arrives
@@ -242,7 +256,7 @@ export async function espnAtpStep(ctx, { budget = 20, today = iso(new Date()) } 
   }
   while (st.cur.queue.length && spent() < budget) {
     const id = st.cur.queue[0];
-    const r = await espnEventStep(ctx, id, { lookups: Math.max(1, budget - spent() - 1) });
+    const r = await espnEventStep(ctx, id, { lookups: Math.max(1, budget - spent() - 1), league });
     out.runs.push(r);
     if (r.state === 'IDENTITY_PENDING') break;
     st.cur.queue.shift();
@@ -254,14 +268,14 @@ export async function espnAtpStep(ctx, { budget = 20, today = iso(new Date()) } 
   // 2. history
   if (st.year < espn.ESPN_FLOOR_YEAR) {
     // history complete: re-read events that still hold unresolved identities once the crosswalk grows (weekly)
-    const last = await ctx.kv.get('espn:reheld');
+    const last = await ctx.kv.get(lk.reheld);
     if (!last || Date.now() - Date.parse(last) > 7 * 86400e3) {
-      const held = (await ctx.kv.get(K.held, 'json')) || [];
+      const held = (await ctx.kv.get(lk.held, 'json')) || [];
       st.retry = held;
-      await ctx.kv.put('espn:reheld', now());
+      await ctx.kv.put(lk.reheld, now());
     }
     while ((st.retry || []).length && spent() < budget) {
-      const r = await espnEventStep(ctx, st.retry[0], { lookups: Math.max(1, budget - spent() - 1) });
+      const r = await espnEventStep(ctx, st.retry[0], { lookups: Math.max(1, budget - spent() - 1), league });
       out.runs.push(r);
       if (r.state === 'IDENTITY_PENDING') break;
       st.retry.shift();
@@ -269,9 +283,9 @@ export async function espnAtpStep(ctx, { budget = 20, today = iso(new Date()) } 
     await save();
     return { ...out, phase: 'history_complete', held_events_retry: (st.retry || []).length };
   }
-  if (!st.queue) { st.queue = await seasonEvents(ctx, st.year); await save(); }
+  if (!st.queue) { st.queue = await seasonEvents(ctx, st.year, league); await save(); }
   while (st.queue.length && spent() < budget) {
-    const r = await espnEventStep(ctx, st.queue[0], { lookups: Math.max(1, budget - spent() - 1) });
+    const r = await espnEventStep(ctx, st.queue[0], { lookups: Math.max(1, budget - spent() - 1), league });
     out.runs.push(r);
     if (r.state === 'IDENTITY_PENDING') break;
     st.queue.shift();
@@ -288,21 +302,23 @@ export async function espnAtpStep(ctx, { budget = 20, today = iso(new Date()) } 
  * than the list existed), NOT a claimed official ATP release date. Walks the current season forward to its
  * latest week, then history backwards week by week to the floor. 404 weeks are recorded absent, not guessed.
  */
-export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()) } = {}) {
+export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()), league = 'atp' } = {}) {
+  const lk = LK[league];
+  const K = { rank: lk.rank };
   const season = Number(today.slice(0, 4));
   const st = (await ctx.kv.get(K.rank, 'json')) || { season, week: 1, hist: { season: season - 1, week: 53 }, cur_checked: null };
   const out = { lists: [] };
   let n = 0;
   const idc = await identityContext(ctx);
   const step = async (s, w) => {
-    const r = await fetchRun(ctx, espn.espnRankingWeek, { season: s, week: w });
+    const r = await fetchRun(ctx, ADA(league).rankingWeek, { season: s, week: w, league });
     n += 1;
     if (r.state !== 'PASS') {
       if (r.state === 'DEGRADED' && (r.http_status === 404 || r.error === 'shape_drift' || r.error === 'zero_records')) return { season: s, week: w, state: 'ABSENT' };
       throw new Error(`espn ranking ${s} w${w}: ${r.state} ${r.error || ''}`.trim());
     }
     const list = r.records[0];
-    const w2 = await writeEspnRanking(ctx, list, idc, r.capture?.capture_id || null);
+    const w2 = await writeEspnRanking(ctx, list, idc, r.capture?.capture_id || null, league);
     return { season: s, week: w, state: 'PASS', ...w2 };
   };
   // current season: advance while weeks exist (a 404 past the latest week just means "not yet")
@@ -327,6 +343,7 @@ export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()) 
       st.fail[key] = (st.fail[key] || 0) + 1;
       if (st.fail[key] < 3) { await ctx.kv.put(K.rank, JSON.stringify(st)); throw e; }
       st.source_errors = [...new Set([...(st.source_errors || []), key])];
+      delete st.fail[key];
       r = { season: st.hist.season, week: st.hist.week, state: 'SOURCE_ERROR' };
     }
     out.lists.push(r);
@@ -334,14 +351,29 @@ export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()) 
     if (st.hist.week < 1) { st.hist.season -= 1; st.hist.week = 53; }
     await ctx.kv.put(K.rank, JSON.stringify(st));
   }
+  // weekly: retry the historical weeks recorded as SOURCE_ERROR (a source error is not proof the week was empty)
+  if ((st.source_errors || []).length && n < weeks && (!st.errors_retried || Date.now() - Date.parse(st.errors_retried) > 7 * 86400e3)) {
+    st.errors_retried = now();
+    out.source_error_retry = [];
+    for (const key of [...st.source_errors]) {
+      if (n >= weeks) break;
+      const [s, w] = key.split('w').map(Number);
+      try {
+        const r = await step(s, w);
+        out.source_error_retry.push({ key, state: r.state });
+        if (r.state === 'PASS' || r.state === 'ABSENT' || r.state === 'KEPT_OFFICIAL') st.source_errors = st.source_errors.filter((k) => k !== key);
+      } catch (e) { out.source_error_retry.push({ key, state: 'SOURCE_ERROR', error: String(e.message).slice(0, 80) }); }
+    }
+    await ctx.kv.put(K.rank, JSON.stringify(st));
+  }
   // daily: link archived ranking rows whose ESPN athlete has since been resolved to a canonical player
   if (!st.relinked || Date.now() - Date.parse(st.relinked) > 86400e3) {
-    const open = [...new Set((await ctx.store.select('tennis_rankings', 'select=provider_player_id&provider_player_id=like.espn:*&pbe_player_id=is.null&limit=5000')).map((r) => r.provider_player_id.slice(5)))];
+    const open = [...new Set((await ctx.store.select('tennis_rankings', `select=provider_player_id,tennis_ranking_snapshots!inner(list_key)&tennis_ranking_snapshots.list_key=eq.${espn.LEAGUES[league].list_key}&provider_player_id=like.espn:*&pbe_player_id=is.null&limit=5000`)).map((r) => r.provider_player_id.slice(5)))];
     const ath = await athletes(ctx, open, 0);
     const { idMap } = buildIdMap(open, idc, ath.get);
     let linked = 0;
     for (const [aid, x] of Object.entries(idMap)) {
-      const p = x.provider === 'atp' ? idc.players.get(`atp:${x.provider_id}`) : null;
+      const p = x.provider === league ? idc.players.get(`${league}:${x.provider_id}`) : null;
       if (!p) continue;
       await ctx.store.req('PATCH', `tennis_rankings?provider_player_id=eq.espn:${aid}&pbe_player_id=is.null`, { body: { pbe_player_id: p.pbe_player_id } });
       linked += 1;
@@ -350,7 +382,7 @@ export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()) 
     await ctx.kv.put(K.rank, JSON.stringify(st));
     out.relinked = { open: open.length, linked };
   }
-  return { ...out, current: `${st.season} w${st.week}`, history_cursor: st.hist.season >= espn.ESPN_FLOOR_YEAR ? `${st.hist.season} w${st.hist.week}` : 'complete', done: st.hist.season < espn.ESPN_FLOOR_YEAR };
+  return { ...out, league, source_errors: st.source_errors || [], current: `${st.season} w${st.week}`, history_cursor: st.hist.season >= espn.ESPN_FLOOR_YEAR ? `${st.hist.season} w${st.hist.week}` : 'complete', done: st.hist.season < espn.ESPN_FLOOR_YEAR };
 }
 
 function isoWeek(day) {
@@ -359,22 +391,95 @@ function isoWeek(day) {
   return Math.ceil(((t - new Date(Date.UTC(t.getUTCFullYear(), 0, 1))) / 86400e3 + 1) / 7);
 }
 
-async function writeEspnRanking(ctx, list, idc, captureId) {
+async function writeEspnRanking(ctx, list, idc, captureId, league = 'atp') {
   if (!list.observed_date) throw new Error('espn ranking list without lastUpdated');
+  const listKey = espn.LEAGUES[league].list_key;
   const ath = await athletes(ctx, list.rows.map((r) => r.espn_id), 0); // rankings never trigger athlete fetches
   const { idMap } = buildIdMap(list.rows.map((r) => r.espn_id), idc, ath.get);
-  const sid = await snapshotId('atp_singles', list.observed_date);
-  const [existing] = await ctx.store.select('tennis_ranking_snapshots', `select=snapshot_id,source_family&list_key=eq.atp_singles&ranking_date=eq.${list.observed_date}`);
-  if (existing && existing.source_family !== 'espn') return { date: list.observed_date, state: 'KEPT_OTHER_SOURCE' };
-  await ctx.store.upsert('tennis_ranking_snapshots', [{ snapshot_id: sid, list_key: 'atp_singles', ranking_date: list.observed_date, source_family: 'espn', capture_id: captureId, row_count: 0, captured_at: now() }], { onConflict: 'snapshot_id', ignore: true });
+  // an OFFICIAL list within 6 days of this one wins: the ESPN list is not stored, only reconciled against it
+  const lo = new Date(Date.parse(list.observed_date) - 6 * 86400e3).toISOString().slice(0, 10);
+  const hi = new Date(Date.parse(list.observed_date) + 6 * 86400e3).toISOString().slice(0, 10);
+  const official = await ctx.store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date,source_family&list_key=eq.${listKey}&source_family=neq.espn&ranking_date=gte.${lo}&ranking_date=lte.${hi}&order=ranking_date.asc`);
+  if (official.length) return { date: list.observed_date, state: 'KEPT_OFFICIAL', reconciliation: await reconcile(ctx, list, idMap, idc, official, league) };
+  const sid = await snapshotId(listKey, list.observed_date);
+  const [existing] = await ctx.store.select('tennis_ranking_snapshots', `select=snapshot_id,source_family&list_key=eq.${listKey}&ranking_date=eq.${list.observed_date}`);
+  if (existing && existing.source_family !== 'espn') return { date: list.observed_date, state: 'KEPT_OFFICIAL' };
+  await ctx.store.upsert('tennis_ranking_snapshots', [{ snapshot_id: sid, list_key: listKey, ranking_date: list.observed_date, source_family: 'espn', capture_id: captureId, row_count: 0, captured_at: now() }], { onConflict: 'snapshot_id', ignore: true });
   const rows = [];
   for (const r of list.rows) {
     const x = idMap[r.espn_id];
-    rows.push({ snapshot_id: sid, provider_player_id: `espn:${r.espn_id}`, pbe_player_id: x && x.provider === 'atp' && idc.players.has(`atp:${x.provider_id}`) ? idc.players.get(`atp:${x.provider_id}`).pbe_player_id : null, rank: r.rank, tied: false, points: r.points, tournaments_played: null, previous_rank: r.previous_rank });
+    rows.push({ snapshot_id: sid, provider_player_id: `espn:${r.espn_id}`, pbe_player_id: x && x.provider === league && idc.players.has(`${league}:${x.provider_id}`) ? idc.players.get(`${league}:${x.provider_id}`).pbe_player_id : null, rank: r.rank, tied: false, points: r.points, tournaments_played: null, previous_rank: r.previous_rank });
   }
   await ctx.store.upsert('tennis_rankings', rows, { onConflict: 'snapshot_id,provider_player_id' });
   await ctx.store.req('PATCH', `tennis_ranking_snapshots?snapshot_id=eq.${sid}`, { body: { row_count: rows.length } });
   return { date: list.observed_date, rows: rows.length, linked: rows.filter((r) => r.pbe_player_id).length };
+}
+
+/** ESPN list vs the official list(s) within 6 days: coverage, rank and points agreement (evidence, KV espn:recon:<league>). */
+async function reconcile(ctx, list, idMap, idc, official, league) {
+  const snap = official.reduce((b, s) => (Math.abs(Date.parse(s.ranking_date) - Date.parse(list.observed_date)) < Math.abs(Date.parse(b.ranking_date) - Date.parse(list.observed_date)) ? s : b));
+  const off = new Map((await ctx.store.select('tennis_rankings', `select=pbe_player_id,rank,points&snapshot_id=eq.${snap.snapshot_id}&pbe_player_id=not.is.null&limit=1000`)).map((r) => [r.pbe_player_id, r]));
+  let linked = 0; let found = 0; let rankEq = 0; let ptsEq = 0; let absDiff = 0;
+  for (const r of list.rows) {
+    const x = idMap[r.espn_id];
+    const p = x && x.provider === league ? idc.players.get(`${league}:${x.provider_id}`) : null;
+    if (!p) continue;
+    linked += 1;
+    const o = off.get(p.pbe_player_id);
+    if (!o) continue;
+    found += 1;
+    if (o.rank === r.rank) rankEq += 1;
+    absDiff += Math.abs(o.rank - r.rank);
+    if (o.points != null && r.points != null && Number(o.points) === Number(r.points)) ptsEq += 1;
+  }
+  const rec = { espn_date: list.observed_date, official_date: snap.ranking_date, days_apart: Math.round((Date.parse(list.observed_date) - Date.parse(snap.ranking_date)) / 86400e3), espn_rows: list.rows.length, linked, in_official: found, rank_equal: rankEq, points_equal: ptsEq, mean_abs_rank_diff: found ? Math.round((absDiff / found) * 100) / 100 : null };
+  const key = `espn:recon:${league}`;
+  const all = (await ctx.kv.get(key, 'json')) || {};
+  all[list.observed_date] = rec;
+  await ctx.kv.put(key, JSON.stringify(all));
+  return rec;
+}
+
+/**
+ * The official WTA edition of an ESPN WTA event, proven by shared singles pairs: candidates are official
+ * (source_family wta) editions of the same year whose dates overlap the event (+-3 days) and, for a Slam, the
+ * canonical Slam edition; the one holding the most of the event's resolved singles pairs wins when that is at
+ * least max(2, 30%) of them and no other candidate ties. No proof -> null (the ESPN edition is used).
+ */
+export async function mapOfficialEdition(store, parsed, idMap) {
+  const e = parsed.edition;
+  if (!e.start_date || !e.end_date) return null;
+  const pairs = new Set();
+  for (const m of parsed.matches) {
+    if (m.event_type !== 'WS') continue;
+    const a = idMap[m.sides.A[0]?.provider_id];
+    const b = idMap[m.sides.B[0]?.provider_id];
+    if (!a || !b) continue;
+    pairs.add([`S:${await mintPlayerId(a.provider, a.provider_id)}`, `S:${await mintPlayerId(b.provider, b.provider_id)}`].sort().join('~'));
+  }
+  if (pairs.size < 2) return null;
+  const lo = new Date(Date.parse(e.start_date) - 3 * 86400e3).toISOString().slice(0, 10);
+  const hi = new Date(Date.parse(e.end_date) + 3 * 86400e3).toISOString().slice(0, 10);
+  const cands = await store.select('tennis_tournament_editions', `select=edition_id,surface,indoor,name,source_family&year=eq.${e.year}&source_family=neq.espn&start_date=lte.${hi}&end_date=gte.${lo}&limit=40`);
+  if (e.slam) {
+    const slam = Object.values(espn.ESPN_SLAMS).find((s) => s.key === e.slam);
+    const sid = await editionId(await tournamentId(`slam:${slam.key}`), e.year);
+    if (!cands.some((c) => c.edition_id === sid)) { const [x] = await store.select('tennis_tournament_editions', `select=edition_id,surface,indoor,name,source_family&edition_id=eq.${sid}`); if (x) cands.push(x); }
+  }
+  let best = null;
+  let second = 0;
+  for (const c of cands) {
+    const rows = await store.select('tennis_matches', `select=match_id,tennis_match_participants(side,participant_key)&edition_id=eq.${c.edition_id}&event_type=eq.WS&limit=1000`);
+    let hit = 0;
+    for (const r of rows) {
+      const ps = (r.tennis_match_participants || []).map((p) => p.participant_key);
+      if (ps.length === 2 && pairs.has(ps.sort().join('~'))) hit += 1;
+    }
+    if (!best || hit > best.hit) { second = best?.hit || 0; best = { ...c, hit }; } else if (hit > second) second = hit;
+  }
+  if (!best || best.hit < Math.max(2, Math.ceil(pairs.size * 0.3)) || best.hit === second) return null;
+  await store.upsert('tennis_edition_external_ids', [{ provider: 'espn_wta', external_id: e.espn_event_id, edition_id: best.edition_id }], { onConflict: 'provider,external_id', ignore: true });
+  return { edition_id: best.edition_id, surface: best.surface ?? null, indoor: best.indoor ?? null, owner: best.source_family, evidence: `${best.hit} of ${pairs.size} resolved singles pairs already in ${best.name || best.edition_id}` };
 }
 
 export { hold };

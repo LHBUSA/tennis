@@ -349,7 +349,9 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
       if (cands.length === 1) {
         const c = cands[0];
         if (c.source_family === provider) { dup(x, `duplicate_candidate:same_source_other_id:${c.match_id}`); continue; }
-        if (c.round && c.round !== 'unknown' && x.n.match.round_code && c.round !== x.n.match.round_code) { dup(x, `duplicate_candidate:round_conflict:${c.source_family}=${c.round},${provider}=${x.n.match.round_code}:${c.match_id}`); continue; }
+        // WTA API rounds carry a stage prefix (M-1, M-Q ...): compared without it
+        const rn = (r) => String(r || '').replace(/^M-/, '');
+        if (c.round && c.round !== 'unknown' && x.n.match.round_code && rn(c.round) !== rn(x.n.match.round_code)) { dup(x, `duplicate_candidate:round_conflict:${c.source_family}=${c.round},${provider}=${x.n.match.round_code}:${c.match_id}`); continue; }
         target = c.match_id;
       }
     }

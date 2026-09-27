@@ -423,3 +423,84 @@ test('rankings: a historical week that keeps answering 5xx is recorded as a sour
   assert.equal(r.lists[1].state, 'PASS');
   assert.deepEqual((await kv.get('bf:espnrank', 'json')).source_errors, ['2018w29']);
 });
+
+// ---- WTA league ----------------------------------------------------------------------------------------
+const wtaResolve = () => new Proxy({}, { get: (_, k) => (typeof k === 'string' ? { provider: 'wta', provider_id: `W${k}`, gender: 'F', method: 'external_id', evidence: 'test' } : undefined) });
+
+test('WTA league: women\'s singles/doubles parsed with Slam rules; mixed is left to the ATP league (same competitions)', async () => {
+  const r = espn.parseEspnEvent(fx('wta-event-154-2026.json'), { idMap: wtaResolve(), league: 'wta' });
+  const m = byComp(r);
+  assert.equal(m['168468'].event_type, 'WS');
+  assert.equal(m['168468'].format_key, 'BO3_FINAL_TB10');
+  assert.equal(m['168468'].sides.A[0].gender, 'F');
+  assert.equal(m['171066'].status, 'retired');
+  assert.equal(m['168749'].event_type, 'WD');
+  assert.ok(!m['168672'], 'mixed doubles skipped in the WTA league');
+  assert.ok(r.skipped.some((s) => s.reason === 'event_type:Mixed Doubles'));
+  for (const x of r.matches) assert.equal((await normalizeMatch(x)).canonical, true, x.provider_match_id);
+  const h = espn.parseEspnEvent(fx('wta-event-250-2012.json'), { idMap: wtaResolve(), league: 'wta' });
+  assert.equal(h.matches.length, 3);
+  assert.ok(h.matches.every((x) => x.format_key === 'BO3_TB7'));
+  const atpInWta = espn.parseEspnEvent(fx('wta-event-250-2012.json'), { idMap: allResolve(), league: 'wta' }).matches[0];
+  assert.ok(atpInWta.warnings.some((w) => w.startsWith('tour_mismatch')), 'an ATP id on a women\'s match is never written');
+  assert.equal(atpInWta.sides.A[0].tour_id, null);
+  assert.equal(espn.parseEspnRanking(fx('wta-ranking-2012-w10.json')).observed_date, '2012-02-27');
+  assert.match(espn.WTA.rankingWeek.request({ season: 2012, week: 10 }).url, /leagues\/wta\/seasons\/2012\/types\/2\/weeks\/10\/rankings\/2$/);
+  assert.match(espn.WTA.event.request({ id: '154-2026' }).url, /leagues\/wta\/events\/154-2026$/);
+});
+
+test('WTA: an ESPN women\'s match attaches to the official WTA row (round M-F == F), never a second row', async () => {
+  const s = new MemStore();
+  const ed = { edition_id: E, surface: 'hard', indoor: false };
+  const wsm = (provider, id, round, A, B) => ({ ...sm(provider, id, 'WS', round, A, B, [[6, 4], [6, 4]]), sides: { A: A.map((t) => ({ provider, provider_id: provider === 'wta' ? t : `${provider}-${t}`, tour_id: { provider: 'wta', provider_id: t }, gender: 'F' })), B: B.map((t) => ({ provider, provider_id: provider === 'wta' ? t : `${provider}-${t}`, tour_id: { provider: 'wta', provider_id: t }, gender: 'F' })) } });
+  await writeMatches(s, [wsm('wta', '1152-2026-LS001', 'M-F', ['111'], ['222'])], ed);
+  const r = await writeMatches(s, [wsm('espn', '1152-2026:9', 'F', ['222'], ['111'])], ed, { dedupe: true });
+  assert.equal(r.attached, 1);
+  assert.equal(r.duplicate_candidates, 0);
+  assert.equal(count(s, 'tennis_matches'), 1);
+  assert.equal(s.rows('tennis_matches')[0].source_family, 'wta', 'official WTA row stays the canonical row');
+});
+
+test('WTA: ESPN event mapped to the official edition only when shared singles pairs prove it', async () => {
+  const { mapOfficialEdition } = await import('../workers/tennis-ingest/src/espn-jobs.js');
+  const s = new MemStore();
+  const official = '00000000-0000-4000-8000-00000000e0f1';
+  const other = '00000000-0000-4000-8000-00000000e0f2';
+  await s.upsert('tennis_tournament_editions', [{ edition_id: official, tournament_id: 't1', year: 2025, start_date: '2025-04-21', end_date: '2025-05-04', source_family: 'wta', name: 'Madrid (WTA)', surface: 'clay' }, { edition_id: other, tournament_id: 't2', year: 2025, start_date: '2025-04-28', end_date: '2025-05-04', source_family: 'wta', name: 'Other' }]);
+  const pid = (x) => mintPlayerId('wta', x);
+  let k = 0;
+  for (const [a, b] of [['1', '2'], ['3', '4'], ['5', '6']]) {
+    k += 1;
+    await s.upsert('tennis_matches', [{ match_id: `m${k}`, edition_id: official, event_type: 'WS' }]);
+    await s.upsert('tennis_match_participants', [{ match_id: `m${k}`, side: 'A', participant_key: `S:${await pid(a)}` }, { match_id: `m${k}`, side: 'B', participant_key: `S:${await pid(b)}` }]);
+  }
+  const mk = (a, b) => ({ event_type: 'WS', sides: { A: [{ provider_id: a }], B: [{ provider_id: b }] } });
+  const idMap = Object.fromEntries(['1', '2', '3', '4', '5', '6', '7', '8'].map((x) => [x, { provider: 'wta', provider_id: x }]));
+  const parsed = { edition: { espn_event_id: '413-2025', year: 2025, start_date: '2025-04-22', end_date: '2025-05-04', slam: null }, matches: [mk('1', '2'), mk('3', '4'), mk('6', '5'), mk('7', '8')] };
+  const hit = await mapOfficialEdition(s, parsed, idMap);
+  assert.equal(hit.edition_id, official);
+  assert.equal(hit.surface, 'clay');
+  assert.match(hit.evidence, /^3 of 4/);
+  const none = await mapOfficialEdition(s, { ...parsed, matches: [mk('7', '8'), mk('1', '9')] }, { ...idMap, 9: { provider: 'wta', provider_id: '9' } });
+  assert.equal(none, null, 'one shared pair is not proof');
+});
+
+test('WTA rankings: an official list within 6 days wins (ESPN list reconciled, not stored); otherwise stored as espn', async () => {
+  const wd = [{ h: { value: 'Q9' }, e: { value: '2001' }, wta: { value: '316956' } }];
+  const { ctx, s, kv } = laneCtx({ wdRows: wd });
+  const list = { ...fx('wta-ranking-2012-w10.json'), lastUpdated: '2026-09-22T08:00Z' };
+  list.ranks[0].athlete.$ref = 'http://x/athletes/2001';
+  ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: wd } }], [/weeks\/38\/rankings\/2/, list], [/weeks\/10\/rankings\/2/, fx('wta-ranking-2012-w10.json')]]);
+  const pid = await mintPlayerId('wta', '316956');
+  await s.upsert('tennis_players', [{ pbe_player_id: pid, founding_external_key: 'wta:316956', full_name: 'P', status: 'active', gender: 'F' }]);
+  await s.upsert('tennis_ranking_snapshots', [{ snapshot_id: 'off', list_key: 'wta_singles', ranking_date: '2026-09-21', source_family: 'wta', row_count: 1 }]);
+  await s.upsert('tennis_rankings', [{ snapshot_id: 'off', provider_player_id: '316956', pbe_player_id: pid, rank: list.ranks[0].current, points: list.ranks[0].points }]);
+  await kv.put('bf:espnrank:wta', JSON.stringify({ season: 2026, week: 38, hist: { season: 2012, week: 10 }, cur_checked: null, relinked: new Date().toISOString() }));
+  const r = await espnRankingStep(ctx, { weeks: 3, today: '2026-09-27', league: 'wta' });
+  const cur = r.lists.find((l) => l.season === 2026 && l.week === 38);
+  assert.equal(cur.state, 'KEPT_OFFICIAL');
+  assert.equal(cur.reconciliation.rank_equal, 1);
+  assert.equal(s.rows('tennis_ranking_snapshots').filter((x) => x.source_family === 'espn' && x.ranking_date === '2026-09-22').length, 0);
+  assert.ok(s.rows('tennis_ranking_snapshots').some((x) => x.source_family === 'espn' && x.list_key === 'wta_singles' && x.ranking_date === '2012-02-27'), 'historical hole filled by ESPN');
+  assert.ok((await kv.get('espn:recon:wta', 'json'))['2026-09-22']);
+});

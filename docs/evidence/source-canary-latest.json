@@ -1,12 +1,12 @@
 {
-  "run_at": "2026-09-27T10:22:38.772Z",
+  "run_at": "2026-09-27T15:59:53.086Z",
   "runner": "scripts/canary/run.mjs (local workstation egress)",
   "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
   "client_stats": {
-    "requests": 7,
+    "requests": 2,
     "not_modified": 0,
     "retries": 0,
-    "blocked": 1
+    "blocked": 0
   },
   "results": [
     {
@@ -442,6 +442,36 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 403 forbidden https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
+      "drift": null
+    },
+    {
+      "key": "espn.wta.event",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026",
+      "http_status": 200,
+      "bytes": 1237629,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "f2c0a01dedc566af153b148aa97a50edbdca111bfae4e225fdbb481f18882547",
+      "attempts": 1,
+      "latency_ms": 257,
+      "record_count": 302,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.wta.rankings",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/seasons/2012/types/2/weeks/10/rankings/2",
+      "http_status": 200,
+      "bytes": 17413,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "78fd01be647355655ef85c5d9e2bb4d3e71e0758b0ef42e332ef90da24106274",
+      "attempts": 1,
+      "latency_ms": 42,
+      "record_count": 1,
+      "error": null,
       "drift": null
     }
   ]

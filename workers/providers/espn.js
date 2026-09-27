@@ -38,7 +38,11 @@ export const ESPN_SLAMS = Object.freeze({
 // Exhibitions / non-standard scoring: recorded as skipped, never written.
 const EXHIBITION = /laver cup|hopman cup|next gen atp finals|ultimate tennis showdown|six kings|exhibition|world tennis league|tie break tens/i;
 
-export const EVENT_TYPES = Object.freeze({ "Men's Singles": 'MS', "Men's Doubles": 'MD', 'Mixed Doubles': 'XD' });
+// Event types observed in real payloads (ATP league: Men's Singles/Doubles + Mixed; WTA league: Women's Singles/
+// Doubles + Mixed — the SAME mixed competitions appear in both leagues and dedupe on their competition id).
+export const EVENT_TYPES = Object.freeze({ "Men's Singles": 'MS', "Men's Doubles": 'MD', "Women's Singles": 'WS', "Women's Doubles": 'WD', 'Mixed Doubles': 'XD' });
+export const LEAGUES = Object.freeze({ atp: { ranking_list: 1, list_key: 'atp_singles', tour: 'atp', events: ['MS', 'MD', 'XD'] }, wta: { ranking_list: 2, list_key: 'wta_singles', tour: 'wta', events: ['WS', 'WD'] } }); // mixed: ingested once, from the ATP league
+const SINGLES = new Set(['MS', 'WS']);
 
 /** Competition key only where the event itself says so; ESPN has no level for 250/500/1000 events. */
 export function espnCompetition(name, slam) {
@@ -175,7 +179,7 @@ export function competitorAthletes(c) {
  * idMap: espn athlete id -> { provider, provider_id, evidence, method, first_name, last_name, gender }.
  * Returns { edition, matches, skipped: [{ id, reason }], athletes: [ids], needsStatus: [compIds] }.
  */
-export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
+export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'atp' } = {}) {
   const ev = splitEventId(json?.id);
   if (!ev) return { edition: null, matches: [], skipped: [{ id: json?.id ?? null, reason: 'bad_event_id' }], athletes: [], needsStatus: [] };
   const slamDef = ESPN_SLAMS[ev.tid] || null;
@@ -202,11 +206,11 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
   for (const c of comps) {
     const pmid = `${json.id}:${c.id}`;
     const et = EVENT_TYPES[c.type?.text];
-    if (!et) { out.skipped.push({ id: pmid, reason: `event_type:${c.type?.text || 'none'}` }); continue; }
+    if (!et || !LEAGUES[league].events.includes(et)) { out.skipped.push({ id: pmid, reason: `event_type:${c.type?.text || 'none'}` }); continue; }
     const cs = [...(c.competitors || [])].sort((a, b) => (a.order ?? 9) - (b.order ?? 9));
     if (cs.length !== 2) { out.skipped.push({ id: pmid, reason: 'competitors' }); continue; }
     const ids = cs.map(competitorAthletes);
-    if (ids.some((x) => !x) || ids.some((x) => x.length !== (et === 'MS' ? 1 : 2))) { out.skipped.push({ id: pmid, reason: 'competitor_ids' }); continue; }
+    if (ids.some((x) => !x) || ids.some((x) => x.length !== (SINGLES.has(et) ? 1 : 2))) { out.skipped.push({ id: pmid, reason: 'competitor_ids' }); continue; }
     for (const x of ids.flat()) out.athletes.add(x);
     const note = (c.notes || []).map((n) => n.text).find((t) => / bt /.test(String(t)));
     if (!note) { out.skipped.push({ id: pmid, reason: 'no_result' }); continue; } // scheduled / in progress: not written by this lane
@@ -253,7 +257,7 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
       sets = r.sets.map((s, i) => ({ ...s, idx: i }));
     }
     // deciding match tiebreak (doubles): "10-6", "13-11" or "1-0 (10-7)" as the third set
-    const doubles = et !== 'MS';
+    const doubles = !SINGLES.has(et);
     let mtb = false;
     // only when the first two sets were split (a 3-set Bo5 doubles win can end with a long advantage set)
     const split = sets.length === 3 && [sets[0], sets[1]].map((s) => (s.w > s.l ? 'w' : 'l')).sort().join('') === 'lw';
@@ -291,8 +295,10 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {} } = {}) {
       outSets.push({ games: orient(s.w, s.l), tiebreak: tb, is_match_tiebreak: false });
     }
     const side = (k) => ids[k].map((aid) => {
-      const x = idMap[aid] || null;
-      const g = et === 'XD' ? x?.gender || null : 'M';
+      let x = idMap[aid] || null;
+      // a women's event resolved to an ATP id (or the reverse) is a crosswalk error: unresolved, never written
+      if (x && et !== 'XD' && x.provider !== (et.startsWith('W') ? 'wta' : 'atp')) { warnings.push(`tour_mismatch:${aid}`); x = null; }
+      const g = et === 'XD' ? x?.gender || null : et.startsWith('W') ? 'F' : 'M';
       return {
         provider: 'espn', provider_id: aid, tour_id: x ? { provider: x.provider, provider_id: x.provider_id } : null,
         tour_id_evidence: x?.evidence || null, tour_id_method: x?.method || null,
@@ -344,21 +350,21 @@ export function parseEspnRanking(j, { season, week } = {}) {
 const J = { accept: 'application/json' };
 export const espnSeasonEvents = {
   key: 'espn.atp.events', family: 'espn', capabilities: ['calendar', 'history'], parser_version: PARSER, cadence: { class: 'daily', idle_s: 86400 },
-  request: ({ year, page = 1 }) => ({ url: `${CORE}/leagues/atp/events?dates=${year}&limit=200&page=${page}`, headers: J }),
+  request: ({ year, page = 1, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/events?dates=${year}&limit=200&page=${page}`, headers: J }),
   shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['items', 'count']) : ['not_json']; },
   parse: (body) => { const j = safeJson(body); return (j.items || []).map((i) => /events\/(\d+-\d{4})/.exec(i.$ref || '')?.[1]).filter(Boolean).map((id) => ({ id, page_count: j.pageCount ?? 1, count: j.count ?? null })); }
 };
 
 export const espnEvent = {
   key: 'espn.atp.event', family: 'espn', capabilities: ['draws', 'set_game_scoring', 'withdrawals_ret_wo', 'history', 'qualifying', 'doubles', 'mixed'], parser_version: PARSER, cadence: { class: 'history', idle_s: 86400 * 30 },
-  request: ({ id }) => ({ url: `${CORE}/leagues/atp/events/${id}`, headers: J }),
+  request: ({ id, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/events/${id}`, headers: J }),
   shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['id', 'name', 'date']) : ['not_json']; },
   parse: (body) => { const j = safeJson(body); return j ? [j] : []; }
 };
 
 export const espnCompetitionStatus = {
   key: 'espn.atp.status', family: 'espn', capabilities: ['withdrawals_ret_wo'], parser_version: PARSER, cadence: { class: 'history', idle_s: 86400 * 30 },
-  request: ({ eventId, compId }) => ({ url: `${CORE}/leagues/atp/events/${eventId}/competitions/${compId}/status`, headers: J }),
+  request: ({ eventId, compId, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/events/${eventId}/competitions/${compId}/status`, headers: J }),
   shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['type.name']) : ['not_json']; },
   parse: (body) => { const j = safeJson(body); return [{ name: j.type.name, completed: !!j.type.completed }]; }
 };
@@ -372,9 +378,19 @@ export const espnAthlete = {
 
 export const espnRankingWeek = {
   key: 'espn.atp.rankings', family: 'espn', capabilities: ['rankings_singles', 'history'], parser_version: PARSER, cadence: { class: 'weekly', idle_s: 86400 },
-  request: ({ season, week }) => ({ url: `${CORE}/leagues/atp/seasons/${season}/types/2/weeks/${week}/rankings/1`, headers: J }),
+  request: ({ season, week, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/seasons/${season}/types/2/weeks/${week}/rankings/${LEAGUES[league].ranking_list}`, headers: J }),
   shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['ranks.0.current', 'lastUpdated']) : ['not_json']; },
   parse: (body, meta = {}) => { const r = parseEspnRanking(safeJson(body), meta.params || {}); return r && r.rows.length ? [r] : []; }
 };
 
 export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek];
+
+/** The same adapters bound to the WTA league (distinct run-ledger keys; identical parsing). */
+const bind = (a, league, key) => ({ ...a, key, request: (p = {}) => a.request({ ...p, league }) });
+export const WTA = Object.freeze({
+  seasonEvents: bind(espnSeasonEvents, 'wta', 'espn.wta.events'),
+  event: bind(espnEvent, 'wta', 'espn.wta.event'),
+  status: bind(espnCompetitionStatus, 'wta', 'espn.wta.status'),
+  rankingWeek: bind(espnRankingWeek, 'wta', 'espn.wta.rankings')
+});
+export const ATP = Object.freeze({ seasonEvents: espnSeasonEvents, event: espnEvent, status: espnCompetitionStatus, rankingWeek: espnRankingWeek });

@@ -18,7 +18,7 @@ import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import * as espn from '../../providers/espn.js';
-import { espnAtpStep, espnRankingStep } from './espn-jobs.js';
+import { espnAtpStep, espnWtaStep, espnRankingStep } from './espn-jobs.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { buildDnaV2 } from './dna-v2-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
@@ -188,6 +188,14 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         const r = await espnAtpStep(ctx, { budget: 20 });
         return { ok: true, out: r };
       },
+      async espn_wta() {
+        const r = await espnWtaStep(ctx, { budget: 20 });
+        return { ok: true, out: r };
+      },
+      async espn_wta_rankings() {
+        const r = await espnRankingStep(ctx, { weeks: 8, league: 'wta' });
+        return { ok: true, done: false, out: r };
+      },
       async espn_rankings() {
         const r = await espnRankingStep(ctx, { weeks: 8 });
         return { ok: true, done: false, out: r };
@@ -227,14 +235,14 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         return { ok: passed > 0 || !done.length, out: { editions: done, remaining: queue.length } };
       }
     };
-    const DECL = [['ao_current', true], ['espn_atp', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false], ['espn_rankings', false]];
+    const DECL = [['ao_current', true], ['espn_atp', true], ['espn_wta', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false], ['espn_rankings', false], ['espn_wta_rankings', false]];
     const states = Object.fromEntries(await Promise.all(DECL.map(async ([n]) => [n, (await kv.get(LANE_STATE_KEY(n), 'json')) || {}])));
     const rr = Number(await kv.get('lanes:rr')) || 0;
     const plan = planTick({ now: Date.now(), lanes: DECL.map(([name, priority]) => ({ name, priority, ...states[name] })), rr });
     await kv.put('lanes:rr', String(plan.rr));
     const out = {};
     for (const name of plan.run) {
-      if (!['ao_current', 'espn_atp'].includes(name) && ctx.upstream >= UPSTREAM_BUDGET) { out[name] = 'budget_spent'; continue; }
+      if (!['ao_current', 'espn_atp', 'espn_wta'].includes(name) && ctx.upstream >= UPSTREAM_BUDGET) { out[name] = 'budget_spent'; continue; }
       let r;
       try { r = await LANES[name](); } catch (e) { r = { ok: false, out: { error: String(e?.message || e).slice(0, 200) } }; }
       await kv.put(LANE_STATE_KEY(name), JSON.stringify(afterRun(states[name], { ok: r.ok, done: r.done, now: Date.now() })));
@@ -300,7 +308,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -318,9 +326,9 @@ export default {
     }
     if (path === '/v1/runs' && request.method === 'GET') {
       if (!env.TENNIS_STATE) return json({ ok: false, error: 'not_configured' }, { status: 503 });
-      const [last, bfCal, bfEvents, bfRank, active, bfEspn, bfEspnRank, laneEspn] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active', 'bf:espn', 'bf:espnrank', 'lane:espn_atp'].map((k) => env.TENNIS_STATE.get(k, 'json')));
+      const [last, bfCal, bfEvents, bfRank, active, bfEspn, bfEspnRank, laneEspn, bfEspnW, bfEspnRankW] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active', 'bf:espn', 'bf:espnrank', 'lane:espn_atp', 'bf:espn:wta', 'bf:espnrank:wta'].map((k) => env.TENNIS_STATE.get(k, 'json')));
       const espnState = bfEspn ? { history_year: bfEspn.year, history_queue: bfEspn.queue ? bfEspn.queue.length : null, current_listed_at: bfEspn.cur?.listed_at, current_queue: bfEspn.cur?.queue?.length ?? 0, current_done: bfEspn.cur?.done?.length ?? 0, lane: laneEspn } : null;
-      return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank, espn_atp: espnState, espn_rankings: bfEspnRank ? { current: `${bfEspnRank.season} w${bfEspnRank.week}`, history: bfEspnRank.hist, relinked: bfEspnRank.relinked } : null }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank, espn_atp: espnState, espn_wta: bfEspnW ? { history_year: bfEspnW.year, history_queue: bfEspnW.queue ? bfEspnW.queue.length : null, current_queue: bfEspnW.cur?.queue?.length ?? 0, current_done: bfEspnW.cur?.done?.length ?? 0 } : null, espn_wta_rankings: bfEspnRankW ? { current: `${bfEspnRankW.season} w${bfEspnRankW.week}`, history: bfEspnRankW.hist, source_errors: bfEspnRankW.source_errors || [] } : null, espn_rankings: bfEspnRank ? { current: `${bfEspnRank.season} w${bfEspnRank.week}`, history: bfEspnRank.hist, relinked: bfEspnRank.relinked } : null }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
     }
     // admin: store an approved, pipeline-generated player-media derivative (scripts/media/photos.mjs)
     if (path === '/v1/media' && request.method === 'PUT') {

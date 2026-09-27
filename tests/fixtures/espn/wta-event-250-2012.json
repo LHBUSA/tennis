@@ -1,0 +1,206 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/250-2012",
+  "captured": "2026-09-27",
+  "trimmed": "3 of 31 competitions"
+ },
+ "id": "250-2012",
+ "date": "2012-06-17T04:00Z",
+ "endDate": "2012-06-24T03:59Z",
+ "name": "WTA UNICEF Open",
+ "shortName": "WTA UNICEF Open",
+ "competitions": [
+  {
+   "id": "40311",
+   "date": "2012-06-17T04:00Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "'s-Hertogenbosch, Netherlands"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "330",
+     "type": "athlete",
+     "order": 1,
+     "name": "Romina Oprandi",
+     "winner": false
+    },
+    {
+     "id": "376",
+     "type": "athlete",
+     "order": 2,
+     "name": "Kim Clijsters",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Centre Court ",
+     "text": "Kim Clijsters (Bel) bt Romina  Oprandi (Swi) 6-7 (5-7) 6-2 6-3 "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/250-2012/competitions/40311/status?lang=en&region=us"
+   },
+   "tournamentId": 250,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Centre Court "
+   }
+  },
+  {
+   "id": "40303",
+   "date": "2012-06-17T04:00Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "'s-Hertogenbosch, Netherlands"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "936",
+     "type": "athlete",
+     "order": 1,
+     "name": "Simona Halep",
+     "winner": false
+    },
+    {
+     "id": "396",
+     "type": "athlete",
+     "order": 2,
+     "name": "Anabel Medina Garrigues",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Court 1",
+     "text": "Anabel Medina Garrigues (Spa) bt Simona Halep (Rom) 7-6 (7-3) 6-2 "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/250-2012/competitions/40303/status?lang=en&region=us"
+   },
+   "tournamentId": 250,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Court 1"
+   }
+  },
+  {
+   "id": "40308",
+   "date": "2012-06-17T09:00Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "'s-Hertogenbosch, Netherlands"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "753",
+     "type": "athlete",
+     "order": 1,
+     "name": "Olga Govortsova",
+     "winner": false
+    },
+    {
+     "id": "238",
+     "type": "athlete",
+     "order": 2,
+     "name": "Flavia Pennetta",
+     "winner": true,
+     "tournamentSeed": 4
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Centre Court ",
+     "text": "(4) Flavia Pennetta (Ita) bt Olga Govortsova (Blr) 2-6 6-1 6-1 "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/250-2012/competitions/40308/status?lang=en&region=us"
+   },
+   "tournamentId": 250,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Centre Court "
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "'s-Hertogenbosch",
+  "country": " Netherlands"
+ }
+}

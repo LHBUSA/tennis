@@ -1,0 +1,56 @@
+{
+ "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/seasons/2012/types/2/weeks/10/rankings/2?lang=en&region=us",
+ "id": "2",
+ "name": "WTA",
+ "shortName": "WTA",
+ "type": "wta",
+ "occurrence": {
+  "number": 10,
+  "type": "week",
+  "last": false,
+  "value": "10",
+  "displayValue": "Week 10"
+ },
+ "headline": "2012 WTA: Week 10",
+ "shortHeadline": "2012 WTA: Week 10",
+ "lastUpdated": "2012-02-27T08:00Z",
+ "ranks": [
+  {
+   "current": 1,
+   "previous": 1,
+   "points": 8980,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/421?lang=en&region=us"
+   }
+  },
+  {
+   "current": 2,
+   "previous": 2,
+   "points": 7680,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/399?lang=en&region=us"
+   }
+  },
+  {
+   "current": 3,
+   "previous": 3,
+   "points": 7095,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/928?lang=en&region=us"
+   }
+  },
+  {
+   "current": 4,
+   "previous": 4,
+   "points": 6270,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/630?lang=en&region=us"
+   }
+  }
+ ],
+ "availability": {}
+}

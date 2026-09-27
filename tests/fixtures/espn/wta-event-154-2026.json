@@ -1,0 +1,328 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026",
+  "captured": "2026-09-27",
+  "trimmed": "5 of 333 competitions"
+ },
+ "id": "154-2026",
+ "date": "2026-01-11T05:00Z",
+ "endDate": "2026-02-02T04:59Z",
+ "name": "Australian Open",
+ "shortName": "Australian Open",
+ "competitions": [
+  {
+   "id": "171062",
+   "date": "2026-01-11T23:00Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "5168",
+     "type": "athlete",
+     "order": 1,
+     "name": "Nuria Brancaccio",
+     "winner": false
+    },
+    {
+     "id": "13479",
+     "type": "athlete",
+     "order": 2,
+     "name": "Mary Stoiana",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying 1st Round - Court 5",
+     "text": "Mary Stoiana (USA) bt Nuria Brancaccio (ITA) 7-5 4-6 7-5"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026/competitions/171062/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 11,
+    "description": "Qualifying 1st Round",
+    "abbreviation": "Q1ST"
+   },
+   "court": {
+    "description": "Court 5"
+   }
+  },
+  {
+   "id": "171066",
+   "date": "2026-01-12T23:05Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "6189",
+     "type": "athlete",
+     "order": 1,
+     "name": "Wei Sijia",
+     "winner": false
+    },
+    {
+     "id": "5937",
+     "type": "athlete",
+     "order": 2,
+     "name": "Elvina Kalieva",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying 1st Round - Court 17",
+     "text": "Elvina Kalieva (USA) bt Sijia Wei (CHN) 4-6 6-2 3-2 ret"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026/competitions/171066/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 11,
+    "description": "Qualifying 1st Round",
+    "abbreviation": "Q1ST"
+   },
+   "court": {
+    "description": "Court 17"
+   }
+  },
+  {
+   "id": "168672",
+   "date": "2026-01-22T02:50Z",
+   "type": {
+    "id": "6",
+    "text": "Mixed Doubles",
+    "slug": "mixed-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "707-2695",
+     "type": "team",
+     "order": 1,
+     "name": "Zhang Shuai/Tim Puetz",
+     "winner": true,
+     "tournamentSeed": 6
+    },
+    {
+     "id": "2298-1344",
+     "type": "team",
+     "order": 2,
+     "name": "Nicole Melichar-Martinez/Yuki Bhambri",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Court 5",
+     "text": "(6) Zhang Shuai (CHN) & Tim Puetz (GER) bt Nicole Melichar-Martinez (USA) & Yuki Bhambri (IND) 6-4 7-6 (7-3)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026/competitions/168672/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Court 5"
+   }
+  },
+  {
+   "id": "168749",
+   "date": "2026-01-31T01:10Z",
+   "type": {
+    "id": "4",
+    "text": "Women's Doubles",
+    "slug": "womens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "3744-2090",
+     "type": "team",
+     "order": 1,
+     "name": "Anna Danilina/Aleksandra Krunic",
+     "winner": false,
+     "tournamentSeed": 7
+    },
+    {
+     "id": "2221-707",
+     "type": "team",
+     "order": 2,
+     "name": "Elise Mertens/Zhang Shuai",
+     "winner": true,
+     "tournamentSeed": 4
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Rod Laver Arena",
+     "text": "(4) Elise Mertens (BEL) & Zhang Shuai (CHN) bt (7) Anna Danilina (KAZ) & Aleksandra Krunic (SER) 7-6 (7-4) 6-4"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026/competitions/168749/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Rod Laver Arena"
+   }
+  },
+  {
+   "id": "168468",
+   "date": "2026-01-31T08:40Z",
+   "type": {
+    "id": "2",
+    "text": "Women's Singles",
+    "slug": "womens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "3038",
+     "type": "athlete",
+     "order": 1,
+     "name": "Aryna Sabalenka",
+     "winner": false,
+     "tournamentSeed": 1
+    },
+    {
+     "id": "3126",
+     "type": "athlete",
+     "order": 2,
+     "name": "Elena Rybakina",
+     "winner": true,
+     "tournamentSeed": 5
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Rod Laver Arena",
+     "text": "(5) Elena Rybakina (KAZ) bt (1) Aryna Sabalenka (BLR) 6-4 4-6 6-4"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026/competitions/168468/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 3,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Rod Laver Arena"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Melbourne",
+  "country": " Australia"
+ }
+}
