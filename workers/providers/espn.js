@@ -393,7 +393,39 @@ export const espnRankingWeek = {
   parse: (body, meta = {}) => { const r = parseEspnRanking(safeJson(body), meta.params || {}); return r && r.rows.length ? [r] : []; }
 };
 
-export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek];
+// Athlete season statistics (/leagues/{l}/seasons/{Y}/types/2/athletes/{id}/statistics): ESPN's own season
+// totals, category "general" only (observed 2026-09-28): singlesWon, singlesLost, singlesTitles, doublesTitles,
+// prize (USD, as ESPN states it). Nothing else is invented; an absent stat stays absent.
+const SEASON_STATS = { singlesWon: 'singles_won', singlesLost: 'singles_lost', singlesTitles: 'singles_titles', doublesTitles: 'doubles_titles', prize: 'prize_usd' };
+export function parseEspnSeasonStats(j) {
+  const cats = j?.splits?.categories || [];
+  const gen = cats.find((c) => c.name === 'general');
+  if (!gen) return null;
+  const out = {};
+  for (const st of gen.stats || []) if (SEASON_STATS[st.name] && Number.isFinite(st.value)) out[SEASON_STATS[st.name]] = st.value;
+  return Object.keys(out).length ? out : null;
+}
+export const espnSeasonStats = {
+  key: 'espn.atp.season_stats', family: 'espn', capabilities: ['season_stats'], parser_version: PARSER, cadence: { class: 'weekly', idle_s: 7 * 86400 },
+  request: ({ season, id, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/seasons/${season}/types/2/athletes/${id}/statistics`, headers: J }),
+  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['splits.categories']) : ['not_json']; },
+  parse: (body) => { const r = parseEspnSeasonStats(safeJson(body)); return r ? [r] : []; }
+};
+
+// Athlete event log (/leagues/{l}/seasons/{Y}/athletes/{id}/eventlog?page=): the competitions ESPN lists for the
+// athlete that season, as refs (event key, competition id, played flag). Used only to check our coverage.
+export function parseEspnEventLog(j) {
+  const items = j?.events?.items || [];
+  return { page_count: j?.events?.pageCount ?? 1, count: j?.events?.count ?? items.length, rows: items.map((it) => ({ event: /events\/(\d+-\d{4})/.exec(it.event?.$ref || '')?.[1] || null, competition: /competitions\/(\d+)/.exec(it.competition?.$ref || '')?.[1] || null, played: it.played === true })).filter((x) => x.event && x.competition) };
+}
+export const espnEventLog = {
+  key: 'espn.atp.eventlog', family: 'espn', capabilities: ['coverage_check'], parser_version: PARSER, cadence: { class: 'weekly', idle_s: 7 * 86400 },
+  request: ({ season, id, page = 1, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/seasons/${season}/athletes/${id}/eventlog?page=${page}`, headers: J }),
+  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['events']) : ['not_json']; },
+  parse: (body) => [parseEspnEventLog(safeJson(body))]
+};
+
+export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek, espnSeasonStats, espnEventLog];
 
 /** The same adapters bound to the WTA league (distinct run-ledger keys; identical parsing). */
 const bind = (a, league, key) => ({ ...a, key, request: (p = {}) => a.request({ ...p, league }) });
@@ -401,6 +433,8 @@ export const WTA = Object.freeze({
   seasonEvents: bind(espnSeasonEvents, 'wta', 'espn.wta.events'),
   event: bind(espnEvent, 'wta', 'espn.wta.event'),
   status: bind(espnCompetitionStatus, 'wta', 'espn.wta.status'),
-  rankingWeek: bind(espnRankingWeek, 'wta', 'espn.wta.rankings')
+  rankingWeek: bind(espnRankingWeek, 'wta', 'espn.wta.rankings'),
+  seasonStats: bind(espnSeasonStats, 'wta', 'espn.wta.season_stats'),
+  eventLog: bind(espnEventLog, 'wta', 'espn.wta.eventlog')
 });
-export const ATP = Object.freeze({ seasonEvents: espnSeasonEvents, event: espnEvent, status: espnCompetitionStatus, rankingWeek: espnRankingWeek });
+export const ATP = Object.freeze({ seasonEvents: espnSeasonEvents, event: espnEvent, status: espnCompetitionStatus, rankingWeek: espnRankingWeek, seasonStats: espnSeasonStats, eventLog: espnEventLog });

@@ -510,3 +510,14 @@ test('WTA rankings: an official list within 6 days wins (ESPN list reconciled, n
   const rec = (await kv.get('espn:recon:wta', 'json'))['2026-09-21'];
   assert.equal(rec.days_apart, 0, 'the ESPN list is dated to the Monday it is in force: same day as the official list');
 });
+
+test('ESPN extras: season statistics (general category only) and event-log refs parsed as reported', async () => {
+  const fs = await import('node:fs');
+  const { espnSeasonStats, espnEventLog, parseEspnSeasonStats } = await import('../workers/providers/espn.js');
+  const s = espnSeasonStats.parse(fs.readFileSync(new URL('./fixtures/espn/athlete-296-2025-statistics.json', import.meta.url), 'utf8'))[0];
+  assert.deepEqual(s, { singles_won: 39, singles_lost: 11, singles_titles: 2, doubles_titles: 0, prize_usd: 5140175 });
+  assert.equal(parseEspnSeasonStats({ splits: { categories: [] } }), null);
+  const l = espnEventLog.parse(fs.readFileSync(new URL('./fixtures/espn/athlete-296-2025-eventlog.json', import.meta.url), 'utf8'))[0];
+  assert.equal(l.page_count, 3); assert.equal(l.count, 62); assert.equal(l.rows.length, 25);
+  assert.deepEqual(l.rows[0], { event: '1039-2025', competition: '165285', played: true });
+});
