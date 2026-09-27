@@ -281,7 +281,7 @@ export const player = mountWith(async (root, { params }, signal) => {
     const d = dr?.data?.dna;
     render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page" style="padding-top:0">
       ${d ? dnaSection(d) : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
-      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}` : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
+      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}
       <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
     return;
   }
