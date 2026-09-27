@@ -1,0 +1,5171 @@
+{
+ "generated_at": "2026-09-27T21:46:10.394Z",
+ "source": "en.wikipedia.org exturlusage (candidates only, never a mapping)",
+ "count": 520,
+ "candidates": [
+  {
+   "atp_id": "59",
+   "slugs": [
+    "salinas"
+   ],
+   "sample_pages": [
+    "Challenger de Salinas"
+   ]
+  },
+  {
+   "atp_id": "83",
+   "slugs": [
+    "eckental"
+   ],
+   "sample_pages": [
+    "2019 Challenger Eckental – Doubles"
+   ]
+  },
+  {
+   "atp_id": "206",
+   "slugs": [
+    "cairo"
+   ],
+   "sample_pages": [
+    "Egyptian Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "213",
+   "slugs": [
+    "san-luis-potosi"
+   ],
+   "sample_pages": [
+    "2023 San Luis Open Challenger",
+    "San Luis Open (tennis)",
+    "2024 San Luis Open Challenger",
+    "2025 San Luis Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "230",
+   "slugs": [
+    "messina"
+   ],
+   "sample_pages": [
+    "International Tennis Tournament of Messina"
+   ]
+  },
+  {
+   "atp_id": "246",
+   "slugs": [
+    "lee-on-solent"
+   ],
+   "sample_pages": [
+    "Lee-on-Solent Open"
+   ]
+  },
+  {
+   "atp_id": "247",
+   "slugs": [
+    "bielefeld"
+   ],
+   "sample_pages": [
+    "Bielefeld Challenger"
+   ]
+  },
+  {
+   "atp_id": "249",
+   "slugs": [
+    "angers"
+   ],
+   "sample_pages": [
+    "Travemünde Challenger"
+   ]
+  },
+  {
+   "atp_id": "278",
+   "slugs": [
+    "barcelona",
+    "barcelona-2"
+   ],
+   "sample_pages": [
+    "ATP Barcelona (1973–1976)"
+   ]
+  },
+  {
+   "atp_id": "301",
+   "slugs": [
+    "auckland",
+    "-"
+   ],
+   "sample_pages": [
+    "2019 ASB Classic – Men's doubles",
+    "2020 ASB Classic",
+    "ATP Auckland Open",
+    "1973 New Zealand Open",
+    "1972 New Zealand Open"
+   ]
+  },
+  {
+   "atp_id": "308",
+   "slugs": [
+    "munich"
+   ],
+   "sample_pages": [
+    "2019 BMW Open",
+    "Bavarian International Tennis Championships",
+    "1976 Romika Cup",
+    "1975 Bavarian Tennis Championships",
+    "1974 Bavarian Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "309",
+   "slugs": [
+    "madrid"
+   ],
+   "sample_pages": [
+    "Madrid Tennis Grand Prix",
+    "Madrid International"
+   ]
+  },
+  {
+   "atp_id": "311",
+   "slugs": [
+    "london"
+   ],
+   "sample_pages": [
+    "1968 Queen's Club Championships",
+    "1969 Queen's Club Championships",
+    "1970 Queen's Club Championships",
+    "1971 Queen's Club Championships",
+    "1972 Queen's Club Championships"
+   ]
+  },
+  {
+   "atp_id": "312",
+   "slugs": [
+    "bologna"
+   ],
+   "sample_pages": [
+    "Bologna Indoor",
+    "1971 Rothmans Open",
+    "1974 Astor Cup",
+    "1975 WCT International",
+    "1978 Italian Indoor Open"
+   ]
+  },
+  {
+   "atp_id": "314",
+   "slugs": [
+    "gstaad"
+   ],
+   "sample_pages": [
+    "2021 Swiss Open Gstaad",
+    "2022 Swiss Open Gstaad",
+    "1975 Suisse Open Gstaad",
+    "2023 Swiss Open Gstaad",
+    "1977 Swiss Open Championships"
+   ]
+  },
+  {
+   "atp_id": "315",
+   "slugs": [
+    "newport"
+   ],
+   "sample_pages": [
+    "2019 Hall of Fame Open",
+    "2021 Hall of Fame Open",
+    "2021 Hall of Fame Open – Singles",
+    "2022 Hall of Fame Open",
+    "2023 Hall of Fame Open"
+   ]
+  },
+  {
+   "atp_id": "316",
+   "slugs": [
+    "bastad"
+   ],
+   "sample_pages": [
+    "2019 Swedish Open",
+    "2000 Wideyes Swedish Open",
+    "2001 Telenordia Swedish Open",
+    "2002 Swedish Open",
+    "2003 Synsam Swedish Open"
+   ]
+  },
+  {
+   "atp_id": "319",
+   "slugs": [
+    "kitzbuhel"
+   ],
+   "sample_pages": [
+    "2005 Austrian Open",
+    "2008 Austrian Open (tennis)",
+    "2024 Generali Open Kitzbühel",
+    "2020 Generali Open Kitzbühel",
+    "2025 Generali Open Kitzbühel"
+   ]
+  },
+  {
+   "atp_id": "320",
+   "slugs": [
+    "tel-aviv"
+   ],
+   "sample_pages": [
+    "Tel Aviv Open"
+   ]
+  },
+  {
+   "atp_id": "321",
+   "slugs": [
+    "stuttgart"
+   ],
+   "sample_pages": [
+    "2022 BOSS Open",
+    "2023 BOSS Open",
+    "1989 Mercedes Cup – Doubles",
+    "2019 MercedesCup",
+    "2018 MercedesCup"
+   ]
+  },
+  {
+   "atp_id": "322",
+   "slugs": [
+    "geneva"
+   ],
+   "sample_pages": [
+    "2019 Geneva Open – Doubles",
+    "Geneva Open",
+    "2025 Geneva Open",
+    "2026 Geneva Open"
+   ]
+  },
+  {
+   "atp_id": "328",
+   "slugs": [
+    "basel"
+   ],
+   "sample_pages": [
+    "Swiss Indoors",
+    "Sport in Switzerland",
+    "2022 Swiss Indoors",
+    "2019 Swiss Indoors",
+    "2023 Swiss Indoors"
+   ]
+  },
+  {
+   "atp_id": "329",
+   "slugs": [
+    "tokyo",
+    "-"
+   ],
+   "sample_pages": [
+    "2019 Rakuten Japan Open Tennis Championships",
+    "2022 Rakuten Japan Open Tennis Championships",
+    "2023 Japan Open Tennis Championships",
+    "Japan Open (tennis)",
+    "1988 Suntory Japan Open Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "330",
+   "slugs": [
+    "tel-aviv"
+   ],
+   "sample_pages": [
+    "Tel Aviv Open"
+   ]
+  },
+  {
+   "atp_id": "336",
+   "slugs": [
+    "hong-kong"
+   ],
+   "sample_pages": [
+    "2024 ATP Hong Kong Tennis Open",
+    "2025 ATP Hong Kong Tennis Open",
+    "2026 ATP Hong Kong Tennis Open"
+   ]
+  },
+  {
+   "atp_id": "337",
+   "slugs": [
+    "vienna"
+   ],
+   "sample_pages": [
+    "Andrey Rublev",
+    "1974 Stadthalle Open",
+    "1976 Fischer-Grand Prix",
+    "1977 Fischer-Grand Prix",
+    "1978 Fischer-Grand Prix"
+   ]
+  },
+  {
+   "atp_id": "338",
+   "slugs": [
+    "sydney"
+   ],
+   "sample_pages": [
+    "Tennis Australia",
+    "1976 Marlboro NSW Open",
+    "1995 Peters International",
+    "Sydney International",
+    "1996 Peters International"
+   ]
+  },
+  {
+   "atp_id": "339",
+   "slugs": [
+    "brisbane"
+   ],
+   "sample_pages": [
+    "Brisbane International",
+    "2026 Brisbane International"
+   ]
+  },
+  {
+   "atp_id": "341",
+   "slugs": [
+    "metz"
+   ],
+   "sample_pages": [
+    "2019 Moselle Open",
+    "2021 Moselle Open",
+    "2022 Moselle Open",
+    "2023 Moselle Open",
+    "2024 Moselle Open"
+   ]
+  },
+  {
+   "atp_id": "344",
+   "slugs": [
+    "caracas"
+   ],
+   "sample_pages": [
+    "Cacharel Caracas Open"
+   ]
+  },
+  {
+   "atp_id": "348",
+   "slugs": [
+    "ostrava"
+   ],
+   "sample_pages": [
+    "ATP Bolzano",
+    "European Indoor Championships",
+    "Frankfurt Cup",
+    "Frankfurt Grand Prix (tennis)",
+    "IPB Czech Indoor"
+   ]
+  },
+  {
+   "atp_id": "352",
+   "slugs": [
+    "paris"
+   ],
+   "sample_pages": [
+    "2019 Rolex Paris Masters – Singles",
+    "2020 Rolex Paris Masters – Singles",
+    "1968 French Covered Court Championships",
+    "1999 Paris Open",
+    "1970 Paris Open"
+   ]
+  },
+  {
+   "atp_id": "355",
+   "slugs": [
+    "salisbury"
+   ],
+   "sample_pages": [
+    "1971 U.S. National Indoor Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "357",
+   "slugs": [
+    "stuttgart"
+   ],
+   "sample_pages": [
+    "Eurocard Open",
+    "1999 Eurocard Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "360",
+   "slugs": [
+    "marrakech"
+   ],
+   "sample_pages": [
+    "Grand Prix Hassan II",
+    "1990 Casablanca Open",
+    "1992 Grand Prix Hassan II",
+    "1993 Grand Prix Hassan II",
+    "1995 Grand Prix Hassan II"
+   ]
+  },
+  {
+   "atp_id": "363",
+   "slugs": [
+    "knoxville"
+   ],
+   "sample_pages": [
+    "Knoxville Challenger"
+   ]
+  },
+  {
+   "atp_id": "375",
+   "slugs": [
+    "montpellier"
+   ],
+   "sample_pages": [
+    "2019 Open Sud de France",
+    "2020 Open Sud de France",
+    "2021 Open Sud de France",
+    "2022 Open Sud de France",
+    "Open Sud de France"
+   ]
+  },
+  {
+   "atp_id": "398",
+   "slugs": [
+    "cherbourg"
+   ],
+   "sample_pages": [
+    "Challenger La Manche"
+   ]
+  },
+  {
+   "atp_id": "403",
+   "slugs": [
+    "miami"
+   ],
+   "sample_pages": [
+    "2022 Miami Open",
+    "Miami Open (tennis)",
+    "2023 Miami Open",
+    "2024 Miami Open",
+    "1996 Lipton Championships"
+   ]
+  },
+  {
+   "atp_id": "404",
+   "slugs": [
+    "indian-wells"
+   ],
+   "sample_pages": [
+    "2020 BNP Paribas Open",
+    "Indian Wells Open",
+    "1979 Congoleum Classic",
+    "1978 American Airlines Tennis Games",
+    "1977 American Airlines Tennis Games"
+   ]
+  },
+  {
+   "atp_id": "407",
+   "slugs": [
+    "rotterdam"
+   ],
+   "sample_pages": [
+    "2019 ABN AMRO World Tennis Tournament",
+    "2020 ABN AMRO World Tennis Tournament",
+    "2021 ABN AMRO World Tennis Tournament",
+    "Rotterdam Open",
+    "2022 ABN AMRO Rotterdam"
+   ]
+  },
+  {
+   "atp_id": "410",
+   "slugs": [
+    "monte-carlo"
+   ],
+   "sample_pages": [
+    "2019 Monte-Carlo Masters",
+    "2021 Monte-Carlo Masters",
+    "2022 Monte-Carlo Masters",
+    "1969 Monte Carlo Open",
+    "2023 Monte-Carlo Masters"
+   ]
+  },
+  {
+   "atp_id": "411",
+   "slugs": [
+    "chicago"
+   ],
+   "sample_pages": [
+    "Chicago Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "412",
+   "slugs": [
+    "atlanta"
+   ],
+   "sample_pages": [
+    "WCT Atlanta Championships"
+   ]
+  },
+  {
+   "atp_id": "414",
+   "slugs": [
+    "hamburg"
+   ],
+   "sample_pages": [
+    "2019 Hamburg European Open",
+    "Hamburg Open",
+    "1985 Grand Prix German Open (tennis)",
+    "1984 Ebel German Open",
+    "1983 German Open"
+   ]
+  },
+  {
+   "atp_id": "416",
+   "slugs": [
+    "rome"
+   ],
+   "sample_pages": [
+    "Italian Open (tennis)",
+    "1986 Italian Open (tennis)",
+    "2023 Italian Open (tennis)",
+    "1996 Italian Open (tennis)",
+    "2024 Italian Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "418",
+   "slugs": [
+    "washington"
+   ],
+   "sample_pages": [
+    "2019 Citi Open",
+    "1976 Washington Star International",
+    "2021 Citi Open",
+    "1969 Washington Star International",
+    "1970 Washington Star International"
+   ]
+  },
+  {
+   "atp_id": "421",
+   "slugs": [
+    "montreal",
+    "toronto"
+   ],
+   "sample_pages": [
+    "2019 Rogers Cup – Men's singles",
+    "2021 National Bank Open",
+    "Canadian Open (tennis)",
+    "2022 National Bank Open",
+    "2023 National Bank Open"
+   ]
+  },
+  {
+   "atp_id": "422",
+   "slugs": [
+    "cincinnati",
+    "new-york"
+   ],
+   "sample_pages": [
+    "2019 Western & Southern Open – Men's singles",
+    "1993 Thriftway ATP Championships",
+    "1999 Great American Insurance ATP Championships",
+    "1974 Western Championships",
+    "1970 Western Championships"
+   ]
+  },
+  {
+   "atp_id": "424",
+   "slugs": [
+    "new-york",
+    "dallas"
+   ],
+   "sample_pages": [
+    "2020 New York Open",
+    "2022 Dallas Open",
+    "Dallas Open (2022)",
+    "2023 Dallas Open",
+    "2024 Dallas Open"
+   ]
+  },
+  {
+   "atp_id": "425",
+   "slugs": [
+    "barcelona"
+   ],
+   "sample_pages": [
+    "1982 Torneo Godó",
+    "1983 Torneo Godó",
+    "1984 Torneo Godó",
+    "1986 Torneo Godó",
+    "2022 Barcelona Open Banc Sabadell"
+   ]
+  },
+  {
+   "atp_id": "429",
+   "slugs": [
+    "stockholm"
+   ],
+   "sample_pages": [
+    "Stockholm Open",
+    "1995 Stockholm Open",
+    "1978 Stockholm Open",
+    "1979 Stockholm Open",
+    "1980 Stockholm Open"
+   ]
+  },
+  {
+   "atp_id": "434",
+   "slugs": [
+    "seoul"
+   ],
+   "sample_pages": [
+    "Seoul Open"
+   ]
+  },
+  {
+   "atp_id": "438",
+   "slugs": [
+    "moscow"
+   ],
+   "sample_pages": [
+    "2019 Kremlin Cup",
+    "2021 Kremlin Cup",
+    "Kremlin Cup"
+   ]
+  },
+  {
+   "atp_id": "439",
+   "slugs": [
+    "umag"
+   ],
+   "sample_pages": [
+    "2019 Croatia Open Umag",
+    "2021 Croatia Open Umag",
+    "2022 Croatia Open Umag",
+    "2002 Croatia Open",
+    "2003 Croatia Open"
+   ]
+  },
+  {
+   "atp_id": "440",
+   "slugs": [
+    "libema-open"
+   ],
+   "sample_pages": [
+    "Rosmalen Grass Court Championships"
+   ]
+  },
+  {
+   "atp_id": "441",
+   "slugs": [
+    "new-haven"
+   ],
+   "sample_pages": [
+    "Connecticut Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "444",
+   "slugs": [
+    "bratislava-2"
+   ],
+   "sample_pages": [
+    "Slovak Open"
+   ]
+  },
+  {
+   "atp_id": "446",
+   "slugs": [
+    "freudenstadt"
+   ],
+   "sample_pages": [
+    "Black Forest Open"
+   ]
+  },
+  {
+   "atp_id": "448",
+   "slugs": [
+    "szczecin"
+   ],
+   "sample_pages": [
+    "Szczecin Open"
+   ]
+  },
+  {
+   "atp_id": "451",
+   "slugs": [
+    "doha"
+   ],
+   "sample_pages": [
+    "2020 Qatar ExxonMobil Open",
+    "2021 Qatar ExxonMobil Open",
+    "2022 Qatar ExxonMobil Open",
+    "ATP Qatar Open",
+    "1993 Qatar Open"
+   ]
+  },
+  {
+   "atp_id": "460",
+   "slugs": [
+    "heilbronn",
+    "heilbronn--bad-rappenau"
+   ],
+   "sample_pages": [
+    "2021 Heilbronner Neckarcup",
+    "2022 Heilbronner Neckarcup",
+    "2023 Heilbronner Neckarcup",
+    "2024 Heilbronner Neckarcup",
+    "Heilbronner Neckarcup"
+   ]
+  },
+  {
+   "atp_id": "469",
+   "slugs": [
+    "lugano"
+   ],
+   "sample_pages": [
+    "BSI Challenger Lugano"
+   ]
+  },
+  {
+   "atp_id": "472",
+   "slugs": [
+    "pozoblanco"
+   ],
+   "sample_pages": [
+    "Open de Tenis Ciudad de Pozoblanco"
+   ]
+  },
+  {
+   "atp_id": "495",
+   "slugs": [
+    "dubai"
+   ],
+   "sample_pages": [
+    "2019 Dubai Tennis Championships",
+    "2020 Dubai Tennis Championships",
+    "2021 Dubai Tennis Championships",
+    "2022 Dubai Tennis Championships",
+    "2023 Dubai Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "496",
+   "slugs": [
+    "marseille"
+   ],
+   "sample_pages": [
+    "2019 Open 13 Provence",
+    "2020 Open 13 Provence",
+    "2021 Open 13 Provence",
+    "2022 Open 13 Provence",
+    "2023 Open 13 Provence"
+   ]
+  },
+  {
+   "atp_id": "499",
+   "slugs": [
+    "delray-beach"
+   ],
+   "sample_pages": [
+    "2019 Delray Beach Open",
+    "2020 Delray Beach Open",
+    "2021 Delray Beach Open",
+    "2022 Delray Beach Open",
+    "2023 Delray Beach Open"
+   ]
+  },
+  {
+   "atp_id": "500",
+   "slugs": [
+    "halle"
+   ],
+   "sample_pages": [
+    "2019 Halle Open",
+    "2021 Halle Open",
+    "2022 Halle Open",
+    "2023 Halle Open",
+    "Halle Open"
+   ]
+  },
+  {
+   "atp_id": "504",
+   "slugs": [
+    "wolfsburg"
+   ],
+   "sample_pages": [
+    "Volkswagen Challenger"
+   ]
+  },
+  {
+   "atp_id": "505",
+   "slugs": [
+    "vina-del-mar"
+   ],
+   "sample_pages": [
+    "2004 BellSouth Open",
+    "2003 BellSouth Open",
+    "2002 BellSouth Open",
+    "2001 Chevrolet Cup",
+    "2005 Movistar Open"
+   ]
+  },
+  {
+   "atp_id": "506",
+   "slugs": [
+    "buenos-aires"
+   ],
+   "sample_pages": [
+    "2019 Argentina Open",
+    "2020 Argentina Open",
+    "1973 South American Open",
+    "2021 Argentina Open",
+    "1972 South American Open"
+   ]
+  },
+  {
+   "atp_id": "517",
+   "slugs": [
+    "oahu"
+   ],
+   "sample_pages": [
+    "Oahu Open"
+   ]
+  },
+  {
+   "atp_id": "520",
+   "slugs": [
+    "roland-garros"
+   ],
+   "sample_pages": [
+    "2022 French Open – Men's singles",
+    "2022 French Open",
+    "Hugo Gaston",
+    "2023 French Open",
+    "2025 French Open – Day-by-day summaries"
+   ]
+  },
+  {
+   "atp_id": "526",
+   "slugs": [
+    "braunschweig"
+   ],
+   "sample_pages": [
+    "Brawo Open"
+   ]
+  },
+  {
+   "atp_id": "533",
+   "slugs": [
+    "sao-paulo"
+   ],
+   "sample_pages": [
+    "2019 Brasil Open",
+    "Brasil Open"
+   ]
+  },
+  {
+   "atp_id": "544",
+   "slugs": [
+    "montevideo"
+   ],
+   "sample_pages": [
+    "2021 Uruguay Open",
+    "Uruguay Open"
+   ]
+  },
+  {
+   "atp_id": "558",
+   "slugs": [
+    "prostejov"
+   ],
+   "sample_pages": [
+    "Czech Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "560",
+   "slugs": [
+    "us-open"
+   ],
+   "sample_pages": [
+    "2026 US Open (tennis)",
+    "2026 US Open – Men's singles"
+   ]
+  },
+  {
+   "atp_id": "568",
+   "slugs": [
+    "st-petersburg"
+   ],
+   "sample_pages": [
+    "St. Petersburg Open",
+    "1995 St. Petersburg Open",
+    "1996 St. Petersburg Open",
+    "1997 St. Petersburg Open",
+    "2020 St. Petersburg Open"
+   ]
+  },
+  {
+   "atp_id": "573",
+   "slugs": [
+    "valencia"
+   ],
+   "sample_pages": [
+    "Valencia Open"
+   ]
+  },
+  {
+   "atp_id": "574",
+   "slugs": [
+    "waikoloa"
+   ],
+   "sample_pages": [
+    "Hilton Waikoloa Village USTA Challenger"
+   ]
+  },
+  {
+   "atp_id": "580",
+   "slugs": [
+    "australian-open"
+   ],
+   "sample_pages": [
+    "Lucas Pouille"
+   ]
+  },
+  {
+   "atp_id": "586",
+   "slugs": [
+    "lexington"
+   ],
+   "sample_pages": [
+    "2022 Lexington Challenger",
+    "Lexington Open"
+   ]
+  },
+  {
+   "atp_id": "600",
+   "slugs": [
+    "prague"
+   ],
+   "sample_pages": [
+    "2022 I.ČLTK Prague Open",
+    "I.ČLTK Prague Open"
+   ]
+  },
+  {
+   "atp_id": "603",
+   "slugs": [
+    "fergana"
+   ],
+   "sample_pages": [
+    "Fergana Challenger"
+   ]
+  },
+  {
+   "atp_id": "605",
+   "slugs": [
+    "nitto-atp-finals"
+   ],
+   "sample_pages": [
+    "2021 ATP Finals",
+    "2022 ATP Finals",
+    "2023 ATP Finals",
+    "2024 ATP Finals",
+    "ATP Finals"
+   ]
+  },
+  {
+   "atp_id": "615",
+   "slugs": [
+    "-"
+   ],
+   "sample_pages": [
+    "World Team Cup"
+   ]
+  },
+  {
+   "atp_id": "637",
+   "slugs": [
+    "champaign"
+   ],
+   "sample_pages": [
+    "Champaign–Urbana Challenger"
+   ]
+  },
+  {
+   "atp_id": "656",
+   "slugs": [
+    "calabasas"
+   ],
+   "sample_pages": [
+    "Calabasas Pro Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "681",
+   "slugs": [
+    "north-miami-beach"
+   ],
+   "sample_pages": [
+    "Miami Grand Prix (tennis)"
+   ]
+  },
+  {
+   "atp_id": "692",
+   "slugs": [
+    "tallahassee"
+   ],
+   "sample_pages": [
+    "Tallahassee Tennis Challenger",
+    "Jeff Salzenstein"
+   ]
+  },
+  {
+   "atp_id": "717",
+   "slugs": [
+    "houston",
+    "pinehurst"
+   ],
+   "sample_pages": [
+    "U.S. Men's Clay Court Championships",
+    "2023 U.S. Men's Clay Court Championships",
+    "2024 U.S. Men's Clay Court Championships",
+    "1995 U.S. Men's Clay Court Championships",
+    "1991 U.S. Men's Clay Court Championships"
+   ]
+  },
+  {
+   "atp_id": "741",
+   "slugs": [
+    "eastbourne"
+   ],
+   "sample_pages": [
+    "2019 Eastbourne International",
+    "2021 Eastbourne International",
+    "2022 Eastbourne International",
+    "2023 Eastbourne International",
+    "2024 Eastbourne International"
+   ]
+  },
+  {
+   "atp_id": "747",
+   "slugs": [
+    "beijing"
+   ],
+   "sample_pages": [
+    "2019 China Open (tennis)",
+    "2023 China Open (tennis)",
+    "2024 China Open (tennis)",
+    "China Open (tennis)",
+    "1994 Salem Open-Beijing"
+   ]
+  },
+  {
+   "atp_id": "784",
+   "slugs": [
+    "seville"
+   ],
+   "sample_pages": [
+    "Copa Sevilla"
+   ]
+  },
+  {
+   "atp_id": "786",
+   "slugs": [
+    "poznan"
+   ],
+   "sample_pages": [
+    "Poznań Open"
+   ]
+  },
+  {
+   "atp_id": "807",
+   "slugs": [
+    "acapulco"
+   ],
+   "sample_pages": [
+    "2019 Abierto Mexicano Telcel",
+    "2020 Abierto Mexicano Telcel",
+    "2021 Abierto Mexicano Telcel",
+    "2022 Abierto Mexicano Telcel",
+    "2023 Abierto Mexicano Telcel"
+   ]
+  },
+  {
+   "atp_id": "849",
+   "slugs": [
+    "campos-do-jordao"
+   ],
+   "sample_pages": [
+    "2011 MasterCard Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "853",
+   "slugs": [
+    "kosice"
+   ],
+   "sample_pages": [
+    "Košice Open"
+   ]
+  },
+  {
+   "atp_id": "854",
+   "slugs": [
+    "bergamo"
+   ],
+   "sample_pages": [
+    "2020 Trofeo Faip–Perrel – Doubles",
+    "Trofeo Faip–Perrel"
+   ]
+  },
+  {
+   "atp_id": "877",
+   "slugs": [
+    "granby"
+   ],
+   "sample_pages": [
+    "2024 Championnats Banque Nationale de Granby",
+    "Championnats de Granby"
+   ]
+  },
+  {
+   "atp_id": "891",
+   "slugs": [
+    "pune"
+   ],
+   "sample_pages": [
+    "2020 Tata Open Maharashtra",
+    "2022 Tata Open Maharashtra",
+    "Maharashtra"
+   ]
+  },
+  {
+   "atp_id": "1202",
+   "slugs": [
+    "coquimbo"
+   ],
+   "sample_pages": [
+    "Challenger Coquimbo"
+   ]
+  },
+  {
+   "atp_id": "1210",
+   "slugs": [
+    "buenos-aires"
+   ],
+   "sample_pages": [
+    "Challenger Tenis Club Argentino"
+   ]
+  },
+  {
+   "atp_id": "1214",
+   "slugs": [
+    "troyes"
+   ],
+   "sample_pages": [
+    "Internationaux de Tennis de Troyes"
+   ]
+  },
+  {
+   "atp_id": "1536",
+   "slugs": [
+    "madrid"
+   ],
+   "sample_pages": [
+    "2022 Mutua Madrid Open",
+    "Madrid Open (tennis)",
+    "2023 Mutua Madrid Open",
+    "2024 Mutua Madrid Open",
+    "2025 Mutua Madrid Open"
+   ]
+  },
+  {
+   "atp_id": "1539",
+   "slugs": [
+    "leon"
+   ],
+   "sample_pages": [
+    "2019 Torneo Internacional Challenger León"
+   ]
+  },
+  {
+   "atp_id": "1541",
+   "slugs": [
+    "tunis"
+   ],
+   "sample_pages": [
+    "Tunis Open"
+   ]
+  },
+  {
+   "atp_id": "1604",
+   "slugs": [
+    "trani"
+   ],
+   "sample_pages": [
+    "Trani Cup"
+   ]
+  },
+  {
+   "atp_id": "1606",
+   "slugs": [
+    "donetsk"
+   ],
+   "sample_pages": [
+    "Alexander Kolyaskin Memorial"
+   ]
+  },
+  {
+   "atp_id": "1607",
+   "slugs": [
+    "banja-luka"
+   ],
+   "sample_pages": [
+    "Banja Luka Challenger"
+   ]
+  },
+  {
+   "atp_id": "1741",
+   "slugs": [
+    "busan"
+   ],
+   "sample_pages": [
+    "Busan Open"
+   ]
+  },
+  {
+   "atp_id": "1763",
+   "slugs": [
+    "genoa"
+   ],
+   "sample_pages": [
+    "AON Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "1768",
+   "slugs": [
+    "tiburon"
+   ],
+   "sample_pages": [
+    "Tiburon Challenger"
+   ]
+  },
+  {
+   "atp_id": "1780",
+   "slugs": [
+    "dnepropetrovsk"
+   ],
+   "sample_pages": [
+    "PEOPLEnet Cup"
+   ]
+  },
+  {
+   "atp_id": "1796",
+   "slugs": [
+    "st-brieuc"
+   ],
+   "sample_pages": [
+    "Open Saint-Brieuc"
+   ]
+  },
+  {
+   "atp_id": "1797",
+   "slugs": [
+    "ostrava"
+   ],
+   "sample_pages": [
+    "Prosperita Open"
+   ]
+  },
+  {
+   "atp_id": "2026",
+   "slugs": [
+    "madrid-1"
+   ],
+   "sample_pages": [
+    "Madrid International"
+   ]
+  },
+  {
+   "atp_id": "2036",
+   "slugs": [
+    "omaha"
+   ],
+   "sample_pages": [
+    "Omaha Open",
+    "1971 Midlands International"
+   ]
+  },
+  {
+   "atp_id": "2038",
+   "slugs": [
+    "calgary"
+   ],
+   "sample_pages": [
+    "1973 Canadian Indoor Championships",
+    "1974 Canadian Indoor Championships"
+   ]
+  },
+  {
+   "atp_id": "2043",
+   "slugs": [
+    "dobrich",
+    "sofia"
+   ],
+   "sample_pages": [
+    "2024 Dobrich Challenger – Singles",
+    "2024 Dobrich Challenger – Doubles",
+    "Dobrich Challenger"
+   ]
+  },
+  {
+   "atp_id": "2058",
+   "slugs": [
+    "new-york"
+   ],
+   "sample_pages": [
+    "Arthur Ashe",
+    "Madison Square Garden Open Tennis Championship",
+    "Clean Air Classic"
+   ]
+  },
+  {
+   "atp_id": "2066",
+   "slugs": [
+    "macon"
+   ],
+   "sample_pages": [
+    "1971 Macon International"
+   ]
+  },
+  {
+   "atp_id": "2120",
+   "slugs": [
+    "cordenons"
+   ],
+   "sample_pages": [
+    "2022 Internazionali di Tennis del Friuli Venezia Giulia",
+    "Internazionali di Tennis del Friuli Venezia Giulia"
+   ]
+  },
+  {
+   "atp_id": "2121",
+   "slugs": [
+    "manta"
+   ],
+   "sample_pages": [
+    "Manta Open"
+   ]
+  },
+  {
+   "atp_id": "2150",
+   "slugs": [
+    "dubrovnik"
+   ],
+   "sample_pages": [
+    "Dubrovnik Challenger"
+   ]
+  },
+  {
+   "atp_id": "2151",
+   "slugs": [
+    "rome"
+   ],
+   "sample_pages": [
+    "Garden Open"
+   ]
+  },
+  {
+   "atp_id": "2205",
+   "slugs": [
+    "noumea"
+   ],
+   "sample_pages": [
+    "2020 BNP Paribas de Nouvelle-Calédonie – Doubles",
+    "Open Nouvelle-Calédonie"
+   ]
+  },
+  {
+   "atp_id": "2207",
+   "slugs": [
+    "sunrise"
+   ],
+   "sample_pages": [
+    "BMW Tennis Championship"
+   ]
+  },
+  {
+   "atp_id": "2208",
+   "slugs": [
+    "monza"
+   ],
+   "sample_pages": [
+    "Internazionali di Monza e Brianza"
+   ]
+  },
+  {
+   "atp_id": "2273",
+   "slugs": [
+    "orleans"
+   ],
+   "sample_pages": [
+    "Open d'Orléans"
+   ]
+  },
+  {
+   "atp_id": "2276",
+   "slugs": [
+    "zagreb"
+   ],
+   "sample_pages": [
+    "2006 PBZ Zagreb Indoors",
+    "2007 PBZ Zagreb Indoors",
+    "Zagreb Indoors"
+   ]
+  },
+  {
+   "atp_id": "2278",
+   "slugs": [
+    "taipei"
+   ],
+   "sample_pages": [
+    "2017 Santaizi ATP Challenger – Singles",
+    "2017 Santaizi ATP Challenger – Doubles",
+    "2018 Santaizi ATP Challenger – Singles",
+    "2018 Santaizi ATP Challenger – Doubles",
+    "Santaizi ATP Challenger"
+   ]
+  },
+  {
+   "atp_id": "2785",
+   "slugs": [
+    "zug"
+   ],
+   "sample_pages": [
+    "Zug Open"
+   ]
+  },
+  {
+   "atp_id": "2787",
+   "slugs": [
+    "lima"
+   ],
+   "sample_pages": [
+    "Lima Challenger"
+   ]
+  },
+  {
+   "atp_id": "2789",
+   "slugs": [
+    "grodzisk-mazowiecki"
+   ],
+   "sample_pages": [
+    "2022 Kozerki Open – Singles",
+    "2022 Kozerki Open – Doubles",
+    "Kozerki Open"
+   ]
+  },
+  {
+   "atp_id": "2791",
+   "slugs": [
+    "nonthaburi"
+   ],
+   "sample_pages": [
+    "2022 Nonthaburi Challenger – Singles",
+    "2022 Nonthaburi Challenger – Doubles",
+    "2022 Nonthaburi Challenger II – Doubles",
+    "2025 Nonthaburi Challenger",
+    "Nonthaburi Challenger"
+   ]
+  },
+  {
+   "atp_id": "2795",
+   "slugs": [
+    "nonthaburi"
+   ],
+   "sample_pages": [
+    "2025 Nonthaburi Challenger II",
+    "Nonthaburi Challenger"
+   ]
+  },
+  {
+   "atp_id": "2797",
+   "slugs": [
+    "chicago"
+   ],
+   "sample_pages": [
+    "Chicago Men's Challenger"
+   ]
+  },
+  {
+   "atp_id": "2803",
+   "slugs": [
+    "charleston"
+   ],
+   "sample_pages": [
+    "LTP Men's Open"
+   ]
+  },
+  {
+   "atp_id": "2805",
+   "slugs": [
+    "florence"
+   ],
+   "sample_pages": [
+    "2022 Firenze Open"
+   ]
+  },
+  {
+   "atp_id": "2807",
+   "slugs": [
+    "gijon"
+   ],
+   "sample_pages": [
+    "2022 Gijón Open",
+    "Gijón Open"
+   ]
+  },
+  {
+   "atp_id": "2809",
+   "slugs": [
+    "naples"
+   ],
+   "sample_pages": [
+    "2022 Tennis Napoli Cup",
+    "Napoli Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "2811",
+   "slugs": [
+    "villa-maria"
+   ],
+   "sample_pages": [
+    "Challenger de Villa María"
+   ]
+  },
+  {
+   "atp_id": "2813",
+   "slugs": [
+    "rio-de-janeiro"
+   ],
+   "sample_pages": [
+    "2022 Challenger Rio de Janeiro – Singles",
+    "2022 Challenger Rio de Janeiro – Doubles",
+    "Challenger Rio de Janeiro"
+   ]
+  },
+  {
+   "atp_id": "2815",
+   "slugs": [
+    "vilnius"
+   ],
+   "sample_pages": [
+    "Vilnius Open"
+   ]
+  },
+  {
+   "atp_id": "2817",
+   "slugs": [
+    "sydney"
+   ],
+   "sample_pages": [
+    "NSW Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "2821",
+   "slugs": [
+    "sao-leopoldo"
+   ],
+   "sample_pages": [
+    "São Léo Open"
+   ]
+  },
+  {
+   "atp_id": "2823",
+   "slugs": [
+    "valencia"
+   ],
+   "sample_pages": [
+    "Copa Faulconbridge"
+   ]
+  },
+  {
+   "atp_id": "2827",
+   "slugs": [
+    "szekesfehervar"
+   ],
+   "sample_pages": [
+    "2023 Kiskút Open – Doubles",
+    "2023 Kiskút Open – Singles"
+   ]
+  },
+  {
+   "atp_id": "2829",
+   "slugs": [
+    "temuco"
+   ],
+   "sample_pages": [
+    "Challenger Temuco"
+   ]
+  },
+  {
+   "atp_id": "2831",
+   "slugs": [
+    "oeiras"
+   ],
+   "sample_pages": [
+    "Oeiras Indoors",
+    "2023 Oeiras Indoors – Doubles",
+    "2023 Oeiras Indoors – Singles"
+   ]
+  },
+  {
+   "atp_id": "2833",
+   "slugs": [
+    "oeiras"
+   ],
+   "sample_pages": [
+    "Oeiras Indoors"
+   ]
+  },
+  {
+   "atp_id": "2835",
+   "slugs": [
+    "piracicaba"
+   ],
+   "sample_pages": [
+    "Piracicaba Challenger"
+   ]
+  },
+  {
+   "atp_id": "2837",
+   "slugs": [
+    "ottignies-louvain-la-neuve"
+   ],
+   "sample_pages": [
+    "BW Open"
+   ]
+  },
+  {
+   "atp_id": "2841",
+   "slugs": [
+    "banja-luka"
+   ],
+   "sample_pages": [
+    "2023 Srpska Open",
+    "2023 Srpska Open – Doubles",
+    "Srpska Open"
+   ]
+  },
+  {
+   "atp_id": "2843",
+   "slugs": [
+    "adelaide"
+   ],
+   "sample_pages": [
+    "2023 Adelaide International 1"
+   ]
+  },
+  {
+   "atp_id": "2845",
+   "slugs": [
+    "vilnius"
+   ],
+   "sample_pages": [
+    "Vitas Gerulaitis Cup"
+   ]
+  },
+  {
+   "atp_id": "2849",
+   "slugs": [
+    "rovereto"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Rovereto"
+   ]
+  },
+  {
+   "atp_id": "2851",
+   "slugs": [
+    "vina-del-mar"
+   ],
+   "sample_pages": [
+    "Viña Challenger"
+   ]
+  },
+  {
+   "atp_id": "2855",
+   "slugs": [
+    "girona"
+   ],
+   "sample_pages": [
+    "Girona Challenger",
+    "2023 Girona Challenger – Singles",
+    "2023 Girona Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2857",
+   "slugs": [
+    "waco"
+   ],
+   "sample_pages": [
+    "Texas Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "2861",
+   "slugs": [
+    "cagliari"
+   ],
+   "sample_pages": [
+    "Sardegna Open"
+   ]
+  },
+  {
+   "atp_id": "2863",
+   "slugs": [
+    "turin"
+   ],
+   "sample_pages": [
+    "Piemonte Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "2867",
+   "slugs": [
+    "acapulco"
+   ],
+   "sample_pages": [
+    "León Challenger"
+   ]
+  },
+  {
+   "atp_id": "2869",
+   "slugs": [
+    "skopje"
+   ],
+   "sample_pages": [
+    "Macedonian Open"
+   ]
+  },
+  {
+   "atp_id": "2871",
+   "slugs": [
+    "oeiras"
+   ],
+   "sample_pages": [
+    "Open de Oeiras"
+   ]
+  },
+  {
+   "atp_id": "2873",
+   "slugs": [
+    "tyler"
+   ],
+   "sample_pages": [
+    "Tyler Tennis Championships",
+    "2023 Tyler Tennis Championships – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2875",
+   "slugs": [
+    "palmas-del-mar"
+   ],
+   "sample_pages": [
+    "Caribbean Open",
+    "2023 Caribbean Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2877",
+   "slugs": [
+    "modena"
+   ],
+   "sample_pages": [
+    "Modena Challenger",
+    "2023 Modena Challenger – Doubles",
+    "2023 Modena Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "2881",
+   "slugs": [
+    "medellin"
+   ],
+   "sample_pages": [
+    "Open Rionegro"
+   ]
+  },
+  {
+   "atp_id": "2883",
+   "slugs": [
+    "bloomfield-hills"
+   ],
+   "sample_pages": [
+    "Cranbrook Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "2885",
+   "slugs": [
+    "stanford"
+   ],
+   "sample_pages": [
+    "2023 Golden Gate Open"
+   ]
+  },
+  {
+   "atp_id": "2887",
+   "slugs": [
+    "santa-fe"
+   ],
+   "sample_pages": [
+    "Challenger Santa Fe"
+   ]
+  },
+  {
+   "atp_id": "2889",
+   "slugs": [
+    "antofagasta"
+   ],
+   "sample_pages": [
+    "Antofagasta Challenger"
+   ]
+  },
+  {
+   "atp_id": "2891",
+   "slugs": [
+    "bad-waltersdorf"
+   ],
+   "sample_pages": [
+    "Bad Waltersdorf Trophy"
+   ]
+  },
+  {
+   "atp_id": "2893",
+   "slugs": [
+    "olbia"
+   ],
+   "sample_pages": [
+    "Olbia Challenger"
+   ]
+  },
+  {
+   "atp_id": "2895",
+   "slugs": [
+    "curitiba"
+   ],
+   "sample_pages": [
+    "Curitiba Challenger"
+   ]
+  },
+  {
+   "atp_id": "2897",
+   "slugs": [
+    "shenzhen"
+   ],
+   "sample_pages": [
+    "Shenzhen Luohu Challenger",
+    "2023 Shenzhen Luohu Challenger – Doubles",
+    "2023 Shenzhen Luohu Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "2901",
+   "slugs": [
+    "punta-del-este"
+   ],
+   "sample_pages": [
+    "Punta Open"
+   ]
+  },
+  {
+   "atp_id": "2903",
+   "slugs": [
+    "indian-wells"
+   ],
+   "sample_pages": [
+    "Southern California Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "2905",
+   "slugs": [
+    "indian-wells"
+   ],
+   "sample_pages": [
+    "Southern California Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "2907",
+   "slugs": [
+    "nottingham"
+   ],
+   "sample_pages": [
+    "Lexus Nottingham Challenger"
+   ]
+  },
+  {
+   "atp_id": "2909",
+   "slugs": [
+    "asuncion"
+   ],
+   "sample_pages": [
+    "Paraguay Open",
+    "2024 Paraguay Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2911",
+   "slugs": [
+    "naples"
+   ],
+   "sample_pages": [
+    "Napoli Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "2913",
+   "slugs": [
+    "kigali"
+   ],
+   "sample_pages": [
+    "Rwanda Challenger"
+   ]
+  },
+  {
+   "atp_id": "2915",
+   "slugs": [
+    "kigali"
+   ],
+   "sample_pages": [
+    "Rwanda Challenger"
+   ]
+  },
+  {
+   "atp_id": "2917",
+   "slugs": [
+    "merida"
+   ],
+   "sample_pages": [
+    "Yucatán Open"
+   ]
+  },
+  {
+   "atp_id": "2919",
+   "slugs": [
+    "porto-alegre"
+   ],
+   "sample_pages": [
+    "Brasil Tennis Open",
+    "2024 Brasil Tennis Open – Doubles",
+    "2024 Brasil Tennis Open – Singles"
+   ]
+  },
+  {
+   "atp_id": "2921",
+   "slugs": [
+    "wuxi"
+   ],
+   "sample_pages": [
+    "Wuxi Open",
+    "2024 Wuxi Open – Singles",
+    "2024 Wuxi Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2923",
+   "slugs": [
+    "santos"
+   ],
+   "sample_pages": [
+    "Santos Brasil Tennis Cup",
+    "2024 Santos Brasil Tennis Cup – Singles",
+    "2024 Santos Brasil Tennis Cup – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2925",
+   "slugs": [
+    "tbilisi",
+    "kachreti"
+   ],
+   "sample_pages": [
+    "Mziuri Cup",
+    "2024 Kachreti Challenger – Doubles",
+    "2024 Kachreti Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "2927",
+   "slugs": [
+    "san-miguel-de-tucuman"
+   ],
+   "sample_pages": [
+    "Challenger Tucumán",
+    "2024 Challenger Tucumán – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2933",
+   "slugs": [
+    "porto"
+   ],
+   "sample_pages": [
+    "CT Porto Cup",
+    "2024 Clube Tenis Porto Challenger – Singles",
+    "2024 Clube Tenis Porto Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2935",
+   "slugs": [
+    "bonn"
+   ],
+   "sample_pages": [
+    "2025 Bonn Open"
+   ]
+  },
+  {
+   "atp_id": "2937",
+   "slugs": [
+    "guangzhou"
+   ],
+   "sample_pages": [
+    "Guangzhou Huangpu International Tennis Open",
+    "2024 Guangzhou Huangpu International Tennis Open – Singles",
+    "2024 Guangzhou Huangpu International Tennis Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2939",
+   "slugs": [
+    "nonthaburi-4"
+   ],
+   "sample_pages": [
+    "Nonthaburi Challenger",
+    "2024 Nonthaburi Challenger IV"
+   ]
+  },
+  {
+   "atp_id": "2941",
+   "slugs": [
+    "lincoln"
+   ],
+   "sample_pages": [
+    "Lincoln Challenger"
+   ]
+  },
+  {
+   "atp_id": "2945",
+   "slugs": [
+    "sofia-2"
+   ],
+   "sample_pages": [
+    "Dobrich Challenger"
+   ]
+  },
+  {
+   "atp_id": "2947",
+   "slugs": [
+    "hangzhou"
+   ],
+   "sample_pages": [
+    "Hangzhou Challenger",
+    "2024 Hangzhou Challenger – Singles",
+    "2024 Hangzhou Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2949",
+   "slugs": [
+    "taipei"
+   ],
+   "sample_pages": [
+    "2024 Taipei OEC Open – Singles",
+    "2024 Taipei OEC Open – Doubles",
+    "Taipei OEC Open"
+   ]
+  },
+  {
+   "atp_id": "2951",
+   "slugs": [
+    "sioux-falls"
+   ],
+   "sample_pages": [
+    "Sioux Falls Challenger"
+   ]
+  },
+  {
+   "atp_id": "2953",
+   "slugs": [
+    "sao-paulo"
+   ],
+   "sample_pages": [
+    "Torneio Internacional Masculino de Tênis"
+   ]
+  },
+  {
+   "atp_id": "2955",
+   "slugs": [
+    "montemar",
+    "alicante"
+   ],
+   "sample_pages": [
+    "Montemar Challenger",
+    "2024 Montemar Challenger – Singles",
+    "2024 Montemar Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2959",
+   "slugs": [
+    "manzanillo"
+   ],
+   "sample_pages": [
+    "Manzanillo Open",
+    "2024 Manzanillo Open – Singles",
+    "2024 Manzanillo Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2961",
+   "slugs": [
+    "brazzaville"
+   ],
+   "sample_pages": [
+    "Brazzaville Challenger",
+    "2024 Brazzaville Challenger – Singles",
+    "2024 Brazzaville Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2963",
+   "slugs": [
+    "lyon"
+   ],
+   "sample_pages": [
+    "All In Open",
+    "2024 All In Open – Singles",
+    "2024 All In Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2965",
+   "slugs": [
+    "rosario"
+   ],
+   "sample_pages": [
+    "Rosario Challenger",
+    "2025 Rosario Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2967",
+   "slugs": [
+    "brisbane"
+   ],
+   "sample_pages": [
+    "Queensland International",
+    "2025 Queensland International – Men's singles",
+    "2025 Queensland International – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "2969",
+   "slugs": [
+    "brisbane"
+   ],
+   "sample_pages": [
+    "Queensland International"
+   ]
+  },
+  {
+   "atp_id": "2971",
+   "slugs": [
+    "san-diego"
+   ],
+   "sample_pages": [
+    "San Diego Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "2973",
+   "slugs": [
+    "thionville"
+   ],
+   "sample_pages": [
+    "2025 Thionville Open – Singles",
+    "2025 Thionville Open – Doubles",
+    "Thionville Open"
+   ]
+  },
+  {
+   "atp_id": "2975",
+   "slugs": [
+    "cap-cana"
+   ],
+   "sample_pages": [
+    "Copa Cap Cana"
+   ]
+  },
+  {
+   "atp_id": "2979",
+   "slugs": [
+    "oeiras"
+   ],
+   "sample_pages": [
+    "Oeiras Indoors"
+   ]
+  },
+  {
+   "atp_id": "2981",
+   "slugs": [
+    "cordoba"
+   ],
+   "sample_pages": [
+    "2025 Challenger Córdoba – Singles",
+    "2025 Challenger Córdoba – Doubles",
+    "Challenger Córdoba"
+   ]
+  },
+  {
+   "atp_id": "2983",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger",
+    "2025 Crete Challenger – Singles",
+    "2025 Crete Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2985",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger"
+   ]
+  },
+  {
+   "atp_id": "2987",
+   "slugs": [
+    "menorca"
+   ],
+   "sample_pages": [
+    "Open Menorca",
+    "Menorca"
+   ]
+  },
+  {
+   "atp_id": "2989",
+   "slugs": [
+    "monza"
+   ],
+   "sample_pages": [
+    "Monza Open",
+    "2025 Monza Open – Singles",
+    "2025 Monza Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "2991",
+   "slugs": [
+    "morelia"
+   ],
+   "sample_pages": [
+    "Morelia Open"
+   ]
+  },
+  {
+   "atp_id": "2993",
+   "slugs": [
+    "chisinau"
+   ],
+   "sample_pages": [
+    "Moldova Open"
+   ]
+  },
+  {
+   "atp_id": "2995",
+   "slugs": [
+    "abidjan"
+   ],
+   "sample_pages": [
+    "Côte d'Ivoire Open"
+   ]
+  },
+  {
+   "atp_id": "2997",
+   "slugs": [
+    "abidjan"
+   ],
+   "sample_pages": [
+    "Côte d'Ivoire Open"
+   ]
+  },
+  {
+   "atp_id": "3007",
+   "slugs": [
+    "nottingham-3"
+   ],
+   "sample_pages": [
+    "Lexus Nottingham Challenger"
+   ]
+  },
+  {
+   "atp_id": "3009",
+   "slugs": [
+    "cancun"
+   ],
+   "sample_pages": [
+    "Cancún Country Open"
+   ]
+  },
+  {
+   "atp_id": "3011",
+   "slugs": [
+    "winston-salem"
+   ],
+   "sample_pages": [
+    "Winston-Salem Challenger",
+    "2025 Winston-Salem Challenger – Doubles",
+    "2025 Winston-Salem Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "3013",
+   "slugs": [
+    "jingshan"
+   ],
+   "sample_pages": [
+    "Jingshan Tennis Open",
+    "2026 Jingshan Tennis Open",
+    "2025 Jingshan Tennis Open – Men's doubles",
+    "2025 Jingshan Tennis Open – Men's singles"
+   ]
+  },
+  {
+   "atp_id": "3015",
+   "slugs": [
+    "sumter"
+   ],
+   "sample_pages": [
+    "Serve First Open"
+   ]
+  },
+  {
+   "atp_id": "3017",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger"
+   ]
+  },
+  {
+   "atp_id": "3019",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger"
+   ]
+  },
+  {
+   "atp_id": "3021",
+   "slugs": [
+    "targu-mures"
+   ],
+   "sample_pages": [
+    "INTARO Open"
+   ]
+  },
+  {
+   "atp_id": "3023",
+   "slugs": [
+    "targu-mures"
+   ],
+   "sample_pages": [
+    "INTARO Open"
+   ]
+  },
+  {
+   "atp_id": "3025",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger"
+   ]
+  },
+  {
+   "atp_id": "3027",
+   "slugs": [
+    "shenzhen"
+   ],
+   "sample_pages": [
+    "Shenzhen Futian Open",
+    "2025 Shenzhen Futian Open – Singles",
+    "2025 Shenzhen Futian Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "3029",
+   "slugs": [
+    "hersonissos"
+   ],
+   "sample_pages": [
+    "Crete Challenger"
+   ]
+  },
+  {
+   "atp_id": "3031",
+   "slugs": [
+    "costa-do-sauipe"
+   ],
+   "sample_pages": [
+    "Costa do Sauípe Open"
+   ]
+  },
+  {
+   "atp_id": "3033",
+   "slugs": [
+    "suzhou"
+   ],
+   "sample_pages": [
+    "China International Suzhou"
+   ]
+  },
+  {
+   "atp_id": "3035",
+   "slugs": [
+    "monastir"
+   ],
+   "sample_pages": [
+    "Monastir Open",
+    "2025 Monastir Open – Doubles",
+    "2025 Monastir Open – Singles"
+   ]
+  },
+  {
+   "atp_id": "3039",
+   "slugs": [
+    "soma-bay"
+   ],
+   "sample_pages": [
+    "Soma Bay Open",
+    "2025 Soma Bay Open – Doubles",
+    "2025 Soma Bay Open – Singles"
+   ]
+  },
+  {
+   "atp_id": "3041",
+   "slugs": [
+    "bogota"
+   ],
+   "sample_pages": [
+    "Challenger Seguros del Estado"
+   ]
+  },
+  {
+   "atp_id": "3043",
+   "slugs": [
+    "athens"
+   ],
+   "sample_pages": [
+    "Athens Challenger",
+    "2025 Athens Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "3045",
+   "slugs": [
+    "manama"
+   ],
+   "sample_pages": [
+    "Manama Challenger",
+    "2025 Manama Challenger – Doubles",
+    "2025 Manama Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "3049",
+   "slugs": [
+    "lima"
+   ],
+   "sample_pages": [
+    "Los Inkas Open"
+   ]
+  },
+  {
+   "atp_id": "3051",
+   "slugs": [
+    "islamabad"
+   ],
+   "sample_pages": [
+    "Islamabad Challenger"
+   ]
+  },
+  {
+   "atp_id": "3053",
+   "slugs": [
+    "itajai"
+   ],
+   "sample_pages": [
+    "Itajaí Open"
+   ]
+  },
+  {
+   "atp_id": "3057",
+   "slugs": [
+    "phan-thiet"
+   ],
+   "sample_pages": [
+    "Phan Thiết Challenger"
+   ]
+  },
+  {
+   "atp_id": "3059",
+   "slugs": [
+    "phan-thiet"
+   ],
+   "sample_pages": [
+    "Phan Thiết Challenger"
+   ]
+  },
+  {
+   "atp_id": "3061",
+   "slugs": [
+    "cesenatico"
+   ],
+   "sample_pages": [
+    "Trofeo Città di Cesenatico"
+   ]
+  },
+  {
+   "atp_id": "3063",
+   "slugs": [
+    "baton-rouge"
+   ],
+   "sample_pages": [
+    "Baton Rouge Challenger"
+   ]
+  },
+  {
+   "atp_id": "3065",
+   "slugs": [
+    "brasilia"
+   ],
+   "sample_pages": [
+    "Brasília Tennis Open",
+    "2026 Brasília Tennis Open – Singles",
+    "2026 Brasília Tennis Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "3067",
+   "slugs": [
+    "fujairah"
+   ],
+   "sample_pages": [
+    "Fujairah Open"
+   ]
+  },
+  {
+   "atp_id": "3071",
+   "slugs": [
+    "sao-paulo"
+   ],
+   "sample_pages": [
+    "Latin America Open"
+   ]
+  },
+  {
+   "atp_id": "3073",
+   "slugs": [
+    "miyazaki"
+   ],
+   "sample_pages": [
+    "Miyazaki Challenger",
+    "2026 Miyazaki Challenger – Doubles",
+    "2026 Miyazaki Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "3075",
+   "slugs": [
+    "metepec"
+   ],
+   "sample_pages": [
+    "Metepec Open"
+   ]
+  },
+  {
+   "atp_id": "3079",
+   "slugs": [
+    "wuning"
+   ],
+   "sample_pages": [
+    "Wuning Challenger",
+    "2026 Wuning Challenger – Doubles",
+    "2026 Wuning Challenger – Singles",
+    "2026 Wuning Challenger"
+   ]
+  },
+  {
+   "atp_id": "3081",
+   "slugs": [
+    "wuning"
+   ],
+   "sample_pages": [
+    "Wuning Challenger",
+    "2026 Wuning Challenger II"
+   ]
+  },
+  {
+   "atp_id": "3083",
+   "slugs": [
+    "jiujiang"
+   ],
+   "sample_pages": [
+    "2026 Jiujiang Challenger",
+    "Jiujiang Challenger",
+    "2026 Jiujiang Challenger – Men's singles",
+    "2026 Jiujiang Challenger – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "3085",
+   "slugs": [
+    "cattolica"
+   ],
+   "sample_pages": [
+    "Cattolica Challenger"
+   ]
+  },
+  {
+   "atp_id": "3087",
+   "slugs": [
+    "centurion"
+   ],
+   "sample_pages": [
+    "Centurion Challenger"
+   ]
+  },
+  {
+   "atp_id": "3089",
+   "slugs": [
+    "centurion"
+   ],
+   "sample_pages": [
+    "Centurion Challenger"
+   ]
+  },
+  {
+   "atp_id": "3095",
+   "slugs": [
+    "cervia"
+   ],
+   "sample_pages": [
+    "Challenger Città di Cervia"
+   ]
+  },
+  {
+   "atp_id": "3097",
+   "slugs": [
+    "kosice"
+   ],
+   "sample_pages": [
+    "Košice Open"
+   ]
+  },
+  {
+   "atp_id": "3101",
+   "slugs": [
+    "liege"
+   ],
+   "sample_pages": [
+    "Ethias Province Open"
+   ]
+  },
+  {
+   "atp_id": "3103",
+   "slugs": [
+    "quebec-city"
+   ],
+   "sample_pages": [
+    "Challenger Banque Nationale de Québec"
+   ]
+  },
+  {
+   "atp_id": "3105",
+   "slugs": [
+    "istanbul"
+   ],
+   "sample_pages": [
+    "Bosphorus Challenger Cup"
+   ]
+  },
+  {
+   "atp_id": "3111",
+   "slugs": [
+    "istanbul"
+   ],
+   "sample_pages": [
+    "ENKA Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "3115",
+   "slugs": [
+    "dublin"
+   ],
+   "sample_pages": [
+    "Dublin Challenger"
+   ]
+  },
+  {
+   "atp_id": "3117",
+   "slugs": [
+    "asucnion"
+   ],
+   "sample_pages": [
+    "CIT Open"
+   ]
+  },
+  {
+   "atp_id": "3119",
+   "slugs": [
+    "quito"
+   ],
+   "sample_pages": [
+    "Quito Challenger"
+   ]
+  },
+  {
+   "atp_id": "3121",
+   "slugs": [
+    "kingston"
+   ],
+   "sample_pages": [
+    "Kingston Open"
+   ]
+  },
+  {
+   "atp_id": "3123",
+   "slugs": [
+    "roehampton"
+   ],
+   "sample_pages": [
+    "Roehampton Challenger"
+   ]
+  },
+  {
+   "atp_id": "3125",
+   "slugs": [
+    "roehampton-2"
+   ],
+   "sample_pages": [
+    "Roehampton Challenger"
+   ]
+  },
+  {
+   "atp_id": "3127",
+   "slugs": [
+    "genoa"
+   ],
+   "sample_pages": [
+    "De Wave Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "3129",
+   "slugs": [
+    "kingston"
+   ],
+   "sample_pages": [
+    "Kingston Open"
+   ]
+  },
+  {
+   "atp_id": "3131",
+   "slugs": [
+    "brownsburg"
+   ],
+   "sample_pages": [
+    "Indiana Hardcourt Championships"
+   ]
+  },
+  {
+   "atp_id": "3133",
+   "slugs": [
+    "sion"
+   ],
+   "sample_pages": [
+    "Open de Sion"
+   ]
+  },
+  {
+   "atp_id": "3135",
+   "slugs": [
+    "tashkent"
+   ],
+   "sample_pages": [
+    "Tashkent Challenger"
+   ]
+  },
+  {
+   "atp_id": "3137",
+   "slugs": [
+    "phan-thiet"
+   ],
+   "sample_pages": [
+    "Phan Thiết Challenger"
+   ]
+  },
+  {
+   "atp_id": "3139",
+   "slugs": [
+    "phan-thiet"
+   ],
+   "sample_pages": [
+    "Phan Thiết Challenger"
+   ]
+  },
+  {
+   "atp_id": "3149",
+   "slugs": [
+    "plovdiv"
+   ],
+   "sample_pages": [
+    "Plovdiv Challenger",
+    "2026 Plovdiv Challenger – Singles"
+   ]
+  },
+  {
+   "atp_id": "3151",
+   "slugs": [
+    "bari"
+   ],
+   "sample_pages": [
+    "Levante Open"
+   ]
+  },
+  {
+   "atp_id": "3167",
+   "slugs": [
+    "samsun"
+   ],
+   "sample_pages": [
+    "Samsun Open",
+    "2026 Samsun Open"
+   ]
+  },
+  {
+   "atp_id": "3169",
+   "slugs": [
+    "plovdiv"
+   ],
+   "sample_pages": [
+    "Plovdiv Challenger"
+   ]
+  },
+  {
+   "atp_id": "3171",
+   "slugs": [
+    "plovdiv"
+   ],
+   "sample_pages": [
+    "Plovdiv Challenger"
+   ]
+  },
+  {
+   "atp_id": "3173",
+   "slugs": [
+    "plovdiv"
+   ],
+   "sample_pages": [
+    "Plovdiv Challenger"
+   ]
+  },
+  {
+   "atp_id": "3175",
+   "slugs": [
+    "san-diego"
+   ],
+   "sample_pages": [
+    "San Diego Challenger"
+   ]
+  },
+  {
+   "atp_id": "3183",
+   "slugs": [
+    "wuning"
+   ],
+   "sample_pages": [
+    "Wuning Challenger"
+   ]
+  },
+  {
+   "atp_id": "3348",
+   "slugs": [
+    "new-haven"
+   ],
+   "sample_pages": [
+    "2019 Oracle Challenger Series – New Haven",
+    "Connecticut Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "3351",
+   "slugs": [
+    "stockton"
+   ],
+   "sample_pages": [
+    "Stockton Challenger"
+   ]
+  },
+  {
+   "atp_id": "3406",
+   "slugs": [
+    "santiago"
+   ],
+   "sample_pages": [
+    "Challenger ATP Cachantún Cup"
+   ]
+  },
+  {
+   "atp_id": "3407",
+   "slugs": [
+    "itajai"
+   ],
+   "sample_pages": [
+    "Taroii Open de Tênis"
+   ]
+  },
+  {
+   "atp_id": "3463",
+   "slugs": [
+    "milan"
+   ],
+   "sample_pages": [
+    "Aspria Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "3473",
+   "slugs": [
+    "como"
+   ],
+   "sample_pages": [
+    "Città di Como Challenger"
+   ]
+  },
+  {
+   "atp_id": "3502",
+   "slugs": [
+    "louisville"
+   ],
+   "sample_pages": [
+    "Ford Tennis Championships"
+   ]
+  },
+  {
+   "atp_id": "3503",
+   "slugs": [
+    "rennes"
+   ],
+   "sample_pages": [
+    "2018 Open de Rennes",
+    "Open de Rennes"
+   ]
+  },
+  {
+   "atp_id": "3584",
+   "slugs": [
+    "casablanca"
+   ],
+   "sample_pages": [
+    "2012 Morocco Tennis Tour – Casablanca"
+   ]
+  },
+  {
+   "atp_id": "3618",
+   "slugs": [
+    "nur-sultan"
+   ],
+   "sample_pages": [
+    "BeeTV Women's"
+   ]
+  },
+  {
+   "atp_id": "3627",
+   "slugs": [
+    "laquila"
+   ],
+   "sample_pages": [
+    "2019 Internazionali di Tennis Città dell'Aquila",
+    "Internazionali di Tennis Città di Todi"
+   ]
+  },
+  {
+   "atp_id": "3767",
+   "slugs": [
+    "meknes"
+   ],
+   "sample_pages": [
+    "Morocco Tennis Tour – Meknes"
+   ]
+  },
+  {
+   "atp_id": "3824",
+   "slugs": [
+    "bordeaux"
+   ],
+   "sample_pages": [
+    "Bordeaux International",
+    "BNP Paribas Primrose Bordeaux",
+    "2025 BNP Paribas Primrose Bordeaux"
+   ]
+  },
+  {
+   "atp_id": "3837",
+   "slugs": [
+    "alessandria"
+   ],
+   "sample_pages": [
+    "Alessandria Challenger"
+   ]
+  },
+  {
+   "atp_id": "3945",
+   "slugs": [
+    "san-benedetto-del-tronto"
+   ],
+   "sample_pages": [
+    "San Benedetto Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "3967",
+   "slugs": [
+    "karshi"
+   ],
+   "sample_pages": [
+    "2017 Karshi Challenger – Doubles",
+    "Karshi Challenger"
+   ]
+  },
+  {
+   "atp_id": "4012",
+   "slugs": [
+    "tashkent"
+   ],
+   "sample_pages": [
+    "Tashkent Challenger"
+   ]
+  },
+  {
+   "atp_id": "4042",
+   "slugs": [
+    "toyota"
+   ],
+   "sample_pages": [
+    "Dunlop World Challenge"
+   ]
+  },
+  {
+   "atp_id": "4138",
+   "slugs": [
+    "tel-aviv"
+   ],
+   "sample_pages": [
+    "2022 Tel Aviv Open",
+    "Tel Aviv Open"
+   ]
+  },
+  {
+   "atp_id": "4140",
+   "slugs": [
+    "seoul"
+   ],
+   "sample_pages": [
+    "2022 Korea Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "4462",
+   "slugs": [
+    "bucharest"
+   ],
+   "sample_pages": [
+    "2024 Țiriac Open",
+    "Romanian Open",
+    "2025 Țiriac Open",
+    "2026 Țiriac Open"
+   ]
+  },
+  {
+   "atp_id": "4713",
+   "slugs": [
+    "hangzhou"
+   ],
+   "sample_pages": [
+    "Hangzhou Open",
+    "2024 Hangzhou Open",
+    "2025 Hangzhou Open",
+    "2026 Hangzhou Open"
+   ]
+  },
+  {
+   "atp_id": "4787",
+   "slugs": [
+    "belgrade"
+   ],
+   "sample_pages": [
+    "2024 Belgrade Open"
+   ]
+  },
+  {
+   "atp_id": "4940",
+   "slugs": [
+    "birmingham"
+   ],
+   "sample_pages": [
+    "Birmingham Classic (tennis)"
+   ]
+  },
+  {
+   "atp_id": "4942",
+   "slugs": [
+    "royan"
+   ],
+   "sample_pages": [
+    "Royan Atlantique Open"
+   ]
+  },
+  {
+   "atp_id": "5014",
+   "slugs": [
+    "shanghai"
+   ],
+   "sample_pages": [
+    "2023 Rolex Shanghai Masters",
+    "2024 Rolex Shanghai Masters",
+    "2025 Rolex Shanghai Masters",
+    "2026 Rolex Shanghai Masters"
+   ]
+  },
+  {
+   "atp_id": "5016",
+   "slugs": [
+    "bucaramanga"
+   ],
+   "sample_pages": [
+    "Bucaramanga Challenger"
+   ]
+  },
+  {
+   "atp_id": "5018",
+   "slugs": [
+    "burnie"
+   ],
+   "sample_pages": [
+    "2020 Burnie International – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "5053",
+   "slugs": [
+    "belgrade"
+   ],
+   "sample_pages": [
+    "2021 Serbia Open",
+    "2022 Serbia Open",
+    "Serbia Open"
+   ]
+  },
+  {
+   "atp_id": "5067",
+   "slugs": [
+    "savannah"
+   ],
+   "sample_pages": [
+    "Savannah Challenger"
+   ]
+  },
+  {
+   "atp_id": "5069",
+   "slugs": [
+    "sarasota"
+   ],
+   "sample_pages": [
+    "Sarasota Open"
+   ]
+  },
+  {
+   "atp_id": "5100",
+   "slugs": [
+    "athens"
+   ],
+   "sample_pages": [
+    "Hellenic Championship (tennis)",
+    "2025 Hellenic Championship"
+   ]
+  },
+  {
+   "atp_id": "6003",
+   "slugs": [
+    "kuala-lumpur"
+   ],
+   "sample_pages": [
+    "2009 Proton Malaysian Open",
+    "2010 Proton Malaysian Open",
+    "2011 Proton Malaysian Open",
+    "2012 Proton Malaysian Open",
+    "2013 Proton Malaysian Open"
+   ]
+  },
+  {
+   "atp_id": "6053",
+   "slugs": [
+    "chuncheon"
+   ],
+   "sample_pages": [
+    "Flea Market Cup"
+   ]
+  },
+  {
+   "atp_id": "6055",
+   "slugs": [
+    "charlottesville"
+   ],
+   "sample_pages": [
+    "2019 Charlottesville Men's Pro Challenger – Doubles",
+    "Charlottesville Men's Pro Challenger"
+   ]
+  },
+  {
+   "atp_id": "6116",
+   "slugs": [
+    "atlanta"
+   ],
+   "sample_pages": [
+    "2019 BB&T Atlanta Open",
+    "2021 Atlanta Open",
+    "2022 Atlanta Open",
+    "2023 Atlanta Open",
+    "2024 Atlanta Open"
+   ]
+  },
+  {
+   "atp_id": "6120",
+   "slugs": [
+    "nice"
+   ],
+   "sample_pages": [
+    "2010 Open de Nice Côte d'Azur"
+   ]
+  },
+  {
+   "atp_id": "6202",
+   "slugs": [
+    "astana"
+   ],
+   "sample_pages": [
+    "Astana Cup"
+   ]
+  },
+  {
+   "atp_id": "6204",
+   "slugs": [
+    "ortisei"
+   ],
+   "sample_pages": [
+    "Sparkassen ATP Challenger"
+   ]
+  },
+  {
+   "atp_id": "6208",
+   "slugs": [
+    "buenos-aires-2"
+   ],
+   "sample_pages": [
+    "Challenger de Buenos Aires"
+   ]
+  },
+  {
+   "atp_id": "6239",
+   "slugs": [
+    "quimper"
+   ],
+   "sample_pages": [
+    "Open Quimper Bretagne"
+   ]
+  },
+  {
+   "atp_id": "6242",
+   "slugs": [
+    "winston-salem"
+   ],
+   "sample_pages": [
+    "Winston-Salem, North Carolina",
+    "Winston-Salem Open",
+    "2023 Winston-Salem Open",
+    "2024 Winston-Salem Open",
+    "2025 Winston-Salem Open"
+   ]
+  },
+  {
+   "atp_id": "6250",
+   "slugs": [
+    "barranquilla"
+   ],
+   "sample_pages": [
+    "Open Barranquilla"
+   ]
+  },
+  {
+   "atp_id": "6254",
+   "slugs": [
+    "recife"
+   ],
+   "sample_pages": [
+    "Pernambuco Brasil Open Series"
+   ]
+  },
+  {
+   "atp_id": "6307",
+   "slugs": [
+    "campinas"
+   ],
+   "sample_pages": [
+    "Campeonato Internacional de Tênis de Campinas"
+   ]
+  },
+  {
+   "atp_id": "6311",
+   "slugs": [
+    "recife-2"
+   ],
+   "sample_pages": [
+    "Recife Open Internacional de Tenis"
+   ]
+  },
+  {
+   "atp_id": "6313",
+   "slugs": [
+    "shanghai"
+   ],
+   "sample_pages": [
+    "Shanghai Challenger"
+   ]
+  },
+  {
+   "atp_id": "6406",
+   "slugs": [
+    "sao-paulo-brazil"
+   ],
+   "sample_pages": [
+    "ATP Challenger Tour Finals"
+   ]
+  },
+  {
+   "atp_id": "6532",
+   "slugs": [
+    "rio-quente"
+   ],
+   "sample_pages": [
+    "Rio Quente Resorts Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "6572",
+   "slugs": [
+    "anning"
+   ],
+   "sample_pages": [
+    "2019 Kunming Open",
+    "Kunming Open"
+   ]
+  },
+  {
+   "atp_id": "6574",
+   "slugs": [
+    "bercuit"
+   ],
+   "sample_pages": [
+    "SDA Tennis Open"
+   ]
+  },
+  {
+   "atp_id": "6579",
+   "slugs": [
+    "lima"
+   ],
+   "sample_pages": [
+    "Lima Challenger"
+   ]
+  },
+  {
+   "atp_id": "6590",
+   "slugs": [
+    "sibiu"
+   ],
+   "sample_pages": [
+    "Sibiu Open"
+   ]
+  },
+  {
+   "atp_id": "6626",
+   "slugs": [
+    "yokohama"
+   ],
+   "sample_pages": [
+    "Keio Challenger"
+   ]
+  },
+  {
+   "atp_id": "6708",
+   "slugs": [
+    "maui"
+   ],
+   "sample_pages": [
+    "Tennis Championships of Maui"
+   ]
+  },
+  {
+   "atp_id": "6724",
+   "slugs": [
+    "mexico-city"
+   ],
+   "sample_pages": [
+    "CDMX Open"
+   ]
+  },
+  {
+   "atp_id": "6757",
+   "slugs": [
+    "blois"
+   ],
+   "sample_pages": [
+    "Internationaux de Tennis de Blois"
+   ]
+  },
+  {
+   "atp_id": "6791",
+   "slugs": [
+    "eskisehir"
+   ],
+   "sample_pages": [
+    "2015 Eskişehir Cup"
+   ]
+  },
+  {
+   "atp_id": "6795",
+   "slugs": [
+    "liberec"
+   ],
+   "sample_pages": [
+    "Svijany Open"
+   ]
+  },
+  {
+   "atp_id": "6809",
+   "slugs": [
+    "meerbusch"
+   ],
+   "sample_pages": [
+    "Meerbusch Challenger"
+   ]
+  },
+  {
+   "atp_id": "6816",
+   "slugs": [
+    "corpus-christi"
+   ],
+   "sample_pages": [
+    "South Texas Pro Championships"
+   ]
+  },
+  {
+   "atp_id": "6817",
+   "slugs": [
+    "san-juan"
+   ],
+   "sample_pages": [
+    "Caribe Hilton International"
+   ]
+  },
+  {
+   "atp_id": "6818",
+   "slugs": [
+    "st-petersburg"
+   ],
+   "sample_pages": [
+    "St. Petersburg Masters Invitational"
+   ]
+  },
+  {
+   "atp_id": "6830",
+   "slugs": [
+    "hoylake"
+   ],
+   "sample_pages": [
+    "North of England Championships"
+   ]
+  },
+  {
+   "atp_id": "6832",
+   "slugs": [
+    "midland"
+   ],
+   "sample_pages": [
+    "Midland RC International"
+   ]
+  },
+  {
+   "atp_id": "6857",
+   "slugs": [
+    "mouilleron-le-captif"
+   ],
+   "sample_pages": [
+    "Open de Vendée"
+   ]
+  },
+  {
+   "atp_id": "6865",
+   "slugs": [
+    "traralgon"
+   ],
+   "sample_pages": [
+    "2019 Latrobe City Traralgon ATP Challenger – Doubles",
+    "2022 Traralgon International"
+   ]
+  },
+  {
+   "atp_id": "6932",
+   "slugs": [
+    "rio-de-janeiro"
+   ],
+   "sample_pages": [
+    "2020 Rio Open",
+    "2022 Rio Open",
+    "2023 Rio Open",
+    "2024 Rio Open",
+    "2025 Rio Open"
+   ]
+  },
+  {
+   "atp_id": "6961",
+   "slugs": [
+    "new-delhi"
+   ],
+   "sample_pages": [
+    "Delhi Open"
+   ]
+  },
+  {
+   "atp_id": "6963",
+   "slugs": [
+    "morelos"
+   ],
+   "sample_pages": [
+    "Morelos Open"
+   ]
+  },
+  {
+   "atp_id": "6965",
+   "slugs": [
+    "guangzhou"
+   ],
+   "sample_pages": [
+    "Guangzhou International Challenger"
+   ]
+  },
+  {
+   "atp_id": "7009",
+   "slugs": [
+    "aix-en-provence"
+   ],
+   "sample_pages": [
+    "2024 Open Aix Provence",
+    "Open du Pays d'Aix"
+   ]
+  },
+  {
+   "atp_id": "7015",
+   "slugs": [
+    "vicenza"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Vicenza"
+   ]
+  },
+  {
+   "atp_id": "7021",
+   "slugs": [
+    "mestre"
+   ],
+   "sample_pages": [
+    "Venice Challenge Save Cup"
+   ]
+  },
+  {
+   "atp_id": "7073",
+   "slugs": [
+    "cortina"
+   ],
+   "sample_pages": [
+    "International Tennis Tournament of Cortina"
+   ]
+  },
+  {
+   "atp_id": "7077",
+   "slugs": [
+    "prague"
+   ],
+   "sample_pages": [
+    "Sparta Prague Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "7083",
+   "slugs": [
+    "istanbul"
+   ],
+   "sample_pages": [
+    "Istanbul Challenger"
+   ]
+  },
+  {
+   "atp_id": "7085",
+   "slugs": [
+    "biella"
+   ],
+   "sample_pages": [
+    "Challenger Pulcra Lachiter Biella"
+   ]
+  },
+  {
+   "atp_id": "7093",
+   "slugs": [
+    "meknes"
+   ],
+   "sample_pages": [
+    "Morocco Tennis Tour – Meknes"
+   ]
+  },
+  {
+   "atp_id": "7100",
+   "slugs": [
+    "pune"
+   ],
+   "sample_pages": [
+    "Pune Challenger"
+   ]
+  },
+  {
+   "atp_id": "7161",
+   "slugs": [
+    "quito"
+   ],
+   "sample_pages": [
+    "Ecuador Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "7163",
+   "slugs": [
+    "istanbul"
+   ],
+   "sample_pages": [
+    "Istanbul Open"
+   ]
+  },
+  {
+   "atp_id": "7201",
+   "slugs": [
+    "santo-domingo"
+   ],
+   "sample_pages": [
+    "Santo Domingo Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "7233",
+   "slugs": [
+    "glasgow"
+   ],
+   "sample_pages": [
+    "2015 Aegon GB Pro-Series Glasgow"
+   ]
+  },
+  {
+   "atp_id": "7241",
+   "slugs": [
+    "batman"
+   ],
+   "sample_pages": [
+    "Batman Cup"
+   ]
+  },
+  {
+   "atp_id": "7247",
+   "slugs": [
+    "turin"
+   ],
+   "sample_pages": [
+    "ATP Challenger Torino"
+   ]
+  },
+  {
+   "atp_id": "7288",
+   "slugs": [
+    "seoul"
+   ],
+   "sample_pages": [
+    "Seoul Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "7290",
+   "slugs": [
+    "estoril"
+   ],
+   "sample_pages": [
+    "2019 Estoril Open",
+    "2021 Estoril Open",
+    "2022 Estoril Open",
+    "Francisco Cabral (tennis)",
+    "2023 Estoril Open"
+   ]
+  },
+  {
+   "atp_id": "7297",
+   "slugs": [
+    "surbiton"
+   ],
+   "sample_pages": [
+    "2022 Surbiton Trophy",
+    "2024 Surbiton Trophy"
+   ]
+  },
+  {
+   "atp_id": "7303",
+   "slugs": [
+    "mexico-city"
+   ],
+   "sample_pages": [
+    "Mexico City WCT"
+   ]
+  },
+  {
+   "atp_id": "7307",
+   "slugs": [
+    "beijing"
+   ],
+   "sample_pages": [
+    "1995 Nokia Open"
+   ]
+  },
+  {
+   "atp_id": "7308",
+   "slugs": [
+    "adelaide"
+   ],
+   "sample_pages": [
+    "1994 Australian Men's Hardcourt Championships",
+    "1993 Australian Men's Hardcourt Championships",
+    "1992 Australian Men's Hardcourt Championships",
+    "1991 Australian Men's Hardcourt Championships",
+    "1990 Australian Men's Hardcourt Championships"
+   ]
+  },
+  {
+   "atp_id": "7316",
+   "slugs": [
+    "cary"
+   ],
+   "sample_pages": [
+    "Cary Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "7333",
+   "slugs": [
+    "ho-chi-minh-city"
+   ],
+   "sample_pages": [
+    "Vietnam Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "7339",
+   "slugs": [
+    "fairfield"
+   ],
+   "sample_pages": [
+    "Fairfield Challenger"
+   ]
+  },
+  {
+   "atp_id": "7341",
+   "slugs": [
+    "brest"
+   ],
+   "sample_pages": [
+    "Brest Challenger"
+   ]
+  },
+  {
+   "atp_id": "7343",
+   "slugs": [
+    "ningbo"
+   ],
+   "sample_pages": [
+    "2019 Ningbo Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "7345",
+   "slugs": [
+    "las-vegas"
+   ],
+   "sample_pages": [
+    "Tennis Channel Open",
+    "Las Vegas Challenger"
+   ]
+  },
+  {
+   "atp_id": "7351",
+   "slugs": [
+    "monterrey"
+   ],
+   "sample_pages": [
+    "Monterrey Challenger"
+   ]
+  },
+  {
+   "atp_id": "7389",
+   "slugs": [
+    "bogota"
+   ],
+   "sample_pages": [
+    "Open Bogotá"
+   ]
+  },
+  {
+   "atp_id": "7391",
+   "slugs": [
+    "guayaquil"
+   ],
+   "sample_pages": [
+    "Challenger Ciudad de Guayaquil"
+   ]
+  },
+  {
+   "atp_id": "7393",
+   "slugs": [
+    "canberra"
+   ],
+   "sample_pages": [
+    "2024 Canberra Tennis International",
+    "2025 Canberra Tennis International",
+    "Canberra Tennis International",
+    "2026 Canberra Tennis International"
+   ]
+  },
+  {
+   "atp_id": "7395",
+   "slugs": [
+    "buenos-aires"
+   ],
+   "sample_pages": [
+    "Challenger de Buenos Aires"
+   ]
+  },
+  {
+   "atp_id": "7397",
+   "slugs": [
+    "kobe"
+   ],
+   "sample_pages": [
+    "2019 Kobe Challenger – Singles",
+    "2019 Kobe Challenger – Doubles",
+    "Kobe Challenger"
+   ]
+  },
+  {
+   "atp_id": "7434",
+   "slugs": [
+    "sofia"
+   ],
+   "sample_pages": [
+    "2019 Sofia Open",
+    "2019 in Bulgaria",
+    "2020 Sofia Open",
+    "2021 Sofia Open",
+    "2022 Sofia Open"
+   ]
+  },
+  {
+   "atp_id": "7480",
+   "slugs": [
+    "los-cabos"
+   ],
+   "sample_pages": [
+    "2019 Los Cabos Open",
+    "2021 Los Cabos Open",
+    "2022 Los Cabos Open",
+    "2023 Los Cabos Open",
+    "2024 Los Cabos Open"
+   ]
+  },
+  {
+   "atp_id": "7485",
+   "slugs": [
+    "antwerp",
+    "brussels"
+   ],
+   "sample_pages": [
+    "2022 European Open",
+    "2025 European Open",
+    "European Open (tennis)",
+    "2019 European Open",
+    "2020 European Open"
+   ]
+  },
+  {
+   "atp_id": "7490",
+   "slugs": [
+    "gwangju"
+   ],
+   "sample_pages": [
+    "Gwangju Open"
+   ]
+  },
+  {
+   "atp_id": "7494",
+   "slugs": [
+    "barletta"
+   ],
+   "sample_pages": [
+    "Open Città della Disfida"
+   ]
+  },
+  {
+   "atp_id": "7496",
+   "slugs": [
+    "zhuhai"
+   ],
+   "sample_pages": [
+    "Zhuhai Open"
+   ]
+  },
+  {
+   "atp_id": "7536",
+   "slugs": [
+    "lyon"
+   ],
+   "sample_pages": [
+    "Open Sopra Steria de Lyon"
+   ]
+  },
+  {
+   "atp_id": "7542",
+   "slugs": [
+    "winnipeg"
+   ],
+   "sample_pages": [
+    "Winnipeg Challenger"
+   ]
+  },
+  {
+   "atp_id": "7555",
+   "slugs": [
+    "qingdao"
+   ],
+   "sample_pages": [
+    "ZS-Sports China International Challenger"
+   ]
+  },
+  {
+   "atp_id": "7559",
+   "slugs": [
+    "fano"
+   ],
+   "sample_pages": [
+    "Adriatic Challenger"
+   ]
+  },
+  {
+   "atp_id": "7581",
+   "slugs": [
+    "chengdu"
+   ],
+   "sample_pages": [
+    "2023 Chengdu Open",
+    "2024 Chengdu Open",
+    "2025 Chengdu Open",
+    "2026 Chengdu Open"
+   ]
+  },
+  {
+   "atp_id": "7648",
+   "slugs": [
+    "budapest"
+   ],
+   "sample_pages": [
+    "2019 Hungarian Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "7652",
+   "slugs": [
+    "koblenz"
+   ],
+   "sample_pages": [
+    "2020 Koblenz Open – Doubles",
+    "Koblenz Open"
+   ]
+  },
+  {
+   "atp_id": "7694",
+   "slugs": [
+    "lyon"
+   ],
+   "sample_pages": [
+    "2019 ATP Lyon Open – Doubles",
+    "ATP Lyon Open"
+   ]
+  },
+  {
+   "atp_id": "7699",
+   "slugs": [
+    "tempe"
+   ],
+   "sample_pages": [
+    "Tempe Challenger"
+   ]
+  },
+  {
+   "atp_id": "7701",
+   "slugs": [
+    "quanzhou"
+   ],
+   "sample_pages": [
+    "International Challenger Quanzhou"
+   ]
+  },
+  {
+   "atp_id": "7707",
+   "slugs": [
+    "francavilla-al-mare"
+   ],
+   "sample_pages": [
+    "Francavilla al Mare Open"
+   ]
+  },
+  {
+   "atp_id": "7740",
+   "slugs": [
+    "nottingham-2"
+   ],
+   "sample_pages": [
+    "Nottingham Open"
+   ]
+  },
+  {
+   "atp_id": "7742",
+   "slugs": [
+    "lisbon"
+   ],
+   "sample_pages": [
+    "2021 Lisboa Belém Open",
+    "2024 Lisboa Belém Open",
+    "Lisboa Belém Open",
+    "2026 Lisboa Belém Open"
+   ]
+  },
+  {
+   "atp_id": "7746",
+   "slugs": [
+    "jinan"
+   ],
+   "sample_pages": [
+    "Jinan Open",
+    "2025 Jinan Open"
+   ]
+  },
+  {
+   "atp_id": "7774",
+   "slugs": [
+    "vancouver"
+   ],
+   "sample_pages": [
+    "2022 Odlum Brown Vancouver Open",
+    "2026 Odlum Brown Vancouver Open",
+    "Vancouver Open"
+   ]
+  },
+  {
+   "atp_id": "7783",
+   "slugs": [
+    "zhangjiagang"
+   ],
+   "sample_pages": [
+    "International Challenger Zhangjiagang"
+   ]
+  },
+  {
+   "atp_id": "7791",
+   "slugs": [
+    "almaty"
+   ],
+   "sample_pages": [
+    "Almaty Challenger"
+   ]
+  },
+  {
+   "atp_id": "7797",
+   "slugs": [
+    "shenzhen"
+   ],
+   "sample_pages": [
+    "2019 Shenzhen Longhua Open – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "7808",
+   "slugs": [
+    "bengaluru"
+   ],
+   "sample_pages": [
+    "Bengaluru Open"
+   ]
+  },
+  {
+   "atp_id": "7841",
+   "slugs": [
+    "bendigo"
+   ],
+   "sample_pages": [
+    "2022 Bendigo International",
+    "Bendigo International (tennis)"
+   ]
+  },
+  {
+   "atp_id": "7845",
+   "slugs": [
+    "newport-beach"
+   ],
+   "sample_pages": [
+    "2019 Oracle Challenger Series – Newport Beach",
+    "2020 Oracle Challenger Series – Newport Beach"
+   ]
+  },
+  {
+   "atp_id": "7849",
+   "slugs": [
+    "chennai"
+   ],
+   "sample_pages": [
+    "Chennai Open Challenger"
+   ]
+  },
+  {
+   "atp_id": "7851",
+   "slugs": [
+    "indian-wells"
+   ],
+   "sample_pages": [
+    "2019 Oracle Challenger Series – Indian Wells",
+    "2020 Oracle Challenger Series – Indian Wells"
+   ]
+  },
+  {
+   "atp_id": "7874",
+   "slugs": [
+    "lille"
+   ],
+   "sample_pages": [
+    "Play In Challenger"
+   ]
+  },
+  {
+   "atp_id": "7878",
+   "slugs": [
+    "marbella"
+   ],
+   "sample_pages": [
+    "2022 Andalucía Challenger"
+   ]
+  },
+  {
+   "atp_id": "7880",
+   "slugs": [
+    "bangkok"
+   ],
+   "sample_pages": [
+    "2020 Bangkok Challenger II – Doubles"
+   ]
+  },
+  {
+   "atp_id": "7909",
+   "slugs": [
+    "villena"
+   ],
+   "sample_pages": [
+    "Villena Open"
+   ]
+  },
+  {
+   "atp_id": "7911",
+   "slugs": [
+    "puerto-vallarta"
+   ],
+   "sample_pages": [
+    "Puerto Vallarta Open"
+   ]
+  },
+  {
+   "atp_id": "7913",
+   "slugs": [
+    "braga"
+   ],
+   "sample_pages": [
+    "Braga Open"
+   ]
+  },
+  {
+   "atp_id": "7922",
+   "slugs": [
+    "sopot"
+   ],
+   "sample_pages": [
+    "2019 BNP Paribas Sopot Open"
+   ]
+  },
+  {
+   "atp_id": "7973",
+   "slugs": [
+    "manacor"
+   ],
+   "sample_pages": [
+    "Rafa Nadal Open"
+   ]
+  },
+  {
+   "atp_id": "8266",
+   "slugs": [
+    "augsburg"
+   ],
+   "sample_pages": [
+    "Schwaben Open"
+   ]
+  },
+  {
+   "atp_id": "8268",
+   "slugs": [
+    "yokkaichi"
+   ],
+   "sample_pages": [
+    "Yokkaichi Challenger"
+   ]
+  },
+  {
+   "atp_id": "8270",
+   "slugs": [
+    "baotou"
+   ],
+   "sample_pages": [
+    "International Challenger Baotou",
+    "2019 International Challenger Baotou – Singles",
+    "2019 International Challenger Baotou – Doubles"
+   ]
+  },
+  {
+   "atp_id": "8281",
+   "slugs": [
+    "columbus"
+   ],
+   "sample_pages": [
+    "Columbus Challenger"
+   ]
+  },
+  {
+   "atp_id": "8285",
+   "slugs": [
+    "nur-sultan"
+   ],
+   "sample_pages": [
+    "BeeTV Women's",
+    "2019 Nur-Sultan Challenger – Singles",
+    "2019 Nur-Sultan Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "8297",
+   "slugs": [
+    "hamburg"
+   ],
+   "sample_pages": [
+    "Hamburg Ladies & Gents Cup"
+   ]
+  },
+  {
+   "atp_id": "8310",
+   "slugs": [
+    "helsinki"
+   ],
+   "sample_pages": [
+    "2019 Tali Open – Singles",
+    "2019 Tali Open – Doubles",
+    "HPP Open"
+   ]
+  },
+  {
+   "atp_id": "8375",
+   "slugs": [
+    "mexico-city"
+   ],
+   "sample_pages": [
+    "Mexico City Open (tennis)",
+    "2022 Mexico City Open – Singles",
+    "2022 Mexico City Open – Doubles"
+   ]
+  },
+  {
+   "atp_id": "8382",
+   "slugs": [
+    "sao-paulo"
+   ],
+   "sample_pages": [
+    "São Paulo Challenger de Tênis"
+   ]
+  },
+  {
+   "atp_id": "8386",
+   "slugs": [
+    "matsuyama"
+   ],
+   "sample_pages": [
+    "Matsuyama Challenger"
+   ]
+  },
+  {
+   "atp_id": "8392",
+   "slugs": [
+    "todi"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Todi"
+   ]
+  },
+  {
+   "atp_id": "8394",
+   "slugs": [
+    "iasi"
+   ],
+   "sample_pages": [
+    "2020 Iași Open – Singles",
+    "2020 Iași Open – Doubles",
+    "2022 Iași Open",
+    "2023 Iași Open",
+    "Iași Open"
+   ]
+  },
+  {
+   "atp_id": "8888",
+   "slugs": [
+    "atp-cup"
+   ],
+   "sample_pages": [
+    "Andrey Rublev"
+   ]
+  },
+  {
+   "atp_id": "8994",
+   "slugs": [
+    "mallorca"
+   ],
+   "sample_pages": [
+    "2023 Mallorca Championships",
+    "2024 Mallorca Championships",
+    "2025 Mallorca Championships",
+    "2026 Mallorca Championships",
+    "Mallorca Open"
+   ]
+  },
+  {
+   "atp_id": "8996",
+   "slugs": [
+    "santiago"
+   ],
+   "sample_pages": [
+    "2020 Chile Open",
+    "2021 Chile Open",
+    "2023 Chile Open",
+    "2024 Chile Open",
+    "2025 Chile Open"
+   ]
+  },
+  {
+   "atp_id": "8998",
+   "slugs": [
+    "adelaide"
+   ],
+   "sample_pages": [
+    "2020 Adelaide International",
+    "2021 Great Ocean Road Open",
+    "2023 Adelaide International 2",
+    "2024 Adelaide International",
+    "2025 Adelaide International"
+   ]
+  },
+  {
+   "atp_id": "9001",
+   "slugs": [
+    "perugia"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Perugia"
+   ]
+  },
+  {
+   "atp_id": "9003",
+   "slugs": [
+    "bratislava"
+   ],
+   "sample_pages": [
+    "Bratislava Open"
+   ]
+  },
+  {
+   "atp_id": "9005",
+   "slugs": [
+    "ilkley"
+   ],
+   "sample_pages": [
+    "2022 Ilkley Trophy",
+    "Ilkley Trophy",
+    "2026 Ilkley Open"
+   ]
+  },
+  {
+   "atp_id": "9028",
+   "slugs": [
+    "manerbio"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis di Manerbio – Trofeo Dimmidisì"
+   ]
+  },
+  {
+   "atp_id": "9118",
+   "slugs": [
+    "new-haven"
+   ],
+   "sample_pages": [
+    "Oracle Challenger Series – New Haven"
+   ]
+  },
+  {
+   "atp_id": "9120",
+   "slugs": [
+    "cassis"
+   ],
+   "sample_pages": [
+    "Cassis Open Provence"
+   ]
+  },
+  {
+   "atp_id": "9124",
+   "slugs": [
+    "florence"
+   ],
+   "sample_pages": [
+    "2019 Firenze Tennis Cup – Singles",
+    "Firenze Tennis Cup"
+   ]
+  },
+  {
+   "atp_id": "9130",
+   "slugs": [
+    "liuzhou"
+   ],
+   "sample_pages": [
+    "2019 Liuzhou Open – Men's singles",
+    "2019 Liuzhou Open – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "9132",
+   "slugs": [
+    "barcelona"
+   ],
+   "sample_pages": [
+    "2019 Sánchez-Casal Cup – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9154",
+   "slugs": [
+    "cleveland"
+   ],
+   "sample_pages": [
+    "Cleveland Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "9158",
+   "slugs": [
+    "cordoba"
+   ],
+   "sample_pages": [
+    "2019 Córdoba Open",
+    "2019 Córdoba Open – Singles",
+    "2019 Córdoba Open – Doubles",
+    "2020 Córdoba Open",
+    "2021 Córdoba Open"
+   ]
+  },
+  {
+   "atp_id": "9160",
+   "slugs": [
+    "da-nang"
+   ],
+   "sample_pages": [
+    "Christopher Rungkat",
+    "Da Nang Tennis Open"
+   ]
+  },
+  {
+   "atp_id": "9162",
+   "slugs": [
+    "pau"
+   ],
+   "sample_pages": [
+    "Teréga Open Pau–Pyrénées",
+    "Pau Championships"
+   ]
+  },
+  {
+   "atp_id": "9164",
+   "slugs": [
+    "zhuhai"
+   ],
+   "sample_pages": [
+    "Zhuhai Championships",
+    "2023 Zhuhai Championships"
+   ]
+  },
+  {
+   "atp_id": "9167",
+   "slugs": [
+    "phoenix"
+   ],
+   "sample_pages": [
+    "Arizona Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "9171",
+   "slugs": [
+    "murcia"
+   ],
+   "sample_pages": [
+    "Murcia Open"
+   ]
+  },
+  {
+   "atp_id": "9186",
+   "slugs": [
+    "jerusalem"
+   ],
+   "sample_pages": [
+    "Jerusalem Volvo Open"
+   ]
+  },
+  {
+   "atp_id": "9188",
+   "slugs": [
+    "little-rock"
+   ],
+   "sample_pages": [
+    "Little Rock Challenger"
+   ]
+  },
+  {
+   "atp_id": "9194",
+   "slugs": [
+    "columbus"
+   ],
+   "sample_pages": [
+    "2021 Columbus Challenger"
+   ]
+  },
+  {
+   "atp_id": "9196",
+   "slugs": [
+    "ludwigshafen"
+   ],
+   "sample_pages": [
+    "Ludwigshafen Challenger",
+    "2019 Ludwigshafen Challenger"
+   ]
+  },
+  {
+   "atp_id": "9198",
+   "slugs": [
+    "bunshoten"
+   ],
+   "sample_pages": [
+    "Dutch Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "9207",
+   "slugs": [
+    "algiers"
+   ],
+   "sample_pages": [
+    "ATP Algiers Open"
+   ]
+  },
+  {
+   "atp_id": "9351",
+   "slugs": [
+    "trieste"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Trieste"
+   ]
+  },
+  {
+   "atp_id": "9408",
+   "slugs": [
+    "sardinia"
+   ],
+   "sample_pages": [
+    "2020 Forte Village Sardegna Open",
+    "Sardegna Open"
+   ]
+  },
+  {
+   "atp_id": "9410",
+   "slugs": [
+    "nur-sultan",
+    "astana",
+    "almaty"
+   ],
+   "sample_pages": [
+    "2020 Astana Open",
+    "2021 Astana Open",
+    "Almaty Open",
+    "Sport in Kazakhstan",
+    "2022 Astana Open"
+   ]
+  },
+  {
+   "atp_id": "9414",
+   "slugs": [
+    "parma"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Parma",
+    "2020 Internazionali di Tennis Città di Parma – Singles",
+    "2020 Internazionali di Tennis Città di Parma – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9426",
+   "slugs": [
+    "antalya"
+   ],
+   "sample_pages": [
+    "2021 Antalya Open"
+   ]
+  },
+  {
+   "atp_id": "9428",
+   "slugs": [
+    "melbourne"
+   ],
+   "sample_pages": [
+    "2021 Murray River Open"
+   ]
+  },
+  {
+   "atp_id": "9430",
+   "slugs": [
+    "antalya"
+   ],
+   "sample_pages": [
+    "Antalya Challenger"
+   ]
+  },
+  {
+   "atp_id": "9434",
+   "slugs": [
+    "biella"
+   ],
+   "sample_pages": [
+    "Biella Challenger Indoor"
+   ]
+  },
+  {
+   "atp_id": "9452",
+   "slugs": [
+    "concepcion"
+   ],
+   "sample_pages": [
+    "Challenger Concepción"
+   ]
+  },
+  {
+   "atp_id": "9460",
+   "slugs": [
+    "singapore"
+   ],
+   "sample_pages": [
+    "2021 Singapore Tennis Open"
+   ]
+  },
+  {
+   "atp_id": "9462",
+   "slugs": [
+    "marbella"
+   ],
+   "sample_pages": [
+    "2021 Andalucía Open"
+   ]
+  },
+  {
+   "atp_id": "9464",
+   "slugs": [
+    "st-petersburg"
+   ],
+   "sample_pages": [
+    "Saint Petersburg Challenger",
+    "2021 Saint Petersburg Challenger – Singles",
+    "2021 Saint Petersburg Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9466",
+   "slugs": [
+    "biella"
+   ],
+   "sample_pages": [
+    "Biella Challenger Indoor"
+   ]
+  },
+  {
+   "atp_id": "9470",
+   "slugs": [
+    "biella-4"
+   ],
+   "sample_pages": [
+    "Biella Challenger Indoor"
+   ]
+  },
+  {
+   "atp_id": "9472",
+   "slugs": [
+    "zadar"
+   ],
+   "sample_pages": [
+    "Zadar Open"
+   ]
+  },
+  {
+   "atp_id": "9479",
+   "slugs": [
+    "santa-cruz"
+   ],
+   "sample_pages": [
+    "Santa Cruz Challenger"
+   ]
+  },
+  {
+   "atp_id": "9481",
+   "slugs": [
+    "cagliari"
+   ],
+   "sample_pages": [
+    "2021 Sardegna Open",
+    "Sardegna Open"
+   ]
+  },
+  {
+   "atp_id": "9496",
+   "slugs": [
+    "biella-5"
+   ],
+   "sample_pages": [
+    "Challenger Pulcra Lachiter Biella"
+   ]
+  },
+  {
+   "atp_id": "9498",
+   "slugs": [
+    "biella-7"
+   ],
+   "sample_pages": [
+    "Challenger Pulcra Lachiter Biella"
+   ]
+  },
+  {
+   "atp_id": "9503",
+   "slugs": [
+    "biella-6"
+   ],
+   "sample_pages": [
+    "Challenger Pulcra Lachiter Biella"
+   ]
+  },
+  {
+   "atp_id": "9510",
+   "slugs": [
+    "parma"
+   ],
+   "sample_pages": [
+    "2021 Emilia-Romagna Open"
+   ]
+  },
+  {
+   "atp_id": "9514",
+   "slugs": [
+    "oeiras-3"
+   ],
+   "sample_pages": [
+    "Open de Oeiras"
+   ]
+  },
+  {
+   "atp_id": "9516",
+   "slugs": [
+    "lugano"
+   ],
+   "sample_pages": [
+    "Challenger Città di Lugano"
+   ]
+  },
+  {
+   "atp_id": "9520",
+   "slugs": [
+    "belgrade"
+   ],
+   "sample_pages": [
+    "2021 Belgrade Challenger",
+    "Serbia Challenger Open"
+   ]
+  },
+  {
+   "atp_id": "9526",
+   "slugs": [
+    "porto"
+   ],
+   "sample_pages": [
+    "2024 Porto Open",
+    "Porto Open",
+    "2025 Porto Open",
+    "2026 Porto Open"
+   ]
+  },
+  {
+   "atp_id": "9531",
+   "slugs": [
+    "salzburg"
+   ],
+   "sample_pages": [
+    "Salzburg Open"
+   ]
+  },
+  {
+   "atp_id": "9533",
+   "slugs": [
+    "nur-sultan",
+    "astana"
+   ],
+   "sample_pages": [
+    "2022 President's Cup (tennis)",
+    "President's Cup (tennis)"
+   ]
+  },
+  {
+   "atp_id": "9540",
+   "slugs": [
+    "san-marino"
+   ],
+   "sample_pages": [
+    "San Marino Open (tennis)"
+   ]
+  },
+  {
+   "atp_id": "9542",
+   "slugs": [
+    "hagen"
+   ],
+   "sample_pages": [
+    "Platzmann Open"
+   ]
+  },
+  {
+   "atp_id": "9544",
+   "slugs": [
+    "verona"
+   ],
+   "sample_pages": [
+    "Internazionali di Tennis Città di Verona"
+   ]
+  },
+  {
+   "atp_id": "9548",
+   "slugs": [
+    "warsaw"
+   ],
+   "sample_pages": [
+    "BNP Paribas Polish Cup",
+    "2021 BNP Paribas Polish Cup – Singles",
+    "2021 BNP Paribas Polish Cup – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9552",
+   "slugs": [
+    "saint-tropez"
+   ],
+   "sample_pages": [
+    "Saint-Tropez Open"
+   ]
+  },
+  {
+   "atp_id": "9556",
+   "slugs": [
+    "tulln"
+   ],
+   "sample_pages": [
+    "NÖ Open"
+   ]
+  },
+  {
+   "atp_id": "9558",
+   "slugs": [
+    "kyiv"
+   ],
+   "sample_pages": [
+    "2021 Kyiv Open – Singles",
+    "2021 Kyiv Open – Doubles",
+    "Kyiv Open"
+   ]
+  },
+  {
+   "atp_id": "9575",
+   "slugs": [
+    "biel"
+   ],
+   "sample_pages": [
+    "Challenger Biel/Bienne"
+   ]
+  },
+  {
+   "atp_id": "9625",
+   "slugs": [
+    "roanne"
+   ],
+   "sample_pages": [
+    "Open International de Tennis de Roanne"
+   ]
+  },
+  {
+   "atp_id": "9631",
+   "slugs": [
+    "bari"
+   ],
+   "sample_pages": [
+    "Open Città di Bari",
+    "2021 Open Città di Bari – Singles",
+    "2021 Open Città di Bari – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9633",
+   "slugs": [
+    "brasilia"
+   ],
+   "sample_pages": [
+    "Aberto da República",
+    "2021 Aberto da República",
+    "2021 Aberto da República – Men's singles",
+    "2021 Aberto da República – Men's doubles"
+   ]
+  },
+  {
+   "atp_id": "9635",
+   "slugs": [
+    "manama"
+   ],
+   "sample_pages": [
+    "Bahrain Ministry of Interior Tennis Challenger",
+    "2021 Bahrain Ministry of Interior Tennis Challenger – Singles",
+    "2021 Bahrain Ministry of Interior Tennis Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9651",
+   "slugs": [
+    "florianopolis"
+   ],
+   "sample_pages": [
+    "Florianópolis Challenger",
+    "2021 Florianópolis Challenger – Singles",
+    "2021 Florianópolis Challenger – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9663",
+   "slugs": [
+    "sydney"
+   ],
+   "sample_pages": [
+    "2022 Sydney Tennis Classic"
+   ]
+  },
+  {
+   "atp_id": "9665",
+   "slugs": [
+    "melbourne"
+   ],
+   "sample_pages": [
+    "2022 Melbourne Summer Set 1"
+   ]
+  },
+  {
+   "atp_id": "9667",
+   "slugs": [
+    "adelaide"
+   ],
+   "sample_pages": [
+    "2022 Adelaide International 2"
+   ]
+  },
+  {
+   "atp_id": "9678",
+   "slugs": [
+    "buenos-aires"
+   ],
+   "sample_pages": [
+    "2022 Challenger de Tigre – Doubles",
+    "2022 Challenger de Tigre – Singles",
+    "Challenger de Tigre"
+   ]
+  },
+  {
+   "atp_id": "9687",
+   "slugs": [
+    "madrid"
+   ],
+   "sample_pages": [
+    "Open Comunidad de Madrid"
+   ]
+  },
+  {
+   "atp_id": "9689",
+   "slugs": [
+    "turin"
+   ],
+   "sample_pages": [
+    "Torino Challenger"
+   ]
+  },
+  {
+   "atp_id": "9693",
+   "slugs": [
+    "aguascalientes"
+   ],
+   "sample_pages": [
+    "San Marcos Open Aguascalientes",
+    "2022 San Marcos Open Aguascalientes – Singles",
+    "2022 San Marcos Open Aguascalientes – Doubles"
+   ]
+  },
+  {
+   "atp_id": "9695",
+   "slugs": [
+    "tigre"
+   ],
+   "sample_pages": [
+    "2023 Challenger de Tigre II",
+    "Challenger de Tigre"
+   ]
+  },
+  {
+   "atp_id": "9697",
+   "slugs": [
+    "mauthausen"
+   ],
+   "sample_pages": [
+    "Upper Austria Open"
+   ]
+  },
+  {
+   "atp_id": "9814",
+   "slugs": [
+    "cali"
+   ],
+   "sample_pages": [
+    "Cali Open"
+   ]
+  },
+  {
+   "atp_id": "9817",
+   "slugs": [
+    "roseto-degli-abruzzi"
+   ],
+   "sample_pages": [
+    "Challenger di Roseto degli Abruzzi"
+   ]
+  },
+  {
+   "atp_id": "9818",
+   "slugs": [
+    "concepcion"
+   ],
+   "sample_pages": [
+    "Challenger del Biobío"
+   ]
+  },
+  {
+   "atp_id": "9820",
+   "slugs": [
+    "santa-cruz-de-la-sierra-2"
+   ],
+   "sample_pages": [
+    "Santa Cruz Challenger"
+   ]
+  },
+  {
+   "atp_id": "9835",
+   "slugs": [
+    "parma---montechiarugolo",
+    "sassuolo",
+    "parma"
+   ],
+   "sample_pages": [
+    "2023 Emilia-Romagna Open",
+    "2025 Emilia-Romagna Open",
+    "Emilia-Romagna Open",
+    "2026 Emilia-Romagna Open"
+   ]
+  }
+ ]
+}

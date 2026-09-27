@@ -1,0 +1,6991 @@
+{
+ "generated_at": "2026-09-27T22:03:37.661Z",
+ "rule": "main-draw singles sheet of the edition's own WTA id, proven: >=4 first-round pairs resolved in the edition, >=90% stored matches, >=75% of the draw resolved, no player twice",
+ "source": "wtafiles.wtatennis.com/pdf/draws/{year}/{wtaId}/MDS.pdf via tennis-ingest /v1/drawsheet (R2-archived)",
+ "summary": {
+  "editions": 275,
+  "proven": 0,
+  "slots": 0,
+  "by_year": {
+   "2012": {
+    "editions": 52,
+    "proven": 0,
+    "unparsed": 3,
+    "not_proven": 24,
+    "no_sheet": 2
+   },
+   "2013": {
+    "editions": 55,
+    "proven": 0,
+    "unparsed": 1,
+    "not_proven": 37,
+    "no_sheet": 0
+   },
+   "2014": {
+    "editions": 57,
+    "proven": 0,
+    "unparsed": 4,
+    "not_proven": 44,
+    "no_sheet": 0
+   },
+   "2015": {
+    "editions": 59,
+    "proven": 0,
+    "unparsed": 29,
+    "not_proven": 23,
+    "no_sheet": 2
+   },
+   "2016": {
+    "editions": 52,
+    "proven": 0,
+    "unparsed": 7,
+    "not_proven": 43,
+    "no_sheet": 0
+   }
+  }
+ },
+ "editions": [
+  {
+   "edition_id": "e54004d4-4af6-5a36-85cf-3e32214428b9",
+   "year": 2012,
+   "name": "Abierto Mexicano TELCEL pres por HSBC - Acapulco, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "b8585e27-8e84-5c08-bf22-8c3dfbe1f954",
+   "year": 2012,
+   "name": "Qatar Total Open - Doha, Qatar",
+   "level": "Premier 5",
+   "start_date": "2012-02-13",
+   "wta_tid": "1003",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1003/MDS.pdf",
+   "capture_id": "78524753833769822158da18",
+   "sha256": "048c2aeb13fb6b6a6c8a93d8f46716b0b068c7595121549b8d6e98c084965fe3",
+   "captured_at": "2026-09-27T21:57:46.487Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Doha, QAT 13-19 February 2012"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9c483292-1347-5f7b-a0da-1100c6502b8c",
+   "year": 2012,
+   "name": "Grand Prix de Sar La Princesse Lalla Meryem, Fes",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "fb396ccc-fbfc-5adb-90c1-cdd186926b3e",
+   "year": 2012,
+   "name": "Memphis WTA International Event - Memphis, TN, USA",
+   "level": "International",
+   "start_date": "2012-02-19",
+   "wta_tid": "1012",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1012/MDS.pdf",
+   "capture_id": "36d0b7d2043490438e87333a",
+   "sha256": "21122e87cc25c4fe3a3c847fe43647823c797bf4766bac39280e24c138943cb9",
+   "captured_at": "2026-09-27T21:57:47.566Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Memphis, USA February 19 - 26, 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b4e147fd-9312-57b9-96f3-5ff01d1361a2",
+   "year": 2012,
+   "name": "WESTERN & SOUTHERN OPEN - CINCINNATI, OH, USA",
+   "level": "Premier 5",
+   "start_date": "2012-08-13",
+   "wta_tid": "1017",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1017/MDS.pdf",
+   "capture_id": "d710ae2a13595fda04bca06d",
+   "sha256": "7651465bfb1c192d30bc072a6a3cb50460f51c805b08b973d14dec00e7f2654f",
+   "captured_at": "2026-09-27T21:57:49.225Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Cincinnati, OH, USA 13 - 19 August 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 27,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3cceaba1-7c89-55b7-ad70-31f31d51a6d8",
+   "year": 2012,
+   "name": "CHINA OPEN - BEIJING, CHINA",
+   "level": "Premier Mandatory",
+   "start_date": "2012-09-29",
+   "wta_tid": "1020",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1020/MDS.pdf",
+   "capture_id": "529750f340fbe3a8934e72ca",
+   "sha256": "b7b906c1abc218c2f1d598fe78ba732c5fdfa8bde6abcda10b485e16f347cad4",
+   "captured_at": "2026-09-27T21:57:50.782Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Beijing, China 29 Sept - 7 Oct 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 31,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7d479acf-9f15-5e10-9e45-023d06f3e19d",
+   "year": 2012,
+   "name": "GUANGZHOU INT'L WOMEN'S OPEN - GUANGZHOU, CHINA",
+   "level": "International",
+   "start_date": "2012-09-17",
+   "wta_tid": "1023",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1023/MDS.pdf",
+   "capture_id": "e14c6878ffe6486dbb30c6dd",
+   "sha256": "1432ecf044b4a58ea7a2d57100a2680e08195bb3683428dfc5a6bd8ec54fe15d",
+   "captured_at": "2026-09-27T21:57:52.564Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Guangzhou, China September 17-22,2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "85eba313-1966-51d5-aa07-7cf313c1ddee",
+   "year": 2012,
+   "name": "KDB KOREA OPEN - SEOUL, KOREA",
+   "level": "International",
+   "start_date": "2012-09-17",
+   "wta_tid": "1024",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1024/MDS.pdf",
+   "capture_id": "c14c8adfd5334cf0220ba164",
+   "sha256": "5b521954b1997682fdaefea33e4784c3285d25674fac595e714bcf3de259732d",
+   "captured_at": "2026-09-27T21:57:54.027Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Seoul, KOR 17 - 23 September 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "cda11542-e83c-5e36-b209-979508a9822f",
+   "year": 2012,
+   "name": "Barcelona Ladies Open - Barcelona, ESP",
+   "level": "International",
+   "start_date": "2012-04-09",
+   "wta_tid": "1035",
+   "status": "no_sheet"
+  },
+  {
+   "edition_id": "930e5e11-6664-57aa-a37e-44fb64763c10",
+   "year": 2012,
+   "name": "Nurnberger Gastein Ladies - Bad Gastein, AUS",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "b90111b9-3bbe-5575-887f-2c6392ffb512",
+   "year": 2012,
+   "name": "Mutua Madrid Open - Madrid, Spain",
+   "level": "Premier Mandatory",
+   "start_date": "2012-05-05",
+   "wta_tid": "1038",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1038/MDS.pdf",
+   "capture_id": "9f798dd78fef1e0e25e0252d",
+   "sha256": "4b8dad89d373af0946dfdb993ee05e64df01334a4dce75e214c4b47d66ce5d3a",
+   "captured_at": "2026-09-27T21:57:57.303Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Blue Clay"
+    ],
+    "dates_raw": [
+     "Madrid, ESP 4-13 May 2012"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "851a4180-7124-595a-b402-55c2944102d2",
+   "year": 2012,
+   "name": "Whirlpool Monterrey Open - Monterrey, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "cf46ad8b-1e61-58ce-af8b-8039ceeba848",
+   "year": 2012,
+   "name": "BMW Malaysian Open - Kuala Lumpur, Malaysia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "f2d142c6-7f35-5ff3-81e7-3ecf6b1b3fa3",
+   "year": 2012,
+   "name": "e-Boks Open ",
+   "level": "International",
+   "start_date": "2012-04-09",
+   "wta_tid": "1042",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1042/MDS.pdf",
+   "capture_id": "5c4a600ff7e8e436878e6ba1",
+   "sha256": "2367db27063f88e9e8d0b19e122634c07fc1a2bde0fc61c608a03413e92ab720",
+   "captured_at": "2026-09-27T21:57:58.831Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Copenhagen, Denmark 9-15 April 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "bb5d7391-049a-553c-ab51-7a0bdf9d4f76",
+   "year": 2012,
+   "name": "BAKU CUP 2012 - BAKU, AZERBAIJAN",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a579e4c6-0d02-5006-90ec-e566607ec9e1",
+   "year": 2012,
+   "name": "CITI OPEN - WASHINGTON, DC, USA",
+   "level": "International",
+   "start_date": "2012-07-29",
+   "wta_tid": "1045",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1045/MDS.pdf",
+   "capture_id": "6c820e3c39fac061c5299d8e",
+   "sha256": "789362467c987c00f56653d9ee7dc5cc17c709f15c8dee8870c6d4d3997ed367",
+   "captured_at": "2026-09-27T21:58:00.655Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Washington, DC, USA 29 Jul - 5 Aug 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "6acb0cb4-6a42-5298-9784-804f01de81c8",
+   "year": 2012,
+   "name": "BRUSSELS OPEN - BRUSSELS, BELGIUM",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a1ff3f6b-fae6-5b8a-8bf2-df1beeb46d07",
+   "year": 2012,
+   "name": "TEXAS TENNIS OPEN - DALLAS, TX,USA",
+   "level": "International",
+   "start_date": "2012-08-19",
+   "wta_tid": "1047",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1047/MDS.pdf",
+   "capture_id": "52d3ff06ab075797b242361a",
+   "sha256": "62d703387216203a05ac4011e74c989ef0acc7da95f33040289c56486362b617",
+   "captured_at": "2026-09-27T21:58:02.019Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Dallas, USA 19-24 August 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 6,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "2ee85a91-9bf8-55ac-83d8-491a27f4ba97",
+   "year": 2012,
+   "name": "SONY SWEDISH OPEN - BASTAD, SWEDEN",
+   "level": "International",
+   "start_date": "2012-07-16",
+   "wta_tid": "1048",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1048/MDS.pdf",
+   "capture_id": "f2d4644027b71f9cf08863b6",
+   "sha256": "930b1b47fb4fde277257ffc88877d7040fb4c1620e69f85fdff5269bea450c8b",
+   "captured_at": "2026-09-27T21:58:03.660Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Bastad, Sweden 16-22 July 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "6c51e177-e7fe-5618-9316-b5b006761afb",
+   "year": 2012,
+   "name": "ASB Classic - Auckland, New Zealand",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "914aa5d3-a684-5c20-b440-6024bd183168",
+   "year": 2012,
+   "name": "Moorilla Hobart International - Hobart, Australia",
+   "level": "International",
+   "start_date": "2012-01-08",
+   "wta_tid": "1050",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1050/MDS.pdf",
+   "capture_id": "92cbdfafff370d6b87c40e63",
+   "sha256": "a96b10215c22f3ebd1101e0b5e31eeb33023bf564d3dac73edb88294439d28da",
+   "captured_at": "2026-09-27T21:58:05.282Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Hobart, Australia 08-14 January 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b21ad130-4039-5951-8fe5-3886e1341d84",
+   "year": 2012,
+   "name": "Porsche Tennis Grand Prix - Stuttgart, GERMANY",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a5f6b187-502d-5829-abf6-d75ee658c007",
+   "year": 2012,
+   "name": "AEGON Classic - Birmingham, Great Britain",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "54ba84a6-f952-554f-948c-2db3645cc3e4",
+   "year": 2012,
+   "name": "TORAY PAN PACIFIC OPEN - TOKYO, JAPAN",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "33330979-d905-5aed-b44f-f210dca1c999",
+   "year": 2012,
+   "name": "TAIPEI, CHINESE TAIPEI",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "39467f8e-5738-57ac-ade0-aae1a9dc3d39",
+   "year": 2012,
+   "name": "Royal Indian Open - Pune, India",
+   "level": "125K",
+   "start_date": "2012-11-05",
+   "wta_tid": "1061",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/1061/MDS.pdf",
+   "capture_id": "1a216b478330957c3ab795cd",
+   "sha256": "451a5bf724799151846d253fc9d76d76e86c133a86dd95ca1a300d95efa4369a",
+   "captured_at": "2026-09-27T21:58:06.878Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Pune, India November 5 - 11, 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "bbcedd14-f6ae-5405-bd74-dee51c968d4f",
+   "year": 2012,
+   "name": "BGL BNP PARIBAS LUXEMBOURG OPEN - LUXEMBOURG, LUXEMBOURG",
+   "level": "International",
+   "start_date": "2012-10-15",
+   "wta_tid": "300",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/300/MDS.pdf",
+   "capture_id": "33cab6f23ec33cc74e3317bc",
+   "sha256": "bdb820e57b9a8cb206b15f72e8cfaecaef9e7b0d2bb759dbea2f868525cc0f9d",
+   "captured_at": "2026-09-27T21:58:08.540Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Luxembourg, LUX October 15 - 21, 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1b07d9b5-4780-5344-8996-bd3d5c5d19b9",
+   "year": 2012,
+   "name": "PTT Pattaya Open- Pattaya City, Thailand",
+   "level": "International",
+   "start_date": "2012-02-06",
+   "wta_tid": "303",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/303/MDS.pdf",
+   "capture_id": "2292b63e4a6b70fa245c0996",
+   "sha256": "3aaf9bd7c613fb040fc7dd0c3c7215bf27c01ca78760652c86bf22412c7bd3f6",
+   "captured_at": "2026-09-27T21:58:10.142Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Pattaya City, Thailand 6-12th February 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0eb40601-10a9-5421-9d79-72fb16558846",
+   "year": 2012,
+   "name": "Estoril Open - Estoril, Portugal",
+   "level": "International",
+   "start_date": "2012-04-30",
+   "wta_tid": "358",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/358/MDS.pdf",
+   "capture_id": "cff6e007a2149b3ab9a2f961",
+   "sha256": "27c64ca668e33a088db9a124c41cf116db3002ba1b08b4795d5c6aee83b56d87",
+   "captured_at": "2026-09-27T21:58:11.667Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Estoril, Portugal April 30 - May 6 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 6,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9766464a-fe70-59d6-90ae-ca596cb11d5b",
+   "year": 2012,
+   "name": "HP JAPAN WOMEN'S OPEN TENNIS 2012 - OSAKA, JAPAN",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "715eacbc-6214-5c7e-a60d-de0adbd1c467",
+   "year": 2012,
+   "name": "Internationaux de Strasbourg - Strasbourg, France",
+   "level": "International",
+   "start_date": "2012-05-21",
+   "wta_tid": "406",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/406/MDS.pdf",
+   "capture_id": "7505922d6ee0398f0d428f25",
+   "sha256": "4be7ec7de0c78a04f5967638e241dda0826c6cd98dbf2debfd19a6b98a5a8729",
+   "captured_at": "2026-09-27T21:58:13.288Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Strasbourg, Fra 21-26 May 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "cf15a0cc-01f2-5b83-b2d9-19ab78235af2",
+   "year": 2012,
+   "name": "MERCURY INSURANCE OPEN PRESENTED BY TRI CITY MEDICAL CENTER - CARLSBAD, CA, USA",
+   "level": "Premier",
+   "start_date": "2012-07-16",
+   "wta_tid": "408",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/408/MDS.pdf",
+   "capture_id": "89d8b9fe49d408b5fa0b4c51",
+   "sha256": "aa2803dd822bf881ac73c0b87b9d24d6184c0a3042593ee0f7580186b677a6cb",
+   "captured_at": "2026-09-27T21:58:14.910Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Carlsbad,CA, USA 16 - 22 July 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "282cf030-80ad-5c38-b683-b0dcf0b35f3d",
+   "year": 2012,
+   "name": "XXV ITALIACOM OPEN Internazionali femminili di Tennis di Palermo - Palermo, ITA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "f52f53d9-f967-5896-a1bd-e6500542e13e",
+   "year": 2012,
+   "name": "GENERALI LADIES LINZ presented BY VOESTALPINE - LINZ, AUSTRIA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "31246de6-3676-564f-829d-6d6afda806ae",
+   "year": 2012,
+   "name": "Budapest Grand Prix - Budapest, Hungary",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "4e235c55-8bd3-59ae-926b-df45a60e8ff2",
+   "year": 2012,
+   "name": "NEW HAVEN OPEN AT YALE presented by FIRST NIAGARA - NEW HAVEN, CT, USA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "bd39f6e0-d246-51a9-a52f-1ba842e0ca22",
+   "year": 2012,
+   "name": "Open GDF Suez - Paris, France",
+   "level": "Premier",
+   "start_date": "2012-02-06",
+   "wta_tid": "604",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/604/MDS.pdf",
+   "capture_id": "cbee29ac481060ae76441e56",
+   "sha256": "324e9c866368bd59d6ac189677ff48c48ebd2056f350f73dadaa594e2f21ed01",
+   "captured_at": "2026-09-27T21:58:16.513Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Paris, Fra 6 - 12 February 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "102d70c3-34d7-5004-a0e0-641356352d5c",
+   "year": 2012,
+   "name": "BNP Paribas Open - Indian Wells, CA, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2012-03-07",
+   "wta_tid": "609",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/609/MDS.pdf",
+   "capture_id": "d14a48d9ffd4b286b8763304",
+   "sha256": "8bb9fb254b21f6fa3b9e1a3bd3b288697c9a78ebd37f5c3e5df0715e63df0f88",
+   "captured_at": "2026-09-27T21:58:18.151Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Indian Wells, USA 5-18 March 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 6,
+    "players": 24,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1d8835bc-2037-5238-b204-b03b8388dbc5",
+   "year": 2012,
+   "name": "OLYMPICS TENNIS EVENT - LONDON, UK",
+   "level": "OLYMPICS",
+   "start_date": "2012-07-28",
+   "wta_tid": "650",
+   "status": "no_sheet"
+  },
+  {
+   "edition_id": "bb265f5c-180c-58fc-81da-2f96443aa8cd",
+   "year": 2012,
+   "name": "BELL CHALLENGE - QUEBEC CITY, CANADA",
+   "level": "International",
+   "start_date": "2012-09-10",
+   "wta_tid": "656",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/656/MDS.pdf",
+   "capture_id": "e8ec30e377029d56506635e9",
+   "sha256": "951953c27dd69fd9a66b60aba5971098e22d3eeb8bfc57748ae29a90e6188c31",
+   "captured_at": "2026-09-27T21:58:21.307Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Quebec City, Canada 10-16 September 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "da92d21b-9e15-5b60-afe8-46bb00d028eb",
+   "year": 2012,
+   "name": "Apia International Sydney - Sydney, Australia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a8e6d080-bad9-5734-b08a-813730f18e22",
+   "year": 2012,
+   "name": "BANK OF THE WEST CLASSIC - STANFORD, CA, USA",
+   "level": "Premier",
+   "start_date": "2012-07-09",
+   "wta_tid": "703",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/703/MDS.pdf",
+   "capture_id": "7754ae9bab793b456b776e4a",
+   "sha256": "308554409b47c55ac3c38228d653b96eaaf2d2e0a8bd2414556761002c174e86",
+   "captured_at": "2026-09-27T21:58:22.882Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Stanford, USA 9-15 July 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "4ea45619-b144-50d1-ae47-66140ec94974",
+   "year": 2012,
+   "name": "Internazionali BNL d'Italia - Rome, Italy",
+   "level": "Premier 5",
+   "start_date": "2012-05-14",
+   "wta_tid": "709",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/709/MDS.pdf",
+   "capture_id": "b5dcb09970c6de906a841033",
+   "sha256": "d5e30bbfaf59c95f1eb1aea99a3e8ae4b30eee250141f17b10bc37c353605138",
+   "captured_at": "2026-09-27T21:58:24.519Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rome, Italy May 13 - 20, 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 3,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b07002ba-4e1b-5133-a512-18f1bb0ace0f",
+   "year": 2012,
+   "name": "AEGON International - Eastbourne, Great Britian",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "344da77b-8d7d-5898-8b41-c7517a8b8e16",
+   "year": 2012,
+   "name": "Dubai Duty Free Tennis Championships - Dubai, United Arab Emirates",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "9ce60222-9af9-55b6-905c-2a24549deb9a",
+   "year": 2012,
+   "name": "KREMLIN CUP - MOSCOW, RUSSIA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "6324d104-1f9f-5fe3-a4ca-8784812dd053",
+   "year": 2012,
+   "name": "Brisbane International - Brisbane, Australia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "65644d18-f60e-5806-b96d-79c123d55f55",
+   "year": 2012,
+   "name": "Family Circle Cup - Charleston, SC, USA",
+   "level": "Premier",
+   "start_date": "2012-04-02",
+   "wta_tid": "804",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/804/MDS.pdf",
+   "capture_id": "6063546dc1814a1a8f6f5cf8",
+   "sha256": "e21b73186073ea0416e9e7ac2be96aa35be6b4a4f81a5d8a3672fc596b2db36d",
+   "captured_at": "2026-09-27T21:58:26.184Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Green Clay"
+    ],
+    "dates_raw": [
+     "Charleston, SC, USA March 30 - April 8, 2012"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 26,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 4,
+    "players": 23,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "10049e15-6d30-5ec5-819e-03554930987f",
+   "year": 2012,
+   "name": "ROGERS CUP presented by NATIONAL BANK - MONTREAL, CANADA",
+   "level": "Premier 5",
+   "start_date": "2012-08-07",
+   "wta_tid": "806",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/806/MDS.pdf",
+   "capture_id": "5747955a5eb0ef1fe711f477",
+   "sha256": "09a22edc6615a36fb636f02023a2ed4e6c222a309808dd5c52b2427be6e4dabc",
+   "captured_at": "2026-09-27T21:58:27.842Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Montréal, Canada 7 - 13 August / août 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 4,
+    "players": 24,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "64283059-3d26-5e36-834c-c69a5c118162",
+   "year": 2012,
+   "name": "Unicef Open - 's-Hertogenbosch, Netherlands",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "dfee6578-4fa4-5a1c-aecf-ab98166b70d6",
+   "year": 2012,
+   "name": "TASHKENT OPEN - TASHKENT, UZBEKISTAN",
+   "level": "International",
+   "start_date": "2012-09-10",
+   "wta_tid": "825",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/825/MDS.pdf",
+   "capture_id": "4cee695b8a9bb97f60378f1e",
+   "sha256": "64d525757a5bc2618aa3882db55539badae4b14f34fa84ee88501b0d16e800b0",
+   "captured_at": "2026-09-27T21:58:29.377Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tashkent, Uzbekistan 10-15 September 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 3,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b51a3542-ba11-50cb-8e0e-da4092fd7184",
+   "year": 2012,
+   "name": "Sony Ericsson Open - Miami, FL, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2012-03-20",
+   "wta_tid": "902",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2012/902/MDS.pdf",
+   "capture_id": "52756754639ad9e79531b64e",
+   "sha256": "27475e20d9a7f4c232b1c4190c825f7d56fb2e5230cbaaeed621a7344db5ff9a",
+   "captured_at": "2026-09-27T21:58:31.000Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Miami, USA March 19-April 1, 2012"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 4,
+    "players": 24,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "4450e192-d40a-564c-b9e5-a87dc9e526e8",
+   "year": 2013,
+   "name": "Abierto Mexicano TELCEL presentador por HSBC - Acapulco, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "133787ec-fe3b-5657-951c-64916eb2dabb",
+   "year": 2013,
+   "name": "Qatar Total Open - Doha, Qatar",
+   "level": "Premier 5",
+   "start_date": "2013-02-11",
+   "wta_tid": "1003",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1003/MDS.pdf",
+   "capture_id": "e3d50fd4d8139665ae3c8d69",
+   "sha256": "85e458a59a530fa68021e536f274c419d944100620dfe60391ac18968e95baa7",
+   "captured_at": "2026-09-27T21:58:32.575Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Doha, QAT 11-17 Feb 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7c7f0921-6e44-587e-a8da-93c89e1dda17",
+   "year": 2013,
+   "name": "Grand Prix de SAR La Princesse Lalla Meryem - Marrakech, Morocco",
+   "level": "International",
+   "start_date": "2013-04-22",
+   "wta_tid": "1005",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1005/MDS.pdf",
+   "capture_id": "c10a49705058e68226385723",
+   "sha256": "7d852a3ed554249ae9b105f58db6a840d78ad71c6b3789678464cf4d81190a34",
+   "captured_at": "2026-09-27T21:58:34.259Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Marrakech, MAR April 22 - 28, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "28267630-111a-5c3b-a55a-412fae3e710a",
+   "year": 2013,
+   "name": "US National Indoor Tennis Championships - Memphis, TN, USA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "96fbdaac-b3e9-55b3-8bc3-b52712de9cec",
+   "year": 2013,
+   "name": "Western & Southern Open - Cincinnati, OH, USA",
+   "level": "Premier 5",
+   "start_date": "2013-08-12",
+   "wta_tid": "1017",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1017/MDS.pdf",
+   "capture_id": "6770cad0ac960325602bc3cc",
+   "sha256": "db715e0036ba4b2ef5c67ebb1c0b6343dc4a928c8b1541c1def02303710a538c",
+   "captured_at": "2026-09-27T21:58:35.767Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Cincinnati, OH, USA 12 - 18 August 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 8,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "27d1caec-4b0a-57b1-a5d7-2f7441fa601b",
+   "year": 2013,
+   "name": "CHINA OPEN - BEIJING, CHINA",
+   "level": "Premier Mandatory",
+   "start_date": "2013-09-28",
+   "wta_tid": "1020",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1020/MDS.pdf",
+   "capture_id": "3516d5df347b8ec72b3e29f8",
+   "sha256": "abf201222c1c04385a19a46c3bbf9fdd1cc754292b6a129913e2815d07541653",
+   "captured_at": "2026-09-27T21:58:37.445Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Beijing, China 28 Sept. - 6 Oct. 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 15,
+    "players": 30,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "fa40aed9-f252-582e-b3ca-e5256a725f10",
+   "year": 2013,
+   "name": "GRC BANK OF GUANGZHOU INTERNATIONAL WOMEN'S OPEN - GUANGZHOU, CHINA",
+   "level": "International",
+   "start_date": "2013-09-16",
+   "wta_tid": "1023",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1023/MDS.pdf",
+   "capture_id": "e75c21938601bd6d15a4abf0",
+   "sha256": "175d5b0fcd77449db026177f19a33ae0abe3c7f22bb92e45a6a41e224cb3c60a",
+   "captured_at": "2026-09-27T21:58:39.001Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Guangzhou, China Sep 14- 21, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "f61d80b7-42d3-5085-8f12-bd553e1e45e6",
+   "year": 2013,
+   "name": "KDB KOREA OPEN - SEOUL, KOREA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "462f912f-8cb7-5818-8b81-f9aac8d3d537",
+   "year": 2013,
+   "name": "N�RNBERGER GASTEIN LADIES - Bad Gastein, Austria",
+   "level": "International",
+   "start_date": "2013-07-15",
+   "wta_tid": "1036",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1036/MDS.pdf",
+   "capture_id": "304da10f16c7c52aad6838c5",
+   "sha256": "946e7f845bfc9c119a85cb71bee459bc2094564f751b85f22411b0ede1802dbf",
+   "captured_at": "2026-09-27T21:58:40.643Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Bad Gastein, AUT 15 - 21 July 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ee5e8179-be3d-5239-aa86-cfda52b275e7",
+   "year": 2013,
+   "name": "Mutua Madrid Open - Madrid, Spain",
+   "level": "Premier Mandatory",
+   "start_date": "2013-05-04",
+   "wta_tid": "1038",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1038/MDS.pdf",
+   "capture_id": "4a96a46c726257436a4084bf",
+   "sha256": "559be287a4d3783a28950ee141389f03f29b8dd699010f0a7311f04b777e6948",
+   "captured_at": "2026-09-27T21:58:42.113Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Madrid, Spain 3-12 May, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e85a0d84-77a7-56fd-9572-31ced4ca6de2",
+   "year": 2013,
+   "name": "MONTERREY OPEN presented by Heineken - Monterrey, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "e590b6ac-1550-559e-b316-7e97407291b8",
+   "year": 2013,
+   "name": "BMW Malaysian Open - Kuala Lumpur, Malaysia",
+   "level": "International",
+   "start_date": "2013-02-25",
+   "wta_tid": "1041",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1041/MDS.pdf",
+   "capture_id": "31871d71b5af2efbe9ea69dd",
+   "sha256": "dabfad0b596e3bf120722a1aba1e78df38209ea63c04a3550fceb117f494de7d",
+   "captured_at": "2026-09-27T21:58:43.813Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Kuala Lumpur, Malaysia Feb 24 - Mar 3, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 10,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "b259247b-c1c3-5076-8603-6a8e70bdbbf8",
+   "year": 2013,
+   "name": "Baku Cup 2013 - Baku, Azerbaijan",
+   "level": "International",
+   "start_date": "2013-07-22",
+   "wta_tid": "1044",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1044/MDS.pdf",
+   "capture_id": "ebdb7373e7599a6b338921be",
+   "sha256": "4e8fbdcfeaa2b2a255fc1f559ca056fcd653b46fbd843f59532d78743366aa6f",
+   "captured_at": "2026-09-27T21:58:45.438Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Baku, Azerbaijan 22 - 28 July, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "d46ecf46-d088-549d-84a1-350ad1127ae6",
+   "year": 2013,
+   "name": "Citi Open - Washington DC USA",
+   "level": "International",
+   "start_date": "2013-07-29",
+   "wta_tid": "1045",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1045/MDS.pdf",
+   "capture_id": "af89194b5c9fb889f0a650c2",
+   "sha256": "4dbcf77509c3a728c693d38c4e7e2747a10258792fa9f9af58e3b41372654b37",
+   "captured_at": "2026-09-27T21:58:47.069Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Washington, DC, USA 29 July - 4 August 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b63e0cc3-483b-5b7c-9eb0-c152f2eebcf2",
+   "year": 2013,
+   "name": "Brussels Open presented by BNP Paribas Fortis - Brussels, Belgium",
+   "level": "Premier",
+   "start_date": "2013-05-20",
+   "wta_tid": "1046",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1046/MDS.pdf",
+   "capture_id": "e964b05218768cb8831b3c24",
+   "sha256": "10dfaf350029d1179b0eceb72489f84d75cf3655e8870d145c6022dc6dab7b78",
+   "captured_at": "2026-09-27T21:58:48.655Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Brussels, Belgium 18-25 May 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "79232e04-28e5-5079-8694-98db2d6561c4",
+   "year": 2013,
+   "name": "Collector Swedish Open - Bastad, Sweden",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "0905316b-1abb-5a68-a267-0005b7572351",
+   "year": 2013,
+   "name": "ASB Classic - Auckland, New Zealand",
+   "level": "International",
+   "start_date": "2012-12-31",
+   "wta_tid": "1049",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1049/MDS.pdf",
+   "capture_id": "ce1612e579f1b0cbc0d26d5c",
+   "sha256": "d651c637cdfd4468dd2a192b76ffc6046aa87752ef5dcf0b97570e1be557b630",
+   "captured_at": "2026-09-27T21:58:50.306Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Auckland, New Zealand 29 December 2012 - 5 January 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "116dc8b0-a686-527b-b55f-3f7c045e35ab",
+   "year": 2013,
+   "name": "Moorilla Hobart International - Hobart, Australia",
+   "level": "International",
+   "start_date": "2013-01-06",
+   "wta_tid": "1050",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1050/MDS.pdf",
+   "capture_id": "57d6a64b5406355255900edc",
+   "sha256": "fe665e6bf7025b9d907990ebf76b94771ae5ac47c1919b96c0a47b0e673c5043",
+   "captured_at": "2026-09-27T21:58:51.900Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Hobart, Australia 6-12 January 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "13fceb3a-aaf6-5b26-b2bb-2b451104a04c",
+   "year": 2013,
+   "name": "Porsche Tennis Grand Prix - Stuttgart, Germany",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "b11eb3d8-6e69-57a2-b820-6d39220f9515",
+   "year": 2013,
+   "name": "Aegon Classic - Birmingham, Great Britain",
+   "level": "International",
+   "start_date": "2013-06-10",
+   "wta_tid": "1052",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1052/MDS.pdf",
+   "capture_id": "20096803517fa237ee4efd18",
+   "sha256": "f3321c65c907f46d1fb14691d40a96c74a4b7c902b642fcf01b327c12a44dd48",
+   "captured_at": "2026-09-27T21:58:53.457Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Birmingham, England 10-16 June, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 15,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "222f864c-8880-5483-8d82-ac0941d32152",
+   "year": 2013,
+   "name": "TORAY PAN PACIFIC OPEN - TOKYO, JAPAN",
+   "level": "Premier 5",
+   "start_date": "2013-09-22",
+   "wta_tid": "1056",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1056/MDS.pdf",
+   "capture_id": "cad0d2e2abbb27f9c089894c",
+   "sha256": "e62ed44dfb212e962dcb99ab87437dcb3f2fdc91b572a6c3fab4ff0e9440fc46",
+   "captured_at": "2026-09-27T21:58:55.109Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tokyo, JPN 22 - 28 September 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 14,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "37a60033-73c2-5d61-a6dc-29238412f311",
+   "year": 2013,
+   "name": "OEC Taipei WTA Ladies Open - Taipei, Chinese Taipei",
+   "level": "125K",
+   "start_date": "2013-11-04",
+   "wta_tid": "1059",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1059/MDS.pdf",
+   "capture_id": "99fb214fc28102e38af510b4",
+   "sha256": "acebeac0719b5756fe3b16380f40b62c44151b785c39eabe8bce2dc6e32e52b7",
+   "captured_at": "2026-09-27T21:58:56.627Z",
+   "header": {
+    "surface": "carpet",
+    "indoor": null,
+    "surface_raw": [
+     "Carpet"
+    ],
+    "dates_raw": [
+     "Taipei, Chinese Taipei November 4 - 10, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1cce4fb2-d1aa-5a48-ae88-6f6cd1c61fb9",
+   "year": 2013,
+   "name": "Shenzhen Longgang Gemdale Open - Shenzhen, China",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "782a5768-f88c-55ba-a1d8-f031a1a19241",
+   "year": 2013,
+   "name": "WTA Brasil Tennis  - Florianopolis, Brazil",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "3f0b3daa-f990-5be2-9826-23aeb6c64a91",
+   "year": 2013,
+   "name": "VII Bionaire Tennis Cup - Cali, Colombia",
+   "level": "125K",
+   "start_date": "2013-02-11",
+   "wta_tid": "1065",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1065/MDS.pdf",
+   "capture_id": "efe7ce83bcb99fbf85907eb5",
+   "sha256": "1ac3cff347e50a6d102d923843cb306c8931908b79bdf11dea264a9740a76e51",
+   "captured_at": "2026-09-27T21:58:58.317Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Cali, Colombia 11-17 February 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 4,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "660cae1d-cac1-5491-a175-73df88cb435b",
+   "year": 2013,
+   "name": "BNP Paribas Katowice Open - Katowice, Poland",
+   "level": "International",
+   "start_date": "2013-04-08",
+   "wta_tid": "1067",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1067/MDS.pdf",
+   "capture_id": "370a50fa3c88f7d368d35fb9",
+   "sha256": "8b889fc31f02603f630279973b543b7fe05fc118b92ff5c0fb5148df8e551a2e",
+   "captured_at": "2026-09-27T21:58:59.917Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay, Red Clay"
+    ],
+    "dates_raw": [
+     "Katowice, Poland 8-14 April 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 6,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "7f0bdb1c-2f6f-52c6-a6e9-10281ff70b9b",
+   "year": 2013,
+   "name": "N�RNBERGER VERSICHERUNGSCUP - N�RNBERG, GERMANY",
+   "level": "International",
+   "start_date": "2013-06-10",
+   "wta_tid": "1068",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1068/MDS.pdf",
+   "capture_id": "8e2b62cb3402b79e553355fe",
+   "sha256": "1240b7a6c0c5e215d53acc34dd7a0acac52dd1c2e22fe84dc3b801dff6b427fb",
+   "captured_at": "2026-09-27T21:59:01.558Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Nuremberg, Ger 8-15 June 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "da7ae227-b4d4-5769-ad83-fa438480b4ca",
+   "year": 2013,
+   "name": "CAOXIJIU Suzhou Ladies Open - Suzhou, China",
+   "level": "125K",
+   "start_date": "2013-08-05",
+   "wta_tid": "1069",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1069/MDS.pdf",
+   "capture_id": "e49cfe2661f6611abf82d3aa",
+   "sha256": "3407f3b4767ed954333e96b4336f1f263c18dfc81fbb06d882ef7305c7d35c5b",
+   "captured_at": "2026-09-27T21:59:03.133Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Suzhou, China 2 - 10 August, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 8,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "d7566f24-4ddb-5158-ae39-d1ea254b1c66",
+   "year": 2013,
+   "name": "2013 Nanjing Ladies Open - Nanjing, China",
+   "level": "125K",
+   "start_date": "2013-10-28",
+   "wta_tid": "1070",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1070/MDS.pdf",
+   "capture_id": "5dd2da7b96b3f7523337c92a",
+   "sha256": "2637723789f6b62b27874f4a544bd47061c417a683ca76d9f1d8f3e4a3fac9bc",
+   "captured_at": "2026-09-27T21:59:04.719Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Nanjing, China 26 Oct - 3 Nov, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 11,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "c5617e7a-0a50-5027-98d0-9345f38969c9",
+   "year": 2013,
+   "name": "Yinzhou Bank International Women's Tennis Open - Ningbo, China",
+   "level": "125K",
+   "start_date": "2013-09-22",
+   "wta_tid": "1071",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/1071/MDS.pdf",
+   "capture_id": "a11add03e274b2a4d8e30d85",
+   "sha256": "98677ab8215b8eaa338808251118e2c2d868116b9349cc3496f659b7db8ea0ae",
+   "captured_at": "2026-09-27T21:59:06.369Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Ningbo, China 22 - 27 September 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "c9705592-6e2c-5b89-967c-641b173aefd9",
+   "year": 2013,
+   "name": "BGL BNP PARIBAS LUXEMBOURG OPEN - LUXEMBOURG",
+   "level": "International",
+   "start_date": "2013-10-14",
+   "wta_tid": "300",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/300/MDS.pdf",
+   "capture_id": "6ed4582d2fb02df8db8e1857",
+   "sha256": "47aead01a6bba5461b0523b8b2ee706bb4b73edf3357c00e1521d15fda61da5f",
+   "captured_at": "2026-09-27T21:59:08.014Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Luxembourg, LUX 14-20 October 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1b5e97a7-0005-5771-ae06-283372e76f6c",
+   "year": 2013,
+   "name": "PTT Pattaya Open - Pattaya City, Thailand",
+   "level": "International",
+   "start_date": "2013-01-28",
+   "wta_tid": "303",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/303/MDS.pdf",
+   "capture_id": "dad1044d62ea6647aa4261e6",
+   "sha256": "4f952cccb54964a9723d55150f69d190831427b301b26b83c4f6793049c16a29",
+   "captured_at": "2026-09-27T21:59:09.607Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Jan 27 - Feb 03 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 6,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "a95041aa-55cd-59d1-974d-3fb9bd19f447",
+   "year": 2013,
+   "name": "PORTUGAL OPEN -  Oeiras, Portugal",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "6fe215a6-a5ad-52e4-9aec-8f5eab3b4e5c",
+   "year": 2013,
+   "name": "HP JAPAN WOMEN'S OPEN TENNIS 2013 - OSAKA, JAPAN",
+   "level": "International",
+   "start_date": "2013-10-07",
+   "wta_tid": "405",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/405/MDS.pdf",
+   "capture_id": "d9a1f9bc95b2a8826d53c5be",
+   "sha256": "13c4b2ea816720da4fcac8abe84324e0c839c4e36e4880041511ba6cb80f40f1",
+   "captured_at": "2026-09-27T21:59:11.236Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Osaka, Japan October 7 - 13, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7ff1daab-2a18-5beb-9dc6-712ee32087c3",
+   "year": 2013,
+   "name": "Internationaux de Strasbourg - Strasbourg, France",
+   "level": "International",
+   "start_date": "2013-05-20",
+   "wta_tid": "406",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/406/MDS.pdf",
+   "capture_id": "77fa57f81e2e64da34ae00c3",
+   "sha256": "8073efc740f6236f85d46b89a75b120cd035dd92e5e2685c1db61a237ddbbbb0",
+   "captured_at": "2026-09-27T21:59:12.806Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Strasbourg, Fra 20 - 25 May 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1d01b3db-628d-5c67-93be-b962a5a8ed62",
+   "year": 2013,
+   "name": "Southern California Open - Carlsbad, CA, USA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "23dc6dbe-04a5-5141-9dd7-5a40d29d3931",
+   "year": 2013,
+   "name": "XXVI Italiacom Open - Palermo, Italy",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "5a177fa9-d5d8-5bfb-b472-e3436fb60fd8",
+   "year": 2013,
+   "name": "Generali Ladies Linz  - Linz, Austria",
+   "level": "International",
+   "start_date": "2013-10-07",
+   "wta_tid": "528",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/528/MDS.pdf",
+   "capture_id": "d491b77c1aac41fd02278005",
+   "sha256": "6d77f61b476c6299464489a43865da49297f69533a961cb254b4e7ccd5df9020",
+   "captured_at": "2026-09-27T21:59:14.444Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Linz, Austria 7-13 October 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "03754ec3-0987-5818-92ff-5ad904625837",
+   "year": 2013,
+   "name": "New Haven at Yale - New Haven, CT, USA",
+   "level": "Premier",
+   "start_date": "2013-08-18",
+   "wta_tid": "602",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/602/MDS.pdf",
+   "capture_id": "ff2b71e6654ca6a51f095e6f",
+   "sha256": "72144ccf93a7fe9141b2a45f9d30369ba7f249ed3b33dd754c0b13c0148246f6",
+   "captured_at": "2026-09-27T21:59:16.016Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "New Haven, USA August 18 - 24, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "95f8a726-81eb-586f-9ecc-626d5111675c",
+   "year": 2013,
+   "name": "21st Open GDF SUEZ - Paris, France",
+   "level": "Premier",
+   "start_date": "2013-01-28",
+   "wta_tid": "604",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/604/MDS.pdf",
+   "capture_id": "b0f62a49339b6bcc909db331",
+   "sha256": "4c7363b4a84ef4b45ed50f61901a3b87ce64d6f1eab21d4d3bf41c3801232e52",
+   "captured_at": "2026-09-27T21:59:17.594Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Paris, FRA 28 Jan. - 3 Feb. 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 5,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "788032df-111d-5feb-bd72-58446b388611",
+   "year": 2013,
+   "name": "BNP Paribas Open - Indian Wells, CA, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2013-03-06",
+   "wta_tid": "609",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/609/MDS.pdf",
+   "capture_id": "ea18e11f2c19a384808b4131",
+   "sha256": "9b7af11c3e77688f49241b31f4ebf1fd221d1a8893df182cb6d4e1a50f1e5513",
+   "captured_at": "2026-09-27T21:59:19.270Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Indian Wells, USA 4-17 March 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 4,
+    "players": 24,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "52c09060-1e94-5913-8f12-1d07870409c0",
+   "year": 2013,
+   "name": "Challenge Bell - Quebec City, Canada",
+   "level": "International",
+   "start_date": "2013-09-09",
+   "wta_tid": "656",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/656/MDS.pdf",
+   "capture_id": "8d2e79c09c9d5c283bbcfccf",
+   "sha256": "aa43c62feb57398c275e50be8f3637c33770aa510c5c0aca929584d7b3714456",
+   "captured_at": "2026-09-27T21:59:20.884Z",
+   "header": {
+    "surface": "carpet",
+    "indoor": null,
+    "surface_raw": [
+     "Carpet"
+    ],
+    "dates_raw": [
+     "Quebec City, Canada September 9 - 15, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "18315805-5558-529f-af0e-a6f951d2e592",
+   "year": 2013,
+   "name": "Apia International Sydney - Sydney, Australia",
+   "level": "Premier",
+   "start_date": "2013-01-06",
+   "wta_tid": "702",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/702/MDS.pdf",
+   "capture_id": "b8765e6cfffd1c57bab5b9ce",
+   "sha256": "4abadb5c9c1fa32afb3b08e52dfcca3402df7229dc63a90ebf72aecdbf0f707b",
+   "captured_at": "2026-09-27T21:59:22.450Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Sydney, AUS 6-11 January 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b765de79-5766-551f-8fbb-213aae829e60",
+   "year": 2013,
+   "name": "Bank of the West Classic - Stanford, CA, USA",
+   "level": "Premier",
+   "start_date": "2013-07-22",
+   "wta_tid": "703",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/703/MDS.pdf",
+   "capture_id": "273528e42f8d0ab6cadb49ab",
+   "sha256": "ab4130ea5bd6fd806c032d88baecdc9e31dfbaad8f1161b58fc9bee61892e343",
+   "captured_at": "2026-09-27T21:59:24.158Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Stanford, USA July 22 - 28, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 15,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "16088fd1-2313-592c-9f11-4af4ed7719fe",
+   "year": 2013,
+   "name": "Internazionali BNL d'Italia - Rome, Italy",
+   "level": "Premier 5",
+   "start_date": "2013-05-13",
+   "wta_tid": "709",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/709/MDS.pdf",
+   "capture_id": "90977816416f272b14c27190",
+   "sha256": "5ea225c493eff9d57f83b96be409b8335ee722327942091d995120e9cecb9405",
+   "captured_at": "2026-09-27T21:59:25.728Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rome, ITA 13-19 May 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1fec554a-ab95-514b-8d79-572cdbb84546",
+   "year": 2013,
+   "name": "Aegon International - Eastbourne, Great Britain",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "69a00f2d-ea5e-59b8-a44c-42e15df70168",
+   "year": 2013,
+   "name": "Dubai Duty Free Tennis Championships - Dubai, UAE",
+   "level": "Premier",
+   "start_date": "2013-02-18",
+   "wta_tid": "718",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/718/MDS.pdf",
+   "capture_id": "d26d01fd00b728362b55056f",
+   "sha256": "9180cffae82c4ee16b66996fef83fa44d22498777d08e928badd127e79c19c77",
+   "captured_at": "2026-09-27T21:59:27.267Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Dubai, UAE 18-23 February 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "91192364-6853-5522-9d3f-d05038883433",
+   "year": 2013,
+   "name": "KREMLIN CUP - MOSCOW, RUSSIA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "887d9941-7148-5d8f-9f1c-33bcc953151f",
+   "year": 2013,
+   "name": "Brisbane International presented by Suncorp - Brisbane, Australia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "fd565293-dc7d-57c8-b05f-6cbe3ce7e7a1",
+   "year": 2013,
+   "name": "Family Circle Cup - Charleston, SC, USA",
+   "level": "Premier",
+   "start_date": "2013-04-01",
+   "wta_tid": "804",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/804/MDS.pdf",
+   "capture_id": "23d8ab9fa737c4f3b5bffbd2",
+   "sha256": "32808e3a3368ed75630bae38b2881cee3cff431d584b0832e12aedb45bc50d35",
+   "captured_at": "2026-09-27T21:59:28.894Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Green Clay"
+    ],
+    "dates_raw": [
+     "Charleston, SC, USA April 1 - 7, 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 1,
+    "confirmed": 1,
+    "resolved": 11,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "ee02cc75-743e-5f7e-866f-a82dac1db4c9",
+   "year": 2013,
+   "name": "Rogers Cup presented by National Bank - Toronto, Canada",
+   "level": "Premier 5",
+   "start_date": "2013-08-05",
+   "wta_tid": "806",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/806/MDS.pdf",
+   "capture_id": "a8240a6b56133de41e33ce98",
+   "sha256": "2221d1fb277503abb957dbf4894a86e7e89ea2e5811d5127d4eecc28f8ad0946",
+   "captured_at": "2026-09-27T21:59:30.489Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Toronto, Can 5 - 11 August 2013"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 10,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "4b1019f3-c3ae-58b7-b02b-8f417644f3b8",
+   "year": 2013,
+   "name": "Topshelf Open - 's-Hertogenbosch, Netherlands",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "f946bc56-2f5f-557d-9ef1-d00215efd95f",
+   "year": 2013,
+   "name": "Tashkent Open - Tashkent,  Uzbekistan",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "0d4391ec-94df-500b-bf66-3c0dc8f06408",
+   "year": 2013,
+   "name": "Copa Claro Colsanitas - Bogota, Colombia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "49a32a32-5cb4-5139-9b9e-dd9e37a047e2",
+   "year": 2013,
+   "name": "Sony Open Tennis - Miami, FL, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2013-03-19",
+   "wta_tid": "902",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2013/902/MDS.pdf",
+   "capture_id": "48d97f13c941ca5229ddeb3e",
+   "sha256": "d98d0e5d4b23a475148bfd79c66289d692284768df5f5def01ed4d9c126b2280",
+   "captured_at": "2026-09-27T21:59:32.153Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Miami, FL, USA 18 - 31 March 2013"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c29d66b4-c176-5862-9cd2-d2c96f2e8efb",
+   "year": 2014,
+   "name": "Abierto Mexicano TELCEL presentado por HSBC - Acapulco, MEX",
+   "level": "International",
+   "start_date": "2014-02-24",
+   "wta_tid": "1002",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1002/MDS.pdf",
+   "capture_id": "5297596b09a83b37d576c20b",
+   "sha256": "af8419a13b9aff225671e4a67a28bfe2dd935285ecfb5ddf66f032437ebc5abc",
+   "captured_at": "2026-09-27T21:59:33.710Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Acapulco, Mexico 22February - 1 March 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "03b343ef-c318-5d67-ba51-634ecdc077bb",
+   "year": 2014,
+   "name": "Qatar Total Open 2014 - Doha, Qatar",
+   "level": "Premier 5",
+   "start_date": "2014-02-10",
+   "wta_tid": "1003",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1003/MDS.pdf",
+   "capture_id": "206f3c249e4b81889bd624fd",
+   "sha256": "038ad3637cbf2937644c3c82613d480683d3985f7934c8bcc40cb33977a0fc6c",
+   "captured_at": "2026-09-27T21:59:35.371Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Doha, Qatar February 10 - 16, 2014"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "823ff9cd-99a5-5659-8d0a-3677b45b99fe",
+   "year": 2014,
+   "name": "Grand Prix de SAR La Princesse Lalla Meryem - Marrakech, Morocco",
+   "level": "International",
+   "start_date": "2014-04-21",
+   "wta_tid": "1005",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1005/MDS.pdf",
+   "capture_id": "a921ab860e8c7f7f19f86180",
+   "sha256": "976e2b77ca838edd6dc76de858c6dee968b200c94636724514e136f9b44a6a73",
+   "captured_at": "2026-09-27T21:59:36.909Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Marrakech, Morocco April 21 - 27, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 4,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ab5eb32e-3c4e-55de-b8c9-73d819c830e1",
+   "year": 2014,
+   "name": "Western & Southern Open - Cincinnati, OH, USA",
+   "level": "Premier 5",
+   "start_date": "2014-08-11",
+   "wta_tid": "1017",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1017/MDS.pdf",
+   "capture_id": "d6c62a653179a17522af34e0",
+   "sha256": "6dd7376f9e9e6d213dc96d1ea8749c58ce4f6e8c0372d327d1b6d4b08094cdd5",
+   "captured_at": "2026-09-27T21:59:38.532Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Cincinnati, OH, USA 11 - 17 August 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 9,
+    "confirmed": 9,
+    "resolved": 24,
+    "players": 56,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c5673b80-3e98-5143-b3de-260419ad1be1",
+   "year": 2014,
+   "name": "China Open 2014 - Beijing, China",
+   "level": "Premier Mandatory",
+   "start_date": "2014-09-27",
+   "wta_tid": "1020",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1020/MDS.pdf",
+   "capture_id": "da2fd7281833ef24baa3d208",
+   "sha256": "b81da141bd803fe0d64735f9bca5f7a3b55a9b351685ae53fd8bc207a208326a",
+   "captured_at": "2026-09-27T21:59:40.123Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Beijing, CHN 27 Sep - 5 Oct 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 18,
+    "players": 60,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "0fa31368-1781-52e3-b545-e0d9da1a228f",
+   "year": 2014,
+   "name": "Guangzhou International Women's Open 2014 - Guangzhou, China",
+   "level": "International",
+   "start_date": "2014-09-15",
+   "wta_tid": "1023",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1023/MDS.pdf",
+   "capture_id": "d5f456cc45f6a5751578f8d7",
+   "sha256": "956ed4725e0212592e37d2270d58293d3c5545d74dfb110257f285613f3184b0",
+   "captured_at": "2026-09-27T21:59:41.735Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Guangzhou, China 15 - 20 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "95ac3449-b448-507f-9b01-466570e62004",
+   "year": 2014,
+   "name": "KIA KOREA OPEN 2014 - Seoul, Korea",
+   "level": "International",
+   "start_date": "2014-09-15",
+   "wta_tid": "1024",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1024/MDS.pdf",
+   "capture_id": "0ea07ecf3abeec6b8f3c44c8",
+   "sha256": "1cb28294bb4d2347be6fd200bf9d988fbdf1c67991d810dab5988e4e6d76bb75",
+   "captured_at": "2026-09-27T21:59:43.343Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Seoul, Korea 15 - 21 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 16,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "6e0bef92-3738-5af7-a269-56aeb3ac3782",
+   "year": 2014,
+   "name": "TEB BNP PARIBAS ISTANBUL CUP - Istanbul, Turkey",
+   "level": "International",
+   "start_date": "2014-07-14",
+   "wta_tid": "1027",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1027/MDS.pdf",
+   "capture_id": "e30caf194ea82d4e964085f9",
+   "sha256": "6c0391597509f6c4858e2d99196b9e2c30d3c53f9f424af92e6b245d59faae5d",
+   "captured_at": "2026-09-27T21:59:44.941Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Istanbul, Turkey 14-20 July 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ba325bdb-c6a9-5041-8251-8643418326c6",
+   "year": 2014,
+   "name": "N�RNBERGER Gastein Ladies - Bad Gastein, Austria",
+   "level": "International",
+   "start_date": "2014-07-07",
+   "wta_tid": "1036",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1036/MDS.pdf",
+   "capture_id": "452f99bf86dfa1828ec618f6",
+   "sha256": "00bd35d484ffcefe8714daaeaa907d8df94e5a8be64746f15fb3c49002fd8106",
+   "captured_at": "2026-09-27T21:59:46.529Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "BAD GASTEIN, Austria 7-13 July 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 12,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "3c4db111-d607-5148-a83a-c6b870f2c64f",
+   "year": 2014,
+   "name": "Mutua Madrid Open - Madrid, Spain",
+   "level": "Premier Mandatory",
+   "start_date": "2014-05-03",
+   "wta_tid": "1038",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1038/MDS.pdf",
+   "capture_id": "bcf693288d19dda31a53f373",
+   "sha256": "770c4b3c77ff4ddffc938f349c95066536be1bc011312ef70091f59175d8d23b",
+   "captured_at": "2026-09-27T21:59:48.267Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Madrid, ESP May 4- 11, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 8,
+    "confirmed": 8,
+    "resolved": 17,
+    "players": 64,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "af0d1fe6-3c1a-538d-94b7-5ad273dc7971",
+   "year": 2014,
+   "name": "Abierto Monterrey presentado por Afirme - Monterrey, Mexico",
+   "level": "International",
+   "start_date": "2014-03-31",
+   "wta_tid": "1039",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1039/MDS.pdf",
+   "capture_id": "22acdfb5117c4f1c5db50a2f",
+   "sha256": "5c755737e0b0d6ea9815389ecc1bcdd9dc1872da9f2ed3d5cde755f5146baf58",
+   "captured_at": "2026-09-27T21:59:49.754Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Monterrey, Mexico 31 March - 6 April 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "4dd929b0-a3a4-561c-be92-ab152dc62068",
+   "year": 2014,
+   "name": "BMW Malaysian Open - Kuala Lumpur, Malaysia",
+   "level": "International",
+   "start_date": "2014-04-14",
+   "wta_tid": "1041",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1041/MDS.pdf",
+   "capture_id": "bb90d82c5c30f27ffe625683",
+   "sha256": "7d7a309d1043a8d15fec797862f1e10e2a69694c5e9c2444d02cd98d5e57ea56",
+   "captured_at": "2026-09-27T21:59:51.421Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Kuala Lumpur, MAS Apr 12- 20, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "38eb0002-50d0-5186-a6da-83dff3d838c3",
+   "year": 2014,
+   "name": "Baku Cup - Baku, Azerbaijan",
+   "level": "International",
+   "start_date": "2014-07-21",
+   "wta_tid": "1044",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1044/MDS.pdf",
+   "capture_id": "9104dce816e225ae2b31d86d",
+   "sha256": "5b33b6d43b7a71d1446c1719701018596d985e3332ee9556f667d66bfff681d1",
+   "captured_at": "2026-09-27T21:59:53.118Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Baku, Azerbaijan 20 - 27 July 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "5f84d52e-48d8-5e6e-bf12-f05011aa9000",
+   "year": 2014,
+   "name": "Citi Open - Washington DC USA",
+   "level": "International",
+   "start_date": "2014-07-28",
+   "wta_tid": "1045",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1045/MDS.pdf",
+   "capture_id": "15f3700d23657cc4ad64e438",
+   "sha256": "15b15a9db929381ae3996aeeb369c0558d69c1b0431e80b2acdeca9960c215b0",
+   "captured_at": "2026-09-27T21:59:54.782Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Washington DC, USA 28 July - 3 August 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "adc21e31-bf02-580b-9c10-43dde726a928",
+   "year": 2014,
+   "name": "Collector Swedish Open - Bastad, Sweden",
+   "level": "International",
+   "start_date": "2014-07-14",
+   "wta_tid": "1048",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1048/MDS.pdf",
+   "capture_id": "cf8e6729c9a4e69d254822ad",
+   "sha256": "36d56b7f551dbc27b127942066acec36cdb0355a694d44f1d41c6ee9cd482c43",
+   "captured_at": "2026-09-27T21:59:56.210Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Bastad, SWE 14 - 20 July 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "a135c7f4-5418-52cc-8b9a-797e5f56d1e1",
+   "year": 2014,
+   "name": "ASB Classic - Auckand, New Zealand",
+   "level": "International",
+   "start_date": "2013-12-30",
+   "wta_tid": "1049",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1049/MDS.pdf",
+   "capture_id": "f0163dd542ef067937146dae",
+   "sha256": "1834cae889b8fbb372e18dcb97f9f70f1c58d197699bdbb3fccd8bb9e3213f8e",
+   "captured_at": "2026-09-27T21:59:57.817Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "December 30 - January 4, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "cdb9f937-3ae7-581e-a66d-ce36af9132aa",
+   "year": 2014,
+   "name": "Hobart International - Hobart, Australia",
+   "level": "International",
+   "start_date": "2014-01-05",
+   "wta_tid": "1050",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1050/MDS.pdf",
+   "capture_id": "4a47b769ab6db1804205e102",
+   "sha256": "abcc4ccd77df498ab01bd4fddaefa6123caae3b1f56b8f1b4c8e54897ca9c0e3",
+   "captured_at": "2026-09-27T21:59:59.440Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Hobart, Australia 5-11 January 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "d0277b98-3fb2-5f08-9af7-c762b4951a7c",
+   "year": 2014,
+   "name": "Porsche Tennis Grand Prix - Stuttgart, Germany",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "9f09a872-d05a-584b-b92c-cb19842ba250",
+   "year": 2014,
+   "name": "Aegon Classic - Birmingham, Great Britain",
+   "level": "Premier",
+   "start_date": "2014-06-09",
+   "wta_tid": "1052",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1052/MDS.pdf",
+   "capture_id": "45cef100f9c2abf20164ae2e",
+   "sha256": "d20b7e5a038b6376c33c80ca96fed6a9d714fd4667b775f88b97d704752a11b7",
+   "captured_at": "2026-09-27T22:00:01.083Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Birmingham, England 9-15 June 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 16,
+    "players": 56,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b93aec60-d8f8-5f10-8434-b3d4432189d7",
+   "year": 2014,
+   "name": "Toray Pan Pacific Open - Tokyo, Japan",
+   "level": "Premier",
+   "start_date": "2014-09-15",
+   "wta_tid": "1056",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1056/MDS.pdf",
+   "capture_id": "9b7849ccdfd89938f0beb705",
+   "sha256": "e4b1c9d3492558caafd1219e72a2ff5f122cd70285a5da85459fc4cd5d5a12f0",
+   "captured_at": "2026-09-27T22:00:02.704Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tokyo, Japan 13 - 21 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "6f8a3c40-b590-50c6-b26f-a9a7b0f89a56",
+   "year": 2014,
+   "name": "OEC Taipei WTA 125K Series - Taipei, Chinese Taipei",
+   "level": "125K",
+   "start_date": "2014-11-03",
+   "wta_tid": "1059",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1059/MDS.pdf",
+   "capture_id": "ba29c9214a17007b296926cc",
+   "sha256": "0818856689877024c189a0b7ea28f9699e98a2d64bd7b1504a249152cd6dbf08",
+   "captured_at": "2026-09-27T22:00:04.173Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Taipei, Taiwan 2-9 Nov, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 10,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "667ef4a9-a9f5-5bf8-90a3-1627a9cb0a5b",
+   "year": 2014,
+   "name": "Shenzhen Open 2014 - Shenzhen, China",
+   "level": "International",
+   "start_date": "2013-12-29",
+   "wta_tid": "1063",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1063/MDS.pdf",
+   "capture_id": "8ac5758843b0d477174e205b",
+   "sha256": "777a13b3f6183d68ee7d6afbf52d640ce5907971f7494481f8d732035f96c3dd",
+   "captured_at": "2026-09-27T22:00:05.750Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Shenzhen, CHN Dec 28, 2013 - Jan 04, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ae8abb20-7e27-55f5-beb0-a51ba6119573",
+   "year": 2014,
+   "name": "Brasil Tennis Cup - Florianopolis, Brazil",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "3d05fc66-dfae-5f0d-9f3b-27bd58fc61a6",
+   "year": 2014,
+   "name": "BNP Paribas Katowice Open - Katowice, Poland",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "6d39048d-d79c-5f2f-9efa-80a283396728",
+   "year": 2014,
+   "name": "N�RNBERGER VERSICHERUNGSCUP - N�RNBERG, GERMANY",
+   "level": "International",
+   "start_date": "2014-05-18",
+   "wta_tid": "1068",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1068/MDS.pdf",
+   "capture_id": "1f3cc174653805caefdaeb36",
+   "sha256": "e8c44d8bbe808f0bf655be2f3d79ca7c783941e5c37340c41e5ec813618029cc",
+   "captured_at": "2026-09-27T22:00:07.558Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Nurnberg, Germany 16-24 May 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1cda85e1-ab3d-5e3d-872d-6929aa8da3f1",
+   "year": 2014,
+   "name": "Huangcangyu WTA Suzhou Ladies Open 2014 - Suzhou, China",
+   "level": "125K",
+   "start_date": "2014-09-01",
+   "wta_tid": "1069",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1069/MDS.pdf",
+   "capture_id": "322345d1d0fa6a57e84e04e5",
+   "sha256": "d17d1af34be1c0455b3a60365a7cf4c660c11fce388ea34e7082d50af0921c56",
+   "captured_at": "2026-09-27T22:00:09.091Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "30 August - 6 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 2,
+    "resolved": 10,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "ac95fe94-5341-5e4c-9430-b2757f07be03",
+   "year": 2014,
+   "name": "2014 Ningbo Women's Tennis Open - Ningbo, China",
+   "level": "125K",
+   "start_date": "2014-10-27",
+   "wta_tid": "1071",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1071/MDS.pdf",
+   "capture_id": "d45d3023cc2f28f5afea5c82",
+   "sha256": "ed2526cc15e04096543cd3182426db9d5a6bc0c684ae663f0a1f4d6445167917",
+   "captured_at": "2026-09-27T22:00:10.720Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 10,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "ba06a411-7e11-5247-b56e-5dd9091bae42",
+   "year": 2014,
+   "name": "Open GDF Suez De Limoges - Limoges, France",
+   "level": "125K",
+   "start_date": "2014-11-03",
+   "wta_tid": "1072",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1072/MDS.pdf",
+   "capture_id": "88b9cf52d47312a775ebd093",
+   "sha256": "bd1284a814c957d586bb731e20895f6d0d19700c0f1bda0c1e3f5c2da6d6c468",
+   "captured_at": "2026-09-27T22:00:12.308Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Limoges, France 3 -9 November 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ce5fc352-b839-51c7-bea7-1060d4c9eadb",
+   "year": 2014,
+   "name": "Rio Open presented by Claro hdtv  - Rio de Janeiro, Brazil",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "b02d662d-f854-570c-9f10-4ae558ce8540",
+   "year": 2014,
+   "name": "Prudential Hong Kong Tennis Open - Hong-Kong, China",
+   "level": "International",
+   "start_date": "2014-09-08",
+   "wta_tid": "1074",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1074/MDS.pdf",
+   "capture_id": "35b609f26c707b673196cafa",
+   "sha256": "f05ad9d962e8c1e1a2340fdc56cff79d5887447f4fdfaa7804a20366c8b375dc",
+   "captured_at": "2026-09-27T22:00:13.939Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Hong Kong, SAR September 6-14, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 7,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "9718ad6c-372b-5daa-bb25-9a0de1ffc29f",
+   "year": 2014,
+   "name": "2014 Dongfeng Motor Wuhan Open - Wuhan, China",
+   "level": "Premier 5",
+   "start_date": "2014-09-21",
+   "wta_tid": "1075",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1075/MDS.pdf",
+   "capture_id": "1138831246c3712096adee5a",
+   "sha256": "2ebeebc0f4c07f18e0ba0e4458687fc03f672d8145ebd19bacc0e71922bf1c86",
+   "captured_at": "2026-09-27T22:00:15.553Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Wuhan, China 19 - 27 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 14,
+    "players": 56,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ddc4f42e-a136-5cf3-8005-5b83bce4e047",
+   "year": 2014,
+   "name": "Tianjin Open - Tianjin, China",
+   "level": "International",
+   "start_date": "2014-10-06",
+   "wta_tid": "1076",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/1076/MDS.pdf",
+   "capture_id": "f7efe8f43d138946b96d933f",
+   "sha256": "38c5b9382a76f3a5cea6cc87218598ae7ac038333e684184e802cda96ac54d46",
+   "captured_at": "2026-09-27T22:00:17.157Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Tianjin, China 6 - 12 October 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 5,
+    "resolved": 16,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "c1259d21-ff7e-54a0-82d9-39fe6748f303",
+   "year": 2014,
+   "name": "Zhong Hong JiangXi International Women's Open - Nan Chang, China",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "da282a58-9706-5b28-96e5-1b08169d6b8f",
+   "year": 2014,
+   "name": "Bucharest Open - Bucharest, Romania",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "1f627a46-f6b9-56e6-89d0-ceff074b4535",
+   "year": 2014,
+   "name": "BGL BNP Paribas Luxembourg Open - Luxembourg, Luxembourg",
+   "level": "International",
+   "start_date": "2014-10-13",
+   "wta_tid": "300",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/300/MDS.pdf",
+   "capture_id": "19b73d869e150683bb9b8ac4",
+   "sha256": "505c494f7c0e13686d8e4d00e748f0bdc28b88ee29cb8c25f4028bd076073d01",
+   "captured_at": "2026-09-27T22:00:18.795Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Luxembourg, Luxembourg 11-18 October 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ba546cab-16f1-5460-959d-a6287257a112",
+   "year": 2014,
+   "name": "PTT Pattaya Open - Pattaya City, Thailand",
+   "level": "International",
+   "start_date": "2014-01-27",
+   "wta_tid": "303",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/303/MDS.pdf",
+   "capture_id": "8c5fa50a73803e3769563668",
+   "sha256": "81fe99b1cc11e60e82ca2078c614944260862245cda27aab4693f1c8a02d019e",
+   "captured_at": "2026-09-27T22:00:20.344Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Pattaya, Thailand 26 Jan - 2 Feb, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "aa73408e-a25e-5e76-b6d9-077d25e5d0c9",
+   "year": 2014,
+   "name": "Portugal Open - Oeiras, Portugal",
+   "level": "International",
+   "start_date": "2014-04-28",
+   "wta_tid": "358",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/358/MDS.pdf",
+   "capture_id": "009af72c7900c69a1dad4f1b",
+   "sha256": "bdc09f5b94c1821d5825222609bc201d6fe16ca7841ac47fae5adf4f14945dfa",
+   "captured_at": "2026-09-27T22:00:21.959Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Oeiras, Portugal 26 April - 4 May 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 5,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7a568265-c6d7-5522-b2d7-027ef2b61a7b",
+   "year": 2014,
+   "name": "Japan Women's Open Tennis 2014 - Osaka, Japan",
+   "level": "International",
+   "start_date": "2014-10-06",
+   "wta_tid": "405",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/405/MDS.pdf",
+   "capture_id": "c92a861ac1eefb259dfbe948",
+   "sha256": "e786c4bc670083b134b13bd077ae436126f943721ed14ca8776b49a299f963b0",
+   "captured_at": "2026-09-27T22:00:23.715Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": []
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "f6f01a95-71bc-5ddb-b9c6-4adb02d94272",
+   "year": 2014,
+   "name": "Internationaux de Strasbourg - Strasbourg, France",
+   "level": "International",
+   "start_date": "2014-05-19",
+   "wta_tid": "406",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/406/MDS.pdf",
+   "capture_id": "28a91c365a4bd2e09c3b7623",
+   "sha256": "c353dfb670ad2a8cd406888d978fb5b61661448d1b9c3f8bc1518d1a05b1d2d4",
+   "captured_at": "2026-09-27T22:00:25.252Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Strasbourg, France 17 - 24 May 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c9c968fc-5143-5843-a3d0-67e841c99270",
+   "year": 2014,
+   "name": "Generali Ladies Linz - Linz, Austria",
+   "level": "International",
+   "start_date": "2014-10-06",
+   "wta_tid": "528",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/528/MDS.pdf",
+   "capture_id": "d771aae137affd510484c390",
+   "sha256": "98b32828f059999c9b9c58d1823132175d09cf29c0071f502cc6ae19644ec469",
+   "captured_at": "2026-09-27T22:00:27.777Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Linz, AUT 6 - 12 October 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "a34bc321-4275-566b-9a25-5e9895fe0c6b",
+   "year": 2014,
+   "name": "Connecticut Open presented by United Technologies - New Haven, CT, USA",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a3d0444f-0513-5b9a-87e4-ad8d62a8e6bd",
+   "year": 2014,
+   "name": "OPEN GDF SUEZ - Paris, France",
+   "level": "Premier",
+   "start_date": "2014-01-27",
+   "wta_tid": "604",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/604/MDS.pdf",
+   "capture_id": "66e12324eaa82d64a9010fab",
+   "sha256": "5eed33300ae999ee49a1bf006a1c2fd4710a175d8b3a385f03bfd5387558ac43",
+   "captured_at": "2026-09-27T22:00:28.926Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Paris, France 25Jan- 2 Feb 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e62fcc57-32ff-538f-af3d-81e1546989c3",
+   "year": 2014,
+   "name": "BNP Paribas Open - Indian Wells, CA, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2014-03-05",
+   "wta_tid": "609",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/609/MDS.pdf",
+   "capture_id": "a0708ba5007b332bdc2d55bb",
+   "sha256": "b77f6ea30e06941d01c80c9e0929198694c475b2cc551030b9f6bad9a3c4b8ac",
+   "captured_at": "2026-09-27T22:00:30.582Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Indian Wells, USA 3-16 March 2014"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "a0053bd6-1bb6-5954-9af0-ffc4f1b655ff",
+   "year": 2014,
+   "name": "Coupe Banque Nationale presentee par Bell - Quebec City, Canada",
+   "level": "International",
+   "start_date": "2014-09-08",
+   "wta_tid": "656",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/656/MDS.pdf",
+   "capture_id": "2d50ba5d6b69e2797a3f3c13",
+   "sha256": "042b5042c05950182349959e35795d60a7f08064d4e87c2cacaee2707aa910f8",
+   "captured_at": "2026-09-27T22:00:32.037Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Quebec City, CAN 8 - 14 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "42e2db48-35ec-5668-9b41-31d3f82408b0",
+   "year": 2014,
+   "name": "Apia International Sydney - Sydney, Australia",
+   "level": "Premier",
+   "start_date": "2014-01-05",
+   "wta_tid": "702",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/702/MDS.pdf",
+   "capture_id": "fb9c0dc4809fbf6a76d31337",
+   "sha256": "302c08f5621413ef57dae8b45db25c5bcfea8b51f0c67925b585183fb6f72acd",
+   "captured_at": "2026-09-27T22:00:33.688Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Sydney, AUS 5-11 January 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "53ce4171-eb95-5c45-af49-ae396f1deaf1",
+   "year": 2014,
+   "name": "Bank of the West Classic - Stanford, CA, USA",
+   "level": "Premier",
+   "start_date": "2014-07-28",
+   "wta_tid": "703",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/703/MDS.pdf",
+   "capture_id": "3394fb9213e9583e05c7194e",
+   "sha256": "ba0a3d38b1dea4710aaaf3b043fbc8279d0c46c6d1f218cbbf159613e39d6069",
+   "captured_at": "2026-09-27T22:00:35.290Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Stanford, USA 26 July - Aug 3, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 28,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "eb4df5bd-8626-55c2-a68c-1752e5bfe7d0",
+   "year": 2014,
+   "name": "Internazionali BNL d'Italia - Rome, Italy",
+   "level": "Premier 5",
+   "start_date": "2014-05-12",
+   "wta_tid": "709",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/709/MDS.pdf",
+   "capture_id": "c0f0249b3a2557485b945238",
+   "sha256": "bf86117f8f0eda3736038e90658082b1a6a5d61f2c8e5715a9b9515bdf70505c",
+   "captured_at": "2026-09-27T22:00:36.837Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rome, Italy 10 - 18 May 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 18,
+    "players": 56,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "43966835-0ee7-5e82-8280-a16d88479bba",
+   "year": 2014,
+   "name": "Aegon International - Eastbourne, Great Britain",
+   "level": "WTA 250",
+   "start_date": "2014-06-16",
+   "wta_tid": "710",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/710/MDS.pdf",
+   "capture_id": "6c07d1e65404e7dbf282dbf6",
+   "sha256": "241bf0f66b1520e1aefcfa697636c429a5c995bd0003864a027211896157d3d3",
+   "captured_at": "2026-09-27T22:00:38.535Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Eastbourne, GBR 14-21 June 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0258bfab-00e1-5df7-b8d0-ef1c2485f26c",
+   "year": 2014,
+   "name": "Dubai Duty Free Tennis Championships - Dubai, UAE",
+   "level": "Premier",
+   "start_date": "2014-02-17",
+   "wta_tid": "718",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/718/MDS.pdf",
+   "capture_id": "11581515e4f714c8508fb734",
+   "sha256": "c9093fc97f7036c615c91a47879f6e6e589c00d65e45c1d39a39bca999147c30",
+   "captured_at": "2026-09-27T22:00:40.272Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Dubai, UAE 15 - 22 February 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "96e8006e-fa2c-5758-bc9d-68b735384b67",
+   "year": 2014,
+   "name": "Kremlin Cup - Moscow, Russia",
+   "level": "Premier",
+   "start_date": "2014-10-13",
+   "wta_tid": "730",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/730/MDS.pdf",
+   "capture_id": "1ad1ff011e5516d3eb313912",
+   "sha256": "604ff54c0cba23a88d3d710b92eef9a992cd5b1208475496b118ee631f875d22",
+   "captured_at": "2026-09-27T22:00:42.568Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Moscow, Russia 13 - 19 October, 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "addf4c12-4558-5f9d-826a-10ab0c1bc38a",
+   "year": 2014,
+   "name": "Brisbane International - Brisbane, Australia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "c255f1e1-880e-5a62-81de-bf4eaaa90130",
+   "year": 2014,
+   "name": "Family Circle Cup - Charleston, SC, USA",
+   "level": "Premier",
+   "start_date": "2014-03-31",
+   "wta_tid": "804",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/804/MDS.pdf",
+   "capture_id": "a498d6746fb798b1ab66432c",
+   "sha256": "68ada8f7230d5213d0bd30a2259c11583f69fdc47125c292645f781c5462315c",
+   "captured_at": "2026-09-27T22:00:43.794Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Green Clay"
+    ],
+    "dates_raw": [
+     "Charleston, SC, USA  March 31 - April 6, 2014"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "cb76a912-317a-5b13-8086-73f81f70de27",
+   "year": 2014,
+   "name": "Coupe Rogers pr�sent�e par Banque Nationale - Montreal, Canada",
+   "level": "Premier 5",
+   "start_date": "2014-08-04",
+   "wta_tid": "806",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/806/MDS.pdf",
+   "capture_id": "af164dcdedf9445e927719ed",
+   "sha256": "8e89873e6512d50f42232e785b242687933c77f6dd721a6f2b11a6bdccc86ca2",
+   "captured_at": "2026-09-27T22:00:45.381Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Montreal, Canada 4 - 10 August/Août 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 64,
+   "proof": {
+    "checked": 7,
+    "confirmed": 7,
+    "resolved": 18,
+    "players": 56,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "f20e923b-4e4c-5032-8821-aed0263bb998",
+   "year": 2014,
+   "name": "Topshelf Open - 's-Hertogenbosch, Netherlands",
+   "level": "International",
+   "start_date": "2014-06-15",
+   "wta_tid": "822",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/822/MDS.pdf",
+   "capture_id": "5c66f05589bbdbe66ab00058",
+   "sha256": "53f6ad72e0474bc3b40ce5450219895077c330b7fc08f422fd768338259ab9e6",
+   "captured_at": "2026-09-27T22:00:46.982Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "s-Hertogenbosch, Netherlands 15-21 June 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3165e507-cc91-5567-b00f-9f39fd59bdab",
+   "year": 2014,
+   "name": "Tashkent Open 2014 - Tashkent, Uzbekistan",
+   "level": "International",
+   "start_date": "2014-09-08",
+   "wta_tid": "825",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/825/MDS.pdf",
+   "capture_id": "d2784a83b1c2e9c4108692d4",
+   "sha256": "a337d5312418ccd5dc51683a839a2809b1129d1954cdc00155980560b6618db9",
+   "captured_at": "2026-09-27T22:00:48.562Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tashkent, Uzbekistan 8-13 September 2014"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c75db29d-fd1c-5fff-87e2-052f86d1d7de",
+   "year": 2014,
+   "name": "Claro Open Colsanitas - Bogota, Colombia",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "cc931d61-84a5-5a32-b73f-e47bfcd8b776",
+   "year": 2014,
+   "name": "Sony Open Tennis - Miami, FL, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2014-03-18",
+   "wta_tid": "902",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2014/902/MDS.pdf",
+   "capture_id": "de37fc87ea9a31d757c0cf7a",
+   "sha256": "134e723d0e92a67dc58cd166519ca0b954de823778097a772be872ae39458a93",
+   "captured_at": "2026-09-27T22:00:50.457Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Miami, FL, USA 17-30 March, 2014"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "2148b509-7390-5ec0-a54a-ef81ca82c7d5",
+   "year": 2015,
+   "name": "Abierto Mexicano TELCEL presentado por HSBC - Acapulco, Mexico",
+   "level": "International",
+   "start_date": "2015-02-23",
+   "wta_tid": "1002",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1002/MDS.pdf",
+   "capture_id": "541bcb851d39ab55715d1576",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:00:51.782Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "404c1f3c-aa1e-5c16-920c-82970823ee17",
+   "year": 2015,
+   "name": "Qatar Total Open 2015 - Doha, Qatar",
+   "level": "Premier",
+   "start_date": "2015-02-23",
+   "wta_tid": "1003",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1003/MDS.pdf",
+   "capture_id": "61c63339495be4bffec83532",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:00:53.403Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "64b81114-d4f9-5c1b-9a93-b946bd71fbde",
+   "year": 2015,
+   "name": "GRAND PRIX de SAR LA PRINCESSE LALLA MERYEM - Marrakech, Morocco",
+   "level": "International",
+   "start_date": "2015-04-27",
+   "wta_tid": "1005",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1005/MDS.pdf",
+   "capture_id": "0ba92c7d6dac5b3d38adcaf5",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:00:54.962Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "13ff002b-7de3-51fe-bcec-d542157fe25e",
+   "year": 2015,
+   "name": "BNP Paribas Fortis Diamond Games",
+   "level": "Premier",
+   "start_date": "2015-02-09",
+   "wta_tid": "1016",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1016/MDS.pdf",
+   "capture_id": "f3e1d883e0143240024f3cc6",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:00:56.583Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9cea675d-f67d-5587-9407-125920a9011e",
+   "year": 2015,
+   "name": "Western & Southern Open - Cincinnati, OH, USA",
+   "level": "Premier 5",
+   "start_date": "2015-08-17",
+   "wta_tid": "1017",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1017/MDS.pdf",
+   "capture_id": "9fd7f576d3b43e5489e34595",
+   "sha256": "c9e38adcd48ebbd4c635ff5b6b23cd48da2bcc74213c482f228c25e79002b5e2",
+   "captured_at": "2026-09-27T22:00:58.268Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Cincinnati, OH, USA 17 - 23 August, 2015"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7f08f69b-d9da-5026-b273-0580c30b3667",
+   "year": 2015,
+   "name": "China Open 2015 - Beijing, China",
+   "level": "Premier Mandatory",
+   "start_date": "2015-10-03",
+   "wta_tid": "1020",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1020/MDS.pdf",
+   "capture_id": "a47b2cde7f6b7dd30ade439f",
+   "sha256": "78f2378c9613ef6dddcd1955b1ed5ccbbccd9d77b735d4ba64a02df1648039e5",
+   "captured_at": "2026-09-27T22:00:59.878Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Beijing, CHN 5 - 11 October 2015"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8e04dc14-7ea2-54e7-8b0d-614d9ee63e56",
+   "year": 2015,
+   "name": "Guangzhou International Women's Open - Guangzhou, China",
+   "level": "International",
+   "start_date": "2015-09-21",
+   "wta_tid": "1023",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1023/MDS.pdf",
+   "capture_id": "26f174a68a6a807c8a1b84d6",
+   "sha256": "33fd00c4c7c292825d1296654554daba58c64d67f2f6075cf462d435adb2aadd",
+   "captured_at": "2026-09-27T22:01:01.470Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Guangzhou, China 21 - 26 September 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "999391b6-2d40-58ae-a403-47cd258252ba",
+   "year": 2015,
+   "name": "Korea Open - Seoul, Korea",
+   "level": "International",
+   "start_date": "2015-09-21",
+   "wta_tid": "1024",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1024/MDS.pdf",
+   "capture_id": "6772652477483d588763152c",
+   "sha256": "89864fd05e799d1a5a2d80fdb2df25f000b3397223938272fe8670d180c7420c",
+   "captured_at": "2026-09-27T22:01:03.074Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": []
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "56012b72-5552-55e2-a241-9f7f5e74bfa6",
+   "year": 2015,
+   "name": "TEB BNP Paribas Istanbul Cup - Istanbul, Turkey",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "77e6fc19-ddbb-58ce-bb87-199f1c2ef687",
+   "year": 2015,
+   "name": "N�RNBERGER GASTEIN LADIES 2015 - Bad Gastein, Austria",
+   "level": "International",
+   "start_date": "2015-07-20",
+   "wta_tid": "1036",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1036/MDS.pdf",
+   "capture_id": "1a1abb0eb227e9627e0575ff",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:04.624Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "06361d09-fddb-5421-8110-1b08cf7d0a5e",
+   "year": 2015,
+   "name": "Mutua Madrid Open - Madrid, Spain",
+   "level": "Premier Mandatory",
+   "start_date": "2015-05-02",
+   "wta_tid": "1038",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1038/MDS.pdf",
+   "capture_id": "f0b30246988c3d89e22a4c67",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:06.250Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3502c6a7-90bb-5ae4-9974-f6bbea2402c9",
+   "year": 2015,
+   "name": "Abierto Monterrey Afirme - Monterrey, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "a7d12196-73f8-5408-90cf-c92069afa894",
+   "year": 2015,
+   "name": "BMW Malaysian Open - Kuala Lumpur, Malaysia",
+   "level": "International",
+   "start_date": "2015-03-02",
+   "wta_tid": "1041",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1041/MDS.pdf",
+   "capture_id": "c82ebce973e40220fcedce12",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:07.882Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8117abae-a075-5bd4-a5e6-a33420f71687",
+   "year": 2015,
+   "name": "Baku Cup - Baku, Azerbaijan",
+   "level": "International",
+   "start_date": "2015-07-27",
+   "wta_tid": "1044",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1044/MDS.pdf",
+   "capture_id": "56da93f077485d78e088df34",
+   "sha256": "dca63ee51150eff443fb15ae76afab5afd6c9bc7e4cb25e95c22787dfa3f1440",
+   "captured_at": "2026-09-27T22:01:09.458Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": []
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ca73b11c-2b74-5921-945d-4c7019cd93fd",
+   "year": 2015,
+   "name": "Citi Open - Washington DC, USA",
+   "level": "International",
+   "start_date": "2015-08-03",
+   "wta_tid": "1045",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1045/MDS.pdf",
+   "capture_id": "4f90618024aff1264f86bb39",
+   "sha256": "a2350d597ff6cf26c98ff7bc0723698f6987d44273f0d960708a4e28ba906eba",
+   "captured_at": "2026-09-27T22:01:11.060Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Washington, D.C., USA 3 - 9 August 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3a04b63d-f3b1-59fb-9769-d412215f50af",
+   "year": 2015,
+   "name": "Collector Swedish Open - Bastad, Sweden",
+   "level": "International",
+   "start_date": "2015-07-13",
+   "wta_tid": "1048",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1048/MDS.pdf",
+   "capture_id": "ab1ee8f7bbbac3906916cbce",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:12.679Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e72c5508-c908-5cc7-988a-05f529b7b595",
+   "year": 2015,
+   "name": "ASB Classic - Auckland, New Zealand",
+   "level": "International",
+   "start_date": "2015-01-05",
+   "wta_tid": "1049",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1049/MDS.pdf",
+   "capture_id": "e2d0141f2dbb211f13f4a424",
+   "sha256": "8715c0b98dea5e7fa9163b995837f5ffa27e8403db34ea20cd223ad46c845983",
+   "captured_at": "2026-09-27T22:01:14.317Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Auckland, NZL 5-10 January 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "6cb90570-a2b0-5828-8cd4-9c81b4ff6f16",
+   "year": 2015,
+   "name": "Hobart International - Hobart, Australia",
+   "level": "International",
+   "start_date": "2015-01-11",
+   "wta_tid": "1050",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1050/MDS.pdf",
+   "capture_id": "0047c0413cc8dc43f230515f",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:15.916Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3033f484-8230-5737-bb63-2feaeb57a859",
+   "year": 2015,
+   "name": "Porsche Tennis Grand Prix - Stuttgart, Germany",
+   "level": "Premier",
+   "start_date": "2015-04-20",
+   "wta_tid": "1051",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1051/MDS.pdf",
+   "capture_id": "6a52c8d5291b1ba81d3da71c",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:17.758Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9372e41c-ef19-52d4-a7d0-d0de4931651c",
+   "year": 2015,
+   "name": "Aegon Classic Birmingham - Birmingham, Great Britain",
+   "level": "Premier",
+   "start_date": "2015-06-15",
+   "wta_tid": "1052",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1052/MDS.pdf",
+   "capture_id": "b0877cc5bafd7d792b118d9c",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:19.165Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "56b72303-b20d-58a5-b4b8-ad7951f89233",
+   "year": 2015,
+   "name": "Toray Pan Pacific Open - Tokyo, Japan",
+   "level": "Premier",
+   "start_date": "2015-09-21",
+   "wta_tid": "1056",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1056/MDS.pdf",
+   "capture_id": "88c84c827071fca7c626633d",
+   "sha256": "52cb6106b4c593da7ff2ee4debc1d66635473d7af83d169eb7d9971adfbf2c6b",
+   "captured_at": "2026-09-27T22:01:20.673Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tokyo, Japan 19-27 September 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 15,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "86fd9dab-cdad-5358-b1c4-3d84b6492663",
+   "year": 2015,
+   "name": "OEC Taipei WTA 125K Series - Taipei, Chinese Taipei",
+   "level": "125K",
+   "start_date": "2015-11-16",
+   "wta_tid": "1059",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1059/MDS.pdf",
+   "capture_id": "d51684ccba0b6e0fde8bf036",
+   "sha256": "c6059a40a52c41937b340a672a93c5c6cc449356591e9e8e4d2581306c09c873",
+   "captured_at": "2026-09-27T22:01:22.247Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Taipei, Chinese Taipei 16-22 November,2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c0764898-bc58-5ce0-a4f4-112180bd0481",
+   "year": 2015,
+   "name": "Shenzhen Open - Shenzhen, China",
+   "level": "International",
+   "start_date": "2015-01-04",
+   "wta_tid": "1063",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1063/MDS.pdf",
+   "capture_id": "c2e44f2b79f234b42c63ce1e",
+   "sha256": "8121843e7d874c2697dfcd32bd95e5ab11e8e79aae59d4a6f8185ad0dca0cc94",
+   "captured_at": "2026-09-27T22:01:24.260Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Shenzhen, China 3-10 Jan, 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "98f70f58-9e90-54ed-b609-628ac653dc05",
+   "year": 2015,
+   "name": "Brasil Tennis Cup - Florianopolis, Brazil",
+   "level": "International",
+   "start_date": "2015-07-27",
+   "wta_tid": "1064",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1064/MDS.pdf",
+   "capture_id": "acd6747dcd9f395b03a33cb8",
+   "sha256": "6ad396af6c7e377e61b9317abd8047cf66c21039586a3e18044f3bfe75d429c9",
+   "captured_at": "2026-09-27T22:01:25.492Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Florianopolis, Brasil July 27 - August 1, 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "709d8489-d732-5b97-b863-6bbc27ecb8cd",
+   "year": 2015,
+   "name": "Katowice Open - Katowice, Poland",
+   "level": "International",
+   "start_date": "2015-04-06",
+   "wta_tid": "1067",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1067/MDS.pdf",
+   "capture_id": "02d3de4ceb492aef8f7d551d",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:27.150Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7f382ded-9717-5e28-bd27-3cd75a7219a4",
+   "year": 2015,
+   "name": "N�RNBERGER Versicherungs Cup 2015 - N�RNBERG, GERMANY",
+   "level": "International",
+   "start_date": "2015-05-17",
+   "wta_tid": "1068",
+   "status": "no_sheet"
+  },
+  {
+   "edition_id": "e1fcebf1-f6b7-53af-9455-b0fafb21f843",
+   "year": 2015,
+   "name": "ENGIE OPEN DE LIMOGES - Limoges, France",
+   "level": "125K",
+   "start_date": "2015-11-09",
+   "wta_tid": "1072",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1072/MDS.pdf",
+   "capture_id": "7dffad607d5a105181a71390",
+   "sha256": "049eeb8a96931fb91d0ee639374bde91e855bdb791351eedb64745e41b8910b9",
+   "captured_at": "2026-09-27T22:01:30.663Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Limoges, France 9 - 15 November 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "eccffa02-0f34-51f4-aacc-d9cf7f47601c",
+   "year": 2015,
+   "name": "Rio Open presented by Claro hdtv - Rio de Janeiro, Brazil",
+   "level": "International",
+   "start_date": "2015-02-16",
+   "wta_tid": "1073",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1073/MDS.pdf",
+   "capture_id": "5081f57a9a4757d0602b299f",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:31.894Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "2e9f3249-56da-5117-8718-538f4ff3aa10",
+   "year": 2015,
+   "name": "2015 DONGFENG MOTOR Wuhan Open - Wuhan, China",
+   "level": "Premier 5",
+   "start_date": "2015-09-27",
+   "wta_tid": "1075",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1075/MDS.pdf",
+   "capture_id": "8eb558dd62fefaa54fbf8f61",
+   "sha256": "ecad6f654fc0bf1a0d05210f6c446d7826f52e6e49ef3bdda4b2a76c3d65e5c8",
+   "captured_at": "2026-09-27T22:01:33.579Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Wuhan, China  27 September - 03 October 2015"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "49151bfd-b48b-58d0-9ab4-ec31db57c71e",
+   "year": 2015,
+   "name": "Tianjin Open - Tianjin, China",
+   "level": "International",
+   "start_date": "2015-10-12",
+   "wta_tid": "1076",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1076/MDS.pdf",
+   "capture_id": "8070e1baf36bf74b312417a9",
+   "sha256": "ad7e4b07d45b8d6097ced71b27f4f4f5d7dda4e133917b42be7628c86078c8ce",
+   "captured_at": "2026-09-27T22:01:35.232Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tianjin, China 12 - 18 October 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 11,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "a35ee4d2-38dd-5c02-8d9b-0d1d325144d0",
+   "year": 2015,
+   "name": "JiangXi Women's Open - Nanchang, China",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "173f1b8f-9d6f-5c0d-a216-d564c33d43f2",
+   "year": 2015,
+   "name": "BRD Bucharest Open - Bucharest, Romania",
+   "level": "International",
+   "start_date": "2015-07-13",
+   "wta_tid": "1079",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1079/MDS.pdf",
+   "capture_id": "310bc9c3662a276242a5964e",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:36.826Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0fda3980-2f87-59a7-a641-86325dd872a6",
+   "year": 2015,
+   "name": "Aegon Open Nottingham - Nottingham, Great Britain",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "76cbd9c1-80e9-5155-877c-15126cc7b5cd",
+   "year": 2015,
+   "name": "Huajin Securities WTA Elite Trophy Zhuhai - Zhuhai, P.R. China",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "d09cd830-2e4e-5b58-8cf8-5fa8e226b809",
+   "year": 2015,
+   "name": "J&T Banka Prague Open - Prague, Czech Republic",
+   "level": "International",
+   "start_date": "2015-04-27",
+   "wta_tid": "1082",
+   "status": "no_sheet"
+  },
+  {
+   "edition_id": "da8deaf4-87eb-5431-bd41-5f466d921168",
+   "year": 2015,
+   "name": "Dalian Women's Tennis Open - Dalian, China",
+   "level": "125K",
+   "start_date": "2015-09-08",
+   "wta_tid": "1083",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1083/MDS.pdf",
+   "capture_id": "04c58becbeeea78d6fd6193d",
+   "sha256": "f04cc1febfd5ba496857df4e96ccae48b21ebb70397957d21de42f063283dd89",
+   "captured_at": "2026-09-27T22:01:40.093Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Dalian, China 6 - 13 September,2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 12,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "3230e6c9-5ac8-5d3b-90a0-aa74cd0cd3aa",
+   "year": 2015,
+   "name": "EA Hua Hin WTA 125 Series presented by Singha - Hua Hin, Thailand",
+   "level": "125K",
+   "start_date": "2015-11-09",
+   "wta_tid": "1084",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1084/MDS.pdf",
+   "capture_id": "d49a792b7d10ce8e897dffe6",
+   "sha256": "5cf90e33046db4f99f52f407e7007b9696f2e66e34f7e2d4c9be187283b8976f",
+   "captured_at": "2026-09-27T22:01:41.634Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "HUA HIN, Thailand 9-15 November 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "0b36085e-7c45-53fd-bf8c-23af19b3fa3b",
+   "year": 2015,
+   "name": "Carlsbad Classic - Carlsbad, CA, USA",
+   "level": "125K",
+   "start_date": "2015-11-23",
+   "wta_tid": "1085",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/1085/MDS.pdf",
+   "capture_id": "d13b8848e164ad7d910c9eb2",
+   "sha256": "10d0013d772dfcfc393baf1d5ad20b897a3de8124e444d77c14dcd167bda45bd",
+   "captured_at": "2026-09-27T22:01:43.255Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Carlsbad, USA November 23 - 29, 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "51bd3633-7a78-536d-80b4-a7e1628c16b2",
+   "year": 2015,
+   "name": "BGL BNP PARIBAS Luxembourg Open - Luxembourg, Luxembourg",
+   "level": "International",
+   "start_date": "2015-10-19",
+   "wta_tid": "300",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/300/MDS.pdf",
+   "capture_id": "e9706d078204a416e01d1ec0",
+   "sha256": "f22d86e3465387abc147120597909cb1e9d9f40e35a3bc31edc94295a9f24df8",
+   "captured_at": "2026-09-27T22:01:44.981Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Luxembourg, LUX 19 - 25 October 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "935996d1-05ef-524b-96ff-1512fdf965c9",
+   "year": 2015,
+   "name": "PTT Thailand Open - Pattaya City, Thailand",
+   "level": "International",
+   "start_date": "2015-02-09",
+   "wta_tid": "303",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/303/MDS.pdf",
+   "capture_id": "7cfd48f1f6776fce45890431",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:46.547Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "18703b09-318e-5eed-96b9-e2746565267e",
+   "year": 2015,
+   "name": "Japan Women's Open Tennis - Tokyo, Japan",
+   "level": "International",
+   "start_date": "2015-09-14",
+   "wta_tid": "405",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/405/MDS.pdf",
+   "capture_id": "3da334cdfc407f9b2d85c103",
+   "sha256": "bae19874705cdfbb9bb2ae22a0a38a276c6c462612965978718959f0859fad5d",
+   "captured_at": "2026-09-27T22:01:48.083Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Tokyo, Japan 14-20 September 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 7,
+    "confirmed": 7,
+    "resolved": 16,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3d6179ef-bc6a-519d-9165-eba66efa6552",
+   "year": 2015,
+   "name": "Internationaux de Strasbourg - Strasbourg, France",
+   "level": "International",
+   "start_date": "2015-05-17",
+   "wta_tid": "406",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/406/MDS.pdf",
+   "capture_id": "3a0c776edd5e3da32b990e45",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:49.658Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "941cd0e3-d9e6-58d6-b1f7-fafbd00448f8",
+   "year": 2015,
+   "name": "Generali Ladies Linz - Linz, Austria",
+   "level": "International",
+   "start_date": "2015-10-12",
+   "wta_tid": "528",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/528/MDS.pdf",
+   "capture_id": "a75ecd72b1d11314f65ebcf3",
+   "sha256": "3f3dbeaa80da349bc7b9a9736c0d0cb341de68fdd6dd7acb85fbb25a74f14ff8",
+   "captured_at": "2026-09-27T22:01:51.384Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Linz, Austria October 12 - 18, 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "bcf71a7e-35d8-535e-b1e3-022f2ac0521e",
+   "year": 2015,
+   "name": "Connecticut Open presented by United Technologies - New Haven, Connecticut",
+   "level": "Premier",
+   "start_date": "2015-08-23",
+   "wta_tid": "602",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/602/MDS.pdf",
+   "capture_id": "de2249430b606ee9e9f97e9d",
+   "sha256": "5569ab17bc6709d498d80c96ba5e103b16891aca2724c712bf83fe94d88ec9ea",
+   "captured_at": "2026-09-27T22:01:52.919Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "New Haven, USA 21-29 August 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 9,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "eb8767f0-7bf7-5e83-812f-3b0a6e833420",
+   "year": 2015,
+   "name": "BNP Paribas Open - Indian Wells, CA, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2015-03-11",
+   "wta_tid": "609",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/609/MDS.pdf",
+   "capture_id": "aa2a3eecbc8260915da4e534",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:54.481Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e0700783-a749-5207-902a-c4e07bb9d876",
+   "year": 2015,
+   "name": "COUPE BANQUE NATIONALE presentee par Videotron - Quebec City, Canada",
+   "level": "International",
+   "start_date": "2015-09-14",
+   "wta_tid": "656",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/656/MDS.pdf",
+   "capture_id": "ba1cbd7cf067b42998d1b184",
+   "sha256": "3694d0ea9ad176fef4c2fc37cb35b75997f8484d3166ccb68368e5ba3a277468",
+   "captured_at": "2026-09-27T22:01:56.145Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Quebec City, Canada September 14 - 20, 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "4977d4c6-f5ff-5c8b-a1e8-ad7836c63c07",
+   "year": 2015,
+   "name": "Apia International Sydney - Sydney, Australia",
+   "level": "Premier",
+   "start_date": "2015-01-11",
+   "wta_tid": "702",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/702/MDS.pdf",
+   "capture_id": "0260c6498b300d7c906c1d1d",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:01:57.687Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8d977116-d152-5376-b5d3-4502fa529071",
+   "year": 2015,
+   "name": "Bank of the West Classic - Stanford, CA, USA",
+   "level": "Premier",
+   "start_date": "2015-08-03",
+   "wta_tid": "703",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/703/MDS.pdf",
+   "capture_id": "7c5ed5b9938443427efc2fc6",
+   "sha256": "65e7bd7f2ac0bfe5e4c50895d0f6aa9ea56d93f85d5bdeb6f114743630279aa8",
+   "captured_at": "2026-09-27T22:01:59.403Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Stanford, USA 1-9 August 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 15,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "83c6c4a1-6ee5-5617-a2dc-fc45a8bab0b3",
+   "year": 2015,
+   "name": "Internazionali BNL d'Italia - Rome, Italy",
+   "level": "Premier 5",
+   "start_date": "2015-05-11",
+   "wta_tid": "709",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/709/MDS.pdf",
+   "capture_id": "b301f67471c657a5455c7ab8",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:00.899Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0c07264c-827a-568f-9528-85067fa0a5dc",
+   "year": 2015,
+   "name": "Aegon International Eastbourne - Eastbourne, Great Britain",
+   "level": "WTA 250",
+   "start_date": "2015-06-21",
+   "wta_tid": "710",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/710/MDS.pdf",
+   "capture_id": "7aa8fc4d65eda8739c869043",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:02.470Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "88e1501f-a60c-5b6a-bbc2-0280e4885046",
+   "year": 2015,
+   "name": "Dubai Duty Free Tennis Championships - Dubai, UAE",
+   "level": "Premier 5",
+   "start_date": "2015-02-15",
+   "wta_tid": "718",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/718/MDS.pdf",
+   "capture_id": "99520ade48e9f0c57a717971",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:04.142Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0a82ad45-ed61-5f38-ab41-6fd165621e4f",
+   "year": 2015,
+   "name": "Kremlin Cup by Bank of Moscow - Moscow, Russia",
+   "level": "Premier",
+   "start_date": "2015-10-19",
+   "wta_tid": "730",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/730/MDS.pdf",
+   "capture_id": "3ff7025ee22740abfe9ea7af",
+   "sha256": "92bae273d28b35dc1f1185a6fab99ac365fb1445a064444aeae47546ede6346b",
+   "captured_at": "2026-09-27T22:02:05.758Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Moscow, Russia 19 - 25 Oct. 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 12,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3fc4fc5e-d865-50bb-9938-f6b222a6ec32",
+   "year": 2015,
+   "name": "Brisbane International presented by Suncorp - Brisbane, Australia",
+   "level": "Premier",
+   "start_date": "2015-01-04",
+   "wta_tid": "800",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/800/MDS.pdf",
+   "capture_id": "d2c25cb23de1c6e0afce1937",
+   "sha256": "2fa33dc692e190937cf65d183840d4fe09ea03d33f4d14260ec1b57702af71c1",
+   "captured_at": "2026-09-27T22:02:07.348Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Brisbane, Australia 4 - 11 January 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 18,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1f1da182-e12d-5d7a-82b9-95508b8e5011",
+   "year": 2015,
+   "name": "Family Circle Cup - Charleston, SC, USA",
+   "level": "Premier",
+   "start_date": "2015-04-06",
+   "wta_tid": "804",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/804/MDS.pdf",
+   "capture_id": "f9dedecbc08f9e389211638f",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:08.956Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7be2a3d6-1c26-55bf-87e6-d2784cd4b9b3",
+   "year": 2015,
+   "name": "Rogers Cup presented by National Bank - Toronto, Canada",
+   "level": "Premier 5",
+   "start_date": "2015-08-10",
+   "wta_tid": "806",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/806/MDS.pdf",
+   "capture_id": "8c0836c540c789da4846f342",
+   "sha256": "50cc0aeea7c1ec39ed5c9c7a4378ae095c25a4ee0323586f2749449d1720b639",
+   "captured_at": "2026-09-27T22:02:10.649Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Toronto, Canada 10- 16 August 2015"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1c8ef141-8466-5d58-bdcc-8518cfb8645d",
+   "year": 2015,
+   "name": "Topshelf Open - 's-Hertogenbosch, Netherlands",
+   "level": "International",
+   "start_date": "2015-06-08",
+   "wta_tid": "822",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/822/MDS.pdf",
+   "capture_id": "48f47edad2db37a1f3e45efb",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:12.209Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "d33ae08c-e5b9-58c7-bdd1-3e3d7976eeba",
+   "year": 2015,
+   "name": "Tashkent Open 2015 - Tashkent, Usbekistan",
+   "level": "International",
+   "start_date": "2015-09-28",
+   "wta_tid": "825",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/825/MDS.pdf",
+   "capture_id": "12a34a8641cd8483335dcb95",
+   "sha256": "593ac4a3886af03429adf37cd1258e3a0403d1faf87f719cf07fb2046e3d36e9",
+   "captured_at": "2026-09-27T22:02:13.768Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "28 September - 3 October 2015"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "699cba17-0292-51e9-98fb-e6c2cda0e8f0",
+   "year": 2015,
+   "name": "Claro Open Colsanitas - Bogota, Colombia",
+   "level": "International",
+   "start_date": "2015-04-13",
+   "wta_tid": "894",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/894/MDS.pdf",
+   "capture_id": "dbbedf00d993b9dbe2930bd8",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:15.264Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "40a8163c-1bdf-5f53-a19b-da026df6e86c",
+   "year": 2015,
+   "name": "Miami Open presented by Itau - Miami, FL, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2015-03-24",
+   "wta_tid": "902",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2015/902/MDS.pdf",
+   "capture_id": "ea2f46717e91797a29d095b3",
+   "sha256": "eaf906597d4921ed8af6cd9dbd721bd69f6da3fe33651a4fd6dec568b31dc4fe",
+   "captured_at": "2026-09-27T22:02:17.010Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8c4ec81d-91a9-5398-accd-c47586cdec05",
+   "year": 2016,
+   "name": "Abierto Mexicano TELCEL presentado por HSBC - Acapulco, Mexico",
+   "level": "International",
+   "start_date": "2016-02-22",
+   "wta_tid": "1002",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1002/MDS.pdf",
+   "capture_id": "0d386c221a4403e8a8c8a8df",
+   "sha256": "435f898df712a65a920051924189a7ff94be5a1ba2a3d449fbeda063e81e0cb8",
+   "captured_at": "2026-09-27T22:02:18.607Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Acapulco, MEX 20-27 February 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "02f0b2e5-51f4-571f-af99-6ff11004c107",
+   "year": 2016,
+   "name": "Qatar Total Open 2016 - Doha, Qatar",
+   "level": "Premier 5",
+   "start_date": "2016-02-21",
+   "wta_tid": "1003",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1003/MDS.pdf",
+   "capture_id": "647ce11352d4468d1d6d128a",
+   "sha256": "ab81c803f8325dc2e2107ca58bd8f029b115891c3b6898159187b4ef157f5aee",
+   "captured_at": "2026-09-27T22:02:20.281Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Doha, Qatar February 21 - 27. 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "fbe168f4-b7a5-5022-90c2-d9535245b476",
+   "year": 2016,
+   "name": "Grand Prix De SAR La Princesse Lalla Meryem - Rabat, Morocco",
+   "level": "International",
+   "start_date": "2016-04-25",
+   "wta_tid": "1005",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1005/MDS.pdf",
+   "capture_id": "c5109e8a0cb8c38d66e66d8c",
+   "sha256": "02d19ffa4d16dcd4a6764a7c3c1c223f199e7b8d78d59399a7b474d5fe6590d4",
+   "captured_at": "2026-09-27T22:02:21.742Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rabat, Morocco 25 - 30 April 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 12,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "653dea35-208f-53ed-9626-b5d027d33f9e",
+   "year": 2016,
+   "name": "Western & Southern Open - Cincinnati, OH, USA",
+   "level": "Premier 5",
+   "start_date": "2016-08-15",
+   "wta_tid": "1017",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1017/MDS.pdf",
+   "capture_id": "d1446ba5526330bd97c8f2b2",
+   "sha256": "1ef539e9083c9065bcad91d84611138287dbd0b5c72054c87ad4dae66d2627bb",
+   "captured_at": "2026-09-27T22:02:23.467Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Cincinnati, OH, USA 15 - 21 August 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 1,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 1,
+    "players": 1,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1bf3e5c4-6eb6-5efa-96b5-e5ec5bf5a341",
+   "year": 2016,
+   "name": "China Open - Beijing, China",
+   "level": "Premier Mandatory",
+   "start_date": "2016-10-01",
+   "wta_tid": "1020",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1020/MDS.pdf",
+   "capture_id": "663217dd26c9e97d8e30c006",
+   "sha256": "110bbc2bd2644504698326b6f28116d0bfd8658f2f66080dfdcc60f0e188ccc5",
+   "captured_at": "2026-09-27T22:02:25.086Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Beijing, CHINA 1 - 9 October 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "7e144d47-7444-5e28-b777-26873e06993c",
+   "year": 2016,
+   "name": "Guangzhou International Women's Open - Guangzhou, China",
+   "level": "International",
+   "start_date": "2016-09-19",
+   "wta_tid": "1023",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1023/MDS.pdf",
+   "capture_id": "84ae49887b960e15b015bb12",
+   "sha256": "7e8d1da2da0c994bd8020caceb8d5d07d093225fb20dae4986c37de690f0531a",
+   "captured_at": "2026-09-27T22:02:26.634Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Guangzhou, China 19 - 24 September 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 10,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "ce6fd6e3-1eb7-54c0-a41d-442feb872560",
+   "year": 2016,
+   "name": "Korea Open - Seoul, Korea",
+   "level": "International",
+   "start_date": "2016-09-19",
+   "wta_tid": "1024",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1024/MDS.pdf",
+   "capture_id": "50d68834d755df8fdefa80d8",
+   "sha256": "d06c98f3beed7358c527b151ca0fc39373e1a90e04be90a9f72420833875dad1",
+   "captured_at": "2026-09-27T22:02:28.292Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Seoul, Korea 17-25 September,2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "808ea5b6-50e9-5a3b-a94d-3ac73d4c8c7b",
+   "year": 2016,
+   "name": "TEB BNP Paribas Istanbul Cup - Istanbul, Turkey",
+   "level": "International",
+   "start_date": "2016-04-18",
+   "wta_tid": "1027",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1027/MDS.pdf",
+   "capture_id": "248e6b9d004d539a9a713db4",
+   "sha256": "5ab5911b4bf80ce32e348ac2166928091a70034b9f0c1c9b5d8c12fbf1bdecea",
+   "captured_at": "2026-09-27T22:02:29.906Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Istanbul, Turkey 17-24 April, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "f4c5b2d7-9907-58e2-8a53-3a8158ddfd7a",
+   "year": 2016,
+   "name": "Mutua Madrid Open - Madrid, Spain",
+   "level": "Premier Mandatory",
+   "start_date": "2016-04-30",
+   "wta_tid": "1038",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1038/MDS.pdf",
+   "capture_id": "661be11988379871b29f70e3",
+   "sha256": "45e5940a358e4d8c3bef08a1429bb5bb50c654e2c55d2a934b943d8d651da916",
+   "captured_at": "2026-09-27T22:02:31.575Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Madrid, ESP April 30 - May 8, 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e4dd8736-5103-5987-ab37-953445b6f15c",
+   "year": 2016,
+   "name": "ABIERTO MONTERREY AFIRME presentado por MasterCard - Monterrey, Mexico",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "de457c23-b424-511e-8d49-33300593b5fb",
+   "year": 2016,
+   "name": "BMW Malaysian Open - Kuala Lumpur, Malaysia",
+   "level": "International",
+   "start_date": "2016-02-29",
+   "wta_tid": "1041",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1041/MDS.pdf",
+   "capture_id": "99313ed5a140668263bd4e62",
+   "sha256": "a90192f69985788d33384f5a4c0f33a10c124cb66f7df0c7f88b3024cce93d6a",
+   "captured_at": "2026-09-27T22:02:33.126Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Kuala Lumpur, MAS 27 Feb- 6 Mar,2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 17,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9e9fd48a-2b2c-520c-bfde-c0afeac46afc",
+   "year": 2016,
+   "name": "Citi Open - Washington DC, USA",
+   "level": "International",
+   "start_date": "2016-07-18",
+   "wta_tid": "1045",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1045/MDS.pdf",
+   "capture_id": "a57fe8ec7d17778634c32529",
+   "sha256": "530fff1e7ce04538dda705f201bfce77371d9e60f599878868bf2d0df013d7ed",
+   "captured_at": "2026-09-27T22:02:35.044Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Washington, USA July 18-24 , 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "49b40868-c220-54ae-8504-c6e3daa60746",
+   "year": 2016,
+   "name": "ERICSSON OPEN - Bastad, Sweden",
+   "level": "International",
+   "start_date": "2016-07-18",
+   "wta_tid": "1048",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1048/MDS.pdf",
+   "capture_id": "95e0c69bd5fd1bb5b10fa680",
+   "sha256": "8c57c887efcf1e0aca42527fe9f913a468610fa4fb56f03bf8b415d136ffa8e2",
+   "captured_at": "2026-09-27T22:02:36.359Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Bastad, Sweden 18 - 24 July 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 7,
+    "confirmed": 7,
+    "resolved": 20,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8d676486-6d18-5327-a41d-1d4eec2cfb6b",
+   "year": 2016,
+   "name": "ASB Classic - Auckland, New Zealand",
+   "level": "International",
+   "start_date": "2016-01-04",
+   "wta_tid": "1049",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1049/MDS.pdf",
+   "capture_id": "7ceff38c3d1b8e5c09a5fff0",
+   "sha256": "5ba420c8d1bc4032ce2ed3f7c5a162e49390f49f767d9f81cf3210524108f4e8",
+   "captured_at": "2026-09-27T22:02:37.938Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Auckland, New Zealand January 4 - 9, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 16,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "27da7bb1-cc72-50ba-887d-5680f910932e",
+   "year": 2016,
+   "name": "Hobart International - Hobart, Australia",
+   "level": "International",
+   "start_date": "2016-01-10",
+   "wta_tid": "1050",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1050/MDS.pdf",
+   "capture_id": "2073296cd5edd169d4290662",
+   "sha256": "c8b1ab15b73eb831c5b9b124f956c6020680ea605a4438aef2b2f2c16bfae590",
+   "captured_at": "2026-09-27T22:02:39.599Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Hobart, Australia 10-16 January 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "62dc2a4c-7c29-522a-829d-38867b80e668",
+   "year": 2016,
+   "name": "Porsche Tennis Grand Prix - Stuttgart, Germany",
+   "level": "Premier",
+   "start_date": "2016-04-18",
+   "wta_tid": "1051",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1051/MDS.pdf",
+   "capture_id": "05399d89eba7d827f404f984",
+   "sha256": "2eec3e5b66366000c71ecdb66d2557743d6a97e6219550d3d794d07815413dd1",
+   "captured_at": "2026-09-27T22:02:41.201Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Stuttgart, GER 18-24 April 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e73c2baf-4f18-53b0-8256-3581b36e057d",
+   "year": 2016,
+   "name": "Aegon Classic Birmingham - Birmingham, Great Britain",
+   "level": "Premier",
+   "start_date": "2016-06-13",
+   "wta_tid": "1052",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1052/MDS.pdf",
+   "capture_id": "330269d45fec1d480ff8cbab",
+   "sha256": "57495661a218950c19974dbb19ac2824543b5e28fa0cce14de36f699b2223769",
+   "captured_at": "2026-09-27T22:02:42.767Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Birmingham, GBR June 13 - 19 , 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "0acd7239-5793-55ec-a77a-a3e083e91ec6",
+   "year": 2016,
+   "name": "Toray Pan Pacific Open - Tokyo, Japan",
+   "level": "Premier",
+   "start_date": "2016-09-19",
+   "wta_tid": "1056",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1056/MDS.pdf",
+   "capture_id": "1d2d3dc8c12d63766edb3aaa",
+   "sha256": "ed48ba23c54611097578c81d3bd5de32c7a5dc0b7b0ac28e2a3adf768328e328",
+   "captured_at": "2026-09-27T22:02:44.251Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tokyo, Japan 17-25 September 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 8,
+    "confirmed": 8,
+    "resolved": 20,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8a529a9e-4207-5ab7-acae-c07c921e0cdb",
+   "year": 2016,
+   "name": "OEC Taipei WTA Ladies Open - Taipei, Chinese Taipei",
+   "level": "125K",
+   "start_date": "2016-11-14",
+   "wta_tid": "1059",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1059/MDS.pdf",
+   "capture_id": "00a29680ee678895972f01a5",
+   "sha256": "971b55b6e5a4de56d0d3a72c0de2c75a471a45df71df9a0f2e623819c0997359",
+   "captured_at": "2026-09-27T22:02:45.972Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Taipei, Taiwan November 13-20, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 7,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "65bbcf25-9cc1-54f5-9007-ee2646d2e1c5",
+   "year": 2016,
+   "name": "Shenzhen Open - Shenzhen, China",
+   "level": "International",
+   "start_date": "2016-01-03",
+   "wta_tid": "1063",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1063/MDS.pdf",
+   "capture_id": "e2b64423fc4e239ecaa1a82e",
+   "sha256": "2cfc010b1b828be34d72db8f550f7f53f4f354d4d4455c8688ef317e5838094c",
+   "captured_at": "2026-09-27T22:02:47.483Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Shenzhen, China 2-9 January, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 3,
+    "resolved": 11,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "6c7d5db0-f4f9-57e3-870e-ec4e9fbffcae",
+   "year": 2016,
+   "name": "Brasil Tennis Cup - Florianopolis, Brazil",
+   "level": "International",
+   "start_date": "2016-07-31",
+   "wta_tid": "1064",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1064/MDS.pdf",
+   "capture_id": "f49d5db9ec825bde1da828e3",
+   "sha256": "a91c063bede02cc9b471d03be0cc084870d349f87caf70840be62ce25b80bd4c",
+   "captured_at": "2026-09-27T22:02:49.179Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Florianopolis, Brasil 31 July -5 August 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 17,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "c50f9c18-5278-58ab-8319-93b949397bbd",
+   "year": 2016,
+   "name": "Katowice Open - Katowice, Poland",
+   "level": "International",
+   "start_date": "2016-04-04",
+   "wta_tid": "1067",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1067/MDS.pdf",
+   "capture_id": "2bd31058d28199c945e0c38b",
+   "sha256": "aae4cd75309e027be66ded698499a17340b9153b211676d7b168d254831e99f0",
+   "captured_at": "2026-09-27T22:02:50.764Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Katowice, POL 4-10 April 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "c4b87a2c-221c-527e-87f9-5e1a1a0ae88f",
+   "year": 2016,
+   "name": "N�RNBERGER VERSICHERUNGS CUP 2016 - N�RNBERG, GERMANY",
+   "level": "International",
+   "start_date": "2016-05-15",
+   "wta_tid": "1068",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1068/MDS.pdf",
+   "capture_id": "1b88f0070b0c0126533ff9e2",
+   "sha256": "62e6a9d054a3ec8b11de2ce00a48e4d1df30168fcf2f6a48dcb0509666794504",
+   "captured_at": "2026-09-27T22:02:52.346Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "NÜRNBERG, GERMANY 15-21 May 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 8,
+    "confirmed": 8,
+    "resolved": 20,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3af2782d-8edf-53aa-a56c-93ded2001ed0",
+   "year": 2016,
+   "name": "ENGIE Open de Limoges - Limoges, France",
+   "level": "125K",
+   "start_date": "2016-11-14",
+   "wta_tid": "1072",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1072/MDS.pdf",
+   "capture_id": "14b292730df3680f0bb17ffd",
+   "sha256": "2c8d2c486bb1a3e746af8ca451c50c96452664bb5a0e574db723001ce3935dc4",
+   "captured_at": "2026-09-27T22:02:54.085Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Limoges, FRA November 14 - 20. 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 9,
+    "confirmed": 9,
+    "resolved": 22,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "780b4096-0166-5ce2-a335-c5b70ba481ed",
+   "year": 2016,
+   "name": "Rio Open presented by Claro - Rio de Janeiro, Brazil",
+   "level": "International",
+   "start_date": "2016-02-15",
+   "wta_tid": "1073",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1073/MDS.pdf",
+   "capture_id": "0a3b9e5523952f1979e790c3",
+   "sha256": "9ea4e87a86bbdb65a874be65a3cb46db7147b0b2fc7ed17d46c01260ddab68df",
+   "captured_at": "2026-09-27T22:02:55.576Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rio de Janeiro, Brazil 15 - 21 February 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e3c50eaa-7238-515c-a5cd-85ed3c2c203e",
+   "year": 2016,
+   "name": "Prudential Hong Kong Tennis Open - Hong Kong, China",
+   "level": "International",
+   "start_date": "2016-10-10",
+   "wta_tid": "1074",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1074/MDS.pdf",
+   "capture_id": "35662cd3406c5d64c748d1bc",
+   "sha256": "ad00fa60b53598007adc85e02d4d7ef9053436dd385abc984614ad0ebbcb2e71",
+   "captured_at": "2026-09-27T22:02:57.285Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Hong Kong, SAR October 8-16, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 10,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "78bd0007-0485-59a7-b146-2721387bd9f3",
+   "year": 2016,
+   "name": "2016 Dongfeng Motor Wuhan Open - Wuhan, China",
+   "level": "Premier 5",
+   "start_date": "2016-09-25",
+   "wta_tid": "1075",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1075/MDS.pdf",
+   "capture_id": "c97464e9b13702ffac78b170",
+   "sha256": "5001a1a56ad073212fb09f718fb1dccee01c60ab67bad3210d93d44c87dcf09d",
+   "captured_at": "2026-09-27T22:02:58.895Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "WUHAN, CHN  25 September-01 October 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9b9c795c-8cfa-54b0-aa9f-130b50bf7ad7",
+   "year": 2016,
+   "name": "Tianjin Open - Tianjin, China",
+   "level": "International",
+   "start_date": "2016-10-10",
+   "wta_tid": "1076",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1076/MDS.pdf",
+   "capture_id": "e2c9835758c07b1366d94ba3",
+   "sha256": "7c6ecb73958f3e6f64e95b5475b61a09bc90dae15cff5b3333fc43573197de83",
+   "captured_at": "2026-09-27T22:03:00.414Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Tianjin, China 10-16 October 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "24603595-eed6-52ab-be23-5a13a2ac61c2",
+   "year": 2016,
+   "name": "JiangXi Open - Nanchang, China",
+   "level": "International",
+   "start_date": "2016-08-01",
+   "wta_tid": "1077",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1077/MDS.pdf",
+   "capture_id": "f0e8bf2f27137942a78c79dd",
+   "sha256": "e2d18d08b1e15c846ec160a05d1fcebfa27ac6e5850eebebc050f8e0082b81c7",
+   "captured_at": "2026-09-27T22:03:02.105Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Nanchang, CHN July 30- August 7, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 7,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "dbcedda6-3edd-5310-b24f-ae427b1f8ad5",
+   "year": 2016,
+   "name": "BRD Bucharest Open - Bucharest, Romania",
+   "level": "International",
+   "start_date": "2016-07-11",
+   "wta_tid": "1079",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1079/MDS.pdf",
+   "capture_id": "b1da205fab90c66b9af733e3",
+   "sha256": "7b75dd1d5350a41df9f3e774542b4ec898ceb09b462f1ab38013181507898f88",
+   "captured_at": "2026-09-27T22:03:03.629Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Bucharest, ROU 11-17 July 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 15,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "b9b2b5d1-7d03-5813-8353-853d931cd9ec",
+   "year": 2016,
+   "name": "Aegon Open Nottingham - Nottingham, Great Britain",
+   "level": "International",
+   "start_date": "2016-06-06",
+   "wta_tid": "1080",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1080/MDS.pdf",
+   "capture_id": "85d8885b2b1f3badae4de7c7",
+   "sha256": "50620c2569411931de6c1a31b705907802827dbf17c87226ebc0b5e7c1dbf63a",
+   "captured_at": "2026-09-27T22:03:05.330Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Nottingham, England 6-12 June, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 11,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "9815354b-b212-5fa0-8710-847943f14e35",
+   "year": 2016,
+   "name": "Huajin Securities WTA Elite Trophy Zhuhai - Zhuhai, P.R. China",
+   "status": "too_few_matches"
+  },
+  {
+   "edition_id": "626faab8-c1ac-5b9f-a76d-7cd4a81cf9d7",
+   "year": 2016,
+   "name": "J&T Banka Prague Open - Prague, Czech Republic",
+   "level": "International",
+   "start_date": "2016-04-25",
+   "wta_tid": "1082",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1082/MDS.pdf",
+   "capture_id": "a883baa3b1b6a0fc823915bf",
+   "sha256": "c9e5b1a090d2893ec18bb870eacf88ea194a0de4a7846e001241ac30eb92ca52",
+   "captured_at": "2026-09-27T22:03:06.870Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Prague, Czech Republic 25-30 April 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 7,
+    "confirmed": 7,
+    "resolved": 18,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "7cdfdae4-abda-5dcd-8086-5d481453e2a1",
+   "year": 2016,
+   "name": "Dalian Women's Tennis Open - Dalian, China",
+   "level": "125K",
+   "start_date": "2016-09-06",
+   "wta_tid": "1083",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1083/MDS.pdf",
+   "capture_id": "4452fcd52cc110b2d1940163",
+   "sha256": "c3d8913da9807f62420eb267fc75aefda54b36e29164e0a98ee779d68dbbaf73",
+   "captured_at": "2026-09-27T22:03:08.449Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": []
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 9,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "b7a794fc-c771-569b-b4f3-0ac9cf156f12",
+   "year": 2016,
+   "name": "St. Petersburg Ladies Trophy - St. Petersburg, Russia",
+   "level": "Premier",
+   "start_date": "2016-02-08",
+   "wta_tid": "1086",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1086/MDS.pdf",
+   "capture_id": "7898e4734a0fa7cfb2dd4780",
+   "sha256": "75657835c862a26ffea5bd4a871ee62a5e826680023254987777efa3543aa445",
+   "captured_at": "2026-09-27T22:03:10.188Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "St. Petersburg, Russia February 8 - 14, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "e7bfca74-4ba9-53e9-a455-e20058d73e80",
+   "year": 2016,
+   "name": "Taiwan Open - Kaohsiung, Chinese Taipei",
+   "level": "International",
+   "start_date": "2016-02-08",
+   "wta_tid": "1087",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1087/MDS.pdf",
+   "capture_id": "816404c05b54b363c35ef24b",
+   "sha256": "52d03ec7ee50b44116a451446fd620db72df21fccd1ffef22d673cae93c99e22",
+   "captured_at": "2026-09-27T22:03:11.704Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Kaohsiung, Taiwan 8 - 14 February, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 3,
+    "confirmed": 3,
+    "resolved": 13,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "afeb16e5-aad0-5509-b685-9f40bca96973",
+   "year": 2016,
+   "name": "San Antonio 125K Series - San Antonio, TX, USA",
+   "level": "125K",
+   "start_date": "2016-03-14",
+   "wta_tid": "1088",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1088/MDS.pdf",
+   "capture_id": "6b4031052722daef48574a2f",
+   "sha256": "8a5876b24b7f5fe4bb2154a6af6c7faa108f0a8fe7477f1b529460a456b170ec",
+   "captured_at": "2026-09-27T22:03:13.331Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "San Antonio, USA 14 - 19 March, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 16,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "62f6bb99-2d23-530b-aca7-5814e92c8e40",
+   "year": 2016,
+   "name": "Bol Open - Bol, Croatia",
+   "level": "125K",
+   "start_date": "2016-05-31",
+   "wta_tid": "1090",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1090/MDS.pdf",
+   "capture_id": "4ceaab002b5b2c680a17cfe4",
+   "sha256": "b13846a3ec9e13565170c954c5249b429c86ee5ed98d00b8abe14e0210f5bcea",
+   "captured_at": "2026-09-27T22:03:14.977Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "BOL, CRO 29 May – 5 June, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "9018088f-ccfd-561c-9e44-1f31979458aa",
+   "year": 2016,
+   "name": "Mallorca Open - Mallorca, Spain",
+   "level": "International",
+   "start_date": "2016-06-13",
+   "wta_tid": "1091",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1091/MDS.pdf",
+   "capture_id": "66440ad4bb5a2dc1b4de0ce5",
+   "sha256": "531b380e4199dc814cc58712f1837de66c6486d3a19db4c01bdcb2aff6626ae7",
+   "captured_at": "2026-09-27T22:03:16.553Z",
+   "header": {
+    "surface": "grass",
+    "indoor": null,
+    "surface_raw": [
+     "Grass"
+    ],
+    "dates_raw": [
+     "Santa Ponsa, Spain 11-19 June 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "1efe6d59-890e-594a-bafe-1f6e5d2dfe37",
+   "year": 2016,
+   "name": "LADIES CHAMPIONSHIP GSTAAD - Gstaad, Switzerland",
+   "level": "International",
+   "start_date": "2016-07-11",
+   "wta_tid": "1094",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1094/MDS.pdf",
+   "capture_id": "98ee9d2ce5a8d9995ed08336",
+   "sha256": "b4fca697a33030b94bc20124a13b1d522d3a31053c1488a13f0d1bf51ef189cb",
+   "captured_at": "2026-09-27T22:03:18.107Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Gstaad, SUI July 11 - 17, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "bd095e03-517f-5e90-8b01-f8ec032d0cad",
+   "year": 2016,
+   "name": "Hawaii Open - Honolulu, HI, USA",
+   "level": "125K",
+   "start_date": "2016-11-21",
+   "wta_tid": "1095",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/1095/MDS.pdf",
+   "capture_id": "5ce6292999d458910e5d6035",
+   "sha256": "69a0a5109d67b3be1a839f653db8402c316cd9d41f8aa5422000dc213fdb192e",
+   "captured_at": "2026-09-27T22:03:19.719Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Honolulu, USA November 21-27, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 16,
+    "players": 32,
+    "unique": false
+   }
+  },
+  {
+   "edition_id": "554f3526-33f6-5d07-9159-fa69f7c907fb",
+   "year": 2016,
+   "name": "BGL BNP Paribas Luxembourg Open - Luxembourg, Luxembourg",
+   "level": "International",
+   "start_date": "2016-10-17",
+   "wta_tid": "300",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/300/MDS.pdf",
+   "capture_id": "b29a35ecfc45b7bccfa68422",
+   "sha256": "4d312f7a81997f56c0b9ae8497fff916fb57e4622a0969b5df7c144cea5971d2",
+   "captured_at": "2026-09-27T22:03:21.341Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Luxembourg, LUX 17 - 22 October 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 14,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "db48b43e-5186-5001-9f72-458fb1d5a666",
+   "year": 2016,
+   "name": "HASHIMOTO SOGYO JAPAN WOMEN'S OPEN TENNIS - Tokyo",
+   "level": "International",
+   "start_date": "2016-09-12",
+   "wta_tid": "405",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/405/MDS.pdf",
+   "capture_id": "c073cf150e91c6ee6a10a193",
+   "sha256": "ca0b0ffb9747a7992b407983bb0eecee0f23e4bb484fd806a2be91b386bde993",
+   "captured_at": "2026-09-27T22:03:22.878Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Tokyo, Japan 10 - 18 September 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 9,
+    "confirmed": 9,
+    "resolved": 23,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "6f67c2c4-4dfd-5c0b-9d19-64de8ac75e2b",
+   "year": 2016,
+   "name": "Internationaux de Strasbourg - Strasbourg, France",
+   "level": "International",
+   "start_date": "2016-05-15",
+   "wta_tid": "406",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/406/MDS.pdf",
+   "capture_id": "e63c53bbdbf0d0072a033a60",
+   "sha256": "a0c5c8d697442a8ca7daf492119e164ce89c7741f9a503d4a455e2b42a2d18f3",
+   "captured_at": "2026-09-27T22:03:24.589Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Strasbourg, FRA May 15 - 21, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 9,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "244d5844-693e-590b-bbbf-d10d5346f614",
+   "year": 2016,
+   "name": "Generali Ladies Linz - Linz, Austria",
+   "level": "International",
+   "start_date": "2016-10-10",
+   "wta_tid": "528",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/528/MDS.pdf",
+   "capture_id": "058f5987c9e83180817a71de",
+   "sha256": "8df06cae4f4e1b98fb8683a1b9c3d6ab10ae52d2a90949cdd058bf9459b73e66",
+   "captured_at": "2026-09-27T22:03:26.352Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "LINZ, AUSTRIA 10 - 16 October 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 6,
+    "confirmed": 6,
+    "resolved": 18,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "4e9d089c-5e25-54f0-a0b0-4e18169fc564",
+   "year": 2016,
+   "name": "Connecticut Open presented by United Technologies - New Haven, Connecticut",
+   "level": "Premier",
+   "start_date": "2016-08-21",
+   "wta_tid": "602",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/602/MDS.pdf",
+   "capture_id": "1968d277208cda2ccbec78d2",
+   "sha256": "4f47971ee7ff64226200d7a6dc0fcd0436d2eb1ccc5bd61178d1a6c4b317a578",
+   "captured_at": "2026-09-27T22:03:27.731Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "New Haven, USA 21-27 August 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 5,
+    "confirmed": 5,
+    "resolved": 13,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "71f2fa94-8963-591a-825b-55f5f593c90a",
+   "year": 2016,
+   "name": "BNP Paribas Open - Indian Wells, CA, USA",
+   "level": "Premier Mandatory",
+   "start_date": "2016-03-09",
+   "wta_tid": "609",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/609/MDS.pdf",
+   "capture_id": "2fb6fff9deb6e4d276e5273b",
+   "sha256": "da9d1d5cdc4773edf080fa895a2c7d8c2b285dddf37d72cc31ee75a5283717de",
+   "captured_at": "2026-09-27T22:03:29.422Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Indian Wells, USA  7-20 March 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 8,
+   "proof": {
+    "checked": 2,
+    "confirmed": 2,
+    "resolved": 6,
+    "players": 6,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "dc456d50-cb2d-5606-ae59-a3e9830ba070",
+   "year": 2016,
+   "name": "OLYMPICS TENNIS EVENT - RIO DE JANEIRO, BRAZIL",
+   "level": "OLYMPICS",
+   "start_date": "2016-08-06",
+   "wta_tid": "650",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/650/MDS.pdf",
+   "capture_id": "d3d4013855265ca3ee0f02fa",
+   "sha256": "0b0d9f042a113047cd299c564dc6f7b973f9eb1725db8f46629306007dfd5e46",
+   "captured_at": "2026-09-27T22:03:31.299Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "As of SAT 13 AUG 2016 at 19:53"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "a3e30719-11a3-5820-82fa-1619e2a68d65",
+   "year": 2016,
+   "name": "COUPE BANQUE NATIONALE presentee par Mazda - Quebec City, Canada",
+   "level": "International",
+   "start_date": "2016-09-12",
+   "wta_tid": "656",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/656/MDS.pdf",
+   "capture_id": "c4a80e3de4d326dc618b60ce",
+   "sha256": "e783c91c15b1061425b978ae7ca5e35509250e0e4d80ff8cb9097e9208b36791",
+   "captured_at": "2026-09-27T22:03:32.616Z",
+   "header": {
+    "surface": "carpet",
+    "indoor": null,
+    "surface_raw": [
+     "Carpet"
+    ],
+    "dates_raw": [
+     "Quebec City, CAN September 12 - 18, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 8,
+    "players": 32,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "3ea534a7-11cd-5e2e-b249-0465d66af62c",
+   "year": 2016,
+   "name": "Apia International Sydney - Sydney, Australia",
+   "level": "Premier",
+   "start_date": "2016-01-10",
+   "wta_tid": "702",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/702/MDS.pdf",
+   "capture_id": "b5990935ff70884e0ed443cf",
+   "sha256": "6b06bce40913ae0cda5f15fde9499d44fae9f5c1952999d1d89862a871823b3c",
+   "captured_at": "2026-09-27T22:03:34.204Z",
+   "header": {
+    "surface": null,
+    "indoor": null,
+    "surface_raw": [],
+    "dates_raw": [
+     "Sydney, Australia 8-16 January 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 13,
+    "players": 30,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "811a7d67-81d6-5015-a06a-e318719ae8b3",
+   "year": 2016,
+   "name": "Bank of the West Classic - Stanford, CA, USA",
+   "level": "Premier",
+   "start_date": "2016-07-18",
+   "wta_tid": "703",
+   "status": "not_proven",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/703/MDS.pdf",
+   "capture_id": "f38b88e7acc60e1d047a13ae",
+   "sha256": "b49686293a43028f20a0ca1d46c7ebb1deae073972e751f9e3ba347970d01a28",
+   "captured_at": "2026-09-27T22:03:35.863Z",
+   "header": {
+    "surface": "hard",
+    "indoor": null,
+    "surface_raw": [
+     "Hard"
+    ],
+    "dates_raw": [
+     "Stanford, USA July 18 - 24, 2016"
+    ]
+   },
+   "parse_ok": true,
+   "draw_size": 32,
+   "proof": {
+    "checked": 4,
+    "confirmed": 4,
+    "resolved": 11,
+    "players": 28,
+    "unique": true
+   }
+  },
+  {
+   "edition_id": "8454b281-1b76-580c-8e82-d7ad4566b50a",
+   "year": 2016,
+   "name": "Internazionali BNL d'Italia - Rome, Italy",
+   "level": "Premier 5",
+   "start_date": "2016-05-09",
+   "wta_tid": "709",
+   "status": "unparsed",
+   "url": "https://wtafiles.wtatennis.com/pdf/draws/2016/709/MDS.pdf",
+   "capture_id": "b4af6720e8a2c2b2c46c52bc",
+   "sha256": "1ee9a8592df5ccf23928ed6a4ca4cca0af578e1228d2666dcc0288da7e623437",
+   "captured_at": "2026-09-27T22:03:37.504Z",
+   "header": {
+    "surface": "clay",
+    "indoor": null,
+    "surface_raw": [
+     "Red Clay"
+    ],
+    "dates_raw": [
+     "Rome, Italy 9-15 May 2016"
+    ]
+   },
+   "parse_ok": false,
+   "draw_size": 0,
+   "proof": {
+    "checked": 0,
+    "confirmed": 0,
+    "resolved": 0,
+    "players": 0,
+    "unique": true
+   }
+  }
+ ]
+}

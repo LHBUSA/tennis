@@ -35,3 +35,17 @@ test('draw sheets: only allow-listed hosts and documents', () => {
   assert.equal(DRAW_SHEETS.wta.url(2016, 1038, 'MDS'), 'https://wtafiles.wtatennis.com/pdf/draws/2016/1038/MDS.pdf');
   assert.deepEqual(Object.keys(DRAW_SHEETS), ['ptl', 'wta']);
 });
+
+test('WTA /records and /year: parsed as reported; a season outside coverage is absent (never zero)', async () => {
+  const fs = await import('node:fs');
+  const { playerRecords, playerYear } = await import('../workers/providers/wta-records.js');
+  const r = playerRecords.parse(fs.readFileSync(new URL('./fixtures/wta/player-records-320760.json', import.meta.url), 'utf8'))[0];
+  assert.equal(r.provider_player_id, '320760');
+  const gs = r.payload.by_level.find((x) => x.level === 'GRAND SLAM');
+  assert.deepEqual([gs.matches, gs.wins, gs.losses, gs.titles], [188, 149, 39, 6]);
+  assert.deepEqual(r.payload.by_surface.map((x) => x.surface).sort(), ['carpet', 'clay', 'grass', 'hard']);
+  assert.ok(r.payload.by_tournament.length > 10 && r.payload.by_tournament.every((t) => Array.isArray(t.years)));
+  const y = playerYear.parse(fs.readFileSync(new URL('./fixtures/wta/player-year-320760-2021.json', import.meta.url), 'utf8'))[0];
+  assert.equal(y.payload.year, 2021); assert.equal(y.payload.aces, 340); assert.equal(y.payload.matchcount, 69); assert.equal(y.payload.level, 'TOUR');
+  assert.deepEqual(playerYear.parse(fs.readFileSync(new URL('./fixtures/wta/player-year-320760-2016.json', import.meta.url), 'utf8')), []);
+});
