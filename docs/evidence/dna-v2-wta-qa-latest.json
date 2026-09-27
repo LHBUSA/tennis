@@ -1,0 +1,446 @@
+{
+  "checked_at": "2026-09-27T20:42:39.289Z",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "no duplicate canonical singles matches (edition + event + stage + pair)",
+      "result": "PASS",
+      "duplicate_groups": 0
+    },
+    {
+      "name": "v2 snapshots: tour always the player's own (ATP/WTA never mixed)",
+      "result": "PASS",
+      "mismatched": 0
+    },
+    {
+      "name": "v1 technical snapshots preserved",
+      "result": "PASS",
+      "v1_rows": 20859,
+      "latest": "2026-09-27"
+    },
+    {
+      "name": "elena-rybakina: meaningful match history",
+      "result": "PASS",
+      "matches": 605,
+      "span": "2014-12-14..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "elena-rybakina: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "elena-rybakina: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "elena-rybakina: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "elena-rybakina: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2320,
+      "rating_status": "published"
+    },
+    {
+      "name": "elena-rybakina: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "aryna-sabalenka: meaningful match history",
+      "result": "PASS",
+      "matches": 716,
+      "span": "2012-11-11..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "aryna-sabalenka: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "aryna-sabalenka: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "aryna-sabalenka: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "aryna-sabalenka: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2321,
+      "rating_status": "published"
+    },
+    {
+      "name": "aryna-sabalenka: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "jessica-pegula: meaningful match history",
+      "result": "PASS",
+      "matches": 785,
+      "span": "2009-04-12..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "jessica-pegula: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "jessica-pegula: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "jessica-pegula: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "jessica-pegula: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2243,
+      "rating_status": "published"
+    },
+    {
+      "name": "jessica-pegula: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "coco-gauff: meaningful match history",
+      "result": "PASS",
+      "matches": 439,
+      "span": "2018-05-27..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "coco-gauff: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "coco-gauff: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "coco-gauff: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "coco-gauff: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2279,
+      "rating_status": "published"
+    },
+    {
+      "name": "coco-gauff: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "laura-siegemund: meaningful match history",
+      "result": "PASS",
+      "matches": 996,
+      "span": "2002-07-14..2026-07-12",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "laura-siegemund: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "laura-siegemund: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "laura-siegemund: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "laura-siegemund: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 1897,
+      "rating_status": "published"
+    },
+    {
+      "name": "laura-siegemund: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "serena-williams: meaningful match history",
+      "result": "PASS",
+      "matches": 559,
+      "span": "2007-01-08..2026-07-12",
+      "sources": [
+        "espn",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "serena-williams: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 39,
+      "leaks": 0
+    },
+    {
+      "name": "serena-williams: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "serena-williams: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "serena-williams: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2081,
+      "rating_status": "published"
+    },
+    {
+      "name": "serena-williams: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "caroline-wozniacki: meaningful match history",
+      "result": "PASS",
+      "matches": 798,
+      "span": "2006-10-29..2024-09-08",
+      "sources": [
+        "espn",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "caroline-wozniacki: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "caroline-wozniacki: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "caroline-wozniacki: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "caroline-wozniacki: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 1978,
+      "rating_status": "published"
+    },
+    {
+      "name": "caroline-wozniacki: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "UI 1440 /players/elena-rybakina",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/elena-rybakina/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/aryna-sabalenka",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/aryna-sabalenka/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/jessica-pegula",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/jessica-pegula/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/coco-gauff",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/coco-gauff/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/laura-siegemund",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/laura-siegemund/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/serena-williams",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/serena-williams/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/caroline-wozniacki",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/caroline-wozniacki/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /dna?metric=match_win_rate&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/elena-rybakina",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/elena-rybakina/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/aryna-sabalenka",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/aryna-sabalenka/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/jessica-pegula",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/jessica-pegula/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/coco-gauff",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/coco-gauff/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/laura-siegemund",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/laura-siegemund/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/serena-williams",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/serena-williams/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/caroline-wozniacki",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/caroline-wozniacki/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /dna?metric=match_win_rate&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    }
+  ]
+}

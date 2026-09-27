@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-27T14:34:39.970Z",
+  "checked_at": "2026-09-27T20:43:55.098Z",
   "result": "PASS",
   "checks": [
     {
@@ -21,7 +21,7 @@
     {
       "name": "carlos-alcaraz: meaningful match history",
       "result": "PASS",
-      "matches": 353,
+      "matches": 358,
       "span": "2020-02-18..2026-09-09",
       "sources": [
         "ausopen",
@@ -50,7 +50,7 @@
       "name": "carlos-alcaraz: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2278,
+      "rating": 2279,
       "rating_status": "published"
     },
     {
@@ -60,7 +60,7 @@
     {
       "name": "jannik-sinner: meaningful match history",
       "result": "PASS",
-      "matches": 419,
+      "matches": 425,
       "span": "2019-04-24..2026-07-12",
       "sources": [
         "ausopen",
@@ -99,7 +99,7 @@
     {
       "name": "novak-djokovic: meaningful match history",
       "result": "PASS",
-      "matches": 1119,
+      "matches": 1195,
       "span": "2007-01-02..2026-08-30",
       "sources": [
         "ausopen",
@@ -128,7 +128,7 @@
       "name": "novak-djokovic: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2142,
+      "rating": 2148,
       "rating_status": "published"
     },
     {
@@ -138,7 +138,7 @@
     {
       "name": "alexander-zverev: meaningful match history",
       "result": "PASS",
-      "matches": 719,
+      "matches": 731,
       "span": "2013-07-15..2026-09-13",
       "sources": [
         "ausopen",
@@ -167,7 +167,7 @@
       "name": "alexander-zverev: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2126,
+      "rating": 2125,
       "rating_status": "published"
     },
     {
@@ -214,11 +214,12 @@
     {
       "name": "roger-federer: meaningful match history",
       "result": "PASS",
-      "matches": 752,
-      "span": "2007-01-15..2021-07-07",
+      "matches": 823,
+      "span": "2007-01-15..2021-07-11",
       "sources": [
         "espn",
-        "rolandgarros"
+        "rolandgarros",
+        "wimbledon"
       ]
     },
     {
@@ -241,7 +242,7 @@
       "name": "roger-federer: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2071,
+      "rating": 2091,
       "rating_status": "published"
     },
     {
@@ -251,10 +252,11 @@
     {
       "name": "david-ferrer: meaningful match history",
       "result": "PASS",
-      "matches": 716,
+      "matches": 745,
       "span": "2007-01-08..2019-05-08",
       "sources": [
-        "espn"
+        "espn",
+        "wimbledon"
       ]
     },
     {
@@ -277,7 +279,7 @@
       "name": "david-ferrer: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 1714,
+      "rating": 1711,
       "rating_status": "published"
     },
     {

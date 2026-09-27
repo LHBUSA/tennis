@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.4.1';
+export const VERSION = '0.4.2';
 
 import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
@@ -116,7 +116,7 @@ async function rankings(store, url) {
     list: listKey, ranking_date: snap.ranking_date, previous_date: prev[0]?.ranking_date || null, total: snap.row_count,
     rows: rows.map((r) => ({ rank: r.rank, points: r.points, tournaments: r.tournaments_played, previous_rank: prevRank.get(r.provider_player_id) ?? null, player: shapePlayer(r.tennis_players) }))
   };
-  return envelope(data, { source: [snap.source_family], source_updated_at: snap.captured_at, policy: { currentS: 8 * 86400, staleS: 15 * 86400 }, semantics: snap.source_family === 'espn' ? `${tour.toUpperCase()} ${type} list as carried by a secondary source (not an official ${tour.toUpperCase()} feed); ranking_date is the date that source last updated the list; movement compares with our archived previous list` : `official ${tour.toUpperCase()} ${type} list dated ${snap.ranking_date}, as published; movement compares with our archived previous list` });
+  return envelope(data, { source: [snap.source_family], source_updated_at: snap.captured_at, policy: { currentS: 8 * 86400, staleS: 15 * 86400 }, semantics: snap.source_family === 'espn' ? `${tour.toUpperCase()} ${type} list as carried by a secondary source (not an official ${tour.toUpperCase()} feed); ranking_date is the Monday from which the list is in force (the first Monday of the source's list week); movement compares with our archived previous list` : `official ${tour.toUpperCase()} ${type} list dated ${snap.ranking_date}, as published; movement compares with our archived previous list` });
 }
 
 async function playerBySlug(store, slug) {

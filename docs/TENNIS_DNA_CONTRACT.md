@@ -78,7 +78,10 @@ ledger row (cross-source dedupe, official > secondary).
 ## Ranking at match time
 
 The latest list with `ranking_date <= rank_day` of the player's own tour, used only if it is at most 28 days
-old. A player absent from a list of N is "outside the top N". No list in force → the match does not enter any
+old. An ESPN list is dated to the **Monday from which it is in force** (ESPN's `lastUpdated` is the start of its
+calendar week, anchored on 1 January: 2026 weeks start on Thursdays); reconciled against 7 official WTA weeks:
+1,033 of 1,033 linked players identical in rank and points on the same Monday. An official list within 6 days
+replaces a secondary one. A player absent from a list of N is "outside the top N". No list in force → the match does not enter any
 ranking-based metric. A current ranking is never applied to a historical match. ATP lists are the ESPN
 secondary-source weekly lists (dated by the source's own update date); WTA lists are official.
 
@@ -134,8 +137,12 @@ Research (walk-forward, evaluation from 2012-01-01 for ATP, both players ≥ 10 
   Evidence: `docs/evidence/dna-v2-backtest-latest.json`.
 - Surface ratings (updated only on matches with a stored surface; prediction = 50/50 blend with overall):
   ATP blend worse than overall (0.5363 vs 0.5321 on 3,871 matches) → **not published for ATP**.
-- **WTA rating held**: no ranking-history benchmark yet (6 lists); publication requires beating the ranking
-  model out of sample on ≥ 500 matches.
+- **WTA rating (2026-09-27, after the ESPN WTA + official WTA history backfill, 100,380 singles matches 2000-2026,
+  824 weekly lists)**: rating log loss 0.6268 vs ranking model 0.6462; Brier 0.2193 vs 0.2280; accuracy 63.5% vs
+  60.5% (5,742 out-of-sample matches, c = 0.55 fitted on 3,829) -> **published**. Margin variant worse (0.6108 vs
+  0.6100). WTA surface blend better than overall (0.6083 vs 0.6112 on 24,061 matches) -> **WTA surface ratings
+  published**. ATP after the ESPN list re-dating: 0.6327 vs 0.6391 (15,640 matches) -> published; ATP surface
+  still held (0.5381 vs 0.5345).
 
 Stored in `tennis_surface_ratings (surface overall|hard|clay|grass, method_version 1)` with `published` in
 provenance; the rating percentile is shown only for published ratings among players with ≥ 20 rated

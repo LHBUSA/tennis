@@ -34,7 +34,8 @@ for (const slug of PLAYERS) {
   add(`${slug}: no technical metric in Match DNA`, keys.every((k) => !TECH.has(k)), { metrics: keys.length });
   const bad = md.families.flatMap((f) => f.metrics).filter((m) => (m.percentile != null && (!['medium', 'high'].includes(m.confidence) || !m.comparative_published)) || (m.value == null && m.confidence !== 'insufficient'));
   add(`${slug}: confidence/percentile coherent`, bad.length === 0, { incoherent: bad.map((m) => m.key) });
-  add(`${slug}: tour`, md.tour === 'ATP', { tour: md.tour, rating: md.rating?.value ?? null, rating_status: md.rating?.status ?? null });
+  const expectTour = j.data.player?.gender === 'F' ? 'WTA' : 'ATP';
+  add(`${slug}: tour`, md.tour === expectTour, { tour: md.tour, rating: md.rating?.value ?? null, rating_status: md.rating?.status ?? null });
   const ids = md.recent.map((r) => r.match_id);
   add(`${slug}: no duplicate match in history`, new Set(ids).size === ids.length);
 }
@@ -53,7 +54,7 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     if (r.broken) fails.push(`broken_images:${r.broken}`);
     if (errors.length) fails.push(`console:${errors[0]}`);
     if (/could not be loaded|Could not load/i.test(r.text)) fails.push('error_state');
-    if (/\/dna$/.test(route) && !/MATCH DNA — LIVE/.test(r.text)) fails.push('match_dna_missing');
+    if (/\/dna$/.test(route) && !/MATCH DNA — LIVE/i.test(r.text)) fails.push('match_dna_missing');
     if (/\/players\/[^/]+$/.test(route) && !/Match DNA/i.test(r.text)) fails.push('overview_match_dna_missing');
     if (/^\/dna\?/.test(route) && !/qualified players/.test(r.text)) fails.push('leaderboard_missing');
     add(`UI ${w} ${route}`, !fails.length, { fails });
@@ -61,7 +62,8 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
   }
 }
 await browser.close();
+const OUT = process.env.OUT || 'docs/evidence/dna-v2-qa-latest.json';
 const doc = { checked_at: new Date().toISOString(), result: checks.every((c) => c.result === 'PASS') ? 'PASS' : 'FAIL', checks };
-fs.writeFileSync('docs/evidence/dna-v2-qa-latest.json', `${JSON.stringify(doc, null, 2)}\n`);
+fs.writeFileSync(OUT, `${JSON.stringify(doc, null, 2)}\n`);
 console.log(`dna v2 QA: ${doc.result} (${checks.filter((c) => c.result === 'PASS').length}/${checks.length})`);
 if (doc.result !== 'PASS') process.exitCode = 1;

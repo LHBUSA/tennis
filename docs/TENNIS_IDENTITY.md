@@ -57,3 +57,10 @@ Cabrera" where the printed result says Nenad Zimonjic / Victor Hanescu). Every E
 checked against the printed result line: the flagged winner's and loser's surnames, and the surname of the
 canonical player each id resolved to, must appear on the correct side of "bt" — otherwise the row is held
 (`result_line_names_disagree_with_winner_flag`, `resolved_player_not_in_result_line`).
+
+### Known limitation of the result-line guard
+
+The printed-result check compares surnames, so it cannot separate siblings who share a surname (Williams,
+Pliskova, Zverev, Murray, Bryan). Sibling identity therefore rests on the exact id chain alone (crosswalk /
+Wikidata P11585 -> P536/P597). Example verified 2026-09-27: ESPN athlete 394 -> Q11459 -> wta:230234 (Serena
+Williams) at Wimbledon 2026 R1 v Maya Joint, confirmed by the official WTA player history (R128, 6-3 6-7(6) 6-3).

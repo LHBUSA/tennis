@@ -335,6 +335,12 @@ const espnDobDay = (ts) => { const t = Date.parse(ts); return Number.isFinite(t)
 
 // ---- rankings ----------------------------------------------------------------------------------------
 /** Weekly list -> { week, season, observed_date, rows: [{ rank, previous_rank, points, trend, espn_id }] } */
+export function mondayOnOrAfter(day) {
+  const d = new Date(`${day}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + ((8 - (d.getUTCDay() || 7)) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
 export function parseEspnRanking(j, { season, week } = {}) {
   if (!Array.isArray(j?.ranks) || !j.ranks.length) return null;
   const rows = [];
@@ -343,7 +349,11 @@ export function parseEspnRanking(j, { season, week } = {}) {
     if (!id || !Number.isInteger(r.current) || r.current < 1) continue;
     rows.push({ rank: r.current, previous_rank: Number.isInteger(r.previous) && r.previous > 0 ? r.previous : null, points: Number.isFinite(r.points) ? r.points : null, trend: r.trend ?? null, espn_id: id });
   }
-  return { season, week, list: j.name || null, observed_date: j.lastUpdated ? String(j.lastUpdated).slice(0, 10) : null, headline: j.headline || null, rows };
+  // lastUpdated is the START of ESPN's calendar week (anchored on 1 January: 2026 weeks start on Thursdays), not a
+  // publication time. The list is the one in force from the Monday inside that week (reconciled 2026: ESPN Thu 07-23
+  // == official WTA Mon 07-27, 146/146 ranks and points) -> dated conservatively to the first Monday on/after it.
+  const week_start = j.lastUpdated ? String(j.lastUpdated).slice(0, 10) : null;
+  return { season, week, list: j.name || null, week_start, observed_date: week_start ? mondayOnOrAfter(week_start) : null, headline: j.headline || null, rows };
 }
 
 // ---- adapters ----------------------------------------------------------------------------------------

@@ -1,0 +1,462 @@
+{
+  "generated_at": "2026-09-27T20:40:45.903Z",
+  "before": {
+    "captured_at": "2026-09-27T16:00Z",
+    "ws_matches": 9368,
+    "wd_matches": 2715,
+    "wta_years": "2025-2026",
+    "wta_singles_ledger": 9321,
+    "wta_ranking_snapshots_official": 7,
+    "wta_ranking_snapshots_espn": 0
+  },
+  "now": {
+    "ws_matches": 101340,
+    "wd_matches": 25345,
+    "wta_years": "2000-2026",
+    "wta_ranking_snapshots_official": 7,
+    "wta_ranking_snapshots_espn": 818,
+    "women_players": 7867
+  },
+  "duplicate_groups_ws_wd": 0,
+  "espn_wta": {
+    "events_captured": 1438,
+    "founded": 30868,
+    "founded_ws": 27689,
+    "founded_wd": 3179,
+    "founded_qualifying": 2191,
+    "attached_to_official": 30284,
+    "editions_mapped_to_official": 182,
+    "duplicate_candidates": 13,
+    "cross_source_disagreements": 5
+  },
+  "wta_history": {
+    "founded": 83760,
+    "founded_ws": 64306,
+    "founded_wd": 19454,
+    "attached_to_other_rows": 8738,
+    "espn_rows_taken_over": 20358,
+    "years": "2000-2026",
+    "held": 3750
+  },
+  "identity": {
+    "espn_women_resolved": 1697,
+    "espn_unresolved_all_tours": 847
+  },
+  "by_year": [
+    {
+      "year": 2000,
+      "ws": 1,
+      "wd": 0,
+      "espn": 0,
+      "history": 1,
+      "official_feeds": 0
+    },
+    {
+      "year": 2001,
+      "ws": 3,
+      "wd": 0,
+      "espn": 0,
+      "history": 3,
+      "official_feeds": 0
+    },
+    {
+      "year": 2002,
+      "ws": 23,
+      "wd": 1,
+      "espn": 0,
+      "history": 24,
+      "official_feeds": 0
+    },
+    {
+      "year": 2003,
+      "ws": 39,
+      "wd": 6,
+      "espn": 0,
+      "history": 45,
+      "official_feeds": 0
+    },
+    {
+      "year": 2004,
+      "ws": 119,
+      "wd": 25,
+      "espn": 0,
+      "history": 144,
+      "official_feeds": 0
+    },
+    {
+      "year": 2005,
+      "ws": 148,
+      "wd": 30,
+      "espn": 0,
+      "history": 178,
+      "official_feeds": 0
+    },
+    {
+      "year": 2006,
+      "ws": 269,
+      "wd": 104,
+      "espn": 0,
+      "history": 373,
+      "official_feeds": 0
+    },
+    {
+      "year": 2007,
+      "ws": 2257,
+      "wd": 244,
+      "espn": 2095,
+      "history": 406,
+      "official_feeds": 0
+    },
+    {
+      "year": 2008,
+      "ws": 2271,
+      "wd": 252,
+      "espn": 2125,
+      "history": 398,
+      "official_feeds": 0
+    },
+    {
+      "year": 2009,
+      "ws": 2430,
+      "wd": 354,
+      "espn": 2160,
+      "history": 624,
+      "official_feeds": 0
+    },
+    {
+      "year": 2010,
+      "ws": 2585,
+      "wd": 388,
+      "espn": 2119,
+      "history": 854,
+      "official_feeds": 0
+    },
+    {
+      "year": 2011,
+      "ws": 2804,
+      "wd": 460,
+      "espn": 2098,
+      "history": 1166,
+      "official_feeds": 0
+    },
+    {
+      "year": 2012,
+      "ws": 3034,
+      "wd": 520,
+      "espn": 2072,
+      "history": 1482,
+      "official_feeds": 0
+    },
+    {
+      "year": 2013,
+      "ws": 3563,
+      "wd": 705,
+      "espn": 1933,
+      "history": 2335,
+      "official_feeds": 0
+    },
+    {
+      "year": 2014,
+      "ws": 3831,
+      "wd": 824,
+      "espn": 1780,
+      "history": 2875,
+      "official_feeds": 0
+    },
+    {
+      "year": 2015,
+      "ws": 4358,
+      "wd": 1042,
+      "espn": 1692,
+      "history": 3708,
+      "official_feeds": 0
+    },
+    {
+      "year": 2016,
+      "ws": 4928,
+      "wd": 1215,
+      "espn": 1607,
+      "history": 4536,
+      "official_feeds": 0
+    },
+    {
+      "year": 2017,
+      "ws": 5432,
+      "wd": 1329,
+      "espn": 1378,
+      "history": 5383,
+      "official_feeds": 0
+    },
+    {
+      "year": 2018,
+      "ws": 6083,
+      "wd": 1440,
+      "espn": 1215,
+      "history": 6308,
+      "official_feeds": 0
+    },
+    {
+      "year": 2019,
+      "ws": 6353,
+      "wd": 1838,
+      "espn": 1000,
+      "history": 7191,
+      "official_feeds": 0
+    },
+    {
+      "year": 2020,
+      "ws": 2773,
+      "wd": 869,
+      "espn": 395,
+      "history": 3247,
+      "official_feeds": 0
+    },
+    {
+      "year": 2021,
+      "ws": 6248,
+      "wd": 1823,
+      "espn": 875,
+      "history": 7196,
+      "official_feeds": 0
+    },
+    {
+      "year": 2022,
+      "ws": 8272,
+      "wd": 2452,
+      "espn": 1752,
+      "history": 8972,
+      "official_feeds": 0
+    },
+    {
+      "year": 2023,
+      "ws": 8999,
+      "wd": 2502,
+      "espn": 1764,
+      "history": 9737,
+      "official_feeds": 0
+    },
+    {
+      "year": 2024,
+      "ws": 8888,
+      "wd": 2451,
+      "espn": 1762,
+      "history": 9577,
+      "official_feeds": 0
+    },
+    {
+      "year": 2025,
+      "ws": 9042,
+      "wd": 2556,
+      "espn": 171,
+      "history": 3785,
+      "official_feeds": 7642
+    },
+    {
+      "year": 2026,
+      "ws": 6643,
+      "wd": 1928,
+      "espn": 855,
+      "history": 3265,
+      "official_feeds": 4451
+    }
+  ],
+  "ranking_lists_by_year": [
+    {
+      "yr": "2007",
+      "source_family": "espn",
+      "lists": 40
+    },
+    {
+      "yr": "2008",
+      "source_family": "espn",
+      "lists": 41
+    },
+    {
+      "yr": "2009",
+      "source_family": "espn",
+      "lists": 44
+    },
+    {
+      "yr": "2010",
+      "source_family": "espn",
+      "lists": 39
+    },
+    {
+      "yr": "2011",
+      "source_family": "espn",
+      "lists": 39
+    },
+    {
+      "yr": "2012",
+      "source_family": "espn",
+      "lists": 36
+    },
+    {
+      "yr": "2013",
+      "source_family": "espn",
+      "lists": 42
+    },
+    {
+      "yr": "2014",
+      "source_family": "espn",
+      "lists": 43
+    },
+    {
+      "yr": "2015",
+      "source_family": "espn",
+      "lists": 44
+    },
+    {
+      "yr": "2016",
+      "source_family": "espn",
+      "lists": 39
+    },
+    {
+      "yr": "2017",
+      "source_family": "espn",
+      "lists": 44
+    },
+    {
+      "yr": "2018",
+      "source_family": "espn",
+      "lists": 43
+    },
+    {
+      "yr": "2019",
+      "source_family": "espn",
+      "lists": 44
+    },
+    {
+      "yr": "2020",
+      "source_family": "espn",
+      "lists": 49
+    },
+    {
+      "yr": "2021",
+      "source_family": "espn",
+      "lists": 48
+    },
+    {
+      "yr": "2022",
+      "source_family": "espn",
+      "lists": 42
+    },
+    {
+      "yr": "2023",
+      "source_family": "espn",
+      "lists": 39
+    },
+    {
+      "yr": "2024",
+      "source_family": "espn",
+      "lists": 38
+    },
+    {
+      "yr": "2025",
+      "source_family": "espn",
+      "lists": 43
+    },
+    {
+      "yr": "2026",
+      "source_family": "espn",
+      "lists": 21
+    },
+    {
+      "yr": "2026",
+      "source_family": "wta",
+      "lists": 7
+    }
+  ],
+  "ranking_reconciliation": {
+    "weeks_compared": 7,
+    "espn_rows": 1050,
+    "linked": 1033,
+    "in_official": 1033,
+    "rank_equal": 1033,
+    "points_equal": 1033,
+    "rank_agreement": 1,
+    "points_agreement": 1,
+    "days_apart": [
+      0
+    ],
+    "weeks": [
+      {
+        "espn_date": "2026-07-27",
+        "official_date": "2026-07-27",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 147,
+        "in_official": 147,
+        "rank_equal": 147,
+        "points_equal": 147,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-08-03",
+        "official_date": "2026-08-03",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 147,
+        "in_official": 147,
+        "rank_equal": 147,
+        "points_equal": 147,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-08-10",
+        "official_date": "2026-08-10",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 147,
+        "in_official": 147,
+        "rank_equal": 147,
+        "points_equal": 147,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-08-24",
+        "official_date": "2026-08-24",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 148,
+        "in_official": 148,
+        "rank_equal": 148,
+        "points_equal": 148,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-08-31",
+        "official_date": "2026-08-31",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 148,
+        "in_official": 148,
+        "rank_equal": 148,
+        "points_equal": 148,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-09-14",
+        "official_date": "2026-09-14",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 148,
+        "in_official": 148,
+        "rank_equal": 148,
+        "points_equal": 148,
+        "mean_abs_rank_diff": 0
+      },
+      {
+        "espn_date": "2026-09-21",
+        "official_date": "2026-09-21",
+        "days_apart": 0,
+        "espn_rows": 150,
+        "linked": 148,
+        "in_official": 148,
+        "rank_equal": 148,
+        "points_equal": 148,
+        "mean_abs_rank_diff": 0
+      }
+    ]
+  }
+}

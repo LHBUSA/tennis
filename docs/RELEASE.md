@@ -30,8 +30,8 @@ forward-only fixes.
 |---|---|---|
 | Vercel `tennis` (tennis.propbetedge.ai) | main HEAD — this docs commit on top of ac58f10 (ac58f10 = `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W`) | `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W` (ac58f10), then `dpl_F3CxdfsLu57sAHAMtAontuesuk4V` (e21d468) |
 | tennis-web | 8d6db251-db10-44ff-b664-492d046a4741 | 6334502d-2f1d-4286-8124-c45a35d4bd52 |
-| tennis-api | faa97c86-6523-4c76-a435-f0d6ee25392e (0.4.1, 2026-09-27) | 43ab9ef8-0468-403e-ac20-48db06673c90 (pre-ESPN) |
-| tennis-ingest | 2a3dbb91-c906-4141-b49d-85f5b7c62c9e (0.3.0 + DNA v2, 2026-09-27) | 29c78a5b-c1ef-4a62-b591-4140e2ca59eb (pre-ESPN) |
+| tennis-api | b62a1197-7797-4b6e-b504-8154746fa1f2 (0.4.2, 2026-09-27) | faa97c86-6523-4c76-a435-f0d6ee25392e |
+| tennis-ingest | 3424ea51-284a-4105-b780-03baf5de8a97 (ESPN WTA + wta_history, 2026-09-27) | 2a3dbb91-c906-4141-b49d-85f5b7c62c9e (pre-WTA lanes) |
 | tennis-live | 3cfd7fd6-e635-4d55-aeab-4849200e0096 | c38a77b3-1d6a-49ff-ad46-6eeddec98068 |
 | tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (**PUBLISH**; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
 
@@ -65,3 +65,6 @@ Rows below are the historical deploy log; the table above is authoritative for w
 | 2026-09-27 | tennis-api | 693a4f95 → 1cc59769 → 8b5a0bec → faa97c86 | 43ab9ef8 | v1 readers pinned to definition_version 1; match_dna + v2 leaders; player rankings/matches ordering |
 | 2026-09-27 | tennis-news | 786c7d6e | 9d9976ae | DNA packet pinned to definition_version 1 |
 | 2026-09-27 | Vercel | main e9e8867 → 8cc1ab2 | previous main deployment | men's directory (ATP secondary list + Slam performance), error-vs-empty states, rankings hub, Match DNA player pages + DNA hub |
+
+| 2026-09-27 | tennis-ingest | 2c847ddb → 6b50aaaf → cd0b48cb → 80626532 → b7bb32b6 → 378789fb → 28091310 → 7a11da5d → efe93023 → 3424ea51 | 2a3dbb91 | espn_wta + espn_wta_rankings, wta_history (sharded), dedupe fixes + self-heal, ESPN lists dated to effective Monday |
+| 2026-09-27 | tennis-api | b62a1197 (0.4.2) | faa97c86 | ESPN list semantics (effective Monday) |

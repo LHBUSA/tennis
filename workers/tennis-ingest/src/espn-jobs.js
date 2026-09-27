@@ -401,9 +401,10 @@ async function writeEspnRanking(ctx, list, idc, captureId, league = 'atp') {
   const hi = new Date(Date.parse(list.observed_date) + 6 * 86400e3).toISOString().slice(0, 10);
   const official = await ctx.store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date,source_family&list_key=eq.${listKey}&source_family=neq.espn&ranking_date=gte.${lo}&ranking_date=lte.${hi}&order=ranking_date.asc`);
   if (official.length) return { date: list.observed_date, state: 'KEPT_OFFICIAL', reconciliation: await reconcile(ctx, list, idMap, idc, official, league) };
-  const sid = await snapshotId(listKey, list.observed_date);
   const [existing] = await ctx.store.select('tennis_ranking_snapshots', `select=snapshot_id,source_family&list_key=eq.${listKey}&ranking_date=eq.${list.observed_date}`);
   if (existing && existing.source_family !== 'espn') return { date: list.observed_date, state: 'KEPT_OFFICIAL' };
+  // a list already stored for this date keeps its row (ids of re-dated lists were minted from the old date)
+  const sid = existing?.snapshot_id || await snapshotId(listKey, list.observed_date);
   await ctx.store.upsert('tennis_ranking_snapshots', [{ snapshot_id: sid, list_key: listKey, ranking_date: list.observed_date, source_family: 'espn', capture_id: captureId, row_count: 0, captured_at: now() }], { onConflict: 'snapshot_id', ignore: true });
   const rows = [];
   for (const r of list.rows) {

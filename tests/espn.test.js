@@ -222,11 +222,14 @@ test('identity: names are never identity — name-only and non-unique name+DOB s
 // ---- rankings ---------------------------------------------------------------------------------------
 test('rankings: weekly list, observation date = ESPN lastUpdated, previous rank kept as printed', () => {
   const r = espn.parseEspnRanking(fx('ranking-2026-w38.json'), { season: 2026, week: 38 });
-  assert.equal(r.observed_date, '2026-09-17');
+  assert.equal(r.week_start, '2026-09-17');
+  assert.equal(r.observed_date, '2026-09-21', 'ESPN week start (Thu) -> the Monday the list is in force');
+  assert.equal(espn.mondayOnOrAfter('2026-09-21'), '2026-09-21');
+  assert.equal(espn.mondayOnOrAfter('2017-01-01'), '2017-01-02');
   assert.equal(r.rows[0].rank, 1);
   assert.equal(r.rows[0].espn_id, '3623');
   assert.equal(r.rows.at(-1).previous_rank, 156);
-  assert.equal(espn.parseEspnRanking(fx('ranking-2010-w10.json')).observed_date, '2010-03-01');
+  assert.equal(espn.parseEspnRanking(fx('ranking-2010-w10.json')).observed_date, '2010-03-01', 'a Monday stays');
   assert.equal(espn.parseEspnRanking({ ranks: [] }), null);
 });
 
@@ -403,7 +406,7 @@ test('lane: rankings snapshot written as source espn with its observation date; 
   const r = await espnRankingStep(ctx, { weeks: 3, today: '2026-09-27' });
   assert.equal(r.lists[0].state, 'PASS');
   const snap = s.rows('tennis_ranking_snapshots')[0];
-  assert.deepEqual([snap.list_key, snap.source_family, snap.ranking_date, snap.row_count], ['atp_singles', 'espn', '2026-09-17', 6]);
+  assert.deepEqual([snap.list_key, snap.source_family, snap.ranking_date, snap.row_count], ['atp_singles', 'espn', '2026-09-21', 6]);
   assert.ok(s.rows('tennis_rankings').every((x) => x.provider_player_id.startsWith('espn:')));
   assert.equal(s.rows('tennis_rankings').filter((x) => x.pbe_player_id).length, 1, 'only the crosswalked player is linked');
   await kv.put('bf:espnrank', JSON.stringify({ season: 2026, week: 38, hist: { season: 2006, week: 1 }, cur_checked: null, relinked: new Date().toISOString() }));
@@ -490,7 +493,7 @@ test('WTA: ESPN event mapped to the official edition only when shared singles pa
 test('WTA rankings: an official list within 6 days wins (ESPN list reconciled, not stored); otherwise stored as espn', async () => {
   const wd = [{ h: { value: 'Q9' }, e: { value: '2001' }, wta: { value: '316956' } }];
   const { ctx, s, kv } = laneCtx({ wdRows: wd });
-  const list = { ...fx('wta-ranking-2012-w10.json'), lastUpdated: '2026-09-22T08:00Z' };
+  const list = { ...fx('wta-ranking-2012-w10.json'), lastUpdated: '2026-09-17T07:00Z' }; // ESPN week start (Thursday)
   list.ranks[0].athlete.$ref = 'http://x/athletes/2001';
   ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: wd } }], [/weeks\/38\/rankings\/2/, list], [/weeks\/10\/rankings\/2/, fx('wta-ranking-2012-w10.json')]]);
   const pid = await mintPlayerId('wta', '316956');
@@ -502,7 +505,8 @@ test('WTA rankings: an official list within 6 days wins (ESPN list reconciled, n
   const cur = r.lists.find((l) => l.season === 2026 && l.week === 38);
   assert.equal(cur.state, 'KEPT_OFFICIAL');
   assert.equal(cur.reconciliation.rank_equal, 1);
-  assert.equal(s.rows('tennis_ranking_snapshots').filter((x) => x.source_family === 'espn' && x.ranking_date === '2026-09-22').length, 0);
+  assert.equal(s.rows('tennis_ranking_snapshots').filter((x) => x.source_family === 'espn' && x.ranking_date === '2026-09-21').length, 0);
   assert.ok(s.rows('tennis_ranking_snapshots').some((x) => x.source_family === 'espn' && x.list_key === 'wta_singles' && x.ranking_date === '2012-02-27'), 'historical hole filled by ESPN');
-  assert.ok((await kv.get('espn:recon:wta', 'json'))['2026-09-22']);
+  const rec = (await kv.get('espn:recon:wta', 'json'))['2026-09-21'];
+  assert.equal(rec.days_apart, 0, 'the ESPN list is dated to the Monday it is in force: same day as the official list');
 });

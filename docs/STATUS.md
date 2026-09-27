@@ -1,4 +1,16 @@
-# Status — 2026-09-27 14:10 UTC (production snapshot)
+# Status — 2026-09-27 21:10 UTC (production snapshot)
+
+**2026-09-27 evening — WTA history (evidence: `docs/evidence/wta-coverage-latest.json`, `espn-wta-discovery-latest.json`,
+`dna-v2-backtest-latest.json`, `dna-v2-wta-qa-latest.json`).** Women's singles 9,368 -> 101,340 and doubles 2,715 -> 25,345
+canonical matches, 2000-2026, from the official WTA player-history lane (`wta_history`, 83,760 rows founded, 8,738
+links to existing rows) and ESPN's WTA league (`espn_wta`, 1,438 events, 30,868 rows still ESPN-owned, 30,284 ESPN
+ids on official rows; 20,358 ESPN rows taken over by official history). 0 same-edition duplicate groups
+(1,052 + 172 cross-source duplicates merged by a logged repair after two mapping defects were fixed). Weekly WTA
+singles lists 2007-2026 (818 ESPN + 7 official; 4 ESPN weeks of 2018 = SOURCE_ERROR, retried weekly); ESPN lists
+dated to their effective Monday (742 re-dated) — official vs ESPN on 7 overlapping weeks: 100% rank + points
+agreement. WTA PBE Rating published (0.6268 vs ranking 0.6462 log loss); WTA Match DNA 1,080 players qualify for
+match win % (was 276); WTA top 150: Match DNA percentiles 150/150, technical DNA 138/150 (unchanged).
+The history lane continues (3,523-player queue; current top 150 done).
 
 **2026-09-27 — ESPN ATP secondary lane + Tennis DNA v2 (details below and in `docs/evidence/espn-atp-coverage-latest.json`,
 `docs/evidence/dna-v2-qa-latest.json`).** Men's graph: 3,725 → 60,899 MS/MD matches (53,384 MS), 56 → 1,285 men's

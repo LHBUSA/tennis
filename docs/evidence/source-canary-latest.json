@@ -1,12 +1,12 @@
 {
-  "run_at": "2026-09-27T16:32:26.653Z",
+  "run_at": "2026-09-27T20:44:57.011Z",
   "runner": "scripts/canary/run.mjs (local workstation egress)",
   "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
   "client_stats": {
-    "requests": 1,
+    "requests": 9,
     "not_modified": 0,
     "retries": 0,
-    "blocked": 0
+    "blocked": 1
   },
   "results": [
     {
@@ -340,6 +340,21 @@
       "drift": null
     },
     {
+      "key": "wta.player.matches",
+      "family": "wta",
+      "state": "PASS",
+      "url": "https://api.wtatennis.com/tennis/players/320760/matches/?page=0&pageSize=5",
+      "http_status": 200,
+      "bytes": 8336,
+      "content_type": "application/json",
+      "sha256": "9275306cc91c7e38d335b9e34ef12fe9e15527e83452f9994f4a32a35dd8022c",
+      "attempts": 1,
+      "latency_ms": 228,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
       "key": "espn.atp.event",
       "family": "espn",
       "state": "PASS",
@@ -349,7 +364,7 @@
       "content_type": "application/json;charset=utf-8",
       "sha256": "08b1acef4b44a261998df996533adac1b51f878999c1b094083c0c2c4e6a3faf",
       "attempts": 1,
-      "latency_ms": 280,
+      "latency_ms": 463,
       "record_count": 333,
       "error": null,
       "drift": null
@@ -364,7 +379,7 @@
       "content_type": "application/json;charset=utf-8",
       "sha256": "63994589288be8be07e5e781a0997b4300b6dc19a258c71a855c0a1301a51d52",
       "attempts": 1,
-      "latency_ms": 174,
+      "latency_ms": 189,
       "record_count": 209,
       "error": null,
       "drift": null
@@ -377,9 +392,9 @@
       "http_status": 200,
       "bytes": 6409,
       "content_type": "application/json;charset=utf-8",
-      "sha256": "0a5b4e6806efa4c7c6091fe1cdb21d5e6346ac8cac0e94ad4d70092d310aa5a4",
+      "sha256": "75b736e41f3ba8df26172b84760e76cdf3f90df4ad79b57729dbb122d39c39a9",
       "attempts": 1,
-      "latency_ms": 48,
+      "latency_ms": 63,
       "record_count": 60,
       "error": null,
       "drift": null
@@ -394,7 +409,7 @@
       "content_type": "application/json;charset=utf-8",
       "sha256": "dbf5fca6a04c08d3e8a5d0e08a176be69ac2b6eca7fb1e9e639d30f35259d806",
       "attempts": 1,
-      "latency_ms": 53,
+      "latency_ms": 47,
       "record_count": 1,
       "error": null,
       "drift": null
@@ -409,7 +424,7 @@
       "content_type": "application/json;charset=utf-8",
       "sha256": "bc8cf87695be572447a9892a392b11540a9790c256a60a03a82bd474fdf0cae1",
       "attempts": 1,
-      "latency_ms": 53,
+      "latency_ms": 54,
       "record_count": 1,
       "error": null,
       "drift": null
@@ -424,7 +439,37 @@
       "content_type": "application/json;charset=utf-8",
       "sha256": "d1d5fc19886fbf4a4e946b1efc3244f0856d9f35fafe0df8d1cd53cc179d01a4",
       "attempts": 1,
-      "latency_ms": 57,
+      "latency_ms": 52,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.wta.event",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026",
+      "http_status": 200,
+      "bytes": 1237629,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "f2c0a01dedc566af153b148aa97a50edbdca111bfae4e225fdbb481f18882547",
+      "attempts": 1,
+      "latency_ms": 42,
+      "record_count": 302,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.wta.rankings",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/seasons/2012/types/2/weeks/10/rankings/2",
+      "http_status": 200,
+      "bytes": 17413,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "78fd01be647355655ef85c5d9e2bb4d3e71e0758b0ef42e332ef90da24106274",
+      "attempts": 1,
+      "latency_ms": 54,
       "record_count": 1,
       "error": null,
       "drift": null
@@ -442,51 +487,6 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 403 forbidden https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
-      "drift": null
-    },
-    {
-      "key": "espn.wta.event",
-      "family": "espn",
-      "state": "PASS",
-      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/events/154-2026",
-      "http_status": 200,
-      "bytes": 1237629,
-      "content_type": "application/json;charset=utf-8",
-      "sha256": "f2c0a01dedc566af153b148aa97a50edbdca111bfae4e225fdbb481f18882547",
-      "attempts": 1,
-      "latency_ms": 257,
-      "record_count": 302,
-      "error": null,
-      "drift": null
-    },
-    {
-      "key": "espn.wta.rankings",
-      "family": "espn",
-      "state": "PASS",
-      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/wta/seasons/2012/types/2/weeks/10/rankings/2",
-      "http_status": 200,
-      "bytes": 17413,
-      "content_type": "application/json;charset=utf-8",
-      "sha256": "78fd01be647355655ef85c5d9e2bb4d3e71e0758b0ef42e332ef90da24106274",
-      "attempts": 1,
-      "latency_ms": 42,
-      "record_count": 1,
-      "error": null,
-      "drift": null
-    },
-    {
-      "key": "wta.player.matches",
-      "family": "wta",
-      "state": "PASS",
-      "url": "https://api.wtatennis.com/tennis/players/320760/matches/?page=0&pageSize=5",
-      "http_status": 200,
-      "bytes": 8336,
-      "content_type": "application/json",
-      "sha256": "9275306cc91c7e38d335b9e34ef12fe9e15527e83452f9994f4a32a35dd8022c",
-      "attempts": 1,
-      "latency_ms": 228,
-      "record_count": 1,
-      "error": null,
       "drift": null
     }
   ]

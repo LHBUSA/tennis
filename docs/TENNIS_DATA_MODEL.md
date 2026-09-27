@@ -58,7 +58,7 @@ the two participant keys** (orientation-free). Then:
 | Found | Incoming source | Action |
 |---|---|---|
 | this external id already linked | any | update that row (idempotent re-ingest) |
-| one row, higher-precedence owner (official feeds outrank `espn`) | espn | **attach** the ESPN external id only; a result disagreement becomes a `cross_source` hold for review; the official row stands |
+| one row, higher-precedence owner (precedence: `espn` 1 < `wta_history` 2 < every per-match official feed 3) | lower | **attach** the ESPN external id only; a result disagreement becomes a `cross_source` hold for review; the official row stands |
 | one row owned by `espn` | official feed | **take over**: same `match_id`, official fields, participants replaced |
 | one row, round codes differ | any | held `duplicate_candidate:round_conflict` |
 | same source, other external id / several rows | any | held `duplicate_candidate` |
@@ -79,3 +79,20 @@ with `ranking_date` = the date ESPN last updated that list (its `lastUpdated`), 
 Monday; `tennis_rankings.provider_player_id = 'espn:<athlete id>'`, `previous_rank` as printed,
 `pbe_player_id` linked once the athlete resolves (daily relink). The public API describes such a list as
 carried by a secondary source, never as an official feed.
+
+### WTA specifics (2026-09-27)
+
+- `espn_wta`: an ESPN WTA event is written into the OFFICIAL WTA edition when shared singles pairs prove it
+  (candidates found through the event's players; >= max(2, 30%) of resolved pairs, unique best), recorded as
+  `tennis_edition_external_ids (espn_wta, '<tid>-<year>')`; otherwise into ESPN's edition. ESPN event ids are one
+  namespace across both leagues (a combined event shares its id); mixed doubles is ingested once, from the ATP
+  league.
+- `wta_history`: official career rows, no match id/time. Side A = the team with the lower WTA id (both players'
+  histories write one identical row). A history row takes over an ESPN row filed in ESPN's edition only when it
+  is ESPN-owned, in an ESPN edition and in the same week (start dates within 3 days).
+- WTA API round ids are opaque (at a 128 draw its `M-2` is round 1; qualifying may be a bare `Q-`): against a WTA
+  API row only the stage and Q/S/F are compared.
+- Writer self-heal: a row found by its own external id that duplicates an equal-or-higher-precedence row of the same
+  match in the edition is merged into it (ids moved, row removed, `tennis_source_changes kind duplicate_merged`).
+- Known source labelling issue (not duplicates): 377 draw-slot conflicts (one player twice in the same round of an
+  edition) from ESPN round mislabels and the WTA API's opaque qualifying ids; reported by `scripts/qa`, not rewritten.
