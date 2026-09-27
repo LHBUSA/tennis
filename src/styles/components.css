@@ -550,3 +550,7 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 @media (max-width: 380px) { .share-b span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .share-b { padding: 0 11px; } .share-l { display: none; } }
 .dna-status { margin: 12px 0 0; padding: 10px 14px; border-left: 3px solid var(--gold-bright); background: var(--paper); font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
 .dna-tbl th[scope='row'] { text-transform: capitalize; }
+/* DNA tables: metric names wrap instead of truncating; on phones the confidence column yields to the percentile/status */
+.dna-tbl th[scope='row'], .dna-tbl td:last-child { white-space: normal; }
+.dna-tbl th[scope='row'] { min-width: 8.5em; }
+@media (max-width: 560px) { .dna-tbl th:nth-child(4), .dna-tbl td:nth-child(4) { display: none; } .dna-tbl th, .dna-tbl td { padding: 8px 5px; } }
