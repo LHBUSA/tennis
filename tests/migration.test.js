@@ -120,3 +120,17 @@ test('venues without venue precision cannot carry coordinates; broadcasts need h
   await assert.rejects(pg.query(`insert into tennis_venues (venue_id, slug, city, precision, source_family, latitude, longitude) values (gen_random_uuid(), 'x', 'Paris', 'city', 'wta', 48.8, 2.3)`), /check/i);
   await assert.rejects(pg.query(`insert into tennis_broadcasts (territory, broadcaster, distribution_type, official_url, source, source_url, verified_at) values ('US','X','tv','https://x.test','s','https://s.test', now())`), /check/i);
 });
+
+test('context layer: a mapping needs id + confidence; unmapped carries none; surface values closed; bye has no player', async () => {
+  const pg = await db();
+  await pg.query(`insert into tennis_tournaments (tournament_id, slug, name, competition_key) values ('${U(1)}', 't', 'T', 'wta_250')`);
+  await pg.query(`insert into tennis_tournament_editions (edition_id, tournament_id, year, competition_key, source_family) values ('${U(2)}', '${U(1)}', 2025, 'wta_250', 'wta')`);
+  await pg.query(`insert into tennis_source_mappings (entity_type, provider, external_id, canonical_id, status, method, confidence, rule_version) values ('edition', 'espn_wta', '1-2025', '${U(2)}', 'mapped', 'shared_matches', 'high', 'v1')`);
+  await pg.query(`insert into tennis_source_mappings (entity_type, provider, external_id, status, method, rule_version) values ('edition', 'espn_wta', '2-2025', 'unresolved', 'shared_matches', 'v1')`);
+  await rejects(pg, `insert into tennis_source_mappings (entity_type, provider, external_id, status, method, confidence, rule_version) values ('edition', 'espn_wta', '3-2025', 'mapped', 'x', 'high', 'v1')`);
+  await rejects(pg, `insert into tennis_source_mappings (entity_type, provider, external_id, status, method, confidence, rule_version) values ('edition', 'espn_wta', '4-2025', 'ambiguous', 'x', 'medium', 'v1')`);
+  await pg.query(`insert into tennis_edition_attributes (edition_id, attribute, value, source, method) values ('${U(2)}', 'surface', 'clay', 'wta', 'direct')`);
+  await rejects(pg, `insert into tennis_edition_attributes (edition_id, attribute, value, source, method) values ('${U(2)}', 'surface', 'red clay', 'x', 'direct')`);
+  await rejects(pg, `insert into tennis_edition_attributes (edition_id, attribute, value, source, method) values ('${U(2)}', 'surface', 'clay', 'y', 'guessed')`);
+  await rejects(pg, `insert into tennis_draw_slots (edition_id, event_type, draw, position, participant_key, bye, source) values ('${U(2)}', 'WS', 'main', 1, 'S:x', true, 'wta')`);
+});
