@@ -81,7 +81,8 @@ async function athletes(ctx, ids, lookups) {
   for (const id of unknown.slice(0, lookups)) {
     const r = await fetchRun(ctx, espn.espnAthlete, { id });
     if (r.state === 'PASS') { const a = r.records[0]; cache[id] = [a.first_name, a.last_name, a.full_name, a.dob, a.nationality, a.hand]; }
-    else if (r.state === 'DEGRADED' && r.http_status === 404) cache[id] = 0;
+    // 404 / 400 ('Sports Athletes not supported for tennis', athlete 458): no bio record exists for that id
+    else if (r.state === 'DEGRADED' && [400, 404].includes(r.http_status)) cache[id] = 0;
     else { await ctx.kv.put(K.ath, JSON.stringify(cache)); throw new Error(`espn athlete ${id}: ${r.state} ${r.error || ''}`.trim()); }
     looked += 1;
   }

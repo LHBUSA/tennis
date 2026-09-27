@@ -365,6 +365,16 @@ test('lane: identity lookups first, then writes; rerun is idempotent; unmapped a
   assert.ok(s.rows('tennis_players').every((p) => /^(atp|wta):/.test(p.founding_external_key)), 'no player founded on an ESPN id');
 });
 
+test('lane: an athlete id ESPN refuses with 400 is recorded as having no bio record, not retried forever', async () => {
+  const ids = athletesOf(fx('event-154-2026.json'));
+  const { ctx, kv } = laneCtx();
+  ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: [] } }], [/status/, fx('status-walkover.json')], [/events\/154-2026$/, fx('event-154-2026.json')], [new RegExp(`athletes/${ids[0]}$`), { __status: 400, body: '{"error":{"message":"Sports Athletes not supported for tennis","code":400}}' }], [/athletes\/(\d+)$/, (url) => ({ id: /athletes\/(\d+)$/.exec(url)[1] })]]);
+  let r;
+  for (let i = 0; i < 10; i += 1) { ctx.espnIdentity = null; r = await espnEventStep(ctx, '154-2026', { lookups: 8 }); if (r.state !== 'IDENTITY_PENDING') break; }
+  assert.equal(r.state, 'PASS');
+  assert.equal((await kv.get('espn:ath', 'json'))[ids[0]], 0);
+});
+
 test('lane: a blocked ESPN endpoint fails closed — error thrown, cursor unchanged, nothing written', async () => {
   const { ctx, s, kv } = laneCtx({ blocked: [/events\/154-2026$/] });
   await assert.rejects(espnAtpStep(ctx, { budget: 10, today: '2026-09-27' }), /BLOCKED_BY_ACCESS_CONTROL/);
