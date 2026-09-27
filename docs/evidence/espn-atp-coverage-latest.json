@@ -1,0 +1,681 @@
+{
+  "generated_at": "2026-09-27T14:02:27.769Z",
+  "source": "production store (tkmln) via scripts/db/run_sql.ps1",
+  "lane": "espn_atp + espn_rankings",
+  "earliest_reliable_year_in_source": 2007,
+  "earliest_year_written": 2007,
+  "growth": {
+    "men_matches_ms_md": {
+      "before": 3725,
+      "now": 60899,
+      "added": 57174
+    },
+    "ms": {
+      "before": 3087,
+      "now": 53384,
+      "added": 50297
+    },
+    "md": {
+      "before": 638,
+      "now": 7515,
+      "added": 6877
+    },
+    "xd": {
+      "before": 31,
+      "now": 1757,
+      "added": 1726
+    },
+    "men_editions": {
+      "before": 56,
+      "now": 1285,
+      "added": 1229
+    },
+    "tournaments": {
+      "before": 918,
+      "now": 1076,
+      "added": 158
+    },
+    "editions": {
+      "before": 1492,
+      "now": 2734,
+      "added": 1242
+    },
+    "men_players": {
+      "before": 648,
+      "now": 1593,
+      "added": 945
+    },
+    "espn_player_ids": {
+      "before": 0,
+      "now": 1886,
+      "added": 1886
+    },
+    "atp_ranking_snapshots": {
+      "before": 0,
+      "now": 342,
+      "added": 342
+    }
+  },
+  "lane_totals": {
+    "matches_added": 58747,
+    "singles_added": 50144,
+    "doubles_added": 6877,
+    "mixed_added": 1726,
+    "qualifying_added": 5134,
+    "retirements_added": 1537,
+    "walkovers_added": 427,
+    "source_links_attached_to_existing": 3153,
+    "editions_added": 1242,
+    "tournaments_added": 158,
+    "player_identities_resolved": 1886,
+    "resolved_by_exact_id": 1317,
+    "resolved_by_name_dob": 569,
+    "identities_unresolved": 400,
+    "identities_ambiguous_or_conflict": 3,
+    "duplicate_candidates_held": 11,
+    "cross_source_disagreements": 11,
+    "matches_held_for_identity": 4755,
+    "rejected_malformed_or_unproven": 4199,
+    "latest_capture": "2026-09-27 14:02:08.955+00",
+    "espn_captures": 6487,
+    "ranking_rows": 50807,
+    "ranking_rows_linked": 49483,
+    "ranking_dates": "2018-07-23 .. 2026-09-17"
+  },
+  "held_reasons": [
+    {
+      "problem": "unresolved_identity",
+      "n": 5025
+    },
+    {
+      "problem": "unmapped_round",
+      "n": 2411
+    },
+    {
+      "problem": "result_line_names_disagree_with_winner_flag",
+      "n": 1520
+    },
+    {
+      "problem": "resolved_player_not_in_result_line",
+      "n": 618
+    },
+    {
+      "problem": "score_invalid",
+      "n": 384
+    },
+    {
+      "problem": "format_unprovable",
+      "n": 77
+    },
+    {
+      "problem": "winner_flag",
+      "n": 25
+    },
+    {
+      "problem": "duplicate_candidate",
+      "n": 11
+    },
+    {
+      "problem": "cross_source_disagreement",
+      "n": 11
+    },
+    {
+      "problem": "participant_invalid",
+      "n": 4
+    },
+    {
+      "problem": "unparseable_result_line",
+      "n": 3
+    },
+    {
+      "problem": "unsupported_ending",
+      "n": 2
+    },
+    {
+      "problem": "winner_disagrees_with_score",
+      "n": 2
+    }
+  ],
+  "events_captured_by_year": [
+    {
+      "year": "2007",
+      "events": 66
+    },
+    {
+      "year": "2008",
+      "events": 67
+    },
+    {
+      "year": "2009",
+      "events": 68
+    },
+    {
+      "year": "2010",
+      "events": 67
+    },
+    {
+      "year": "2011",
+      "events": 67
+    },
+    {
+      "year": "2012",
+      "events": 66
+    },
+    {
+      "year": "2013",
+      "events": 67
+    },
+    {
+      "year": "2014",
+      "events": 67
+    },
+    {
+      "year": "2015",
+      "events": 96
+    },
+    {
+      "year": "2016",
+      "events": 95
+    },
+    {
+      "year": "2017",
+      "events": 68
+    },
+    {
+      "year": "2018",
+      "events": 89
+    },
+    {
+      "year": "2019",
+      "events": 66
+    },
+    {
+      "year": "2020",
+      "events": 33
+    },
+    {
+      "year": "2021",
+      "events": 65
+    },
+    {
+      "year": "2022",
+      "events": 80
+    },
+    {
+      "year": "2023",
+      "events": 68
+    },
+    {
+      "year": "2024",
+      "events": 69
+    },
+    {
+      "year": "2025",
+      "events": 61
+    },
+    {
+      "year": "2026",
+      "events": 60
+    }
+  ],
+  "coverage_by_season": [
+    {
+      "year": 1979,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 4,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1980,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 7,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1981,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 4,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1982,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 4,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1983,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 1,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1984,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 2,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1985,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 3,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1986,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 2,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1987,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 6,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1988,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 4,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1989,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 3,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1990,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 2,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1991,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 5,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1992,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 8,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1993,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 8,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1994,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 9,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1995,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 9,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1996,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 5,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1997,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 10,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1998,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 7,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 1999,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 10,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2000,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 7,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2001,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 16,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2002,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 17,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2003,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 17,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2004,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 26,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2005,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 36,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2006,
+      "espn_editions": 0,
+      "espn_matches": 0,
+      "espn_ms": 0,
+      "espn_md": 0,
+      "all_men_matches": 54,
+      "espn_links_on_official": 0
+    },
+    {
+      "year": 2007,
+      "espn_editions": 66,
+      "espn_matches": 2633,
+      "espn_ms": 2429,
+      "espn_md": 140,
+      "all_men_matches": 2644,
+      "espn_links_on_official": 67
+    },
+    {
+      "year": 2008,
+      "espn_editions": 66,
+      "espn_matches": 2571,
+      "espn_ms": 2336,
+      "espn_md": 156,
+      "all_men_matches": 2563,
+      "espn_links_on_official": 64
+    },
+    {
+      "year": 2009,
+      "espn_editions": 65,
+      "espn_matches": 2580,
+      "espn_ms": 2336,
+      "espn_md": 153,
+      "all_men_matches": 2570,
+      "espn_links_on_official": 76
+    },
+    {
+      "year": 2010,
+      "espn_editions": 65,
+      "espn_matches": 2576,
+      "espn_ms": 2346,
+      "espn_md": 149,
+      "all_men_matches": 2589,
+      "espn_links_on_official": 80
+    },
+    {
+      "year": 2011,
+      "espn_editions": 66,
+      "espn_matches": 2524,
+      "espn_ms": 2301,
+      "espn_md": 148,
+      "all_men_matches": 2576,
+      "espn_links_on_official": 121
+    },
+    {
+      "year": 2012,
+      "espn_editions": 66,
+      "espn_matches": 2425,
+      "espn_ms": 2190,
+      "espn_md": 147,
+      "all_men_matches": 2534,
+      "espn_links_on_official": 155
+    },
+    {
+      "year": 2013,
+      "espn_editions": 64,
+      "espn_matches": 2455,
+      "espn_ms": 2239,
+      "espn_md": 141,
+      "all_men_matches": 2529,
+      "espn_links_on_official": 122
+    },
+    {
+      "year": 2014,
+      "espn_editions": 64,
+      "espn_matches": 2481,
+      "espn_ms": 2243,
+      "espn_md": 160,
+      "all_men_matches": 2532,
+      "espn_links_on_official": 105
+    },
+    {
+      "year": 2015,
+      "espn_editions": 66,
+      "espn_matches": 2593,
+      "espn_ms": 2322,
+      "espn_md": 182,
+      "all_men_matches": 2636,
+      "espn_links_on_official": 104
+    },
+    {
+      "year": 2016,
+      "espn_editions": 67,
+      "espn_matches": 2624,
+      "espn_ms": 2332,
+      "espn_md": 198,
+      "all_men_matches": 2666,
+      "espn_links_on_official": 102
+    },
+    {
+      "year": 2017,
+      "espn_editions": 67,
+      "espn_matches": 2575,
+      "espn_ms": 2298,
+      "espn_md": 183,
+      "all_men_matches": 2612,
+      "espn_links_on_official": 98
+    },
+    {
+      "year": 2018,
+      "espn_editions": 67,
+      "espn_matches": 2697,
+      "espn_ms": 2321,
+      "espn_md": 279,
+      "all_men_matches": 2811,
+      "espn_links_on_official": 148
+    },
+    {
+      "year": 2019,
+      "espn_editions": 66,
+      "espn_matches": 2861,
+      "espn_ms": 2314,
+      "espn_md": 443,
+      "all_men_matches": 2955,
+      "espn_links_on_official": 158
+    },
+    {
+      "year": 2020,
+      "espn_editions": 33,
+      "espn_matches": 1373,
+      "espn_ms": 1134,
+      "espn_md": 214,
+      "all_men_matches": 1446,
+      "espn_links_on_official": 72
+    },
+    {
+      "year": 2021,
+      "espn_editions": 62,
+      "espn_matches": 2812,
+      "espn_ms": 2281,
+      "espn_md": 428,
+      "all_men_matches": 2927,
+      "espn_links_on_official": 149
+    },
+    {
+      "year": 2022,
+      "espn_editions": 68,
+      "espn_matches": 4341,
+      "espn_ms": 3472,
+      "espn_md": 763,
+      "all_men_matches": 4427,
+      "espn_links_on_official": 187
+    },
+    {
+      "year": 2023,
+      "espn_editions": 65,
+      "espn_matches": 4274,
+      "espn_ms": 3558,
+      "espn_md": 613,
+      "all_men_matches": 4434,
+      "espn_links_on_official": 260
+    },
+    {
+      "year": 2024,
+      "espn_editions": 66,
+      "espn_matches": 4377,
+      "espn_ms": 3593,
+      "espn_md": 655,
+      "all_men_matches": 4543,
+      "espn_links_on_official": 290
+    },
+    {
+      "year": 2025,
+      "espn_editions": 60,
+      "espn_matches": 4300,
+      "espn_ms": 3360,
+      "espn_md": 849,
+      "all_men_matches": 4600,
+      "espn_links_on_official": 377
+    },
+    {
+      "year": 2026,
+      "espn_editions": 47,
+      "espn_matches": 3675,
+      "espn_ms": 2739,
+      "espn_md": 876,
+      "all_men_matches": 4021,
+      "espn_links_on_official": 416
+    }
+  ],
+  "coverage_by_level": [
+    {
+      "level": "level_not_in_source",
+      "editions": 1157,
+      "matches": 44538
+    },
+    {
+      "level": "grand_slam",
+      "editions": 78,
+      "matches": 13793
+    },
+    {
+      "level": "atp_finals",
+      "editions": 19,
+      "matches": 215
+    },
+    {
+      "level": "olympics",
+      "editions": 2,
+      "matches": 201
+    }
+  ],
+  "notes": [
+    "surface and ATP level are not in the ESPN payload: non-Slam ESPN editions carry surface=null and competition_key only when the event name states it (ATP Finals, Olympics, Davis/United Cup)",
+    "ESPN carries no match statistics: Tennis DNA inputs are unchanged by this lane"
+  ]
+}

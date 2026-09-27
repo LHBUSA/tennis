@@ -1,0 +1,448 @@
+{
+  "checked_at": "2026-09-27T14:01:49.055Z",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "no duplicate canonical singles matches (edition + event + stage + pair)",
+      "result": "PASS",
+      "duplicate_groups": 0
+    },
+    {
+      "name": "v2 snapshots: tour always the player's own (ATP/WTA never mixed)",
+      "result": "PASS",
+      "mismatched": 0
+    },
+    {
+      "name": "v1 technical snapshots preserved",
+      "result": "PASS",
+      "v1_rows": 20859,
+      "latest": "2026-09-27"
+    },
+    {
+      "name": "carlos-alcaraz: meaningful match history",
+      "result": "PASS",
+      "matches": 339,
+      "span": "2020-02-18..2026-09-09",
+      "sources": [
+        "ausopen",
+        "espn",
+        "rolandgarros",
+        "wimbledon"
+      ]
+    },
+    {
+      "name": "carlos-alcaraz: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "carlos-alcaraz: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "carlos-alcaraz: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "carlos-alcaraz: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 2272,
+      "rating_status": "published"
+    },
+    {
+      "name": "carlos-alcaraz: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "jannik-sinner: meaningful match history",
+      "result": "PASS",
+      "matches": 409,
+      "span": "2019-04-24..2026-07-12",
+      "sources": [
+        "ausopen",
+        "espn",
+        "rolandgarros",
+        "wimbledon"
+      ]
+    },
+    {
+      "name": "jannik-sinner: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "jannik-sinner: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "jannik-sinner: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "jannik-sinner: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 2411,
+      "rating_status": "published"
+    },
+    {
+      "name": "jannik-sinner: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "novak-djokovic: meaningful match history",
+      "result": "PASS",
+      "matches": 1108,
+      "span": "2007-01-02..2026-08-30",
+      "sources": [
+        "ausopen",
+        "espn",
+        "rolandgarros",
+        "wimbledon"
+      ]
+    },
+    {
+      "name": "novak-djokovic: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "novak-djokovic: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "novak-djokovic: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "novak-djokovic: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 2139,
+      "rating_status": "published"
+    },
+    {
+      "name": "novak-djokovic: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "alexander-zverev: meaningful match history",
+      "result": "PASS",
+      "matches": 712,
+      "span": "2013-07-15..2026-09-13",
+      "sources": [
+        "ausopen",
+        "espn",
+        "rolandgarros",
+        "wimbledon"
+      ]
+    },
+    {
+      "name": "alexander-zverev: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "alexander-zverev: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "alexander-zverev: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "alexander-zverev: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 2125,
+      "rating_status": "published"
+    },
+    {
+      "name": "alexander-zverev: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "gustavo-heide: meaningful match history",
+      "result": "PASS",
+      "matches": 33,
+      "span": "2022-02-12..2026-08-11",
+      "sources": [
+        "ausopen",
+        "espn"
+      ]
+    },
+    {
+      "name": "gustavo-heide: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 33,
+      "leaks": 0
+    },
+    {
+      "name": "gustavo-heide: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "gustavo-heide: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "gustavo-heide: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 1433,
+      "rating_status": "published"
+    },
+    {
+      "name": "gustavo-heide: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "roger-federer: meaningful match history",
+      "result": "PASS",
+      "matches": 752,
+      "span": "2007-01-15..2021-07-07",
+      "sources": [
+        "espn",
+        "rolandgarros"
+      ]
+    },
+    {
+      "name": "roger-federer: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "roger-federer: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "roger-federer: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "roger-federer: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 2071,
+      "rating_status": "published"
+    },
+    {
+      "name": "roger-federer: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "david-ferrer: meaningful match history",
+      "result": "PASS",
+      "matches": 716,
+      "span": "2007-01-08..2019-05-08",
+      "sources": [
+        "espn"
+      ]
+    },
+    {
+      "name": "david-ferrer: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 16,
+      "leaks": 0
+    },
+    {
+      "name": "david-ferrer: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "david-ferrer: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "david-ferrer: tour",
+      "result": "PASS",
+      "tour": "ATP",
+      "rating": 1714,
+      "rating_status": "published"
+    },
+    {
+      "name": "david-ferrer: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "UI 1440 /players/carlos-alcaraz",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/carlos-alcaraz/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/jannik-sinner",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/jannik-sinner/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/novak-djokovic",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/novak-djokovic/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/alexander-zverev",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/alexander-zverev/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/gustavo-heide",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/gustavo-heide/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/roger-federer",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/roger-federer/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/david-ferrer",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/david-ferrer/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /dna?metric=match_win_rate&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/carlos-alcaraz",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/carlos-alcaraz/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/jannik-sinner",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/jannik-sinner/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/novak-djokovic",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/novak-djokovic/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/alexander-zverev",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/alexander-zverev/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/gustavo-heide",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/gustavo-heide/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/roger-federer",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/roger-federer/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/david-ferrer",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/david-ferrer/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /dna?metric=match_win_rate&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    }
+  ]
+}

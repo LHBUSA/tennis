@@ -1,4 +1,12 @@
-# Status — 2026-09-26 23:30 UTC (production snapshot)
+# Status — 2026-09-27 14:10 UTC (production snapshot)
+
+**2026-09-27 — ESPN ATP secondary lane + Tennis DNA v2 (details below and in `docs/evidence/espn-atp-coverage-latest.json`,
+`docs/evidence/dna-v2-qa-latest.json`).** Men's graph: 3,725 → 60,899 MS/MD matches (53,384 MS), 56 → 1,285 men's
+editions, 648 → 1,593 men; ATP Tour results 2007–2026 from ESPN (secondary; official sources outrank it — 3,153
+ESPN ids attached to official rows, 0 duplicate canonical matches). Weekly ATP singles lists (ESPN, top 100–150,
+2018-07 → 2026-09 so far, backfilling to 2007). Tennis DNA v2 (Match DNA + PBE Rating) LIVE for ATP: 568 ATP
+players qualify for match win %, 145 of the current top 150 have a published percentile; technical DNA (v1)
+unchanged at 17/30 (held).
 
 **FULL OWNER BAR: NOT YET MET.** Live and real: the Tennis frontend, the WTA core product, Australian Open
 2026 men's coverage with genuine point-by-point, Wimbledon archive (degraded source) and Roland-Garros
@@ -45,14 +53,24 @@ Product: ONE Tennis product — men’s and women’s singles, doubles and mixed
   matches each). Men's singles 2021–2026 written (391+ canonical), cursor at 2020 SM; DM and QM follow.
   Identity: 271 players inspected, 149 resolved to ATP ids by exact name + DOB + nationality, 0 ambiguous,
   the rest held (never name-only).
-- **ATP Tour / Challenger:** ProTennisLive draw PDFs are reachable but carry names only — draw context,
-  never canonical. atptour.com / Infosys: Cloudflare challenge. **Official ATP rankings: BLOCKED.**
+- **ATP Tour (ESPN core API, secondary source, owner decision 2026-09-27) — INGESTED 2007–2026.** Lane
+  `espn_atp`: 58,747 canonical rows written (50,144 MS, 6,877 MD, 1,726 XD; 5,134 qualifying; 1,537 retirements;
+  427 walkovers), 1,242 editions / 158 tournaments added; 3,153 ESPN ids attached to official Slam rows. Identity:
+  1,886 ESPN athletes resolved (1,317 by exact ids via the crosswalk / Wikidata P11585→P536/P597, 569 by exact
+  name + DOB); 400 unresolved + 3 ambiguous/conflict held. Holds: 5,025 identity, 2,411 round missing from the
+  source (doubles without a round), 2,138 result-line/id contradictions (ESPN remaps historical athlete ids),
+  384 invalid scores, 77 unprovable formats, 11 duplicate candidates, 11 cross-source disagreements. No
+  surface, level or match statistics in ESPN (non-Slam editions carry surface = null).
+- **ATP Challenger:** ProTennisLive draw PDFs carry names only — never canonical. atptour.com / Infosys:
+  Cloudflare challenge. **Official ATP ranking feed: BLOCKED**; weekly ATP singles lists are held from ESPN as
+  a secondary source (never labelled official).
 - **Davis Cup (ITF Stadion):** reachable, NOT INGESTED — `tennisId` has no crosswalk to tour ids and no DOB.
 - **US Open:** BLOCKED from Cloudflare egress.
 - **Photos:** 329 men approved; AO 2026 men's main draw 123/128; 2026 men's field (all ingested events)
   272/324.
-- **Tennis DNA (ATP):** 7/30 qualified → **held** on every surface (API, player page, leaders, PBEcast,
-  newsroom packet).
+- **Tennis DNA:** v2 **Match DNA — live** (definition_version 2; results-based families, per-metric same-tour
+  gates; PBE Rating published for ATP after beating a ranking model out of sample, held for WTA). v1 **technical
+  DNA** unchanged: ATP 17/30 → held; only 238 men's singles matches carry statistics (all Australian Open).
 
 ## Open ingest holds (844)
 
