@@ -21,6 +21,7 @@ import * as open from '../../workers/providers/open.js';
 import * as rg from '../../workers/providers/rolandgarros.js';
 import * as espn from '../../workers/providers/espn.js';
 import * as wtaHistory from '../../workers/providers/wta-history.js';
+import * as wtaRecords from '../../workers/providers/wta-records.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
@@ -62,13 +63,19 @@ export const CANARIES = [
   { adapter: espn.WTA.rankingWeek, params: { season: 2012, week: 10 } },
   { adapter: wtaHistory.playerMatches, params: { id: 320760, page: 0, pageSize: 5 } },
   { adapter: probe('espn.site.scoreboard', 'espn', 'https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard', ['schedule']) },
+  { adapter: probe('espn.web.bracket', 'espn', 'https://www.espn.com/tennis/bracket/_/year/2025/tournamentId/172/type/1', ['draws']) },
+  { adapter: wtaRecords.playerRecords, params: { id: 320760 } },
+  { adapter: wtaRecords.playerYear, params: { id: 320760, year: 2025 } },
+  { adapter: espn.espnSeasonStats, params: { season: 2025, id: '296' } },
+  { adapter: espn.espnEventLog, params: { season: 2025, id: '296' } },
+  { adapter: open.wtaDrawPdf, params: { year: 2025, tournamentId: 1038 } },
   { adapter: probe('atp.rankings.page', 'atp', 'https://www.atptour.com/en/rankings/singles', ['rankings_singles']) },
   { adapter: probe('itf.api.calendar', 'itf', 'https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=', ['calendar']) }
 ];
 
 async function main() {
   const filter = process.argv[2] || '';
-  const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 }, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'site.api.espn.com': { retries: 0 } } });
+  const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 }, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'site.api.espn.com': { retries: 0 }, 'www.espn.com': { retries: 0, timeout_ms: 20000 } } });
   const runAt = new Date().toISOString();
   const results = [];
   for (const { adapter, params = {}, key = adapter.key } of CANARIES.filter((c) => (c.key || c.adapter.key).startsWith(filter))) {

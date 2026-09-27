@@ -242,8 +242,8 @@
         "status": "RESTRICTS_AUTOMATED_ACCESS",
         "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
       },
-      "production_status": "INGESTING (lane wta_history, 2026-09-27): /players/{id}/matches career lists -> canonical matches (official; outranks espn, yields to per-match WTA API rows); /players/{id} bios via the same rows; /year and /records not adapted",
-      "notes": "Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100.",
+      "production_status": "INGESTING: /players/{id}/matches (lane wta_history, official player history; backfill of the 3,523-player population); /players/{id}/records + /players/{id}/year/{y} (lane wta_records, top 200 of the official list; stored as reported in tennis_player_source_records, compared, never merged)",
+      "notes": "Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100. /records counts SINGLES AND DOUBLES together (320760: \"Grand Slam\" 6 titles = 4 singles + 2 doubles). /year returns one season's serve/return COUNTS for seasons in the WTA stats coverage (2017+ observed; earlier seasons return the player object only -> recorded absent, never zero); its MatchCount covers only the matches in the WTA stats system, so season totals are not like-for-like with our per-match statistics.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     },
@@ -331,8 +331,8 @@
         "status": "NOT_RETRIEVED",
         "quote": null
       },
-      "production_status": "NOT CANONICAL — draw context only; names alone are never identity (no PDF text extraction into canonical rows)",
-      "notes": "Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.",
+      "production_status": "REGISTRY ONLY, NOT INGESTED — blocked from Cloudflare egress (HTTP 429 + challenge page on the 3rd request from tennis-ingest, 2026-09-28; not bypassed, not re-routed through another network). Workstation canary PASS.",
+      "notes": "Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status. 2026-09-28 (Phase 5): the reviewed registry build (scripts/context/drawsheets.mjs) would use a sheet only when its first round PROVES the ESPN edition (>= 4 first-round pairs resolved within the edition's own stored players, >= 90% of them stored matches, >= 75% of the draw resolved, no player twice): header surface per edition + draw slots that point at players already in that edition. A PDF still never mints or merges a player. Candidate ATP ids come from Wikipedia links (candidates only). Blocked from Worker egress, so the ATP registry holds 1 attempted tournament; ATP surfaces come from combined events instead.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     },
@@ -1062,7 +1062,9 @@
           "espn.atp.rankings",
           "espn.atp.rankings@2010",
           "espn.wta.event",
-          "espn.wta.rankings"
+          "espn.wta.rankings",
+          "espn.atp.season_stats",
+          "espn.atp.eventlog"
         ],
         "audited": "2026-09-27",
         "file": "docs/evidence/espn-atp-discovery-latest.json",
@@ -1075,7 +1077,7 @@
         "status": "RESTRICTED",
         "quote": "§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path."
       },
-      "production_status": "SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner.",
+      "production_status": "SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. | 2026-09-28: season statistics (/seasons/{Y}/types/2/athletes/{id}/statistics: singles W-L, titles, prize) and event log (/seasons/{Y}/athletes/{id}/eventlog) for the top 150 of each tour (lane espn_extras; stored as reported; the event log is a coverage check only). Brackets: only on www.espn.com (connection reset before any HTTP response to our honest UA) — unavailable; competitors carry tournamentSeed only (no draw position).",
       "notes": "Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated. WTA league (2026-09-27): same payloads, competitions 2007+, weekly WTA singles lists (ranking id 2) 2007+; events share one id namespace with the ATP league; mixed doubles ingested once (ATP league); ESPN WTA events map onto the official WTA edition when shared singles pairs prove it; official WTA lists within 6 days win (ESPN list reconciled, not stored).",
       "storage_policy": "raw payload content-addressed in R2 (family espn); normalized rows in Supabase with source_family espn",
       "attribution": null,
@@ -1143,6 +1145,35 @@
       "production_status": "NOT INGESTED — every rubber would be an unresolved identity; no name-only merges",
       "notes": "Reachable with ties, nominations and rubbers 1900+. person.tennisId has no deterministic crosswalk to tour ids and person records carry no date of birth, so rubbers are not canonicalized.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
+      "attribution": null
+    },
+    {
+      "key": "wta.draw_pdf",
+      "family": "wta-draws",
+      "name": "WTA official draw sheets (wtafiles.wtatennis.com PDFs)",
+      "tier": "official_tour",
+      "url": "https://wtafiles.wtatennis.com/pdf/draws/{year}/{wtaTournamentId}/{MDS|QS}.pdf",
+      "capabilities": [
+        "draws"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "canary_key": "wta.draw_pdf",
+        "audited": "2026-09-28",
+        "accessible": "HTTP 200 from workstation and Cloudflare egress; layouts vary by year (2014+ parse to complete draws; 2010-2012 partial)"
+      },
+      "native_ids": {
+        "tournament": "WTA tournament group id (e.g. 1038 Madrid)"
+      },
+      "robots": "wtafiles.wtatennis.com/robots.txt -> ResourceNotFound (none published)",
+      "terms": {
+        "url": null,
+        "status": "NOT_RETRIEVED",
+        "quote": null
+      },
+      "production_status": "REGISTRY (reviewed build, scripts/context/wta-drawsheets.mjs): main-draw singles positions / seeds / entry status, used only for editions the sheet PROVES (first-round pairs = stored matches); applied to tennis_draw_slots with source wta-draws",
+      "notes": "Fetched only through tennis-ingest /v1/drawsheet (polite client, byte-exact R2 archive + capture row). A sheet never mints or merges a player: a slot points at a player already stored in that edition, or stays unresolved.",
+      "storage_policy": "raw PDF content-addressed in R2; parsed slots in Supabase with capture id",
       "attribution": null
     }
   ],

@@ -72,7 +72,7 @@ Wimbledon + AO archives for men's Slam results keyed by embedded ATP ids.
 ## Generated tables
 
 <!-- generated:start (npm run matrix) -->
-Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
+Registry 2026-09-27 · canary run 2026-09-27T23:57:12.361Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
 
 | Source | Verdict | Capabilities | Canary (latest) | Terms | Production status |
 |---|---|---|---|---|---|
@@ -80,14 +80,14 @@ Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.m
 | `wta.rankings.singles` WTA API — singles rankings (dated lists, historical) | PASS | rankings_singles, player_identity, player_bio, history | PASS · HTTP 200 · 5 rec · 1265 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.rankings.doubles` WTA API — doubles rankings | PASS | rankings_doubles, player_identity | PASS · HTTP 200 · 5 rec · 1294 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.race` WTA API — Race rankings | UNVERIFIED | race | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
-| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14093 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
-| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 53 rec · 60767 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 30 rec · 20702 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
+| `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 53 rec · 61710 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.match_stats` WTA API — match statistics (per set + totals) | PASS | match_stats, serve_stats, return_stats | PASS · HTTP 200 · 1 rec · 2191 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
-| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | PASS · HTTP 200 · 1 rec · 8336 B | RESTRICTS_AUTOMATED_ACCESS | INGESTING (lane wta_history, 2026-09-27): /players/{id}/matches career lists -> canonical matches (official; outranks espn, yields to per-match WTA API rows); /players/{id} bios via the same rows; /year and /records not adapted |
+| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | PASS · HTTP 200 · 1 rec · 8336 B | RESTRICTS_AUTOMATED_ACCESS | INGESTING: /players/{id}/matches (lane wta_history, official player history; backfill of the 3,523-player population); /players/{id}/records + /players/{id}/year/{y} (lane wta_records, top 200 of the official list; stored as reported in tennis_player_source_records, compared, never merged) |
 | **ATP** | | | | | |
 | `atp.site` atptour.com — rankings, calendar, scores, stats, players (incl. Challenger) | BLOCKED_BY_ACCESS_CONTROL | rankings_singles, rankings_doubles, race, calendar, draws, live_state, match_stats, player_bio, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 403 | RESTRICTS_AUTOMATED_ACCESS | NOT_USED — Cloudflare challenge on every request; not evaded |
 | `atp.infosys` ATP stats platform (Infosys) | BLOCKED_BY_ACCESS_CONTROL | point_by_point, match_stats | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_USED |
-| `protennislive.draw_pdf` ProTennisLive — ATP Tour + Challenger official draw / order-of-play PDFs | DEGRADED | draws | PASS · HTTP 200 · 1 rec · 139642 B | NOT_RETRIEVED | NOT CANONICAL — draw context only; names alone are never identity (no PDF text extraction into canonical rows) |
+| `protennislive.draw_pdf` ProTennisLive — ATP Tour + Challenger official draw / order-of-play PDFs | DEGRADED | draws | PASS · HTTP 200 · 1 rec · 144232 B | NOT_RETRIEVED | REGISTRY ONLY, NOT INGESTED — blocked from Cloudflare egress (HTTP 429 + challenge page on the 3rd request from tennis-ingest, 2026-09-28; not bypassed, not re-routed through another network). Workstation canary PASS. |
 | **ITF** | | | | | |
 | `itf.site` itftennis.com — World Tennis Tour calendar, results, rankings, players | BLOCKED_BY_ACCESS_CONTROL | calendar, draws, schedule, rankings_singles, player_bio, match_history, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 200 | NOT_RETRIEVED | NOT_USED — Incapsula JS challenge (served with HTTP 200); not evaded |
 | **Grand Slams** | | | | | |
@@ -123,7 +123,7 @@ Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.m
 | `commercial.api-tennis.com` api-tennis.com | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.rapidapi` RapidAPI tennis APIs | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | **ESPN core API (secondary source, owner decision 2026-09-27)** | | | | | |
-| `espn.tennis.core` ESPN tennis core API (sports.core.api.espn.com, undocumented) | PASS | calendar, draws, set_game_scoring, withdrawals_ret_wo, qualifying, doubles, mixed, history, rankings_singles, player_bio, player_identity | PASS · HTTP 200 · 333 rec · 1238272 B | RESTRICTED | SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. |
+| `espn.tennis.core` ESPN tennis core API (sports.core.api.espn.com, undocumented) | PASS | calendar, draws, set_game_scoring, withdrawals_ret_wo, qualifying, doubles, mixed, history, rankings_singles, player_bio, player_identity | PASS · HTTP 200 · 333 rec · 1238272 B | RESTRICTED | SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. \| 2026-09-28: season statistics (/seasons/{Y}/types/2/athletes/{id}/statistics: singles W-L, titles, prize) and event log (/seasons/{Y}/athletes/{id}/eventlog) for the top 150 of each tour (lane espn_extras; stored as reported; the event log is a coverage check only). Brackets: only on www.espn.com (connection reset before any HTTP response to our honest UA) — unavailable; competitors carry tournamentSeed only (no draw position). |
 
 ### Endpoint templates and notes
 
@@ -145,7 +145,7 @@ Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.m
   Field semantics verified against set scores; a consistency check (service points = points won; per-set sums = totals) runs on every parse.  
   robots: www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)
 - **`wta.player`** — `https://api.wtatennis.com/tennis/players/{id} ; /players/{id}/matches/ ; /players/{id}/year/{y} ; /players/{id}/records` · ids: player = integer  
-  Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100.  
+  Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100. /records counts SINGLES AND DOUBLES together (320760: "Grand Slam" 6 titles = 4 singles + 2 doubles). /year returns one season's serve/return COUNTS for seasons in the WTA stats coverage (2017+ observed; earlier seasons return the player object only -> recorded absent, never zero); its MatchCount covers only the matches in the WTA stats system, so season totals are not like-for-like with our per-match statistics.  
   robots: www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)
 - **`atp.site`** — `https://www.atptour.com/ and app.atptour.com (all paths probed)` · ids: player = 4-char alphanumeric (e.g. S0AG)  
   ATP player ids reach us legitimately through Slam feeds and Wikidata instead.  
@@ -153,7 +153,7 @@ Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.m
 - **`atp.infosys`** — `https://itp-atp-sls.infosys-platforms.com/prod/api/...`  
   CloudFront 403.
 - **`protennislive.draw_pdf`** — `https://www.protennislive.com/posting/{year}/{atpTournamentId}/{mds|mdd|qs|op}.pdf` · ids: tournament = ATP tournament id (e.g. 7581 Chengdu)  
-  Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status.  
+  Covers ATP Tour and ATP Challenger events (mds/mdd = main-draw singles/doubles, qs = qualifying, op = order of play). Names + countries only: no player ids, no DOB, so nothing from these PDFs can mint or merge a canonical player. Unpublished draws return HTTP 200 with a ~2.6 KB placeholder PDF; the canary checks size and text, not status. 2026-09-28 (Phase 5): the reviewed registry build (scripts/context/drawsheets.mjs) would use a sheet only when its first round PROVES the ESPN edition (>= 4 first-round pairs resolved within the edition's own stored players, >= 90% of them stored matches, >= 75% of the draw resolved, no player twice): header surface per edition + draw slots that point at players already in that edition. A PDF still never mints or merges a player. Candidate ATP ids come from Wikipedia links (candidates only). Blocked from Worker egress, so the ATP registry holds 1 attempted tournament; ATP surfaces come from combined events instead.  
   robots: robots.txt -> 404 (none published)
 - **`itf.site`** — `https://www.itftennis.com/tennis/api/TournamentApi/... ; /PlayerRankApi/...` · ids: player = 9-digit integer (e.g. 100241350)  
   ITF ids are available through Wikidata P599 (7,417 humans) for identity only.  
@@ -207,6 +207,9 @@ Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.m
   robots: not retrieved for da.wimbledon.com
 - **`daviscup.stadion`** — `https://api.itf-production.sports-data.stadion.io/custom/tieCentre/{tieId}` · ids: player = ITF tennisId (e.g. GOM1041959) — matches no Wikidata P536/P599/P2641  
   Reachable with ties, nominations and rubbers 1900+. person.tennisId has no deterministic crosswalk to tour ids and person records carry no date of birth, so rubbers are not canonicalized.
+- **`wta.draw_pdf`** — `https://wtafiles.wtatennis.com/pdf/draws/{year}/{wtaTournamentId}/{MDS|QS}.pdf` · ids: tournament = WTA tournament group id (e.g. 1038 Madrid)  
+  Fetched only through tennis-ingest /v1/drawsheet (polite client, byte-exact R2 archive + capture row). A sheet never mints or merges a player: a slot points at a player already stored in that edition, or stays unresolved.  
+  robots: wtafiles.wtatennis.com/robots.txt -> ResourceNotFound (none published)
 
 ### Terms of use — verbatim
 

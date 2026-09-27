@@ -87,4 +87,18 @@ export const protennisliveDraw = {
   parse: (body, meta) => [{ type: 'artifact', provider: 'protennislive', url: meta?.url || null, bytes: body.length, parsed: false }]
 };
 
-export const ADAPTERS = [wikidataCrosswalk, commonsLicense, protennisliveDraw];
+// Official WTA draw sheets (wtafiles.wtatennis.com/pdf/draws/{year}/{wtaId}/{MDS|QS}.pdf): main-draw singles
+// positions, seeds, entry status and the header surface. Parsed only in the reviewed registry build
+// (scripts/context/drawsheet-parse.mjs), and used only when the sheet's first round proves the edition.
+export const wtaDrawPdf = {
+  key: 'wta.draw_pdf',
+  family: 'wta-draws',
+  capabilities: ['draws'],
+  parser_version: PARSER,
+  cadence: { class: 'event_window', active_s: 1800, idle_s: 86400 },
+  request: ({ year, tournamentId, doc = 'MDS' }) => ({ url: `https://wtafiles.wtatennis.com/pdf/draws/${year}/${tournamentId}/${doc}.pdf`, headers: { accept: 'application/pdf' } }),
+  shape: (body) => (String(body).startsWith('%PDF') ? [] : ['not_a_pdf']),
+  parse: (body) => [{ type: 'draw_pdf', bytes: String(body).length }]
+};
+
+export const ADAPTERS = [wikidataCrosswalk, commonsLicense, protennisliveDraw, wtaDrawPdf];
