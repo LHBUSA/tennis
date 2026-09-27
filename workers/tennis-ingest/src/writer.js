@@ -160,10 +160,12 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     normalized.push({ sm, n, id: await matchId(sm.provider, sm.provider_match_id) });
   }
   let attach = [];
+  let alias = [];
   if (sourceDedupe && normalized.length) {
     const cs = await crossSource(store, edition.edition_id, normalized, holds, captureId);
     normalized.splice(0, normalized.length, ...cs.write);
     attach = cs.attach;
+    alias = cs.alias;
     result.duplicate_candidates = cs.duplicates;
     result.taken_over = cs.write.filter((x) => x.takeover).length;
     // a takeover may orient sides differently: the owner's participant rows are replaced, not merged
@@ -255,6 +257,15 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     const ids = attach.map((x) => x.sm.provider_match_id);
     for (let i = 0; i < ids.length; i += 150) await store.req('PATCH', `tennis_ingest_holds?entity_type=eq.match&provider=eq.${attach[0].sm.provider}&resolved_at=is.null&external_id=${inList(ids.slice(i, i + 150))}`, { body: { resolved_at: now() } });
   }
+  // aliases resolve to their first listing's final row (written, attached or taken over above)
+  const live = alias.filter((a) => a.first.id);
+  if (live.length) {
+    const exists = new Set((await store.select('tennis_matches', `select=match_id&match_id=${inList([...new Set(live.map((a) => a.first.id))])}`)).map((r) => r.match_id));
+    const rows = live.filter((a) => exists.has(a.first.id)).map((a) => ({ provider: a.x.sm.provider, external_id: a.x.sm.provider_match_id, match_id: a.first.id }));
+    await store.upsert('tennis_match_external_ids', rows, { onConflict: 'provider,external_id', ignore: true });
+    for (let i = 0; i < rows.length; i += 150) await store.req('PATCH', `tennis_ingest_holds?entity_type=eq.match&provider=eq.${rows[0].provider}&resolved_at=is.null&external_id=${inList(rows.slice(i, i + 150).map((r) => r.external_id))}`, { body: { resolved_at: now() } });
+    result.aliased = rows.length;
+  }
   await hold(store, dedupe(holds, (h) => `${h.provider}:${h.external_id}`));
   result.held = holds.length;
   return result;
@@ -314,13 +325,21 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
   for (let i = 0; i < pm.length; i += 150) for (const r of await store.select('tennis_match_external_ids', `select=external_id,match_id&provider=eq.${provider}&external_id=${inList(pm.slice(i, i + 150))}`)) extMap.set(r.external_id, r.match_id);
   const write = [];
   const attach = [];
-  const seen = new Set();
+  const seen = new Map();
+  const alias = [];
   let duplicates = 0;
   const dup = (x, problem) => { duplicates += 1; holds.push({ provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [problem], payload: slim(x.sm), capture_id: captureId }); };
   for (const x of normalized) {
     const key = pairKey(x);
-    if (seen.has(key)) { dup(x, 'duplicate_candidate:twice_in_one_payload'); continue; }
-    seen.add(key);
+    if (seen.has(key)) {
+      // the source lists one match under two ids: link the second id only when round, winner and score are identical
+      const f = seen.get(key);
+      const same = f.n.match.round_code === x.n.match.round_code && f.n.match.score_text === x.n.match.score_text && f.n.match.status === x.n.match.status
+        && f.n.match.participants[f.n.match.winner_side] === x.n.match.participants[x.n.match.winner_side];
+      if (same) alias.push({ x, first: f }); else dup(x, 'duplicate_candidate:twice_in_one_payload');
+      continue;
+    }
+    seen.set(key, x);
     // 1. this external id is already linked (idempotent re-ingest, including earlier attachments)
     let target = extMap.get(x.sm.provider_match_id) || (byId.has(x.id) ? x.id : null);
     // 2. the same match from another source, by natural key
@@ -348,7 +367,7 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
       holds.push({ provider, entity_type: 'cross_source', external_id: x.sm.provider_match_id, problems: [`cross_source_disagreement: ${owner.source_family} ${owner.status} ${a || '-'} vs ${provider} ${x.n.match.status} ${b || '-'}${ownWinner !== ourWinner ? ' (winner differs)' : ''}`], payload: { match_id: target, owner: owner.source_family }, capture_id: captureId });
     }
   }
-  return { write, attach, duplicates };
+  return { write, attach, duplicates, alias };
 }
 
 const prevSnapshot = (p) => snapshotOf({ status: p.status, live: p.live_state, sets: (p.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ games: { A: t.games_a, B: t.games_b }, tiebreak: t.tb_a == null ? null : { A: t.tb_a, B: t.tb_b }, is_match_tiebreak: t.is_match_tiebreak })) });

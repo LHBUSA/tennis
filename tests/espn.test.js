@@ -288,6 +288,23 @@ test('ambiguity is held: round conflict, same-source collision, disagreeing resu
   assert.equal(count(s, 'tennis_matches'), 1);
 });
 
+test('one match listed twice by the source: identical listing links both ids to one row; a different result is held', async () => {
+  const s = new MemStore();
+  const ed = { edition_id: E, surface: 'hard', indoor: false };
+  const a = sm('espn', '119-2022:116012', 'MS', 'Q-1', ['AAAA'], ['BBBB'], [[6, 4], [7, 6]]);
+  const b = sm('espn', '119-2022:168902', 'MS', 'Q-1', ['AAAA'], ['BBBB'], [[6, 4], [7, 6]]);
+  const r = await writeMatches(s, [a, b], ed, { dedupe: true });
+  assert.equal(count(s, 'tennis_matches'), 1);
+  assert.equal(r.aliased, 1);
+  assert.equal(new Set(s.rows('tennis_match_external_ids').map((x) => x.match_id)).size, 1);
+  assert.equal(count(s, 'tennis_match_external_ids'), 2);
+  const c = sm('espn', '119-2022:999', 'MS', 'Q-1', ['AAAA'], ['CCCC'], [[6, 4], [6, 4]]);
+  const d = sm('espn', '119-2022:998', 'MS', 'Q-1', ['AAAA'], ['CCCC'], [[6, 3], [6, 4]]);
+  const r2 = await writeMatches(s, [c, d], ed, { dedupe: true });
+  assert.equal(r2.duplicate_candidates, 1);
+  assert.equal(count(s, 'tennis_matches'), 2);
+});
+
 test('WTA path unchanged: without dedupe the writer never reads the edition index', async () => {
   const s = new MemStore();
   await writeMatches(s, [sm('wta', 'X-1', 'MS', 'M-1', ['AAAA'], ['BBBB'], [[6, 4], [6, 4]])], { edition_id: E });
