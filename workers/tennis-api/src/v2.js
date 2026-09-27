@@ -65,26 +65,41 @@ async function storedDna(store, pid, surface = 'all') {
   return (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics,provenance&pbe_player_id=eq.${pid}&surface=eq.${surface}&order=as_of.desc&limit=1`))[0] || null;
 }
 
-/** PBEcast DNA pair: surface snapshots only when the tour's DNA is published. */
+/** PBEcast DNA pair: the player's individual measurements (+ surface snapshot); comparison rules inside. */
 async function gatedPair(store, pid, surf) {
   const all = await dnaWithPercentiles(store, pid, 'all');
-  if (all?.published === false) return { all, surface: null };
   return { all, surface: surf ? await storedDna(store, pid, surf) : null };
 }
 
-async function dnaWithPercentiles(store, pid, surface = 'all') {
+/**
+ * Tennis DNA publication contract (owner rule 2026-09-26). Publication layer only: definitions, definition_version,
+ * confidence thresholds, missingness, as-of exclusivity and tour separation are unchanged.
+ *   Level 1  individual measurements: published whenever stored (value, sample, numerator/denominator,
+ *            confidence). Missing stays missing; no percentile is implied.
+ *   Level 2  metric percentile: only when the player's metric is medium/high confidence AND the same-tour peer
+ *            population for that metric reaches the percentile minimum (percentile() -> null below 10).
+ *   Level 3  full comparative DNA (radar/fingerprint, strengths, watch areas, headline traits, leaderboard):
+ *            only when the tour has DNA_MIN_QUALIFIED qualified players (tourDnaStatus().ready).
+ */
+export async function dnaWithPercentiles(store, pid, surface = 'all') {
   const snap = await storedDna(store, pid, surface);
   if (!snap) return null;
   const gender = (await store.select('tennis_players', `select=gender&pbe_player_id=eq.${pid}`))[0]?.gender === 'M' ? 'M' : 'F';
   const gate = await tourDnaStatus(store, gender);
-  if (!gate.ready) return { published: false, tour: TOUR_OF[gender], reason: `${TOUR_OF[gender]} Tennis DNA is published once ${gate.threshold} players have a medium-confidence sample (currently ${gate.qualified})`, qualified: gate.qualified, threshold: gate.threshold };
   const { pop, players } = await population(store, snap.as_of, surface, gender);
   const dims = DNA_DIMENSIONS.map(([k, label]) => {
     const m = snap.metrics[k];
     const usable = m && m.value != null && ['medium', 'high'].includes(m.confidence);
-    return { key: k, label, value: m?.value ?? null, confidence: m?.confidence ?? 'insufficient', sample_matches: m?.sample_matches ?? 0, percentile: usable ? percentile(pop[k], m.value, k) : null, population: pop[k].length };
+    const p = usable ? percentile(pop[k], m.value, k) : null;
+    const status = m?.value == null ? 'missing' : !usable ? 'player_sample_low' : p == null ? 'peer_sample_not_mature' : 'published';
+    return { key: k, label, value: m?.value ?? null, confidence: m?.confidence ?? 'insufficient', sample_matches: m?.sample_matches ?? 0, numerator: m?.numerator ?? null, denominator: m?.denominator ?? null, percentile: p, percentile_status: status, population: pop[k].length };
   });
-  return { as_of: snap.as_of, surface, definition_version: snap.definition_version, metrics: snap.metrics, dimensions: dims, population_players: players, matches_considered: snap.provenance?.matches_considered ?? null, tour: TOUR_OF[gender], percentile_basis: `${TOUR_OF[gender]} singles players with a stored v${snap.definition_version} snapshot on ${snap.as_of} (${surface}) whose metric confidence is medium or high` };
+  const tour = TOUR_OF[gender];
+  return {
+    as_of: snap.as_of, surface, definition_version: snap.definition_version, metrics: snap.metrics, dimensions: dims, population_players: players, matches_considered: snap.provenance?.matches_considered ?? null, tour,
+    percentile_basis: `${tour} singles players with a stored v${snap.definition_version} snapshot on ${snap.as_of} (${surface}) whose metric confidence is medium or high (a percentile needs at least 10 such peers)`,
+    comparative: { published: gate.ready, qualified: gate.qualified, threshold: gate.threshold, status: gate.ready ? `${tour} comparative DNA is published` : `${tour} comparative DNA is still building: ${gate.qualified} of ${gate.threshold} players currently meet the full comparative-DNA standard` }
+  };
 }
 
 async function rankAt(store, pid, date) {
@@ -179,7 +194,7 @@ async function playerDnaV2(store, slug, url) {
   const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
   const d = await dnaWithPercentiles(store, p.pbe_player_id, surface);
   const surfaces = {};
-  if (d?.published !== false) for (const s of ['hard', 'clay', 'grass']) { const x = await storedDna(store, p.pbe_player_id, s); if (x) surfaces[s] = { as_of: x.as_of, matches_considered: x.provenance?.matches_considered ?? null, metrics: x.metrics }; }
+  if (d) for (const s of ['hard', 'clay', 'grass']) { const x = await storedDna(store, p.pbe_player_id, s); if (x) surfaces[s] = { as_of: x.as_of, matches_considered: x.provenance?.matches_considered ?? null, metrics: x.metrics }; }
   return ok({ player: shapePlayer(p), dna: d, surfaces }, { rows: [], source: ['pbe_derived'], updated: d?.as_of ? `${d.as_of}T00:00:00Z` : null, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: 'stored Tennis DNA v1 (singles); percentiles vs the stored population on the same as_of date' });
 }
 

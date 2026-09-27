@@ -248,6 +248,23 @@ function playerHero(p, meta, tab) {
     <div class="page" style="padding-top:0"><nav class="tabs" aria-label="Player sections"><a href="/players/${p.slug}" ${!tab ? html`aria-current="page"` : ''}>Overview</a><a href="/players/${p.slug}/dna" ${tab === 'dna' ? html`aria-current="page"` : ''}>Tennis DNA</a></nav><p class="meta">${freshnessBadge(meta)} <span>${meta?.semantics || ''}</span></p></div>`;
 }
 
+const ORD = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
+const PCT_NOTE = { missing: '—', player_sample_low: 'Sample too small', peer_sample_not_mature: 'Peer sample not mature' };
+/** Tennis DNA publication contract: individual measurements always; a metric percentile only with enough same-tour
+ *  peers; the full comparative view (radar, bars) only once the tour gate opens. */
+function dnaSection(d) {
+  const byKey = Object.fromEntries((d.dimensions || []).map((x) => [x.key, x]));
+  const cmp = d.comparative || { published: false };
+  const rows = Object.values(d.metrics || {}).filter((m) => m && m.metric_key);
+  return html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · ${d.tour} singles · as of ${fmtDate(d.as_of)}</span></header>
+    ${cmp.published ? html`<div class="dna-wrap"><div>${dnaRadar(d.dimensions)}<p class="note">Percentile vs ${d.percentile_basis}.</p></div><div>${dnaBars(d.dimensions)}</div></div>` : ''}
+    <div class="tbl-wrap"><table class="tbl dna-tbl"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n hide-s">Sample</th><th>Confidence</th><th>${d.tour} percentile</th></tr></thead><tbody>
+      ${rows.map((m) => { const x = byKey[m.metric_key]; return html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${m.value == null ? '—' : pct(m.value)}</td><td class="n hide-s">${m.numerator == null ? '' : `${m.numerator}/${m.denominator} · `}${m.sample_matches ?? 0} matches</td><td><span class="conf c-${m.confidence}">${m.confidence}</span></td><td>${x?.percentile != null ? html`<b>${ORD(x.percentile)}</b>` : html`<span class="note">${x ? PCT_NOTE[x.percentile_status] || '—' : '—'}</span>`}</td></tr>`; })}
+    </tbody></table></div>
+    ${cmp.published ? '' : html`<p class="dna-status"><b>${d.tour} peer comparison still building.</b> ${cmp.qualified} of ${cmp.threshold} players currently meet the full comparative-DNA standard, so the tour radar, strengths and leaderboard are not shown yet. A metric's percentile appears once at least 10 ${d.tour} players have a medium-confidence sample for it. ATP and WTA are never compared.</p>`}
+  </section>`;
+}
+
 export const player = mountWith(async (root, { params }, signal) => {
   render(root, html`<div class="page"><p class="loading">Loading player…</p></div>`);
   const [pr, prof] = await Promise.all([api(`/v1/players/${params.slug}`, { signal }), api(`/v1/players/${params.slug}/profile`, { signal })]).catch(() => [null, null]);
@@ -263,10 +280,7 @@ export const player = mountWith(async (root, { params }, signal) => {
     const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
     const d = dr?.data?.dna;
     render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page" style="padding-top:0">
-      ${d?.published === false ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">${d.tour} · not published yet</span></header><p class="empty-h">${d.tour} Tennis DNA opens once the sample is meaningful.</p><p class="note">${d.reason}. ATP and WTA are separate populations and are never compared.</p></section>` : d ? html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · singles · as of ${fmtDate(d.as_of)}</span></header>
-        <div class="dna-wrap"><div>${dnaRadar(d.dimensions)}<p class="note">Percentile vs ${d.percentile_basis}. Dimensions whose sample is not yet medium confidence show n/a.</p></div>
-        <div>${dnaBars(d.dimensions)}
-          <table class="cmp2" style="margin-top:14px"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n">Sample</th></tr></thead><tbody>${Object.values(d.metrics).map((m) => html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${pct(m.value)}</td><td class="n">${m.numerator == null ? '—' : `${m.numerator}/${m.denominator}`} · ${m.sample_matches}m <span class="conf c-${m.confidence}">${m.confidence}</span></td></tr>`)}</tbody></table></div></div></section>
+      ${d ? dnaSection(d) : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
       ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}` : emptyModule(dr?.meta || pr.meta, 'No stored Tennis DNA for this player yet (it needs matches with published statistics).')}
       <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
     return;
@@ -275,7 +289,7 @@ export const player = mountWith(async (root, { params }, signal) => {
   // men's DNA is gated by population size; the gate never hides the rest of the profile
   const dnaGate = p.gender === 'M' ? (await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null))?.data?.dna : null;
   render(root, html`${playerHero(p, pr.meta, null)}<div class="page" style="padding-top:0">
-    ${dnaGate?.published === false ? html`<p class="note dna-gate">Tennis DNA not published yet · ${dnaGate.qualified}/${dnaGate.threshold} qualified. <a href="/methodology">Why →</a></p>` : ''}
+    ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Tennis DNA measurements →</a> · ${dnaGate.tour} comparative DNA is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold}).</p>` : ''}
     <div class="grid-2">
       <section class="mod"><header class="mod-h"><h2>Recent form</h2><span class="mod-k">last ${f?.form?.length || 0}</span></header><div class="mod-b">${f?.form?.length ? html`<div class="form">${f.form.map((x) => html`<a class="${x.result}" href="/matches/${x.id}" title="${x.result} ${x.score || ''} · ${x.tournament || ''} ${x.year || ''}">${x.result}</a>`)}</div>` : html`<p class="note">No completed singles matches in the store yet — history is backfilling.</p>`}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>
       <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
@@ -323,7 +337,7 @@ export const dna = mountWith((root, _c, signal) => {
   root.querySelector('.page-h').insertAdjacentHTML('beforeend', String(html`<div class="chips" aria-label="Tour" data-tour-chips>${[['wta', 'WTA'], ['atp', 'ATP']].map(([t, l]) => html`<a class="chip${tour === t ? ' on' : ''}" href="${dnaUrl({ tour: t })}" ${t === 'atp' && tour !== 'atp' ? raw('data-atp-chip hidden') : ''}>${l}</a>`)}</div><div class="chips">${[['all', 'All surfaces'], ['hard', 'Hard'], ['clay', 'Clay'], ['grass', 'Grass']].map(([s, l]) => html`<a class="chip${surface === s ? ' on' : ''}" href="${dnaUrl({ surface: s })}">${l}</a>`)}</div>`));
   // the ATP switch appears only once ATP DNA is published (sample threshold)
   api(`/v1/dna/leaders?metric=${metric}&tour=atp&limit=1`, { signal }).then((r) => { if (r?.data?.published !== false) root.querySelector('[data-atp-chip]')?.removeAttribute('hidden'); }).catch(() => {});
-  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => d.published === false ? html`<div class="mod"><p class="empty-h">${tour.toUpperCase()} Tennis DNA is not published yet.</p><p class="note">It opens once ${d.threshold} players have a medium-confidence sample (currently ${d.qualified}). ATP and WTA are separate populations and are never compared.</p></div>` : html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
+  return fill(root, `/v1/dna/leaders?metric=${metric}&surface=${surface}&tour=${tour}&limit=50`, (d) => d.published === false ? html`<div class="mod"><p class="empty-h">${tour.toUpperCase()} comparative DNA is still building.</p><p class="note">The ${tour.toUpperCase()} leaderboard opens once ${d.threshold} players meet the full comparative-DNA standard (currently ${d.qualified}). Each player's own measurements are already on their Tennis DNA page. ATP and WTA are separate populations and are never compared.</p></div>` : html`<p class="note">${d.definition} · ${tour.toUpperCase()} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
     ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${pct(r.value)}</td><td class="n hide-s">${r.numerator}/${r.denominator} · ${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No player has a medium-confidence sample for this metric yet.</p><p class="note">Tennis DNA is built from stored match statistics; the historical backfill adds them every few minutes. Small samples are never ranked.</p></div>`}
     <p class="note"><a href="/methodology">Definitions and confidence rules →</a></p>`, 'Tennis DNA unavailable.', signal);
 });

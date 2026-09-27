@@ -46,6 +46,9 @@ const BANNED = [
   [/\b(first|maiden|debut)\s+(title|final|trophy|semifinal|quarterfinal|win over)|career[- ](high|best)|personal best|record\b|all-time|historic/i, 'unsupported_first_or_record'],
   [/[“”"]/, 'unsupported_quote'],
   [/\b(our model|win probability|projected|fair price|edge of)\b/i, 'unsupported_model'],
+  // tour-relative claims: the packet carries individual measurements only (no peer percentiles), so any
+  // comparison with the tour is unsupported (Tennis DNA publication rule 2026-09-26)
+  [/\b(\d{1,2}(st|nd|rd|th)\s+percentile|percentile|top\s+\d{1,2}\s*(%|per\s*cent)|(best|highest|lowest|worst|strongest|weakest)\s+(on|in)\s+(the\s+)?(tour|wta|atp|field)|among\s+the\s+(best|elite|top)\b|above[- ]average|below[- ]average|tour[- ]average|tour[- ]leading|league[- ]leading)/i, 'unsupported_comparative'],
   [/\b(in the world of|it remains to be seen|only time will tell|a testament to|speaks volumes|make no mistake|at the end of the day|the perfect storm|sent shockwaves|stunned the world)\b/i, 'cliche']
 ];
 

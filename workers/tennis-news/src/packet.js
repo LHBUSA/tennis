@@ -174,10 +174,11 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     // next scheduled match for the winner in this edition, only when the draw already shows it
     const next = (await loadMatches(store, `edition_id=eq.${m.tournament.edition_id}&status=eq.scheduled&limit=40`)).filter((x) => sideOfPlayer(x, wid) && x.round_order > m.round_order)[0];
     if (next) { const s = sideOfPlayer(next, wid); packet.next = { match_id: next.id, round_label: next.round_label, opponent: next.sides[s === 'A' ? 'B' : 'A']?.players.map((p) => ({ id: p.id, slug: p.slug, name: p.name })) || [] }; }
-    // DNA: stored snapshot built before the match date, medium/high confidence metrics only.
-    // Men's (ATP) Tennis DNA is not published yet (population threshold), so a men's packet carries none.
+    // DNA: stored snapshot built before the match date, medium/high confidence individual measurements only.
+    // No peer percentiles are carried (tour comparison is gated separately and the gates reject comparative
+    // claims), so men's singles measurements are usable too. ATP and WTA are never compared.
     const dna = {};
-    for (const pid of m.event_type === 'WS' ? [wid, lid] : []) {
+    for (const pid of m.event_type === 'WS' || m.event_type === 'MS' ? [wid, lid] : []) {
       const snap = (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics&pbe_player_id=eq.${pid}&surface=eq.all&as_of=lte.${date}&order=as_of.desc&limit=1`))[0];
       if (!snap) continue;
       const metrics = Object.fromEntries(Object.entries(snap.metrics || {}).filter(([, v]) => v && ['medium', 'high'].includes(v.confidence) && Number.isFinite(v.value)).map(([k, v]) => [k, { value: v.value, pct: Math.round(v.value * 1000) / 10, sample_matches: v.sample_matches, confidence: v.confidence }]));

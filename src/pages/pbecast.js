@@ -125,13 +125,14 @@ function statsPanel(st) {
 }
 
 function dnaCompare(data, m) {
-  const gated = [data.dna?.A?.all, data.dna?.B?.all].find((x) => x?.published === false);
-  if (gated) return html`<p class="note">${gated.reason}. ATP and WTA are separate populations.</p>`;
+  // individual measurements always; a percentile only where that metric has enough same-tour peers
+  const building = [data.dna?.A?.all, data.dna?.B?.all].find((x) => x?.comparative && !x.comparative.published);
   const A = data.dna?.A?.all?.dimensions, B = data.dna?.B?.all?.dimensions;
   if (!A && !B) return html`<p class="note">No stored Tennis DNA for these players yet.</p>`;
   const dims = (A || B).map((d, i) => ({ label: d.label, a: A?.[i], b: B?.[i] }));
   const v = (x) => (x?.value == null ? '—' : pct(x.value));
   return html`<table class="cmp2 dna-cmp"><thead><tr><th class="n">${sideName(m, 'A')}</th><th></th><th>${sideName(m, 'B')}</th></tr></thead><tbody>${dims.map((d) => html`<tr><td class="n">${v(d.a)}${d.a?.percentile != null ? html` <small>${d.a.percentile}th</small>` : ''}</td><th scope="row">${d.label}</th><td>${v(d.b)}${d.b?.percentile != null ? html` <small>${d.b.percentile}th</small>` : ''}</td></tr>`)}</tbody></table>
+    ${building ? html`<p class="note">${building.comparative.status}. Percentiles appear per metric once 10 same-tour peers qualify.</p>` : ''}
     <p class="note">Stored Tennis DNA v1 as of ${data.dna?.A?.all?.as_of || data.dna?.B?.all?.as_of || '—'} (exclusive). Percentiles only where the metric sample is medium or high confidence. <a href="/methodology">Definitions</a>.</p>`;
 }
 
