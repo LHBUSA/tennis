@@ -317,7 +317,18 @@ export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()) 
     await ctx.kv.put(K.rank, JSON.stringify(st));
   }
   while (n < weeks && st.hist.season >= espn.ESPN_FLOOR_YEAR) {
-    const r = await step(st.hist.season, st.hist.week);
+    let r;
+    try { r = await step(st.hist.season, st.hist.week); } catch (e) {
+      // a HISTORICAL week that answers 5xx on 3 separate runs (ESPN "application error", e.g. 2018 w29) is recorded
+      // as a source error and passed; anything else (blocks, transient failures) still stops the lane
+      const key = `${st.hist.season}w${st.hist.week}`;
+      if (!/DEGRADED http_5\d\d/.test(String(e.message))) throw e;
+      st.fail = st.fail || {};
+      st.fail[key] = (st.fail[key] || 0) + 1;
+      if (st.fail[key] < 3) { await ctx.kv.put(K.rank, JSON.stringify(st)); throw e; }
+      st.source_errors = [...new Set([...(st.source_errors || []), key])];
+      r = { season: st.hist.season, week: st.hist.week, state: 'SOURCE_ERROR' };
+    }
     out.lists.push(r);
     st.hist.week -= 1;
     if (st.hist.week < 1) { st.hist.season -= 1; st.hist.week = 53; }

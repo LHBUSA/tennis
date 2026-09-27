@@ -411,3 +411,15 @@ test('lane: rankings snapshot written as source espn with its observation date; 
   assert.equal(count(s, 'tennis_ranking_snapshots'), 1);
   assert.equal(count(s, 'tennis_rankings'), 6);
 });
+
+test('rankings: a historical week that keeps answering 5xx is recorded as a source error after 3 runs, never guessed', async () => {
+  const { ctx, kv } = laneCtx({ wdRows: [{ h: { value: 'Q1' }, e: { value: '3623' }, atp: { value: 'S0AG' } }] });
+  ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: [{ h: { value: 'Q1' }, e: { value: '3623' }, atp: { value: 'S0AG' } }] } }], [/weeks\/29\/rankings/, { __status: 500, body: '{"error":{"message":"application error","code":500}}' }], [/weeks\/28\/rankings/, fx('ranking-2010-w10.json')]]);
+  await kv.put('bf:espnrank', JSON.stringify({ season: 2026, week: 40, hist: { season: 2018, week: 29 }, cur_checked: new Date().toISOString(), relinked: new Date().toISOString() }));
+  for (let i = 0; i < 2; i += 1) { ctx.espnIdentity = null; await assert.rejects(espnRankingStep(ctx, { weeks: 2, today: '2026-09-27' }), /http_500/); }
+  ctx.espnIdentity = null;
+  const r = await espnRankingStep(ctx, { weeks: 2, today: '2026-09-27' });
+  assert.equal(r.lists[0].state, 'SOURCE_ERROR');
+  assert.equal(r.lists[1].state, 'PASS');
+  assert.deepEqual((await kv.get('bf:espnrank', 'json')).source_errors, ['2018w29']);
+});
