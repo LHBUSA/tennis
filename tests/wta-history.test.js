@@ -17,6 +17,10 @@ test('rounds by draw size; qualifying; unknown rounds refused', () => {
   assert.deepEqual(historyRound('R64', 'M', 64), { stage: 'main', code: '1' });
   assert.deepEqual(historyRound('Q', 'M', 32), { stage: 'main', code: 'Q' });
   assert.deepEqual(historyRound('Q2', 'Q', 32), { stage: 'qualifying', code: 'Q-2' });
+  assert.deepEqual(historyRound('R32', 'Q', 32, 32), { stage: 'qualifying', code: 'Q-1' });
+  assert.deepEqual(historyRound('Q', 'Q', 32, 32), { stage: 'qualifying', code: 'Q-3' });
+  assert.deepEqual(historyRound('R16', 'Q', 32, 64), { stage: 'qualifying', code: 'Q-3' });
+  assert.equal(historyRound('R32', 'Q', 32, null), null, 'no qualifying draw size, no guess');
   assert.equal(historyRound('R16', 'M', null), null);
   assert.equal(historyRound('X', 'M', 32), null);
   assert.deepEqual(historyScore('6-3  6-7(6)  7-5').map((s) => [s.w, s.l, s.tbLoser]), [[6, 3, null], [6, 7, 6], [7, 5, null]]);

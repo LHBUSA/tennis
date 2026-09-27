@@ -17,9 +17,18 @@ const PARSER = '1';
 const nextPow2 = (n) => 2 ** Math.ceil(Math.log2(Math.max(2, n)));
 
 /** Round -> canonical code ('1'..'n', Q, S, F, Q-n) using the event's draw size. */
-export function historyRound(roundName, qpm, drawSize) {
+export function historyRound(roundName, qpm, drawSize, qualDrawSize = null) {
   const r = String(roundName || '').trim().toUpperCase();
-  if (qpm === 'Q') { const m = /^Q(\d)$/.exec(r) || /^R(\d)$/.exec(r); return m ? { stage: 'qualifying', code: `Q-${m[1]}` } : null; }
+  if (qpm === 'Q') {
+    // qualifying rows print main-draw style labels against the QUALIFYING draw (DrawSizes "32M/32Q/16D"):
+    // 32Q -> R32, R16, Q ; 64Q -> R64, R32, R16 ; the qualifying "Q" is the round after R16 (numbered as R8)
+    const d = /^Q(\d)$/.exec(r);
+    if (d) return { stage: 'qualifying', code: `Q-${d[1]}` };
+    const n = r === 'Q' ? 8 : Number((/^R(\d+)$/.exec(r) || [])[1]);
+    if (!n || !qualDrawSize) return null;
+    const no = Math.log2(nextPow2(qualDrawSize)) - Math.log2(n) + 1;
+    return Number.isInteger(no) && no >= 1 && no <= 4 ? { stage: 'qualifying', code: `Q-${no}` } : null;
+  }
   if (r === 'F') return { stage: 'main', code: 'F' };
   if (r === 'S' || r === 'SF') return { stage: 'main', code: 'S' };
   if (r === 'Q' || r === 'QF') return { stage: 'main', code: 'Q' };
@@ -67,7 +76,8 @@ export function parseHistoryRow(row, { today = new Date().toISOString().slice(0,
   if (!winner) warnings.push('winner_unknown');
   const status = row.reason_code === 'W' ? 'completed' : row.reason_code === 'R' ? 'retired' : null;
   if (!status) warnings.push(`unmapped_reason:${row.reason_code}`);
-  const rd = historyRound(row.round_name, row.qpm_flag, et === 'WS' ? t.singlesDrawSize : t.doublesDrawSize);
+  const qd = Number((/(\d+)Q/.exec(row.DrawSizes || '') || [])[1]) || null;
+  const rd = historyRound(row.round_name, row.qpm_flag, et === 'WS' ? t.singlesDrawSize : t.doublesDrawSize, qd);
   if (!rd) warnings.push(`unmapped_round:${row.round_name}`);
   const sc = historyScore(row.scores);
   if (!sc || (status === 'completed' && !sc.length)) warnings.push('unparseable_score');

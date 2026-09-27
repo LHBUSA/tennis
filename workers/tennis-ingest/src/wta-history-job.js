@@ -105,8 +105,12 @@ export async function historyPage(ctx, wtaId, page) {
     if (!groups.has(key)) groups.set(key, { edition: p.edition, matches: [] });
     groups.get(key).matches.push(p.match);
   }
+  const known = new Set((await ctx.kv.get('wh:eds', 'json')) || []);
   for (const g of groups.values()) {
-    const eid = await ensureHistoryEdition(ctx.store, g.edition);
+    // an edition ensured on an earlier run (same facts) needs no re-check
+    const ek = `${g.edition.provider_tournament_id}-${g.edition.year}`;
+    const eid = known.has(ek) ? await editionId(await tournamentId(tournamentKey('wta', g.edition.provider_tournament_id, g.edition.name, g.edition.level)), g.edition.year) : await ensureHistoryEdition(ctx.store, g.edition);
+    known.add(ek);
     for (const m of g.matches) {
       if (!m.stage) continue;
       const mineSide = m.sides.A.some((x) => x.provider_id === String(wtaId)) ? 'A' : 'B';
@@ -118,6 +122,7 @@ export async function historyPage(ctx, wtaId, page) {
     for (const k of ['written', 'attached', 'taken_over', 'held', 'duplicate_candidates']) out[k] += w[k] || 0;
     await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.wta_history&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   }
+  await ctx.kv.put('wh:eds', JSON.stringify([...known]));
   return { state: rows.length < PAGE ? 'END' : 'MORE', ...out };
 }
 
