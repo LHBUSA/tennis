@@ -106,3 +106,9 @@ test('ESPN attaches to a WTA API row whose round id is opaque (M-2 = round 1 at 
   const r3 = await writeMatches(s2, [sm('espn', 'e:9', 'S', '10', '20')], { edition_id: E }, { dedupe: true });
   assert.equal(r3.duplicate_candidates, 1, 'Q/S/F must still agree');
 });
+
+test('cross-edition hints: only ESPN rows in ESPN editions of the same week; never another official edition', async () => {
+  const src = fs.readFileSync(new URL('../workers/tennis-ingest/src/wta-history-job.js', import.meta.url), 'utf8');
+  assert.match(src, /c\.source === 'espn' && c\.edition_source === 'espn' && sameEventWeek/);
+  assert.doesNotMatch(src, /const overlaps =/);
+});

@@ -34,7 +34,7 @@ async function playerIndex(store, pid) {
   const mine = new Set(mem.map((m) => m.participant_key));
   const rows = [];
   for (let off = 0; ; off += 1000) {
-    const page = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,round,source_family,tennis_tournament_editions(start_date,end_date),tennis_match_participants(participant_key))&participant_key=${inList([...mine])}&order=match_id.asc&limit=1000&offset=${off}`);
+    const page = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,round,source_family,tennis_tournament_editions(start_date,end_date,source_family),tennis_match_participants(participant_key))&participant_key=${inList([...mine])}&order=match_id.asc&limit=1000&offset=${off}`);
     rows.push(...page);
     if (page.length < 1000) break;
   }
@@ -46,7 +46,7 @@ async function playerIndex(store, pid) {
     const stage = /^Q-/.test(m.round || '') ? 'qualifying' : m.round === 'RR' ? 'round_robin' : 'main';
     const k = `${m.event_type}|${stage}|${opp}`;
     if (!idx.has(k)) idx.set(k, []);
-    idx.get(k).push({ match_id: r.match_id, edition_id: m.edition_id, source: m.source_family, start: m.tennis_tournament_editions?.start_date || null, end: m.tennis_tournament_editions?.end_date || null });
+    idx.get(k).push({ match_id: r.match_id, edition_id: m.edition_id, source: m.source_family, edition_source: m.tennis_tournament_editions?.source_family || null, start: m.tennis_tournament_editions?.start_date || null, end: m.tennis_tournament_editions?.end_date || null });
   }
   return idx;
 }
@@ -78,7 +78,8 @@ export async function ensureHistoryEdition(store, e) {
 }
 
 const keyOf = async (members) => (members.length === 1 ? `S:${await mintPlayerId('wta', members[0].provider_id)}` : `D:${(await Promise.all(members.map((m) => mintPlayerId('wta', m.provider_id)))).sort().join('+')}`);
-const overlaps = (a, b) => a.start && a.end && b.start && b.end && Date.parse(a.start) - 3 * 86400e3 <= Date.parse(b.end) && Date.parse(b.start) - 3 * 86400e3 <= Date.parse(a.end);
+// the SAME event filed under ESPN's edition: start dates within 3 days (back-to-back weeks never qualify)
+const sameEventWeek = (a, b) => a.start && b.start && Math.abs(Date.parse(a.start) - Date.parse(b.start)) <= 3 * 86400e3;
 
 /** One page of one player's history. */
 export async function historyPage(ctx, wtaId, page) {
@@ -115,7 +116,9 @@ export async function historyPage(ctx, wtaId, page) {
       if (!m.stage) continue;
       const mineSide = m.sides.A.some((x) => x.provider_id === String(wtaId)) ? 'A' : 'B';
       const opp = await keyOf(m.sides[mineSide === 'A' ? 'B' : 'A']);
-      const cands = (idx.get(`${m.event_type}|${m.stage}|${opp}`) || []).filter((c) => c.edition_id !== eid && overlaps(c, { start: g.edition.start_date, end: g.edition.end_date }));
+      // only an ESPN-owned row in an ESPN edition can be the same match filed elsewhere; an official row in another
+      // official edition is ANOTHER match (players meet in back-to-back tournaments)
+      const cands = (idx.get(`${m.event_type}|${m.stage}|${opp}`) || []).filter((c) => c.edition_id !== eid && c.source === 'espn' && c.edition_source === 'espn' && sameEventWeek(c, { start: g.edition.start_date }));
       if (cands.length === 1) { m.existing_match_id = cands[0].match_id; m.existing_owner = cands[0].source; out.cross_edition += 1; }
     }
     const w = await writeMatches(ctx.store, g.matches, { edition_id: eid, surface: g.edition.surface, indoor: g.edition.indoor }, { captureId: r.capture?.capture_id || null, dedupe: true });
