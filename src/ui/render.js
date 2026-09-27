@@ -91,7 +91,7 @@ export function rankingTable(d, { compact = false } = {}) {
     <thead><tr><th scope="col" style="width:${compact ? 44 : 60}px">#</th><th scope="col">Player</th><th scope="col" class="n" style="width:${compact ? 80 : 100}px">Points</th>${compact ? '' : html`<th scope="col" class="n hide-s" style="width:70px">Move</th>`}</tr></thead>
     <tbody>${d.rows.map((r) => {
       const mv = r.previous_rank == null ? null : r.previous_rank - r.rank;
-      return html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}">${r.player?.name}</a> ${nat(r.player?.nationality)}</span></td><td class="n">${r.points == null ? '—' : r.points.toLocaleString('en-US')}</td>${compact ? '' : html`<td class="n mv hide-s ${mv > 0 ? 'up' : mv < 0 ? 'down' : ''}">${mv == null ? '—' : mv === 0 ? '=' : mv > 0 ? `▲${mv}` : `▼${-mv}`}</td>`}</tr>`;
+      return html`<tr><td class="rk-n">${r.rank}</td><td>${r.player ? html`<span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span>` : html`<span class="note">Identity not yet proven</span>`}</td><td class="n">${r.points == null ? '—' : r.points.toLocaleString('en-US')}</td>${compact ? '' : html`<td class="n mv hide-s ${mv > 0 ? 'up' : mv < 0 ? 'down' : ''}">${mv == null ? '—' : mv === 0 ? '=' : mv > 0 ? `▲${mv}` : `▼${-mv}`}</td>`}</tr>`;
     })}</tbody>
   </table></div>`;
 }

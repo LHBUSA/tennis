@@ -19,6 +19,23 @@ export function ageText(s) {
   return `${Math.round(s / 86400)}d`;
 }
 
+/**
+ * 'error' when the API failed (store read failure, ERROR freshness, no response) — never shown as "nothing stored";
+ * 'empty' only when the API answered successfully with no data (or isEmpty(data) says so); otherwise 'data'.
+ */
+export function resultState(res, isEmpty = null) {
+  if (!res || res.ok === false || res.meta?.freshness === 'ERROR') return 'error';
+  if (res.data == null) return 'empty';
+  return isEmpty && isEmpty(res.data) ? 'empty' : 'data';
+}
+
+export function errorModule(meta, note) {
+  return html`<div class="empty" role="alert">
+    <p class="empty-h">${freshnessBadge(meta)} Could not load</p>
+    <p>${note}</p>
+  </div>`;
+}
+
 export function emptyModule(meta, note) {
   return html`<div class="empty">
     <p class="empty-h">${freshnessBadge(meta)} No data shown</p>

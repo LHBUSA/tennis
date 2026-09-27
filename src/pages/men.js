@@ -6,7 +6,7 @@
 
 import { html, render } from '../lib/dom.js';
 import { api } from '../data/api.js';
-import { emptyModule, freshnessBadge } from '../ui/state.js';
+import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
 import { avatar } from '../ui/avatar.js';
 import { matchList, eventLabel, roundLabel, surfaceClass } from '../ui/render.js';
 import { track } from '../analytics.js';
@@ -15,7 +15,7 @@ const n = (x) => Number(x || 0).toLocaleString('en-US');
 const TOURNAMENT_NOTE = { 'australian-open': 'Match centre: results, statistics and genuine point-by-point', wimbledon: 'Draws archive: results by round (source-quality holds apply)', 'roland-garros': 'Results by round; identity proven player by player' };
 
 export function editionRow(e) {
-  const c = e.counts;
+  const c = e.counts || {};
   const parts = [c.ms_main && `${n(c.ms_main)} singles`, c.ms_qualifying && `${n(c.ms_qualifying)} qualifying`, c.md && `${n(c.md)} doubles`, c.xd && `${n(c.xd)} mixed`].filter(Boolean).join(' · ');
   return html`<a class="tr ${surfaceClass(e.surface)}" href="/tournaments/${e.slug}/${e.year}${c.ms_main ? '/mens-singles' : ''}">
     <span class="tr-l">Grand Slam${e.surface ? ` · ${e.surface}` : ''}</span>
@@ -55,10 +55,10 @@ export function mount(root) {
     if (!body) return;
     render(root.querySelector('[data-meta]'), html`${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span>`);
     const d = res.data;
-    if (!d) { render(body, emptyModule(res.meta, 'Men’s coverage is unavailable right now.')); return; }
-    render(root.querySelector('[data-totals]'), html`<b>${n(d.totals.matches)}</b> men’s matches · <b>${n(d.totals.editions)}</b> Grand Slam editions · <b>${n(d.totals.point_by_point)}</b> with genuine point-by-point`);
+    if (!d) { render(body, resultState(res) === 'error' ? errorModule(res.meta, 'Men’s coverage data could not be loaded.') : emptyModule(res.meta, 'No men’s coverage stored yet.')); return; }
+    render(root.querySelector('[data-totals]'), html`<b>${n(d.totals.matches)}</b> men’s matches · <b>${n(d.totals.editions)}</b> Grand Slam editions${d.atp_tour?.available ? html` · ATP Tour results ${d.atp_tour.first_year}–${d.atp_tour.last_year}` : ''} · <b>${n(d.totals.point_by_point)}</b> with genuine point-by-point`);
     const ao = d.editions.find((e) => e.slug === 'australian-open' && e.counts.point_by_point > 0);
-    const bySlam = (slug) => d.editions.filter((e) => e.slug === slug);
+    const bySlam = (slug) => [...d.editions, ...(d.archive_editions || [])].filter((e) => e.slug === slug);
     const years = (slug) => bySlam(slug).map((e) => e.year).sort();
     render(body, html`
       ${d.recent.map((r) => r.matches.length ? html`<section class="mod"><header class="mod-h"><h2>Latest results · ${r.edition.tournament} ${r.edition.year}</h2><a class="mod-k" href="/tournaments/${r.edition.slug}/${r.edition.year}">All matches →</a></header>${matchList(r.matches.slice(0, 6), { showTournament: false })}${r.edition.counts.ms_main < 127 && r.edition.slug !== 'australian-open' ? html`<p class="note">${n(r.edition.counts.ms_main)} of 127 main-draw singles matches are published so far; the rest wait for a proven player identity and are never guessed.</p>` : ''}</section>` : '')}

@@ -2,7 +2,7 @@
 
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
-import { emptyModule, freshnessBadge } from '../ui/state.js';
+import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
 import { avatar, nat } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
@@ -21,7 +21,7 @@ function shell(root, { eyebrow, heading, lede = '', chips = null }) {
     <div data-body><p class="loading">Loading…</p></div></div>`);
 }
 
-async function fill(root, path, draw, note, signal, { poll = 0 } = {}) {
+async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'This data could not be loaded right now. Please try again shortly.' } = {}) {
   const run = async () => {
     let res;
     try { res = await api(path, { signal }); } catch { return; }
@@ -29,6 +29,8 @@ async function fill(root, path, draw, note, signal, { poll = 0 } = {}) {
     const meta = root.querySelector('[data-meta]');
     if (!body) return;
     if (meta) render(meta, html`${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span>`);
+    // an API failure is an error state, never "nothing stored"
+    if (resultState(res) === 'error') { render(body, errorModule(res.meta, errorNote)); return; }
     const out = res.data != null ? draw(res.data, res.meta) : null;
     render(body, out || emptyModule(res.meta, note));
   };
@@ -170,9 +172,9 @@ export const rankings = mountWith((root, { params, route }, signal) => {
   const tour = params.tour === 'men' ? 'atp' : 'wta';
   const type = route?.doubles ? 'doubles' : 'singles';
   track('tennis_rankings_open', { tour, route: location.pathname });
-  const chips = [['/rankings', 'All rankings', false], ['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles'], ['/rankings/men', 'ATP · not available', tour === 'atp']];
-  shell(root, { eyebrow: 'Rankings', heading: `${tour.toUpperCase()} ${type === 'doubles' ? 'Doubles' : 'Singles'} Rankings`, lede: tour === 'atp' ? '' : 'The official list exactly as published, archived weekly so ranking history belongs to PropBetEdge. Movement compares with our previous archived list.', chips });
-  return fill(root, `/v1/rankings?tour=${tour}&type=${type}&limit=200`, (d) => html`<p class="note">List dated ${fmtDate(d.ranking_date)} · ${d.total.toLocaleString('en-US')} ranked${d.previous_date ? ` · movement vs ${fmtDate(d.previous_date)}` : ''}</p>${rankingTable(d)}`, tour === 'atp' ? 'ATP rankings are not available yet: atptour.com refuses automated access and PropBetEdge does not evade it. Another legitimate path is being built.' : 'No complete ranking list archived yet.', signal);
+  const chips = [['/rankings', 'All rankings', false], ['/rankings/women', 'WTA singles', tour === 'wta' && type === 'singles'], ['/rankings/women/doubles', 'WTA doubles', tour === 'wta' && type === 'doubles'], ['/rankings/men', 'ATP singles', tour === 'atp' && type === 'singles']];
+  shell(root, { eyebrow: 'Rankings', heading: `${tour.toUpperCase()} ${type === 'doubles' ? 'Doubles' : 'Singles'} Rankings`, lede: tour === 'atp' ? (type === 'singles' ? 'Weekly ATP singles list carried by a secondary source — not an official ATP feed — archived so ranking history belongs to PropBetEdge.' : '') : 'The official list exactly as published, archived weekly so ranking history belongs to PropBetEdge. Movement compares with our previous archived list.', chips });
+  return fill(root, `/v1/rankings?tour=${tour}&type=${type}&limit=200`, (d) => html`<p class="note">List dated ${fmtDate(d.ranking_date)} · ${d.total.toLocaleString('en-US')} ranked${d.previous_date ? ` · movement vs ${fmtDate(d.previous_date)}` : ''}${tour === 'atp' ? ' · carried by a secondary source, not an official ATP feed' : ''}</p>${rankingTable(d)}`, tour === 'atp' ? (type === 'doubles' ? 'ATP doubles rankings are not available from a legitimate source yet.' : 'No ATP singles list archived yet.') : 'No complete ranking list archived yet.', signal);
 });
 
 export const rankingsHub = mountWith((root) => {
@@ -181,22 +183,28 @@ export const rankingsHub = mountWith((root) => {
   render(root.querySelector('[data-body]'), html`<div class="rk-hub">
     <a class="rk-card" href="/rankings/women"><span class="st-ok">WTA RANKINGS — AVAILABLE</span><b>WTA singles</b><span class="note">Official list, archived weekly, with movement.</span></a>
     <a class="rk-card" href="/rankings/women/doubles"><span class="st-ok">WTA RANKINGS — AVAILABLE</span><b>WTA doubles</b><span class="note">Official doubles list, archived weekly.</span></a>
-    <div class="rk-card"><span class="st-no">ATP RANKINGS — SOURCE NOT YET AVAILABLE</span><b>ATP singles &amp; doubles</b><span class="note">atptour.com refuses automated access and PropBetEdge does not evade it. No ATP ranking is shown until a legitimate source exists. Men’s Grand Slam results, players and replays: <a href="/men">Men’s tennis →</a></span></div>
+    <a class="rk-card" href="/rankings/men"><span class="st-ok">ATP SINGLES — SECONDARY SOURCE</span><b>ATP singles</b><span class="note">Weekly list (top 100–150) carried by a secondary source, not an official ATP feed. ATP doubles rankings are not available yet.</span></a>
   </div>`);
   return () => {};
 });
 
 // ---- players + search --------------------------------------------------------------------------------
-const menTable = (d, limit = 500) => html`<p class="note">Men’s singles players in the newest Grand Slam main draws we hold (${d.basis.join(', ')}), by furthest round reached — not a ranking. Official ATP rankings are not yet available.</p>
+const atpTable = (k) => html`<h2 class="sec">ATP singles <small>list dated ${fmtDate(k.ranking_date)} · ${k.rows.length}</small></h2>
+  ${rankingTable(k)}
+  <p class="note">${k.disclosure || 'ATP singles list'} · dated when that source last updated it${k.previous_date ? ` · movement vs our archived list of ${fmtDate(k.previous_date)}` : ''}.</p>`;
+const menDirectory = (d) => (d.ranking?.rows?.length || d.rows.length ? html`${d.ranking?.rows?.length ? atpTable(d.ranking) : ''}${d.rows.length ? html`<h2 class="sec">Grand Slam performance <small>${d.basis.join(' · ')}</small></h2>${menTable(d, 200)}` : ''}` : null);
+const menTable = (d, limit = 500) => html`<p class="note">Men’s singles players in the newest Grand Slam main draws we hold (${d.basis.join(', ')}), by furthest round reached — not a ranking.</p>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Best result</th><th class="n hide-s">Draws</th></tr></thead><tbody>${d.rows.slice(0, limit).map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.best.stage} <small class="note">· ${r.best.edition}</small></td><td class="n hide-s">${r.draws.length}</td></tr>`)}</tbody></table></div>`;
 export const players = mountWith((root, _c, signal) => {
   const gq = new URLSearchParams(location.search).get('gender');
   const g = ['men', 'women'].includes(gq) ? gq : 'all';
   track('tennis_players_open', { gender: g });
-  shell(root, { eyebrow: 'Players', heading: 'Players', lede: 'One canonical identity per player across every source — men and women. Search, or browse below.', chips: [['/players', 'All', g === 'all'], ['/players?gender=men', 'Men', g === 'men'], ['/players?gender=women', 'Women', g === 'women']] });
+  shell(root, { eyebrow: 'Players', heading: g === 'men' ? 'MEN’S PLAYERS' : 'Players', lede: g === 'men' ? 'ATP singles ranking carried by a secondary source, plus PropBetEdge’s canonical profiles and Grand Slam history.' : 'One canonical identity per player across every source — men and women. Search, or browse below.', chips: [['/players', 'All', g === 'all'], ['/players?gender=men', 'Men', g === 'men'], ['/players?gender=women', 'Women', g === 'women']] });
   root.querySelector('.page-h').insertAdjacentHTML('beforeend', '<form class="search" role="search" action="/search"><label class="sr" for="q">Search players and tournaments</label><input id="q" name="q" type="search" placeholder="Search players or tournaments" autocomplete="off" minlength="2" maxlength="60"><button class="btn green" type="submit">Search</button></form>');
   const women = (d) => html`<p class="note">WTA singles · official list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`;
-  if (g === 'men') return fill(root, '/v1/men/players', (d) => (d.rows.length ? menTable(d) : null), 'No men’s players stored yet.', signal);
+  if (g === 'men') {
+    return fill(root, '/v1/men/players', menDirectory, 'No men’s players stored yet.', signal, { errorNote: 'Men’s player data could not be loaded.' });
+  }
   if (g === 'women') return fill(root, '/v1/players', women, 'No ranking list archived yet.', signal);
   Promise.all([api('/v1/men/players', { signal }), api('/v1/players', { signal }), api('/v1/slams', { signal })]).then(([m, w, sl]) => {
     const body = root.querySelector('[data-body]');
@@ -204,14 +212,15 @@ export const players = mountWith((root, _c, signal) => {
     // one directory: every player we hold a profile for, with the context each source gives
     const all = new Map();
     for (const r of w.data?.rows || []) all.set(r.player.id, { player: r.player, context: `WTA No. ${r.rank}`, sortKey: r.player.last_name || r.player.name });
+    for (const r of m.data?.ranking?.rows || []) if (r.player && !all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `ATP No. ${r.rank} (secondary source)`, sortKey: r.player.last_name || r.player.name });
     for (const r of m.data?.rows || []) if (!all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `${r.best.stage} · ${r.best.edition}`, sortKey: r.player.last_name || r.player.name });
     const rows = [...all.values()].sort((a, b) => String(a.sortKey).localeCompare(String(b.sortKey)));
     const featured = (sl.data?.featured || []).slice(0, 8);
     render(body, html`${featured.length ? html`<h2 class="sec">Featured <small>recent Grand Slam champions and finalists</small></h2><ul class="men-feat">${featured.map((f) => html`<li><a href="/players/${f.player.slug}">${avatar(f.player, { size: 'square', px: 64 })}<span><b>${f.player.name}</b><small>${f.note}</small></span></a></li>`)}</ul>` : ''}
       <h2 class="sec">All players <small>${rows.length.toLocaleString('en-US')} · A–Z</small></h2>
-      ${rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Context</th></tr></thead><tbody>${rows.map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.context}</td></tr>`)}</tbody></table></div><p class="note">Women carry the official WTA singles ranking; men carry their best recent Grand Slam result (official ATP rankings are not yet available). Filter with Men or Women above, or search.</p>` : emptyModule(w.meta, 'No players stored yet.')}`);
+      ${rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Context</th></tr></thead><tbody>${rows.map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.context}</td></tr>`)}</tbody></table></div><p class="note">Women carry the official WTA singles ranking; men carry their ATP singles position from a list carried by a secondary source (not an official ATP feed), or their best recent Grand Slam result. Filter with Men or Women above, or search.</p>` : resultState(w) === 'error' || resultState(m) === 'error' ? errorModule(w.meta, 'Player data could not be loaded.') : emptyModule(w.meta, 'No players stored yet.')}`);
     const meta = root.querySelector('[data-meta]');
-    if (meta) render(meta, html`${freshnessBadge(w.meta)} <span>official WTA list + Grand Slam draws</span>`);
+    if (meta) render(meta, html`${freshnessBadge(w.meta)} <span>official WTA list + ATP list from a secondary source + Grand Slam draws</span>`);
   }).catch(() => {});
   return () => {};
 });
