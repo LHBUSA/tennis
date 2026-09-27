@@ -121,6 +121,8 @@ export async function writeEspnEdition(store, e) {
     await store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: slam.key, name: slam.name, competition_key: 'grand_slam', country: slam.country, city: slam.city }], { onConflict: 'tournament_id', ignore: true });
     // an official source's edition row is never overwritten; ESPN only creates a missing one
     await store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: e.year, competition_key: 'grand_slam', start_date: e.start_date, end_date: e.end_date, surface: slam.surface, indoor: false, source_family: 'espn', name: `${slam.name} ${e.year}`, level: 'Grand Slam', city: slam.city, country: slam.country, source_status: e.status, updated_at: now() }], { onConflict: 'edition_id', ignore: true });
+    // an official edition row without dates gets ESPN's calendar days (fill-missing only; never overwritten)
+    if (e.start_date && e.end_date && e.end_date >= e.start_date) await store.req('PATCH', `tennis_tournament_editions?edition_id=eq.${eid}&start_date=is.null&end_date=is.null`, { body: { start_date: e.start_date, end_date: e.end_date } });
   } else {
     const [have] = await store.select('tennis_tournaments', `select=tournament_id,slug&tournament_id=eq.${tid}`);
     if (!have) {
