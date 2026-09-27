@@ -141,11 +141,14 @@ const isDeadlock = (e) => /40P01|deadlock/i.test(String(e?.message || e));
  * with a completion key is skipped by every runner (cron or any shard layout), so re-sharding never re-fetches
  * finished history; a player in progress resumes at its recorded page.
  */
-export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, admin = false, pageFn = historyPage } = {}) {
+export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, admin = false, resume = null, pageFn = historyPage } = {}) {
   const SK = shards > 1 ? `${S}:${shard}/${shards}` : S;
   if (admin) await ctx.kv.put(ADMIN_FLAG, new Date().toISOString(), { expirationTtl: 900 });
   else if (await ctx.kv.get(ADMIN_FLAG)) return { skipped: 'admin_backfill_active' };
   let st = (await ctx.kv.get(SK, 'json')) || { i: shard, page: 0, built_at: null, players_done: 0 };
+  // KV reads can trail a write by up to a minute: the driver hands back the cursor it was given last time, and
+  // the further of the two wins (a cursor only moves forward), so a stale read never repeats pages
+  if (resume && Number.isInteger(resume.i) && (resume.i > st.i || (resume.i === st.i && resume.page > (st.page || 0)))) st = { ...st, i: resume.i, page: resume.page, acc: resume.i === st.i ? st.acc : null };
   let queue = (await ctx.kv.get(Q, 'json')) || [];
   if (!queue.length || !st.built_at || Date.now() - Date.parse(st.built_at) > 30 * 86400e3) {
     queue = await buildQueue(ctx);
@@ -184,5 +187,5 @@ export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, ad
     await ctx.kv.put(SK, JSON.stringify(st));
   }
   if (guard >= 400) await ctx.kv.put(SK, JSON.stringify(st));
-  return { ...out, queue: queue.length, position: st.i, players_done: st.players_done, done: st.i >= queue.length };
+  return { ...out, queue: queue.length, position: st.i, page: st.page, players_done: st.players_done, done: st.i >= queue.length };
 }

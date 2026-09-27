@@ -159,3 +159,16 @@ test('history backfill: completion ledger skips finished players across shard la
   const cron = await wtaHistoryStep(ctx, { pages: 2, pageFn });
   assert.equal(cron.skipped_done, 6); assert.equal(cron.done, true); assert.equal(calls.length, 7);
 });
+
+test('history backfill: a stale state read never moves the cursor backward (driver resume wins when further)', async () => {
+  const { wtaHistoryStep } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV } = await import('./helpers/memstore.js');
+  const kv = new MemKV();
+  await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c']));
+  await kv.put('wh:state', JSON.stringify({ i: 0, page: 0, built_at: new Date().toISOString(), players_done: 0 }));
+  const calls = [];
+  const r = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 1, page: 3 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
+  assert.deepEqual(calls, ['b:3']); assert.equal(r.position, 1); assert.equal(r.page, 4);
+  const back = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 0, page: 0 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
+  assert.equal(calls.at(-1), 'b:4'); assert.equal(back.position, 1);
+});

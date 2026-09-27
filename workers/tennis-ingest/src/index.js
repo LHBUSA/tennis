@@ -322,7 +322,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -388,7 +388,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards') } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
