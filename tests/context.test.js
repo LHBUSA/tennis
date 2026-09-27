@@ -49,3 +49,40 @@ test('WTA /records and /year: parsed as reported; a season outside coverage is a
   assert.equal(y.payload.year, 2021); assert.equal(y.payload.aces, 340); assert.equal(y.payload.matchcount, 69); assert.equal(y.payload.level, 'TOUR');
   assert.deepEqual(playerYear.parse(fs.readFileSync(new URL('./fixtures/wta/player-year-320760-2016.json', import.meta.url), 'utf8')), []);
 });
+
+test('edition merge: an ESPN shadow row equal to an official row is merged, a unique one is moved, men\'s rows stay; an emptied shadow is removed', async () => {
+  const { mergeOne } = await import('../workers/tennis-ingest/src/edition-merge-job.js');
+  const T = { editions: [{ edition_id: 'OFF', surface: 'clay', indoor: false }, { edition_id: 'SH' }], matches: [], ext: [], changes: [], draws: [], deleted: [] };
+  const m = (id, ed, et, round, a, b, src) => T.matches.push({ match_id: id, edition_id: ed, event_type: et, round, format_key: 'BO3_TB7', source_family: src, tennis_match_participants: [{ side: 'A', participant_key: a }, { side: 'B', participant_key: b }] });
+  m('o1', 'OFF', 'WS', 'M-2', 'S:x', 'S:y', 'wta_history');
+  m('e1', 'SH', 'WS', '1', 'S:y', 'S:x', 'espn'); // same match, other orientation -> merge
+  m('e2', 'SH', 'WS', 'Q-1', 'S:p', 'S:q', 'espn'); // no official counterpart -> move
+  T.ext.push({ provider: 'espn', external_id: '9-2024:1', match_id: 'e1' });
+  const val = (q, k) => (new URLSearchParams(q).get(k) || '').replace(/^eq\./, '');
+  const inIds = (q) => ((new URLSearchParams(q).get('match_id') || '').match(/^in\.\((.*)\)$/)?.[1] || '').split(',').map((x) => x.replace(/"/g, ''));
+  const store = {
+    async select(t, q) {
+      if (t === 'tennis_tournament_editions') return T.editions.filter((e) => e.edition_id === val(q, 'edition_id'));
+      if (t === 'tennis_matches') { const ed = val(q, 'edition_id'); const off = Number(new URLSearchParams(q).get('offset') || 0); return off ? [] : T.matches.filter((x) => x.edition_id === ed && ['WS', 'WD'].includes(x.event_type)); }
+      return [];
+    },
+    async count(t, q) { if (t === 'tennis_matches') return T.matches.filter((x) => x.edition_id === val(q, 'edition_id')).length; return 0; },
+    async req(method, path, { body }) {
+      const [t, q] = path.split('?');
+      if (t === 'tennis_match_external_ids') for (const x of T.ext) if (x.match_id === val(q, 'match_id')) Object.assign(x, body);
+      if (t === 'tennis_matches') for (const x of T.matches) if (inIds(q).includes(x.match_id)) Object.assign(x, body);
+      if (t === 'tennis_edition_external_ids') T.deleted.push(`repoint:${val(q, 'edition_id')}`);
+    },
+    async del(t, q) { if (t === 'tennis_matches') T.matches = T.matches.filter((x) => !inIds(q).includes(x.match_id)); if (t === 'tennis_tournament_editions') T.deleted.push(val(q, 'edition_id')); },
+    async upsert(t, rows) { if (t === 'tennis_draws') T.draws.push(...rows); },
+    async insert(t, rows) { T.changes.push(...rows); }
+  };
+  const r = await mergeOne({ store }, { ev: '9-2024', shadow: 'SH', official: 'OFF' });
+  assert.deepEqual([r.shadow_rows, r.merged, r.moved, r.ambiguous], [2, 1, 1, 0]);
+  assert.equal(T.ext[0].match_id, 'o1', 'the ESPN id now points at the official row');
+  assert.ok(!T.matches.some((x) => x.match_id === 'e1'));
+  const moved = T.matches.find((x) => x.match_id === 'e2');
+  assert.equal(moved.edition_id, 'OFF'); assert.equal(moved.surface, 'clay'); assert.equal(T.draws[0].stage, 'qualifying');
+  assert.ok(T.changes.some((c) => c.kind === 'duplicate_merged') && T.changes.some((c) => c.kind === 'edition_moved') && T.changes.some((c) => c.kind === 'edition_merged'));
+  assert.ok(T.deleted.includes('SH'));
+});

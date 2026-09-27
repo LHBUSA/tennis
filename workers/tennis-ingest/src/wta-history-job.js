@@ -15,16 +15,25 @@ const Q = 'wh:queue';
 const S = 'wh:state';
 const PAGE = 100;
 
-async function buildQueue(ctx) {
+/**
+ * The backfill population: the previous queue (order kept) plus any player newly on the latest official WTA
+ * singles list. Never "every WTA id we know": opponents minted by the backfill itself do not join the queue, so the
+ * lane cannot turn into an open-ended crawl (the 2026-09-28 scope is the 3,523-player population + new entrants).
+ */
+async function buildQueue(ctx, prev = []) {
   const [snap] = await ctx.store.select('tennis_ranking_snapshots', 'select=snapshot_id&list_key=eq.wta_singles&source_family=eq.wta&row_count=gt.0&order=ranking_date.desc&limit=1');
   const top = snap ? (await ctx.store.select('tennis_rankings', `select=provider_player_id,rank&snapshot_id=eq.${snap.snapshot_id}&order=rank.asc&limit=1000`)).map((r) => r.provider_player_id) : [];
-  const all = [];
-  for (let off = 0; ; off += 1000) {
-    const rows = await ctx.store.select('tennis_players', `select=founding_external_key&founding_external_key=like.wta:*&status=eq.active&order=founding_external_key.asc&limit=1000&offset=${off}`);
-    all.push(...rows.map((r) => r.founding_external_key.slice(4)));
-    if (rows.length < 1000) break;
+  if (!prev.length) {
+    // first build only: the official top list, then the canonical WTA players known at that time
+    const all = [];
+    for (let off = 0; ; off += 1000) {
+      const rows = await ctx.store.select('tennis_players', `select=founding_external_key&founding_external_key=like.wta:*&status=eq.active&order=founding_external_key.asc&limit=1000&offset=${off}`);
+      all.push(...rows.map((r) => r.founding_external_key.slice(4)));
+      if (rows.length < 1000) break;
+    }
+    return [...new Set([...top, ...all])];
   }
-  return [...new Set([...top, ...all])];
+  return [...new Set([...prev, ...top])];
 }
 
 /** The player's existing canonical matches in ANY edition: `${event}|${stage}|${opponentKey}` -> [{ match_id, edition_id, source, start, end }]. */
@@ -145,15 +154,18 @@ export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, ad
   const SK = shards > 1 ? `${S}:${shard}/${shards}` : S;
   if (admin) await ctx.kv.put(ADMIN_FLAG, new Date().toISOString(), { expirationTtl: 900 });
   else if (await ctx.kv.get(ADMIN_FLAG)) return { skipped: 'admin_backfill_active' };
-  let st = (await ctx.kv.get(SK, 'json')) || { i: shard, page: 0, built_at: null, players_done: 0 };
+  let st = (await ctx.kv.get(SK, 'json')) || { i: shard, page: 0, players_done: 0 };
   // KV reads can trail a write by up to a minute: the driver hands back the cursor it was given last time, and
   // the further of the two wins (a cursor only moves forward), so a stale read never repeats pages
   if (resume && Number.isInteger(resume.i) && (resume.i > st.i || (resume.i === st.i && resume.page > (st.page || 0)))) st = { ...st, i: resume.i, page: resume.page, acc: resume.i === st.i ? st.acc : null };
   let queue = (await ctx.kv.get(Q, 'json')) || [];
-  if (!queue.length || !st.built_at || Date.now() - Date.parse(st.built_at) > 30 * 86400e3) {
-    queue = await buildQueue(ctx);
+  // the queue carries its own build time: a new shard layout (no state yet) never triggers a rebuild
+  const qBuilt = await ctx.kv.get(`${Q}:built_at`);
+  if (!queue.length || !qBuilt || Date.now() - Date.parse(qBuilt) > 30 * 86400e3) {
+    queue = await buildQueue(ctx, queue);
     await ctx.kv.put(Q, JSON.stringify(queue));
-    st = { ...st, built_at: new Date().toISOString(), i: st.i >= queue.length ? shard : st.i };
+    await ctx.kv.put(`${Q}:built_at`, new Date().toISOString());
+    if (st.i >= queue.length) st = { ...st, i: shard, page: 0 };
   }
   const out = { runs: [], skipped_done: 0 };
   let n = 0;

@@ -133,6 +133,7 @@ test('history backfill: completion ledger skips finished players across shard la
   const kv = new MemKV();
   const built = new Date().toISOString();
   await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c', 'd', 'e', 'f']));
+  await kv.put('wh:queue:built_at', built);
   await kv.put('wh:done:b', '{"rows":3}');
   await kv.put('wh:page:c', '2');
   await kv.put('wh:state:0/2', JSON.stringify({ i: 0, page: 0, built_at: built, players_done: 0 }));
@@ -165,6 +166,7 @@ test('history backfill: a stale state read never moves the cursor backward (driv
   const { MemKV } = await import('./helpers/memstore.js');
   const kv = new MemKV();
   await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c']));
+  await kv.put('wh:queue:built_at', new Date().toISOString());
   await kv.put('wh:state', JSON.stringify({ i: 0, page: 0, built_at: new Date().toISOString(), players_done: 0 }));
   const calls = [];
   const r = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 1, page: 3 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
@@ -184,4 +186,22 @@ test('round-robin matchdays of small draws (WTA Finals) and scoreless D rows (wa
   assert.equal(wo.match.status, 'walkover'); assert.equal(wo.match.end_reason, 'walkover'); assert.equal(wo.match.sets.length, 0); assert.ok(wo.match.winner_side);
   const dScore = parseHistoryRow({ ...base, round_name: 'S', reason_code: 'D', scores: '6-2  3-1' }, { today: '2026-09-27' });
   assert.equal(dScore.match.status, null, 'a D row with a score is held');
+});
+
+test('history backfill: a queue rebuild keeps the population and adds only new official top-list players (never every minted WTA id)', async () => {
+  const { wtaHistoryStep } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV } = await import('./helpers/memstore.js');
+  const kv = new MemKV();
+  await kv.put('wh:queue', JSON.stringify(['p1', 'p2']));
+  await kv.put('wh:queue:built_at', '2020-01-01T00:00:00Z'); // stale -> rebuilt from the previous queue
+  const store = {
+    async select(t) {
+      if (t === 'tennis_ranking_snapshots') return [{ snapshot_id: 's1' }];
+      if (t === 'tennis_rankings') return [{ provider_player_id: 'p2', rank: 1 }, { provider_player_id: 'n9', rank: 2 }];
+      if (t === 'tennis_players') throw new Error('must not scan every canonical WTA player on a rebuild');
+      return [];
+    }
+  };
+  await wtaHistoryStep({ kv, store }, { pages: 0 });
+  assert.deepEqual(JSON.parse(await kv.get('wh:queue')), ['p1', 'p2', 'n9']);
 });
