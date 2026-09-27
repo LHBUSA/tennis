@@ -172,3 +172,16 @@ test('history backfill: a stale state read never moves the cursor backward (driv
   const back = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 0, page: 0 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
   assert.equal(calls.at(-1), 'b:4'); assert.equal(back.position, 1);
 });
+
+test('round-robin matchdays of small draws (WTA Finals) and scoreless D rows (walkovers) are mapped; anything else stays held', async () => {
+  const base = { s_d_flag: 'S', qpm_flag: 'M', winner: 1, player_1: '320760', player_2: '316956', tournament: { tournamentGroup: { id: 808, name: 'WTA FINALS', level: 'WTA Finals' }, year: 2022, startDate: '2022-10-31', endDate: '2022-11-07', surface: 'Hard', inOutdoor: 'I', singlesDrawSize: 8, doublesDrawSize: 8 } };
+  const rr = parseHistoryRow({ ...base, round_name: 'R1', reason_code: 'W', scores: '6-2  2-6  6-1' }, { today: '2026-09-27' });
+  assert.equal(rr.match.stage, 'round_robin'); assert.equal(rr.match.round_code, 'RR'); assert.equal(rr.match.status, 'completed');
+  // the same label in a 32 draw is not a round-robin day: held
+  const ko = parseHistoryRow({ ...base, round_name: 'R1', reason_code: 'W', scores: '6-2  6-1', tournament: { ...base.tournament, singlesDrawSize: 32 } }, { today: '2026-09-27' });
+  assert.equal(ko.match.status, null); assert.ok(ko.match.warnings.includes('unmapped_round:R1'));
+  const wo = parseHistoryRow({ ...base, round_name: 'S', reason_code: 'D', scores: '' }, { today: '2026-09-27' });
+  assert.equal(wo.match.status, 'walkover'); assert.equal(wo.match.end_reason, 'walkover'); assert.equal(wo.match.sets.length, 0); assert.ok(wo.match.winner_side);
+  const dScore = parseHistoryRow({ ...base, round_name: 'S', reason_code: 'D', scores: '6-2  3-1' }, { today: '2026-09-27' });
+  assert.equal(dScore.match.status, null, 'a D row with a score is held');
+});

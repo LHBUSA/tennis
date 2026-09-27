@@ -6,7 +6,9 @@
 //
 // Observed codes (2026-09-27, players 320760 + others): s_d_flag S|D; qpm_flag M|Q; reason_code W (played),
 // R (retired, partial score), B (bye: no match). Scores are winner-first, loser tiebreak points in brackets:
-// "6-3  6-7(6)  7-5". Any other code is held, never guessed.
+// "6-3  6-7(6)  7-5". D = not played, winner advanced (observed with an empty score and the winner's points
+// awarded; 2,406 of 2,407 D rows carry no score): a walkover when the score is empty, otherwise held.
+// Any other code is held, never guessed.
 
 import { safeJson, requirePaths } from '../shared/adapter.js';
 import { SLAMS } from '../shared/canonical/ids.js';
@@ -33,6 +35,9 @@ export function historyRound(roundName, qpm, drawSize, qualDrawSize = null) {
   if (r === 'S' || r === 'SF') return { stage: 'main', code: 'S' };
   if (r === 'Q' || r === 'QF') return { stage: 'main', code: 'Q' };
   if (r === 'RR') return { stage: 'round_robin', code: 'RR' };
+  // round-robin events (WTA Finals 8, Elite Trophy 12) print matchdays as R1..R3: a knockout draw never labels a
+  // round "R1" (its rounds are R<field size>, Q, S, F), so a small draw's R1-R3 are round-robin matches
+  if (/^R[1-3]$/.test(r) && qpm !== 'Q' && drawSize && drawSize <= 12) return { stage: 'round_robin', code: 'RR' };
   const m = /^R(\d+)$/.exec(r);
   if (!m || !drawSize) return null;
   const n = Number(m[1]);
@@ -74,13 +79,14 @@ export function parseHistoryRow(row, { today = new Date().toISOString().slice(0,
   const winner = rawWinner && swap ? (rawWinner === 'A' ? 'B' : 'A') : rawWinner;
   const warnings = [];
   if (!winner) warnings.push('winner_unknown');
-  const status = row.reason_code === 'W' ? 'completed' : row.reason_code === 'R' ? 'retired' : null;
+  const walkover = row.reason_code === 'D' && !String(row.scores || '').trim();
+  const status = row.reason_code === 'W' ? 'completed' : row.reason_code === 'R' ? 'retired' : walkover ? 'walkover' : null;
   if (!status) warnings.push(`unmapped_reason:${row.reason_code}`);
   const qd = Number((/(\d+)Q/.exec(row.DrawSizes || '') || [])[1]) || null;
   const rd = historyRound(row.round_name, row.qpm_flag, et === 'WS' ? t.singlesDrawSize : t.doublesDrawSize, qd);
   if (!rd) warnings.push(`unmapped_round:${row.round_name}`);
   const sc = historyScore(row.scores);
-  if (!sc || (status === 'completed' && !sc.length)) warnings.push('unparseable_score');
+  if (!sc || (status === 'completed' && !sc.length) || (status === 'walkover' && sc.length)) warnings.push('unparseable_score');
   const slamKey = /grand slam/i.test(t.level || g.level || '') ? SLAMS[String(g.name || '').toLowerCase().trim()] || null : null;
   // Bo3 everywhere for women; a split-set third "set" of 10+ (or bracketed) in doubles is a match tiebreak
   let mtb = false;
@@ -103,7 +109,7 @@ export function parseHistoryRow(row, { today = new Date().toISOString().slice(0,
     match: {
       type: 'match', provider: 'wta_history', provider_match_id: `${g.id}-${t.year}-${et}-${row.qpm_flag}-${String(row.round_name).trim()}-${pair(ids[0])}-${pair(ids[1])}`.replace(/\s+/g, ''),
       event_type: et, stage: rd?.stage || null, round_code: rd?.code || null, format_key, status: blocking ? null : status, winner_side: blocking ? null : winner,
-      end_reason: status === 'retired' ? 'retirement' : 'completed', retired_side: status === 'retired' ? (winner === 'A' ? 'B' : 'A') : null,
+      end_reason: status === 'retired' ? 'retirement' : status === 'walkover' ? 'walkover' : 'completed', retired_side: status === 'retired' ? (winner === 'A' ? 'B' : 'A') : null,
       sets: outSets, live: null, sides: { A: ids[0].map(member), B: ids[1].map(member) },
       seeds: swap ? { A: row.seed_2 ?? null, B: row.seed_1 ?? null } : { A: row.seed_1 ?? null, B: row.seed_2 ?? null }, entry: { A: null, B: null },
       entry_rank: swap ? { A: row.rank_2 || null, B: row.rank_1 || null } : { A: row.rank_1 || null, B: row.rank_2 || null }, scheduled_at: null, started_at: null, source_updated_at: null, warnings
