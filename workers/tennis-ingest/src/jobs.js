@@ -14,6 +14,7 @@ import { editionId, tournamentId, tournamentKey } from '../../shared/canonical/i
 import { aoPointEvents, eventId, CONTRACT } from '../../shared/canonical/events.js';
 import { normalizeName, resolveIdentity } from '../../shared/canonical/identity.js';
 import { hold } from './writer.js';
+import { writeFacts } from './context-jobs.js';
 import { recordCapture, recordRun, writeRankingPage, finalizeSnapshot, writeEditions, writeMatches, writeMatchStats, writeCrosswalk, upsertPlayersFull } from './writer.js';
 
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -54,7 +55,10 @@ export async function calendarWindow(ctx, from, to) {
     editions.push(...(r.records || []));
     if ((r.records || []).length < 100) break;
   }
-  if (editions.length) await writeEditions(ctx.store, editions, 'wta');
+  if (editions.length) {
+    await writeEditions(ctx.store, editions, 'wta');
+    await writeFacts(ctx.store, editions, null); // sourced attribute rows + mappings for the editions just written
+  }
   return { ok, editions };
 }
 

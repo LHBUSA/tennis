@@ -71,7 +71,7 @@ export class SourceClient {
    * GET with hygiene. Returns { url, status, ok, not_modified, content_type, etag, last_modified,
    * body (string), bytes, latency_ms, fetched_at, attempts }.
    */
-  async get(url, { headers = {}, conditional = true } = {}) {
+  async get(url, { headers = {}, conditional = true, binary = false } = {}) {
     const host = new URL(url).host;
     const p = this.policy(host);
     let attempt = 0;
@@ -99,9 +99,10 @@ export class SourceClient {
           this.stats.not_modified += 1;
           return { url, status: 304, ok: true, not_modified: true, content_type: v.content_type, etag: v.etag, last_modified: v.last_modified, body: v.body, bytes: v.body.length, latency_ms: latency, fetched_at: new Date(this.now()).toISOString(), attempts: attempt };
         }
-        const body = await res.text();
         const ct = res.headers.get('content-type') || '';
-        if (res.status === 403 || CHALLENGE.some((re) => re.test(body.slice(0, 20000)))) {
+        // binary (PDF draw sheets): bytes kept exact for the archive; a challenge page is HTML, never the document
+        const body = binary && !/html/i.test(ct) ? new Uint8Array(await res.arrayBuffer()) : await res.text();
+        if (res.status === 403 || (typeof body === 'string' && CHALLENGE.some((re) => re.test(body.slice(0, 20000))))) {
           this.stats.blocked += 1;
           throw new SourceBlockedError(url, res.status, res.status === 403 ? 'forbidden' : 'challenge_page');
         }
@@ -116,7 +117,7 @@ export class SourceClient {
         const etag = res.headers.get('etag');
         const lm = res.headers.get('last-modified');
         if (res.ok && (etag || lm)) this.validators.set(url, { etag, last_modified: lm, body, content_type: ct });
-        return { url, status: res.status, ok: res.ok, not_modified: false, content_type: ct, etag, last_modified: lm, body, bytes: body.length, latency_ms: latency, fetched_at: new Date(this.now()).toISOString(), attempts: attempt };
+        return { url, status: res.status, ok: res.ok, not_modified: false, content_type: ct, etag, last_modified: lm, body, bytes: body.byteLength ?? body.length, latency_ms: latency, fetched_at: new Date(this.now()).toISOString(), attempts: attempt };
       } catch (err) {
         if (err instanceof SourceBlockedError) throw err;
         if (attempt <= p.retries) {

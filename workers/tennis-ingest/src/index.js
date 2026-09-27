@@ -22,6 +22,7 @@ import { espnAtpStep, espnWtaStep, espnRankingStep } from './espn-jobs.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { buildDnaV2 } from './dna-v2-job.js';
 import { wtaHistoryStep } from './wta-history-job.js';
+import { wtaEditionFactsStep, drawSheet } from './context-jobs.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
@@ -86,7 +87,7 @@ export async function tick(env, { force = {}, only = null, budget = null, params
 }
 
 async function tickInner(env, store, kv, force, { only = null, budget = null, params = {} } = {}) {
-  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 } } }), log: [], steps: [], upstream: 0 };
+  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 }, 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), log: [], steps: [], upstream: 0 };
   // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
   if (only) return laneOnly(ctx, only, budget, params);
   const started = new Date();
@@ -321,7 +322,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -372,6 +373,17 @@ export default {
       } catch (e) {
         return json({ ok: true, data: { target, status: null, ms: Date.now() - t0, error: ctl.signal.aborted ? 'timeout_20s' : String(e.message).slice(0, 200) } }, { headers: { 'cache-control': 'no-store' } });
       } finally { clearTimeout(timer); }
+    }
+    // admin: one allow-listed official draw sheet (PDF) via the polite client, archived byte-exact to R2
+    if (path === '/v1/drawsheet' && request.method === 'GET') {
+      const auth = request.headers.get('authorization') || '';
+      if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      const store = storeFromEnv(env);
+      const ctx = { env, store, kv: env.TENNIS_STATE, client: new SourceClient({ policies: { 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), upstream: 0, log: [] };
+      let r;
+      try { r = await drawSheet(ctx, { source: url.searchParams.get('source'), year: url.searchParams.get('year'), tid: url.searchParams.get('tid'), doc: url.searchParams.get('doc') }); } catch (e) { return json({ ok: false, error: String(e?.message || e).slice(0, 200), blocked: e?.code === 'source_blocked' }, { status: 502 }); }
+      if (r.status !== 200) return json({ ok: false, status: r.status, error: r.error || null, content_type: r.content_type || null }, { status: r.status === 400 ? 400 : 404 });
+      return new Response(r.body, { headers: { 'content-type': 'application/pdf', 'x-capture-id': r.capture.capture_id, 'x-sha256': r.capture.content_sha256, 'x-source-url': r.capture.url, 'x-captured-at': r.capture.captured_at, 'cache-control': 'no-store' } });
     }
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
