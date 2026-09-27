@@ -127,12 +127,13 @@ before the update, so a rating never sees its own or any later result.
 
 Research (walk-forward, evaluation from 2012-01-01 for ATP, both players ≥ 10 prior rated matches):
 - standard vs margin-sensitive (K × (1 + 2·|game share − 0.5|), capped 2): the margin variant was worse
-  (ATP log loss 0.6242 vs 0.6213) → **standard**.
+  (ATP log loss 0.6236 vs 0.6207) → **standard**.
 - vs a ranking model p = rB^c / (rA^c + rB^c) with c fitted on the earliest 40% of ranked matches and both
-  compared on the remaining 60%: ATP rating log loss 0.6361 vs ranking 0.6382; Brier 0.2228 vs 0.2242;
-  accuracy 63.3% vs 62.4% (9,571 matches) → **ATP rating published**.
+  compared on the remaining 60%: ATP rating log loss 0.6347 vs ranking 0.6399; Brier 0.2222 vs 0.2249;
+  accuracy 63.4% vs 62.2% (15,270 matches; c = 0.7 fitted on 10,383) → **ATP rating published**.
+  Evidence: `docs/evidence/dna-v2-backtest-latest.json`.
 - Surface ratings (updated only on matches with a stored surface; prediction = 50/50 blend with overall):
-  ATP blend worse than overall (0.5360 vs 0.5309 on 3,739 matches) → **not published for ATP**.
+  ATP blend worse than overall (0.5363 vs 0.5321 on 3,871 matches) → **not published for ATP**.
 - **WTA rating held**: no ranking-history benchmark yet (6 lists); publication requires beating the ranking
   model out of sample on ≥ 500 matches.
 
