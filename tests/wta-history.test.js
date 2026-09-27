@@ -70,3 +70,35 @@ test('precedence: history takes over ESPN (even from another edition); WTA API t
   const h2 = await writeMatches(s, [sm('wta_history', 'other-id', '2', '10', '20')], { edition_id: E }, { dedupe: true });
   assert.equal(h2.attached, 1, 'history attaches to the official WTA API row');
 });
+
+test('history editions are insert-only: an official calendar edition keeps its fields; only gaps are filled', async () => {
+  const { ensureHistoryEdition } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { tournamentId, tournamentKey, editionId } = await import('../workers/shared/canonical/ids.js');
+  const s = new MemStore();
+  const tid = await tournamentId(tournamentKey('wta', '1017', 'Cincinnati', 'WTA 1000'));
+  const eid = await editionId(tid, 2018);
+  await s.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'cincinnati', name: 'Cincinnati' }]);
+  await s.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: 2018, name: 'Western & Southern Open', venue_id: 'v1', city: 'Mason', surface: null, start_date: '2018-08-13', end_date: '2018-08-19', source_family: 'wta' }]);
+  const got = await ensureHistoryEdition(s, { provider_tournament_id: '1017', name: 'Cincinnati', title: 'X', level: 'WTA 1000', year: 2018, start_date: '2018-08-12', end_date: '2018-08-20', surface: 'hard', indoor: false });
+  assert.equal(got, eid);
+  const row = s.rows('tennis_tournament_editions')[0];
+  assert.deepEqual([row.name, row.venue_id, row.city, row.start_date], ['Western & Southern Open', 'v1', 'Mason', '2018-08-13'], 'official fields untouched');
+  assert.equal(row.surface, 'hard', 'missing surface filled');
+  const itf = await ensureHistoryEdition(s, { provider_tournament_id: '847', name: 'MINSK', level: 'ITF', year: 2012, start_date: '2012-11-05', end_date: '2012-11-11', surface: 'hard', indoor: true });
+  assert.ok(s.rows('tennis_tournaments').some((t) => t.slug === 'minsk-itf' && t.name === 'Minsk'));
+  assert.ok(itf);
+});
+
+test('ESPN attaches to a WTA API row whose round id is opaque (M-2 = round 1 at a 128 draw; qualifying "Q-")', async () => {
+  const s = new MemStore();
+  await writeMatches(s, [sm('wta', '0901-2026-LS101', 'M-2', '10', '20'), sm('wta', '0901-2026-QS001', 'Q-', '30', '40', { stage: 'qualifying' })], { edition_id: E });
+  const r = await writeMatches(s, [sm('espn', '154-2026:1', '1', '10', '20'), sm('espn', '154-2026:2', 'Q-1', '30', '40', { stage: 'qualifying' })], { edition_id: E }, { dedupe: true });
+  assert.equal(r.attached, 2);
+  assert.equal(r.duplicate_candidates, 0);
+  const r2 = await writeMatches(s, [sm('espn', '154-2026:3', 'S', '10', '20')], { edition_id: '00000000-0000-4000-8000-00000000e999' }, { dedupe: true });
+  assert.equal(r2.attached, 0, 'different edition: not this match');
+  const s2 = new MemStore();
+  await writeMatches(s2, [sm('wta', 'X-F', 'M-F', '10', '20')], { edition_id: E });
+  const r3 = await writeMatches(s2, [sm('espn', 'e:9', 'S', '10', '20')], { edition_id: E }, { dedupe: true });
+  assert.equal(r3.duplicate_candidates, 1, 'Q/S/F must still agree');
+});

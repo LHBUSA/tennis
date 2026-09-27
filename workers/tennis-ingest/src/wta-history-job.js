@@ -6,9 +6,9 @@
 
 import * as hist from '../../providers/wta-history.js';
 import { fetchRun } from './jobs.js';
-import { writeMatches, writeEditions, upsertPlayersFull } from './writer.js';
+import { writeMatches, upsertPlayersFull } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
-import { tournamentId, tournamentKey, editionId } from '../../shared/canonical/ids.js';
+import { tournamentId, tournamentKey, editionId, slugify, competitionFor, SLAMS } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
 
 const Q = 'wh:queue';
@@ -51,6 +51,32 @@ async function playerIndex(store, pid) {
   return idx;
 }
 
+/**
+ * Edition for history rows: INSERT-ONLY (an existing official calendar edition is never overwritten); dates,
+ * surface and indoor are filled only where the stored edition has none. New tournaments get a unique slug.
+ */
+export async function ensureHistoryEdition(store, e) {
+  const key = tournamentKey('wta', e.provider_tournament_id, e.name, e.level);
+  const tid = await tournamentId(key);
+  const eid = await editionId(tid, e.year);
+  const [t] = await store.select('tennis_tournaments', `select=tournament_id&tournament_id=eq.${tid}`);
+  if (!t) {
+    const slam = key.startsWith('slam:') ? key.slice(5) : null;
+    let slug = slam || `${slugify(e.name)}${/^itf$/i.test(e.level || '') ? '-itf' : ''}` || `wta-${e.provider_tournament_id}`;
+    const [taken] = await store.select('tennis_tournaments', `select=tournament_id&slug=eq.${slug}`);
+    if (taken) slug = `${slug}-${e.provider_tournament_id}`;
+    const nm = slam ? Object.keys(SLAMS).find((k) => SLAMS[k] === slam).replace(/\b\w/g, (c) => c.toUpperCase()) : String(e.name || '').toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+    await store.upsert('tennis_tournaments', [{ tournament_id: tid, slug, name: nm, competition_key: competitionFor(e.level), country: null, city: null }], { onConflict: 'tournament_id', ignore: true });
+  }
+  await store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: e.year, competition_key: competitionFor(e.level), start_date: e.start_date, end_date: e.end_date && e.start_date && e.end_date < e.start_date ? e.start_date : e.end_date, surface: e.surface, indoor: e.indoor, source_family: 'wta', name: e.title || e.name, level: e.level, singles_draw_size: e.singles_draw_size, doubles_draw_size: e.doubles_draw_size, updated_at: new Date().toISOString() }], { onConflict: 'edition_id', ignore: true });
+  if (e.surface) await store.req('PATCH', `tennis_tournament_editions?edition_id=eq.${eid}&surface=is.null`, { body: { surface: e.surface } });
+  if (e.indoor != null) await store.req('PATCH', `tennis_tournament_editions?edition_id=eq.${eid}&indoor=is.null`, { body: { indoor: e.indoor } });
+  if (e.start_date && e.end_date) await store.req('PATCH', `tennis_tournament_editions?edition_id=eq.${eid}&start_date=is.null&end_date=is.null`, { body: { start_date: e.start_date, end_date: e.end_date } });
+  await store.upsert('tennis_tournament_external_ids', [{ provider: 'wta', external_id: String(e.provider_tournament_id), tournament_id: tid }], { onConflict: 'provider,external_id', ignore: true });
+  await store.upsert('tennis_edition_external_ids', [{ provider: 'wta', external_id: `${e.live_scoring_id || e.provider_tournament_id}-${e.year}`, edition_id: eid }], { onConflict: 'provider,external_id', ignore: true });
+  return eid;
+}
+
 const keyOf = async (members) => (members.length === 1 ? `S:${await mintPlayerId('wta', members[0].provider_id)}` : `D:${(await Promise.all(members.map((m) => mintPlayerId('wta', m.provider_id)))).sort().join('+')}`);
 const overlaps = (a, b) => a.start && a.end && b.start && b.end && Date.parse(a.start) - 3 * 86400e3 <= Date.parse(b.end) && Date.parse(b.start) - 3 * 86400e3 <= Date.parse(a.end);
 
@@ -80,8 +106,7 @@ export async function historyPage(ctx, wtaId, page) {
     groups.get(key).matches.push(p.match);
   }
   for (const g of groups.values()) {
-    await writeEditions(ctx.store, [{ ...g.edition }], 'wta');
-    const eid = await editionId(await tournamentId(tournamentKey('wta', g.edition.provider_tournament_id, g.edition.name, g.edition.level)), g.edition.year);
+    const eid = await ensureHistoryEdition(ctx.store, g.edition);
     for (const m of g.matches) {
       if (!m.stage) continue;
       const mineSide = m.sides.A.some((x) => x.provider_id === String(wtaId)) ? 'A' : 'B';

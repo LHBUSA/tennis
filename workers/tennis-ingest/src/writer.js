@@ -353,7 +353,10 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
         if (c.source_family === provider) { dup(x, `duplicate_candidate:same_source_other_id:${c.match_id}`); continue; }
         // WTA API rounds carry a stage prefix (M-1, M-Q ...): compared without it
         const rn = (r) => String(r || '').replace(/^M-/, '');
-        if (c.round && c.round !== 'unknown' && x.n.match.round_code && rn(c.round) !== rn(x.n.match.round_code)) { dup(x, `duplicate_candidate:round_conflict:${c.source_family}=${c.round},${provider}=${x.n.match.round_code}:${c.match_id}`); continue; }
+        // the WTA API's numeric round ids are its own (at a 128 draw its M-2 is round 1; qualifying may be a bare
+        // 'Q-'): against a WTA API row only the stage (already in the key) and Q/S/F are compared
+        const opaque = [c.source_family, provider].includes('wta') && (/^\d*$/.test(rn(c.round)) || /^Q-\d*$/.test(rn(c.round))) && (/^\d+$/.test(rn(x.n.match.round_code)) || /^Q-\d*$/.test(rn(x.n.match.round_code)));
+        if (!opaque && c.round && c.round !== 'unknown' && x.n.match.round_code && rn(c.round) !== rn(x.n.match.round_code)) { dup(x, `duplicate_candidate:round_conflict:${c.source_family}=${c.round},${provider}=${x.n.match.round_code}:${c.match_id}`); continue; }
         target = c.match_id;
       }
     }
