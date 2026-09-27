@@ -1,6 +1,7 @@
 // /men — the entry point for every legitimate piece of men's coverage we hold: Grand Slam draws
 // (Australian Open match centre with genuine point-by-point, Wimbledon draws archive, Roland-Garros
-// results). ATP Tour / Challenger data and official ATP rankings have no legitimate source yet; the page
+// results) plus ATP Tour results and weekly ATP singles lists from a secondary source (ESPN lane, 2026-09-27).
+// ATP Challenger data and official ATP ranking feeds have no legitimate source yet; the page
 // says so plainly and never fills the gap with anything unsourced.
 
 import { html, render } from '../lib/dom.js';
@@ -79,8 +80,9 @@ export function mount(root) {
           <li class="ok"><b>Grand Slam coverage</b><span>Australian Open (complete, with statistics and point-by-point), Wimbledon archive, Roland-Garros.</span></li>
           <li class="ok"><b>Player profiles and photos</b><span>Every men’s player we hold has a canonical profile; photos only with a proven identity and an open licence.</span></li>
           <li class="${d.dna.published ? 'ok' : 'wait'}"><b>Men’s Tennis DNA</b><span>${d.dna.published ? 'Published.' : `Not published yet · ${d.dna.qualified}/${d.dna.threshold} players have a meaningful sample.`}</span></li>
-          <li class="no"><b>ATP Tour and ATP Challenger</b><span>Not yet available — no legitimate source.</span></li>
-          <li class="no"><b>Official ATP rankings</b><span>Not yet available — we show none rather than invent any.</span></li>
+          <li class="ok"><b>ATP Tour results</b><span>From 2007, from a secondary source behind official Grand Slam data: results, rounds and scores; no match statistics or surface yet.</span></li>
+          <li class="wait"><b>ATP singles rankings</b><span>Weekly top 100–150 lists (2007 on) from a secondary source, dated when that source updated them — not an official ATP feed.</span></li>
+          <li class="no"><b>ATP Challenger and official ATP ranking feeds</b><span>Not yet available — no legitimate source.</span></li>
         </ul><p class="note"><a href="/sources">Source details →</a></p></section>`);
   }).catch(() => {});
   return () => ctl.abort();
