@@ -1,0 +1,205 @@
+{
+  "checked_at": "2026-09-27T13:01:28.261Z",
+  "base": "https://tennis.propbetedge.ai",
+  "result": "PASS",
+  "checks": [
+    {
+      "route": "/players",
+      "width": 1440,
+      "ms": 3556,
+      "h1": "PLAYERS",
+      "table_rows": 378,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players?gender=men",
+      "width": 1440,
+      "ms": 1536,
+      "h1": "MEN’S PLAYERS",
+      "table_rows": 314,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players?gender=women",
+      "width": 1440,
+      "ms": 1687,
+      "h1": "PLAYERS",
+      "table_rows": 200,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/men",
+      "width": 1440,
+      "ms": 2554,
+      "h1": "MEN'S TENNIS",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/rankings",
+      "width": 1440,
+      "ms": 1433,
+      "h1": "TENNIS RANKINGS",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/rankings/men",
+      "width": 1440,
+      "ms": 1570,
+      "h1": "ATP SINGLES RANKINGS",
+      "table_rows": 150,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/jannik-sinner",
+      "width": 1440,
+      "ms": 3278,
+      "h1": "JANNIK SINNER",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/alexander-zverev",
+      "width": 1440,
+      "ms": 2408,
+      "h1": "ALEXANDER ZVEREV",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/carlos-alcaraz",
+      "width": 1440,
+      "ms": 2555,
+      "h1": "CARLOS ALCARAZ",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/ben-shelton",
+      "width": 1440,
+      "ms": 2277,
+      "h1": "BEN SHELTON",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/felix-auger-aliassime",
+      "width": 1440,
+      "ms": 2967,
+      "h1": "FELIX AUGER-ALIASSIME",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players",
+      "width": 390,
+      "ms": 1549,
+      "h1": "PLAYERS",
+      "table_rows": 378,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players?gender=men",
+      "width": 390,
+      "ms": 1577,
+      "h1": "MEN’S PLAYERS",
+      "table_rows": 314,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players?gender=women",
+      "width": 390,
+      "ms": 1598,
+      "h1": "PLAYERS",
+      "table_rows": 200,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/men",
+      "width": 390,
+      "ms": 1561,
+      "h1": "MEN'S TENNIS",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/rankings",
+      "width": 390,
+      "ms": 1293,
+      "h1": "TENNIS RANKINGS",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/rankings/men",
+      "width": 390,
+      "ms": 1293,
+      "h1": "ATP SINGLES RANKINGS",
+      "table_rows": 150,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/jannik-sinner",
+      "width": 390,
+      "ms": 1420,
+      "h1": "JANNIK SINNER",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/alexander-zverev",
+      "width": 390,
+      "ms": 1361,
+      "h1": "ALEXANDER ZVEREV",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/carlos-alcaraz",
+      "width": 390,
+      "ms": 1318,
+      "h1": "CARLOS ALCARAZ",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/ben-shelton",
+      "width": 390,
+      "ms": 1286,
+      "h1": "BEN SHELTON",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "route": "/players/felix-auger-aliassime",
+      "width": 390,
+      "ms": 1260,
+      "h1": "FELIX AUGER-ALIASSIME",
+      "table_rows": 0,
+      "result": "PASS",
+      "fails": []
+    }
+  ]
+}
