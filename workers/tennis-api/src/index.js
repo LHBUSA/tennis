@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 
 import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
@@ -270,8 +270,10 @@ export default {
     const cache = ctx && globalThis.caches?.default;
     const ttl = (TTL.find(([re]) => re.test(path)) || [null, 30])[1];
     const bypass = isPreview(url, env);
+    // cache key carries the API version: a deploy that changes response shapes never serves the old shape
+    const cacheKey = new Request(`${url.origin}${url.pathname}${url.search}${url.search ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
     if (cache && !bypass) {
-      const hit = await cache.match(request);
+      const hit = await cache.match(cacheKey);
       if (hit) return hit;
     }
     let body;
@@ -283,7 +285,7 @@ export default {
     if (body === undefined) return json({ ok: false, error: 'not_found' }, { status: 404 });
     if (body === null) return json(envelope(null, { freshness: 'UNAVAILABLE', semantics: 'not found in the canonical store' }), { status: 404 });
     const res = json(body, { headers: { 'cache-control': bypass ? 'no-store' : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
-    if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(request, res.clone()));
+    if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(cacheKey, res.clone()));
     return res;
   }
 };
