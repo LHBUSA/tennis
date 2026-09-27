@@ -112,3 +112,17 @@ test('cross-edition hints: only ESPN rows in ESPN editions of the same week; nev
   assert.match(src, /c\.source === 'espn' && c\.edition_source === 'espn' && sameEventWeek/);
   assert.doesNotMatch(src, /const overlaps =/);
 });
+
+test('self-heal: a row found by its own id that duplicates an official row in this edition is merged into it', async () => {
+  const s = new MemStore();
+  const OTHER = '00000000-0000-4000-8000-00000000e779';
+  await writeMatches(s, [sm('espn', '414-2026:1', 'Q-1', '10', '20', { stage: 'qualifying' })], { edition_id: OTHER }, { dedupe: true });
+  await writeMatches(s, [sm('wta', '0709-2026-RS033', 'Q-', '10', '20', { stage: 'qualifying' })], { edition_id: E });
+  assert.equal(s.rows('tennis_matches').length, 2, 'two rows before (ESPN in its own edition)');
+  const r = await writeMatches(s, [sm('espn', '414-2026:1', 'Q-1', '10', '20', { stage: 'qualifying' })], { edition_id: E }, { dedupe: true });
+  assert.equal(r.merged, 1);
+  assert.equal(s.rows('tennis_matches').length, 1);
+  assert.equal(s.rows('tennis_matches')[0].source_family, 'wta');
+  assert.equal(s.rows('tennis_match_external_ids').find((x) => x.provider === 'espn').match_id, s.rows('tennis_matches')[0].match_id);
+  assert.ok(s.rows('tennis_source_changes').some((c) => c.kind === 'duplicate_merged'));
+});

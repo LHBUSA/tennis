@@ -461,27 +461,29 @@ test('WTA: an ESPN women\'s match attaches to the official WTA row (round M-F ==
   assert.equal(s.rows('tennis_matches')[0].source_family, 'wta', 'official WTA row stays the canonical row');
 });
 
-test('WTA: ESPN event mapped to the official edition only when shared singles pairs prove it', async () => {
+test('WTA: ESPN event mapped to the official edition only when shared singles pairs prove it (found through the players)', async () => {
   const { mapOfficialEdition } = await import('../workers/tennis-ingest/src/espn-jobs.js');
-  const s = new MemStore();
   const official = '00000000-0000-4000-8000-00000000e0f1';
-  const other = '00000000-0000-4000-8000-00000000e0f2';
-  await s.upsert('tennis_tournament_editions', [{ edition_id: official, tournament_id: 't1', year: 2025, start_date: '2025-04-21', end_date: '2025-05-04', source_family: 'wta', name: 'Madrid (WTA)', surface: 'clay' }, { edition_id: other, tournament_id: 't2', year: 2025, start_date: '2025-04-28', end_date: '2025-05-04', source_family: 'wta', name: 'Other' }]);
+  const nextWeek = '00000000-0000-4000-8000-00000000e0f2';
   const pid = (x) => mintPlayerId('wta', x);
+  const ed = (id, start, end, src = 'wta', name = 'Madrid (WTA)') => ({ edition_id: id, event_type: 'WS', tennis_tournament_editions: { year: 2025, start_date: start, end_date: end, source_family: src, surface: 'clay', indoor: false, name } });
+  const rows = [];
   let k = 0;
-  for (const [a, b] of [['1', '2'], ['3', '4'], ['5', '6']]) {
-    k += 1;
-    await s.upsert('tennis_matches', [{ match_id: `m${k}`, edition_id: official, event_type: 'WS' }]);
-    await s.upsert('tennis_match_participants', [{ match_id: `m${k}`, side: 'A', participant_key: `S:${await pid(a)}` }, { match_id: `m${k}`, side: 'B', participant_key: `S:${await pid(b)}` }]);
-  }
+  const add = (a, b, m) => { k += 1; rows.push({ match_id: `m${k}`, participant_key: a, tennis_matches: m }, { match_id: `m${k}`, participant_key: b, tennis_matches: m }); };
+  for (const [a, b] of [['1', '2'], ['3', '4'], ['5', '6']]) add(`S:${await pid(a)}`, `S:${await pid(b)}`, ed(official, '2025-04-21', '2025-05-04'));
+  add(`S:${await pid('1')}`, `S:${await pid('2')}`, ed(nextWeek, '2025-05-06', '2025-05-18', 'wta', 'Rome (WTA)')); // same pair, next tournament
+  add(`S:${await pid('3')}`, `S:${await pid('4')}`, ed('espn-ed', '2025-04-21', '2025-05-04', 'espn', 'ESPN copy'));
+  const writes = [];
+  const store = { select: async (t, q) => (t === 'tennis_match_participants' && /offset=0/.test(q) ? rows : []), upsert: async (t, r) => { writes.push([t, r]); return []; } };
   const mk = (a, b) => ({ event_type: 'WS', sides: { A: [{ provider_id: a }], B: [{ provider_id: b }] } });
-  const idMap = Object.fromEntries(['1', '2', '3', '4', '5', '6', '7', '8'].map((x) => [x, { provider: 'wta', provider_id: x }]));
+  const idMap = Object.fromEntries(['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((x) => [x, { provider: 'wta', provider_id: x }]));
   const parsed = { edition: { espn_event_id: '413-2025', year: 2025, start_date: '2025-04-22', end_date: '2025-05-04', slam: null }, matches: [mk('1', '2'), mk('3', '4'), mk('6', '5'), mk('7', '8')] };
-  const hit = await mapOfficialEdition(s, parsed, idMap);
-  assert.equal(hit.edition_id, official);
+  const hit = await mapOfficialEdition(store, parsed, idMap);
+  assert.equal(hit.edition_id, official, 'the next-week edition (dates outside the window) and ESPN copies never qualify');
   assert.equal(hit.surface, 'clay');
   assert.match(hit.evidence, /^3 of 4/);
-  const none = await mapOfficialEdition(s, { ...parsed, matches: [mk('7', '8'), mk('1', '9')] }, { ...idMap, 9: { provider: 'wta', provider_id: '9' } });
+  assert.deepEqual(writes[0][1][0], { provider: 'espn_wta', external_id: '413-2025', edition_id: official });
+  const none = await mapOfficialEdition({ ...store, select: async () => rows.slice(0, 2) }, { ...parsed, matches: [mk('7', '8'), mk('1', '9')] }, idMap);
   assert.equal(none, null, 'one shared pair is not proof');
 });
 

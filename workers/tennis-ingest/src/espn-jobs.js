@@ -458,25 +458,37 @@ export async function mapOfficialEdition(store, parsed, idMap) {
     pairs.add([`S:${await mintPlayerId(a.provider, a.provider_id)}`, `S:${await mintPlayerId(b.provider, b.provider_id)}`].sort().join('~'));
   }
   if (pairs.size < 2) return null;
-  const lo = new Date(Date.parse(e.start_date) - 3 * 86400e3).toISOString().slice(0, 10);
-  const hi = new Date(Date.parse(e.end_date) + 3 * 86400e3).toISOString().slice(0, 10);
-  const cands = await store.select('tennis_tournament_editions', `select=edition_id,surface,indoor,name,source_family&year=eq.${e.year}&source_family=neq.espn&start_date=lte.${hi}&end_date=gte.${lo}&limit=40`);
+  const lo = Date.parse(e.start_date) - 3 * 86400e3;
+  const hi = Date.parse(e.end_date) + 3 * 86400e3;
+  // candidate editions found THROUGH the players: their women's singles matches of that year, grouped by edition
+  // (a date-window scan of editions drowns in same-fortnight ITF events)
+  const keys = [...new Set([...pairs].flatMap((p) => p.split('~')))];
+  const byMatch = new Map();
+  for (let i = 0; i < keys.length; i += 60) {
+    for (let off = 0; ; off += 1000) {
+      const rows = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,tennis_tournament_editions!inner(year,start_date,end_date,source_family,surface,indoor,name))&participant_key=${inList(keys.slice(i, i + 60))}&tennis_matches.event_type=eq.WS&tennis_matches.tennis_tournament_editions.year=eq.${e.year}&order=match_id.asc&limit=1000&offset=${off}`);
+      for (const r of rows) { if (!byMatch.has(r.match_id)) byMatch.set(r.match_id, { keys: [], m: r.tennis_matches }); byMatch.get(r.match_id).keys.push(r.participant_key); }
+      if (rows.length < 1000) break;
+    }
+  }
+  const tally = new Map();
+  for (const { keys: ks, m } of byMatch.values()) {
+    const ed = m.tennis_tournament_editions;
+    if (!ed || ed.source_family === 'espn' || !ed.start_date || !ed.end_date) continue;
+    if (!(Date.parse(ed.start_date) <= hi && Date.parse(ed.end_date) >= lo)) continue;
+    if (ks.length !== 2 || !pairs.has([...ks].sort().join('~'))) continue;
+    const t = tally.get(m.edition_id) || { edition_id: m.edition_id, surface: ed.surface, indoor: ed.indoor, name: ed.name, source_family: ed.source_family, hit: 0 };
+    t.hit += 1;
+    tally.set(m.edition_id, t);
+  }
   if (e.slam) {
-    const slam = Object.values(espn.ESPN_SLAMS).find((s) => s.key === e.slam);
+    const slam = Object.values(espn.ESPN_SLAMS).find((x) => x.key === e.slam);
     const sid = await editionId(await tournamentId(`slam:${slam.key}`), e.year);
-    if (!cands.some((c) => c.edition_id === sid)) { const [x] = await store.select('tennis_tournament_editions', `select=edition_id,surface,indoor,name,source_family&edition_id=eq.${sid}`); if (x) cands.push(x); }
+    if (!tally.has(sid)) { const [x] = await store.select('tennis_tournament_editions', `select=edition_id,surface,indoor,name,source_family&edition_id=eq.${sid}`); if (x && x.source_family !== 'espn') tally.set(sid, { ...x, hit: 0 }); }
   }
   let best = null;
   let second = 0;
-  for (const c of cands) {
-    const rows = await store.select('tennis_matches', `select=match_id,tennis_match_participants(side,participant_key)&edition_id=eq.${c.edition_id}&event_type=eq.WS&limit=1000`);
-    let hit = 0;
-    for (const r of rows) {
-      const ps = (r.tennis_match_participants || []).map((p) => p.participant_key);
-      if (ps.length === 2 && pairs.has(ps.sort().join('~'))) hit += 1;
-    }
-    if (!best || hit > best.hit) { second = best?.hit || 0; best = { ...c, hit }; } else if (hit > second) second = hit;
-  }
+  for (const c of [...tally.values()].sort((a, b) => b.hit - a.hit)) { if (!best) best = c; else if (!second) second = c.hit; }
   if (!best || best.hit < Math.max(2, Math.ceil(pairs.size * 0.3)) || best.hit === second) return null;
   await store.upsert('tennis_edition_external_ids', [{ provider: 'espn_wta', external_id: e.espn_event_id, edition_id: best.edition_id }], { onConflict: 'provider,external_id', ignore: true });
   return { edition_id: best.edition_id, surface: best.surface ?? null, indoor: best.indoor ?? null, owner: best.source_family, evidence: `${best.hit} of ${pairs.size} resolved singles pairs already in ${best.name || best.edition_id}` };

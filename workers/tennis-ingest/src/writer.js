@@ -166,6 +166,14 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     normalized.splice(0, normalized.length, ...cs.write);
     attach = cs.attach;
     alias = cs.alias;
+    // duplicate rows found by the self-heal: external ids move to the surviving row, the lower row is removed
+    for (const mg of cs.merges) {
+      await store.req('PATCH', `tennis_match_external_ids?match_id=eq.${mg.from}`, { body: { match_id: mg.into } });
+      for (const t of ['tennis_match_events', 'tennis_sets', 'tennis_match_participants', 'tennis_match_stats']) await store.del(t, `match_id=eq.${mg.from}`);
+      await store.del('tennis_matches', `match_id=eq.${mg.from}`);
+      await store.insert('tennis_source_changes', [{ entity_type: 'match', entity_id: mg.from, field: 'row', kind: 'duplicate_merged', from_value: null, to_value: mg.into, source_family: mg.provider, capture_id: captureId }]);
+    }
+    result.merged = cs.merges.length;
     result.duplicate_candidates = cs.duplicates;
     result.taken_over = cs.write.filter((x) => x.takeover).length;
     // a takeover may orient sides differently: the owner's participant rows are replaced, not merged
@@ -328,6 +336,7 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
   const attach = [];
   const seen = new Map();
   const alias = [];
+  const merges = [];
   let duplicates = 0;
   const dup = (x, problem) => { duplicates += 1; holds.push({ provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [problem], payload: slim(x.sm), capture_id: captureId }); };
   for (const x of normalized) {
@@ -344,6 +353,17 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
     // 1. this external id is already linked (idempotent re-ingest, including earlier attachments)
     // (a caller may prove the same match in ANOTHER edition, e.g. an ESPN row filed under ESPN's edition)
     let target = extMap.get(x.sm.provider_match_id) || x.sm.existing_match_id || (byId.has(x.id) ? x.id : null);
+    // self-heal: our own/lower row found by id while THIS edition already holds the same match owned by an
+    // equal-or-higher source -> merge into that row (ids moved, lower row removed, logged)
+    if (target) {
+      const others = (byKey.get(key) || []).filter((c) => c.match_id !== target);
+      const mine = byId.get(target);
+      const rn2 = (r) => String(r || '').replace(/^M-/, '');
+      if (others.length === 1 && sourcePriority(others[0].source_family) >= sourcePriority(mine?.source_family || provider) && !(others[0].round && x.n.match.round_code && /^[QSF]$/.test(rn2(others[0].round)) && /^[QSF]$/.test(rn2(x.n.match.round_code)) && rn2(others[0].round) !== rn2(x.n.match.round_code))) {
+        merges.push({ from: target, into: others[0].match_id, provider });
+        target = others[0].match_id;
+      }
+    }
     // 2. the same match from another source, by natural key
     if (!target) {
       const cands = (byKey.get(key) || []).filter((c) => c.match_id !== x.id);
@@ -376,7 +396,7 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
       holds.push({ provider, entity_type: 'cross_source', external_id: x.sm.provider_match_id, problems: [`cross_source_disagreement: ${owner.source_family} ${owner.status} ${a || '-'} vs ${provider} ${x.n.match.status} ${b || '-'}${ownWinner !== ourWinner ? ' (winner differs)' : ''}`], payload: { match_id: target, owner: owner.source_family }, capture_id: captureId });
     }
   }
-  return { write, attach, duplicates, alias };
+  return { write, attach, duplicates, alias, merges };
 }
 
 const prevSnapshot = (p) => snapshotOf({ status: p.status, live: p.live_state, sets: (p.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ games: { A: t.games_a, B: t.games_b }, tiebreak: t.tb_a == null ? null : { A: t.tb_a, B: t.tb_b }, is_match_tiebreak: t.is_match_tiebreak })) });
