@@ -25,6 +25,7 @@ below are generated: edit the registry and run `npm run canary && npm run matrix
 | Family | What PropBetEdge can acquire today | How |
 |---|---|---|
 | **WTA** (tour, WTA 125, qualifying, doubles) | rankings singles+doubles incl. historical weeks · calendar · every match with live point/server · per-set serve/return stats · player identity/DOB/history | `api.wtatennis.com` — the JSON API wtatennis.com renders from. No key, no challenge; flaky connections (retry). |
+| **ESPN core API** (secondary, owner decision 2026-09-27) | ATP Tour + Slam results 2007→ (singles, doubles, mixed, Slam qualifying; round, seeds, score line with tiebreaks, ret/w-o), athlete bio/DOB, weekly ATP singles rankings (top 100-150, points, previous rank) 2007→ | `sports.core.api.espn.com` — one event request = a whole tournament. No surface, no ATP level, no match statistics, no Challengers. `site.api.espn.com` 403 (Akamai; not bypassed). Lanes `espn_atp` / `espn_rankings`; official sources outrank it. Discovery: `docs/evidence/espn-atp-discovery-latest.json`. |
 | **ATP** (tour + Challenger) | draw PDFs only (names, no ids) | atptour.com / app.atptour.com / Infosys all challenge (Cloudflare/CloudFront 403). ProTennisLive `/posting/` PDFs are open. |
 | **ITF** (World Tennis Tour) | nothing directly | Incapsula JS challenge on every path (served as HTTP 200). ITF ids exist on Wikidata (P599). |
 | **Grand Slams** | Wimbledon draws/scores/players (all years probed) · AO day results, player registry, match centre with point-by-point (current edition) | Static feeds each site loads. US Open hung (recheck), Roland-Garros only in SSR payload. |
@@ -71,7 +72,7 @@ Wimbledon + AO archives for men's Slam results keyed by embedded ATP ids.
 ## Generated tables
 
 <!-- generated:start (npm run matrix) -->
-Registry 2026-09-26 · canary run 2026-09-26T20:17:24.418Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
+Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
 
 | Source | Verdict | Capabilities | Canary (latest) | Terms | Production status |
 |---|---|---|---|---|---|
@@ -121,7 +122,8 @@ Registry 2026-09-26 · canary run 2026-09-26T20:17:24.418Z (scripts/canary/run.m
 | `commercial.sportsdataio` SportsDataIO | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.api-tennis.com` api-tennis.com | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.rapidapi` RapidAPI tennis APIs | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
-| `espn.tennis.core` ESPN tennis (core + site.web APIs, undocumented) | COMMERCIAL_REFERENCE_ONLY | schedule, set_game_scoring, rankings_singles, player_bio, history | — | RESTRICTED | INTERNAL REFERENCE / GAP-CHECKING ONLY (owner approved 2026-09-26): never canonical, never a production dependency, never republished, never customer-facing; skipped where an official source answers |
+| **ESPN core API (secondary source, owner decision 2026-09-27)** | | | | | |
+| `espn.tennis.core` ESPN tennis core API (sports.core.api.espn.com, undocumented) | PASS | calendar, draws, set_game_scoring, withdrawals_ret_wo, qualifying, doubles, mixed, history, rankings_singles, player_bio, player_identity | PASS · HTTP 200 · 333 rec · 1238272 B | RESTRICTED | SECONDARY INGESTION (lane espn_atp + espn_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. |
 
 ### Endpoint templates and notes
 
@@ -197,6 +199,9 @@ Registry 2026-09-26 · canary run 2026-09-26T20:17:24.418Z (scripts/canary/run.m
   robots: Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)
 - **`odds.tennis_data_co_uk`** — `http://www.tennis-data.co.uk/{year}/{year}.xlsx`  
   Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.
+- **`espn.tennis.core`** — `https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/{tid}-{YYYY}` · ids: player = ESPN athlete integer (e.g. 3623); event = {tournamentId}-{year} (e.g. 154-2026); match = {event}:{competitionId}  
+  Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated.  
+  robots: espn.com robots.txt not readable for our UA (connection reset); core API /robots.txt 403
 - **`wimbledon.archive`** — `https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}` · ids: player = archive UUID (tourid on the player record for some players)  
   DEGRADED for source quality: the archive reports some deciding-set tiebreak scores that are impossible under the edition rule (e.g. 2022 QF Nadal d. Fritz 10-4 appears as 7-4); every such match is held. Identity: archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held. The ingest Worker (Cloudflare egress) has also received intermittent HTTP 403 from this host; the lane backs off and never retries around it.  
   robots: not retrieved for da.wimbledon.com
@@ -211,5 +216,5 @@ Registry 2026-09-26 · canary run 2026-09-26T20:17:24.418Z (scripts/canary/run.m
 - **Wikidata** (https://www.wikidata.org/wiki/Wikidata:Licensing): “Structured data is CC0.”
 - **Wikidata** (https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia): “Each file carries its own license; only CC0 / PD / CC BY / CC BY-SA are accepted (docs/MEDIA.md).”
 - **Open data** (https://raw.githubusercontent.com/JeffSackmann/tennis_MatchChartingProject/master/README.md): “... is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. ... In other words: Attribution is required. Non-commercial use only.”
-- **Commercial (reference only)** (https://disneytermsofuse.com/english/): “§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path.”
+- **ESPN core API (secondary source, owner decision 2026-09-27)** (https://disneytermsofuse.com/english/): “§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path.”
 <!-- generated:end -->

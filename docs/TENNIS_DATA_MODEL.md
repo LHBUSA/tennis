@@ -40,9 +40,42 @@ Statuses: `scheduled in_progress suspended completed retired walkover defaulted 
 final status requires `winner_side`. Sets store games A-B, tiebreak points, `tb_winner_points_derived`
 (true when the source printed only the loser's points, e.g. `7-6(5)`), `is_match_tiebreak`. Format keys
 (`scoring.js FORMATS`): `BO3_TB7`, `BO5_FINAL_TB10`, `BO3_FINAL_TB10`, `BO5_FINAL_ADV`, `BO3_FINAL_ADV`,
-`DOUBLES_TOUR` (no-ad + 10-point match tiebreak), `BO3_MATCH_TB10`.
+`DOUBLES_TOUR` (no-ad + 10-point match tiebreak), `BO3_MATCH_TB10`, `BO5_TB7` (tiebreak at 6-6 in every set of a
+best-of-five: US Open to 2021).
 
 ## Completeness
 
 `tennis_coverage` records, per tour × season × event type (× tournament), whether matches / match stats /
 points are `complete | partial | unavailable | unaudited`. Nothing is called complete until audited.
+
+## One real match = one row (cross-source)
+
+Canonical match ids are minted per source (`uuidv5(match:<provider>:<id>)`), so the writer
+(`writer.js crossSource`, opt-in per lane: every Slam lane and `espn_atp`; the WTA lane is unchanged)
+first looks for the same match inside the edition: **event type + stage (main / qualifying / round robin) +
+the two participant keys** (orientation-free). Then:
+
+| Found | Incoming source | Action |
+|---|---|---|
+| this external id already linked | any | update that row (idempotent re-ingest) |
+| one row, higher-precedence owner (official feeds outrank `espn`) | espn | **attach** the ESPN external id only; a result disagreement becomes a `cross_source` hold for review; the official row stands |
+| one row owned by `espn` | official feed | **take over**: same `match_id`, official fields, participants replaced |
+| one row, round codes differ | any | held `duplicate_candidate:round_conflict` |
+| same source, other external id / several rows | any | held `duplicate_candidate` |
+
+Provenance for an ESPN row or link: `source_family` + `tennis_match_external_ids (espn, '<tid>-<year>:<competition>')`
+→ the event capture in `tennis_source_captures` (request identity carries the event id) → the immutable
+payload in R2 (`tennis-source/espn/sha256/…`).
+
+## Dates
+
+ESPN competition timestamps are stored in `scheduled_at` as the source prints them; `T05:00Z` / `T04:00Z` values
+are day precision (US-Eastern midnight), not a start time. `started_at` is only a source-observed start.
+
+## Rankings from a secondary source
+
+ESPN ATP singles lists are stored as `tennis_ranking_snapshots (list_key atp_singles, source_family espn)`
+with `ranking_date` = the date ESPN last updated that list (its `lastUpdated`), never an assumed official ATP
+Monday; `tennis_rankings.provider_player_id = 'espn:<athlete id>'`, `previous_rank` as printed,
+`pbe_player_id` linked once the athlete resolves (daily relink). The public API describes such a list as
+carried by a secondary source, never as an official feed.

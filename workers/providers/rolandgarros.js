@@ -10,6 +10,7 @@ import { safeJson, requirePaths } from '../shared/adapter.js';
 const PARSER = '1';
 const RG_EVENTS = { SM: { event_type: 'MS', stage: 'main' }, DM: { event_type: 'MD', stage: 'main' }, QM: { event_type: 'MS', stage: 'qualifying' } };
 const ROUND = { 1: '1', 2: '2', 3: '3', 4: '4', 5: 'Q', 6: 'S', 7: 'F' };
+const DM_ROUND = { 1: '1', 2: '2', 3: '3', 4: 'Q', 5: 'S', 6: 'F' };
 const MONTHS = { january: 1, february: 2, march: 3, april: 4, may: 5, june: 6, july: 7, august: 8, september: 9, october: 10, november: 11, december: 12 };
 
 /** Deciding-set rule at Roland-Garros: advantage through 2021, 10-point tiebreak at 6-6 from 2022. */
@@ -76,7 +77,11 @@ export function parseRgResults(json, { year, event, idMap = {} } = {}) {
       const format_key = status === 'walkover' ? rgFormat(event === 'SM' ? 5 : 3, year) : rgFormat(bestOf, year);
       if (!format_key) warnings.push('format_unprovable');
       const rn = Number(m.matchData?.round ?? r.roundNumber);
-      const round_code = ev.stage === 'qualifying' ? (rn >= 1 && rn <= 3 ? `Q-${rn}` : null) : ROUND[rn] || null;
+      // main-draw rounds by the payload's own label: doubles has 6 rounds (4 = QF), singles 7 (4 = R16).
+      // (Numbering alone stored doubles QF/SF/F as 4/Q/S before 2026-09-27; caught by the ESPN cross-source check.)
+      const label = String(r.roundLabel || '').toLowerCase();
+      const byLabel = /^quarter/.test(label) ? 'Q' : /^semi/.test(label) ? 'S' : /^final$/.test(label) ? 'F' : null;
+      const round_code = ev.stage === 'qualifying' ? (rn >= 1 && rn <= 3 ? `Q-${rn}` : null) : byLabel || (event === 'DM' ? DM_ROUND[rn] : ROUND[rn]) || null;
       if (!round_code) warnings.push(`unmapped_round:${rn}`);
       const started = m.matchData?.endTimestamp && m.matchData?.durationInMinutes ? new Date(m.matchData.endTimestamp - m.matchData.durationInMinutes * 60000).toISOString() : null;
       out.push({

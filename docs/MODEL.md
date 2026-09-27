@@ -21,6 +21,22 @@ appropriate, confidence, top factors, coverage warnings, `model_version`, `gener
 - No post-match stats, durations or odds captured after `locked_at`.
 - Training splits are chronological; no random k-fold over time.
 
+## Feature readiness (stored data, 2026-09-27)
+
+Point-in-time selectors: `workers/shared/features/asof.js` (`rankingAsOf` = latest list with
+`ranking_date <= match day`; `priorMatches` = strictly earlier matches), tested for no future leakage.
+
+| Feature family | Stored inputs | Gap |
+|---|---|---|
+| Overall Elo / opponent-adjusted rating | every canonical match: participants, winner, status, round, edition, day | none for results; Challenger/ITF not ingested |
+| Surface Elo / surface form | `tennis_tournament_editions.surface` | **ESPN non-Slam editions have surface = null** (ESPN has no surface) |
+| Rolling ranking / ranking velocity | WTA weekly lists; ATP weekly lists (ESPN, top 100-150, 2007→) with points + previous rank | ATP ranks below 150 unavailable; ATP doubles rankings unavailable |
+| Form (last 5/10/20, quality-adjusted) | results + day + opponent | none |
+| Workload (prior match date, 24h/72h/7d/14d, sets, games, progression) | `scheduled_at` (day precision for older ESPN rows), `tennis_sets`, round | exact start times only where the source prints them |
+| Tiebreak / deciding-set record | `tennis_sets` (tiebreak points, match tiebreaks) | none |
+| Break-point metrics | `tennis_match_stats` (WTA, AO) | none from ESPN (no statistics) |
+| Retirement / walkover history | `status`, `end_reason` | none |
+
 ## Validation
 
 Walk-forward by season; log loss, Brier, calibration curves by tour/gender/surface/level/format;

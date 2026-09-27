@@ -36,3 +36,24 @@ Name only is never identity. No fuzzy match ever writes a production row.
 Alias kinds: legal, married, former, transliteration, feed, short.
 
 Reconciliation reports come from the identity queue once ingestion runs.
+
+## ESPN athlete ids (`workers/shared/canonical/espn-identity.js`, lane `espn_atp`)
+
+ESPN ids never found a player. Each ESPN athlete reaches a tour id (then the tour-id UUID) through, in order:
+
+1. the crosswalk we already hold (`provider=espn`) → `external_id`;
+2. Wikidata **P11585** (ESPN.com tennis player ID) on the same item as **P536** (ATP) / **P597** (WTA) →
+   `external_id`, corroborated when we already hold that player: the surname must agree and the DOB must not
+   conflict; a tour id Wikidata gives to two ESPN ids is refused;
+3. exact normalized full name + exact DOB (+ nationality when both have one), unique among canonical tour-id
+   players → `name_dob` (the Roland-Garros contract);
+4. only when step 3 has **no candidate at all**: exact normalized English label + exact **day-precision**
+   DOB (Wikidata `timePrecision 11`), unique among every Wikidata item with an ATP or WTA id → `name_dob`.
+
+Anything else is `unresolved` / `ambiguous` in `tennis_identity_queue` and the athlete's matches are held.
+
+ESPN remaps historical athlete ids (AO 2008 lists id 543 "Lesley Pattinama Kerkhove" and 440 "Lizette
+Cabrera" where the printed result says Nenad Zimonjic / Victor Hanescu). Every ESPN match is therefore also
+checked against the printed result line: the flagged winner's and loser's surnames, and the surname of the
+canonical player each id resolved to, must appear on the correct side of "bt" — otherwise the row is held
+(`result_line_names_disagree_with_winner_flag`, `resolved_player_not_in_result_line`).

@@ -1,6 +1,6 @@
 {
   "registry_version": 1,
-  "updated_at": "2026-09-26",
+  "updated_at": "2026-09-27",
   "cost_target": "$0 data licensing / API cost",
   "directive": "docs/TENNIS_SOURCE_MATRIX.md (owner directive 2026-09-26: we build the data layer, we do not rent it)",
   "families": [
@@ -39,6 +39,10 @@
     {
       "key": "commercial",
       "label": "Commercial (reference only)"
+    },
+    {
+      "key": "espn",
+      "label": "ESPN core API (secondary source, owner decision 2026-09-27)"
     }
   ],
   "sources": [

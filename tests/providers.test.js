@@ -327,3 +327,14 @@ test('AO gap fill: slot ids cover the whole main draw; only an official walkover
   assert.deepEqual(wo.sides.B[0].tour_id, { provider: 'atp', provider_id: 'D643' });
   assert.equal(slams.parseAusopenWalkover({ match_id: 'MS406', match_status: { name: 'Complete' }, teams: [] }, 2026), null, 'a played match never comes from here');
 });
+
+test('Roland-Garros doubles rounds: 6 rounds, 4 = quarterfinal (label first, numbering by event)', async () => {
+  const rg = await import('../workers/providers/rolandgarros.js');
+  const team = (id, won, g) => ({ winner: won, players: [{ id: id, firstName: 'A', lastName: `P${id}` }, { id: id + 1, firstName: 'B', lastName: `P${id + 1}` }], sets: g.map((x) => ({ score: x })) });
+  const round = (n, label) => ({ roundNumber: n, roundLabel: label, matches: [{ id: `M${n}`, teamA: team(10 * n, true, [6, 6]), teamB: team(10 * n + 5, false, [4, 4]), matchData: { status: 'FINISHED', round: n } }] });
+  const json = { tournamentEvent: { roundResults: [round(4, 'Quarterfinals'), round(5, 'Semifinals'), round(6, 'Final')] } };
+  assert.deepEqual(rg.parseRgResults(json, { year: 2025, event: 'DM' }).map((m) => m.round_code), ['Q', 'S', 'F']);
+  delete json.tournamentEvent.roundResults[0].roundLabel;
+  assert.equal(rg.parseRgResults(json, { year: 2025, event: 'DM' })[0].round_code, 'Q', 'numbering fallback is per event');
+  assert.equal(rg.parseRgResults({ tournamentEvent: { roundResults: [{ roundNumber: 4, matches: round(4).matches }] } }, { year: 2025, event: 'SM' })[0]?.round_code ?? '4', '4');
+});
