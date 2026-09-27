@@ -72,7 +72,7 @@ Wimbledon + AO archives for men's Slam results keyed by embedded ATP ids.
 ## Generated tables
 
 <!-- generated:start (npm run matrix) -->
-Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
+Registry 2026-09-27 · canary run 2026-09-27T16:32:26.653Z (scripts/canary/run.mjs (local workstation egress)) · UA `PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)`
 
 | Source | Verdict | Capabilities | Canary (latest) | Terms | Production status |
 |---|---|---|---|---|---|
@@ -83,7 +83,7 @@ Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.m
 | `wta.calendar` WTA API — tournament calendar (WTA 1000/500/250/125) | PASS | calendar | PASS · HTTP 200 · 19 rec · 14093 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.matches` WTA API — tournament matches (results + live state) | PASS | schedule, live_state, set_game_scoring, doubles, qualifying, withdrawals_ret_wo | PASS · HTTP 200 · 53 rec · 60767 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
 | `wta.match_stats` WTA API — match statistics (per set + totals) | PASS | match_stats, serve_stats, return_stats | PASS · HTTP 200 · 1 rec · 2191 B | RESTRICTS_AUTOMATED_ACCESS | INGEST — owner-approved 2026-09-26 (tennis-ingest cron) |
-| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_ADAPTED |
+| `wta.player` WTA API — player identity, match history, season stats, records | PASS | player_identity, player_bio, match_history, h2h | PASS · HTTP 200 · 1 rec · 8336 B | RESTRICTS_AUTOMATED_ACCESS | INGESTING (lane wta_history, 2026-09-27): /players/{id}/matches career lists -> canonical matches (official; outranks espn, yields to per-match WTA API rows); /players/{id} bios via the same rows; /year and /records not adapted |
 | **ATP** | | | | | |
 | `atp.site` atptour.com — rankings, calendar, scores, stats, players (incl. Challenger) | BLOCKED_BY_ACCESS_CONTROL | rankings_singles, rankings_doubles, race, calendar, draws, live_state, match_stats, player_bio, history | BLOCKED_BY_ACCESS_CONTROL · HTTP 403 | RESTRICTS_AUTOMATED_ACCESS | NOT_USED — Cloudflare challenge on every request; not evaded |
 | `atp.infosys` ATP stats platform (Infosys) | BLOCKED_BY_ACCESS_CONTROL | point_by_point, match_stats | audit request (private archive) | RESTRICTS_AUTOMATED_ACCESS | NOT_USED |
@@ -123,7 +123,7 @@ Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.m
 | `commercial.api-tennis.com` api-tennis.com | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | `commercial.rapidapi` RapidAPI tennis APIs | COMMERCIAL_REFERENCE_ONLY | live_state, match_stats | — | NOT_REVIEWED | REFERENCE_ONLY — owner directive: $0 data licensing |
 | **ESPN core API (secondary source, owner decision 2026-09-27)** | | | | | |
-| `espn.tennis.core` ESPN tennis core API (sports.core.api.espn.com, undocumented) | PASS | calendar, draws, set_game_scoring, withdrawals_ret_wo, qualifying, doubles, mixed, history, rankings_singles, player_bio, player_identity | PASS · HTTP 200 · 333 rec · 1238272 B | RESTRICTED | SECONDARY INGESTION (lane espn_atp + espn_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. |
+| `espn.tennis.core` ESPN tennis core API (sports.core.api.espn.com, undocumented) | PASS | calendar, draws, set_game_scoring, withdrawals_ret_wo, qualifying, doubles, mixed, history, rankings_singles, player_bio, player_identity | PASS · HTTP 200 · 333 rec · 1238272 B | RESTRICTED | SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner. |
 
 ### Endpoint templates and notes
 
@@ -145,7 +145,7 @@ Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.m
   Field semantics verified against set scores; a consistency check (service points = points won; per-set sums = totals) runs on every parse.  
   robots: www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)
 - **`wta.player`** — `https://api.wtatennis.com/tennis/players/{id} ; /players/{id}/matches/ ; /players/{id}/year/{y} ; /players/{id}/records` · ids: player = integer  
-  Proven by Phase 0 audit requests; adapter not built yet. No dedicated H2H endpoint (404); H2H derives from match history.  
+  Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100.  
   robots: www.wtatennis.com: 'User-agent: * / Disallow:' (empty = allow all). api.wtatennis.com/robots.txt -> 404 (none)
 - **`atp.site`** — `https://www.atptour.com/ and app.atptour.com (all paths probed)` · ids: player = 4-char alphanumeric (e.g. S0AG)  
   ATP player ids reach us legitimately through Slam feeds and Wikidata instead.  
@@ -199,8 +199,8 @@ Registry 2026-09-27 · canary run 2026-09-27T10:22:38.772Z (scripts/canary/run.m
   robots: Disallow: /jsfrags/, /jsmatches/, /jsplayers/ (the player/match data paths)
 - **`odds.tennis_data_co_uk`** — `http://www.tennis-data.co.uk/{year}/{year}.xlsx`  
   Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.
-- **`espn.tennis.core`** — `https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/{tid}-{YYYY}` · ids: player = ESPN athlete integer (e.g. 3623); event = {tournamentId}-{year} (e.g. 154-2026); match = {event}:{competitionId}  
-  Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated.  
+- **`espn.tennis.core`** — `https://sports.core.api.espn.com/v2/sports/tennis/leagues/{atp|wta}/events/{tid}-{YYYY}` · ids: player = ESPN athlete integer (e.g. 3623); event = {tournamentId}-{year} (e.g. 154-2026); match = {event}:{competitionId}  
+  Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated. WTA league (2026-09-27): same payloads, competitions 2007+, weekly WTA singles lists (ranking id 2) 2007+; events share one id namespace with the ATP league; mixed doubles ingested once (ATP league); ESPN WTA events map onto the official WTA edition when shared singles pairs prove it; official WTA lists within 6 days win (ESPN list reconciled, not stored).  
   robots: espn.com robots.txt not readable for our UA (connection reset); core API /robots.txt 403
 - **`wimbledon.archive`** — `https://da.wimbledon.com/v1/draws_archive/draw/{MS|MD|QS}/{year}` · ids: player = archive UUID (tourid on the player record for some players)  
   DEGRADED for source quality: the archive reports some deciding-set tiebreak scores that are impossible under the edition rule (e.g. 2022 QF Nadal d. Fritz 10-4 appears as 7-4); every such match is held. Identity: archive UUID -> ATP only via Wikidata P4503->P536, same-match 2025 join, archive tourid; else held. The ingest Worker (Cloudflare egress) has also received intermittent HTTP 403 from this host; the lane backs off and never retries around it.  

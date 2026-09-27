@@ -230,6 +230,7 @@
       ],
       "verdict": "PASS",
       "evidence": {
+        "canary_key": "wta.player.matches",
         "r2_key": "tennis-source/audit/phase0-source-audit-2026-09-26.json"
       },
       "native_ids": {
@@ -241,8 +242,8 @@
         "status": "RESTRICTS_AUTOMATED_ACCESS",
         "quote": "You must not: \"harvest\" (or collect) information from the WTA Sites using an automated software tool or manually on a mass basis (unless we have given you separate written permission to do so). ... use automated means to access the WTA Sites or gain unauthorized access to the WTA Sites or to any account or computer system connected to the WTA Sites. This prohibition does not apply to search engines accessing the WTA Sites solely for web indexing purposes."
       },
-      "production_status": "NOT_ADAPTED",
-      "notes": "Proven by Phase 0 audit requests; adapter not built yet. No dedicated H2H endpoint (404); H2H derives from match history.",
+      "production_status": "INGESTING (lane wta_history, 2026-09-27): /players/{id}/matches career lists -> canonical matches (official; outranks espn, yields to per-match WTA API rows); /players/{id} bios via the same rows; /year and /records not adapted",
+      "notes": "Rows carry no match id or time: identity = edition + event + stage + participants; day = edition end date. Codes observed: W played, R retired, B bye (skipped); qualifying rows label rounds against the qualifying draw. pageSize capped at 100.",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null
     },
@@ -1037,7 +1038,7 @@
       "family": "espn",
       "name": "ESPN tennis core API (sports.core.api.espn.com, undocumented)",
       "tier": "secondary",
-      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/{tid}-{YYYY}",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/{atp|wta}/events/{tid}-{YYYY}",
       "capabilities": [
         "calendar",
         "draws",
@@ -1055,11 +1056,13 @@
       "evidence": {
         "canary_key": "espn.atp.event",
         "historical_canary_keys": [
+          "espn.athlete",
           "espn.atp.event@2008",
+          "espn.atp.events",
           "espn.atp.rankings",
           "espn.atp.rankings@2010",
-          "espn.atp.events",
-          "espn.athlete"
+          "espn.wta.event",
+          "espn.wta.rankings"
         ],
         "audited": "2026-09-27",
         "file": "docs/evidence/espn-atp-discovery-latest.json",
@@ -1072,8 +1075,8 @@
         "status": "RESTRICTED",
         "quote": "§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path."
       },
-      "production_status": "SECONDARY INGESTION (lane espn_atp + espn_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner.",
-      "notes": "Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated.",
+      "production_status": "SECONDARY INGESTION (lanes espn_atp, espn_rankings, espn_wta, espn_wta_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner.",
+      "notes": "Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated. WTA league (2026-09-27): same payloads, competitions 2007+, weekly WTA singles lists (ranking id 2) 2007+; events share one id namespace with the ATP league; mixed doubles ingested once (ATP league); ESPN WTA events map onto the official WTA edition when shared singles pairs prove it; official WTA lists within 6 days win (ESPN list reconciled, not stored).",
       "storage_policy": "raw payload content-addressed in R2 (family espn); normalized rows in Supabase with source_family espn",
       "attribution": null,
       "native_ids": {

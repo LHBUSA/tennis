@@ -1,9 +1,9 @@
 {
-  "run_at": "2026-09-27T15:59:53.086Z",
+  "run_at": "2026-09-27T16:32:26.653Z",
   "runner": "scripts/canary/run.mjs (local workstation egress)",
   "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
   "client_stats": {
-    "requests": 2,
+    "requests": 1,
     "not_modified": 0,
     "retries": 0,
     "blocked": 0
@@ -470,6 +470,21 @@
       "sha256": "78fd01be647355655ef85c5d9e2bb4d3e71e0758b0ef42e332ef90da24106274",
       "attempts": 1,
       "latency_ms": 42,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "wta.player.matches",
+      "family": "wta",
+      "state": "PASS",
+      "url": "https://api.wtatennis.com/tennis/players/320760/matches/?page=0&pageSize=5",
+      "http_status": 200,
+      "bytes": 8336,
+      "content_type": "application/json",
+      "sha256": "9275306cc91c7e38d335b9e34ef12fe9e15527e83452f9994f4a32a35dd8022c",
+      "attempts": 1,
+      "latency_ms": 228,
       "record_count": 1,
       "error": null,
       "drift": null

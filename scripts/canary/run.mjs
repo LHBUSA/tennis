@@ -20,6 +20,7 @@ import * as slams from '../../workers/providers/slams.js';
 import * as open from '../../workers/providers/open.js';
 import * as rg from '../../workers/providers/rolandgarros.js';
 import * as espn from '../../workers/providers/espn.js';
+import * as wtaHistory from '../../workers/providers/wta-history.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
@@ -59,6 +60,7 @@ export const CANARIES = [
   { adapter: espn.espnRankingWeek, key: 'espn.atp.rankings@2010', params: { season: 2010, week: 10 } },
   { adapter: { ...espn.WTA.event, parse: (body) => espn.parseEspnEvent(JSON.parse(body), { league: 'wta' }).matches.filter((m) => m.warnings.every((w) => !/names_disagree|unparseable|winner_flag/.test(w))) }, key: 'espn.wta.event', params: { id: '154-2026' } },
   { adapter: espn.WTA.rankingWeek, params: { season: 2012, week: 10 } },
+  { adapter: wtaHistory.playerMatches, params: { id: 320760, page: 0, pageSize: 5 } },
   { adapter: probe('espn.site.scoreboard', 'espn', 'https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard', ['schedule']) },
   { adapter: probe('atp.rankings.page', 'atp', 'https://www.atptour.com/en/rankings/singles', ['rankings_singles']) },
   { adapter: probe('itf.api.calendar', 'itf', 'https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=', ['calendar']) }
