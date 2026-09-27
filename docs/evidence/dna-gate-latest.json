@@ -1,0 +1,51 @@
+{
+  "checked_at": "2026-09-27T00:46:03.810Z",
+  "threshold": 30,
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "atp leaderboard gate matches the store",
+      "result": "PASS",
+      "db_as_of": "2026-09-27",
+      "db_qualified": 17,
+      "api_as_of": "2026-09-27",
+      "api_published": false,
+      "api_qualified": 17,
+      "threshold": 30
+    },
+    {
+      "name": "atp player comparative status matches the gate",
+      "result": "PASS",
+      "player": "alex-de-minaur",
+      "api": {
+        "published": false,
+        "qualified": 17,
+        "threshold": 30,
+        "as_of": "2026-09-27",
+        "status": "ATP comparative DNA is still building: 17 of 30 players currently meet the full comparative-DNA standard"
+      }
+    },
+    {
+      "name": "wta leaderboard gate matches the store",
+      "result": "PASS",
+      "db_as_of": "2026-09-27",
+      "db_qualified": 359,
+      "api_as_of": "2026-09-27",
+      "api_published": true,
+      "api_qualified": 321,
+      "threshold": 30
+    },
+    {
+      "name": "wta player comparative status matches the gate",
+      "result": "PASS",
+      "player": "gabriela-knutson",
+      "api": {
+        "published": true,
+        "qualified": 359,
+        "threshold": 30,
+        "as_of": "2026-09-27",
+        "status": "WTA comparative DNA is published"
+      }
+    }
+  ]
+}

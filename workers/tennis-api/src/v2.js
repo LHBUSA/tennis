@@ -31,19 +31,23 @@ async function playerBySlug(store, slug) {
   return (await store.select('tennis_players', `select=pbe_player_id,slug,full_name,first_name,last_name,gender,dob,nationality,plays,height_cm,updated_at,${MEDIA}&${col}=eq.${slug}`))[0] || null;
 }
 
-async function latestAsOf(store) {
-  return (await store.select('tennis_dna_snapshots', 'select=as_of&order=as_of.desc&limit=1'))[0]?.as_of || null;
+/** Latest DNA snapshot date for ONE tour. Tours are never coupled: a newer WTA build must not move the ATP gate
+ *  (or the reverse) onto a date where that tour has no complete snapshot. */
+export async function latestAsOfForGender(store, gender) {
+  return (await store.select('tennis_dna_snapshots', `select=as_of,tennis_players!inner(gender)&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=as_of.desc&limit=1`))[0]?.as_of || null;
 }
 
 const TOUR_OF = { F: 'WTA', M: 'ATP' };
 /** A tour's Tennis DNA is published only once its population is meaningful (owner rule 2026-09-26). */
 export const DNA_MIN_QUALIFIED = 30;
+/** Level-3 gate, evaluated live on every request from the tour's own latest snapshot: it opens at
+ *  DNA_MIN_QUALIFIED and closes again if a newer legitimate snapshot drops below it (fails closed). */
 export async function tourDnaStatus(store, gender) {
-  const asOf = await latestAsOf(store);
+  const asOf = await latestAsOfForGender(store, gender);
   if (!asOf) return { ready: false, qualified: 0, as_of: null };
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.all&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}`);
   const qualified = rows.filter((r) => ['medium', 'high'].includes(r.metrics?.service_points_won?.confidence)).length;
-  return { ready: qualified >= DNA_MIN_QUALIFIED, qualified, as_of: asOf, threshold: DNA_MIN_QUALIFIED };
+  return { ready: qualified >= DNA_MIN_QUALIFIED, qualified, as_of: asOf, threshold: DNA_MIN_QUALIFIED, tour: TOUR_OF[gender === 'M' ? 'M' : 'F'] };
 }
 /** Population for percentiles: same as_of + surface + TOUR (ATP and WTA are never pooled), confidence medium/high. */
 async function population(store, asOf, surface, gender) {
@@ -98,7 +102,7 @@ export async function dnaWithPercentiles(store, pid, surface = 'all') {
   return {
     as_of: snap.as_of, surface, definition_version: snap.definition_version, metrics: snap.metrics, dimensions: dims, population_players: players, matches_considered: snap.provenance?.matches_considered ?? null, tour,
     percentile_basis: `${tour} singles players with a stored v${snap.definition_version} snapshot on ${snap.as_of} (${surface}) whose metric confidence is medium or high (a percentile needs at least 10 such peers)`,
-    comparative: { published: gate.ready, qualified: gate.qualified, threshold: gate.threshold, status: gate.ready ? `${tour} comparative DNA is published` : `${tour} comparative DNA is still building: ${gate.qualified} of ${gate.threshold} players currently meet the full comparative-DNA standard` }
+    comparative: { published: gate.ready, qualified: gate.qualified, threshold: gate.threshold, as_of: gate.as_of, status: gate.ready ? `${tour} comparative DNA is published` : `${tour} comparative DNA is still building: ${gate.qualified} of ${gate.threshold} players currently meet the full comparative-DNA standard` }
   };
 }
 
@@ -202,10 +206,10 @@ async function dnaLeaders(store, url) {
   const metric = url.searchParams.get('metric') || 'hold_rate';
   if (!DEFINITIONS[metric]) return envelope(null, { freshness: 'ERROR', semantics: 'unknown metric' });
   const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
-  const asOf = await latestAsOf(store);
-  if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
   const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
   const gate = await tourDnaStatus(store, tour === 'atp' ? 'M' : 'F');
+  const asOf = gate.as_of;
+  if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
   if (!gate.ready) return ok({ metric, tour, published: false, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: gate.qualified, threshold: gate.threshold, rows: [] }, { rows: [], source: ['pbe_derived'], updated: `${asOf}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: `${tour.toUpperCase()} Tennis DNA is not published until ${gate.threshold} players have a medium-confidence sample (currently ${gate.qualified})` });
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}`);
   const list = rows.map((r) => ({ player: shapePlayer(r.tennis_players), m: r.metrics?.[metric] })).filter((x) => x.m && x.m.value != null && ['medium', 'high'].includes(x.m.confidence));
