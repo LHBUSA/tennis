@@ -1,0 +1,1 @@
+{"$ref":"http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168603/status?lang=en&region=us","period":1,"type":{"id":"40","name":"STATUS_WALKOVER","state":"post","completed":true,"description":"Walkover","detail":"Walkover","shortDetail":"Walkover"}}

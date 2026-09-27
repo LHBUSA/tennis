@@ -1,0 +1,76 @@
+{
+ "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/8136?lang=en&region=us",
+ "id": "8136",
+ "uid": "s:850~a:8136",
+ "type": "tennis",
+ "guid": "078901d5-6763-322b-b800-25a53bc98249",
+ "firstName": "Titouan",
+ "lastName": "Droguet",
+ "fullName": "Titouan Droguet",
+ "displayName": "Titouan Droguet",
+ "shortName": "T. Droguet",
+ "weight": 176,
+ "displayWeight": "176 lbs",
+ "height": 75,
+ "displayHeight": "6' 3\"",
+ "age": 25,
+ "dateOfBirth": "2001-06-15T07:00Z",
+ "debutYear": 2018,
+ "birthPlace": {
+  "summary": "Villeneuve saint Georges"
+ },
+ "citizenshipCountry": {
+  "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/all/countries/156?lang=en&region=us",
+  "id": "156",
+  "slug": "france",
+  "alternateId": "156",
+  "name": "France",
+  "abbreviation": "FRA",
+  "flag": {
+   "href": "https://a.espncdn.com/i/teamlogos/countries/500/fra.png",
+   "alt": "France",
+   "rel": [
+    "country-flag"
+   ]
+  },
+  "athletes": {
+   "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/all/countries/156/athletes?lang=en&region=us"
+  }
+ },
+ "slug": "titouan-droguet",
+ "hand": {
+  "type": "RIGHT",
+  "abbreviation": "R",
+  "displayValue": "Right"
+ },
+ "flag": {
+  "href": "https://a.espncdn.com/i/teamlogos/countries/500/fra.png",
+  "alt": "France",
+  "rel": [
+   "country-flag"
+  ]
+ },
+ "linked": true,
+ "statistics": {
+  "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2026/types/2/athletes/8136/statistics?lang=en&region=us"
+ },
+ "experience": {
+  "years": 8
+ },
+ "active": true,
+ "eventLog": {
+  "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2026/athletes/8136/eventlog?lang=en&region=us"
+ },
+ "status": {
+  "id": "1",
+  "name": "Active",
+  "type": "active",
+  "abbreviation": "Active"
+ },
+ "competitions": {
+  "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/8136/competitions?lang=en&region=us"
+ },
+ "ranks": {
+  "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2026/players/8136/ranks?lang=en&region=us"
+ }
+}

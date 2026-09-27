@@ -22,6 +22,8 @@ export const other = (side) => (side === 'A' ? 'B' : 'A');
 export const FORMATS = Object.freeze({
   // ATP/WTA tour singles.
   BO3_TB7: fmt({ best_of: 3, final_set: { mode: 'tiebreak', tiebreak_to: 7 } }),
+  // Best of five with a tiebreak at 6-6 in every set (US Open to 2021; ATP best-of-five finals).
+  BO5_TB7: fmt({ best_of: 5, final_set: { mode: 'tiebreak', tiebreak_to: 7 } }),
   // Grand Slam singles since 2022: 10-point tiebreak at 6-6 in the deciding set.
   BO5_FINAL_TB10: fmt({ best_of: 5, final_set: { mode: 'tiebreak', tiebreak_to: 10 } }),
   BO3_FINAL_TB10: fmt({ best_of: 3, final_set: { mode: 'tiebreak', tiebreak_to: 10 } }),

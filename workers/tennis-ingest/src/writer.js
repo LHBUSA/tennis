@@ -70,7 +70,7 @@ async function ensurePlayersFromIdentities(store, identities) {
     });
     const [p, e] = splitExt(i.external);
     ext.push({ provider: p, external_id: e, pbe_player_id: i.pbe_player_id, method: 'founding', evidence: [i.external] });
-    if (m.provider !== p) ext.push({ provider: m.provider, external_id: String(m.provider_id), pbe_player_id: i.pbe_player_id, method: m.tour_id_evidence ? 'name_dob' : 'external_id', evidence: [m.tour_id_evidence || `${m.provider}:${m.provider_id} embeds ${i.external}`] });
+    if (m.provider !== p) ext.push({ provider: m.provider, external_id: String(m.provider_id), pbe_player_id: i.pbe_player_id, method: m.tour_id_method || (m.tour_id_evidence ? 'name_dob' : 'external_id'), evidence: [m.tour_id_evidence || `${m.provider}:${m.provider_id} embeds ${i.external}`] });
   }
   await store.upsert('tennis_players', [...rows.values()], { onConflict: 'pbe_player_id', ignore: true });
   const dedup = [...new Map(ext.map((x) => [`${x.provider}:${x.external_id}`, x])).values()];
@@ -147,8 +147,8 @@ const dedupe = (rows, k) => [...new Map(rows.map((r) => [k(r), r])).values()];
  * sourceMatches: provider-neutral SourceMatch records for ONE edition.
  * edition: { edition_id, surface, indoor }.
  */
-export async function writeMatches(store, sourceMatches, edition, { captureId = null } = {}) {
-  const result = { written: 0, held: 0, changes: 0, skipped: 0 };
+export async function writeMatches(store, sourceMatches, edition, { captureId = null, dedupe: sourceDedupe = false } = {}) {
+  const result = { written: 0, held: 0, changes: 0, skipped: 0, attached: 0, taken_over: 0, duplicate_candidates: 0 };
   const normalized = [];
   const holds = [];
   for (const sm of sourceMatches) {
@@ -158,6 +158,22 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     const n = await normalizeMatch(sm);
     if (!n.canonical) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: n.problems, payload: slim(sm), capture_id: captureId }); continue; }
     normalized.push({ sm, n, id: await matchId(sm.provider, sm.provider_match_id) });
+  }
+  let attach = [];
+  if (sourceDedupe && normalized.length) {
+    const cs = await crossSource(store, edition.edition_id, normalized, holds, captureId);
+    normalized.splice(0, normalized.length, ...cs.write);
+    attach = cs.attach;
+    result.duplicate_candidates = cs.duplicates;
+    result.taken_over = cs.write.filter((x) => x.takeover).length;
+    // a takeover may orient sides differently: the owner's participant rows are replaced, not merged
+    for (const x of cs.write.filter((w) => w.takeover)) await store.del('tennis_match_participants', `match_id=eq.${x.id}`);
+  }
+  if (attach.length) {
+    // the same real-world match already owned by a higher-precedence source: link the external id only
+    await ensurePlayersFromIdentities(store, attach.flatMap((x) => x.n.identities));
+    await store.upsert('tennis_match_external_ids', attach.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
+    result.attached = attach.length;
   }
   if (normalized.length) {
     const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
@@ -230,15 +246,107 @@ export async function writeMatches(store, sourceMatches, edition, { captureId = 
     result.written = keep.length;
     result.changes = changes.length;
     // a later clean observation resolves an earlier hold for the same source row
-    const resolvedIds = keep.map((x) => x.sm.provider_match_id);
+    const resolvedIds = [...keep, ...attach].map((x) => x.sm.provider_match_id);
     for (let i = 0; i < resolvedIds.length; i += 150) {
       const part = resolvedIds.slice(i, i + 150);
       await store.req('PATCH', `tennis_ingest_holds?entity_type=eq.match&provider=eq.${keep[0].sm.provider}&resolved_at=is.null&external_id=${inList(part)}`, { body: { resolved_at: now() } });
     }
+  } else if (attach.length) {
+    const ids = attach.map((x) => x.sm.provider_match_id);
+    for (let i = 0; i < ids.length; i += 150) await store.req('PATCH', `tennis_ingest_holds?entity_type=eq.match&provider=eq.${attach[0].sm.provider}&resolved_at=is.null&external_id=${inList(ids.slice(i, i + 150))}`, { body: { resolved_at: now() } });
   }
   await hold(store, dedupe(holds, (h) => `${h.provider}:${h.external_id}`));
   result.held = holds.length;
   return result;
+}
+
+// ---- cross-source duplicate prevention -------------------------------------------------------------------
+// One real-world match = one canonical row, whichever sources report it. Identity of a match inside an
+// edition: event type + stage (main / qualifying / round robin) + the two participant keys (a pair meets at
+// most once per stage of one event). Official feeds outrank secondary ones (espn): a secondary row that finds
+// an official row attaches its external id only (a result disagreement is recorded for review, the owner's
+// row stands); an official row that finds a secondary-owned row takes it over (same match_id, official
+// fields). Several candidates, a same-source collision or a round conflict is held — never merged.
+export const SOURCE_PRIORITY = Object.freeze({ espn: 1 });
+export const sourcePriority = (p) => SOURCE_PRIORITY[p] ?? 2;
+const stageOfRound = (round) => (round === 'RR' ? 'round_robin' : /^Q-/.test(String(round || '')) ? 'qualifying' : 'main');
+export function naturalKey(eventType, round, a, b) {
+  return `${eventType}|${stageOfRound(round)}|${[a, b].sort().join('~')}`;
+}
+const pairKey = (x) => naturalKey(x.n.match.event_type, x.n.match.round_code, x.n.match.participants.A, x.n.match.participants.B);
+
+/** Winner-oriented games ("6-4 3-6 7-6 RET") from a stored A/B score text: orientation-free comparison. */
+export function winnerGames(scoreText, winnerSide) {
+  if (!scoreText) return null;
+  const sets = [...String(scoreText).matchAll(/\[?(\d+)-(\d+)\]?/g)].map((m) => [Number(m[1]), Number(m[2])]);
+  const tail = /\b(RET|W\/O|DEF|ABD)\b/.exec(scoreText)?.[1] || '';
+  return [...sets.map(([a, b]) => (winnerSide === 'B' ? `${b}-${a}` : `${a}-${b}`)), tail].filter(Boolean).join(' ');
+}
+
+async function selectAll(store, table, query, page = 1000) {
+  const out = [];
+  for (let off = 0; ; off += page) {
+    const rows = await store.select(table, `${query}&limit=${page}&offset=${off}`);
+    out.push(...rows);
+    if (rows.length < page) return out;
+  }
+}
+
+async function crossSource(store, editionId, normalized, holds, captureId) {
+  const provider = normalized[0].sm.provider;
+  const existing = await selectAll(store, 'tennis_matches', `select=match_id,event_type,round,status,score_text,winner_side,source_family&edition_id=eq.${editionId}&order=match_id.asc`);
+  const byId = new Map(existing.map((m) => [m.match_id, { ...m, parts: {} }]));
+  const ids = [...byId.keys()];
+  for (let i = 0; i < ids.length; i += 150) {
+    for (const p of await store.select('tennis_match_participants', `select=match_id,side,participant_key&match_id=${inList(ids.slice(i, i + 150))}`)) if (byId.has(p.match_id)) byId.get(p.match_id).parts[p.side] = p.participant_key;
+  }
+  const byKey = new Map();
+  for (const m of byId.values()) {
+    if (!m.parts.A || !m.parts.B) continue;
+    const k = naturalKey(m.event_type, m.round, m.parts.A, m.parts.B);
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(m);
+  }
+  const extMap = new Map();
+  const pm = normalized.map((x) => x.sm.provider_match_id);
+  for (let i = 0; i < pm.length; i += 150) for (const r of await store.select('tennis_match_external_ids', `select=external_id,match_id&provider=eq.${provider}&external_id=${inList(pm.slice(i, i + 150))}`)) extMap.set(r.external_id, r.match_id);
+  const write = [];
+  const attach = [];
+  const seen = new Set();
+  let duplicates = 0;
+  const dup = (x, problem) => { duplicates += 1; holds.push({ provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [problem], payload: slim(x.sm), capture_id: captureId }); };
+  for (const x of normalized) {
+    const key = pairKey(x);
+    if (seen.has(key)) { dup(x, 'duplicate_candidate:twice_in_one_payload'); continue; }
+    seen.add(key);
+    // 1. this external id is already linked (idempotent re-ingest, including earlier attachments)
+    let target = extMap.get(x.sm.provider_match_id) || (byId.has(x.id) ? x.id : null);
+    // 2. the same match from another source, by natural key
+    if (!target) {
+      const cands = (byKey.get(key) || []).filter((c) => c.match_id !== x.id);
+      if (cands.length > 1) { dup(x, `duplicate_candidate:${cands.length}_existing_rows`); continue; }
+      if (cands.length === 1) {
+        const c = cands[0];
+        if (c.source_family === provider) { dup(x, `duplicate_candidate:same_source_other_id:${c.match_id}`); continue; }
+        if (c.round && c.round !== 'unknown' && x.n.match.round_code && c.round !== x.n.match.round_code) { dup(x, `duplicate_candidate:round_conflict:${c.source_family}=${c.round},${provider}=${x.n.match.round_code}:${c.match_id}`); continue; }
+        target = c.match_id;
+      }
+    }
+    if (!target) { write.push(x); continue; }
+    x.id = target;
+    const owner = byId.get(target);
+    if (!owner || owner.source_family === provider) { write.push(x); continue; }
+    if (sourcePriority(provider) > sourcePriority(owner.source_family)) { x.takeover = owner.source_family; write.push(x); continue; }
+    attach.push(x);
+    const ownWinner = owner.winner_side ? owner.parts[owner.winner_side] : null;
+    const ourWinner = x.n.match.winner_side ? x.n.match.participants[x.n.match.winner_side] : null;
+    const a = winnerGames(owner.score_text, owner.winner_side);
+    const b = winnerGames(x.n.match.score_text, x.n.match.winner_side);
+    if (ownWinner !== ourWinner || owner.status !== x.n.match.status || (a && b && a !== b)) {
+      holds.push({ provider, entity_type: 'cross_source', external_id: x.sm.provider_match_id, problems: [`cross_source_disagreement: ${owner.source_family} ${owner.status} ${a || '-'} vs ${provider} ${x.n.match.status} ${b || '-'}${ownWinner !== ourWinner ? ' (winner differs)' : ''}`], payload: { match_id: target, owner: owner.source_family }, capture_id: captureId });
+    }
+  }
+  return { write, attach, duplicates };
 }
 
 const prevSnapshot = (p) => snapshotOf({ status: p.status, live: p.live_state, sets: (p.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ games: { A: t.games_a, B: t.games_b }, tiebreak: t.tb_a == null ? null : { A: t.tb_a, B: t.tb_b }, is_match_tiebreak: t.is_match_tiebreak })) });

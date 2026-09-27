@@ -1,0 +1,74 @@
+{
+ "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2026/types/2/weeks/38/rankings/1?lang=en&region=us",
+ "id": "1",
+ "name": "ATP",
+ "shortName": "ATP",
+ "type": "atp",
+ "occurrence": {
+  "number": 38,
+  "type": "week",
+  "last": false,
+  "value": "38",
+  "displayValue": "Week 38"
+ },
+ "headline": "2026 ATP: Week 38",
+ "shortHeadline": "2026 ATP: Week 38",
+ "lastUpdated": "2026-09-17T07:00Z",
+ "ranks": [
+  {
+   "current": 1,
+   "previous": 1,
+   "points": 11500,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/3623?lang=en&region=us"
+   }
+  },
+  {
+   "current": 2,
+   "previous": 2,
+   "points": 9690,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/2375?lang=en&region=us"
+   }
+  },
+  {
+   "current": 3,
+   "previous": 3,
+   "points": 5560,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/3782?lang=en&region=us"
+   }
+  },
+  {
+   "current": 4,
+   "previous": 4,
+   "points": 4680,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/9250?lang=en&region=us"
+   }
+  },
+  {
+   "current": 5,
+   "previous": 5,
+   "points": 3890,
+   "trend": "-",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/3209?lang=en&region=us"
+   }
+  },
+  {
+   "current": 150,
+   "previous": 156,
+   "points": 371,
+   "trend": "+6",
+   "athlete": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/athletes/3449?lang=en&region=us"
+   }
+  }
+ ],
+ "availability": {}
+}

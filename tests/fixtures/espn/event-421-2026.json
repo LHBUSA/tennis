@@ -1,0 +1,264 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/421-2026",
+  "captured": "2026-09-27",
+  "trimmed": "4 of 142 competitions; links/refs removed"
+ },
+ "id": "421-2026",
+ "date": "2026-08-01T04:00Z",
+ "endDate": "2026-08-14T03:59Z",
+ "name": "National Bank Open presented by Rogers",
+ "shortName": "National Bank Open presented by Rogers",
+ "competitions": [
+  {
+   "id": "183332",
+   "date": "2026-08-01T14:40Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Toronto, Canada"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2278",
+     "type": "athlete",
+     "order": 1,
+     "name": "Marco Trungelliti",
+     "winner": false
+    },
+    {
+     "id": "3371",
+     "type": "athlete",
+     "order": 2,
+     "name": "Nicolas Mejia",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying Final - Court 9",
+     "text": "Nicolas Mejia (COL) bt Marco Trungelliti (ARG) 7-6 (7-5) 3-6 6-1"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/421-2026/competitions/183332/status?lang=en&region=us"
+   },
+   "tournamentId": 421,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 14,
+    "description": "Qualifying Final",
+    "abbreviation": "QUAL"
+   },
+   "court": {
+    "description": "Court 9"
+   }
+  },
+  {
+   "id": "181778",
+   "date": "2026-08-04T20:30Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Toronto, Canada"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2709",
+     "type": "athlete",
+     "order": 1,
+     "name": "Jaume Munar",
+     "winner": false
+    },
+    {
+     "id": "11757",
+     "type": "athlete",
+     "order": 2,
+     "name": "Alexander Blockx",
+     "winner": true,
+     "tournamentSeed": 27
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 2",
+     "text": "(27) Alexander Blockx (BEL) bt Jaume Munar (ESP) w/o"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/421-2026/competitions/181778/status?lang=en&region=us"
+   },
+   "tournamentId": 421,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 2,
+    "description": "Round 2",
+    "abbreviation": "2ND"
+   }
+  },
+  {
+   "id": "181857",
+   "date": "2026-08-06T17:50Z",
+   "type": {
+    "id": "3",
+    "text": "Men's Doubles",
+    "slug": "mens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Toronto, Canada"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2354-2624",
+     "type": "team",
+     "order": 1,
+     "name": "Lucas Miedler/Marc Polmans",
+     "winner": false
+    },
+    {
+     "id": "3719-2989",
+     "type": "team",
+     "order": 2,
+     "name": "Andre Goransson/Casper Ruud",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Court 5",
+     "text": "Andre Goransson (SWE) & Casper Ruud (NOR) bt Lucas Miedler (AUT) & Marc Polmans (AUS) 6-7 (5-7) 6-3 1-0 (10-2)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/421-2026/competitions/181857/status?lang=en&region=us"
+   },
+   "tournamentId": 421,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Court 5"
+   }
+  },
+  {
+   "id": "181845",
+   "date": "2026-08-14T00:10Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Toronto, Canada"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "9250",
+     "type": "athlete",
+     "order": 1,
+     "name": "Ben Shelton",
+     "winner": true,
+     "tournamentSeed": 5
+    },
+    {
+     "id": "3774",
+     "type": "athlete",
+     "order": 2,
+     "name": "Brandon Nakashima",
+     "winner": false,
+     "tournamentSeed": 28
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Center Court",
+     "text": "(5) Ben Shelton (USA) bt (28) Brandon Nakashima (USA) 6-3 7-6 (7-4)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/421-2026/competitions/181845/status?lang=en&region=us"
+   },
+   "tournamentId": 421,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Center Court"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Toronto",
+  "country": " Canada"
+ }
+}

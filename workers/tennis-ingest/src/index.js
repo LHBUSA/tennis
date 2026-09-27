@@ -17,11 +17,13 @@ import { storeFromEnv } from '../../shared/store/postgrest.js';
 import * as wta from '../../providers/wta.js';
 import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
+import * as espn from '../../providers/espn.js';
+import { espnAtpStep, espnRankingStep } from './espn-jobs.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
 const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
 const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
@@ -39,7 +41,9 @@ export function canaryPlan() {
     [wta.calendar, { from: day(-7), to: day(21) }],
     [slams.wimbledonDraw, { year: 2025, eventCode: 'MS' }],
     [slams.ausopenDay, { year: 2026, day: 1 }],
-    [open.wikidataCrosswalk, { limit: 5 }]
+    [open.wikidataCrosswalk, { limit: 5 }],
+    [espn.espnEvent, { id: '154-2026' }],
+    [espn.espnRankingWeek, { season: 2026, week: 38 }]
   ].map(([a, params]) => ({ ...a, request: () => a.request(params) }));
 }
 
@@ -56,7 +60,7 @@ async function step(ctx, name, fn) {
   }
 }
 
-export async function tick(env, { force = {} } = {}) {
+export async function tick(env, { force = {}, only = null, budget = null } = {}) {
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured', store: !!store, kv: !!kv };
@@ -65,14 +69,16 @@ export async function tick(env, { force = {} } = {}) {
   if (lock && Date.now() - Date.parse(lock) < 170 * 1000) return { ok: false, error: 'tick_in_progress', since: lock };
   await kv.put('tick:lock', new Date().toISOString(), { expirationTtl: 180 });
   try {
-    return await tickInner(env, store, kv, force);
+    return await tickInner(env, store, kv, force, { only, budget });
   } finally {
     await kv.delete('tick:lock');
   }
 }
 
-async function tickInner(env, store, kv, force) {
-  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 } } }), log: [], steps: [], upstream: 0 };
+async function tickInner(env, store, kv, force, { only = null, budget = null } = {}) {
+  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 } } }), log: [], steps: [], upstream: 0 };
+  // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
+  if (only) return laneOnly(ctx, only, budget);
   const started = new Date();
   const today = iso(started);
   const hour = 3600 * 1000;
@@ -176,6 +182,15 @@ async function tickInner(env, store, kv, force) {
         const r = await rolandGarrosStep(ctx);
         return { ok: !r.error, done: !!r.done, out: r };
       },
+      async espn_atp() {
+        // a block / transient failure throws -> this lane backs off alone; the cursor never skips an event
+        const r = await espnAtpStep(ctx, { budget: 20 });
+        return { ok: true, out: r };
+      },
+      async espn_rankings() {
+        const r = await espnRankingStep(ctx, { weeks: 8 });
+        return { ok: true, done: false, out: r };
+      },
       async wta_calendar() {
         let calKey = 'bf:cal';
         let cal = (await kv.get('bf:cal', 'json')) || { from: BACKFILL_FROM, done: false };
@@ -211,14 +226,14 @@ async function tickInner(env, store, kv, force) {
         return { ok: passed > 0 || !done.length, out: { editions: done, remaining: queue.length } };
       }
     };
-    const DECL = [['ao_current', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false]];
+    const DECL = [['ao_current', true], ['espn_atp', true], ['rank_history', false], ['wimbledon_archive', false], ['rolandgarros', false], ['wta_calendar', false], ['espn_rankings', false]];
     const states = Object.fromEntries(await Promise.all(DECL.map(async ([n]) => [n, (await kv.get(LANE_STATE_KEY(n), 'json')) || {}])));
     const rr = Number(await kv.get('lanes:rr')) || 0;
     const plan = planTick({ now: Date.now(), lanes: DECL.map(([name, priority]) => ({ name, priority, ...states[name] })), rr });
     await kv.put('lanes:rr', String(plan.rr));
     const out = {};
     for (const name of plan.run) {
-      if (name !== 'ao_current' && ctx.upstream >= UPSTREAM_BUDGET) { out[name] = 'budget_spent'; continue; }
+      if (!['ao_current', 'espn_atp'].includes(name) && ctx.upstream >= UPSTREAM_BUDGET) { out[name] = 'budget_spent'; continue; }
       let r;
       try { r = await LANES[name](); } catch (e) { r = { ok: false, out: { error: String(e?.message || e).slice(0, 200) } }; }
       await kv.put(LANE_STATE_KEY(name), JSON.stringify(afterRun(states[name], { ok: r.ok, done: r.done, now: Date.now() })));
@@ -266,6 +281,19 @@ async function tickInner(env, store, kv, force) {
   return summary;
 }
 
+/** Run ONE ESPN lane with an explicit request budget (POST /v1/runs?lane=espn_atp&budget=N). Same code,
+ *  same lane state + backoff as the cron; used to accelerate a backfill without widening every tick. */
+async function laneOnly(ctx, lane, budget) {
+  const b = Math.max(1, Math.min(Number(budget) || 20, 120));
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }) };
+  if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
+  const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
+  let r;
+  try { r = { ok: true, out: await fns[lane]() }; } catch (e) { r = { ok: false, out: { error: String(e?.message || e).slice(0, 300) } }; }
+  await ctx.kv.put(LANE_STATE_KEY(lane), JSON.stringify(afterRun(state, { ok: r.ok, now: Date.now() })));
+  return { worker: 'tennis-ingest', version: VERSION, lane, budget: b, ok: r.ok, upstream_requests: ctx.upstream, store_requests: ctx.store.requests, client: ctx.client.stats, result: r.out, runs: ctx.log.slice(-80) };
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -275,8 +303,9 @@ export default {
     }
     if (path === '/v1/runs' && request.method === 'GET') {
       if (!env.TENNIS_STATE) return json({ ok: false, error: 'not_configured' }, { status: 503 });
-      const [last, bfCal, bfEvents, bfRank, active] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active'].map((k) => env.TENNIS_STATE.get(k, 'json')));
-      return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
+      const [last, bfCal, bfEvents, bfRank, active, bfEspn, bfEspnRank, laneEspn] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active', 'bf:espn', 'bf:espnrank', 'lane:espn_atp'].map((k) => env.TENNIS_STATE.get(k, 'json')));
+      const espnState = bfEspn ? { history_year: bfEspn.year, history_queue: bfEspn.queue ? bfEspn.queue.length : null, current_listed_at: bfEspn.cur?.listed_at, current_queue: bfEspn.cur?.queue?.length ?? 0, current_done: bfEspn.cur?.done?.length ?? 0, lane: laneEspn } : null;
+      return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank, espn_atp: espnState, espn_rankings: bfEspnRank ? { current: `${bfEspnRank.season} w${bfEspnRank.week}`, history: bfEspnRank.hist, relinked: bfEspnRank.relinked } : null }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
     }
     // admin: store an approved, pipeline-generated player-media derivative (scripts/media/photos.mjs)
     if (path === '/v1/media' && request.method === 'PUT') {
@@ -294,7 +323,7 @@ export default {
     if (path === '/v1/probe' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      const PROBES = { usopen_robots: 'https://www.usopen.org/robots.txt', usopen_ms_2025: 'https://www.usopen.org/en_US/scores/feeds/2025/draws/MS.json', usopen_home: 'https://www.usopen.org/' };
+      const PROBES = { espn_core_event: 'https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026', espn_site_scoreboard: 'https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard', usopen_robots: 'https://www.usopen.org/robots.txt', usopen_ms_2025: 'https://www.usopen.org/en_US/scores/feeds/2025/draws/MS.json', usopen_home: 'https://www.usopen.org/' };
       const target = PROBES[url.searchParams.get('target')];
       if (!target) return json({ ok: false, error: 'unknown target', targets: Object.keys(PROBES) }, { status: 400 });
       const t0 = Date.now();
@@ -311,7 +340,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget') }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },

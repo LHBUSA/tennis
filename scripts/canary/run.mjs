@@ -19,6 +19,7 @@ import * as wta from '../../workers/providers/wta.js';
 import * as slams from '../../workers/providers/slams.js';
 import * as open from '../../workers/providers/open.js';
 import * as rg from '../../workers/providers/rolandgarros.js';
+import * as espn from '../../workers/providers/espn.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
@@ -33,6 +34,7 @@ const probe = (key, family, url, capabilities) => ({
 // Roland-Garros: the canary counts parsed matches (not payloads), for every edition the lane claims. The
 // current edition keeps the bare registry key; earlier years are suffixed @year.
 const rgMatches = { ...rg.rgResults, parse: (body) => rg.rgResults.parse(body).flatMap((j) => (j.tournamentEvent?.roundResults || []).flatMap((r) => r.matches || [])) };
+const espnResults = { ...espn.espnEvent, parse: (body) => espn.parseEspnEvent(JSON.parse(body), {}).matches.filter((m) => m.warnings.every((w) => !/names_disagree|unparseable|winner_flag/.test(w))) };
 const RG_YEARS = [2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
 export const CANARIES = [
@@ -48,13 +50,21 @@ export const CANARIES = [
   { adapter: open.commonsLicense, params: { file: 'Andre Agassi (2011).jpg' } },
   { adapter: open.protennisliveDraw, params: { year: 2026, tournamentId: 7581 } },
   ...RG_YEARS.map((year) => ({ adapter: rgMatches, key: year === 2026 ? 'rolandgarros.results' : `rolandgarros.results@${year}`, params: { year, event: 'SM' } })),
+  // ESPN ATP (secondary, lane espn_atp): the event canary counts RESULT rows the parser accepts, not payloads.
+  { adapter: espnResults, key: 'espn.atp.event', params: { id: '154-2026' } },
+  { adapter: espnResults, key: 'espn.atp.event@2008', params: { id: '154-2008' } },
+  { adapter: espn.espnSeasonEvents, params: { year: 2026 } },
+  { adapter: espn.espnAthlete, params: { id: '3623' } },
+  { adapter: espn.espnRankingWeek, params: { season: 2026, week: 38 } },
+  { adapter: espn.espnRankingWeek, key: 'espn.atp.rankings@2010', params: { season: 2010, week: 10 } },
+  { adapter: probe('espn.site.scoreboard', 'espn', 'https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard', ['schedule']) },
   { adapter: probe('atp.rankings.page', 'atp', 'https://www.atptour.com/en/rankings/singles', ['rankings_singles']) },
   { adapter: probe('itf.api.calendar', 'itf', 'https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=', ['calendar']) }
 ];
 
 async function main() {
   const filter = process.argv[2] || '';
-  const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 } } });
+  const client = new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, 'query.wikidata.org': { min_interval_ms: 2000 }, 'www.atptour.com': { retries: 0 }, 'www.itftennis.com': { retries: 0 }, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'site.api.espn.com': { retries: 0 } } });
   const runAt = new Date().toISOString();
   const results = [];
   for (const { adapter, params = {}, key = adapter.key } of CANARIES.filter((c) => (c.key || c.adapter.key).startsWith(filter))) {

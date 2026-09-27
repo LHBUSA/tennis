@@ -1,0 +1,87 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2021",
+  "captured": "2026-09-27",
+  "trimmed": "1 of 232 competitions; links/refs removed"
+ },
+ "id": "154-2021",
+ "date": "2021-01-10T05:00Z",
+ "endDate": "2021-02-22T04:59Z",
+ "name": "Australian Open",
+ "shortName": "Australian Open",
+ "competitions": [
+  {
+   "id": "106430",
+   "date": "2021-02-12T02:30Z",
+   "type": {
+    "id": "6",
+    "text": "Mixed Doubles",
+    "slug": "mixed-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2167-1963",
+     "type": "team",
+     "order": 1,
+     "name": "Hao-Ching Chan/Juan Sebastian Cabal",
+     "winner": false
+    },
+    {
+     "id": "3625-3335",
+     "type": "team",
+     "order": 2,
+     "name": "Desirae Krawczyk/Joe Salisbury",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Court 7",
+     "text": "Desirae Krawczyk (USA) & Joe Salisbury (Gbr) bt Hao-Ching Chan (Tpe) & Juan Sebastian Cabal (Col) 6-4 3-6 1-0 (10-7)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2021/competitions/106430/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Court 7"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Melbourne",
+  "country": " Australia"
+ }
+}

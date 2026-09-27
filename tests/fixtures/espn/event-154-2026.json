@@ -1,0 +1,444 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026",
+  "captured": "2026-09-27",
+  "trimmed": "7 of 333 competitions; links/refs removed"
+ },
+ "id": "154-2026",
+ "date": "2026-01-11T05:00Z",
+ "endDate": "2026-02-02T04:59Z",
+ "name": "Australian Open",
+ "shortName": "Australian Open",
+ "competitions": [
+  {
+   "id": "171004",
+   "date": "2026-01-11T23:05Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "8136",
+     "type": "athlete",
+     "order": 1,
+     "name": "Titouan Droguet",
+     "winner": true
+    },
+    {
+     "id": "2377",
+     "type": "athlete",
+     "order": 2,
+     "name": "Nicolas Jarry",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying 1st Round - ANZ Arena",
+     "text": "Titouan Droguet (FRA) bt Nicolas Jarry (CHI) 6-4 6-3"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/171004/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 11,
+    "description": "Qualifying 1st Round",
+    "abbreviation": "Q1ST"
+   },
+   "court": {
+    "description": "ANZ Arena"
+   }
+  },
+  {
+   "id": "171030",
+   "date": "2026-01-12T05:15Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "1769",
+     "type": "athlete",
+     "order": 1,
+     "name": "Dusan Lajovic",
+     "winner": true
+    },
+    {
+     "id": "3694",
+     "type": "athlete",
+     "order": 2,
+     "name": "Facundo Diaz Acosta",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying 1st Round - Court 13",
+     "text": "Dusan Lajovic (SER) bt Facundo Diaz Acosta (ARG) 7-6 (7-3) 5-7 7-6 (10-3)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/171030/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 11,
+    "description": "Qualifying 1st Round",
+    "abbreviation": "Q1ST"
+   },
+   "court": {
+    "description": "Court 13"
+   }
+  },
+  {
+   "id": "168492",
+   "date": "2026-01-19T00:10Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "4115",
+     "type": "athlete",
+     "order": 1,
+     "name": "Nuno Borges",
+     "winner": true
+    },
+    {
+     "id": "3209",
+     "type": "athlete",
+     "order": 2,
+     "name": "Felix Auger-Aliassime",
+     "winner": false,
+     "tournamentSeed": 7
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - John Cain Arena",
+     "text": "Nuno Borges (POR) bt (7) Felix Auger-Aliassime (CAN) 3-6 6-4 6-4 0-0 ret"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168492/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "John Cain Arena"
+   }
+  },
+  {
+   "id": "168603",
+   "date": "2026-01-26T09:30Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "10319",
+     "type": "athlete",
+     "order": 1,
+     "name": "Jakub Mensik",
+     "winner": false,
+     "tournamentSeed": 16
+    },
+    {
+     "id": "296",
+     "type": "athlete",
+     "order": 2,
+     "name": "Novak Djokovic",
+     "winner": true,
+     "tournamentSeed": 4
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 4",
+     "text": "(4) Novak Djokovic (SER) bt (16) Jakub Mensik (CZE) "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168603/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 4,
+    "description": "Round 4",
+    "abbreviation": "4TH"
+   }
+  },
+  {
+   "id": "168697",
+   "date": "2026-01-30T01:05Z",
+   "type": {
+    "id": "6",
+    "text": "Mixed Doubles",
+    "slug": "mixed-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "8104-2319",
+     "type": "team",
+     "order": 1,
+     "name": "Olivia Gadecki/John Peers",
+     "winner": true
+    },
+    {
+     "id": "1273-3735",
+     "type": "team",
+     "order": 2,
+     "name": "Kristina Mladenovic/Manuel Guinard",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Rod Laver Arena",
+     "text": "Olivia Gadecki (AUS) & John Peers (AUS) bt Kristina Mladenovic (FRA) & Manuel Guinard (FRA) 4-6 6-3 1-0 (10-8)"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168697/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Rod Laver Arena"
+   }
+  },
+  {
+   "id": "168678",
+   "date": "2026-01-31T03:50Z",
+   "type": {
+    "id": "3",
+    "text": "Men's Doubles",
+    "slug": "mens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "1745-2624",
+     "type": "team",
+     "order": 1,
+     "name": "Jason Kubler/Marc Polmans",
+     "winner": false
+    },
+    {
+     "id": "2293-2699",
+     "type": "team",
+     "order": 2,
+     "name": "Christian Harrison/Neal Skupski",
+     "winner": true,
+     "tournamentSeed": 6
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Rod Laver Arena",
+     "text": "(6) Christian Harrison (USA) & Neal Skupski (GBR) bt Jason Kubler (AUS) & Marc Polmans (AUS) 7-6 (7-4) 6-4"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168678/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Rod Laver Arena"
+   }
+  },
+  {
+   "id": "168571",
+   "date": "2026-02-01T08:45Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "3782",
+     "type": "athlete",
+     "order": 1,
+     "name": "Carlos Alcaraz",
+     "winner": true,
+     "tournamentSeed": 1
+    },
+    {
+     "id": "296",
+     "type": "athlete",
+     "order": 2,
+     "name": "Novak Djokovic",
+     "winner": false,
+     "tournamentSeed": 4
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Rod Laver Arena",
+     "text": "(1) Carlos Alcaraz (ESP) bt (4) Novak Djokovic (SER) 2-6 6-2 6-3 7-5"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026/competitions/168571/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Rod Laver Arena"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Melbourne",
+  "country": " Australia"
+ }
+}

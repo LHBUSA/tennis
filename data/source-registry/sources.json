@@ -1030,22 +1030,37 @@
     },
     {
       "key": "espn.tennis.core",
-      "family": "commercial",
-      "name": "ESPN tennis (core + site.web APIs, undocumented)",
-      "tier": "commercial",
-      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/{atp|wta}/events?dates={YYYY}",
+      "family": "espn",
+      "name": "ESPN tennis core API (sports.core.api.espn.com, undocumented)",
+      "tier": "secondary",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/{tid}-{YYYY}",
       "capabilities": [
-        "schedule",
+        "calendar",
+        "draws",
         "set_game_scoring",
+        "withdrawals_ret_wo",
+        "qualifying",
+        "doubles",
+        "mixed",
+        "history",
         "rankings_singles",
         "player_bio",
-        "history"
+        "player_identity"
       ],
-      "verdict": "COMMERCIAL_REFERENCE_ONLY",
+      "verdict": "PASS",
       "evidence": {
-        "audited": "2026-09-26",
-        "accessible": "core API + site.web.api 200; site.api.espn.com 403 (Akamai edge block, not bypassed); summary 400; match statistics 404; no point-by-point; no Challengers; competitions verified 2015+",
-        "crosscheck": "AO 2026 and Wimbledon 2025 men's finals identical to official Slam feeds"
+        "canary_key": "espn.atp.event",
+        "historical_canary_keys": [
+          "espn.atp.event@2008",
+          "espn.atp.rankings",
+          "espn.atp.rankings@2010",
+          "espn.atp.events",
+          "espn.athlete"
+        ],
+        "audited": "2026-09-27",
+        "file": "docs/evidence/espn-atp-discovery-latest.json",
+        "accessible": "core API 200 (events, competitions, status, linescores, athletes, weekly rankings); site.api.espn.com 403 (Akamai edge block, not bypassed); competitor statistics 404; no point-by-point; no Challengers; competitions 2007+ (2002-2006 editions empty)",
+        "crosscheck": "AO 2026: 333 ESPN competitions = 333 canonical official matches"
       },
       "robots": "espn.com robots.txt not readable for our UA (connection reset); core API /robots.txt 403",
       "terms": {
@@ -1053,11 +1068,15 @@
         "status": "RESTRICTED",
         "quote": "§2.B(viii) no commercial or business-related use without express written permission; §2.B(x) no robot/spider/script access, data mining or web scraping; §3.H no commercial use except as expressly licensed. Public developer API closed 2014-12-08; no licence path."
       },
-      "production_status": "INTERNAL REFERENCE / GAP-CHECKING ONLY (owner approved 2026-09-26): never canonical, never a production dependency, never republished, never customer-facing; skipped where an official source answers",
-      "notes": "Identity: ESPN athlete ids are internal ints; the CC0 path is Wikidata P11585 (ESPN tennis id) <-> P536 (ATP id), 1,317 players with both, usable without touching ESPN.",
-      "storage_policy": null,
+      "production_status": "SECONDARY INGESTION (lane espn_atp + espn_rankings) — owner decision 2026-09-27 supersedes the 2026-09-26 reference-only approval. Official sources keep precedence (an ESPN row attaches to, never overwrites, an official match; an official row takes over an ESPN row). Structured facts only; no editorial text stored. Terms remain RESTRICTED (quoted) — accepted by the owner.",
+      "notes": "Identity: ESPN athlete ids -> tour ids via the PBE crosswalk, Wikidata P11585 (ESPN tennis id) with P536/P597, or exact name + DOB unique; never name-only. No surface or tournament level in the payload (only Slams known). Rankings: weekly ATP singles top 100-150 with points and previous rank, dated by the source lastUpdated.",
+      "storage_policy": "raw payload content-addressed in R2 (family espn); normalized rows in Supabase with source_family espn",
       "attribution": null,
-      "native_ids": null
+      "native_ids": {
+        "player": "ESPN athlete integer (e.g. 3623)",
+        "event": "{tournamentId}-{year} (e.g. 154-2026)",
+        "match": "{event}:{competitionId}"
+      }
     },
     {
       "key": "wimbledon.archive",

@@ -1,0 +1,207 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/20-2015",
+  "captured": "2026-09-27",
+  "trimmed": "3 of 27 competitions; links/refs removed"
+ },
+ "id": "20-2015",
+ "date": "2015-01-05T05:00Z",
+ "endDate": "2015-01-12T04:59Z",
+ "name": "ATP Aircel Chennai Open",
+ "shortName": "ATP Aircel Chennai Open",
+ "competitions": [
+  {
+   "id": "57543",
+   "date": "2015-01-05T05:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chennai, India"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "1129",
+     "type": "athlete",
+     "order": 1,
+     "name": "Andreas Haider-Maurer",
+     "winner": true
+    },
+    {
+     "id": "698",
+     "type": "athlete",
+     "order": 2,
+     "name": "Marcel Granollers",
+     "winner": false,
+     "tournamentSeed": 7
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Court 1",
+     "text": "Andreas Haider-Maurer (Aut) bt (7) Marcel Granollers (Spa) 3-6 7-6 (8-6) 2-0 ret"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/20-2015/competitions/57543/status?lang=en&region=us"
+   },
+   "tournamentId": 20,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Court 1"
+   }
+  },
+  {
+   "id": "57537",
+   "date": "2015-01-05T05:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chennai, India"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2202",
+     "type": "athlete",
+     "order": 1,
+     "name": "Borna Coric",
+     "winner": true
+    },
+    {
+     "id": "650",
+     "type": "athlete",
+     "order": 2,
+     "name": "Robin Haase",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Stadium",
+     "text": "Borna Coric (Cro) bt Robin Haase (Ned) 6-2 6-2 "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/20-2015/competitions/57537/status?lang=en&region=us"
+   },
+   "tournamentId": 20,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Stadium"
+   }
+  },
+  {
+   "id": "57539",
+   "date": "2015-01-05T11:30Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chennai, India"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "720",
+     "type": "athlete",
+     "order": 1,
+     "name": "Edouard Roger-Vasselin",
+     "winner": false
+    },
+    {
+     "id": "294",
+     "type": "athlete",
+     "order": 2,
+     "name": "Gilles Muller",
+     "winner": true,
+     "tournamentSeed": 8
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Stadium",
+     "text": "(8) Gilles Muller (Lux) bt Edouard Roger-Vasselin (Fra) 6-7 (11-13) 6-1 7-6 (7-3) "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/20-2015/competitions/57539/status?lang=en&region=us"
+   },
+   "tournamentId": 20,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Stadium"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Chennai",
+  "country": " India"
+ }
+}

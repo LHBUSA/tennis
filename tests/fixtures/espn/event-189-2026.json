@@ -1,0 +1,204 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/189-2026",
+  "captured": "2026-09-27",
+  "trimmed": "3 of 323 competitions; links/refs removed"
+ },
+ "id": "189-2026",
+ "date": "2026-08-24T04:00Z",
+ "endDate": "2026-09-14T03:59Z",
+ "name": "US Open",
+ "shortName": "US Open",
+ "competitions": [
+  {
+   "id": "184825",
+   "date": "2026-08-24T15:15Z",
+   "type": {
+    "id": "6",
+    "text": "Mixed Doubles",
+    "slug": "mixed-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "New York, USA"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2204-3064",
+     "type": "team",
+     "order": 1,
+     "name": "Erin Routliffe/Lloyd Glasspool",
+     "winner": true
+    },
+    {
+     "id": "2732-2699",
+     "type": "team",
+     "order": 2,
+     "name": "Luisa Stefani/Neal Skupski",
+     "winner": false
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying 1st Round - Grandstand",
+     "text": "Erin Routliffe (NZL) & Lloyd Glasspool (GBR) bt Luisa Stefani (BRA) & Neal Skupski (GBR) 4-1 3-5 10-7"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/189-2026/competitions/184825/status?lang=en&region=us"
+   },
+   "tournamentId": 189,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 11,
+    "description": "Qualifying 1st Round",
+    "abbreviation": "Q1ST"
+   },
+   "court": {
+    "description": "Grandstand"
+   }
+  },
+  {
+   "id": "184769",
+   "date": "2026-08-27T16:30Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "New York, USA"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "4099",
+     "type": "athlete",
+     "order": 1,
+     "name": "Otto Virtanen",
+     "winner": false
+    },
+    {
+     "id": "1287",
+     "type": "athlete",
+     "order": 2,
+     "name": "Grigor Dimitrov",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying Final",
+     "text": "Grigor Dimitrov (BUL) bt Otto Virtanen (FIN) w/o"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/189-2026/competitions/184769/status?lang=en&region=us"
+   },
+   "tournamentId": 189,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 14,
+    "description": "Qualifying Final",
+    "abbreviation": "QUAL"
+   }
+  },
+  {
+   "id": "182677",
+   "date": "2026-09-13T18:15Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "New York, USA"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2375",
+     "type": "athlete",
+     "order": 1,
+     "name": "Alexander Zverev",
+     "winner": true,
+     "tournamentSeed": 1
+    },
+    {
+     "id": "9250",
+     "type": "athlete",
+     "order": 2,
+     "name": "Ben Shelton",
+     "winner": false,
+     "tournamentSeed": 8
+    }
+   ],
+   "notes": [
+    {
+     "type": "Final - Arthur Ashe Stadium",
+     "text": "(1) Alexander Zverev (GER) bt (8) Ben Shelton (USA) 6-3 7-6 (7-2) 5-7 6-2"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/189-2026/competitions/182677/status?lang=en&region=us"
+   },
+   "tournamentId": 189,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   },
+   "court": {
+    "description": "Arthur Ashe Stadium"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "New York",
+  "country": " USA"
+ }
+}

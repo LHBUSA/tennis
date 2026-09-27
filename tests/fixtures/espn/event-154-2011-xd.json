@@ -1,0 +1,87 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2011",
+  "captured": "2026-09-27",
+  "trimmed": "1 of 223 competitions; links/refs removed"
+ },
+ "id": "154-2011",
+ "date": "2011-01-17T05:00Z",
+ "endDate": "2011-01-31T04:59Z",
+ "name": "Australian Open",
+ "shortName": "Australian Open",
+ "competitions": [
+  {
+   "id": "30639",
+   "date": "2011-01-21T00:00Z",
+   "type": {
+    "id": "6",
+    "text": "Mixed Doubles",
+    "slug": "mixed-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Melbourne, Australia"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "387-281",
+     "type": "team",
+     "order": 1,
+     "name": "Alicia Molik/Peter Luczak",
+     "winner": false
+    },
+    {
+     "id": "507-599",
+     "type": "team",
+     "order": 2,
+     "name": "Chia-Jung Chuang/Dick Norman",
+     "winner": true
+    }
+   ],
+   "notes": [
+    {
+     "type": "Round 1 - Show Court 2",
+     "text": "Chia-Jung Chuang (Tpe) & Dick Norman (Bel) bt Alicia Molik (Aus) & Peter Luczak (Aus) 6-3 3-6 13-11 "
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2011/competitions/30639/status?lang=en&region=us"
+   },
+   "tournamentId": 154,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Show Court 2"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "3",
+   "name": "STATUS_FINAL",
+   "state": "post",
+   "completed": true,
+   "description": "Final"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Melbourne",
+  "country": " Australia"
+ }
+}

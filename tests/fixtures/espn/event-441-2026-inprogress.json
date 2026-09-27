@@ -1,0 +1,332 @@
+{
+ "_capture": {
+  "source": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026",
+  "captured": "2026-09-27",
+  "trimmed": "6 of 54 competitions; links/refs removed"
+ },
+ "id": "441-2026",
+ "date": "2026-09-22T04:00Z",
+ "endDate": "2026-09-30T03:59Z",
+ "name": "Chengdu Open",
+ "shortName": "Chengdu Open",
+ "competitions": [
+  {
+   "id": "183415",
+   "date": "2026-09-27T10:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2863",
+     "type": "athlete",
+     "order": 1,
+     "name": "Lloyd Harris"
+    },
+    {
+     "id": "2726",
+     "type": "athlete",
+     "order": 2,
+     "name": "Hubert Hurkacz",
+     "tournamentSeed": 5
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183415/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 5,
+    "description": "Quarterfinal",
+    "abbreviation": "QF"
+   },
+   "court": {
+    "description": "Center Court"
+   }
+  },
+  {
+   "id": "183436",
+   "date": "2026-09-28T07:00Z",
+   "type": {
+    "id": "3",
+    "text": "Men's Doubles",
+    "slug": "mens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "10882-1965",
+     "type": "team",
+     "order": 1,
+     "name": "Theo Arribage/Albano Olivetti",
+     "tournamentSeed": 1
+    },
+    {
+     "id": "3627-3719",
+     "type": "team",
+     "order": 2,
+     "name": "Robert Galloway/Andre Goransson",
+     "tournamentSeed": 4
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183436/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 6,
+    "description": "Semifinal",
+    "abbreviation": "SF"
+   },
+   "court": {
+    "description": "Center Court"
+   }
+  },
+  {
+   "id": "183421",
+   "date": "2026-09-28T09:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2498",
+     "type": "athlete",
+     "order": 1,
+     "name": "Nikoloz Basilashvili"
+    },
+    {
+     "id": "3212",
+     "type": "athlete",
+     "order": 2,
+     "name": "Alejandro Davidovich Fokina",
+     "tournamentSeed": 2
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183421/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 6,
+    "description": "Semifinal",
+    "abbreviation": "SF"
+   },
+   "court": {
+    "description": "Center Court"
+   }
+  },
+  {
+   "id": "183420",
+   "date": "2026-09-28T11:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2147483647",
+     "type": "athlete",
+     "order": 2,
+     "name": "TBD"
+    },
+    {
+     "id": "2147483647",
+     "type": "athlete",
+     "order": 2,
+     "name": "TBD"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183420/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 6,
+    "description": "Semifinal",
+    "abbreviation": "SF"
+   },
+   "court": {
+    "description": "Center Court"
+   }
+  },
+  {
+   "id": "183437",
+   "date": "2026-09-29T04:00Z",
+   "type": {
+    "id": "3",
+    "text": "Men's Doubles",
+    "slug": "mens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": false,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2147483647",
+     "type": "athlete",
+     "order": 2,
+     "name": "TBD"
+    },
+    {
+     "id": "11262",
+     "type": "athlete",
+     "order": 2,
+     "name": "Luke Johnson"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183437/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   }
+  },
+  {
+   "id": "183422",
+   "date": "2026-09-29T04:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": false,
+   "neutralSite": false,
+   "venue": {
+    "address": {
+     "summary": "Chengdu, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2147483647",
+     "type": "athlete",
+     "order": 2,
+     "name": "TBD"
+    },
+    {
+     "id": "2147483647",
+     "type": "athlete",
+     "order": 2,
+     "name": "TBD"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/441-2026/competitions/183422/status?lang=en&region=us"
+   },
+   "tournamentId": 441,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 7,
+    "description": "Final",
+    "abbreviation": "F"
+   }
+  }
+ ],
+ "status": {
+  "type": {
+   "id": "2",
+   "name": "STATUS_IN_PROGRESS",
+   "state": "in",
+   "completed": false,
+   "description": "In Progress"
+  }
+ },
+ "purse": 0,
+ "location": {
+  "city": "Chengdu",
+  "country": " China PR"
+ }
+}

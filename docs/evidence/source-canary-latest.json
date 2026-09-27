@@ -1,12 +1,12 @@
 {
-  "run_at": "2026-09-26T20:17:24.418Z",
+  "run_at": "2026-09-27T10:22:38.772Z",
   "runner": "scripts/canary/run.mjs (local workstation egress)",
   "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
   "client_stats": {
-    "requests": 22,
+    "requests": 7,
     "not_modified": 0,
-    "retries": 1,
-    "blocked": 2
+    "retries": 0,
+    "blocked": 1
   },
   "results": [
     {
@@ -337,6 +337,111 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 200 challenge_page https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=",
+      "drift": null
+    },
+    {
+      "key": "espn.atp.event",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2026",
+      "http_status": 200,
+      "bytes": 1238272,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "08b1acef4b44a261998df996533adac1b51f878999c1b094083c0c2c4e6a3faf",
+      "attempts": 1,
+      "latency_ms": 280,
+      "record_count": 333,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.atp.event@2008",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/154-2008",
+      "http_status": 200,
+      "bytes": 780834,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "63994589288be8be07e5e781a0997b4300b6dc19a258c71a855c0a1301a51d52",
+      "attempts": 1,
+      "latency_ms": 174,
+      "record_count": 209,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.atp.events",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events?dates=2026&limit=200&page=1",
+      "http_status": 200,
+      "bytes": 6409,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "0a5b4e6806efa4c7c6091fe1cdb21d5e6346ac8cac0e94ad4d70092d310aa5a4",
+      "attempts": 1,
+      "latency_ms": 48,
+      "record_count": 60,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.athlete",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/athletes/3623",
+      "http_status": 200,
+      "bytes": 4011,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "dbf5fca6a04c08d3e8a5d0e08a176be69ac2b6eca7fb1e9e639d30f35259d806",
+      "attempts": 1,
+      "latency_ms": 53,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.atp.rankings",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2026/types/2/weeks/38/rankings/1",
+      "http_status": 200,
+      "bytes": 25673,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "bc8cf87695be572447a9892a392b11540a9790c256a60a03a82bd474fdf0cae1",
+      "attempts": 1,
+      "latency_ms": 53,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.atp.rankings@2010",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2010/types/2/weeks/10/rankings/1",
+      "http_status": 200,
+      "bytes": 17394,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "d1d5fc19886fbf4a4e946b1efc3244f0856d9f35fafe0df8d1cd53cc179d01a4",
+      "attempts": 1,
+      "latency_ms": 57,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.site.scoreboard",
+      "family": "espn",
+      "state": "BLOCKED_BY_ACCESS_CONTROL",
+      "url": "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
+      "http_status": 403,
+      "bytes": null,
+      "content_type": null,
+      "sha256": null,
+      "attempts": null,
+      "latency_ms": null,
+      "record_count": null,
+      "error": "blocked 403 forbidden https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
       "drift": null
     }
   ]

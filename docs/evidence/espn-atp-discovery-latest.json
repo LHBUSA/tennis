@@ -1,0 +1,784 @@
+{
+  "generated_at": "2026-09-27T10:24:08.577Z",
+  "role": "SECONDARY INGESTION SOURCE (owner decision 2026-09-27). Discovery of the ESPN tennis core API graph from workstation egress; honest UA, >=1.1 s between requests, no retries through blocks.",
+  "user_agent": "PropBetEdge-Tennis-Reference/0.2 (+https://tennis.propbetedge.ai/sources)",
+  "rate_behavior": "~0.2-0.6 s per core request (1.8 s for a 0.8 MB Slam event); no 429 in ~250 requests at 1 req/s; no challenge pages on sports.core.api.espn.com",
+  "endpoints": [
+    {
+      "pattern": "/v2/sports/tennis/leagues",
+      "status": 200,
+      "fields": [
+        "items[$ref] atp, wta"
+      ]
+    },
+    {
+      "pattern": "/v2/sports/tennis/leagues/atp/seasons",
+      "status": 200,
+      "fields": [
+        "items 2002..2026"
+      ],
+      "pagination": "count/pageIndex/pageSize/pageCount; limit=200 returns a season in one page"
+    },
+    {
+      "pattern": "/v2/sports/tennis/leagues/atp/events?dates={YYYY}&limit=200",
+      "status": 200,
+      "fields": [
+        "items[$ref] -> events/{tid}-{YYYY}"
+      ],
+      "native_ids": [
+        "event {tid}-{YYYY}"
+      ],
+      "notes": "60-96 events per season; includes Slams, ATP Finals, 250/500/1000; no Challengers"
+    },
+    {
+      "pattern": "/v2/sports/tennis/leagues/atp/events/{tid}-{YYYY}",
+      "status": 200,
+      "fields": [
+        "name",
+        "date",
+        "endDate (US-Eastern midnight in UTC)",
+        "location{city,country name}",
+        "status.type.name",
+        "competitions[] inline: id, date, timeValid, type{text: Men's Singles|Men's Doubles|Mixed Doubles|Boys*}, round{description, roundType, abbreviation}, court.description, venue{address.summary, indoor}, competitors[]{id (athlete id, or athleteA-athleteB for teams), order, name, winner, tournamentSeed}, notes[0]{type: '<round> - <court>', text: '<winner> bt <loser> <score> [ret|w/o]'}, format.regulation.periods (always 5: NOT a best-of signal)",
+        "winners[]",
+        "defendingChampions[]",
+        "tournament $ref",
+        "venues $ref (faux)"
+      ],
+      "joins": [
+        "competitors.id -> /athletes/{id}",
+        "team id A-B -> /competitors/{id}/roster entries[].playerId (verified 517-574 = Bryan/Bryan)"
+      ],
+      "notes": "ONE request carries every match of the tournament: the ingestion unit"
+    },
+    {
+      "pattern": "/events/{e}/competitions/{c}/status",
+      "status": 200,
+      "fields": [
+        "type.name: STATUS_FINAL | STATUS_RETIRED | STATUS_WALKOVER | STATUS_SCHEDULED | STATUS_IN_PROGRESS",
+        "period"
+      ],
+      "notes": "used only to confirm an empty score is a walkover"
+    },
+    {
+      "pattern": "/events/{e}/competitions/{c}/competitors/{id}/linescores",
+      "status": 200,
+      "fields": [
+        "items[]{period, value (games), tiebreak (points, only on tiebreak sets)}"
+      ],
+      "notes": "agrees with the result line on sampled matches; not needed (result line carries the same facts in one request)"
+    },
+    {
+      "pattern": "/events/{e}/competitions/{c}/competitors/{id}/statistics",
+      "status": 404,
+      "notes": "No competitor stats found: ESPN has NO match statistics for tennis"
+    },
+    {
+      "pattern": "/events/{e}/competitions/{c}/odds",
+      "status": 200,
+      "fields": [
+        "count 0"
+      ],
+      "notes": "empty"
+    },
+    {
+      "pattern": "/v2/sports/tennis/athletes/{id}",
+      "status": 200,
+      "fields": [
+        "firstName",
+        "lastName",
+        "fullName",
+        "dateOfBirth",
+        "citizenshipCountry.abbreviation",
+        "birthPlace",
+        "hand",
+        "height",
+        "weight",
+        "debutYear",
+        "links"
+      ],
+      "native_ids": [
+        "athlete integer"
+      ],
+      "notes": "athlete list: /leagues/atp/athletes (18,233, paginated)"
+    },
+    {
+      "pattern": "/leagues/atp/seasons/{Y}/types/2/athletes/{id}/statistics",
+      "status": 200,
+      "fields": [
+        "singlesWon",
+        "singlesLost",
+        "singlesTitles",
+        "doublesTitles",
+        "prize"
+      ],
+      "notes": "season aggregates only; not match-level"
+    },
+    {
+      "pattern": "/leagues/atp/seasons/{Y}/athletes/{id}/eventlog",
+      "status": 200,
+      "fields": [
+        "events[]{event, competition, competitor $refs, played}"
+      ],
+      "pagination": "25 per page"
+    },
+    {
+      "pattern": "/leagues/atp/seasons/{Y}/rankings",
+      "status": 200,
+      "fields": [
+        "items: rankings/1 (ATP singles) only"
+      ],
+      "notes": "rankings/2 (doubles) = 404"
+    },
+    {
+      "pattern": "/leagues/atp/seasons/{Y}/types/2/weeks/{W}/rankings/1",
+      "status": 200,
+      "fields": [
+        "occurrence.number (week)",
+        "lastUpdated",
+        "ranks[]{current, previous, points, trend, athlete $ref}"
+      ],
+      "notes": "top 150 (2026) / top 100 (2007-2016); 2007-2026 verified at week 10 except 2020 week 10 (404); 2006 and earlier 404"
+    },
+    {
+      "pattern": "/leagues/atp/tournaments/{tid}",
+      "status": 200,
+      "fields": [
+        "displayName",
+        "major (Slam flag)"
+      ],
+      "notes": "no level (250/500/1000), no surface"
+    },
+    {
+      "pattern": "/leagues/atp/tournaments/{tid}/seasons/{Y}",
+      "status": 200,
+      "fields": [
+        "groups[]{displayName (round), startDate, endDate, matchups[$ref]}"
+      ]
+    },
+    {
+      "pattern": "/leagues/atp/calendar",
+      "status": 200,
+      "fields": [
+        "ondays/offdays/blacklist/whitelist refs"
+      ]
+    },
+    {
+      "pattern": "https://site.api.espn.com/apis/site/v2/sports/tennis/atp/scoreboard",
+      "status": 403,
+      "notes": "Akamai Access Denied to our honest UA: BLOCKED, recorded, not bypassed"
+    }
+  ],
+  "earliest_reliable_year": 2007,
+  "earliest_reliable_year_basis": "sweep 2002-2026 (AO + one other event per season): 2002-2006 editions list 0 competitions; 2007 onward carry full competitions + result lines; some later editions are empty (e.g. Dusseldorf 2015, Warsaw 2009)",
+  "identity": {
+    "athlete_ids": "ESPN integers; Wikidata P11585 = ESPN.com tennis player ID (3,508 items; 1,317 also carry P536 ATP id)",
+    "hazard": "historical athlete ids can point at the wrong human: AO 2008 competitors list id 543 'Lesley Pattinama Kerkhove' and 440 'Lizette Cabrera' where the result line prints Nenad Zimonjic / Victor Hanescu (12 of 221 AO 2008 competitions) — the parser holds any row whose printed names disagree with the ids"
+  },
+  "omissions": [
+    "surface",
+    "tournament level (except Slam flag)",
+    "match statistics",
+    "point-by-point",
+    "Challengers / ITF",
+    "doubles rankings",
+    "ranking history before 2007",
+    "entry type (Q/WC/LL) — only seeds"
+  ],
+  "sweep_by_year": {
+    "2002": {
+      "events_listed": 65,
+      "ao": {
+        "competitions": 0,
+        "by_type": {},
+        "with_result_line": 0
+      },
+      "sample_event": {
+        "id": "7-2002",
+        "name": "Swiss Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2003": {
+      "events_listed": 66,
+      "ao": {
+        "competitions": 0,
+        "by_type": {},
+        "with_result_line": 0
+      },
+      "sample_event": {
+        "id": "571-2003",
+        "name": "Ordina Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2004": {
+      "events_listed": 61,
+      "ao": {
+        "competitions": 0,
+        "by_type": {},
+        "with_result_line": 0
+      },
+      "sample_event": {
+        "id": "570-2004",
+        "name": "Stella Artois Championships",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2005": {
+      "events_listed": 63,
+      "ao": {
+        "competitions": 0,
+        "by_type": {},
+        "with_result_line": 0
+      },
+      "sample_event": {
+        "id": "7-2005",
+        "name": "Allianz Swiss Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2006": {
+      "events_listed": 64,
+      "ao": {
+        "competitions": 0,
+        "by_type": {},
+        "with_result_line": 0
+      },
+      "sample_event": {
+        "id": "305-2006",
+        "name": "The Red Letter Days Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2007": {
+      "events_listed": 69,
+      "ao": {
+        "competitions": 221,
+        "by_type": {
+          "Men's Singles": 127,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 221
+      },
+      "sample_event": {
+        "id": "7-2007",
+        "name": "ATP Allianz Suisse Open Gstaad",
+        "competitions": 31,
+        "by_type": {
+          "Men's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2007-03-05T08:00Z"
+      }
+    },
+    "2008": {
+      "events_listed": 67,
+      "ao": {
+        "competitions": 221,
+        "by_type": {
+          "Men's Singles": 127,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 221
+      },
+      "sample_event": {
+        "id": "277-2008",
+        "name": "ATP Orange Warsaw Open",
+        "competitions": 31,
+        "by_type": {
+          "Men's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2008-03-03T08:00Z"
+      }
+    },
+    "2009": {
+      "events_listed": 68,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Men's Singles": 128,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 222
+      },
+      "sample_event": {
+        "id": "277-2009",
+        "name": "ATP Orange Warsaw Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2009-03-02T08:00Z"
+      }
+    },
+    "2010": {
+      "events_listed": 67,
+      "ao": {
+        "competitions": 222,
+        "by_type": {
+          "Men's Singles": 127,
+          "Men's Doubles": 64,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 222
+      },
+      "sample_event": {
+        "id": "129-2010",
+        "name": "ATP AEGON Championships",
+        "competitions": 56,
+        "by_type": {
+          "Men's Singles": 56
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2010-03-01T08:00Z"
+      }
+    },
+    "2011": {
+      "events_listed": 70,
+      "ao": {
+        "competitions": 223,
+        "by_type": {
+          "Men's Singles": 127,
+          "Men's Doubles": 65,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 223
+      },
+      "sample_event": {
+        "id": "305-2011",
+        "name": "ATP AEGON International",
+        "competitions": 31,
+        "by_type": {
+          "Men's Singles": 31
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2011-02-28T08:00Z"
+      }
+    },
+    "2012": {
+      "events_listed": 68,
+      "ao": {
+        "competitions": 223,
+        "by_type": {
+          "Men's Singles": 127,
+          "Men's Doubles": 65,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 223
+      },
+      "sample_event": {
+        "id": "305-2012",
+        "name": "ATP AEGON International",
+        "competitions": 27,
+        "by_type": {
+          "Men's Singles": 27
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2012-02-27T08:00Z"
+      }
+    },
+    "2013": {
+      "events_listed": 69,
+      "ao": {
+        "competitions": 225,
+        "by_type": {
+          "Men's Singles": 130,
+          "Men's Doubles": 64,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 224
+      },
+      "sample_event": {
+        "id": "305-2013",
+        "name": "ATP AEGON International",
+        "competitions": 27,
+        "by_type": {
+          "Men's Singles": 27
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2013-03-05T08:00Z"
+      }
+    },
+    "2014": {
+      "events_listed": 67,
+      "ao": {
+        "competitions": 320,
+        "by_type": {
+          "Men's Singles": 130,
+          "Men's Doubles": 64,
+          "Mixed Doubles": 32,
+          "Boys Singles": 63,
+          "Boys Doubles": 31
+        },
+        "with_result_line": 320
+      },
+      "sample_event": {
+        "id": "129-2014",
+        "name": "ATP AEGON Championships",
+        "competitions": 55,
+        "by_type": {
+          "Men's Singles": 55
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2014-03-03T08:00Z"
+      }
+    },
+    "2015": {
+      "events_listed": 96,
+      "ao": {
+        "competitions": 316,
+        "by_type": {
+          "Men's Singles": 128,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31,
+          "Boys Singles": 63,
+          "Boys Doubles": 31
+        },
+        "with_result_line": 314
+      },
+      "sample_event": {
+        "id": "1-2015",
+        "name": "ATP Dusseldorf Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2015-03-02T08:00Z"
+      }
+    },
+    "2016": {
+      "events_listed": 95,
+      "ao": {
+        "competitions": 319,
+        "by_type": {
+          "Men's Singles": 131,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31,
+          "Boys Singles": 63,
+          "Boys Doubles": 31
+        },
+        "with_result_line": 315
+      },
+      "sample_event": {
+        "id": "396-2016",
+        "name": "Gonet Geneva Open",
+        "competitions": 28,
+        "by_type": {
+          "Men's Singles": 28
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2016-02-29T08:00Z"
+      }
+    },
+    "2017": {
+      "events_listed": 71,
+      "ao": {
+        "competitions": 232,
+        "by_type": {
+          "Men's Doubles": 71,
+          "Men's Singles": 130,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 225
+      },
+      "sample_event": {
+        "id": "415-2017",
+        "name": "ATP & WTA Topshelf Open",
+        "competitions": 30,
+        "by_type": {
+          "Men's Singles": 30
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 102,
+        "lastUpdated": "2017-03-05T08:00Z"
+      }
+    },
+    "2018": {
+      "events_listed": 89,
+      "ao": {
+        "competitions": 232,
+        "by_type": {
+          "Men's Singles": 136,
+          "Men's Doubles": 64,
+          "Mixed Doubles": 32
+        },
+        "with_result_line": 232
+      },
+      "sample_event": {
+        "id": "939-2018",
+        "name": "Libema Open",
+        "competitions": 0,
+        "by_type": {}
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 100,
+        "lastUpdated": "2018-03-05T08:00Z"
+      }
+    },
+    "2019": {
+      "events_listed": 66,
+      "ao": {
+        "competitions": 234,
+        "by_type": {
+          "Men's Singles": 136,
+          "Men's Doubles": 67,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 234
+      },
+      "sample_event": {
+        "id": "129-2019",
+        "name": "Fever-Tree Championships",
+        "competitions": 33,
+        "by_type": {
+          "Men's Singles": 33
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2020": {
+      "events_listed": 33,
+      "ao": {
+        "competitions": 237,
+        "by_type": {
+          "Men's Singles": 138,
+          "Men's Doubles": 65,
+          "Mixed Doubles": 34
+        },
+        "with_result_line": 237
+      },
+      "sample_event": {
+        "id": "304-2020",
+        "name": "Generali Open",
+        "competitions": 30,
+        "by_type": {
+          "Men's Singles": 30
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2021": {
+      "events_listed": 66,
+      "ao": {
+        "competitions": 232,
+        "by_type": {
+          "Men's Singles": 136,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 33
+        },
+        "with_result_line": 232
+      },
+      "sample_event": {
+        "id": "27-2021",
+        "name": "Noventi Open",
+        "competitions": 33,
+        "by_type": {
+          "Men's Singles": 33
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 151,
+        "lastUpdated": "2021-03-07T08:00Z"
+      }
+    },
+    "2022": {
+      "events_listed": 83,
+      "ao": {
+        "competitions": 666,
+        "by_type": {
+          "Men's Singles": 478,
+          "Men's Doubles": 126,
+          "Mixed Doubles": 62
+        },
+        "with_result_line": 665
+      },
+      "sample_event": {
+        "id": "129-2022",
+        "name": "HSBC Championships",
+        "competitions": 44,
+        "by_type": {
+          "Men's Singles": 43,
+          "Men's Doubles": 1
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 150,
+        "lastUpdated": "2022-03-06T08:00Z"
+      }
+    },
+    "2023": {
+      "events_listed": 72,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Men's Singles": 239,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 333
+      },
+      "sample_event": {
+        "id": "306-2023",
+        "name": "Nordea Open",
+        "competitions": 39,
+        "by_type": {
+          "Men's Singles": 39
+        }
+      },
+      "ranking_week10": {
+        "status": 200,
+        "n": 150,
+        "lastUpdated": "2023-03-05T08:00Z"
+      }
+    },
+    "2024": {
+      "events_listed": 72,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Men's Singles": 239,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 333
+      },
+      "sample_event": {
+        "id": "129-2024",
+        "name": "HSBC Championships",
+        "competitions": 44,
+        "by_type": {
+          "Men's Singles": 43,
+          "Men's Doubles": 1
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2025": {
+      "events_listed": 61,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Men's Singles": 239,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 333
+      },
+      "sample_event": {
+        "id": "27-2025",
+        "name": "Terra Wortmann Open",
+        "competitions": 61,
+        "by_type": {
+          "Men's Singles": 43,
+          "Men's Doubles": 18
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    },
+    "2026": {
+      "events_listed": 60,
+      "ao": {
+        "competitions": 333,
+        "by_type": {
+          "Men's Singles": 239,
+          "Men's Doubles": 63,
+          "Mixed Doubles": 31
+        },
+        "with_result_line": 333
+      },
+      "sample_event": {
+        "id": "129-2026",
+        "name": "HSBC Championships",
+        "competitions": 59,
+        "by_type": {
+          "Men's Singles": 41,
+          "Men's Doubles": 18
+        }
+      },
+      "ranking_week10": {
+        "status": 404,
+        "n": 0
+      }
+    }
+  },
+  "result_line_tails_seen_in_sweep": {
+    "score": 6116,
+    "ret": 164,
+    "w/o": 35
+  }
+}

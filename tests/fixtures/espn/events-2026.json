@@ -1,0 +1,20 @@
+{
+ "count": 60,
+ "pageIndex": 1,
+ "pageSize": 200,
+ "pageCount": 1,
+ "items": [
+  {
+   "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/970-2026?lang=en&region=us"
+  },
+  {
+   "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/925-2026?lang=en&region=us"
+  },
+  {
+   "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/971-2026?lang=en&region=us"
+  },
+  {
+   "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/611-2026?lang=en&region=us"
+  }
+ ]
+}
