@@ -184,6 +184,20 @@ test('identity: crosswalk and Wikidata P11585->P536 resolve; corroboration confl
   assert.equal(resolveEspnIdentity('5', { ...stored, athlete: null }).status, 'resolved');
 });
 
+test('identity step 4: Wikidata tour-id holder by exact name + day DOB, unique; several holders refuse', async () => {
+  const { wikidataNameIndex } = await import('../workers/shared/canonical/espn-identity.js');
+  const idc = baseIdc({ wdNames: wikidataNameIndex([['atp:Q111', 'Anton Newman', '2002-10-30'], ['atp:D001', 'Dup Name', '2000-01-02'], ['atp:D002', 'Dup Name', '2000-01-02'], ['atp:Y001', 'Year Only', '2000']]) });
+  const r = resolveEspnIdentity('50', { ...idc, athlete: { full_name: 'Anton Newman', dob: '2002-10-30' } });
+  assert.equal(r.status, 'resolved');
+  assert.equal(r.tour.provider_id, 'Q111');
+  assert.equal(r.method, 'name_dob');
+  assert.equal(resolveEspnIdentity('51', { ...idc, athlete: { full_name: 'Anton Newman', dob: '2002-10-31' } }).status, 'unresolved');
+  assert.equal(resolveEspnIdentity('52', { ...idc, athlete: { full_name: 'Dup Name', dob: '2000-01-02' } }).status, 'ambiguous');
+  assert.equal(resolveEspnIdentity('53', { ...idc, athlete: { full_name: 'Anton Newman', dob: null } }).status, 'unresolved', 'no DOB, no match');
+  assert.equal(resolveEspnIdentity('2', { ...idc, athlete: { full_name: 'Twin Name', dob: '1999-01-01', nationality: 'USA' } }).status, 'ambiguous', 'step 4 never overrides a canonical ambiguity');
+  assert.equal(winnerGames('6-2 6-1 0-0 RET', 'A'), winnerGames('6-2 6-1 RET', 'A'));
+});
+
 test('identity: names are never identity — name-only and non-unique name+DOB stay unresolved', () => {
   const idc = baseIdc();
   assert.equal(resolveEspnIdentity('1', { ...idc, athlete: { full_name: 'Jannik Sinner', dob: null } }).status, 'unresolved');

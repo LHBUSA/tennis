@@ -11,7 +11,7 @@ import { writeMatches, hold } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, editionId, snapshotId, slugify } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
-import { resolveEspnIdentity, wikidataEspnMap } from '../../shared/canonical/espn-identity.js';
+import { resolveEspnIdentity, wikidataEspnMap, wikidataNameIndex } from '../../shared/canonical/espn-identity.js';
 
 const now = () => new Date().toISOString();
 const K = { state: 'bf:espn', ath: 'espn:ath', wd: 'espn:wd', status: 'espn:status', rank: 'bf:espnrank', held: 'espn:held' };
@@ -43,6 +43,18 @@ async function wikidataMap(ctx) {
   return rows;
 }
 
+/** Every Wikidata item with an ATP or WTA id and a DAY-precision date of birth (weekly, KV espn:wdnames). */
+async function wikidataNames(ctx) {
+  const cached = await ctx.kv.get('espn:wdnames', 'json');
+  if (cached && Date.now() - Date.parse(cached.at) < WD_TTL_DAYS * 86400e3) return cached.rows;
+  const query = 'SELECT ?atp ?wta ?dob ?l WHERE { { ?h wdt:P536 ?atp } UNION { ?h wdt:P597 ?wta } ?h p:P569/psv:P569 [ wikibase:timeValue ?dob ; wikibase:timePrecision 11 ] . ?h rdfs:label ?l FILTER(lang(?l) = "en") }';
+  const adapter = { key: 'wikidata.tour_dob', family: 'wikidata', capabilities: ['player_identity'], parser_version: '1', request: () => ({ url: `https://query.wikidata.org/sparql?format=json&query=${encodeURIComponent(query)}`, headers: { accept: 'application/sparql-results+json' } }), shape: (b) => (/"bindings"/.test(b) ? [] : ['no_bindings']), parse: (b) => (JSON.parse(b).results?.bindings || []).map((x) => [x.atp ? `atp:${String(x.atp.value).toUpperCase()}` : `wta:${x.wta.value}`, x.l.value, String(x.dob.value).slice(0, 10)]) };
+  const r = await fetchRun(ctx, adapter, {});
+  if (r.state !== 'PASS') return cached ? cached.rows : [];
+  await ctx.kv.put('espn:wdnames', JSON.stringify({ at: now(), rows: r.records }));
+  return r.records;
+}
+
 export async function identityContext(ctx) {
   if (ctx.espnIdentity) return ctx.espnIdentity;
   const rows = await wikidataMap(ctx);
@@ -56,7 +68,7 @@ export async function identityContext(ctx) {
     if (p && /^(atp|wta):/.test(p.founding_external_key)) stored.set(String(x.external_id), p.founding_external_key);
   }
   const nameIndex = { byExternal: new Map(), players: players.filter((p) => p.dob && /^(atp|wta):/.test(p.founding_external_key)).map((p) => ({ ...p, founding: p.founding_external_key })) };
-  ctx.espnIdentity = { wd, wdShared, players: byFounding, stored, nameIndex };
+  ctx.espnIdentity = { wd, wdShared, players: byFounding, stored, nameIndex, wdNames: wikidataNameIndex(await wikidataNames(ctx)) };
   return ctx.espnIdentity;
 }
 
@@ -88,7 +100,8 @@ export function buildIdMap(ids, idc, getAthlete, observedNames = {}) {
     const r = resolveEspnIdentity(id, { ...idc, athlete: a, observedName: observedNames[id] || '' });
     if (r.status === 'resolved') {
       outcomes.resolved += 1;
-      outcomes[r.evidence.includes('crosswalk') ? 'by_crosswalk' : r.method === 'name_dob' ? 'by_name_dob' : 'by_wikidata'] += 1;
+      const how = r.evidence.includes('crosswalk') ? 'by_crosswalk' : r.evidence.includes('holder') ? 'by_wikidata_name_dob' : r.method === 'name_dob' ? 'by_name_dob' : 'by_wikidata';
+      outcomes[how] = (outcomes[how] || 0) + 1;
       idMap[id] = { provider: r.tour.provider, provider_id: r.tour.provider_id, evidence: r.evidence, method: r.method, first_name: a?.first_name || null, last_name: a?.last_name || null, country: a?.nationality || null, gender: r.tour.provider === 'wta' ? 'F' : 'M', dob: a?.dob || null, hand: a?.hand || null, canonical_name: idc.players.get(`${r.tour.provider}:${r.tour.provider_id}`)?.full_name || null };
     } else {
       outcomes[r.status] = (outcomes[r.status] || 0) + 1;

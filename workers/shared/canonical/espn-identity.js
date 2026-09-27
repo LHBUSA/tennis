@@ -8,6 +8,8 @@
 //                                                                                             method external_id
 //   3. exact normalized full name + exact DOB (+ nationality when both have one), unique among tour-id
 //      players (identity.js resolveIdentity — the same contract Roland-Garros uses)          method name_dob
+//   4. only when 3 finds no candidate at all: exact normalized English label + exact DAY-precision DOB,
+//      unique among every Wikidata item carrying an ATP (P536) or WTA (P597) id              method name_dob
 // Anything else is unresolved / ambiguous / conflict: the athlete's matches are held, never guessed.
 
 import { normalizeName, resolveIdentity } from './identity.js';
@@ -58,7 +60,20 @@ export function resolveEspnIdentity(espnId, c) {
   const a = c.athlete;
   if (!a?.dob || !a.full_name) return { status: 'unresolved', reason: a ? 'no_dob_for_corroboration' : 'athlete_not_fetched' };
   const r = resolveIdentity({ provider: 'espn', provider_id: id, full_name: a.full_name, dob: a.dob, nationality: a.nationality }, c.nameIndex);
-  if (r.status !== 'resolved') return { status: r.status, reason: r.reason, candidates: r.candidates || [] };
+  if (r.status !== 'resolved') {
+    if (r.reason === 'no_candidate' && c.wdNames) {
+      const hits = [...(c.wdNames.get(`${normalizeName(a.full_name)}|${a.dob}`) || [])];
+      if (hits.length > 1) return { status: 'ambiguous', reason: 'wikidata_name_dob_matches_several_tour_ids' };
+      if (hits.length === 1) {
+        const key = hits[0];
+        if (c.wdShared.has(key)) return { status: 'ambiguous', reason: `wikidata_tour_id_on_several_espn_ids:${key}` };
+        const p = c.players.get(key);
+        if (p?.dob && p.dob !== a.dob) return { status: 'conflict', reason: `crosswalk_dob_conflict:${key}`, candidates: [p.pbe_player_id] };
+        return { status: 'resolved', tour: splitKey(key), method: 'name_dob', evidence: `espn:${id} matched ${key} (Wikidata ${key.startsWith('atp:') ? 'P536' : 'P597'} holder) by exact name + day-precision date of birth (unique)` };
+      }
+    }
+    return { status: r.status, reason: r.reason, candidates: r.candidates || [] };
+  }
   const hit = c.nameIndex.players.find((p) => p.pbe_player_id === r.pbe_player_id);
   if (!hit?.founding) return { status: 'unresolved', reason: 'matched_player_has_no_tour_id' };
   return { status: 'resolved', tour: splitKey(hit.founding), method: 'name_dob', evidence: `espn:${id} matched ${hit.founding} by exact name + date of birth${a.nationality ? ' + nationality' : ''} (unique)` };
@@ -86,4 +101,16 @@ export function wikidataEspnMap(bindings) {
   for (const [e, v] of wd) for (const k of [v.atp && `atp:${v.atp}`, v.wta && `wta:${v.wta}`].filter(Boolean)) claims.set(k, [...(claims.get(k) || []), e]);
   const wdShared = new Set([...claims].filter(([, es]) => es.length > 1).map(([k]) => k));
   return { wd, wdShared };
+}
+
+/** Wikidata tour-id holders -> Map('normalized label|YYYY-MM-DD' -> Set('atp:X' | 'wta:Y')). Rows: [key, label, dob]. */
+export function wikidataNameIndex(rows) {
+  const m = new Map();
+  for (const [key, label, dob] of rows || []) {
+    if (!key || !label || !/^\d{4}-\d{2}-\d{2}$/.test(dob || '')) continue;
+    const k = `${normalizeName(label)}|${dob}`;
+    if (!m.has(k)) m.set(k, new Set());
+    m.get(k).add(key);
+  }
+  return m;
 }

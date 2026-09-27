@@ -280,6 +280,8 @@ export function winnerGames(scoreText, winnerSide) {
   if (!scoreText) return null;
   const sets = [...String(scoreText).matchAll(/\[?(\d+)-(\d+)\]?/g)].map((m) => [Number(m[1]), Number(m[2])]);
   const tail = /\b(RET|W\/O|DEF|ABD)\b/.exec(scoreText)?.[1] || '';
+  // a retirement before the first game of a new set is printed "0-0 RET" by some sources, omitted by others
+  if (tail && sets.length && sets.at(-1)[0] === 0 && sets.at(-1)[1] === 0) sets.pop();
   return [...sets.map(([a, b]) => (winnerSide === 'B' ? `${b}-${a}` : `${a}-${b}`)), tail].filter(Boolean).join(' ');
 }
 
