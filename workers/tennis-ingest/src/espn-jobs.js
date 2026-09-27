@@ -379,6 +379,7 @@ export async function espnRankingStep(ctx, { weeks = 8, today = iso(new Date()),
       linked += 1;
     }
     st.relinked = now();
+    if (linked) await ctx.kv.put('rank:changed_at', now()); // DNA v2 rank-list cache: rank rows relinked
     await ctx.kv.put(K.rank, JSON.stringify(st));
     out.relinked = { open: open.length, linked };
   }
@@ -413,6 +414,7 @@ async function writeEspnRanking(ctx, list, idc, captureId, league = 'atp') {
   }
   await ctx.store.upsert('tennis_rankings', rows, { onConflict: 'snapshot_id,provider_player_id' });
   await ctx.store.req('PATCH', `tennis_ranking_snapshots?snapshot_id=eq.${sid}`, { body: { row_count: rows.length } });
+  await ctx.kv.put('rank:changed_at', now()); // DNA v2 rank-list cache: stored rank rows changed
   return { date: list.observed_date, rows: rows.length, linked: rows.filter((r) => r.pbe_player_id).length };
 }
 

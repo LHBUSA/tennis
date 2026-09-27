@@ -26,7 +26,30 @@ const roundOrder = (r) => ROUND_ORDER[String(r || '').replace(/^M-/, '')] ?? 6;
  *        source_family, sets: [{ set_no, games_a, games_b, tb_a, tb_b }], A: pid, B: pid,
  *        edition: { start_date, end_date, competition_key, level, year } }
  */
-export function ledgerEntry(r, tourOf) {
+// Ledger entries are small fixed-shape objects (one hidden class): no per-row sort-key string is stored; the
+// `order` getter rebuilds it on demand for callers that want it, and byOrder() compares without allocating.
+class LedgerEntry {
+  constructor(id, tour, day, rankDay, ro, A, B, winner, status, sets, bestOf, surface, round, source, level) {
+    this.id = id; this.tour = tour; this.day = day; this.rank_day = rankDay; this.ro = ro; this.A = A; this.B = B;
+    this.winner = winner; this.status = status; this.packed = sets; this.bestOf = bestOf; this.surface = surface;
+    this.round = round; this.source = source; this.level = level; this.seq = null;
+  }
+  get order() { return `${this.day}|${String(this.ro).padStart(2, '0')}|${this.id}`; }
+  /** Sets as { a, b } games (decoded from one small integer per set: a + 256 * b). */
+  get sets() { return this.packed.map((x) => ({ a: x & 255, b: x >> 8 })); }
+}
+const same = (x) => x;
+
+/** Chronological order: day, then round (earlier rounds first), then match id. Entries sorted once may carry
+ *  `seq` (their index in that sort), which is then compared directly. Identical to comparing `order` strings. */
+export function byOrder(a, b) {
+  if (a.seq != null && b.seq != null) return a.seq - b.seq;
+  if (a.day !== b.day) return a.day < b.day ? -1 : 1;
+  if (a.ro !== b.ro) return a.ro - b.ro;
+  return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+}
+
+export function ledgerEntry(r, tourOf, intern = same) {
   if (!['MS', 'WS'].includes(r.event_type) || !['completed', 'retired'].includes(r.status) || !['A', 'B'].includes(r.winner_side)) return null;
   if (!r.A || !r.B || r.A === r.B) return null;
   const tour = tourOf(r.A);
@@ -36,13 +59,13 @@ export function ledgerEntry(r, tourOf) {
   const plausible = ts && (!r.edition?.year || Math.abs(Number(String(ts).slice(0, 4)) - r.edition.year) <= 1);
   const day = plausible ? String(ts).slice(0, 10) : r.edition?.end_date || null;
   if (!day) return null;
-  const sets = [...(r.sets || [])].sort((a, b) => a.set_no - b.set_no).map((s) => ({ a: s.games_a, b: s.games_b, tbA: s.tb_a, tbB: s.tb_b }));
+  // games per set only (tiebreak points are never read by Match DNA); one integer per set, a + 256 * b
+  const sets = r.packed || [...(r.sets || [])].sort((a, b) => a.set_no - b.set_no).map((s) => (s.games_a & 255) + 256 * (s.games_b & 255));
   const bestOf = /^BO5|^BO5_/.test(r.format_key || '') ? 5 : /^(BO3|DOUBLES_TOUR)/.test(r.format_key || '') ? 3 : null;
-  return {
-    id: r.match_id, tour, day, rank_day: r.edition?.start_date && r.edition.start_date <= day ? r.edition.start_date : day,
-    order: `${day}|${String(roundOrder(r.round)).padStart(2, '0')}|${r.match_id}`, A: r.A, B: r.B, winner: r.winner_side, status: r.status,
-    sets, bestOf, surface: r.surface || null, round: r.round, source: r.source_family, level: r.edition?.competition_key || null
-  };
+  const d = intern(day);
+  return new LedgerEntry(r.match_id, tour, d, r.edition?.start_date && r.edition.start_date <= day ? intern(r.edition.start_date) : d,
+    roundOrder(r.round), intern(r.A), intern(r.B), r.winner_side, intern(r.status), sets, bestOf, r.surface ? intern(r.surface) : null,
+    intern(r.round), intern(r.source_family), r.edition?.competition_key ? intern(r.edition.competition_key) : null);
 }
 
 // ---- ranking at match time ----------------------------------------------------------------------------
@@ -75,22 +98,23 @@ const expected = (ra, rb) => 1 / (1 + 10 ** ((rb - ra) / 400));
 function gameShare(e) {
   let a = 0;
   let b = 0;
-  for (const s of e.sets) { a += s.a; b += s.b; }
+  for (const x of e.packed) { a += x & 255; b += x >> 8; }
   return a + b ? a / (a + b) : 0.5;
 }
 
 /**
  * Chronological rating run over ONE tour's ledger (sorted by `order`). Retirements do not update ratings
  * (unfinished contests); every other entry updates both players after the prediction is recorded.
- * Returns { ratings: Map(pid -> { r, n, last_day }), pre: Map(matchId -> { ra, rb, na, nb, p }), surface: Map }.
+ * Returns { ratings: Map(pid -> { r, n, last_day }), pre: PreMatch (get(entry | matchId) -> prediction), surface: Map }.
  */
 export function ratingRun(ledger, { variant = 'standard', surfaces = true, init = 1500 } = {}) {
   const v = RATING_VARIANTS[variant];
   const ratings = new Map();
   const surf = new Map(); // `${pid}|${surface}` -> { r, n }
   const get = (m, k) => { if (!m.has(k)) m.set(k, { r: init, n: 0, last_day: null }); return m.get(k); };
-  const pre = new Map();
-  for (const e of ledger) {
+  const pre = new PreMatch(ledger);
+  for (let i = 0; i < ledger.length; i += 1) {
+    const e = ledger[i];
     const a = get(ratings, e.A);
     const b = get(ratings, e.B);
     const p = expected(a.r, b.r);
@@ -102,7 +126,7 @@ export function ratingRun(ledger, { variant = 'standard', surfaces = true, init 
       sb = get(surf, `${e.B}|${e.surface}`);
       ps = expected((a.r + sa.r) / 2, (b.r + sb.r) / 2);
     }
-    pre.set(e.id, { ra: a.r, rb: b.r, na: a.n, nb: b.n, p, ps, nsa: sa?.n ?? null, nsb: sb?.n ?? null });
+    pre.put(i, a.r, b.r, a.n, b.n, p, ps, sa?.n ?? null, sb?.n ?? null);
     if (e.status !== 'completed') continue;
     const won = e.winner === 'A' ? 1 : 0;
     const mult = v.margin ? Math.min(2, 1 + Math.abs(gameShare(e) - 0.5) * 2) : 1;
@@ -112,6 +136,41 @@ export function ratingRun(ledger, { variant = 'standard', surfaces = true, init 
     if (sa) { const q = expected(sa.r, sb.r); sa.r += v.k(sa.n) * mult * (won - q); sb.r += v.k(sb.n) * mult * ((1 - won) - (1 - q)); sa.n += 1; sb.n += 1; }
   }
   return { ratings, pre, surface: surf };
+}
+
+/**
+ * Pre-match predictions of one rating run, column-stored by ledger position (8 numbers per match instead of an
+ * object per match). get(entry | matchId) returns { ra, rb, na, nb, p, ps, nsa, nsb }: the same values the old
+ * per-match objects held (null where they held null).
+ */
+class PreMatch {
+  constructor(ledger) {
+    const n = ledger.length;
+    this.ledger = ledger;
+    this.ra = new Float64Array(n); this.rb = new Float64Array(n); this.p = new Float64Array(n); this.ps = new Float64Array(n);
+    this.na = new Int32Array(n); this.nb = new Int32Array(n); this.nsa = new Int32Array(n); this.nsb = new Int32Array(n);
+    this.hasPs = new Uint8Array(n); this.hasNs = new Uint8Array(n);
+    this.byId = null;
+  }
+  put(i, ra, rb, na, nb, p, ps, nsa, nsb) {
+    this.ra[i] = ra; this.rb[i] = rb; this.na[i] = na; this.nb[i] = nb; this.p[i] = p;
+    if (ps != null) { this.ps[i] = ps; this.hasPs[i] = 1; }
+    if (nsa != null) { this.nsa[i] = nsa; this.nsb[i] = nsb; this.hasNs[i] = 1; }
+  }
+  index(x) {
+    if (typeof x === 'object' && x) {
+      if (Number.isInteger(x.seq) && this.ledger[x.seq] === x) return x.seq;
+      x = x.id;
+    }
+    if (!this.byId) { this.byId = new Map(); this.ledger.forEach((e, i) => this.byId.set(e.id, i)); }
+    return this.byId.get(x);
+  }
+  get(x) {
+    const i = this.index(x);
+    if (i == null) return undefined;
+    return { ra: this.ra[i], rb: this.rb[i], na: this.na[i], nb: this.nb[i], p: this.p[i], ps: this.hasPs[i] ? this.ps[i] : null, nsa: this.hasNs[i] ? this.nsa[i] : null, nsb: this.hasNs[i] ? this.nsb[i] : null };
+  }
+  has(x) { return this.index(x) != null; }
 }
 
 const ll = (p, y) => -(y ? Math.log(Math.max(1e-9, p)) : Math.log(Math.max(1e-9, 1 - p)));
@@ -131,8 +190,8 @@ export function backtest(ledger, runs, rankAt, { from, minPrior = 10 } = {}) {
     const rb = rankAt(e.B, e.rank_day);
     if (ra?.rank && rb?.rank) ranked.push(e);
   }
-  const cut = ranked[Math.floor(ranked.length * 0.4)]?.order ?? null;
-  const train = ranked.filter((e) => cut && e.order < cut).map((e) => [rankAt(e.A, e.rank_day).rank, rankAt(e.B, e.rank_day).rank, e.winner === 'A' ? 1 : 0]);
+  const cut = ranked[Math.floor(ranked.length * 0.4)] ?? null;
+  const train = ranked.filter((e) => cut && byOrder(e, cut) < 0).map((e) => [rankAt(e.A, e.rank_day).rank, rankAt(e.B, e.rank_day).rank, e.winner === 'A' ? 1 : 0]);
   let c = null;
   let best = Infinity;
   for (let x = 0.05; x <= 3.001 && train.length >= 200; x += 0.05) {
@@ -144,13 +203,13 @@ export function backtest(ledger, runs, rankAt, { from, minPrior = 10 } = {}) {
     const acc = { n: 0, ll: 0, brier: 0, right: 0, coin_ll: 0, ranked: { n: 0, ll: 0, rank_ll: 0, brier: 0, rank_brier: 0, right: 0, rank_right: 0 }, surface: { n: 0, ll: 0, overall_ll: 0 } };
     for (const e of ledger) {
       if (e.status !== 'completed' || e.day < from) continue;
-      const pr = run.pre.get(e.id);
+      const pr = run.pre.get(e);
       if (!pr || pr.na < minPrior || pr.nb < minPrior) continue;
       const y = e.winner === 'A' ? 1 : 0;
       acc.n += 1; acc.ll += ll(pr.p, y); acc.brier += (pr.p - y) ** 2; acc.right += (pr.p > 0.5) === (y === 1) ? 1 : 0; acc.coin_ll += Math.log(2);
       const ra = rankAt(e.A, e.rank_day);
       const rb = rankAt(e.B, e.rank_day);
-      if (c != null && ra?.rank && rb?.rank && e.order >= cut) {
+      if (c != null && ra?.rank && rb?.rank && byOrder(e, cut) >= 0) {
         const q = rb.rank ** c / (ra.rank ** c + rb.rank ** c);
         const R = acc.ranked;
         R.n += 1; R.ll += ll(pr.p, y); R.rank_ll += ll(q, y); R.brier += (pr.p - y) ** 2; R.rank_brier += (q - y) ** 2; R.right += (pr.p > 0.5) === (y === 1) ? 1 : 0; R.rank_right += (q > 0.5) === (y === 1) ? 1 : 0;
@@ -212,7 +271,7 @@ const setDone = (s) => { const hi = Math.max(s.a, s.b); const lo = Math.min(s.a,
 /** One player's view of a ledger entry: me/opp oriented. */
 function view(e, pid) {
   const me = e.A === pid ? 'A' : 'B';
-  const sets = e.sets.map((s) => (me === 'A' ? { my: s.a, op: s.b } : { my: s.b, op: s.a }));
+  const sets = e.packed.map((x) => (me === 'A' ? { my: x & 255, op: x >> 8 } : { my: x >> 8, op: x & 255 }));
   return { e, won: e.winner === me, opp: me === 'A' ? e.B : e.A, sets };
 }
 
@@ -221,7 +280,7 @@ function view(e, pid) {
  * rankAt(pid, day) -> { rank } | { outside } | null (tour-specific). pre: Map(matchId -> rating prediction).
  */
 export function buildMatchDna(pid, entries, asOf, { rankAt = () => null, pre = null, rating = null } = {}) {
-  const ms = entries.filter((e) => e.day < asOf).sort((a, b) => (a.order < b.order ? -1 : 1)).map((e) => view(e, pid));
+  const ms = entries.filter((e) => e.day < asOf).sort(byOrder).map((e) => view(e, pid));
   const done = ms.filter((v) => v.e.status === 'completed');
   let w = 0; let setsW = 0; let setsP = 0; let gW = 0; let gP = 0; let straight = 0; let decW = 0; let decP = 0; let tbW = 0; let tbP = 0;
   let closeW = 0; let closeP = 0; let cbW = 0; let cbP = 0; let fsW = 0; let fsP = 0; let decDep = 0; let gdiff = 0; let sdiff = 0;
@@ -275,7 +334,7 @@ export function buildMatchDna(pid, entries, asOf, { rankAt = () => null, pre = n
       for (const t of [10, 25, 50, 100]) if (r.rank <= t) { tiers[t][1] += 1; if (v.won) tiers[t][0] += 1; }
       if (r.rank > 100) { out100[1] += 1; if (!v.won) out100[0] += 1; }
     } else if (r?.outside >= 100) { out100[1] += 1; if (!v.won) out100[0] += 1; }
-    const p = pre?.get(v.e.id);
+    const p = pre?.get(v.e);
     if (p && v.e.status === 'completed' && p.na >= 10 && p.nb >= 10) { const pw = v.e.A === pid ? p.p : 1 - p.p; wae += (v.won ? 1 : 0) - pw; waeN += 1; }
   }
   for (const t of [10, 25, 50, 100]) m[`top${t}_win_rate`] = metric(`top${t}_win_rate`, tiers[t][0], tiers[t][1], tiers[t][1], asOf, { record: { W: tiers[t][0], L: tiers[t][1] - tiers[t][0] } });
@@ -322,47 +381,78 @@ const usable = (m) => m && m.value != null && m.comparable && ['medium', 'high']
  * Established rating = >= 20 rated matches and a match in the 365 days before as_of; published ratings only.
  */
 export function applyPopulation(group, { asOf, ratingPublished = false } = {}) {
-  const out = {};
-  for (const key of Object.keys(MATCH_DEFINITIONS)) {
-    const vals = group.map((g) => g.metrics[key]).filter(usable).map((m) => m.value).sort((a, b) => a - b);
-    out[key] = vals.length;
-    for (const g of group) {
-      const m = g.metrics[key];
-      if (!m) continue;
-      m.population_qualified = vals.length;
-      m.comparative_published = m.comparable && vals.length >= COMPARATIVE_MIN;
-      m.percentile = usable(m) && vals.length >= PERCENTILE_MIN_PEERS ? pct(vals, m.value, m.lower_is_better) : null;
-    }
-  }
+  const idx = populationIndex(group, { asOf });
+  for (const g of group) applyPopulationOne(g, idx, { ratingPublished });
+  return idx.counts;
+}
+
+/**
+ * The population half of applyPopulation, from slim records { metrics: { key: { value, comparable, confidence } },
+ * rating: { value, rated_matches } | null, last_day }: sorted qualified values per metric + established ratings.
+ * Lets a build hold one small record per player instead of every full snapshot (dna-v2-job two-pass build).
+ */
+export function populationIndex(group, { asOf }) {
   const yearAgo = new Date(Date.parse(asOf) - 365 * 86400e3).toISOString().slice(0, 10);
-  const est = (g) => g.metrics._rating && g.metrics._rating.rated_matches >= 20 && (g.provenance.sample.last_day || '') >= yearAgo;
-  const rv = group.filter(est).map((g) => g.metrics._rating.value).sort((a, b) => a - b);
-  out.pbe_rating = rv.length;
-  for (const g of group) {
-    const r = g.metrics._rating;
-    if (!r) continue;
-    r.population_established = rv.length;
-    r.established = est(g);
-    r.percentile = ratingPublished && est(g) && rv.length >= COMPARATIVE_MIN ? pct(rv, r.value, false) : null;
+  const vals = {};
+  const counts = {};
+  for (const key of Object.keys(MATCH_DEFINITIONS)) {
+    vals[key] = group.map((g) => g.metrics[key]).filter(usable).map((m) => m.value).sort((a, b) => a - b);
+    counts[key] = vals[key].length;
   }
-  return out;
+  const rv = group.filter((g) => estOf(g, yearAgo)).map((g) => (g.rating || g.metrics._rating).value).sort((a, b) => a - b);
+  counts.pbe_rating = rv.length;
+  return { vals, rv, yearAgo, counts };
+}
+
+// established rating: >= 20 rated matches and a match in the 365 days before as_of (slim or full record)
+function estOf(g, yearAgo) {
+  const r = g.rating !== undefined ? g.rating : g.metrics._rating;
+  const last = g.last_day !== undefined ? g.last_day : g.provenance?.sample?.last_day;
+  return !!(r && r.rated_matches >= 20 && (last || '') >= yearAgo);
+}
+
+/** Mutates ONE full snapshot with the population's percentiles and gates (identical to applyPopulation). */
+export function applyPopulationOne(g, idx, { ratingPublished = false } = {}) {
+  for (const key of Object.keys(MATCH_DEFINITIONS)) {
+    const m = g.metrics[key];
+    if (!m) continue;
+    const vals = idx.vals[key];
+    m.population_qualified = vals.length;
+    m.comparative_published = m.comparable && vals.length >= COMPARATIVE_MIN;
+    m.percentile = usable(m) && vals.length >= PERCENTILE_MIN_PEERS ? pct(vals, m.value, m.lower_is_better) : null;
+  }
+  const r = g.metrics._rating;
+  if (!r) return;
+  r.population_established = idx.rv.length;
+  r.established = estOf(g, idx.yearAgo);
+  r.percentile = ratingPublished && r.established && idx.rv.length >= COMPARATIVE_MIN ? pct(idx.rv, r.value, false) : null;
+}
+
+/** Slim population record of a full snapshot (what populationIndex needs, nothing else). */
+export function slimForPopulation(snap) {
+  const metrics = {};
+  for (const key of Object.keys(MATCH_DEFINITIONS)) { const m = snap.metrics[key]; if (m) metrics[key] = { value: m.value, comparable: m.comparable, confidence: m.confidence }; }
+  const r = snap.metrics._rating;
+  return { metrics, rating: r ? { value: r.value, rated_matches: r.rated_matches } : null, last_day: snap.provenance.sample.last_day };
 }
 
 function pct(sorted, v, lowerIsBetter) {
-  let below = 0;
-  for (const x of sorted) if (x < v) below += 1; else break;
-  const p = Math.round((below / sorted.length) * 100);
+  // number of values strictly below v (sorted ascending): binary search, the same count as a linear scan
+  let lo = 0;
+  let hi = sorted.length;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (sorted[mid] < v) lo = mid + 1; else hi = mid; }
+  const p = Math.round((lo / sorted.length) * 100);
   return lowerIsBetter ? 100 - p : p;
 }
 
 /** The player's last `limit` ledger matches before as_of, with the opponent's rank at match time. */
 export function recentMatches(pid, entries, asOf, { rankAt = () => null, limit = 40 } = {}) {
-  return entries.filter((e) => e.day < asOf).sort((a, b) => (a.order < b.order ? 1 : -1)).slice(0, limit).map((e) => {
+  return entries.filter((e) => e.day < asOf).sort((a, b) => byOrder(b, a)).slice(0, limit).map((e) => {
     const me = e.A === pid ? 'A' : 'B';
     const opp = me === 'A' ? e.B : e.A;
     const r = rankAt(opp, e.rank_day);
     return { match_id: e.id, day: e.day, opponent: opp, won: e.winner === me, status: e.status, round: e.round, surface: e.surface,
-      score: e.sets.map((x) => (me === 'A' ? `${x.a}-${x.b}` : `${x.b}-${x.a}`)).join(' ') + (e.status === 'retired' ? ' ret.' : ''),
+      score: e.packed.map((x) => (me === 'A' ? `${x & 255}-${x >> 8}` : `${x >> 8}-${x & 255}`)).join(' ') + (e.status === 'retired' ? ' ret.' : ''),
       opponent_rank: r?.rank ? { rank: r.rank, list_date: r.list_date } : r?.outside ? { outside: r.outside, list_date: r.list_date } : null };
   });
 }

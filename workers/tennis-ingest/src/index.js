@@ -68,10 +68,11 @@ export async function tick(env, { force = {}, only = null, budget = null, params
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured', store: !!store, kv: !!kv };
-  // sharded history runs take their own per-shard lock (they never touch another lane's state); everything
-  // else is one tick at a time: a slow tick must not overlap the next cron firing
-  if (only === 'wta_history' && Number(params.shards) > 1) {
-    const lk = `tick:lock:wta_history:${params.shard}/${params.shards}`;
+  // everything else is one tick at a time (a slow tick must not overlap the next cron firing); lanes whose admin runs never share cursor state with a cron step take their own lock (per shard for the
+  // sharded history backfill), so a long backfill never starves the cron tick or another admin lane
+  const OWN_LOCK = ['wta_records', 'wta_edition_facts', 'dna_v2'];
+  if ((only === 'wta_history' && Number(params.shards) > 1) || OWN_LOCK.includes(only)) {
+    const lk = only === 'wta_history' ? `tick:lock:wta_history:${params.shard}/${params.shards}` : `tick:lock:lane:${only}`;
     const held = await kv.get(lk);
     if (held && Date.now() - Date.parse(held) < 290 * 1000) return { ok: false, error: 'tick_in_progress', since: held };
     await kv.put(lk, new Date().toISOString(), { expirationTtl: 300 });
@@ -291,10 +292,11 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     if (!force.dna && (await kv.get('dna2:last')) === day) return 'fresh';
     const hist = (await kv.get('dna2:hist')) || `${day.slice(0, 7)}-01`;
     const asOfs = [day, ...(hist >= '2008-01-01' && hist !== day ? [hist] : [])];
-    const r = await buildDnaV2(ctx, { asOfs });
+    // input mode: 'full' until the incremental loader has been proven equal (KV dna2:mode = 'auto' switches)
+    const r = await buildDnaV2(ctx, { asOfs, mode: (await kv.get('dna2:mode')) === 'auto' ? 'auto' : 'full' });
     await kv.put('dna2:last', day);
     if (asOfs.length > 1) { const d = new Date(`${hist}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); await kv.put('dna2:hist', d.toISOString().slice(0, 10)); }
-    return { as_of: r.as_of, snapshots: r.snapshots, ratings: r.ratings, ms: r.ms, published: Object.fromEntries(Object.entries(r.tours).map(([t, x]) => [t, x.published])) };
+    return { as_of: r.as_of, snapshots: r.snapshots, ratings: r.ratings, ms: r.ms, phase_ms: r.phase_ms, inputs: r.inputs, published: Object.fromEntries(Object.entries(r.tours).map(([t, x]) => [t, x.published])) };
   });
 
   // 6. weekly identity jobs
@@ -327,7 +329,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -393,7 +395,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume') } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume'), mode: url.searchParams.get('mode') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },

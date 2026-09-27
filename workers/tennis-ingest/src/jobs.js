@@ -111,6 +111,7 @@ export async function rankingStep(ctx, kind, date, pages) {
     if (r.state !== 'PASS') break;
     // the API answers any date with the list in force on it; keep the list's own date
     const w = await writeRankingPage(ctx.store, r.records, { captureId: r.capture?.capture_id || null });
+    await ctx.kv.put('rank:changed_at', new Date().toISOString()); // DNA v2 rank-list cache: rank rows written
     st.snapshot_id = w.snapshot_id;
     st.list_date = r.records[0].ranking_date;
     st.page += 1;
