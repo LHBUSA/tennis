@@ -368,7 +368,7 @@ test('lane: identity lookups first, then writes; rerun is idempotent; unmapped a
 test('lane: an athlete id ESPN refuses with 400 is recorded as having no bio record, not retried forever', async () => {
   const ids = athletesOf(fx('event-154-2026.json'));
   const { ctx, kv } = laneCtx();
-  ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: [] } }], [/status/, fx('status-walkover.json')], [/events\/154-2026$/, fx('event-154-2026.json')], [new RegExp(`athletes/${ids[0]}$`), { __status: 400, body: '{"error":{"message":"Sports Athletes not supported for tennis","code":400}}' }], [/athletes\/(\d+)$/, (url) => ({ id: /athletes\/(\d+)$/.exec(url)[1] })]]);
+  ctx.client = fakeClient([[/query\.wikidata\.org/, { results: { bindings: [{ h: { value: 'Q1' }, e: { value: '1' }, atp: { value: 'Z1' } }] } }], [/status/, fx('status-walkover.json')], [/events\/154-2026$/, fx('event-154-2026.json')], [new RegExp(`athletes/${ids[0]}$`), { __status: 400, body: '{"error":{"message":"Sports Athletes not supported for tennis","code":400}}' }], [/athletes\/(\d+)$/, (url) => ({ id: /athletes\/(\d+)$/.exec(url)[1] })]]);
   let r;
   for (let i = 0; i < 10; i += 1) { ctx.espnIdentity = null; r = await espnEventStep(ctx, '154-2026', { lookups: 8 }); if (r.state !== 'IDENTITY_PENDING') break; }
   assert.equal(r.state, 'PASS');
