@@ -21,9 +21,14 @@ export function mount(root) {
         <img src="/brand/tennis-hero-1600.webp" srcset="/brand/tennis-hero-1200.webp 1200w, /brand/tennis-hero-1600.webp 1600w, /brand/tennis-hero-2400.webp 2400w" sizes="100vw" width="1600" height="900" alt="" fetchpriority="high" decoding="async">
       </picture>
       <div class="hero-in">
+        <div class="open-build">
+          <span class="open-build__badge"><i aria-hidden="true"></i>OPEN BUILD</span>
+          <span class="open-build__copy">Real data · real-time systems · daily updates</span>
+        </div>
         <p class="eyebrow">PropBetEdge Tennis</p>
         <h1 id="hero-h">Global Tennis Intelligence</h1>
         <p class="hero-sub">Singles, doubles and mixed — live scores, Grand Slam match data, point-by-point PBEcast replays and player analytics, built on a data graph PropBetEdge collects, normalizes and owns.</p>
+        <p class="open-build__note">Follow along as we build PropBetEdge Tennis in public. The data is real and live; the product is still being finished.</p>
         <div class="hero-cta"><a class="btn" href="/live">Live now</a><a class="btn ghost" href="/pbecast">PBEcast</a><a class="btn ghost" href="/news">News</a><a class="btn ghost" href="/players">Players</a><a class="btn ghost" href="/tournaments">Tournaments</a></div>
         <p class="hero-strip" data-strip>Checking live matches…</p>
       </div>
