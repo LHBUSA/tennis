@@ -61,6 +61,9 @@ try {
       errors.length = 0;
       await page.goto(BASE + p, { waitUntil: 'networkidle', timeout: 60000 });
       await page.waitForFunction(() => !document.querySelector('.loading'), null, { timeout: 30000 }).catch(() => errors.push('still loading after 30s'));
+      // load every lazy image before measuring / capturing (a full-page shot does not scroll)
+      await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight; y += 700) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 60)); } window.scrollTo(0, 0); });
+      await page.waitForLoadState('networkidle').catch(() => {});
       const m = await page.evaluate(() => {
         const text = document.querySelector('main')?.innerText || '';
         return {

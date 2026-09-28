@@ -627,7 +627,7 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .ptw li:first-child { border-top: 0; }
 .ptw-n { color: var(--muted); font: 700 13px var(--f-data); text-align: right; }
 .ptw-p { min-width: 0; }
-.ptw-p a { display: block; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptw-p a { display: block; font-weight: 700; overflow-wrap: anywhere; line-height: 1.3; }
 .ptw-p small { color: var(--muted); font-size: 12px; }
 .ptw b { font-size: 13.5px; text-align: right; }
 @media (max-width: 520px) {
