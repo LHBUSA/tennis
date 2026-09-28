@@ -38,6 +38,10 @@ for (const slug of PLAYERS) {
   add(`${slug}: tour`, md.tour === expectTour, { tour: md.tour, rating: md.rating?.value ?? null, rating_status: md.rating?.status ?? null });
   const ids = md.recent.map((r) => r.match_id);
   add(`${slug}: no duplicate match in history`, new Set(ids).size === ids.length);
+  // surface Match DNA (2026-09-28): sourced surfaces only, subsets of the overall record, gates coherent
+  const S = md.by_surface || [];
+  const sBad = S.filter((x) => !['hard', 'clay', 'grass'].includes(x.surface) || x.sample.matches < 5 || x.sample.matches > md.sample.matches || x.metrics.some((m) => m.percentile != null && (!['medium', 'high'].includes(m.confidence))) || (x.rating && x.rating.status === 'published' && md.rating?.status === 'not_validated'));
+  add(`${slug}: surface Match DNA coherent`, sBad.length === 0, { surfaces: S.map((x) => `${x.surface}:${x.sample.matches}`), sum: S.reduce((t, x) => t + x.sample.matches, 0), overall: md.sample.matches, bad: sBad.map((x) => x.surface) });
 }
 
 const browser = await chromium.launch({ executablePath: CHROME, headless: true });
@@ -55,6 +59,7 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     if (errors.length) fails.push(`console:${errors[0]}`);
     if (/could not be loaded|Could not load/i.test(r.text)) fails.push('error_state');
     if (/\/dna$/.test(route) && !/MATCH DNA — LIVE/i.test(r.text)) fails.push('match_dna_missing');
+    if (/\/dna$/.test(route) && !/by surface/i.test(r.text)) fails.push('surface_table_missing');
     if (/\/players\/[^/]+$/.test(route) && !/Match DNA/i.test(r.text)) fails.push('overview_match_dna_missing');
     if (/^\/dna\?/.test(route) && !/qualified players/.test(r.text)) fails.push('leaderboard_missing');
     add(`UI ${w} ${route}`, !fails.length, { fails });

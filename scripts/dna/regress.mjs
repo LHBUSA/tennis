@@ -46,6 +46,7 @@ class FakeStore {
       const et = p.event_type?.startsWith('eq.') ? [p.event_type.slice(3)] : ['MS', 'WS'];
       // timestamps compared as instants (the SQL dump prints '2026-09-27 23:16:00+00'; PostgREST compares server-side)
       const cut = since ? Date.parse(decodeURIComponent(since)) : null;
+      // the builder's scans carry no status filter (a row that left completed/retired must leave the cache)
       const rows = D.matches.filter((m) => m.match_id > gt && et.includes(m.event_type) && (cut == null || Date.parse(String(m.updated_at).replace(' ', 'T').replace(/\+00$/, 'Z')) > cut));
       return rows.slice(0, Number(p.limit || 1000));
     }
