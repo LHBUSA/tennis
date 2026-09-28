@@ -273,3 +273,12 @@ test('writeGroups: two incoming rows that resolve to the same match in one pass 
   assert.equal(s.rows('tennis_match_participants').filter((p) => p.match_id === espnId).length, 2);
   assert.ok(s.rows('tennis_ingest_holds').some((h) => /same_match_twice_in_one_pass/.test(h.problems.join(' '))));
 });
+
+test('a draw placeholder never becomes a person (TBD / BYE / non-numeric WTA ids are skipped)', async () => {
+  const { realProviderId } = await import('../workers/tennis-ingest/src/writer.js');
+  assert.equal(realProviderId('wta', 'TBD'), false); assert.equal(realProviderId('wta', 'Bye'), false); assert.equal(realProviderId('wta', '320760'), true);
+  assert.equal(realProviderId('espn', '3623'), true); assert.equal(realProviderId('espn', 'undefined'), false); assert.equal(realProviderId('atp', 'S0AG'), true);
+  const s = new MemStore();
+  const r = await writeMatches(s, [sm('wta', '1-2026-LS001', 'M-1', '320760', 'TBD')], { edition_id: E }, { dedupe: true });
+  assert.equal(r.skipped, 1); assert.equal(s.rows('tennis_players').length, 0);
+});

@@ -39,10 +39,21 @@ export async function hold(store, rows) {
 
 // ---- players -------------------------------------------------------------------------------------------
 /** Players from an authoritative bio source (rankings, player endpoint): merge. */
+// a draw placeholder is never a person: TBD / BYE / QUALIFIER slots, 'undefined', and non-numeric WTA / ATP ids
+// (observed 2026-09-27: a canonical player "wta:TBD" minted from a draw slot; removed 2026-09-28)
+const PLACEHOLDER = /^(tbd|tba|bye|qualifier|q|ll|wc|undefined|null|n\/a|-)$/i;
+export function realProviderId(provider, id) {
+  const s = String(id ?? '').trim();
+  if (!s || PLACEHOLDER.test(s)) return false;
+  if (['wta', 'atp'].includes(provider) && !/^[0-9A-Z]{1,12}$/.test(s)) return false;
+  if (provider === 'wta' && !/^\d+$/.test(s)) return false;
+  return true;
+}
+
 export async function upsertPlayersFull(store, members, provider) {
   const byId = new Map();
   for (const m of members) {
-    if (!m?.provider_id) continue;
+    if (!m?.provider_id || !realProviderId(provider, m.provider_id)) continue;
     const id = await mintPlayerId(provider, m.provider_id);
     byId.set(id, {
       pbe_player_id: id, founding_external_key: externalKey(provider, m.provider_id),
@@ -163,7 +174,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
   const holds = [];
   for (const { edition, sourceMatches } of groups) for (const sm of sourceMatches) {
     // matches without both sides decided yet (TBD slots) are not matches yet
-    if (!(sm.sides?.A?.length && sm.sides?.B?.length) || sm.sides.A.some((m) => !m.provider_id || m.provider_id === 'undefined') || sm.sides.B.some((m) => !m.provider_id || m.provider_id === 'undefined')) { result.skipped += 1; continue; }
+    if (!(sm.sides?.A?.length && sm.sides?.B?.length) || [...sm.sides.A, ...sm.sides.B].some((m) => !m.provider_id || !realProviderId(m.provider, m.provider_id))) { result.skipped += 1; continue; }
     if (!sm.status) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: sm.warnings || ['no_status'], payload: slim(sm), capture_id: captureId }); continue; }
     const n = await normalizeMatch(sm);
     if (!n.canonical) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: n.problems, payload: slim(sm), capture_id: captureId }); continue; }
