@@ -179,7 +179,7 @@ export function competitorAthletes(c) {
  * idMap: espn athlete id -> { provider, provider_id, evidence, method, first_name, last_name, gender }.
  * Returns { edition, matches, skipped: [{ id, reason }], athletes: [ids], needsStatus: [compIds] }.
  */
-export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'atp' } = {}) {
+export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'atp', now = Date.now() } = {}) {
   const ev = splitEventId(json?.id);
   if (!ev) return { edition: null, matches: [], skipped: [{ id: json?.id ?? null, reason: 'bad_event_id' }], athletes: [], needsStatus: [] };
   const slamDef = ESPN_SLAMS[ev.tid] || null;
@@ -213,7 +213,26 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'at
     if (ids.some((x) => !x) || ids.some((x) => x.length !== (SINGLES.has(et) ? 1 : 2))) { out.skipped.push({ id: pmid, reason: 'competitor_ids' }); continue; }
     for (const x of ids.flat()) out.athletes.add(x);
     const note = (c.notes || []).map((n) => n.text).find((t) => / bt /.test(String(t)));
-    if (!note) { out.skipped.push({ id: pmid, reason: 'no_result' }); continue; } // scheduled / in progress: not written by this lane
+    if (!note) {
+      // an UPCOMING fixture (Phase 6 Matchup DNA): no result line and a start still in the future is unambiguous; a
+      // past start without a result (live, cancelled, unreported) stays unwritten — never guessed
+      const at = c.date && Math.abs(Number(String(c.date).slice(0, 4)) - ev.year) <= 1 ? Date.parse(c.date) : NaN;
+      let frd = espnRound(c.round, qual[et] || 0);
+      if (frd?.stage === 'round_robin' && slam) frd = null;
+      if (!(at > now) || !frd) { out.skipped.push({ id: pmid, reason: 'no_result' }); continue; }
+      const fside = (k) => ids[k].map((aid) => {
+        let x = idMap[aid] || null;
+        if (x && et !== 'XD' && x.provider !== (et.startsWith('W') ? 'wta' : 'atp')) x = null;
+        return { provider: 'espn', provider_id: aid, tour_id: x ? { provider: x.provider, provider_id: x.provider_id } : null, tour_id_evidence: x?.evidence || null, tour_id_method: x?.method || null, first_name: x?.first_name || null, last_name: x?.last_name || null, country: x?.country || null, gender: et === 'XD' ? x?.gender || null : et.startsWith('W') ? 'F' : 'M' };
+      });
+      out.matches.push({
+        type: 'match', provider: 'espn', provider_match_id: pmid, provider_event: { id: json.id, year: ev.year }, event_type: et, stage: frd.stage, round_code: frd.code, format_key: null,
+        status: 'scheduled', winner_side: null, end_reason: null, retired_side: null, withdrawn_side: null, sets: [], live: null, sides: { A: fside(0), B: fside(1) },
+        seeds: { A: Number.isInteger(cs[0].tournamentSeed) ? cs[0].tournamentSeed : null, B: Number.isInteger(cs[1].tournamentSeed) ? cs[1].tournamentSeed : null }, entry: { A: null, B: null },
+        court_name: c.court?.description || null, scheduled_at: new Date(at).toISOString(), match_day: espnDay(c.date), started_at: null, source_updated_at: null, warnings: []
+      });
+      continue;
+    }
     const warnings = [];
     const r = parseResultNote(note);
     const winners = cs.filter((x) => x.winner === true);

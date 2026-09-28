@@ -119,8 +119,9 @@ test('non-Slam doubles "1-0 (10-2)" and historical "13-11" / "1-0 (10-7)" are ma
   assert.deepEqual([Math.max(tb.A, tb.B), Math.min(tb.A, tb.B)], [13, 11]);
 });
 
-test('in-progress / scheduled competitions are not written by this lane', () => {
-  const r = espn.parseEspnEvent(fx('event-441-2026-inprogress.json'), { idMap: allResolve() });
+test('in-progress / past competitions without a result are not written by this lane', () => {
+  // clock pinned after every start in the capture: nothing is upcoming, so nothing without a result may be written
+  const r = espn.parseEspnEvent(fx('event-441-2026-inprogress.json'), { idMap: allResolve(), now: Date.parse('2030-01-01') });
   assert.equal(r.matches.length, 0);
   assert.ok(r.skipped.every((s) => ['no_result', 'competitor_ids'].includes(s.reason)));
 });
@@ -527,4 +528,27 @@ test('ESPN event log: a bare $ref (no log that season) is absent, not drift', as
   const body = JSON.stringify({ $ref: 'http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2025/athletes/10645/eventlog' });
   assert.deepEqual(espnEventLog.shape(body), []);
   assert.deepEqual(espnEventLog.parse(body), []);
+});
+
+test('upcoming fixtures: a future-dated competition without a result is a scheduled match; a past one is not written', async () => {
+  const { MemStore } = await import('./helpers/memstore.js');
+  const comp = (id, date) => ({ id, date, type: { text: "Men's Singles" }, round: { description: 'Round 2' }, court: { description: 'Court 1' }, notes: [],
+    competitors: [{ order: 1, id: '11', athlete: { $ref: 'x/athletes/11?' }, tournamentSeed: 3 }, { order: 2, id: '22', athlete: { $ref: 'x/athletes/22?' } }] });
+  const json = { id: '999-2026', name: 'Test Open', date: '2026-10-05T00:00Z', endDate: '2026-10-11T00:00Z', season: { year: 2026 }, competitions: [comp('1', '2026-10-06T10:00Z'), comp('2', '2026-09-01T10:00Z')] };
+  const now = Date.parse('2026-09-28T12:00:00Z');
+  const p = espn.parseEspnEvent(json, { idMap: allResolve(), now });
+  const fx = p.matches.filter((m) => m.status === 'scheduled');
+  assert.equal(fx.length, 1); assert.equal(fx[0].provider_match_id, '999-2026:1'); assert.equal(fx[0].scheduled_at, '2026-10-06T10:00:00.000Z');
+  assert.equal(fx[0].winner_side, null); assert.deepEqual(fx[0].sets, []); assert.equal(fx[0].seeds.A, 3);
+  assert.ok(p.skipped.some((x) => x.id === '999-2026:2' && x.reason === 'no_result'), 'a past start without a result is never guessed');
+  const s = new MemStore();
+  const E = '00000000-0000-4000-8000-0000000fe001';
+  const w = await writeMatches(s, fx, { edition_id: E }, { dedupe: true });
+  assert.equal(w.written, 1);
+  const row = s.rows('tennis_matches')[0];
+  assert.equal(row.status, 'scheduled'); assert.equal(row.winner_side, null);
+  // the same ESPN id later reports the result: same row, now final
+  const done = { ...fx[0], status: 'completed', winner_side: 'A', end_reason: 'completed', format_key: 'BO3_TB7', sets: [{ games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 6, B: 2 }, tiebreak: null, is_match_tiebreak: false }] };
+  await writeMatches(s, [done], { edition_id: E }, { dedupe: true });
+  assert.equal(s.rows('tennis_matches').length, 1); assert.equal(s.rows('tennis_matches')[0].status, 'completed');
 });
