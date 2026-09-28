@@ -1,6 +1,6 @@
 // In-memory stand-in for workers/shared/store/postgrest.js (tests only). Implements the PostgREST query
 // subset the ingest writers use: eq / neq / in / is.null / not.is.null / like / gt / gte / lt / lte filters,
-// limit / offset / order, one-level embeds joined on match_id, upsert with on_conflict (merge or ignore),
+// limit / offset / order, one-level embeds joined on match_id (embedded filters + !inner applied before paging), upsert with on_conflict (merge or ignore),
 // PATCH / DELETE through req(), exact count. Unique constraints listed below raise 409 like Postgres would.
 
 const PK = {
@@ -36,26 +36,43 @@ function parseList(v) {
 }
 const likeRe = (p) => new RegExp(`^${p.split('*').map((s) => s.replace(/[.+?^${}()|[\]\\]/g, '\\$&')).join('.*')}$`);
 
+function opTest(part, v) {
+  const [op, ...rest] = v.split('.');
+  const val = rest.join('.');
+  const f = {
+    eq: (x) => String(x) === val, neq: (x) => String(x) !== val, gt: (x) => x > coerce(val, x), gte: (x) => x >= coerce(val, x), lt: (x) => x < coerce(val, x), lte: (x) => x <= coerce(val, x),
+    in: (x) => parseList(val).includes(String(x)), like: (x) => x != null && likeRe(val).test(String(x)),
+    is: (x) => (val === 'null' ? x == null : String(x) === val), not: (x) => (val === 'is.null' ? x != null : true)
+  }[op];
+  if (!f) throw new Error(`memstore: unsupported filter ${part}`);
+  return f;
+}
+
+// Embedded resources (joined on match_id, one level): `embed.col=op.val` filters the embedded rows; an embed written
+// `embed!inner(...)` drops parent rows that have no embedded row left. Both apply BEFORE order / offset / limit,
+// as in PostgREST.
 function matcher(query) {
   const tests = [];
-  const opts = { limit: Infinity, offset: 0, order: null, embeds: [] };
+  const opts = { limit: Infinity, offset: 0, order: null, embeds: [], inner: new Set(), embedTests: {} };
   for (const part of String(query || '').split('&').filter(Boolean)) {
     const i = part.indexOf('=');
     const k = decodeURIComponent(part.slice(0, i));
     const v = decodeURIComponent(part.slice(i + 1));
-    if (k === 'select') { opts.embeds = [...v.matchAll(/(\w+)(?:!inner)?\(/g)].map((m) => m[1]); continue; }
+    if (k === 'select') {
+      opts.embeds = [...v.matchAll(/(\w+)(?:!inner)?\(/g)].map((m) => m[1]);
+      for (const m of v.matchAll(/(\w+)!inner\(/g)) opts.inner.add(m[1]);
+      continue;
+    }
     if (k === 'limit') { opts.limit = Number(v); continue; }
     if (k === 'offset') { opts.offset = Number(v); continue; }
     if (k === 'order') { opts.order = v; continue; }
-    if (k.includes('.')) continue; // embedded-resource filters are not modelled
-    const [op, ...rest] = v.split('.');
-    const val = rest.join('.');
-    const f = {
-      eq: (x) => String(x) === val, neq: (x) => String(x) !== val, gt: (x) => x > coerce(val, x), gte: (x) => x >= coerce(val, x), lt: (x) => x < coerce(val, x), lte: (x) => x <= coerce(val, x),
-      in: (x) => parseList(val).includes(String(x)), like: (x) => x != null && likeRe(val).test(String(x)),
-      is: (x) => (val === 'null' ? x == null : String(x) === val), not: (x) => (val === 'is.null' ? x != null : true)
-    }[op];
-    if (!f) throw new Error(`memstore: unsupported filter ${part}`);
+    if (k.includes('.')) {
+      const [embed, col] = k.split('.');
+      const f = opTest(part, v);
+      (opts.embedTests[embed] ||= []).push((row) => f(row[col]));
+      continue;
+    }
+    const f = opTest(part, v);
     tests.push((row) => f(row[k]));
   }
   return { test: (row) => tests.every((t) => t(row)), opts };
@@ -79,10 +96,13 @@ export class MemStore {
     this.log.push(['GET', table, query]);
     const { test, opts } = matcher(query);
     let out = this.rows(table).filter(test).map((r) => ({ ...r }));
+    for (const e of opts.embeds) {
+      const et = opts.embedTests[e] || [];
+      for (const r of out) r[e] = this.rows(e).filter((x) => x.match_id === r.match_id && et.every((t) => t(x))).map((x) => ({ ...x }));
+      if (opts.inner.has(e)) out = out.filter((r) => r[e].length);
+    }
     if (opts.order) { const [col, dir] = opts.order.split(',')[0].split('.'); out.sort((a, b) => (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1)); }
-    out = out.slice(opts.offset, opts.offset + opts.limit);
-    for (const e of opts.embeds) for (const r of out) r[e] = this.rows(e).filter((x) => x.match_id === r.match_id).map((x) => ({ ...x }));
-    return out;
+    return out.slice(opts.offset, opts.offset + opts.limit);
   }
   async upsert(table, rows, { onConflict, ignore = false } = {}) {
     this.requests += 1;

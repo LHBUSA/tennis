@@ -357,13 +357,42 @@ export function winnerGames(scoreText, winnerSide) {
   return [...sets.map(([a, b]) => (winnerSide === 'B' ? `${b}-${a}` : `${a}-${b}`)), tail].filter(Boolean).join(' ');
 }
 
-async function selectAll(store, table, query, page = 1000) {
-  const out = [];
-  for (let off = 0; ; off += page) {
-    const rows = await store.select(table, `${query}&limit=${page}&offset=${off}`);
-    out.push(...rows);
-    if (rows.length < page) return out;
+
+/**
+ * Stored matches of `eds` that involve any of `keys` (participant keys). EDITION-FIRST (2026-09-28): each request starts
+ * from tennis_matches by edition (index tennis_matches_edition) and embeds only participants whose key is incoming
+ * (!inner drops matches without one), ordered by (edition_id, match_id) -- the order that index provides, so the planner
+ * cannot switch to walking a whole primary key to satisfy ORDER BY + LIMIT. Editions go in groups of ED_GROUP so one
+ * statement's cost stays bounded by at most 8 editions' matches. The previous participant-first form read every
+ * historical participant row of the incoming players and could walk the whole participants index (Seoul 60 keys:
+ * ~1.1 s warm; 3 editions 22.7 s cold) -> 57014 under the 8 s statement timeout. Same result set.
+ * Paging: a group's page is complete unless it holds `page` rows; then each edition of that group is finished with a
+ * single-edition keyset on match_id (never OFFSET).
+ */
+export const ED_GROUP = 8;
+export async function candidateMatchIds(store, keys, eds, { page = 1000, keyBatch = 100, edGroup = ED_GROUP } = {}) {
+  const out = new Set();
+  if (!keys.length || !eds.length) return out;
+  const sel = 'select=match_id,tennis_match_participants!inner(participant_key)';
+  for (let i = 0; i < keys.length; i += keyBatch) {
+    const kf = `tennis_match_participants.participant_key=${inList(keys.slice(i, i + keyBatch))}`;
+    for (let g = 0; g < eds.length; g += edGroup) {
+      const group = eds.slice(g, g + edGroup);
+      const rows = await store.select('tennis_matches', `${sel}&edition_id=${inList(group)}&${kf}&order=edition_id.asc,match_id.asc&limit=${page}`);
+      for (const r of rows) out.add(r.match_id);
+      if (rows.length < page) continue;
+      for (const e of group) {
+        let after = null;
+        for (;;) {
+          const more = await store.select('tennis_matches', `${sel}&edition_id=eq.${e}&${kf}${after ? `&match_id=gt.${after}` : ''}&order=match_id.asc&limit=${page}`);
+          for (const r of more) out.add(r.match_id);
+          if (more.length < page) break;
+          after = more.at(-1).match_id;
+        }
+      }
+    }
   }
+  return out;
 }
 
 async function crossSource(store, normalized, holds, captureId) {
@@ -377,9 +406,7 @@ async function crossSource(store, normalized, holds, captureId) {
   const cand = new Set();
   for (const x of normalized) { cand.add(x.id); if (extMap.has(x.sm.provider_match_id)) cand.add(extMap.get(x.sm.provider_match_id)); }
   const keys = [...new Set(normalized.flatMap((x) => [x.n.match.participants.A, x.n.match.participants.B]))];
-  for (let i = 0; i < keys.length; i += 100) {
-    for (const r of await selectAll(store, 'tennis_match_participants', `select=match_id,tennis_matches!inner(edition_id)&participant_key=${inList(keys.slice(i, i + 100))}&tennis_matches.edition_id=${inList(eds)}&order=match_id.asc,side.asc`)) cand.add(r.match_id);
-  }
+  for (const id of await candidateMatchIds(store, keys, eds)) cand.add(id);
   const ids = [...cand];
   const rows = [];
   for (let i = 0; i < ids.length; i += 150) rows.push(...(await store.select('tennis_matches', `select=match_id,edition_id,event_type,round,status,score_text,winner_side,source_family&match_id=${inList(ids.slice(i, i + 150))}`)));

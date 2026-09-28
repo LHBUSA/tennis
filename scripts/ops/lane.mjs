@@ -37,6 +37,8 @@ async function shard(k) {
     if (shards > 1) { q.set('shard', String(k)); q.set('shards', String(shards)); }
     if (write != null) q.set('write', write);
     if (dry != null) q.set('dry', dry);
+    // --q key=value (repeatable): extra lane parameters, e.g. candidate_probe editions / player / n / legacy
+    rest.forEach((a, i) => { if (a === '--q' && /^[a-z_]+=[\w,.-]*$/.test(rest[i + 1] || '')) { const [kk, vv] = rest[i + 1].split('='); q.set(kk, vv); } });
     let body = null;
     try {
       // node:https (not fetch): undici gives up after 300 s without response headers, shorter than a full DNA build
