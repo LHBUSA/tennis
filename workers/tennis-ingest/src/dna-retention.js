@@ -1,27 +1,35 @@
-// Tennis DNA snapshot retention (owner-approved 2026-09-28): per definition version, keep every snapshot dated within
-// the last DAILY_DAYS days, the EARLIEST snapshot of every calendar month (the monthly snapshot; the historical lanes
-// already build first-of-month dates) and always the newest date; delete the other dates' rows. Readers only use the
-// newest date (API) or the latest date before a story's date (newsroom packet), so a pruned daily never breaks a read.
-// Bounded per run (MAX_DATES_PER_RUN) and skipped while the database guard has bulk work paused.
+// Tennis DNA snapshot retention (owner-approved 2026-09-28, corrected 2026-09-28): retention preserves the latest 14
+// successful daily DNA snapshots independently for each DNA version, plus the designated monthly archive snapshots and the
+// latest snapshot. Missing build days do not reduce the number of daily snapshots retained (a COUNT of stored snapshot
+// dates, never a calendar window). Monthly archive = the earliest stored date of every calendar month (the historical
+// lanes build first-of-month dates); it is additional protection and does not count against the 14. Readers only use
+// the newest date (API) or the latest date before a story's date (newsroom packet), so a pruned daily never breaks a read.
+// Bounded per run (MAX_DATES_PER_RUN dates, shared across versions) and skipped while the database guard has bulk work
+// paused.
 
-export const DAILY_DAYS = 14;
+export const DAILY_KEEP = 14;
 export const MAX_DATES_PER_RUN = 3;
 const SURFACES = ['all', 'hard', 'clay', 'grass'];
 
-/** Pure plan: { keep: [{ as_of, why }], remove: [as_of] } for one definition version's distinct dates. */
-export function retentionPlan(dates, today, { days = DAILY_DAYS } = {}) {
+/**
+ * Pure plan for ONE definition version's distinct stored snapshot dates:
+ * { daily: [the latest DAILY_KEEP dates], keep: [{ as_of, why }], remove: [as_of] }.
+ * why: 'daily' (one of the latest 14) | 'newest' | 'monthly' (earliest date of its month). `today` is informational
+ * only: the rule never measures calendar distance.
+ */
+export function retentionPlan(dates, today = null, { keep = DAILY_KEEP } = {}) {
   const sorted = [...new Set(dates)].sort();
-  const cutoff = new Date(Date.parse(`${today}T00:00:00Z`) - days * 86400e3).toISOString().slice(0, 10);
+  const daily = new Set(sorted.slice(-keep));
   const monthly = new Map();
   for (const d of sorted) if (!monthly.has(d.slice(0, 7))) monthly.set(d.slice(0, 7), d);
   const newest = sorted.at(-1);
-  const keep = [];
+  const kept = [];
   const remove = [];
   for (const d of sorted) {
-    const why = d > cutoff ? 'daily' : monthly.get(d.slice(0, 7)) === d ? 'monthly' : d === newest ? 'newest' : null;
-    if (why) keep.push({ as_of: d, why }); else remove.push(d);
+    const why = d === newest ? 'newest' : daily.has(d) ? 'daily' : monthly.get(d.slice(0, 7)) === d ? 'monthly' : null;
+    if (why) kept.push({ as_of: d, why }); else remove.push(d);
   }
-  return { cutoff, keep, remove };
+  return { today, daily: [...daily].sort().reverse(), oldest_daily: sorted.slice(-keep)[0] ?? null, keep: kept, remove };
 }
 
 /** Distinct as_of dates of one definition version (skip-scan: one indexed-order read per date). */
@@ -38,7 +46,7 @@ async function distinctDates(store, dv) {
 }
 
 export async function runRetention(ctx, { today, write = true } = {}) {
-  const report = { today, daily_days: DAILY_DAYS, versions: {} };
+  const report = { today, daily_keep: DAILY_KEEP, policy: 'latest 14 successful snapshots per version + monthly archive + newest', versions: {} };
   let budget = MAX_DATES_PER_RUN;
   for (const dv of [1, 2]) {
     const plan = retentionPlan(await distinctDates(ctx.store, dv), today);
@@ -54,7 +62,7 @@ export async function runRetention(ctx, { today, write = true } = {}) {
       deleted.push({ as_of: d, rows });
       budget -= 1;
     }
-    report.versions[dv] = { cutoff: plan.cutoff, kept: plan.keep, to_remove: plan.remove, deleted, remaining_after_run: plan.remove.length - deleted.length };
+    report.versions[dv] = { daily_protected: plan.daily, kept: plan.keep, to_remove: plan.remove, deleted, remaining_after_run: plan.remove.length - deleted.length };
   }
   if (write) await ctx.kv.put('dna:retention:last', JSON.stringify({ ...report, at: new Date().toISOString() }));
   return report;

@@ -19,12 +19,14 @@ const dates = sql('select definition_version dv, as_of::text as_of, count(*) n, 
 const sizes = () => ({ ...sql(`select pg_total_relation_size('tennis_dna_snapshots') total_bytes, pg_table_size('tennis_dna_snapshots') table_bytes, pg_database_size(current_database()) db_bytes`)[0],
   ...sql(`select n_live_tup live, n_dead_tup dead, last_autovacuum, last_vacuum, autovacuum_count from pg_stat_user_tables where relname = 'tennis_dna_snapshots'`)[0] });
 const out = { mode, today, run_at: new Date().toISOString(), max_dates_per_run: MAX_DATES_PER_RUN, versions: {}, sizes: sizes() };
+let budget = MAX_DATES_PER_RUN; // shared across versions, exactly as runRetention spends it
 for (const dv of [1, 2]) {
   const rows = dates.filter((d) => Number(d.dv) === dv);
   const plan = retentionPlan(rows.map((d) => d.as_of), today);
   const by = new Map(rows.map((d) => [d.as_of, d]));
-  const firstRun = plan.remove.slice(0, MAX_DATES_PER_RUN);
-  out.versions[dv] = { cutoff: plan.cutoff, protected: plan.keep, eligible: plan.remove.map((d) => ({ as_of: d, rows: Number(by.get(d).n), est_bytes: Number(by.get(d).bytes) })),
+  const firstRun = plan.remove.slice(0, Math.max(0, budget));
+  budget -= firstRun.length;
+  out.versions[dv] = { daily_protected: plan.daily, monthly_protected: plan.keep.filter((k) => k.why === 'monthly').map((k) => k.as_of), protected: plan.keep, eligible: plan.remove.map((d) => ({ as_of: d, rows: Number(by.get(d).n), est_bytes: Number(by.get(d).bytes) })),
     eligible_rows: plan.remove.reduce((t, d) => t + Number(by.get(d).n), 0), eligible_est_bytes: plan.remove.reduce((t, d) => t + Number(by.get(d).bytes), 0),
     first_run_dates: firstRun, all_dates: rows.map((d) => ({ as_of: d.as_of, rows: Number(d.n) })) };
 }
@@ -34,13 +36,15 @@ for (const [dv, v] of Object.entries(out.versions)) {
   const all = v.all_dates.map((d) => d.as_of);
   const newest = all.at(-1);
   inv.push({ dv, name: 'latest protected', pass: !!newest && !v.eligible.some((e) => e.as_of === newest) });
-  inv.push({ dv, name: 'every date within 14 days protected', pass: !v.eligible.some((e) => e.as_of > v.cutoff) });
+  const latest14 = all.slice(-14);
+  inv.push({ dv, name: 'latest 14 stored snapshot dates protected (count, not calendar)', pass: latest14.every((d) => !v.eligible.some((e) => e.as_of === d)) && v.daily_protected.length === Math.min(14, all.length) });
   const months = new Map(); for (const d of all) if (!months.has(d.slice(0, 7))) months.set(d.slice(0, 7), d);
   inv.push({ dv, name: 'earliest date of every month protected (month-start archive)', pass: [...months.values()].every((d) => !v.eligible.some((e) => e.as_of === d)) });
 }
+inv.push({ dv: 'all', name: `first run deletes at most ${MAX_DATES_PER_RUN} dates across versions`, pass: Object.values(out.versions).reduce((t, v) => t + v.first_run_dates.length, 0) <= MAX_DATES_PER_RUN });
 out.invariants = inv;
 fs.writeFileSync(path.join(DIR, `${mode}-${out.run_at.replace(/[:.]/g, '-')}.json`), `${JSON.stringify(out, null, 1)}\n`);
-for (const [dv, v] of Object.entries(out.versions)) console.log(`v${dv}: dates ${v.all_dates.length}, protected ${v.protected.length}, eligible ${v.eligible.length} (${v.eligible_rows} rows, ~${(v.eligible_est_bytes / 1048576).toFixed(1)} MB), first run would delete ${JSON.stringify(v.first_run_dates)}`);
+for (const [dv, v] of Object.entries(out.versions)) console.log(`v${dv}: dates ${v.all_dates.length}, daily-protected ${v.daily_protected.length} (${v.daily_protected.at(-1)}..${v.daily_protected[0]}), monthly ${v.monthly_protected.length}, protected ${v.protected.length}, eligible ${v.eligible.length} (${v.eligible_rows} rows, ~${(v.eligible_est_bytes / 1048576).toFixed(1)} MB), first run would delete ${JSON.stringify(v.first_run_dates)}`);
 console.log(`sizes: table ${(out.sizes.total_bytes / 1048576).toFixed(0)} MB, db ${(out.sizes.db_bytes / 1048576).toFixed(0)} MB, live ${out.sizes.live}, dead ${out.sizes.dead}, last autovacuum ${out.sizes.last_autovacuum}`);
 console.log(`invariants: ${inv.filter((x) => x.pass).length}/${inv.length} PASS`);
 if (mode === 'verify' && inv.some((x) => !x.pass)) process.exitCode = 1;

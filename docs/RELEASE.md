@@ -47,18 +47,19 @@ All rollback targets above were confirmed to exist (`wrangler versions view`, Ve
 - **Storage watch (observe only, no new cleanup policy):** `node scripts/ops/storage-report.mjs` weekly ->
   `docs/evidence/storage/<date>.json` (size, index size, estimated rows, dead rows, 7-day growth). Baseline 2026-09-28:
   database 8,648 MB; tennis_dna_snapshots 457 MB, tennis_matches 356 MB.
-- **DNA snapshot retention (authoritative: the POLICY, not a date list).** Automatic in tennis-ingest cron step
-  `dna_retention` (after the day's DNA build) and the admin lane `dna_retention` (`--write 1`); both call
-  `runRetention` (workers/tennis-ingest/src/dna-retention.js), which computes the plan with `retentionPlan` BEFORE its
-  first DELETE and deletes only planned dates: newest date kept (`'newest'`), every date newer than today-14 days kept
-  (`'daily'`: today and the 13 days before), earliest date of every month kept (`'monthly'` = the month-start archive),
-  each definition version planned from its own dates and deleted with `definition_version=eq.<v>` (v1 and v2), at most
-  `MAX_DATES_PER_RUN = 3` dates per run across both versions. The 14 days are a calendar window: a day without a build
-  leaves fewer than 14 dailies (policy as approved, not a defect). Projection from the real date list on 2026-09-28
-  (NOT a production requirement): first eligible automatic deletion 2026-10-10 (v1 2026-09-26); 2026-10-11 (v1 + v2
-  2026-09-27); 2026-10-12 (v1 + v2 2026-09-28). Earlier notes said 10-11/10-12 for the first two: an off-by-one in a
-  hand calculation (the cutoff date itself is not protected), corrected here. Proof: `scripts/ops/retention-proof.mjs`
-  plan / verify; the job's own result is KV `dna:retention:last`.
+- **DNA snapshot retention (authoritative: the POLICY, not a date list).** Retention preserves the latest 14
+  successful daily DNA snapshots independently for each DNA version, plus the designated monthly archive snapshots and
+  the latest snapshot. Missing build days do not reduce the number of daily snapshots retained. Implementation:
+  tennis-ingest cron step `dna_retention` (after the day's DNA build) and the admin lane `dna_retention` (`--write 1`)
+  both call `runRetention` (workers/tennis-ingest/src/dna-retention.js), which computes `retentionPlan` for each
+  definition version from that version's own stored dates BEFORE its first DELETE and deletes only planned dates:
+  newest (`'newest'`), the latest 14 stored dates (`'daily'`, a count), the earliest stored date of every month
+  (`'monthly'` archive, additional to the 14), per-version delete filter `definition_version=eq.<v>`, at most
+  `MAX_DATES_PER_RUN = 3` dates per run shared across versions. Corrected 2026-09-28 from a 14-calendar-day window
+  (no production delete ever ran under the old rule). Projection from the real date list on 2026-09-28, assuming one
+  successful build per day (NOT a requirement; missed builds move it later): first deletion 2026-10-10 (v1 2026-09-26),
+  2026-10-11 (v1 + v2 2026-09-27), 2026-10-12 (v1 + v2 2026-09-28). Proof: `scripts/ops/retention-proof.mjs` plan /
+  verify; the job's own result is KV `dna:retention:last`.
 - **Phase 6 status:** live; COMPLETE only after the real fixture lifecycle check (2026-09-29 matches) passes and the first
   real production retention deletion (projected 2026-10-10) has happened with post-delete invariants passing. Frozen: no Tennis feature work until then.
 
