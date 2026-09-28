@@ -167,11 +167,25 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     if (!n.canonical) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: n.problems, payload: slim(sm), capture_id: captureId }); continue; }
     normalized.push({ sm, n, id: await matchId(sm.provider, sm.provider_match_id), ed: edition });
   }
+  // one pass never writes a match twice: two incoming rows that resolved to the same match (e.g. two editions'
+  // rows proving the same ESPN row) keep the first; the others are held (per-edition passes used to let the
+  // later one silently overwrite the earlier)
+  const onePerMatch = () => {
+    const firstById = new Map();
+    const unique = [];
+    for (const x of normalized) {
+      if (firstById.has(x.id)) { result.duplicate_candidates += 1; holds.push({ provider: x.sm.provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [`duplicate_candidate:same_match_twice_in_one_pass:${x.id}`], payload: slim(x.sm), capture_id: captureId }); continue; }
+      firstById.set(x.id, x);
+      unique.push(x);
+    }
+    normalized.splice(0, normalized.length, ...unique);
+  };
   let attach = [];
   let alias = [];
   if (sourceDedupe && normalized.length) {
     const cs = await crossSource(store, normalized, holds, captureId);
     normalized.splice(0, normalized.length, ...cs.write);
+    onePerMatch();
     attach = cs.attach;
     alias = cs.alias;
     // duplicate rows found by the self-heal: external ids move to the surviving row, the lower row is removed
@@ -182,10 +196,11 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
       await store.insert('tennis_source_changes', [{ entity_type: 'match', entity_id: mg.from, field: 'row', kind: 'duplicate_merged', from_value: null, to_value: mg.into, source_family: mg.provider, capture_id: captureId }]);
     }
     result.merged = cs.merges.length;
-    result.duplicate_candidates = cs.duplicates;
-    result.taken_over = cs.write.filter((x) => x.takeover).length;
+    result.duplicate_candidates += cs.duplicates;
+    result.taken_over = normalized.filter((x) => x.takeover).length;
     // a takeover may orient sides differently: the owner's participant rows are replaced, not merged
-    for (const x of cs.write.filter((w) => w.takeover || w.reorient)) await store.del('tennis_match_participants', `match_id=eq.${x.id}`);
+    const replaced = normalized.filter((w) => w.takeover || w.reorient).map((w) => w.id);
+    for (let i = 0; i < replaced.length; i += 100) await store.del('tennis_match_participants', `match_id=${inList(replaced.slice(i, i + 100))}`);
   }
   if (attach.length) {
     // the same real-world match already owned by a higher-precedence source: link the external id only
@@ -193,6 +208,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     await store.upsert('tennis_match_external_ids', attach.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
     result.attached = attach.length;
   }
+  onePerMatch();
   if (normalized.length) {
     const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
     let keep = [];

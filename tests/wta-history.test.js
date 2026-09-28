@@ -51,6 +51,7 @@ test('real rows: winner-first scores oriented to sides; retirement; bye skipped;
 
 const E = '00000000-0000-4000-8000-00000000e777';
 const E2 = '00000000-0000-4000-8000-00000000e778';
+const E3 = '00000000-0000-4000-8000-00000000e779';
 const sm = (provider, id, round, A, B, extra = {}) => ({ type: 'match', provider, provider_match_id: id, event_type: 'WS', stage: 'main', round_code: round, format_key: 'BO3_TB7', status: 'completed', winner_side: 'A', end_reason: 'completed', sets: [{ games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }], sides: { A: [{ provider: provider === 'espn' ? 'espn' : 'wta', provider_id: provider === 'espn' ? `e${A}` : A, tour_id: { provider: 'wta', provider_id: A }, gender: 'F' }], B: [{ provider: provider === 'espn' ? 'espn' : 'wta', provider_id: provider === 'espn' ? `e${B}` : B, tour_id: { provider: 'wta', provider_id: B }, gender: 'F' }] }, seeds: {}, entry: {}, warnings: [], ...extra });
 
 test('precedence: history takes over ESPN (even from another edition); WTA API takes over history; history attaches to WTA API', async () => {
@@ -229,7 +230,7 @@ test('history: an HTTP 200 with an empty body ends that player (no match list), 
   const ctx = { kv, store: new MemStore(), env: {}, upstream: 0, log: [], client: { stats: {}, async get(url) { return { url, status: 200, ok: true, body: '', bytes: 0, content_type: 'application/json', fetched_at: new Date().toISOString(), latency_ms: 1 }; } } };
   const r = await historyPage(ctx, '1022815', 0);
   assert.equal(r.state, 'END'); assert.equal(r.empty_body, true);
-  assert.deepEqual(JSON.parse(await kv.get('wh:empty')), ['1022815']);
+  assert.ok(await kv.get('wh:empty:1022815'));
 });
 
 test('history: a 200 with a body that drifted is NOT treated as an empty history (it fails loudly)', async () => {
@@ -256,4 +257,19 @@ test('writeGroups: several editions in one pass keep per-edition identity (the s
   assert.equal(inE.length, 1); assert.equal(inE2.length, 2);
   assert.equal(inE[0].source_family, 'wta_history'); assert.equal(inE[0].surface, 'clay');
   assert.equal(inE2.find((m) => m.source_family === 'wta_history').surface, 'hard');
+});
+
+test('writeGroups: two incoming rows that resolve to the same match in one pass write it once; the second is held', async () => {
+  const { writeGroups } = await import('../workers/tennis-ingest/src/writer.js');
+  const s = new MemStore();
+  await writeMatches(s, [sm('espn', '402-2012:1', '2', '10', '20')], { edition_id: E2 }, { dedupe: true });
+  const espnId = s.rows('tennis_matches')[0].match_id;
+  const r = await writeGroups(s, [
+    { edition: { edition_id: E }, sourceMatches: [sm('wta_history', 'h1', '2', '10', '20', { existing_match_id: espnId, existing_owner: 'espn' })] },
+    { edition: { edition_id: E3 }, sourceMatches: [sm('wta_history', 'h2', '2', '10', '20', { existing_match_id: espnId, existing_owner: 'espn' })] }
+  ], { dedupe: true });
+  assert.equal(r.taken_over, 1); assert.equal(r.duplicate_candidates, 1);
+  assert.equal(s.rows('tennis_matches').length, 1);
+  assert.equal(s.rows('tennis_match_participants').filter((p) => p.match_id === espnId).length, 2);
+  assert.ok(s.rows('tennis_ingest_holds').some((h) => /same_match_twice_in_one_pass/.test(h.problems.join(' '))));
 });

@@ -97,9 +97,8 @@ export async function historyPage(ctx, wtaId, page) {
     if (r.state === 'DEGRADED' && (r.error === 'zero_records' || r.http_status === 404)) return { state: 'END' };
     // HTTP 200 with an EMPTY body (observed 1022815): the player has no match list — absent, recorded for audit
     if (r.http_status === 200 && r.bytes === 0) {
-      const empty = new Set((await ctx.kv.get('wh:empty', 'json')) || []);
-      empty.add(String(wtaId));
-      await ctx.kv.put('wh:empty', JSON.stringify([...empty]));
+      // per-player key (no shared-key write contention between shards)
+      await ctx.kv.put(`wh:empty:${wtaId}`, new Date().toISOString());
       return { state: 'END', empty_body: true };
     }
     throw new Error(`wta history ${wtaId} p${page}: ${r.state} ${r.error || ''}`.trim());
@@ -126,6 +125,7 @@ export async function historyPage(ctx, wtaId, page) {
     groups.get(key).matches.push(p.match);
   }
   const known = new Set((await ctx.kv.get('wh:eds', 'json')) || []);
+  const knownBefore = known.size;
   const batch = [];
   for (const g of groups.values()) {
     // an edition ensured on an earlier run (same facts) needs no re-check
@@ -150,7 +150,9 @@ export async function historyPage(ctx, wtaId, page) {
     const eds = batch.map((b) => b.edition.edition_id);
     for (let i = 0; i < eds.length; i += 100) await ctx.store.req('PATCH', `tennis_matches?edition_id=${inList(eds.slice(i, i + 100))}&source_family=eq.wta_history&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   }
-  await ctx.kv.put('wh:eds', JSON.stringify([...known]));
+  // wh:eds is only a cache (every shard shares the key; KV allows ~1 write/s per key): written when it grew, a
+  // rate-limited write is skipped
+  if (known.size !== knownBefore) { try { await ctx.kv.put('wh:eds', JSON.stringify([...known])); } catch (e) { if (!/429/.test(String(e?.message || e))) throw e; } }
   return { state: rows.length < PAGE ? 'END' : 'MORE', ...out };
 }
 
