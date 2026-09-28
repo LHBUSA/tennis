@@ -133,27 +133,27 @@ test('history backfill: completion ledger skips finished players across shard la
   const { MemKV } = await import('./helpers/memstore.js');
   const kv = new MemKV();
   const built = new Date().toISOString();
-  await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c', 'd', 'e', 'f']));
+  await kv.put('wh:queue', JSON.stringify(['101', '102', '103', '104', '105', '106']));
   await kv.put('wh:queue:built_at', built);
-  await kv.put('wh:done:b', '{"rows":3}');
-  await kv.put('wh:page:c', '2');
+  await kv.put('wh:done:102', '{"rows":3}');
+  await kv.put('wh:page:103', '2');
   await kv.put('wh:state:0/2', JSON.stringify({ i: 0, page: 0, built_at: built, players_done: 0 }));
   await kv.put('wh:state:1/2', JSON.stringify({ i: 1, page: 0, built_at: built, players_done: 0 }));
   const calls = [];
   let deadlocked = false;
   const pageFn = async (ctx, id, page) => {
     calls.push(`${id}:${page}`);
-    if (id === 'e' && !deadlocked) { deadlocked = true; throw new Error('postgrest 500 {"code":"40P01"} deadlock detected'); }
-    return { state: id === 'a' && page === 0 ? 'MORE' : 'END', rows: 10, written: 7, attached: 2, held: 1 };
+    if (id === '105' && !deadlocked) { deadlocked = true; throw new Error('postgrest 500 {"code":"40P01"} deadlock detected'); }
+    return { state: id === '101' && page === 0 ? 'MORE' : 'END', rows: 10, written: 7, attached: 2, held: 1 };
   };
   const ctx = { kv };
   const s0 = await wtaHistoryStep(ctx, { pages: 8, shard: 0, shards: 2, admin: true, pageFn });
   const s1 = await wtaHistoryStep(ctx, { pages: 8, shard: 1, shards: 2, admin: true, pageFn });
-  assert.deepEqual(calls, ['a:0', 'a:1', 'c:2', 'e:0', 'e:0', 'd:0', 'f:0']);
+  assert.deepEqual(calls, ['101:0', '101:1', '103:2', '105:0', '105:0', '104:0', '106:0']);
   assert.equal(s0.done, true); assert.equal(s1.done, true); assert.equal(s1.skipped_done, 1);
-  assert.deepEqual(JSON.parse(await kv.get('wh:done:a')).pages, 2);
-  assert.equal(JSON.parse(await kv.get('wh:done:a')).written, 14);
-  assert.equal(await kv.get('wh:page:c'), null);
+  assert.deepEqual(JSON.parse(await kv.get('wh:done:101')).pages, 2);
+  assert.equal(JSON.parse(await kv.get('wh:done:101')).written, 14);
+  assert.equal(await kv.get('wh:page:103'), null);
   // the cron (unsharded) stands aside while an admin backfill is active, then finds every player done
   assert.deepEqual(await wtaHistoryStep(ctx, { pages: 2, pageFn }), { skipped: 'admin_backfill_active' });
   await kv.delete(ADMIN_FLAG);
@@ -166,14 +166,14 @@ test('history backfill: a stale state read never moves the cursor backward (driv
   const { wtaHistoryStep } = await import('../workers/tennis-ingest/src/wta-history-job.js');
   const { MemKV } = await import('./helpers/memstore.js');
   const kv = new MemKV();
-  await kv.put('wh:queue', JSON.stringify(['a', 'b', 'c']));
+  await kv.put('wh:queue', JSON.stringify(['101', '102', '103']));
   await kv.put('wh:queue:built_at', new Date().toISOString());
   await kv.put('wh:state', JSON.stringify({ i: 0, page: 0, built_at: new Date().toISOString(), players_done: 0 }));
   const calls = [];
   const r = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 1, page: 3 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
-  assert.deepEqual(calls, ['b:3']); assert.equal(r.position, 1); assert.equal(r.page, 4);
+  assert.deepEqual(calls, ['102:3']); assert.equal(r.position, 1); assert.equal(r.page, 4);
   const back = await wtaHistoryStep({ kv }, { pages: 1, resume: { i: 0, page: 0 }, pageFn: async (c, id, page) => { calls.push(`${id}:${page}`); return { state: 'MORE' }; } });
-  assert.equal(calls.at(-1), 'b:4'); assert.equal(back.position, 1);
+  assert.equal(calls.at(-1), '102:4'); assert.equal(back.position, 1);
 });
 
 test('round-robin matchdays of small draws (WTA Finals) and scoreless D rows (walkovers) are mapped; anything else stays held', async () => {
@@ -193,18 +193,18 @@ test('history backfill: a queue rebuild keeps the population and adds only new o
   const { wtaHistoryStep } = await import('../workers/tennis-ingest/src/wta-history-job.js');
   const { MemKV } = await import('./helpers/memstore.js');
   const kv = new MemKV();
-  await kv.put('wh:queue', JSON.stringify(['p1', 'p2']));
+  await kv.put('wh:queue', JSON.stringify(['201', '202']));
   await kv.put('wh:queue:built_at', '2020-01-01T00:00:00Z'); // stale -> rebuilt from the previous queue
   const store = {
     async select(t) {
       if (t === 'tennis_ranking_snapshots') return [{ snapshot_id: 's1' }];
-      if (t === 'tennis_rankings') return [{ provider_player_id: 'p2', rank: 1 }, { provider_player_id: 'n9', rank: 2 }];
+      if (t === 'tennis_rankings') return [{ provider_player_id: '202', rank: 1 }, { provider_player_id: '209', rank: 2 }];
       if (t === 'tennis_players') throw new Error('must not scan every canonical WTA player on a rebuild');
       return [];
     }
   };
   await wtaHistoryStep({ kv, store }, { pages: 0 });
-  assert.deepEqual(JSON.parse(await kv.get('wh:queue')), ['p1', 'p2', 'n9']);
+  assert.deepEqual(JSON.parse(await kv.get('wh:queue')), ['201', '202', '209']);
 });
 
 test('precedence never turns a played match into "not played": an official walkover against a scored ESPN row attaches and is held', async () => {
@@ -281,4 +281,15 @@ test('a draw placeholder never becomes a person (TBD / BYE / non-numeric WTA ids
   const s = new MemStore();
   const r = await writeMatches(s, [sm('wta', '1-2026-LS001', 'M-1', '320760', 'TBD')], { edition_id: E }, { dedupe: true });
   assert.equal(r.skipped, 1); assert.equal(s.rows('tennis_players').length, 0);
+});
+
+test('history backfill: a placeholder queue entry ("TBD") is skipped without a fetch', async () => {
+  const { wtaHistoryStep } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV } = await import('./helpers/memstore.js');
+  const kv = new MemKV();
+  await kv.put('wh:queue', JSON.stringify(['TBD', '301']));
+  await kv.put('wh:queue:built_at', new Date().toISOString());
+  const calls = [];
+  const r = await wtaHistoryStep({ kv }, { pages: 2, pageFn: async (c, id, page) => { calls.push(id); return { state: 'END' }; } });
+  assert.deepEqual(calls, ['301']); assert.equal(r.done, true);
 });
