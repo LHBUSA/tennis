@@ -21,6 +21,7 @@ export const NETWORK = Object.freeze({
     { key: 'wnba', label: 'WNBA', name: 'WNBA Intelligence', href: 'https://wnba.propbetedge.ai/' },
     { key: 'nhl', label: 'NHL', name: 'Hockey Intelligence', href: 'https://nhl.propbetedge.ai/' },
     { key: 'ufc', label: 'UFC', name: 'Fight Intelligence', href: 'https://ufc.propbetedge.ai/' },
-    { key: 'tennis', label: 'Tennis', name: 'Tennis Intelligence', href: '/' }
+    { key: 'tennis', label: 'Tennis', name: 'Tennis Intelligence', href: '/' },
+    { key: 'soccer', label: 'Soccer', name: 'Soccer Intelligence', href: 'https://soccer.propbetedge.ai/' }
   ]
 });
