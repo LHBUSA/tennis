@@ -73,6 +73,25 @@ union all
 select atp_ed, 'indoor', indoor::text, 'wta', 'combined_event', 'espn:' || ev, jsonb_build_object('espn_event', ev, 'wta_edition', wta_ed), now() from c where indoor is not null
 on conflict (edition_id, attribute, source) do update set value = excluded.value, method = excluded.method, source_ref = excluded.source_ref, evidence = excluded.evidence, observed_at = excluded.observed_at;
 
+-- R3b. The same combined-event evidence as an identity link: the official WTA edition's own id (tournament group
+--      id - year) -> the ESPN men's edition of the same event (provider wta_combined, method combined_event).
+with a as (
+  select m.external_id ev, m.canonical_id atp_ed from tennis_source_mappings m
+  where m.entity_type = 'edition' and m.provider = 'espn_atp' and m.status = 'mapped' and m.method = 'espn_founded'),
+w as (
+  select m.external_id ev, m.canonical_id wta_ed from tennis_source_mappings m
+  where m.entity_type = 'edition' and m.provider = 'espn_wta' and m.status = 'mapped' and m.confidence = 'high' and m.method = 'shared_matches'),
+link as (
+  select distinct on (w.wta_ed) w.wta_ed, a.atp_ed, a.ev, x.external_id wta_key
+  from a join w using (ev)
+  join tennis_edition_attributes at on at.edition_id = a.atp_ed and at.attribute = 'surface' and at.method = 'combined_event' and at.evidence->>'wta_edition' = w.wta_ed::text
+  join tennis_edition_external_ids x on x.edition_id = w.wta_ed and x.provider = 'wta'
+  order by w.wta_ed, x.external_id)
+insert into tennis_source_mappings (entity_type, provider, external_id, canonical_id, status, method, confidence, evidence, rule_version, decided_at)
+select 'edition', 'wta_combined', wta_key, atp_ed, 'mapped', 'combined_event', 'high', jsonb_build_object('espn_event', ev, 'wta_edition', wta_ed, 'note', 'the ESPN men''s edition of the same combined event (same ESPN event id, same city, same week)'), 'context-v1', now()
+from link
+on conflict (entity_type, provider, external_id) do update set canonical_id = excluded.canonical_id, evidence = excluded.evidence, decided_at = excluded.decided_at;
+
 -- R4. Effective edition surface / indoor = the sourced attribute when the edition has none (never overwrites);
 --     a sourced value that disagrees with a stored one is logged.
 update tennis_tournament_editions e set surface = a.value
@@ -88,5 +107,6 @@ where a.attribute = 'surface' and e.surface is not null and e.surface <> a.value
 on conflict (entity_type, entity_id, field, source) do nothing;
 
 -- R5. Matches inherit their edition's surface / indoor (only where the match has none).
-update tennis_matches m set surface = e.surface from tennis_tournament_editions e where e.edition_id = m.edition_id and m.surface is null and e.surface is not null;
-update tennis_matches m set indoor = e.indoor from tennis_tournament_editions e where e.edition_id = m.edition_id and m.indoor is null and e.indoor is not null;
+-- (updated_at is bumped: the DNA v2 incremental ledger cache reads changed rows by updated_at)
+update tennis_matches m set surface = e.surface, updated_at = now() from tennis_tournament_editions e where e.edition_id = m.edition_id and m.surface is null and e.surface is not null;
+update tennis_matches m set indoor = e.indoor, updated_at = now() from tennis_tournament_editions e where e.edition_id = m.edition_id and m.indoor is null and e.indoor is not null;
