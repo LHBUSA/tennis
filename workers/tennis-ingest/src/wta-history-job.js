@@ -106,7 +106,10 @@ export async function historyPage(ctx, wtaId, page) {
   for (const x of rows) for (const p of [x.opponent, x.partner, x.opponent_partner]) if (p?.id) people.set(String(p.id), p);
   await upsertPlayersFull(ctx.store, [...people.values()].map((p) => ({ provider_id: String(p.id), first_name: p.firstName || null, last_name: p.lastName || null, full_name: p.fullName || null, gender: 'F', dob: /^\d{4}-\d{2}-\d{2}$/.test(p.dateOfBirth || '') ? p.dateOfBirth : null, country: p.countryCode || null })), 'wta');
   const pid = await mintPlayerId('wta', wtaId);
-  const idx = await playerIndex(ctx.store, pid);
+  // one index per player per invocation: later pages of the same player reuse it (its only use is to find
+  // ESPN-owned rows to take over; a row already taken over by an earlier page resolves to the same match)
+  if (ctx.whIndex?.pid !== pid) ctx.whIndex = { pid, idx: await playerIndex(ctx.store, pid) };
+  const idx = ctx.whIndex.idx;
   const groups = new Map();
   const out = { rows: rows.length, written: 0, attached: 0, taken_over: 0, held: 0, duplicate_candidates: 0, skipped: {}, cross_edition: 0 };
   for (const p of parsed) {
