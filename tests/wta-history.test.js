@@ -238,3 +238,22 @@ test('history: a 200 with a body that drifted is NOT treated as an empty history
   const ctx = { kv: new MemKV(), store: new MemStore(), env: {}, upstream: 0, log: [], client: { stats: {}, async get(url) { return { url, status: 200, ok: true, body: '{"unexpected":true}', bytes: 19, content_type: 'application/json', fetched_at: new Date().toISOString(), latency_ms: 1 }; } } };
   await assert.rejects(historyPage(ctx, '1', 0), /shape_drift/);
 });
+
+test('writeGroups: several editions in one pass keep per-edition identity (the same pair in two editions = two matches; takeover and attach decided per edition)', async () => {
+  const { writeGroups } = await import('../workers/tennis-ingest/src/writer.js');
+  const s = new MemStore();
+  await writeMatches(s, [sm('espn', '402-2012:1', '2', '10', '20')], { edition_id: E }, { dedupe: true });
+  await writeMatches(s, [sm('wta', '999-2012-LS007', 'M-2', '10', '20')], { edition_id: E2 }, { dedupe: true });
+  const r = await writeGroups(s, [
+    { edition: { edition_id: E, surface: 'clay' }, sourceMatches: [sm('wta_history', 'h-E-10-20', '2', '10', '20')] },
+    { edition: { edition_id: E2, surface: 'hard' }, sourceMatches: [sm('wta_history', 'h-E2-10-20', '2', '10', '20'), sm('wta_history', 'h-E2-10-30', '2', '10', '30')] }
+  ], { dedupe: true });
+  assert.equal(r.taken_over, 1, 'E: history takes over the ESPN row');
+  assert.equal(r.attached, 1, 'E2: history attaches to the official WTA API row');
+  assert.equal(r.written, 2, 'the takeover + the new E2 match');
+  const inE = s.rows('tennis_matches').filter((m) => m.edition_id === E);
+  const inE2 = s.rows('tennis_matches').filter((m) => m.edition_id === E2);
+  assert.equal(inE.length, 1); assert.equal(inE2.length, 2);
+  assert.equal(inE[0].source_family, 'wta_history'); assert.equal(inE[0].surface, 'clay');
+  assert.equal(inE2.find((m) => m.source_family === 'wta_history').surface, 'hard');
+});

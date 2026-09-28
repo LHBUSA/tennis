@@ -6,7 +6,7 @@
 
 import * as hist from '../../providers/wta-history.js';
 import { fetchRun } from './jobs.js';
-import { writeMatches, upsertPlayersFull } from './writer.js';
+import { writeGroups, upsertPlayersFull } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, tournamentKey, editionId, slugify, competitionFor, SLAMS } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
@@ -126,6 +126,7 @@ export async function historyPage(ctx, wtaId, page) {
     groups.get(key).matches.push(p.match);
   }
   const known = new Set((await ctx.kv.get('wh:eds', 'json')) || []);
+  const batch = [];
   for (const g of groups.values()) {
     // an edition ensured on an earlier run (same facts) needs no re-check
     const ek = `${g.edition.provider_tournament_id}-${g.edition.year}`;
@@ -140,9 +141,14 @@ export async function historyPage(ctx, wtaId, page) {
       const cands = (idx.get(`${m.event_type}|${m.stage}|${opp}`) || []).filter((c) => c.edition_id !== eid && c.source === 'espn' && c.edition_source === 'espn' && sameEventWeek(c, { start: g.edition.start_date }));
       if (cands.length === 1) { m.existing_match_id = cands[0].match_id; m.existing_owner = cands[0].source; out.cross_edition += 1; }
     }
-    const w = await writeMatches(ctx.store, g.matches, { edition_id: eid, surface: g.edition.surface, indoor: g.edition.indoor }, { captureId: r.capture?.capture_id || null, dedupe: true });
+    batch.push({ edition: { edition_id: eid, surface: g.edition.surface, indoor: g.edition.indoor }, sourceMatches: g.matches });
+  }
+  // the whole page in one batched pass (identical per-edition rules; ~20 store requests instead of ~15 per edition)
+  if (batch.length) {
+    const w = await writeGroups(ctx.store, batch, { captureId: r.capture?.capture_id || null, dedupe: true });
     for (const k of ['written', 'attached', 'taken_over', 'held', 'duplicate_candidates']) out[k] += w[k] || 0;
-    await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.wta_history&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
+    const eds = batch.map((b) => b.edition.edition_id);
+    for (let i = 0; i < eds.length; i += 100) await ctx.store.req('PATCH', `tennis_matches?edition_id=${inList(eds.slice(i, i + 100))}&source_family=eq.wta_history&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   }
   await ctx.kv.put('wh:eds', JSON.stringify([...known]));
   return { state: rows.length < PAGE ? 'END' : 'MORE', ...out };
