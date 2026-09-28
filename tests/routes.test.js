@@ -60,3 +60,9 @@ test('coverage matrix never counts commercial reference sources', () => {
   assert.equal(cell['wta|rankings_singles'], 'PASS');
   assert.equal(cell['atp|rankings_singles'], 'BLOCKED_BY_ACCESS_CONTROL');
 });
+
+test('paged reads refuse an unordered query (offset paging over an unstable order skips / repeats rows)', async () => {
+  const { allRows } = await import('../workers/tennis-api/src/v2.js');
+  await assert.rejects(() => allRows({ select: async () => [] }, 'tennis_dna_snapshots', 'select=pbe_player_id&as_of=eq.2026-09-28'), /needs an order/);
+  assert.deepEqual(await allRows({ select: async () => [{ a: 1 }] }, 'x', 'select=a&order=a.asc'), [{ a: 1 }]);
+});

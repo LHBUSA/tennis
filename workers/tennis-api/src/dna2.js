@@ -82,7 +82,7 @@ export async function matchDnaLeaders(store, { metric, tour, limit }) {
   const col = metric === 'pbe_rating' ? 'metrics->_rating' : `metrics->${metric}`;
   const rows = [];
   for (let off = 0; ; off += 1000) {
-    const page = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&limit=1000&offset=${off}`);
+    const page = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&order=pbe_player_id.asc&limit=1000&offset=${off}`);
     rows.push(...page);
     if (page.length < 1000) break;
   }

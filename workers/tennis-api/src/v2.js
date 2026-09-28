@@ -18,7 +18,10 @@ const LOWER_IS_BETTER = new Set(['double_fault_rate']);
 
 import { matchDna, matchDnaLeaders, V2_METRICS } from './dna2.js';
 
+// offset paging is only exact over a stable order: every caller's query names one (a page boundary over an unordered
+// scan can skip or repeat rows, which made leader counts drift between requests until 2026-09-28)
 export async function allRows(store, table, query, cap = 5000) {
+  if (!/(^|&)order=/.test(query)) throw new Error(`allRows needs an order: ${table}`);
   const out = [];
   for (let off = 0; off < cap; off += 1000) {
     const r = await store.select(table, `${query}&limit=1000&offset=${off}`);
@@ -47,13 +50,13 @@ export const DNA_MIN_QUALIFIED = 30;
 export async function tourDnaStatus(store, gender) {
   const asOf = await latestAsOfForGender(store, gender);
   if (!asOf) return { ready: false, qualified: 0, as_of: null };
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.all&definition_version=eq.1&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}`);
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.all&definition_version=eq.1&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const qualified = rows.filter((r) => ['medium', 'high'].includes(r.metrics?.service_points_won?.confidence)).length;
   return { ready: qualified >= DNA_MIN_QUALIFIED, qualified, as_of: asOf, threshold: DNA_MIN_QUALIFIED, tour: TOUR_OF[gender === 'M' ? 'M' : 'F'] };
 }
 /** Population for percentiles: same as_of + surface + TOUR (ATP and WTA are never pooled), confidence medium/high. */
 async function population(store, asOf, surface, gender) {
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}`);
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const pop = {};
   for (const [k] of Object.entries(DEFINITIONS)) pop[k] = rows.map((r) => r.metrics?.[k]).filter((m) => m && m.value != null && ['medium', 'high'].includes(m.confidence)).map((m) => m.value).sort((a, b) => a - b);
   return { pop, players: rows.length };
@@ -221,7 +224,7 @@ async function dnaLeaders(store, url) {
   const asOf = gate.as_of;
   if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
   if (!gate.ready) return ok({ metric, tour, published: false, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: gate.qualified, threshold: gate.threshold, rows: [] }, { rows: [], source: ['pbe_derived'], updated: `${asOf}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: `${tour.toUpperCase()} Tennis DNA is not published until ${gate.threshold} players have a medium-confidence sample (currently ${gate.qualified})` });
-  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.1&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}`);
+  const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.1&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const list = rows.map((r) => ({ player: shapePlayer(r.tennis_players), m: r.metrics?.[metric] })).filter((x) => x.m && x.m.value != null && ['medium', 'high'].includes(x.m.confidence));
   list.sort((a, b) => (LOWER_IS_BETTER.has(metric) ? a.m.value - b.m.value : b.m.value - a.m.value));
   const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);
@@ -236,7 +239,7 @@ async function profile(store, slug) {
   const key = `S:${p.pbe_player_id}`;
   const mp = await store.select('tennis_match_participants', `select=match_id,side&participant_key=eq.${key}&limit=2000`);
   const side = new Map(mp.map((r) => [r.match_id, r.side]));
-  const ms = mp.length ? await allRows(store, 'tennis_matches', `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(pbe_player_id,slug,full_name,nationality,gender,' + MEDIA + ')'})))&match_id=${inList([...side.keys()].slice(0, 900))}&order=source_updated_at.desc.nullslast`) : [];
+  const ms = mp.length ? await allRows(store, 'tennis_matches', `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(pbe_player_id,slug,full_name,nationality,gender,' + MEDIA + ')'})))&match_id=${inList([...side.keys()].slice(0, 900))}&order=source_updated_at.desc.nullslast,match_id.asc`) : [];
   const finals = ms.filter((m) => FINAL.includes(m.status) && m.status !== 'walkover');
   const result = (m) => (m.winner_side === side.get(m.match_id) ? 'W' : 'L');
   const surf = {};
