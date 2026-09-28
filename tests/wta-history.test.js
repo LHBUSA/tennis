@@ -293,3 +293,10 @@ test('history backfill: a placeholder queue entry ("TBD") is skipped without a f
   const r = await wtaHistoryStep({ kv }, { pages: 2, pageFn: async (c, id, page) => { calls.push(id); return { state: 'END' }; } });
   assert.deepEqual(calls, ['301']); assert.equal(r.done, true);
 });
+
+test('inList encodes query-string-sensitive characters (a doubles key "D:a+b" must not arrive as "D:a b")', async () => {
+  const { inList } = await import('../workers/shared/store/postgrest.js');
+  const q = inList(['D:aa+bb', 'S:cc']);
+  assert.ok(q.includes('D:aa%2Bbb')); assert.ok(!q.includes('+'));
+  assert.equal(decodeURIComponent(q), 'in.("D:aa+bb","S:cc")');
+});

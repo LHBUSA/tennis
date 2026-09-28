@@ -83,4 +83,7 @@ export class Store {
 }
 
 /** PostgREST `in.(...)` list with quoting for text values. */
-export const inList = (vals) => `in.(${vals.map((v) => `"${String(v).replace(/"/g, '\\"')}"`).join(',')})`;
+// values are URL-encoded where the query string would change them: a doubles participant key "D:a+b" otherwise
+// arrives as "D:a b" (+ = space) and silently matches nothing (defect found 2026-09-28)
+const q = (v) => String(v).replace(/"/g, '\\"').replace(/[%+&#\s]/g, (c) => encodeURIComponent(c));
+export const inList = (vals) => `in.(${vals.map((v) => `"${q(v)}"`).join(',')})`;
