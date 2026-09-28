@@ -191,6 +191,8 @@ export async function wtaHistoryStep(ctx, { pages = 2, shard = 0, shards = 1, ad
   while (n < pages && st.i < queue.length && guard < 400) {
     guard += 1;
     const id = queue[st.i];
+    // a queue entry that is not a WTA player id (a draw placeholder such as "TBD") is skipped, never fetched
+    if (!/^\d+$/.test(String(id))) { out.skipped_done += 1; st.i += shards; st.page = 0; st.acc = null; continue; }
     if (!st.acc) {
       // entering a player: skip a finished one, resume one another runner left mid-history
       if (await ctx.kv.get(DONE(id))) { out.skipped_done += 1; st.i += shards; st.page = 0; continue; }
