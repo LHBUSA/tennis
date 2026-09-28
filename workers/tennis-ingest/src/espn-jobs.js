@@ -23,6 +23,12 @@ const LK = {
 const ADA = (league) => (league === 'wta' ? espn.WTA : espn.ATP);
 const WD_TTL_DAYS = 7;
 const CURRENT_REFRESH_MS = 3 * 3600 * 1000;
+export const FIXTURE_LEAD_DAYS = 2;
+/** Current-season events to (re-)read: not final, and started or starting within FIXTURE_LEAD_DAYS. */
+export function currentQueue(ids, done, future, today) {
+  const readFrom = iso(new Date(Date.parse(`${today}T00:00:00Z`) + FIXTURE_LEAD_DAYS * 86400e3));
+  return ids.filter((id) => !done.has(id) && !(future[id] && future[id] > readFrom));
+}
 
 async function all(store, table, query, page = 1000) {
   const out = [];
@@ -250,8 +256,9 @@ export async function espnLaneStep(ctx, { budget = 20, today = iso(new Date()), 
     const ids = await seasonEvents(ctx, season, league);
     const done = new Set(st.cur.done);
     const future = st.cur.future || {};
-    // events that have not started are re-read only once their start date arrives
-    st.cur = { listed_at: now(), queue: ids.filter((id) => !done.has(id) && !(future[id] && future[id] > today)), done: [...done], future };
+    // events that have not started are re-read from FIXTURE_LEAD_DAYS before their start date (draws and the first
+    // day's order of play publish before day one: Matchup DNA needs those fixtures); later events wait
+    st.cur = { listed_at: now(), queue: currentQueue(ids, done, future, today), done: [...done], future };
     await save();
   }
   while (st.cur.queue.length && spent() < budget) {

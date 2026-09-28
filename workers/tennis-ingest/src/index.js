@@ -27,7 +27,7 @@ import { wtaRecordsStep } from './wta-records-job.js';
 import { espnExtrasStep } from './espn-extras-job.js';
 import { editionMergeStep } from './edition-merge-job.js';
 import { runRetention } from './dna-retention.js';
-import { BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
+import { STORE_5XX, BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
@@ -163,7 +163,15 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     const prevLive = new Map(((await kv.get('live:editions', 'json')) || []).map((e) => [e.edition_id, e]));
     for (const ed of active.slice(0, 12)) {
       if (owned.has(ed.edition_id)) { out.push({ event: `${ed.event_id}-${ed.year}`, state: 'OWNED_BY_LIVE' }); if (prevLive.has(ed.edition_id)) live.push(prevLive.get(ed.edition_id)); continue; }
-      const r = await editionMatches(ctx, ed);
+      // one edition's failure never blocks the others (2026-09-28: a statement timeout on one edition stopped every
+      // edition after it, including the two that started that day); the error is recorded per edition
+      let r;
+      try { r = await editionMatches(ctx, ed); } catch (e) {
+        const msg = String(e?.message || e);
+        out.push({ event: `${ed.event_id}-${ed.year}`, edition_id: ed.edition_id, state: 'ERROR', error: msg.slice(0, 400), query: e?.query || null });
+        if (STORE_5XX.test(msg)) await noteStoreError(kv, msg);
+        continue;
+      }
       out.push({ event: `${ed.event_id}-${ed.year}`, ...r });
       if (r.live) live.push({ ...ed, live: r.live });
     }

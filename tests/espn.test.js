@@ -587,3 +587,9 @@ test('fixture lifecycle: repeat passes, postponement, result and walkover all la
   await pass(a, comp('7', '2026-10-09T12:00Z'), Date.parse('2026-10-08T00:00:00Z'));
   assert.equal(a.rows('tennis_matches')[0].status, 'completed');
 });
+
+test('current season queue: final events never re-read; events starting within 2 days ARE read (day-one fixtures)', async () => {
+  const { currentQueue } = await import('../workers/tennis-ingest/src/espn-jobs.js');
+  const q = currentQueue(['a', 'b', 'c', 'd', 'e'], new Set(['a']), { b: '2026-09-29', c: '2026-09-30', d: '2026-10-06' }, '2026-09-28');
+  assert.deepEqual(q, ['b', 'c', 'e'], 'a is final, d starts in 8 days, e has no known start (in progress)');
+});

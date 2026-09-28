@@ -37,7 +37,8 @@ export class Store {
     const call = this.f;
     const res = await call(`${this.base}/${path}`, { method, headers: this.headers(prefer ? { prefer } : {}), body: body === undefined ? undefined : JSON.stringify(body) });
     const text = await res.text();
-    if (!res.ok) throw new StoreError(res.status, text, `${method} ${path.split('?')[0]}`);
+    // the query string (filters only; never a credential: keys travel in headers) is kept for diagnosis
+    if (!res.ok) { const err = new StoreError(res.status, text, `${method} ${path.split('?')[0]}`); err.query = (path.split('?')[1] || '').slice(0, 400); throw err; }
     return text ? JSON.parse(text) : null;
   }
 
