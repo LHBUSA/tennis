@@ -74,8 +74,8 @@ export function parseDates(s) {
 const NAME = String.raw`(BYE|Bye|[A-ZÀ-Þ][A-ZÀ-Þ'’\-\. ]*[A-ZÀ-Þ.],\s?(?:[A-Za-zÀ-ɏ'’\-\. ]*?|\.\.\.))(?=\s{2,}|\s+[A-Z]{3}(?:\s|$)|\s*$)`;
 // a draw row starts at the left margin: [entry] number [entry] [number] [entry] [NAT] then a name, Bye, or nothing
 const ROW = new RegExp(String.raw`^\s{0,8}(?:(${ENTRY})\s+)?(\d{1,3})(?:\s*(${ENTRY})(?=\s|$))?(?:\s+(\d{1,3}))?(?:\s+(${ENTRY}))?(?:\s+(?!BYE\b)([A-Z]{3}))?(?:\s+${NAME}|\s*$)`);
-// a name printed on its own line (position on a neighbouring line): indented [entry] [seed] NAT NAME
-const NAME_ONLY = new RegExp(String.raw`^\s{5,24}(?:(${ENTRY})\s+)?(?:(\d{1,2})\s+)?(?!BYE\b)([A-Z]{3})\s+${NAME}`);
+// a name printed on its own line (position on a neighbouring line): indented [entry] [seed] [NAT] NAME
+const NAME_ONLY = new RegExp(String.raw`^\s{5,24}(?:(${ENTRY})\s+)?(?:(\d{1,2})\s+)?(?:(?!BYE\b)([A-Z]{3})\s+)?${NAME}`);
 const STOP = /SEEDED PLAYERS|Seeded Players|LAST DIRECT ACCEPTANCE|Copyright|RANKING POINTS|PRIZE MONEY/;
 
 const slot = (pos, seed, entry, nat, name) => {

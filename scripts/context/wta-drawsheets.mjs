@@ -75,6 +75,11 @@ async function main() {
     for (const tid of e.tids) {
       const s = await sheet(e.year, tid);
       if (s.status !== 200) { best = best || { wta_tid: tid, status: s.status === 404 ? 'no_sheet' : `http_${s.status}` }; continue; }
+      // source limitations are named, not counted as parse failures: WTA archive placeholders, and sheets whose
+      // fonts carry no extractable text (glyph soup)
+      if (/Not Yet Available/i.test(s.text)) { best = best || { wta_tid: tid, status: 'placeholder', url: s.url, capture_id: s.capture_id }; continue; }
+      const letters = (s.text.match(/[A-Za-z]/g) || []).length;
+      if (!s.text.trim() || letters < 0.5 * (s.text.replace(/\s/g, '').length || 1)) { best = best || { wta_tid: tid, status: 'unreadable', url: s.url, capture_id: s.capture_id }; continue; }
       const header = parseHeader(s.text);
       const parsed = parseSlots(s.text);
       const proof = proveDraw(parsed, data.people, data.matches);
@@ -92,7 +97,7 @@ async function main() {
 
 const summary = (results) => {
   const by = {};
-  for (const r of results) { const y = (by[r.year] ||= { editions: 0, proven: 0, unparsed: 0, not_proven: 0, no_sheet: 0 }); y.editions += 1; if (y[r.status] != null) y[r.status] += 1; }
+  for (const r of results) { const y = (by[r.year] ||= { editions: 0, proven: 0, unparsed: 0, not_proven: 0, no_sheet: 0, placeholder: 0, unreadable: 0 }); y.editions += 1; if (y[r.status] != null) y[r.status] += 1; }
   return { editions: results.length, proven: results.filter((r) => r.status === 'proven').length, slots: results.reduce((t, r) => t + (r.slots?.length || 0), 0), by_year: by };
 };
 function write(results) {
