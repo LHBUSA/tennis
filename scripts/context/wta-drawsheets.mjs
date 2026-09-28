@@ -30,7 +30,8 @@ async function sheet(year, wtaId) {
   const dir = path.join(CACHE, 'wta', String(year));
   const pdf = path.join(dir, `${wtaId}-MDS.pdf`);
   const meta = path.join(dir, `${wtaId}-MDS.json`);
-  const text = () => execFileSync('pdftotext', ['-layout', '-enc', 'UTF-8', pdf, '-'], { encoding: 'utf8' });
+  // a PDF whose fonts carry no extractable text (observed 2023/2041) is recorded unreadable, never guessed
+  const text = () => { try { return execFileSync('pdftotext', ['-layout', '-enc', 'UTF-8', pdf, '-'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }); } catch { return ''; } };
   if (fs.existsSync(meta)) { const m = JSON.parse(fs.readFileSync(meta, 'utf8')); return m.status === 200 ? { ...m, text: text() } : m; }
   fs.mkdirSync(dir, { recursive: true });
   const wait = lastFetch + 1600 - Date.now();

@@ -421,8 +421,9 @@ export function parseEspnEventLog(j) {
 export const espnEventLog = {
   key: 'espn.atp.eventlog', family: 'espn', capabilities: ['coverage_check'], parser_version: PARSER, cadence: { class: 'weekly', idle_s: 7 * 86400 },
   request: ({ season, id, page = 1, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/seasons/${season}/athletes/${id}/eventlog?page=${page}`, headers: J }),
-  shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['events']) : ['not_json']; },
-  parse: (body) => [parseEspnEventLog(safeJson(body))]
+  // an athlete without a log that season answers with a bare $ref (observed 10645 / 2025): absent, not drift
+  shape: (body) => { const j = safeJson(body); if (!j) return ['not_json']; return j.events || j.$ref ? [] : ['missing_events']; },
+  parse: (body) => { const j = safeJson(body); return j?.events ? [parseEspnEventLog(j)] : []; }
 };
 
 export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek, espnSeasonStats, espnEventLog];

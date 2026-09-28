@@ -521,3 +521,10 @@ test('ESPN extras: season statistics (general category only) and event-log refs 
   assert.equal(l.page_count, 3); assert.equal(l.count, 62); assert.equal(l.rows.length, 25);
   assert.deepEqual(l.rows[0], { event: '1039-2025', competition: '165285', played: true });
 });
+
+test('ESPN event log: a bare $ref (no log that season) is absent, not drift', async () => {
+  const { espnEventLog } = await import('../workers/providers/espn.js');
+  const body = JSON.stringify({ $ref: 'http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/seasons/2025/athletes/10645/eventlog' });
+  assert.deepEqual(espnEventLog.shape(body), []);
+  assert.deepEqual(espnEventLog.parse(body), []);
+});

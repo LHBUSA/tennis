@@ -33,7 +33,8 @@ export function parseHeader(text) {
   for (const line of lines) {
     for (const seg of segs(line)) {
       // the dates line of newer sheets carries "dates | prize | Surface"
-      const parts = seg.includes('|') ? seg.split('|').map((x) => x.trim()) : [seg];
+      // "dates | prize | Surface" (newer sheets) or "dates  Surface" (two spaces, 2021 WTA layout)
+      const parts = seg.includes('|') ? seg.split('|').map((x) => x.trim()) : MON.test(seg) ? seg.split(/\s{2,}/) : [seg];
       for (const p of parts) {
         const s = surfaceOf(p);
         if (s) found.push(s);
@@ -93,7 +94,9 @@ export function parseSlots(text) {
   let expected = 1;
   for (const page of text.split('\f')) {
     const lines = page.split(/\r?\n/);
-    const stop = lines.findIndex((l) => STOP.test(l));
+    // the seed / prize tables end a page — but only AFTER its first draw row (some headers print "PRIZE MONEY")
+    const first = lines.findIndex((l) => ROW.test(l));
+    const stop = first < 0 ? -1 : lines.findIndex((l, i) => i > first && STOP.test(l));
     const body = stop >= 0 ? lines.slice(0, stop) : lines;
     const used = new Set();
     const nameOnly = body.map((l, i) => { const m = l.match(NAME_ONLY); return m && !l.match(ROW) ? { i, entry: m[1], seed: m[2] ? Number(m[2]) : null, nat: m[3], name: m[4] } : null; }).filter(Boolean);

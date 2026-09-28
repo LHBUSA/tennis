@@ -158,3 +158,55 @@ valid ranking list simply does not enter ranking metrics. Unknown surface is sho
 Daily in tennis-ingest (step `dna_v2`, today + one historical month-start per day back to 2008); admin
 `POST /v1/runs?lane=dna_v2[&as_of=YYYY-MM-DD,...][&write=0]`. Idempotent upserts on
 `(pbe_player_id, as_of, surface, definition_version)`; raw evidence untouched.
+
+## Surface Match DNA (2026-09-28; definition_version 2, surface hard / clay / grass)
+
+The same Match DNA definitions over a player's matches on ONE surface, for the build's first as_of (today):
+
+- A match's surface is its edition's sourced surface (`docs/TENNIS_DATA_MODEL.md` "Context layer"); never inferred.
+  A match without a sourced surface is in no surface snapshot. A player needs >= 5 matches on the surface.
+- Population = same tour x same surface x same as_of; per-metric gates exactly as overall (percentile at >= 10
+  medium/high peers, published at >= 30).
+- `_rating` = the surface PBE Rating (the surface run of the chosen variant) with the SURFACE model's publication
+  status: `published` only when the surface blend beats the overall rating out of sample (backtest
+  `surface_blend`, >= 500 matches) for that tour; percentile among established players on that surface.
+- `wins_above_expectation` uses the surface-blend pre-match probability where the surface model is published for the
+  tour, else the overall rating (`provenance.wae_basis`).
+- `_recent` = the last 20 matches on the surface; `_form.career` / `_form.years` = records on the surface.
+- API: `GET /v1/players/:slug/dna` -> `match_dna.by_surface[]` (additive, tennis-api 0.5.0). Overall snapshots and
+  every existing reader (`surface=eq.all`, v1 readers pinned to definition 1) are unchanged.
+
+## Build performance (2026-09-28)
+
+**Before:** one full-universe build held both tours' ledgers (~360 B per row, uninterned ids, a sort-key string per
+row, set objects), both rating variants' per-match prediction objects and every snapshot until the end. At 186k
+ledger rows the build died in production with `Worker exceeded memory limit` (1102; cpu 17.0 s, wall 90.6 s);
+the last good build (153k rows, 6,991 snapshots) took ~88 s.
+
+**Now (byte-identical output):**
+
+- one tour in memory at a time (MS ledger -> ATP, WS -> WTA; a row whose two players are both of the other tour is
+  counted `mismatched_rows` and left out — 0 on 2026-09-28 — instead of being pooled);
+- interned strings, fixed-shape entries, sets packed one integer per set (tiebreak points are never read by a metric);
+- pre-match predictions column-stored (typed arrays); the losing rating variant released after the backtest;
+- two-pass population: pass 1 keeps one slim record per player, pass 2 rebuilds each snapshot, applies the
+  population and writes in batches of 200 (percentile by binary search: the same count as the linear scan);
+- rank lists paged correctly: batches whose row counts sum to <= 1,000, a larger list paged alone. **Defect fixed:**
+  six lists had shared one 1,000-row page, so the ~1,570-row official WTA lists (2026) were truncated to an arbitrary
+  subset (8,400+ of 9,426 ranks missing) — WTA rank-at-match and rank peaks in their weeks were incomplete.
+
+**Incremental inputs** (`workers/tennis-ingest/src/dna-cache.js`): each tour's raw ledger rows are cached in R2 (16
+chunks by match-id prefix); a build reads only rows with `updated_at` after the watermark (minus 5 min), drops rows
+the writer logged as merged away (`tennis_source_changes duplicate_merged`), merges chunk by chunk, and is trusted
+only if the eligible-row count equals the database's exact count — otherwise, or when the cache is missing / older
+than 7 days / another version, the tour is scanned in full (which rewrites the cache). Rank lists are cached with
+their snapshot descriptors and invalidated by any write to `tennis_rankings` (KV `rank:changed_at`). Every
+repair that edits `tennis_matches`, `tennis_sets` or `tennis_match_participants` outside the writer must bump
+`tennis_matches.updated_at` (the reconciliation SQL does). Production switch: KV `dna2:mode` = `auto`
+(default `full`); optional shadow verification (KV `dna2:shadow`) streams a full scan and compares hashes.
+
+**Regression proof** (`scripts/dna/dump.mjs` + `scripts/dna/regress.mjs`): frozen production inputs, the previous
+builder vs the new one through a read-only fake store; every written row compared as canonical JSON (keys
+sorted). 2026-09-28: 191,952 matches / 198,730 ranking rows / 11,648 players — 4 as_ofs, 24,903 snapshots and
+22,902 ratings byte-identical; live set (sampled after a full GC at every store call) 187 MB -> 78 MB
+(2 as_ofs: 139 MB -> 61-63 MB); incremental inputs on unchanged data: store requests 534 -> 124, identical output.

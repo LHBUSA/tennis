@@ -96,3 +96,53 @@ carried by a secondary source, never as an official feed.
   match in the edition is merged into it (ids moved, row removed, `tennis_source_changes kind duplicate_merged`).
 - Known source labelling issue (not duplicates): 377 draw-slot conflicts (one player twice in the same round of an
   edition) from ESPN round mislabels and the WTA API's opaque qualifying ids; reported by `scripts/qa`, not rewritten.
+
+## Context layer (Phase 5, 2026-09-28; migration 20260928000100)
+
+Identity of tournaments and editions, and the facts attached to them, each with provenance. Nothing here is
+decided by a name.
+
+| Table | What |
+|---|---|
+| `tennis_tournaments` / `tennis_tournament_editions` | canonical tournament and edition (a tour-neutral event; a combined event's men's rows live in ESPN's edition, its women's rows in the official WTA edition) |
+| `tennis_tournament_external_ids` / `tennis_edition_external_ids` | resolution index (provider id -> canonical id) |
+| `tennis_source_mappings` | every provider tournament / edition id we looked at: `status` mapped / unresolved / ambiguous / rejected, `method`, `confidence` (mapped only), `evidence` (counts, ids, dates), `rule_version` |
+| `tennis_edition_attributes` | sourced edition facts (surface, indoor, level) per source: `method` direct (the source states it for this edition), combined_event, draw_sheet, mapped_edition; `capture_id`, `evidence` |
+| `tennis_draw_slots` | draw position / seed / entry per source; `participant_key` null = unresolved (never guessed) |
+| `tennis_player_source_records` | source-published player aggregates kept as reported (WTA /records, /year; ESPN season statistics + event-log coverage) |
+| `tennis_source_disagreements` | a source value that disagrees with a stored / derived value — logged, never written over it |
+
+Mapping methods (rule `context-v1`, `scripts/context/reconcile.sql`, `workers/tennis-ingest/src/context-jobs.js`):
+
+- `official_id` (high): the WTA calendar's own tournament group id / edition — the canonical key is minted from it.
+- `shared_matches`: an ESPN event -> the canonical edition holding its rows (the ESPN match ids point at rows in
+  exactly one official edition). High at >= 3 rows, medium at 2; one row, or two official editions -> unresolved /
+  ambiguous. Official start date within 7 days of ESPN's.
+- `espn_founded` (high): the ESPN event has no official counterpart; ESPN's own edition is canonical.
+- `mapped_editions`: an ESPN tournament id -> the ONE canonical tournament all its mapped editions belong to;
+  two or more -> ambiguous (a tournament that changed identity across years is never collapsed).
+
+Surface (never inferred from a name, city, country, month or convention; unknown stays null):
+
+1. `direct` — the official WTA calendar (per edition, 2000 ->; `wta_edition_facts` lane) and the official Slam
+   feeds. The Slam editions ESPN created carry the WTA calendar's value for the same edition as their attribute.
+2. `combined_event` — an ESPN ATP edition whose ESPN event id is also the WTA league's event, mapped (high) to an
+   official WTA edition in the SAME city (edition city, else the official calendar's) within 7 days: the official
+   edition's surface / indoor. Toronto / Montreal splits and "Washington" vs "Washington DC" are refused.
+3. `draw_sheet` — ProTennisLive header surface of a PROVEN ATP draw sheet (registry built; blocked from Cloudflare
+   egress 2026-09-28, so not applied).
+An edition's effective `surface` is filled from its attributes only where empty; matches inherit it (`matches.surface`
+set where null, `updated_at` bumped). A sourced value that differs from a stored one goes to the disagreement log.
+
+Edition consolidation (`edition_merge` lane): ESPN WTA rows written before their official edition could be proven
+sat in ESPN "shadow" editions. For every high `shared_matches` mapping, each ESPN-owned WS / WD row is merged into
+the official row of the same match (event, stage, participant pair; exactly one) or moved into the official edition
+(draw, surface), logged as `duplicate_merged` / `edition_moved`; an emptied shadow edition is removed
+(`edition_merged`) and its ESPN id repointed. Men's rows of a combined event's ESPN edition are never touched.
+
+Draw slots: official draw-sheet PDFs (WTA `wtafiles`, ATP ProTennisLive) are fetched only through tennis-ingest
+`/v1/drawsheet` (allow-listed, polite client, byte-exact R2 archive + capture row) and parsed in a reviewed build
+(`scripts/context/drawsheet-parse.mjs`). A sheet is used only when it PROVES the edition: >= 4 first-round pairs
+resolved within that edition's own stored players, >= 90% of them stored matches, >= 75% of the draw resolved, no
+player twice. A slot points at a player already stored in the edition or stays unresolved; a PDF never mints or
+merges a player.

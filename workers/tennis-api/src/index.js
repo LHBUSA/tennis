@@ -73,8 +73,22 @@ async function tournament(store, slug, year) {
   if (!t.length) return null;
   const e = await store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_status,source_family,updated_at,tennis_tournaments(slug,name),tennis_venues(slug,city,country,venue_name,precision)&tournament_id=eq.${t[0].tournament_id}&year=eq.${year}`);
   if (!e.length) return null;
-  const matches = await store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&limit=1000`);
-  return ok({ edition: { ...shapeEdition(e[0]), status: e[0].source_status, venue: e[0].tennis_venues || null }, media: { hero: resolveHero({ tournament: { slug, year }, featured_ids: [], player_ids: [] }, editorial) }, matches: matches.map(shapeMatch) }, { rows: [...e, ...matches], policy: { currentS: 300, staleS: 3600 }, semantics: 'one tournament edition with every observed match (all events and stages)' });
+  const [matches, slots, attrs] = await Promise.all([
+    store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&limit=1000`),
+    store.select('tennis_draw_slots', `select=event_type,draw,position,participant_key,bye,seed,entry_type,source,source_ref,capture_id&edition_id=eq.${e[0].edition_id}&order=event_type.asc,draw.asc,position.asc&limit=1000`),
+    store.select('tennis_edition_attributes', `select=attribute,value,source,method,source_ref&edition_id=eq.${e[0].edition_id}`)
+  ]);
+  // draws (additive 0.5.0): official draw-sheet slots proven against this edition's matches; unresolved slots stay null
+  const pids = [...new Set(slots.map((x) => x.participant_key).filter((k) => k && k.startsWith('S:')).map((k) => k.slice(2)))];
+  const people = pids.length ? new Map((await store.select('tennis_players', `select=pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA}&pbe_player_id=${inList(pids)}`)).map((x) => [x.pbe_player_id, shapePlayer(x)])) : new Map();
+  const draws = [];
+  for (const sl of slots) {
+    let d = draws.find((x) => x.event_type === sl.event_type && x.draw === sl.draw && x.source === sl.source);
+    if (!d) { d = { event_type: sl.event_type, draw: sl.draw, source: sl.source, source_ref: sl.source_ref, capture_id: sl.capture_id, slots: [] }; draws.push(d); }
+    d.slots.push({ position: sl.position, bye: sl.bye, seed: sl.seed, entry: sl.entry_type, player: sl.participant_key?.startsWith('S:') ? people.get(sl.participant_key.slice(2)) || null : null });
+  }
+  const surfaceProvenance = attrs.filter((x) => x.attribute === 'surface').map((x) => ({ value: x.value, source: x.source, method: x.method }));
+  return ok({ edition: { ...shapeEdition(e[0]), status: e[0].source_status, venue: e[0].tennis_venues || null, surface_provenance: surfaceProvenance }, media: { hero: resolveHero({ tournament: { slug, year }, featured_ids: [], player_ids: [] }, editorial) }, matches: matches.map(shapeMatch), draws }, { rows: [...e, ...matches], policy: { currentS: 300, staleS: 3600 }, semantics: 'one tournament edition with every observed match (all events and stages); draws = official draw-sheet slots proven against these matches' });
 }
 
 async function match(store, id) {
