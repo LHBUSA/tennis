@@ -5,9 +5,11 @@
 
 import { inList } from '../../shared/store/postgrest.js';
 import { loadTourLedger, cachedRankRows } from './dna-cache.js';
-import { ledgerEntry, byOrder, rankIndex, ratingRun, backtest, buildMatchDna, populationIndex, applyPopulationOne, slimForPopulation, recentMatches, MATCH_DNA_VERSION, RATING_METHOD_VERSION } from '../../shared/dna/match-dna.js';
+import { ledgerEntry, byOrder, rankIndex, ratingRun, backtest, buildMatchDna, populationIndex, applyPopulationOne, slimForPopulation, recentMatches, buildProfile, PROFILE_VERSION, MATCH_DNA_VERSION, RATING_METHOD_VERSION } from '../../shared/dna/match-dna.js';
 
 const BUILDER = 'tennis-ingest dna-v2-job 1.0';
+// rating history is stored for players active in the 365 days before as_of (inactive careers keep their splits)
+const yearBefore = (asOf) => new Date(Date.parse(asOf) - 365 * 86400e3).toISOString().slice(0, 10);
 // burn-in seasons before evaluation starts (ATP ledger from 2007; WTA from 2020)
 const BACKTEST_FROM = { ATP: '2012-01-01', WTA: '2023-01-01' };
 const MIN_EVAL = 500;
@@ -66,6 +68,8 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   const mark = (k) => { phase[k] = Date.now() - tp; tp = Date.now(); };
   let gender = new Map((await all(store, 'tennis_players', 'select=pbe_player_id,gender&status=eq.active&order=pbe_player_id.asc')).map((p) => [p.pbe_player_id, p.gender]));
   const tourOf = (pid) => (gender.get(pid) === 'M' ? 'ATP' : gender.get(pid) === 'F' ? 'WTA' : null);
+  // opponent handedness for the vs-left/right split: stored bio only (unsourced = unknown, never guessed)
+  const hand = new Map((await all(store, 'tennis_players', 'select=pbe_player_id,plays&plays=in.(left,right)&order=pbe_player_id.asc')).map((p) => [p.pbe_player_id, p.plays]));
   let editions = new Map((await all(store, 'tennis_tournament_editions', 'select=edition_id,start_date,end_date,competition_key,level,year&order=edition_id.asc')).map((e) => [e.edition_id, e]));
   mark('players_editions');
   const lists = { ATP: await loadRankLists(ctx, 'atp_singles', { mode }), WTA: await loadRankLists(ctx, 'wta_singles', { mode }) };
@@ -134,6 +138,35 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
       if (!dna.sample.matches) return null;
       return { next, n, rating, snap: { pbe_player_id: pid, as_of: asOf, surface: 'all', definition_version: MATCH_DNA_VERSION, metrics: { ...dna.metrics, _form: dna.form, _surface_record: dna.surface_record, _rating: rating, _tour: tour }, provenance: { builder: BUILDER, ledger_rule: 'singles completed+retired, dated, same tour', sample: dna.sample, rank_lists: lists[tour].length } } };
     };
+    // Players to Watch inputs (as_of = the build's first date): rating now vs 30 / 90 days earlier by the same
+    // rule as a snapshot's rating (pre-match rating of the first match on/after the date, else the final rating)
+    const watchRows = [];
+    const ratingAt = (pid, sorted, day, sf = null) => {
+      const next = sorted.find((e) => e.day >= day && (!sf || e.surface === sf));
+      if (next && !sf) { const p = run.pre.get(next); return { r: next.A === pid ? p.ra : p.rb, n: next.A === pid ? p.na : p.nb }; }
+      if (next) { const p = run.pre.surface(next); return p ? { r: next.A === pid ? p.sra : p.srb, n: next.A === pid ? p.nsa : p.nsb } : null; }
+      const f = sf ? run.surface.get(`${pid}|${sf}`) : run.ratings.get(pid);
+      return f?.n ? { r: f.r, n: f.n } : null;
+    };
+    const watchRow = (pid, entries, asOf, x) => {
+      const sorted = [...entries].sort(byOrder);
+      const past = sorted.filter((e) => e.day < asOf);
+      const ago = (d) => new Date(Date.parse(asOf) - d * 86400e3).toISOString().slice(0, 10);
+      const r30 = ratingAt(pid, sorted, ago(30));
+      const r90 = ratingAt(pid, sorted, ago(90));
+      const surf = {};
+      for (const sf of SURFACES) {
+        const now = ratingAt(pid, sorted, asOf, sf);
+        const then = ratingAt(pid, sorted, ago(90), sf);
+        const played = past.filter((e) => e.surface === sf && e.day >= ago(90)).length;
+        if (now && then) surf[sf] = { now: Math.round(now.r), then: Math.round(then.r), n_now: now.n, n_then: then.n, matches_90d: played };
+      }
+      const rk = rankAt(pid, asOf);
+      return { pid, rating: x.rating.value, n: x.rating.rated_matches, first_day: past[0]?.day ?? null, last_day: past.at(-1)?.day ?? null,
+        m30: past.filter((e) => e.day >= ago(30)).length, m90: past.filter((e) => e.day >= ago(90)).length,
+        r30: r30 && { r: Math.round(r30.r), n: r30.n }, r90: r90 && { r: Math.round(r90.r), n: r90.n }, surf,
+        rank: rk?.rank ? { rank: rk.rank, list_date: rk.list_date } : null };
+    };
     for (const asOf of asOfs) {
       // pass 1: the same-tour, same-as_of population from one slim record per player
       const slim = [];
@@ -141,6 +174,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         const x = snapshotOf(pid, entries, asOf);
         if (!x) continue;
         slim.push(slimForPopulation(x.snap));
+        if (asOf === asOfs[0] && x.rating) watchRows.push(watchRow(pid, entries, asOf, x));
         if (asOf === asOfs[0] && x.rating) {
           ratingRows.push({ pbe_player_id: pid, surface: 'overall', as_of: asOf, method_version: RATING_METHOD_VERSION, rating: x.rating.value, uncertainty: null, sample_matches: x.n, provenance: { variant, published, tour, builder: BUILDER } });
           if (!x.next) for (const sf of ['hard', 'clay', 'grass']) { const r = run.surface.get(`${pid}|${sf}`); if (r?.n) ratingRows.push({ pbe_player_id: pid, surface: sf, as_of: asOf, method_version: RATING_METHOD_VERSION, rating: Math.round(r.r), uncertainty: null, sample_matches: r.n, provenance: { variant, published: surfacePublished, tour, builder: BUILDER, note: 'surface rating from matches whose surface is stored; blend 50/50 with overall for prediction' } }); }
@@ -158,6 +192,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         if (!x) continue;
         applyPopulationOne(x.snap, idx, { ratingPublished: published });
         x.snap.metrics._recent = recentMatches(pid, entries, asOf, { rankAt, limit: 40 });
+        x.snap.metrics._profile = buildProfile(pid, entries, asOf, { pre: run.pre, hand, rating: x.rating, history: !!x.rating && x.rating.rated_matches >= 20 && x.snap.provenance.sample.last_day >= yearBefore(asOf) });
         batch.push(x.snap);
         if (batch.length >= 200) await flush();
       }
@@ -192,12 +227,15 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
           if (!x) continue;
           applyPopulationOne(x.snap, idx, { ratingPublished: surfacePublished });
           x.snap.metrics._recent = recentMatches(pid, x.se, asOf, { rankAt, limit: 20 });
+          const sr = x.snap.metrics._rating;
+          x.snap.metrics._profile = buildProfile(pid, x.se, asOf, { pre: surfPre, run: run.pre, hand, rating: sr, surface: sf, history: !!sr && sr.rated_matches >= 20 && x.snap.provenance.sample.last_day >= yearBefore(asOf) });
           batch.push(x.snap);
           if (batch.length >= 200) await flush();
         }
         await flush();
       }
     }
+    if (asOfs.length) summary.tours[tour].watch = playersToWatch(watchRows, asOfs[0], { published, surfacePublished });
     lists[tour] = null; // this tour's rank maps are no longer needed
   }
   mark('compute_and_snapshot_writes');
@@ -205,6 +243,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   summary.ratings = ratingRows.length;
   if (write) {
     for (let i = 0; i < ratingRows.length; i += 500) await store.upsert('tennis_surface_ratings', ratingRows.slice(i, i + 500), { onConflict: 'pbe_player_id,surface,as_of,method_version' });
+    await writeWatch(ctx.kv, summary, asOfs[0]);
     await ctx.kv.put('dna:v2:summary', JSON.stringify({ ...summary, built_at: new Date().toISOString() }));
   }
   if (write) mark('rating_writes');
@@ -212,4 +251,57 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   summary.inputs = inputs;
   summary.ms = Date.now() - t0;
   return summary;
+}
+
+// ---- Players to Watch (Phase 6) -------------------------------------------------------------------------
+// Every list ranks stored PBE Rating movements (no editorial judgement). A player qualifies only with an
+// established rating (>= 20 rated matches) and a match in the last 60 days, plus the minimum samples named per list.
+export const WATCH = Object.freeze({ top: 10, recent_days: 60, min_rated: 20, rise_min_matches_90d: 5, surface_min_rated: 10, surface_min_matches_90d: 3, emerging_years: 3, rank_scope: 200 });
+
+export function playersToWatch(rows, asOf, { published = false, surfacePublished = false } = {}) {
+  const ago = (d) => new Date(Date.parse(asOf) - d * 86400e3).toISOString().slice(0, 10);
+  const active = rows.filter((r) => r.n >= WATCH.min_rated && (r.last_day || '') >= ago(WATCH.recent_days));
+  const by = (f, dir = -1) => (a, b) => dir * (f(a) - f(b)) || (String(a.r?.pid ?? a.pid) < String(b.r?.pid ?? b.pid) ? -1 : 1);
+  const top = (xs) => xs.slice(0, WATCH.top);
+  const row = (r, extra) => ({ pbe_player_id: r.pid, rating: r.rating, rated_matches: r.n, rank: r.rank, last_match: r.last_day, ...extra });
+  const d30 = active.filter((r) => r.r30 && r.r30.n >= WATCH.min_rated && r.m30 >= 1).map((r) => ({ r, d: r.rating - r.r30.r }));
+  const d90 = active.filter((r) => r.r90 && r.r90.n >= WATCH.min_rated && r.m90 >= WATCH.rise_min_matches_90d).map((r) => ({ r, d: r.rating - r.r90.r }));
+  // rating vs ranking on the SAME set: active established players holding a rank within the top rank_scope on the
+  // list in force at as_of; both orders are positions inside that set (players missing from our ledger cannot inflate
+  // a gap). gap = ranking position - rating position.
+  const set = active.filter((r) => r.rank?.rank && r.rank.rank <= WATCH.rank_scope);
+  const rankPos = new Map([...set].sort((a, b) => a.rank.rank - b.rank.rank || (a.pid < b.pid ? -1 : 1)).map((r, i) => [r.pid, i + 1]));
+  const ratingPos = new Map([...set].sort(by((r) => r.rating)).map((r, i) => [r.pid, i + 1]));
+  const ranked = set.map((r) => ({ r, rr: ratingPos.get(r.pid), kp: rankPos.get(r.pid), gap: rankPos.get(r.pid) - ratingPos.get(r.pid) }));
+  const surfaces = {};
+  for (const sf of ['hard', 'clay', 'grass']) {
+    const xs = active.map((r) => ({ r, s: r.surf[sf] })).filter((x) => x.s && x.s.n_then >= WATCH.surface_min_rated && x.s.matches_90d >= WATCH.surface_min_matches_90d).map((x) => ({ ...x, d: x.s.now - x.s.then }));
+    surfaces[sf] = top(xs.filter((x) => x.d > 0).sort(by((x) => x.d))).map((x) => row(x.r, { surface_rating: x.s.now, surface_rating_90d_ago: x.s.then, change: x.d, surface_matches_90d: x.s.matches_90d }));
+  }
+  const emergingFrom = ago(WATCH.emerging_years * 365);
+  return {
+    as_of: asOf, rating_published: published, surface_rating_published: surfacePublished, population: active.length, rules: WATCH,
+    biggest_30d_change: {
+      risers: top(d30.filter((x) => x.d > 0).sort(by((x) => x.d))).map((x) => row(x.r, { rating_30d_ago: x.r.r30.r, change: x.d, matches_30d: x.r.m30 })),
+      fallers: top(d30.filter((x) => x.d < 0).sort(by((x) => x.d, 1))).map((x) => row(x.r, { rating_30d_ago: x.r.r30.r, change: x.d, matches_30d: x.r.m30 }))
+    },
+    fastest_rising_90d: top(d90.filter((x) => x.d > 0).sort(by((x) => x.d))).map((x) => row(x.r, { rating_90d_ago: x.r.r90.r, change: x.d, matches_90d: x.r.m90 })),
+    surface_risers_90d: surfaces,
+    ranking_comparison_set: set.length,
+    outperforming_ranking: top(ranked.filter((x) => x.gap > 0).sort(by((x) => x.gap))).map((x) => row(x.r, { rating_position: x.rr, ranking_position: x.kp, ranking_gap: x.gap })),
+    underperforming_ranking: top(ranked.filter((x) => x.gap < 0).sort(by((x) => x.gap, 1))).map((x) => row(x.r, { rating_position: x.rr, ranking_position: x.kp, ranking_gap: x.gap })),
+    emerging: top(active.filter((r) => (r.first_day || '') >= emergingFrom).sort(by((r) => r.rating))).map((r) => row(r, { first_ledger_match: r.first_day }))
+  };
+}
+
+/** KV: the current lists (rebuilt daily) and the weekly edition, frozen on Mondays and never rewritten. */
+export async function writeWatch(kv, summary, asOf) {
+  const watch = { as_of: asOf, built_at: new Date().toISOString(), profile_version: PROFILE_VERSION, tours: {} };
+  for (const [t, x] of Object.entries(summary.tours)) { watch.tours[t] = x.watch || null; delete x.watch; }
+  await kv.put('dna:v2:watch:current', JSON.stringify(watch));
+  if (new Date(`${asOf}T00:00:00Z`).getUTCDay() !== 1) return;
+  if (await kv.get(`dna:v2:watch:week:${asOf}`)) return;
+  await kv.put(`dna:v2:watch:week:${asOf}`, JSON.stringify(watch));
+  const weeks = JSON.parse((await kv.get('dna:v2:watch:weeks')) || '[]');
+  await kv.put('dna:v2:watch:weeks', JSON.stringify([asOf, ...weeks.filter((w) => w !== asOf)].slice(0, 104)));
 }

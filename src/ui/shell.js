@@ -15,6 +15,8 @@ export const PRIMARY_NAV = [
 ];
 
 export const MORE_NAV = [
+  { href: '/matchups', label: 'Matchups', note: 'This week’s singles matches with PBE Rating win probabilities', id: 'matchups' },
+  { href: '/players-to-watch', label: 'Players to Watch', note: 'Weekly rating risers, fallers and emerging players', id: 'players-to-watch' },
   { href: '/schedule', label: 'Schedule', note: 'Today, tomorrow and this week — men, women and mixed', id: 'schedule' },
   { href: '/rankings', label: 'Rankings', note: 'Official WTA lists, archived weekly; ATP status', id: 'rankings' },
   { href: '/methodology', label: 'Methodology', note: 'Tennis DNA formulas, samples, as-of rules' },
@@ -22,7 +24,7 @@ export const MORE_NAV = [
   { href: '/credits', label: 'Photo credits', note: 'Every player photo, its author and license' }
 ];
 
-const NAV_GROUP = { men: 'players', 'player-sub': 'players', player: 'players', match: 'more', matches: 'more', schedule: 'more', rankings: 'more', 'rankings-list': 'more', labs: 'more', 'news-desk': 'news', 'news-article': 'news', 'pbecast-hub': 'pbecast', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'dna-player': 'dna', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
+const NAV_GROUP = { men: 'players', 'player-sub': 'players', player: 'players', match: 'more', matches: 'more', schedule: 'more', rankings: 'more', 'rankings-list': 'more', labs: 'more', 'news-desk': 'news', 'news-article': 'news', 'pbecast-hub': 'pbecast', tournament: 'tournaments', 'tournament-sub': 'tournaments', 'dna-player': 'dna', matchups: 'more', matchup: 'more', 'players-to-watch': 'more', pbecast: 'pbecast', h2h: 'players', venue: 'tournaments' };
 
 export function shellHtml() {
   return html`

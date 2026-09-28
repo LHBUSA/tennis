@@ -126,7 +126,7 @@ export function ratingRun(ledger, { variant = 'standard', surfaces = true, init 
       sb = get(surf, `${e.B}|${e.surface}`);
       ps = expected((a.r + sa.r) / 2, (b.r + sb.r) / 2);
     }
-    pre.put(i, a.r, b.r, a.n, b.n, p, ps, sa?.n ?? null, sb?.n ?? null);
+    pre.put(i, a.r, b.r, a.n, b.n, p, ps, sa?.n ?? null, sb?.n ?? null, sa?.r, sb?.r);
     if (e.status !== 'completed') continue;
     const won = e.winner === 'A' ? 1 : 0;
     const mult = v.margin ? Math.min(2, 1 + Math.abs(gameShare(e) - 0.5) * 2) : 1;
@@ -150,9 +150,11 @@ class PreMatch {
     this.ra = new Float64Array(n); this.rb = new Float64Array(n); this.p = new Float64Array(n); this.ps = new Float64Array(n);
     this.na = new Int32Array(n); this.nb = new Int32Array(n); this.nsa = new Int32Array(n); this.nsb = new Int32Array(n);
     this.hasPs = new Uint8Array(n); this.hasNs = new Uint8Array(n);
+    this.sra = new Float32Array(n); this.srb = new Float32Array(n); // pre-match surface ratings (history/risers only)
     this.byId = null;
   }
-  put(i, ra, rb, na, nb, p, ps, nsa, nsb) {
+  put(i, ra, rb, na, nb, p, ps, nsa, nsb, sra, srb) {
+    if (sra != null) { this.sra[i] = sra; this.srb[i] = srb; }
     this.ra[i] = ra; this.rb[i] = rb; this.na[i] = na; this.nb[i] = nb; this.p[i] = p;
     if (ps != null) { this.ps[i] = ps; this.hasPs[i] = 1; }
     if (nsa != null) { this.nsa[i] = nsa; this.nsb[i] = nsb; this.hasNs[i] = 1; }
@@ -170,9 +172,27 @@ class PreMatch {
     if (i == null) return undefined;
     return { ra: this.ra[i], rb: this.rb[i], na: this.na[i], nb: this.nb[i], p: this.p[i], ps: this.hasPs[i] ? this.ps[i] : null, nsa: this.hasNs[i] ? this.nsa[i] : null, nsb: this.hasNs[i] ? this.nsb[i] : null };
   }
+  /** Pre-match surface ratings { sra, srb, nsa, nsb } of an entry played on a stored surface, else null. */
+  surface(x) {
+    const i = this.index(x);
+    if (i == null || !this.hasNs[i]) return null;
+    return { sra: this.sra[i], srb: this.srb[i], nsa: this.nsa[i], nsb: this.nsb[i] };
+  }
   has(x) { return this.index(x) != null; }
 }
 
+// calibration bands: favourite probability 0.50-0.55, 0.55-0.60, ... 0.95-1.00; keyed 'all' and per stored surface
+export const CAL_BAND = 0.05;
+export const calBand = (p) => Math.min(9, Math.floor((Math.max(p, 1 - p) - 0.5) / CAL_BAND));
+function calib(t, p, y, surface) {
+  const b = calBand(p);
+  const fav = p >= 0.5 ? y : 1 - y;
+  for (const k of ['all', surface || 'unknown']) {
+    const x = (t[k] ||= Array.from({ length: 10 }, () => [0, 0, 0]));
+    x[b][0] += 1; x[b][1] += Math.max(p, 1 - p); x[b][2] += fav;
+  }
+}
+const calOut = (t) => Object.fromEntries(Object.entries(t).map(([k, bands]) => [k, bands.map(([n, sp, w], i) => ({ from: 0.5 + i * CAL_BAND, to: Math.min(1, 0.5 + (i + 1) * CAL_BAND), matches: n, predicted: n ? Math.round((sp / n) * 10000) / 10000 : null, observed: n ? Math.round((w / n) * 10000) / 10000 : null }))]));
 const ll = (p, y) => -(y ? Math.log(Math.max(1e-9, p)) : Math.log(Math.max(1e-9, 1 - p)));
 /**
  * Walk-forward backtest: predictions are always pre-match; evaluation starts at `from` (earlier seasons are
@@ -201,6 +221,7 @@ export function backtest(ledger, runs, rankAt, { from, minPrior = 10 } = {}) {
   const out = {};
   for (const [name, run] of Object.entries(runs)) {
     const acc = { n: 0, ll: 0, brier: 0, right: 0, coin_ll: 0, ranked: { n: 0, ll: 0, rank_ll: 0, brier: 0, rank_brier: 0, right: 0, rank_right: 0 }, surface: { n: 0, ll: 0, overall_ll: 0 } };
+    const cal = { overall: {}, surface_blend: {} };
     for (const e of ledger) {
       if (e.status !== 'completed' || e.day < from) continue;
       const pr = run.pre.get(e);
@@ -215,13 +236,18 @@ export function backtest(ledger, runs, rankAt, { from, minPrior = 10 } = {}) {
         R.n += 1; R.ll += ll(pr.p, y); R.rank_ll += ll(q, y); R.brier += (pr.p - y) ** 2; R.rank_brier += (q - y) ** 2; R.right += (pr.p > 0.5) === (y === 1) ? 1 : 0; R.rank_right += (q > 0.5) === (y === 1) ? 1 : 0;
       }
       if (pr.ps != null && pr.nsa >= 5 && pr.nsb >= 5) { acc.surface.n += 1; acc.surface.ll += ll(pr.ps, y); acc.surface.overall_ll += ll(pr.p, y); }
+      // calibration / similarity: out-of-sample matches grouped by the favourite's probability band (5 points) and
+      // the edition's stored surface, for the overall prediction and (where it applies) the surface blend
+      calib(cal.overall, pr.p, y, e.surface);
+      if (pr.ps != null && pr.nsa >= 5 && pr.nsb >= 5) calib(cal.surface_blend, pr.ps, y, e.surface);
     }
     const r4 = (x) => Math.round(x * 10000) / 10000;
     const R = acc.ranked;
     out[name] = {
       matches: acc.n, log_loss: acc.n ? r4(acc.ll / acc.n) : null, brier: acc.n ? r4(acc.brier / acc.n) : null, accuracy: acc.n ? r4(acc.right / acc.n) : null, coin_log_loss: acc.n ? r4(acc.coin_ll / acc.n) : null,
       vs_rank: R.n ? { rank_model_fit_matches: train.length, matches: R.n, rating_log_loss: r4(R.ll / R.n), rank_log_loss: r4(R.rank_ll / R.n), rating_brier: r4(R.brier / R.n), rank_brier: r4(R.rank_brier / R.n), rating_accuracy: r4(R.right / R.n), rank_accuracy: r4(R.rank_right / R.n), rank_model_c: c } : null,
-      surface_blend: acc.surface.n ? { matches: acc.surface.n, blended_log_loss: r4(acc.surface.ll / acc.surface.n), overall_log_loss: r4(acc.surface.overall_ll / acc.surface.n) } : null
+      surface_blend: acc.surface.n ? { matches: acc.surface.n, blended_log_loss: r4(acc.surface.ll / acc.surface.n), overall_log_loss: r4(acc.surface.overall_ll / acc.surface.n) } : null,
+      calibration: { band: CAL_BAND, basis: 'out-of-sample matches (both players >= minPrior rated matches) by favourite probability band and stored edition surface', overall: calOut(cal.overall), surface_blend: calOut(cal.surface_blend) }
     };
   }
   return out;
@@ -456,3 +482,112 @@ export function recentMatches(pid, entries, asOf, { rankAt = () => null, limit =
       opponent_rank: r?.rank ? { rank: r.rank, list_date: r.list_date } : r?.outside ? { outside: r.outside, list_date: r.list_date } : null };
   });
 }
+
+// ---- Player DNA profile (Phase 6) ---------------------------------------------------------------------
+// Informational splits of the SAME ledger (no new source, no estimate): every split carries its W-L and its match
+// count; a split with fewer than PROFILE_MIN matches is flagged small_sample and never ranked. Nothing is compared
+// across players here. Opponent strength uses the PBE Rating BEFORE the match (both players >= 10 rated matches).
+export const PROFILE_VERSION = 1;
+export const PROFILE_MIN = 10;
+export const PROFILE_WEEKS = [5, 10, 20, 52];
+const ROUND_GROUP = { 'Q-1': 'qualifying', 'Q-2': 'qualifying', 'Q-3': 'qualifying', 'Q-4': 'qualifying', RR: 'round_robin', 1: 'early', 2: 'early', 3: 'middle', 4: 'middle', Q: 'quarterfinal', S: 'semifinal', F: 'final' };
+const roundGroup = (r) => ROUND_GROUP[String(r || '').replace(/^M-/, '')] || 'unknown';
+const STRENGTH_GAP = 100; // rating points: stronger / similar / weaker opponent
+
+function acc() { return { W: 0, L: 0, sets_w: 0, sets_p: 0, games_w: 0, games_p: 0, wae: 0, wae_n: 0 }; }
+function add(a, v, pw) {
+  a[v.won ? 'W' : 'L'] += 1;
+  for (const s of v.sets) { a.games_w += s.my; a.games_p += s.my + s.op; if (setDone({ a: s.my, b: s.op })) { a.sets_p += 1; if (s.my > s.op) a.sets_w += 1; } }
+  if (pw != null) { a.wae += (v.won ? 1 : 0) - pw; a.wae_n += 1; }
+}
+// compact split (stored in every snapshot): W, L, set / game win rate, wins above expectation over n_rated rated
+// completed matches. matches = W + L and small_sample = matches < PROFILE_MIN are derived by the reader.
+function out(a) {
+  const x = { W: a.W, L: a.L };
+  if (a.sets_p) x.set = r4(a.sets_w / a.sets_p);
+  if (a.games_p) x.game = r4(a.games_w / a.games_p);
+  if (a.wae_n) { x.wae = r4(a.wae / a.wae_n); x.n_rated = a.wae_n; }
+  return x;
+}
+
+/**
+ * Player DNA profile at asOf (exclusive). pre: the run's PreMatch; hand: Map(pid -> 'left'|'right') from the stored
+ * player bio (opponents without a sourced hand are counted as hand unknown, never guessed);
+ * rating: this snapshot's rating ({ value } | null); history: include the monthly rating history; run: the rating
+ * run's PreMatch for history points when `pre` is a wrapper; surface: history from the pre-match surface ratings.
+ */
+export function buildProfile(pid, entries, asOf, { pre = null, hand = new Map(), history = true, rating = null, run = null, surface = null } = {}) {
+  const ms = entries.filter((e) => e.day < asOf).sort(byOrder).map((e) => view(e, pid));
+  const at = Date.parse(asOf);
+  const windows = {};
+  for (const w of PROFILE_WEEKS) windows[`${w}w`] = { from: new Date(at - w * 7 * 86400e3).toISOString().slice(0, 10), a: acc() };
+  const strength = { stronger: acc(), similar: acc(), weaker: acc(), unrated: acc() };
+  const hands = { left: acc(), right: acc(), unknown: acc() };
+  const levels = {};
+  const rounds = {};
+  const points = [];
+  for (const v of ms) {
+    const p = pre?.get(v.e);
+    const mine = v.e.A === pid;
+    const rated = p && p.na >= 10 && p.nb >= 10;
+    const pw = rated && v.e.status === 'completed' ? (mine ? p.p : 1 - p.p) : null;
+    for (const w of Object.values(windows)) if (v.e.day >= w.from) add(w.a, v, pw);
+    if (rated) { const gap = (mine ? p.rb - p.ra : p.ra - p.rb); add(strength[gap >= STRENGTH_GAP ? 'stronger' : gap <= -STRENGTH_GAP ? 'weaker' : 'similar'], v, pw); } else add(strength.unrated, v, null);
+    add(hands[hand.get(v.opp) === 'left' ? 'left' : hand.get(v.opp) === 'right' ? 'right' : 'unknown'], v, pw);
+    const lv = v.e.level || 'unclassified';
+    add(levels[lv] || (levels[lv] = acc()), v, pw);
+    const rg = roundGroup(v.e.round);
+    add(rounds[rg] || (rounds[rg] = acc()), v, pw);
+    // history points: the overall run's pre-match rating, or (surface profile) the pre-match SURFACE rating
+    const hp = surface ? (run || pre)?.surface?.(v.e) : (run || pre)?.get(v.e);
+    if (hp && surface) points.push([v.e.day, mine ? hp.sra : hp.srb, mine ? hp.nsa : hp.nsb]);
+    else if (hp) points.push([v.e.day, mine ? hp.ra : hp.rb, mine ? hp.na : hp.nb]);
+  }
+  const map = (o) => Object.fromEntries(Object.entries(o).map(([k, a]) => [k, out(a)]).filter(([, x]) => x.W + x.L));
+  // definitions of every split live in PROFILE_DEFINITIONS (served by the API), not in each stored row
+  const profile = {
+    v: PROFILE_VERSION,
+    windows: Object.fromEntries(Object.entries(windows).map(([k, w]) => [k, { from: w.from, ...out(w.a) }])),
+    vs_strength: map(strength),
+    vs_hand: map(hands),
+    by_level: map(levels),
+    by_round: map(rounds)
+  };
+  if (history) profile.rating_history = ratingHistory(points, rating, asOf);
+  return profile;
+}
+
+/**
+ * Monthly rating series from the player's own pre-match ratings: one point per month the player played = the rating
+ * entering that month's FIRST match (no interpolation for idle months), plus the current rating at as_of.
+ * Inflection points: peak, and the largest gain / drop between two points at most 92 days apart.
+ */
+export function ratingHistory(points, rating, asOf) {
+  const series = [];
+  for (const [day, r, n] of points) { const m = day.slice(0, 7); if (series.at(-1)?.[0] !== m) series.push([m, Math.round(r), n, day]); }
+  if (rating?.value != null) series.push([asOf.slice(0, 7), rating.value, rating.rated_matches ?? null, asOf]);
+  const est = series.filter((x) => x[2] == null || x[2] >= 20);
+  let peak = null; let gain = null; let drop = null;
+  for (let i = 0; i < est.length; i += 1) {
+    if (!peak || est[i][1] > peak[1]) peak = est[i];
+    for (let j = i + 1; j < est.length && Date.parse(est[j][3]) - Date.parse(est[i][3]) <= 92 * 86400e3; j += 1) {
+      const d = est[j][1] - est[i][1];
+      if (d > 0 && (!gain || d > gain.change)) gain = { from: est[i][3], to: est[j][3], change: d, from_rating: est[i][1], to_rating: est[j][1] };
+      if (d < 0 && (!drop || d < drop.change)) drop = { from: est[i][3], to: est[j][3], change: d, from_rating: est[i][1], to_rating: est[j][1] };
+    }
+  }
+  // series rows: [month, rating, rated_matches]; the last row is the current rating at as_of
+  return { series: series.map(([m, r, n]) => [m, r, n]), peak: peak && { day: peak[3], rating: peak[1] }, gain_3m: gain, drop_3m: drop };
+}
+
+/** Reader-side definitions of the stored profile (the API serves these; rows stay compact). */
+export const PROFILE_DEFINITIONS = Object.freeze({
+  split: 'W-L, set win rate (set), game win rate (game) and wins above expectation (wae) over n_rated rated completed matches; a split with fewer than 10 matches is a small sample and never ranked',
+  windows: 'matches in the last 5 / 10 / 20 / 52 weeks before as_of',
+  vs_strength: `opponent PBE Rating before the match vs the player’s own: stronger = opponent ${STRENGTH_GAP}+ points higher, weaker = ${STRENGTH_GAP}+ lower, similar otherwise; unrated = either player below 10 rated matches`,
+  vs_hand: 'opponent playing hand from the stored player bio; unknown = not sourced (never guessed)',
+  by_level: 'edition competition level as stored; unclassified = the source gives no level',
+  by_round: 'qualifying, round robin, early (R1-R2), middle (R3-R4), quarterfinal, semifinal, final',
+  rating_history: 'one point per month played = the pre-match rating at the first match of that month (idle months have no point); last point = rating at as_of; peak / biggest 3-month gain and drop over established points (20+ rated matches)',
+  style_archetypes: 'not available: style archetypes need point-level serve/return statistics for both players and are never derived from results'
+});

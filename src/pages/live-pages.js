@@ -5,6 +5,7 @@ import { api } from '../data/api.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
 import { matchDnaSummary, familyTable, formBlock, historyTable, ratingLine, careerBlock, surfaceTable } from '../ui/match-dna.js';
 import { avatar, nat } from '../ui/avatar.js';
+import { ratingChart, profileBlock } from '../ui/player-profile.js';
 import { shareBar } from '../ui/share.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
 import { track } from '../analytics.js';
@@ -295,10 +296,13 @@ export const player = mountWith(async (root, { params }, signal) => {
     const md = dr?.data?.match_dna;
     render(root, html`${playerHero(p, pr.meta, 'dna', md)}<div class="page" style="padding-top:0">
       ${md ? html`<p class="dna-status"><b>MATCH DNA — LIVE.</b> Built from ${md.sample.matches} singles results in the canonical match record (${md.tour} population, as of ${fmtDate(md.as_of)}). Each metric publishes its ${md.tour} comparison on its own once ${md.gates.comparative_min} players qualify. <b>TECHNICAL DNA — ${d?.comparative?.published ? 'PUBLISHED' : 'COVERAGE BUILDING'}</b>: serve/return numbers exist only where detailed match statistics were published.</p>
-        ${md.rating ? html`<section class="mod"><header class="mod-h"><h2>PBE Rating</h2><span class="mod-k">chronological Elo · method v${md.rating.method_version}</span></header><div class="mod-b"><p class="ph-rating">${ratingLine(md.rating)}</p><p class="note">Pre-match ratings only ever use earlier results; validated against a ranking model out of sample before publication (see methodology).</p></div></section>` : ''}
+        ${md.rating ? html`<section class="mod"><header class="mod-h"><h2>PBE Rating</h2><span class="mod-k">chronological Elo · method v${md.rating.method_version}</span></header><div class="mod-b"><p class="ph-rating">${ratingLine(md.rating)}</p><p class="note">Pre-match ratings only ever use earlier results; validated against a ranking model out of sample before publication (see methodology).</p>
+          ${md.rating.status !== 'not_validated' && md.profile?.rating_history ? html`<h3 class="sub-h">Rating history</h3>${ratingChart(md.profile.rating_history)}<p class="note">${md.profile_definitions?.rating_history || ''}.</p>` : ''}</div></section>` : ''}
+        ${profileBlock(md.profile, md.profile_definitions, md.as_of)}
         <section class="mod"><header class="mod-h"><h2>Form</h2><span class="mod-k">as of ${fmtDate(md.as_of)}</span></header><div class="mod-b">${formBlock(md.form)}</div></section>
         ${md.families.map((f) => familyTable(f, md.tour))}
-        ${surfaceTable(md)}` : ''}
+        ${surfaceTable(md)}
+        ${(md.by_surface || []).some((x) => x.profile?.rating_history && x.rating && x.rating.status !== 'not_validated') ? html`<section class="mod"><header class="mod-h"><h2>Surface rating history</h2><span class="mod-k">pre-match surface ratings · months played on the surface</span></header><div class="surf-charts">${md.by_surface.filter((x) => x.profile?.rating_history && x.rating && x.rating.status !== 'not_validated').map((x) => html`<div class="surf-chart ${x.surface}"><h3 class="sub-h">${x.surface[0].toUpperCase()}${x.surface.slice(1)}</h3>${ratingChart(x.profile.rating_history, { label: `${x.surface} rating history` })}</div>`)}</div></section>` : ''}` : ''}
       <h2 class="sec">Technical DNA <small>serve · return · pressure from match statistics</small></h2>
       ${d ? dnaSection(d) : emptyModule(dr?.meta || pr.meta, 'No technical DNA yet: it needs matches with published serve/return statistics.')}
       ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}

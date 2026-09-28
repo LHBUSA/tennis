@@ -30,6 +30,7 @@ const PAGES = {
   live: lp('live'), schedule: lp('schedule'), matches: lp('schedule'), match: lp('match'),
   tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'), venue: lp('venue'),
   rankings: lp('rankingsHub'), 'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
+  matchups: () => import('./pages/intel.js').then((m) => ({ mount: m.matchups })), matchup: () => import('./pages/intel.js').then((m) => ({ mount: m.matchup })), 'players-to-watch': () => import('./pages/intel.js').then((m) => ({ mount: m.watch })),
   dna: lp('dna'), 'pbecast-hub': lp('pbecastHub'), search: lp('search'), credits: lp('credits'), coverage: lp('coverage')
 };
 const dataPage = () => import('./pages/data-page.js');

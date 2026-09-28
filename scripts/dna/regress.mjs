@@ -32,6 +32,7 @@ class FakeStore {
     this.requests += 1;
     sampleLive(`select ${table} #${this.requests}`);
     const p = q(query);
+    if (table === 'tennis_players' && p.plays) return page(loadOpt('hands'), p);
     if (table === 'tennis_players') return page(D.players, p);
     if (table === 'tennis_tournament_editions') return page(D.editions, p);
     if (table === 'tennis_ranking_snapshots') return page(D.snapshots.filter((s) => s.list_key === p.list_key.slice(3)), p);
@@ -91,14 +92,25 @@ async function run(root, label) {
   peak = Math.max(peak, process.memoryUsage().heapUsed);
   const lines = (f) => fs.readFileSync(f, 'utf8').split('\n').filter(Boolean);
   const key = (x) => `${x.pbe_player_id}|${x.as_of}|${x.surface}`;
-  const all = lines(store.files.tennis_dna_snapshots).map((s) => JSON.parse(s)).map(canon);
+  // additive metric keys (IGNORE_KEYS=_profile,...) are measured, then stripped before the byte comparison
+  const ignore = (process.env.IGNORE_KEYS || '').split(',').filter(Boolean);
+  const added = { rows: 0, bytes: 0, max_bytes: 0 };
+  const all = lines(store.files.tennis_dna_snapshots).map((s) => JSON.parse(s)).map((x) => {
+    for (const k of ignore) if (x.metrics?.[k] !== undefined) { const b = JSON.stringify(x.metrics[k]).length; added.rows += 1; added.bytes += b; added.max_bytes = Math.max(added.max_bytes, b); delete x.metrics[k]; }
+    return x;
+  }).map(canon);
+  if (ignore.length) console.log(`  ${label.trim()} additive keys ${ignore}: rows ${added.rows}, avg ${added.rows ? Math.round(added.bytes / added.rows) : 0} B, max ${added.max_bytes} B`);
   // rows of surfaces the baseline never wrote are reported as additions, not compared
   const snaps = all.filter((x) => x.surface === 'all').sort((a, b) => (key(a) < key(b) ? -1 : 1));
   const extra = {};
   for (const x of all) if (x.surface !== 'all') extra[x.surface] = (extra[x.surface] || 0) + 1;
   const rats = lines(store.files.tennis_surface_ratings).map((s) => JSON.parse(s)).map(canon).sort((a, b) => (`${a.pbe_player_id}|${a.surface}|${a.as_of}` < `${b.pbe_player_id}|${b.surface}|${b.as_of}` ? -1 : 1));
   const h = (x) => crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
-  const tours = canon(Object.fromEntries(Object.entries(summary.tours).map(([t, x]) => [t, { ...x }])));
+  // additive summary fields (IGNORE_SUMMARY=calibration,...) are removed at any depth before comparing
+  const dropS = new Set((process.env.IGNORE_SUMMARY || '').split(',').filter(Boolean));
+  const strip = (v) => (Array.isArray(v) ? v.map(strip) : v && typeof v === 'object' ? Object.fromEntries(Object.entries(v).filter(([k]) => !dropS.has(k)).map(([k, x]) => [k, strip(x)])) : v);
+  const tours = canon(strip(Object.fromEntries(Object.entries(summary.tours).map(([t, x]) => [t, { ...x }]))));
+  if (process.env.WATCH_OUT) { const w = kvMap.get('dna:v2:watch:current'); if (w) fs.writeFileSync(process.env.WATCH_OUT, w); }
   console.log(`${label}: ${Date.now() - t0} ms, live set max +${(live / 1048576).toFixed(0)} MB (sampled after GC at each store call; peak at ${where}), store requests ${store.requests}, snapshots ${snaps.length}, ratings ${rats.length}`);
   return { snaps, rats, tours, hs: h(snaps), hr: h(rats), ht: h(tours), summary, extra };
 }

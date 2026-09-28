@@ -564,3 +564,76 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .surf-tbl td { white-space: nowrap; vertical-align: top; }
 .surf-tbl td small { display: block; }
 @media (max-width: 560px) { .surf-tbl th, .surf-tbl td { padding: 8px 4px; font-size: 0.9em; } .surf-tbl th[scope='row'] { min-width: 6.5em; } }
+
+/* ---- Phase 6: rating chart, profile splits, Matchup DNA, Players to Watch ---------------------------- */
+.sub-h { font: 800 13px/1.2 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); margin: 16px 0 8px; }
+.rc-fig { margin: 0; }
+.rc { width: 100%; height: auto; display: block; background: var(--white); }
+.rc-g { stroke: var(--rule); stroke-width: 1; }
+.rc-y, .rc-x { fill: var(--muted); font: 500 11px var(--f-ui); }
+.rc-l { fill: none; stroke: var(--court-600); stroke-width: 2.4; stroke-linejoin: round; stroke-linecap: round; }
+.rc-p { fill: var(--court-600); }
+.rc-mk circle { stroke: var(--white); stroke-width: 2; }
+.rc-mk text { font: 700 11.5px var(--f-ui); paint-order: stroke; stroke: var(--white); stroke-width: 3px; }
+.rc-mk.peak circle { fill: var(--gold); } .rc-mk.peak text { fill: var(--gold); }
+.rc-mk.up circle { fill: var(--win); } .rc-mk.up text { fill: var(--win); }
+.rc-mk.down circle { fill: var(--loss); } .rc-mk.down text { fill: var(--loss); }
+.rc-fig figcaption { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; color: var(--ink-2); font-size: 13px; }
+.rc-fig .k { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 0; }
+.k.peak { background: var(--gold); } .k.up { background: var(--win); } .k.down { background: var(--loss); }
+.surf-charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 16px; }
+.surf-chart { border-top: 4px solid var(--rule-2); padding-top: 4px; }
+.surf-chart.hard { border-color: var(--hard); } .surf-chart.clay { border-color: var(--clay); } .surf-chart.grass { border-color: var(--grass); }
+.surf-chart .rc-l { stroke: var(--ink-2); } .surf-chart .rc-p { fill: var(--ink-2); }
+.win-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.win { background: var(--paper); border-radius: var(--r); padding: 12px 14px; border-left: 4px solid var(--court-600); }
+.win span { display: block; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.win b { display: block; font-size: 24px; color: var(--ink); margin: 2px 0; }
+.win small { color: var(--ink-2); font-size: 12.5px; }
+.win.small { border-left-color: var(--rule-2); }
+.split-tbl th[scope='row'] { text-align: left; font-weight: 600; color: var(--ink); }
+.split-tbl tr.small th, .split-tbl tr.small td { color: var(--muted); }
+.tag { display: inline-block; font: 700 10.5px/1 var(--f-ui); letter-spacing: 0.04em; text-transform: uppercase; color: var(--warn); background: var(--gold-soft); border-radius: 4px; padding: 3px 5px; margin-left: 4px; vertical-align: 1px; }
+.mu-list { display: grid; gap: 10px; }
+.mu-card { display: block; border: 1px solid var(--rule); border-radius: var(--r); padding: 12px 14px; color: var(--ink); background: var(--white); }
+.mu-card:hover { border-color: var(--court-600); text-decoration: none; }
+.mu-row { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; }
+.mu-p { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.mu-p b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.mu-p.r { justify-content: flex-end; text-align: right; }
+.mu-p small { color: var(--muted); }
+.mu-t { color: var(--muted); font-size: 12.5px; text-align: center; white-space: nowrap; }
+.mu-k { margin: 8px 0 0; color: var(--ink-2); font-size: 13px; }
+.mu-withheld { margin: 10px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--paper); color: var(--ink-2); font-size: 13px; }
+.pbar { display: flex; height: 30px; border-radius: 8px; overflow: hidden; margin-top: 10px; background: var(--paper-2); }
+.pbar span { display: flex; align-items: center; min-width: 44px; padding: 0 10px; color: var(--ink-2); background: var(--court-100); font: 700 14px var(--f-ui); }
+.pbar .b { justify-content: flex-end; background: var(--paper-2); }
+.pbar .fav { background: var(--court-700); color: var(--on-dark); }
+.mu-h1 { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.mu-h1 span { display: inline-flex; align-items: center; gap: 12px; }
+.mu-h1 em { font-style: normal; color: var(--muted); font-size: 0.6em; }
+.mu-model .pbar { height: 44px; } .mu-model .pbar span { font-size: 18px; }
+.mu-why { margin: 14px 0; padding: 12px 16px; background: var(--court-50); border-radius: var(--r); border-left: 4px solid var(--court-600); }
+.mu-why .sub-h { margin-top: 0; }
+.mu-why ul { margin: 0; padding-left: 18px; color: var(--ink); font-size: 14.5px; line-height: 1.55; }
+.mu-tbl th[scope='row'] { text-align: left; font-weight: 600; }
+.mu-conf { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; margin-top: 12px; }
+.mu-conf div { background: var(--paper); border-radius: var(--r); padding: 12px; }
+.mu-conf span { display: block; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+.mu-conf b { display: block; font-size: 20px; text-transform: capitalize; }
+.mu-conf small { color: var(--ink-2); font-size: 12.5px; }
+.ptw { list-style: none; margin: 8px 0 0; padding: 0; }
+.ptw li { display: grid; grid-template-columns: 26px 36px 1fr auto; align-items: center; gap: 10px; padding: 8px 0; border-top: 1px solid var(--rule); }
+.ptw li:first-child { border-top: 0; }
+.ptw-n { color: var(--muted); font: 700 13px var(--f-data); text-align: right; }
+.ptw-p { min-width: 0; }
+.ptw-p a { display: block; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptw-p small { color: var(--muted); font-size: 12px; }
+.ptw b { font-size: 13.5px; text-align: right; }
+@media (max-width: 520px) {
+  .mu-row { grid-template-columns: 1fr; gap: 6px; }
+  .mu-p.r { justify-content: flex-start; flex-direction: row-reverse; text-align: left; }
+  .mu-t { text-align: left; }
+  .ptw li { grid-template-columns: 22px 32px 1fr; }
+  .ptw b { grid-column: 3; text-align: left; }
+}

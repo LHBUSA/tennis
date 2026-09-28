@@ -4,7 +4,7 @@
 // separately and unchanged.
 
 import { inList } from '../../shared/store/postgrest.js';
-import { MATCH_DEFINITIONS, COMPARATIVE_MIN, PERCENTILE_MIN_PEERS } from '../../shared/dna/match-dna.js';
+import { MATCH_DEFINITIONS, COMPARATIVE_MIN, PERCENTILE_MIN_PEERS, PROFILE_DEFINITIONS, PROFILE_MIN } from '../../shared/dna/match-dna.js';
 import { MEDIA, shapePlayer } from './shape.js';
 
 const FAMILIES = [
@@ -37,6 +37,7 @@ export async function surfaceDna(store, pid) {
       surface: sf, as_of: r.as_of, sample: r.provenance?.sample || null, wae_basis: r.provenance?.wae_basis || null,
       rating: rt ? { value: rt.value, rated_matches: rt.rated_matches, provisional: rt.provisional, percentile: rt.percentile ?? null, established: !!rt.established, status: !rt.published ? 'not_validated' : rt.provisional ? 'provisional' : 'published' } : null,
       form: M._form ? { last10: M._form.last10, current_streak: M._form.current_streak, career: M._form.career } : null,
+      profile: M._profile || null,
       metrics: SURFACE_KEYS.map((k) => { const m = M[k] || {}; const d = MATCH_DEFINITIONS[k]; return { key: k, label: d.label, unit: d.unit, value: m.value ?? null, confidence: m.confidence || 'insufficient', sample_matches: m.sample_matches ?? 0, record: m.record || null, percentile: m.comparative_published ? m.percentile ?? null : null, population_qualified: m.population_qualified ?? 0, status: statusOf(m) }; })
     };
   });
@@ -66,7 +67,8 @@ export async function matchDna(store, player) {
   const rating = M._rating ? { ...M._rating, status: !M._rating.published ? 'not_validated' : M._rating.provisional ? 'provisional' : 'published' } : null;
   return {
     definition_version: 2, as_of: snap.as_of, tour: M._tour || tourOf(player.gender), sample: snap.provenance?.sample || null,
-    rating, form: M._form || null, surface_record: M._surface_record || null, families, by_surface: await surfaceDna(store, player.pbe_player_id),
+    rating, form: M._form || null, surface_record: M._surface_record || null, families,
+    profile: M._profile || null, profile_definitions: { ...PROFILE_DEFINITIONS, min_sample: PROFILE_MIN }, by_surface: await surfaceDna(store, player.pbe_player_id),
     recent: recent.map((r) => { const e = E.get(r.match_id); return { ...r, opponent: P.get(r.opponent) || null, tournament: e ? { name: e.tennis_tournaments?.name || e.name, slug: e.tennis_tournaments?.slug || null, year: e.year } : null }; }),
     gates: { percentile_min_peers: PERCENTILE_MIN_PEERS, comparative_min: COMPARATIVE_MIN, basis: `${M._tour || tourOf(player.gender)} singles players with a stored v2 snapshot on ${snap.as_of}; a metric's comparison publishes on its own once ${COMPARATIVE_MIN} players qualify (medium/high confidence)` }
   };
