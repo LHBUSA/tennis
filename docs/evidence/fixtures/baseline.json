@@ -1,0 +1,1721 @@
+{
+ "captured_at": "2026-09-28T17:09:21.209Z",
+ "fixtures": [
+  {
+   "match_id": "50435965-cfd1-5478-90b7-a44d935ed764",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 02:00:00+00",
+   "natural_key": "MS|qualifying|S:6e366f54-3f50-5aab-a8d0-514c6cbf6015~S:f71c924f-73ff-53ec-a644-b13e52edfab2",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186238"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:6e366f54-3f50-5aab-a8d0-514c6cbf6015",
+     "name": "Stefanos Tsitsipas"
+    },
+    {
+     "side": "B",
+     "key": "S:f71c924f-73ff-53ec-a644-b13e52edfab2",
+     "name": "Rinky Hijikata"
+    }
+   ]
+  },
+  {
+   "match_id": "3ce72095-ba6f-5151-b2b0-2ac72a738f80",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 03:00:00+00",
+   "natural_key": "MS|qualifying|S:101d63b4-d5c4-52b2-8291-9d4284d8103c~S:e1978034-04f4-577f-a44f-581b28857884",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186241"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:e1978034-04f4-577f-a44f-581b28857884",
+     "name": "Jaume Munar"
+    },
+    {
+     "side": "B",
+     "key": "S:101d63b4-d5c4-52b2-8291-9d4284d8103c",
+     "name": "Aleksandar Kovacevic"
+    }
+   ]
+  },
+  {
+   "match_id": "8fa16708-32e3-5fe9-a2c6-7e17bb9c599b",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 03:00:00+00",
+   "natural_key": "MS|qualifying|S:3877a2de-989d-556a-b458-a87ea995ed44~S:b9090557-bba8-5f5c-bfc6-6527635c9ba1",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186260"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:3877a2de-989d-556a-b458-a87ea995ed44",
+     "name": "Tomas Machac"
+    },
+    {
+     "side": "B",
+     "key": "S:b9090557-bba8-5f5c-bfc6-6527635c9ba1",
+     "name": "Arthur Gea"
+    }
+   ]
+  },
+  {
+   "match_id": "c3d87d87-9866-5a4b-b29c-bb16928ebdaa",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 03:30:00+00",
+   "natural_key": "MS|qualifying|S:288c4f3a-8572-5e86-86e8-baf43154eab6~S:9f1ad79b-df5c-5a42-8975-0bb3fa6cd0bd",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186240"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:288c4f3a-8572-5e86-86e8-baf43154eab6",
+     "name": "Arthur Fils"
+    },
+    {
+     "side": "B",
+     "key": "S:9f1ad79b-df5c-5a42-8975-0bb3fa6cd0bd",
+     "name": "Kamil Majchrzak"
+    }
+   ]
+  },
+  {
+   "match_id": "9004ffe6-267d-5c7b-92eb-17070baf686b",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 04:00:00+00",
+   "natural_key": "MS|qualifying|S:6b3d11fe-ef0e-5b4e-9e81-9aec6ea71ab4~S:d1d28952-ff5a-54c2-be27-06e5aeadf538",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186258"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:6b3d11fe-ef0e-5b4e-9e81-9aec6ea71ab4",
+     "name": "Marco Trungelliti"
+    },
+    {
+     "side": "B",
+     "key": "S:d1d28952-ff5a-54c2-be27-06e5aeadf538",
+     "name": "Alex Molcan"
+    }
+   ]
+  },
+  {
+   "match_id": "753143ec-e7fb-56ff-a075-d114254edeb3",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "Q-1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 04:30:00+00",
+   "natural_key": "MD|qualifying|D:46be40b1-7fec-5de1-bac0-ebcd5f0194fe+b0369243-141d-5f54-9bd6-84a7412cb38e~D:57cd0ae9-e95f-576a-9965-406ab07bd78d+57de9eae-0f39-5cc6-a75a-296f90c1a47b",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186265"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:57cd0ae9-e95f-576a-9965-406ab07bd78d+57de9eae-0f39-5cc6-a75a-296f90c1a47b",
+     "name": "Santiago Gonzalez"
+    },
+    {
+     "side": "B",
+     "key": "D:46be40b1-7fec-5de1-bac0-ebcd5f0194fe+b0369243-141d-5f54-9bd6-84a7412cb38e",
+     "name": "David Stevenson"
+    }
+   ]
+  },
+  {
+   "match_id": "a86c12b1-569c-53e1-beda-ffce9f615f93",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 05:00:00+00",
+   "natural_key": "MS|qualifying|S:28353751-abd7-5974-8864-be62a2fbc8d6~S:5a8914a6-a86f-5999-97d6-801efb5ca67a",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186239"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:5a8914a6-a86f-5999-97d6-801efb5ca67a",
+     "name": "Adolfo Daniel Vallejo"
+    },
+    {
+     "side": "B",
+     "key": "S:28353751-abd7-5974-8864-be62a2fbc8d6",
+     "name": "Jaime Faria"
+    }
+   ]
+  },
+  {
+   "match_id": "d6ff0825-6f93-50a5-994b-d1dc71ea793f",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 05:00:00+00",
+   "natural_key": "MS|qualifying|S:6d916c2a-72bf-5f2d-a36c-270a533735e0~S:dcb3a539-e886-53ef-8ba6-b90d3fee9f33",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186261"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:6d916c2a-72bf-5f2d-a36c-270a533735e0",
+     "name": "Botic van de Zandschulp"
+    },
+    {
+     "side": "B",
+     "key": "S:dcb3a539-e886-53ef-8ba6-b90d3fee9f33",
+     "name": "Jie Cui"
+    }
+   ]
+  },
+  {
+   "match_id": "d574010f-ad0f-5ed0-ad05-abcfa9753052",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "Q-2",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 05:30:00+00",
+   "natural_key": "MS|qualifying|S:5e670281-1ffc-508d-ad2d-39a337976b91~S:a2e06733-28b1-5c59-9fa6-8c1075355522",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186259"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:a2e06733-28b1-5c59-9fa6-8c1075355522",
+     "name": "Adrian Mannarino"
+    },
+    {
+     "side": "B",
+     "key": "S:5e670281-1ffc-508d-ad2d-39a337976b91",
+     "name": "Pablo Carreno Busta"
+    }
+   ]
+  },
+  {
+   "match_id": "f16e4dc4-b7ac-509f-93b2-57627c7c1258",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "Q-1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 06:00:00+00",
+   "natural_key": "MD|qualifying|D:82d002c0-52be-5d49-bea5-407ae9e118bb+b01438fe-e0e7-58e6-a6ab-fb98afe9e845~D:93350164-0fb5-5b49-b797-36a475d75cf8+a40544ab-c390-52e0-b15d-5a3d0790238b",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:186266"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:82d002c0-52be-5d49-bea5-407ae9e118bb+b01438fe-e0e7-58e6-a6ab-fb98afe9e845",
+     "name": "Theodore Winegar"
+    },
+    {
+     "side": "B",
+     "key": "D:93350164-0fb5-5b49-b797-36a475d75cf8+a40544ab-c390-52e0-b15d-5a3d0790238b",
+     "name": "Sho Shimabukuro"
+    }
+   ]
+  },
+  {
+   "match_id": "ac55896e-b200-54fe-8ee9-da57a9a00ec2",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "Q-1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 06:30:00+00",
+   "natural_key": "MD|qualifying|D:4d7ef8e3-5eb2-5bff-b9fd-738b2ff345cf+7b59f700-0059-5ab1-92b4-3b902f6cf8b7~D:9378d274-e543-56f4-840a-35f156fbfb27+dcb3a539-e886-53ef-8ba6-b90d3fee9f33",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186262"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:9378d274-e543-56f4-840a-35f156fbfb27+dcb3a539-e886-53ef-8ba6-b90d3fee9f33",
+     "name": "Rigele Te"
+    },
+    {
+     "side": "B",
+     "key": "D:4d7ef8e3-5eb2-5bff-b9fd-738b2ff345cf+7b59f700-0059-5ab1-92b4-3b902f6cf8b7",
+     "name": "Andres Molteni"
+    }
+   ]
+  },
+  {
+   "match_id": "c1ca6e6c-ebfe-51af-aab6-f4b5d4607b10",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "Q-1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 07:00:00+00",
+   "natural_key": "MD|qualifying|D:9f8918eb-003f-5cca-965a-54a159b549e4+c752441d-99e8-566d-a34c-f7a3fbd9c845~D:b45b78d9-4fa1-5f3a-896c-19dabbb59b38+f5115cf0-dfd9-5696-90a1-bbc1667f9642",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:186263"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:b45b78d9-4fa1-5f3a-896c-19dabbb59b38+f5115cf0-dfd9-5696-90a1-bbc1667f9642",
+     "name": "Sem Verbeek"
+    },
+    {
+     "side": "B",
+     "key": "D:9f8918eb-003f-5cca-965a-54a159b549e4+c752441d-99e8-566d-a34c-f7a3fbd9c845",
+     "name": "James Watt"
+    }
+   ]
+  },
+  {
+   "match_id": "91b58948-69bd-52ad-a0c3-5d30b734acbc",
+   "edition_id": "a2d2ce95-f4ed-5957-a52a-f6e8ba553919",
+   "edition": "Chengdu Open",
+   "event_type": "MD",
+   "round": "F",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 08:00:00+00",
+   "natural_key": "MD|main|D:386d1942-1dcb-5f02-bd98-d2e0917b3ec1+fbd21de7-33b1-53ab-92f1-7f92f86129b1~D:8303bb66-3520-5e20-98b7-95e83fd45e37+d0200271-667f-5adf-9269-a980e867dfb1",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:20.137+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "441-2026:183437"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:386d1942-1dcb-5f02-bd98-d2e0917b3ec1+fbd21de7-33b1-53ab-92f1-7f92f86129b1",
+     "name": "Andre Goransson"
+    },
+    {
+     "side": "B",
+     "key": "D:8303bb66-3520-5e20-98b7-95e83fd45e37+d0200271-667f-5adf-9269-a980e867dfb1",
+     "name": "Jan Zielinski"
+    }
+   ]
+  },
+  {
+   "match_id": "7ea5fda6-de24-5f14-a8c8-f05d594aec1b",
+   "edition_id": "9f2b00f1-df18-5cce-83f5-5a48b1cd0aad",
+   "edition": "AITO Hangzhou Open",
+   "event_type": "MD",
+   "round": "F",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 08:30:00+00",
+   "natural_key": "MD|main|D:05793d7e-b954-5727-a2ad-126bb89c1e3e+0605d0e9-c8dd-5ad3-b4a2-343c4c89894d~D:b4bccbb0-d3a4-5159-a3fa-1b615f315582+c6574da5-be3e-5896-95cc-9a73ac3f5ed4",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:34.231+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "1001-2026:183391"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:05793d7e-b954-5727-a2ad-126bb89c1e3e+0605d0e9-c8dd-5ad3-b4a2-343c4c89894d",
+     "name": "JJ Tracy"
+    },
+    {
+     "side": "B",
+     "key": "D:b4bccbb0-d3a4-5159-a3fa-1b615f315582+c6574da5-be3e-5896-95cc-9a73ac3f5ed4",
+     "name": "David Pel"
+    }
+   ]
+  },
+  {
+   "match_id": "284a1dc8-a350-566b-9107-65d013a0390b",
+   "edition_id": "a2d2ce95-f4ed-5957-a52a-f6e8ba553919",
+   "edition": "Chengdu Open",
+   "event_type": "MS",
+   "round": "F",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 11:00:00+00",
+   "natural_key": "MS|main|S:45b8b7c2-9c9c-5429-9167-57b059a8599e~S:e235b6ad-dc91-5980-aa00-461f71aaef35",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:20.137+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "441-2026:183422"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:e235b6ad-dc91-5980-aa00-461f71aaef35",
+     "name": "Hubert Hurkacz"
+    },
+    {
+     "side": "B",
+     "key": "S:45b8b7c2-9c9c-5429-9167-57b059a8599e",
+     "name": "Alejandro Davidovich Fokina"
+    }
+   ]
+  },
+  {
+   "match_id": "b22b8b9c-6508-56c6-a043-e5fd6ca3af7f",
+   "edition_id": "9f2b00f1-df18-5cce-83f5-5a48b1cd0aad",
+   "edition": "AITO Hangzhou Open",
+   "event_type": "MS",
+   "round": "F",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-29 11:30:00+00",
+   "natural_key": "MS|main|S:534c9f12-71e9-5623-b8f0-46b4c149187b~S:5446ad2b-dd71-5faa-ba16-8e2289994802",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:34.231+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "1001-2026:183376"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:534c9f12-71e9-5623-b8f0-46b4c149187b",
+     "name": "Daniil Medvedev"
+    },
+    {
+     "side": "B",
+     "key": "S:5446ad2b-dd71-5faa-ba16-8e2289994802",
+     "name": "Andrey Rublev"
+    }
+   ]
+  },
+  {
+   "match_id": "04e17cf2-cb31-5ce0-83d6-21f13c08996c",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:1258e21b-dd1b-5885-bd8f-3b53fd68dc99~S:93350164-0fb5-5b49-b797-36a475d75cf8",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183493"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:1258e21b-dd1b-5885-bd8f-3b53fd68dc99",
+     "name": "Denis Shapovalov"
+    },
+    {
+     "side": "B",
+     "key": "S:93350164-0fb5-5b49-b797-36a475d75cf8",
+     "name": "Sho Shimabukuro"
+    }
+   ]
+  },
+  {
+   "match_id": "07b81b23-ed56-5163-b924-2968e033bf7a",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:386d1942-1dcb-5f02-bd98-d2e0917b3ec1+fbd21de7-33b1-53ab-92f1-7f92f86129b1~D:3cdb95e8-f068-50fe-870b-02d776eb7dae+db94f4a5-3213-57a2-a7b0-d54da483afbc",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183524"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:386d1942-1dcb-5f02-bd98-d2e0917b3ec1+fbd21de7-33b1-53ab-92f1-7f92f86129b1",
+     "name": "Andre Goransson"
+    },
+    {
+     "side": "B",
+     "key": "D:3cdb95e8-f068-50fe-870b-02d776eb7dae+db94f4a5-3213-57a2-a7b0-d54da483afbc",
+     "name": "Luca Van Assche"
+    }
+   ]
+  },
+  {
+   "match_id": "097056ed-624f-5802-bffd-cf5fd2105b62",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:3afc116a-ae9f-500a-ba24-c2009355afb5~S:4b2d4cbb-7529-5aa2-b1ef-9d4a1a00c8ef",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183440"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:3afc116a-ae9f-500a-ba24-c2009355afb5",
+     "name": "Alexander Zverev"
+    },
+    {
+     "side": "B",
+     "key": "S:4b2d4cbb-7529-5aa2-b1ef-9d4a1a00c8ef",
+     "name": "Cameron Norrie"
+    }
+   ]
+  },
+  {
+   "match_id": "0b148355-d98a-5833-b0fb-08ea5bc99dd8",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:3afc116a-ae9f-500a-ba24-c2009355afb5+c1efa9d7-e2cd-5a1f-9444-d3c124d6e5fe~D:65609af5-1e44-5ede-9448-86d441016820+aef18cd6-8b53-572b-a502-a8e38fc9059c",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183470"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:3afc116a-ae9f-500a-ba24-c2009355afb5+c1efa9d7-e2cd-5a1f-9444-d3c124d6e5fe",
+     "name": "Alexander Zverev"
+    },
+    {
+     "side": "B",
+     "key": "D:65609af5-1e44-5ede-9448-86d441016820+aef18cd6-8b53-572b-a502-a8e38fc9059c",
+     "name": "Constantin Frantzen"
+    }
+   ]
+  },
+  {
+   "match_id": "0ed72819-98d6-5aec-906a-638d52aaaf4b",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:3679246f-42b9-5ee8-a952-21e475e50d40+6974645c-1d42-57e2-b5ad-850465b0c7d2~D:82a99fde-0305-5a13-9113-55e9b871a07c+e49f0018-90ae-5f51-9210-ddee557de381",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183519"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:82a99fde-0305-5a13-9113-55e9b871a07c+e49f0018-90ae-5f51-9210-ddee557de381",
+     "name": "Andrea Vavassori"
+    },
+    {
+     "side": "B",
+     "key": "D:3679246f-42b9-5ee8-a952-21e475e50d40+6974645c-1d42-57e2-b5ad-850465b0c7d2",
+     "name": "Shintaro Mochizuki"
+    }
+   ]
+  },
+  {
+   "match_id": "185b0aab-9b85-5f94-8d82-841ed9d00fd7",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:2a435e81-3333-52b1-b92f-b12b91ce38b2~S:5446ad2b-dd71-5faa-ba16-8e2289994802",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183443"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:2a435e81-3333-52b1-b92f-b12b91ce38b2",
+     "name": "Tallon Griekspoor"
+    },
+    {
+     "side": "B",
+     "key": "S:5446ad2b-dd71-5faa-ba16-8e2289994802",
+     "name": "Andrey Rublev"
+    }
+   ]
+  },
+  {
+   "match_id": "1d53bc63-9ccb-518a-9233-d24541de14d5",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:45b8b7c2-9c9c-5429-9167-57b059a8599e~S:7d2196c7-47f2-5f69-a38a-89fd0cb0a0c4",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183499"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:45b8b7c2-9c9c-5429-9167-57b059a8599e",
+     "name": "Alejandro Davidovich Fokina"
+    },
+    {
+     "side": "B",
+     "key": "S:7d2196c7-47f2-5f69-a38a-89fd0cb0a0c4",
+     "name": "Matteo Berrettini"
+    }
+   ]
+  },
+  {
+   "match_id": "263c6520-3004-5de6-9ea9-10d060978b53",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:282421b5-5fc1-5e5f-b301-8b535ec389e8~S:83e506ef-4860-5bd3-99b9-a132192853d2",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183457"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:282421b5-5fc1-5e5f-b301-8b535ec389e8",
+     "name": "Juncheng Shang"
+    },
+    {
+     "side": "B",
+     "key": "S:83e506ef-4860-5bd3-99b9-a132192853d2",
+     "name": "Sebastian Baez"
+    }
+   ]
+  },
+  {
+   "match_id": "2ad9c122-29c2-52b6-b2f0-f8bd00a90431",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:a65f6949-e3cd-5726-b892-b855e45b60c2~S:c76a1e3b-baef-591f-b2e6-8c11aec677c5",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183497"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:c76a1e3b-baef-591f-b2e6-8c11aec677c5",
+     "name": "Carlos Alcaraz"
+    },
+    {
+     "side": "B",
+     "key": "S:a65f6949-e3cd-5726-b892-b855e45b60c2",
+     "name": "Alex Michelsen"
+    }
+   ]
+  },
+  {
+   "match_id": "2d6ae6e7-3257-5943-987d-c49087f73cfd",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:5eae6eec-e018-5242-91b5-8e3207674e1c~S:fe8f1b97-3e0a-5fc3-89df-62e064458f73",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183447"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:5eae6eec-e018-5242-91b5-8e3207674e1c",
+     "name": "Karen Khachanov"
+    },
+    {
+     "side": "B",
+     "key": "S:fe8f1b97-3e0a-5fc3-89df-62e064458f73",
+     "name": "Felix Auger-Aliassime"
+    }
+   ]
+  },
+  {
+   "match_id": "4b253a40-adf8-5cd2-8a68-9c2f4d319624",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:96f081e0-ebee-5254-bd2a-94c1eaec4323~S:c93edbe0-4235-5d62-89d1-60930f620a91",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183487"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:96f081e0-ebee-5254-bd2a-94c1eaec4323",
+     "name": "Kei Nishikori"
+    },
+    {
+     "side": "B",
+     "key": "S:c93edbe0-4235-5d62-89d1-60930f620a91",
+     "name": "Frances Tiafoe"
+    }
+   ]
+  },
+  {
+   "match_id": "518e6222-9344-59c0-b112-2f9f08251987",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:80fcea66-3ee0-5d0c-a309-d361560ddfc1~S:b10b7c9a-e40b-5ce6-9045-0ff205827acb",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183492"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:b10b7c9a-e40b-5ce6-9045-0ff205827acb",
+     "name": "Luciano Darderi"
+    },
+    {
+     "side": "B",
+     "key": "S:80fcea66-3ee0-5d0c-a309-d361560ddfc1",
+     "name": "Casper Ruud"
+    }
+   ]
+  },
+  {
+   "match_id": "6f022c3d-a4f7-54b5-9d69-4d8f29b0f324",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:02d8e239-f042-58ae-914e-314f5c091d42~S:14d5e0ea-86d5-51c4-9677-53ecf7ffd7d4",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183485"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:02d8e239-f042-58ae-914e-314f5c091d42",
+     "name": "Lorenzo Musetti"
+    },
+    {
+     "side": "B",
+     "key": "S:14d5e0ea-86d5-51c4-9677-53ecf7ffd7d4",
+     "name": "Arthur Fery"
+    }
+   ]
+  },
+  {
+   "match_id": "79b4e1a5-d1a3-59f0-98dd-b7761b392206",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:05793d7e-b954-5727-a2ad-126bb89c1e3e+0605d0e9-c8dd-5ad3-b4a2-343c4c89894d~D:67661ef2-3c4b-584d-9412-671ea90d8563+f7f2980f-7834-5180-a5bc-1e8b5044e53f",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183482"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:05793d7e-b954-5727-a2ad-126bb89c1e3e+0605d0e9-c8dd-5ad3-b4a2-343c4c89894d",
+     "name": "JJ Tracy"
+    },
+    {
+     "side": "B",
+     "key": "D:67661ef2-3c4b-584d-9412-671ea90d8563+f7f2980f-7834-5180-a5bc-1e8b5044e53f",
+     "name": "Flavio Cobolli"
+    }
+   ]
+  },
+  {
+   "match_id": "7eda77e2-7cc9-5616-86c8-3a0202855be9",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:66da34b3-1fe8-5a02-993b-41d06634a5ea~S:7ae0e54a-2143-5570-82a5-896f0df8c350",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183455"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:66da34b3-1fe8-5a02-993b-41d06634a5ea",
+     "name": "Nuno Borges"
+    },
+    {
+     "side": "B",
+     "key": "S:7ae0e54a-2143-5570-82a5-896f0df8c350",
+     "name": "Novak Djokovic"
+    }
+   ]
+  },
+  {
+   "match_id": "857f6982-06a7-5b9d-977b-8f35e65cfec1",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:71bc9b41-30bd-54e9-a730-d0b9bcfdfa7b~S:ff1852ff-e9df-5bd5-be86-ed7258ff1315",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183496"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:ff1852ff-e9df-5bd5-be86-ed7258ff1315",
+     "name": "Valentin Vacherot"
+    },
+    {
+     "side": "B",
+     "key": "S:71bc9b41-30bd-54e9-a730-d0b9bcfdfa7b",
+     "name": "Alexander Blockx"
+    }
+   ]
+  },
+  {
+   "match_id": "8d1b7f3c-8cf1-5ec8-ac2e-5ce51bbf6274",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:8e60512b-164a-5ff6-8ac8-4df5d1db4064~S:c7dc1be7-1212-515f-9774-0df3af8914b7",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183461"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:c7dc1be7-1212-515f-9774-0df3af8914b7",
+     "name": "Jan-Lennard Struff"
+    },
+    {
+     "side": "B",
+     "key": "S:8e60512b-164a-5ff6-8ac8-4df5d1db4064",
+     "name": "Thiago Agustin Tirante"
+    }
+   ]
+  },
+  {
+   "match_id": "9d348c82-38bc-5adf-a894-0fb2bd838286",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:8303bb66-3520-5e20-98b7-95e83fd45e37+930c7e7b-2d97-5fba-8ce5-24059195bc53~D:d0200271-667f-5adf-9269-a980e867dfb1+e832b582-f8eb-513c-99d1-acb87c93c3a8",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183526"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:d0200271-667f-5adf-9269-a980e867dfb1+e832b582-f8eb-513c-99d1-acb87c93c3a8",
+     "name": "Luke Johnson"
+    },
+    {
+     "side": "B",
+     "key": "D:8303bb66-3520-5e20-98b7-95e83fd45e37+930c7e7b-2d97-5fba-8ce5-24059195bc53",
+     "name": "Jan Zielinski"
+    }
+   ]
+  },
+  {
+   "match_id": "9e3d7522-9884-5d45-8a3c-7e9b4be52bde",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:282421b5-5fc1-5e5f-b301-8b535ec389e8+a4b667de-b685-5272-aa05-dbede90265b9~D:30e99857-08d9-5215-a249-3c102e22613b+9c091273-522c-57db-b9f0-1104afe5cc9c",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183472"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:282421b5-5fc1-5e5f-b301-8b535ec389e8+a4b667de-b685-5272-aa05-dbede90265b9",
+     "name": "Juncheng Shang"
+    },
+    {
+     "side": "B",
+     "key": "D:30e99857-08d9-5215-a249-3c102e22613b+9c091273-522c-57db-b9f0-1104afe5cc9c",
+     "name": "Francisco Cerundolo"
+    }
+   ]
+  },
+  {
+   "match_id": "9feaad6c-ea23-51a2-b8ee-cfe813f2cd6a",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:07681d30-9e80-5788-ab26-d9b047b79db5~S:968b2d04-e066-5b18-a331-51653413665b",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183491"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:07681d30-9e80-5788-ab26-d9b047b79db5",
+     "name": "Brandon Nakashima"
+    },
+    {
+     "side": "B",
+     "key": "S:968b2d04-e066-5b18-a331-51653413665b",
+     "name": "Ugo Humbert"
+    }
+   ]
+  },
+  {
+   "match_id": "a17cbfb9-384f-55a1-88e3-9459df071a4a",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:072f5062-c3f3-5194-9316-ccf9af51cb6c~S:fa56a21c-1ee4-550a-a850-7620d385947c",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183490"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:fa56a21c-1ee4-550a-a850-7620d385947c",
+     "name": "Jiri Lehecka"
+    },
+    {
+     "side": "B",
+     "key": "S:072f5062-c3f3-5194-9316-ccf9af51cb6c",
+     "name": "Zizou Bergs"
+    }
+   ]
+  },
+  {
+   "match_id": "afafc245-097d-569d-b3ac-35cc98a61bdb",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:62c480c9-10db-5fe2-8051-93a91f28b13d~S:d8cf769a-cc64-5c5e-947a-98357d297a8a",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183458"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:62c480c9-10db-5fe2-8051-93a91f28b13d",
+     "name": "Alex de Minaur"
+    },
+    {
+     "side": "B",
+     "key": "S:d8cf769a-cc64-5c5e-947a-98357d297a8a",
+     "name": "Mariano Navone"
+    }
+   ]
+  },
+  {
+   "match_id": "b766dc95-8677-5eb0-8762-37949553166d",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:6d0a5275-7770-56a7-a5e8-f19b56d870e5~S:f7f2980f-7834-5180-a5bc-1e8b5044e53f",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183445"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:f7f2980f-7834-5180-a5bc-1e8b5044e53f",
+     "name": "Ignacio Buse"
+    },
+    {
+     "side": "B",
+     "key": "S:6d0a5275-7770-56a7-a5e8-f19b56d870e5",
+     "name": "Quentin Halys"
+    }
+   ]
+  },
+  {
+   "match_id": "bd3bab67-81cf-5a3a-b878-be8d87bfc548",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:a4b667de-b685-5272-aa05-dbede90265b9~S:b9b881f2-e266-5dc8-983c-4daefaf6f5bc",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183459"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:a4b667de-b685-5272-aa05-dbede90265b9",
+     "name": "Alexander Bublik"
+    },
+    {
+     "side": "B",
+     "key": "S:b9b881f2-e266-5dc8-983c-4daefaf6f5bc",
+     "name": "Jakub Mensik"
+    }
+   ]
+  },
+  {
+   "match_id": "be0b0b70-b268-5284-b5e1-8dfad8fb4e22",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:7625f275-8a2c-5fb3-ae9a-2b05816d42e5~S:e235b6ad-dc91-5980-aa00-461f71aaef35",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183438"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:7625f275-8a2c-5fb3-ae9a-2b05816d42e5",
+     "name": "Learner Tien"
+    },
+    {
+     "side": "B",
+     "key": "S:e235b6ad-dc91-5980-aa00-461f71aaef35",
+     "name": "Hubert Hurkacz"
+    }
+   ]
+  },
+  {
+   "match_id": "c524ddb5-b476-5abb-b0b8-dae206367e7a",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:48515584-7440-5db7-a87e-478d52868396+b10b7c9a-e40b-5ce6-9045-0ff205827acb~D:ae0f771f-e06b-52da-8e8f-08814b2a3e5d+f71c924f-73ff-53ec-a644-b13e52edfab2",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183523"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:48515584-7440-5db7-a87e-478d52868396+b10b7c9a-e40b-5ce6-9045-0ff205827acb",
+     "name": "Tomas Martin Etcheverry"
+    },
+    {
+     "side": "B",
+     "key": "D:ae0f771f-e06b-52da-8e8f-08814b2a3e5d+f71c924f-73ff-53ec-a644-b13e52edfab2",
+     "name": "Kaito Uesugi"
+    }
+   ]
+  },
+  {
+   "match_id": "c7442c16-f8d3-55a0-8a12-46238fff5e22",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:caccedbd-a27b-5a6e-a79e-c29cf55f3760~S:db94f4a5-3213-57a2-a7b0-d54da483afbc",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183488"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:db94f4a5-3213-57a2-a7b0-d54da483afbc",
+     "name": "Alejandro Tabilo"
+    },
+    {
+     "side": "B",
+     "key": "S:caccedbd-a27b-5a6e-a79e-c29cf55f3760",
+     "name": "Tommy Paul"
+    }
+   ]
+  },
+  {
+   "match_id": "c8c5d2e3-3e4a-52af-86be-15bc3471e6b0",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:25e944b6-ccfd-54d5-8874-a939c06caf8e+484fa536-76d9-5ac8-bff4-40470cdfaa66~D:535e1bf1-5431-5d25-9812-c0901893b961+9381480a-04bb-5617-bc83-ed1c24a3b8fa",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183471"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:25e944b6-ccfd-54d5-8874-a939c06caf8e+484fa536-76d9-5ac8-bff4-40470cdfaa66",
+     "name": "Zhizhen Zhang"
+    },
+    {
+     "side": "B",
+     "key": "D:535e1bf1-5431-5d25-9812-c0901893b961+9381480a-04bb-5617-bc83-ed1c24a3b8fa",
+     "name": "Mark Wallner"
+    }
+   ]
+  },
+  {
+   "match_id": "ce2896d0-b798-5862-a1e8-eb94f507e34c",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:6988a59e-8325-5a1c-9d8b-77327a072ac7~S:a40544ab-c390-52e0-b15d-5a3d0790238b",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183495"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:6988a59e-8325-5a1c-9d8b-77327a072ac7",
+     "name": "Matteo Arnaldi"
+    },
+    {
+     "side": "B",
+     "key": "S:a40544ab-c390-52e0-b15d-5a3d0790238b",
+     "name": "Rei Sakamoto"
+    }
+   ]
+  },
+  {
+   "match_id": "d4d8f944-3c7d-51db-8279-0acb6e7e70d7",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:01379ed8-8e2f-5ce9-a7f8-f4a17fa7e986+da4a2a4c-e3c8-524e-8248-99cd105300a8~D:bce42610-b3da-5ac5-b154-ea694cca00dd+c8ab7697-6c75-51a6-b094-848a2f844eb1",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183474"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:bce42610-b3da-5ac5-b154-ea694cca00dd+c8ab7697-6c75-51a6-b094-848a2f844eb1",
+     "name": "Robert Cash"
+    },
+    {
+     "side": "B",
+     "key": "D:01379ed8-8e2f-5ce9-a7f8-f4a17fa7e986+da4a2a4c-e3c8-524e-8248-99cd105300a8",
+     "name": "Rafael Matos"
+    }
+   ]
+  },
+  {
+   "match_id": "da0eb611-19b9-5379-901d-4c4e02b1f4c0",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:45e47cfa-d7b5-5df3-98ee-67c354c9838f+f92f850c-701a-50cc-b357-89e574d0d611~D:71bc9b41-30bd-54e9-a730-d0b9bcfdfa7b+a65f6949-e3cd-5726-b892-b855e45b60c2",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183517"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:45e47cfa-d7b5-5df3-98ee-67c354c9838f+f92f850c-701a-50cc-b357-89e574d0d611",
+     "name": "Lucas Miedler"
+    },
+    {
+     "side": "B",
+     "key": "D:71bc9b41-30bd-54e9-a730-d0b9bcfdfa7b+a65f6949-e3cd-5726-b892-b855e45b60c2",
+     "name": "Alexander Blockx"
+    }
+   ]
+  },
+  {
+   "match_id": "dcd8dfb6-0643-5c0e-b067-f5baa5bad551",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:25a335ab-3262-5246-b7d9-0572f0b142ac~S:8e01f849-5b5e-54e8-857d-466da3b2f9fd",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183484"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:8e01f849-5b5e-54e8-857d-466da3b2f9fd",
+     "name": "Holger Rune"
+    },
+    {
+     "side": "B",
+     "key": "S:25a335ab-3262-5246-b7d9-0572f0b142ac",
+     "name": "Kyrian Jacquet"
+    }
+   ]
+  },
+  {
+   "match_id": "de558424-e179-5234-8411-4da9fd25f312",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:07681d30-9e80-5788-ab26-d9b047b79db5+b9b3e716-5c49-51c0-a6da-d42f8c21f317~D:a0f1e51c-6a3a-5775-948a-7e86d114e80e+b1500655-29b7-5e12-a6a1-c3f522d09152",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183516"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:07681d30-9e80-5788-ab26-d9b047b79db5+b9b3e716-5c49-51c0-a6da-d42f8c21f317",
+     "name": "Brandon Nakashima"
+    },
+    {
+     "side": "B",
+     "key": "D:a0f1e51c-6a3a-5775-948a-7e86d114e80e+b1500655-29b7-5e12-a6a1-c3f522d09152",
+     "name": "Theo Arribage"
+    }
+   ]
+  },
+  {
+   "match_id": "e02ad357-24cc-51f3-bc3b-c7c1d1cd68bb",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MS",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MS|main|S:67661ef2-3c4b-584d-9412-671ea90d8563~S:f4ef33ab-9ca0-57cf-9f22-cbaadea30267",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183441"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "S:f4ef33ab-9ca0-57cf-9f22-cbaadea30267",
+     "name": "Roman Safiullin"
+    },
+    {
+     "side": "B",
+     "key": "S:67661ef2-3c4b-584d-9412-671ea90d8563",
+     "name": "Flavio Cobolli"
+    }
+   ]
+  },
+  {
+   "match_id": "f3f77e6e-6e5f-587e-a00b-fec49e21db5f",
+   "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "edition": "Kinoshita Group Japan Open Tennis Championships",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:4c9b73be-cf8f-5592-ae53-57d120ac9fb3+ac338a7d-a968-582d-a33b-2133e8d1a39a~D:586bc65f-cc51-543c-b755-8789f36746a4+a820c6d4-cf5c-5371-9a24-ed289560c6d2",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:40:47.178+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "5-2026:183525"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:586bc65f-cc51-543c-b755-8789f36746a4+a820c6d4-cf5c-5371-9a24-ed289560c6d2",
+     "name": "Austin Krajicek"
+    },
+    {
+     "side": "B",
+     "key": "D:4c9b73be-cf8f-5592-ae53-57d120ac9fb3+ac338a7d-a968-582d-a33b-2133e8d1a39a",
+     "name": "Petr Nouza"
+    }
+   ]
+  },
+  {
+   "match_id": "fd3afabf-b616-5cec-82e3-c49fdfd088a7",
+   "edition_id": "81fb3ab5-a037-5418-8008-efcfd35005e6",
+   "edition": "China Open",
+   "event_type": "MD",
+   "round": "1",
+   "status": "scheduled",
+   "winner_side": null,
+   "end_reason": null,
+   "score_text": null,
+   "scheduled_at": "2026-09-30 04:00:00+00",
+   "natural_key": "MD|main|D:5446ad2b-dd71-5faa-ba16-8e2289994802+5eae6eec-e018-5242-91b5-8e3207674e1c~D:900be3b4-6a0b-5b0d-9b59-f9e3555a2481+ffe60364-cba9-5478-a60f-6b04a0c5f99a",
+   "source_family": "espn",
+   "updated_at": "2026-09-28 16:41:01.329+00",
+   "ext": [
+    {
+     "provider": "espn",
+     "external_id": "959-2026:183475"
+    }
+   ],
+   "parts": [
+    {
+     "side": "A",
+     "key": "D:5446ad2b-dd71-5faa-ba16-8e2289994802+5eae6eec-e018-5242-91b5-8e3207674e1c",
+     "name": "Andrey Rublev"
+    },
+    {
+     "side": "B",
+     "key": "D:900be3b4-6a0b-5b0d-9b59-f9e3555a2481+ffe60364-cba9-5478-a60f-6b04a0c5f99a",
+     "name": "Julian Cash"
+    }
+   ]
+  }
+ ]
+}
