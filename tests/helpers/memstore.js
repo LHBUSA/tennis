@@ -13,7 +13,9 @@ const PK = {
 };
 const UNIQUE = {
   tennis_match_participants: [['match_id', 'participant_key']], tennis_tournaments: [['slug']], tennis_players: [['founding_external_key']],
-  tennis_ranking_snapshots: [['list_key', 'ranking_date']], tennis_tournament_editions: [['tournament_id', 'year']]
+  tennis_ranking_snapshots: [['list_key', 'ranking_date']], tennis_tournament_editions: [['tournament_id', 'year']],
+  // migration 20260928000200: partial unique index (rows without a natural_key are not constrained)
+  tennis_matches: [['edition_id', 'natural_key']]
 };
 
 const DEFAULTS = { tennis_matches: { stats_status: 'pending' }, tennis_players: { status: 'active' } };
@@ -66,6 +68,7 @@ export class MemStore {
   key(table, row, cols) { return (cols || PK[table] || Object.keys(row)).map((c) => String(row[c])).join('|'); }
   checkUnique(table, row, self) {
     for (const cols of UNIQUE[table] || []) {
+      if (cols.some((c) => row[c] == null)) continue; // NULLs never collide (partial / nullable unique indexes)
       const k = this.key(table, row, cols);
       const other = this.rows(table).find((r) => r !== self && this.key(table, r, cols) === k);
       if (other) { const e = new Error(`postgrest 409 duplicate key ${table}(${cols})`); e.status = 409; throw e; }

@@ -253,7 +253,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     }
     await store.upsert('tennis_draws', dedupe(draws, (r) => r.draw_id), { onConflict: 'draw_id', ignore: true });
     const matchRow = (x) => ({
-      match_id: x.id, edition_id: x.ed.edition_id, draw_id: x.draw_id, event_type: x.n.match.event_type, round: x.n.match.round_code || 'unknown', format_key: x.n.match.format_key || 'unknown',
+      match_id: x.id, edition_id: x.ed.edition_id, natural_key: pairKey(x), draw_id: x.draw_id, event_type: x.n.match.event_type, round: x.n.match.round_code || 'unknown', format_key: x.n.match.format_key || 'unknown',
       status: x.n.match.status, winner_side: x.n.match.winner_side, end_reason: x.n.match.end_reason, scheduled_at: x.sm.scheduled_at || null, started_at: x.sm.started_at || null, court: x.sm.court_name || null, schedule_note: x.sm.schedule_note || null, score_text: x.n.match.score_text, duration_s: x.n.match.duration_s,
       surface: x.ed.surface ?? null, indoor: x.ed.indoor ?? null, source_family: x.sm.provider, live_state: x.n.match.live || null, source_updated_at: x.n.match.source_updated_at, updated_at: now()
     });
@@ -262,13 +262,23 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     const rejected = new Set();
     // One malformed row must never fail the whole edition: on a data error, retry row by row and hold
     // only the rows Postgres rejects.
+    // Another writer may have inserted the same match (other id) between our read and this write: the database's
+    // natural-key index refuses it (409); that row then attaches its external id to the surviving row.
+    const raced = [];
     const upsertMatches = async (list, row) => {
       try {
         await store.upsert('tennis_matches', list.map(row), { onConflict: 'match_id' });
       } catch (e) {
-        if (e?.status !== 400) throw e;
+        if (e?.status !== 400 && e?.status !== 409) throw e;
         for (const x of list) {
           try { await store.upsert('tennis_matches', [row(x)], { onConflict: 'match_id' }); } catch (err) {
+            if (err?.status === 409) {
+              const [other] = await store.select('tennis_matches', `select=match_id&edition_id=eq.${x.ed.edition_id}&natural_key=eq.${encodeURIComponent(pairKey(x))}`);
+              if (!other || other.match_id === x.id) throw err;
+              rejected.add(x.id);
+              raced.push({ x, into: other.match_id });
+              continue;
+            }
             if (err?.status !== 400) throw err;
             rejected.add(x.id);
             holds.push({ provider: x.sm.provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [`db_rejected:${String(err.message).slice(0, 200)}`], payload: slim(x.sm), capture_id: captureId });
@@ -282,6 +292,11 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     await upsertMatches(rest.filter(wentFinal), (x) => ({ ...matchRow(x), stats_status: 'pending' }));
     await upsertMatches(wo, (x) => ({ ...matchRow(x), stats_status: 'not_applicable' }));
     keep = keep.filter((x) => !rejected.has(x.id));
+    if (raced.length) {
+      await store.upsert('tennis_match_external_ids', raced.map((r) => ({ provider: r.x.sm.provider, external_id: r.x.sm.provider_match_id, match_id: r.into })), { onConflict: 'provider,external_id', ignore: true });
+      result.attached += raced.length;
+      result.raced = raced.length;
+    }
     await store.upsert('tennis_match_external_ids', keep.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
     await store.upsert('tennis_match_participants', keep.flatMap((x) => ['A', 'B'].map((side) => ({ match_id: x.id, side, participant_key: x.n.match.participants[side], seed: x.sm.seeds?.[side] ?? null, entry_type: x.sm.entry?.[side] || null }))), { onConflict: 'match_id,side' });
     const sets = keep.flatMap((x) => (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s) })));

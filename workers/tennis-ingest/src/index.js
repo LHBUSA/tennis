@@ -26,6 +26,7 @@ import { wtaEditionFactsStep, drawSheet } from './context-jobs.js';
 import { wtaRecordsStep } from './wta-records-job.js';
 import { espnExtrasStep } from './espn-extras-job.js';
 import { editionMergeStep } from './edition-merge-job.js';
+import { BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
@@ -70,6 +71,24 @@ export async function tick(env, { force = {}, only = null, budget = null, params
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured', store: !!store, kv: !!kv };
+  // bulk admin work against the shared database: refused while the guard is paused, capped in concurrency, and every
+  // store error it hits feeds the breaker (db-guard.js)
+  if (only && BULK_LANES.has(only)) {
+    const paused = await pausedReason(kv);
+    if (paused) return { ok: false, error: 'db_paused', ...paused };
+    const slot = await acquireSlot(kv, `${only}:${params.shard ?? '-'}`);
+    if (!slot) return { ok: false, error: 'concurrency_ceiling' };
+    try {
+      const r = await tickLocked(env, store, kv, force, { only, budget, params });
+      const err = r?.result?.error || r?.error;
+      if (err) await noteStoreError(kv, err);
+      return r;
+    } catch (e) { await noteStoreError(kv, String(e?.message || e)); throw e; } finally { await releaseSlot(kv, slot); }
+  }
+  return tickLocked(env, store, kv, force, { only, budget, params });
+}
+
+async function tickLocked(env, store, kv, force, { only = null, budget = null, params = {} } = {}) {
   // everything else is one tick at a time (a slow tick must not overlap the next cron firing); lanes whose admin runs never share cursor state with a cron step take their own lock (per shard for the
   // sharded history backfill), so a long backfill never starves the cron tick or another admin lane
   const OWN_LOCK = ['wta_records', 'wta_edition_facts', 'dna_v2', 'espn_extras', 'edition_merge'];
@@ -95,6 +114,8 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
   // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
   if (only) return laneOnly(ctx, only, budget, params);
   const started = new Date();
+  // 0. shared-database health (pauses bulk lanes on failure; db-guard.js)
+  await step(ctx, 'db_health', () => probe(store, kv));
   const today = iso(started);
   const hour = 3600 * 1000;
 
@@ -207,6 +228,7 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         return { ok: true, out: r };
       },
       async wta_history() {
+        if (await pausedReason(kv)) return { ok: true, done: false, out: 'db_paused' };
         const r = await wtaHistoryStep(ctx, { pages: 2 });
         return { ok: true, done: false, out: r };
       },
