@@ -31,7 +31,7 @@ forward-only fixes.
 | Vercel `tennis` (tennis.propbetedge.ai) | app code a30a570 (`dpl_4UZiabQJvbCoV5vEZuvsSohyDiEm`); later docs/evidence-only commits on main rebuild the same app | `dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9` (18e5537, Phase 6), then `dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z` (f70b1c4, pre-Phase-6) |
 | tennis-web | bcb45c39-33f4-42f6-8004-3acf7a03ccff (since 2026-09-27 01:10; this table said 8d6db251 until 2026-09-28 — corrected from the live deployment) | 2b611570-99c2-4a91-8a37-4e315e0290f3 |
 | tennis-api | ceba8a94-329f-4261-b381-4867a112031a (0.6.0: /v1/matchups, /v1/matchups/:id, /v1/players-to-watch, match_dna.profile, stable paging) | bdf4fa97-dd15-421a-983f-3b9b109ff9ac (0.5.0) |
-| tennis-ingest | 4a84fdb1-a7da-4a1c-a709-7a8c697732aa (b83b1a2: retention = latest 14 successful snapshots per version; otherwise identical to 13dafdd3) | 13dafdd3-8d6d-44ae-9231-2b6529e529f9 (Phase 6; calendar-window retention — do not keep it past a delete day), then 37ea192e / 8ec09873 |
+| tennis-ingest | 18cc4f6a-f194-401a-9405-090851473a09 (c0a8d15: crossSource candidate lookup edition-first — Seoul 57014 fix; read-only `candidate_probe` lane; count-based retention unchanged) | 4a84fdb1-a7da-4a1c-a709-7a8c697732aa (old lookup; same retention), then 13dafdd3 |
 | tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 | forward fix only (earlier versions predate the 2026-09-28 admin-token rotation) |
 | tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (PUBLISH; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
 | Supabase tkmln | migration 20260928000200 applied + unique index tennis_matches_natural_key (valid) | forward fix only (drop index concurrently would restore pre-6 behaviour) |
@@ -108,6 +108,8 @@ Rows below are the historical deploy log; the table above is authoritative for w
 
 | 2026-09-28 | tennis-ingest | 4a84fdb1 (uploaded, version dry run: policy count-based, 0 eligible) -> 100% | 13dafdd3 | retention correction (owner-approved, retention-only); 289 tests; production dry run + proof plan 7/7 |
 
+| 2026-09-28 | tennis-ingest | 18cc4f6a (dark probe: 7 active editions + 2 veteran histories, candidate sets identical to the old query) -> 100% | 4a84fdb1 | Seoul timeout fix; 4 ticks 0 errors; holds / external ids / natural keys unchanged |
+
 ## Incidents
 
 **2026-09-28 00:24-00:26 UTC — tkmln PostgREST 503/520/521/525 (PGRST002), all tennis reads failed ~2-3 min.**
@@ -136,3 +138,15 @@ the step now isolates editions (tennis-ingest 13dafdd3) and keeps the failing qu
 
 **Flaky test (build dpl_GkmnJpEgkiYmrsii3NXkwjyp9x2A).** The concurrent-writer race test assumed the race would happen;
 one Vercel build ran the writers serially. Now deterministic (barrier store, 34e8a00).
+
+**2026-09-28 — matches step 57014 (Seoul and others), ROOT CAUSE: query shape.** writer.js crossSource() found candidate rows
+participant-first: PostgREST's `tennis_match_participants?...&tennis_matches!inner(edition_id)&...&order=match_id,side&limit=1000`
+becomes an inner LATERAL with LIMIT/OFFSET (no join flattening) under ORDER BY match_id + LIMIT, so the planner either read
+every historical participant row of the incoming players (Seoul: 60 keys -> 19,201 rows for 58 candidates) or walked the
+whole participants primary key (114,649 buffers, ~1.1 s warm; 22.7 s cold for 3 editions) — over the 8 s authenticator
+statement_timeout whenever the cache was cold or the database busy (pg_stat_statements: 13,375 calls, mean 296 ms,
+max 7.9 s, ~62.6k buffers/call; timed-out calls are not recorded). Fix (18cc4f6a): edition-first — tennis_matches by
+edition (index tennis_matches_edition) with `tennis_match_participants!inner(participant_key)` filtered to the incoming
+keys, ordered by (edition_id, match_id), editions in groups of 8, keyset paging (no OFFSET). Generated query in production:
+mean 28 ms, max 1.0 s, ~960 buffers/call. No index, no db-guard change. Evidence: scripts/ops/bench-candidate-query.mjs,
+tests/candidate-lookup.test.js (0 differences vs the old query), `candidate_probe` lane.
