@@ -1,0 +1,87 @@
+{
+ "date": "2026-09-28",
+ "captured_at": "2026-09-28T17:07:29.460Z",
+ "database_bytes": 9067924627,
+ "tables": {
+  "tennis_dna_snapshots": {
+   "total_bytes": 478732288,
+   "table_bytes": 472006656,
+   "index_bytes": 6725632,
+   "live_rows": 94241,
+   "dead_rows": 6144,
+   "last_autovacuum": "2026-09-28 15:41:27.474804+00",
+   "last_autoanalyze": "2026-09-28 15:42:27.636645+00",
+   "autovacuum_count": 3
+  },
+  "tennis_match_events": {
+   "total_bytes": 48939008,
+   "table_bytes": 35913728,
+   "index_bytes": 13025280,
+   "live_rows": 53201,
+   "dead_rows": 0,
+   "last_autovacuum": null,
+   "last_autoanalyze": null,
+   "autovacuum_count": 0
+  },
+  "tennis_match_external_ids": {
+   "total_bytes": 137363456,
+   "table_bytes": 70025216,
+   "index_bytes": 67338240,
+   "live_rows": 756884,
+   "dead_rows": 3898,
+   "last_autovacuum": "2026-09-28 03:14:49.850631+00",
+   "last_autoanalyze": "2026-09-28 03:49:51.708696+00",
+   "autovacuum_count": 2
+  },
+  "tennis_match_participants": {
+   "total_bytes": 409206784,
+   "table_bytes": 146685952,
+   "index_bytes": 262520832,
+   "live_rows": 1372114,
+   "dead_rows": 64267,
+   "last_autovacuum": "2026-09-28 03:48:06.591031+00",
+   "last_autoanalyze": "2026-09-28 14:20:23.090785+00",
+   "autovacuum_count": 3
+  },
+  "tennis_matches": {
+   "total_bytes": 372981760,
+   "table_bytes": 207904768,
+   "index_bytes": 165076992,
+   "live_rows": 686057,
+   "dead_rows": 1515,
+   "last_autovacuum": "2026-09-28 14:09:26.4969+00",
+   "last_autoanalyze": "2026-09-28 14:17:23.126806+00",
+   "autovacuum_count": 7
+  },
+  "tennis_rankings": {
+   "total_bytes": 39641088,
+   "table_bytes": 20881408,
+   "index_bytes": 18759680,
+   "live_rows": 210029,
+   "dead_rows": 0,
+   "last_autovacuum": null,
+   "last_autoanalyze": null,
+   "autovacuum_count": 0
+  },
+  "tennis_sets": {
+   "total_bytes": 196313088,
+   "table_bytes": 112713728,
+   "index_bytes": 83599360,
+   "live_rows": 1550864,
+   "dead_rows": 28941,
+   "last_autovacuum": "2026-09-28 04:04:02.799895+00",
+   "last_autoanalyze": "2026-09-28 13:26:20.565578+00",
+   "autovacuum_count": 3
+  },
+  "tennis_surface_ratings": {
+   "total_bytes": 39944192,
+   "table_bytes": 33636352,
+   "index_bytes": 6307840,
+   "live_rows": 82789,
+   "dead_rows": 0,
+   "last_autovacuum": "2026-09-28 15:42:27.839147+00",
+   "last_autoanalyze": "2026-09-28 15:42:28.278513+00",
+   "autovacuum_count": 3
+  }
+ }
+}

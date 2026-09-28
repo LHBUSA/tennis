@@ -24,17 +24,31 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
-## Current production (2026-09-28 16:30 UTC, Phase 6)
+## Current production (verified live 2026-09-28 17:10 UTC: wrangler deployments status per Worker, Vercel production list)
 
 | Component | Current | Rollback target |
 |---|---|---|
-| Vercel `tennis` (tennis.propbetedge.ai) | main a30a570 (Phase 6 pages; first Phase 6 prod build `dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9` = 18e5537) | `dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z` (f70b1c4, pre-Phase-6) |
-| tennis-web | 8d6db251-db10-44ff-b664-492d046a4741 | 6334502d-2f1d-4286-8124-c45a35d4bd52 |
+| Vercel `tennis` (tennis.propbetedge.ai) | app code a30a570 (`dpl_4UZiabQJvbCoV5vEZuvsSohyDiEm`); later docs/evidence-only commits on main rebuild the same app | `dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9` (18e5537, Phase 6), then `dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z` (f70b1c4, pre-Phase-6) |
+| tennis-web | bcb45c39-33f4-42f6-8004-3acf7a03ccff (since 2026-09-27 01:10; this table said 8d6db251 until 2026-09-28 — corrected from the live deployment) | 2b611570-99c2-4a91-8a37-4e315e0290f3 |
 | tennis-api | ceba8a94-329f-4261-b381-4867a112031a (0.6.0: /v1/matchups, /v1/matchups/:id, /v1/players-to-watch, match_dna.profile, stable paging) | bdf4fa97-dd15-421a-983f-3b9b109ff9ac (0.5.0) |
 | tennis-ingest | 13dafdd3-8d6d-44ae-9231-2b6529e529f9 (Phase 6: fixtures + 2-day lookahead, profile/watch/calibration, retention, natural_key writer, per-edition isolation) | 37ea192e-ea4c-4f4f-9a86-cc3f64c546f7 (Phase 6 without the isolation fix), then 8ec09873-52dc-43f1-baef-0f22b97a3ffe (Phase 5; writes no natural_key -> run scripts/ops/natural-key.sql after a rollback) |
-| tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 | do not roll back past 26ac259c |
+| tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 | forward fix only (earlier versions predate the 2026-09-28 admin-token rotation) |
 | tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (PUBLISH; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
 | Supabase tkmln | migration 20260928000200 applied + unique index tennis_matches_natural_key (valid) | forward fix only (drop index concurrently would restore pre-6 behaviour) |
+
+All rollback targets above were confirmed to exist (`wrangler versions view`, Vercel `isRollbackCandidate`) on 2026-09-28.
+
+## Operations notes
+
+- **Long admin runs:** an admin lane run (e.g. `dna_v2`) can complete even when the HTTP request times out or its
+  response never arrives (observed for runs over ~5-8 min). The KV result is authoritative: `lane:<name>.last_ok`,
+  and for DNA `dna:v2:summary.built_at` / `dna:v2:watch:current`. Do not re-run a long lane because the request failed;
+  read KV first. Request limits are unchanged by design.
+- **Storage watch (observe only, no new cleanup policy):** `node scripts/ops/storage-report.mjs` weekly ->
+  `docs/evidence/storage/<date>.json` (size, index size, estimated rows, dead rows, 7-day growth). Baseline 2026-09-28:
+  database 8,648 MB; tennis_dna_snapshots 457 MB, tennis_matches 356 MB.
+- **Phase 6 status:** live; COMPLETE only after the first fixture completion (2026-09-29) and the first real retention
+  delete (~2026-10-12) are proven. Frozen: no Tennis feature work until then.
 
 Rows below are the historical deploy log; the table above is authoritative for what is running.
 
