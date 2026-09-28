@@ -31,7 +31,7 @@ forward-only fixes.
 | Vercel `tennis` (tennis.propbetedge.ai) | app code a30a570 (`dpl_4UZiabQJvbCoV5vEZuvsSohyDiEm`); later docs/evidence-only commits on main rebuild the same app | `dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9` (18e5537, Phase 6), then `dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z` (f70b1c4, pre-Phase-6) |
 | tennis-web | bcb45c39-33f4-42f6-8004-3acf7a03ccff (since 2026-09-27 01:10; this table said 8d6db251 until 2026-09-28 — corrected from the live deployment) | 2b611570-99c2-4a91-8a37-4e315e0290f3 |
 | tennis-api | ceba8a94-329f-4261-b381-4867a112031a (0.6.0: /v1/matchups, /v1/matchups/:id, /v1/players-to-watch, match_dna.profile, stable paging) | bdf4fa97-dd15-421a-983f-3b9b109ff9ac (0.5.0) |
-| tennis-ingest | 13dafdd3-8d6d-44ae-9231-2b6529e529f9 (Phase 6: fixtures + 2-day lookahead, profile/watch/calibration, retention, natural_key writer, per-edition isolation) | 37ea192e-ea4c-4f4f-9a86-cc3f64c546f7 (Phase 6 without the isolation fix), then 8ec09873-52dc-43f1-baef-0f22b97a3ffe (Phase 5; writes no natural_key -> run scripts/ops/natural-key.sql after a rollback) |
+| tennis-ingest | 4a84fdb1-a7da-4a1c-a709-7a8c697732aa (b83b1a2: retention = latest 14 successful snapshots per version; otherwise identical to 13dafdd3) | 13dafdd3-8d6d-44ae-9231-2b6529e529f9 (Phase 6; calendar-window retention — do not keep it past a delete day), then 37ea192e / 8ec09873 |
 | tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 | forward fix only (earlier versions predate the 2026-09-28 admin-token rotation) |
 | tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (PUBLISH; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
 | Supabase tkmln | migration 20260928000200 applied + unique index tennis_matches_natural_key (valid) | forward fix only (drop index concurrently would restore pre-6 behaviour) |
@@ -105,6 +105,8 @@ Rows below are the historical deploy log; the table above is authoritative for w
 | 2026-09-28 | tennis-api | c79af9be / 4ebfb7f1 (uploaded, 0%) -> ceba8a94 100% | bdf4fa97 | version canary 34/34 (existing routes byte-equal to production; leaders deterministic = DB count 2190) |
 | 2026-09-28 | tennis-ingest | 803b7e29 (uploaded) -> 37ea192e 0% (override-only measurement: full no-write build 55.6 s CPU / 288 s wall) -> 37ea192e 100% -> 13dafdd3 100% | 8ec09873 | first Phase 6 DNA build 15:42 UTC: 37,386 snapshots with profile, 54,149 surface ratings, calibration, watch (weekly edition 2026-09-28 frozen) |
 | 2026-09-28 | Vercel | dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9 (18e5537) -> a30a570 | dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z | Matchups, Players to Watch, Player DNA profile + charts |
+
+| 2026-09-28 | tennis-ingest | 4a84fdb1 (uploaded, version dry run: policy count-based, 0 eligible) -> 100% | 13dafdd3 | retention correction (owner-approved, retention-only); 289 tests; production dry run + proof plan 7/7 |
 
 ## Incidents
 
