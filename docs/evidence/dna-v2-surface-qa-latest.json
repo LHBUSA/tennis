@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-28T12:53:28.877Z",
+  "checked_at": "2026-09-28T00:06:25.702Z",
   "result": "PASS",
   "checks": [
     {
@@ -15,13 +15,13 @@
     {
       "name": "v1 technical snapshots preserved",
       "result": "PASS",
-      "v1_rows": 24143,
-      "latest": "2026-09-28"
+      "v1_rows": 20859,
+      "latest": "2026-09-27"
     },
     {
       "name": "aryna-sabalenka: meaningful match history",
       "result": "PASS",
-      "matches": 736,
+      "matches": 737,
       "span": "2012-11-11..2026-09-13",
       "sources": [
         "espn",
@@ -49,7 +49,7 @@
       "name": "aryna-sabalenka: tour",
       "result": "PASS",
       "tour": "WTA",
-      "rating": 2870,
+      "rating": 2609,
       "rating_status": "published"
     },
     {
@@ -60,18 +60,18 @@
       "name": "aryna-sabalenka: surface Match DNA coherent",
       "result": "PASS",
       "surfaces": [
-        "hard:499",
+        "hard:497",
         "clay:160",
         "grass:69"
       ],
-      "sum": 728,
-      "overall": 736,
+      "sum": 726,
+      "overall": 737,
       "bad": []
     },
     {
       "name": "iga-swiatek: meaningful match history",
       "result": "PASS",
-      "matches": 530,
+      "matches": 537,
       "span": "2016-10-30..2026-09-13",
       "sources": [
         "espn",
@@ -99,7 +99,7 @@
       "name": "iga-swiatek: tour",
       "result": "PASS",
       "tour": "WTA",
-      "rating": 2798,
+      "rating": 2537,
       "rating_status": "published"
     },
     {
@@ -115,13 +115,13 @@
         "grass:41"
       ],
       "sum": 527,
-      "overall": 530,
+      "overall": 537,
       "bad": []
     },
     {
       "name": "coco-gauff: meaningful match history",
       "result": "PASS",
-      "matches": 440,
+      "matches": 441,
       "span": "2018-05-27..2026-09-13",
       "sources": [
         "espn",
@@ -149,7 +149,7 @@
       "name": "coco-gauff: tour",
       "result": "PASS",
       "tour": "WTA",
-      "rating": 2828,
+      "rating": 2568,
       "rating_status": "published"
     },
     {
@@ -160,160 +160,114 @@
       "name": "coco-gauff: surface Match DNA coherent",
       "result": "PASS",
       "surfaces": [
-        "hard:275",
+        "hard:276",
         "clay:122",
         "grass:43"
       ],
-      "sum": 440,
-      "overall": 440,
+      "sum": 441,
+      "overall": 441,
       "bad": []
     },
     {
-      "name": "elena-rybakina: meaningful match history",
+      "name": "carlos-alcaraz: meaningful match history",
       "result": "PASS",
-      "matches": 604,
-      "span": "2014-12-14..2026-09-13",
+      "matches": 358,
+      "span": "2020-02-18..2026-09-09",
       "sources": [
+        "ausopen",
         "espn",
-        "wta",
-        "wta_history"
+        "rolandgarros",
+        "wimbledon"
       ]
     },
     {
-      "name": "elena-rybakina: opponent rank never from a later list",
+      "name": "carlos-alcaraz: opponent rank never from a later list",
       "result": "PASS",
       "checked": 40,
       "leaks": 0
     },
     {
-      "name": "elena-rybakina: no technical metric in Match DNA",
+      "name": "carlos-alcaraz: no technical metric in Match DNA",
       "result": "PASS",
       "metrics": 19
     },
     {
-      "name": "elena-rybakina: confidence/percentile coherent",
+      "name": "carlos-alcaraz: confidence/percentile coherent",
       "result": "PASS",
       "incoherent": []
     },
     {
-      "name": "elena-rybakina: tour",
+      "name": "carlos-alcaraz: tour",
       "result": "PASS",
-      "tour": "WTA",
-      "rating": 2868,
+      "tour": "ATP",
+      "rating": 2278,
       "rating_status": "published"
     },
     {
-      "name": "elena-rybakina: no duplicate match in history",
+      "name": "carlos-alcaraz: no duplicate match in history",
       "result": "PASS"
     },
     {
-      "name": "elena-rybakina: surface Match DNA coherent",
+      "name": "carlos-alcaraz: surface Match DNA coherent",
       "result": "PASS",
       "surfaces": [
-        "hard:398",
-        "clay:146",
-        "grass:58"
+        "hard:123",
+        "clay:62",
+        "grass:27"
       ],
-      "sum": 602,
-      "overall": 604,
+      "sum": 212,
+      "overall": 358,
       "bad": []
     },
     {
-      "name": "jessica-pegula: meaningful match history",
+      "name": "jannik-sinner: meaningful match history",
       "result": "PASS",
-      "matches": 790,
-      "span": "2009-04-12..2026-09-13",
+      "matches": 425,
+      "span": "2019-04-24..2026-07-12",
       "sources": [
-        "wta",
-        "wta_history"
-      ]
-    },
-    {
-      "name": "jessica-pegula: opponent rank never from a later list",
-      "result": "PASS",
-      "checked": 40,
-      "leaks": 0
-    },
-    {
-      "name": "jessica-pegula: no technical metric in Match DNA",
-      "result": "PASS",
-      "metrics": 19
-    },
-    {
-      "name": "jessica-pegula: confidence/percentile coherent",
-      "result": "PASS",
-      "incoherent": []
-    },
-    {
-      "name": "jessica-pegula: tour",
-      "result": "PASS",
-      "tour": "WTA",
-      "rating": 2785,
-      "rating_status": "published"
-    },
-    {
-      "name": "jessica-pegula: no duplicate match in history",
-      "result": "PASS"
-    },
-    {
-      "name": "jessica-pegula: surface Match DNA coherent",
-      "result": "PASS",
-      "surfaces": [
-        "hard:506",
-        "clay:208",
-        "grass:64"
-      ],
-      "sum": 778,
-      "overall": 790,
-      "bad": []
-    },
-    {
-      "name": "serena-williams: meaningful match history",
-      "result": "PASS",
-      "matches": 794,
-      "span": "1998-01-18..2026-07-12",
-      "sources": [
+        "ausopen",
         "espn",
-        "wta_history"
+        "rolandgarros",
+        "wimbledon"
       ]
     },
     {
-      "name": "serena-williams: opponent rank never from a later list",
+      "name": "jannik-sinner: opponent rank never from a later list",
       "result": "PASS",
       "checked": 40,
       "leaks": 0
     },
     {
-      "name": "serena-williams: no technical metric in Match DNA",
+      "name": "jannik-sinner: no technical metric in Match DNA",
       "result": "PASS",
       "metrics": 19
     },
     {
-      "name": "serena-williams: confidence/percentile coherent",
+      "name": "jannik-sinner: confidence/percentile coherent",
       "result": "PASS",
       "incoherent": []
     },
     {
-      "name": "serena-williams: tour",
+      "name": "jannik-sinner: tour",
       "result": "PASS",
-      "tour": "WTA",
-      "rating": 2616,
+      "tour": "ATP",
+      "rating": 2410,
       "rating_status": "published"
     },
     {
-      "name": "serena-williams: no duplicate match in history",
+      "name": "jannik-sinner: no duplicate match in history",
       "result": "PASS"
     },
     {
-      "name": "serena-williams: surface Match DNA coherent",
+      "name": "jannik-sinner: surface Match DNA coherent",
       "result": "PASS",
       "surfaces": [
-        "hard:494",
-        "clay:179",
-        "grass:102"
+        "hard:143",
+        "clay:66",
+        "grass:35"
       ],
-      "sum": 775,
-      "overall": 794,
+      "sum": 244,
+      "overall": 425,
       "bad": []
     },
     {
@@ -347,32 +301,22 @@
       "fails": []
     },
     {
-      "name": "UI 1440 /players/elena-rybakina",
+      "name": "UI 1440 /players/carlos-alcaraz",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 1440 /players/elena-rybakina/dna",
+      "name": "UI 1440 /players/carlos-alcaraz/dna",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 1440 /players/jessica-pegula",
+      "name": "UI 1440 /players/jannik-sinner",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 1440 /players/jessica-pegula/dna",
-      "result": "PASS",
-      "fails": []
-    },
-    {
-      "name": "UI 1440 /players/serena-williams",
-      "result": "PASS",
-      "fails": []
-    },
-    {
-      "name": "UI 1440 /players/serena-williams/dna",
+      "name": "UI 1440 /players/jannik-sinner/dna",
       "result": "PASS",
       "fails": []
     },
@@ -417,32 +361,22 @@
       "fails": []
     },
     {
-      "name": "UI 390 /players/elena-rybakina",
+      "name": "UI 390 /players/carlos-alcaraz",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 390 /players/elena-rybakina/dna",
+      "name": "UI 390 /players/carlos-alcaraz/dna",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 390 /players/jessica-pegula",
+      "name": "UI 390 /players/jannik-sinner",
       "result": "PASS",
       "fails": []
     },
     {
-      "name": "UI 390 /players/jessica-pegula/dna",
-      "result": "PASS",
-      "fails": []
-    },
-    {
-      "name": "UI 390 /players/serena-williams",
-      "result": "PASS",
-      "fails": []
-    },
-    {
-      "name": "UI 390 /players/serena-williams/dna",
+      "name": "UI 390 /players/jannik-sinner/dna",
       "result": "PASS",
       "fails": []
     },

@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-09-27T20:43:55.098Z",
+  "checked_at": "2026-09-28T12:51:33.531Z",
   "result": "PASS",
   "checks": [
     {
@@ -15,8 +15,8 @@
     {
       "name": "v1 technical snapshots preserved",
       "result": "PASS",
-      "v1_rows": 20859,
-      "latest": "2026-09-27"
+      "v1_rows": 24143,
+      "latest": "2026-09-28"
     },
     {
       "name": "carlos-alcaraz: meaningful match history",
@@ -50,12 +50,24 @@
       "name": "carlos-alcaraz: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2279,
+      "rating": 2277,
       "rating_status": "published"
     },
     {
       "name": "carlos-alcaraz: no duplicate match in history",
       "result": "PASS"
+    },
+    {
+      "name": "carlos-alcaraz: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:123",
+        "clay:62",
+        "grass:27"
+      ],
+      "sum": 212,
+      "overall": 358,
+      "bad": []
     },
     {
       "name": "jannik-sinner: meaningful match history",
@@ -89,7 +101,7 @@
       "name": "jannik-sinner: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2411,
+      "rating": 2409,
       "rating_status": "published"
     },
     {
@@ -97,10 +109,22 @@
       "result": "PASS"
     },
     {
+      "name": "jannik-sinner: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:143",
+        "clay:66",
+        "grass:35"
+      ],
+      "sum": 244,
+      "overall": 425,
+      "bad": []
+    },
+    {
       "name": "novak-djokovic: meaningful match history",
       "result": "PASS",
-      "matches": 1195,
-      "span": "2007-01-02..2026-08-30",
+      "matches": 1200,
+      "span": "2005-07-03..2026-08-30",
       "sources": [
         "ausopen",
         "espn",
@@ -128,12 +152,24 @@
       "name": "novak-djokovic: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2148,
+      "rating": 2146,
       "rating_status": "published"
     },
     {
       "name": "novak-djokovic: no duplicate match in history",
       "result": "PASS"
+    },
+    {
+      "name": "novak-djokovic: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:273",
+        "clay:166",
+        "grass:122"
+      ],
+      "sum": 561,
+      "overall": 1200,
+      "bad": []
     },
     {
       "name": "alexander-zverev: meaningful match history",
@@ -167,12 +203,24 @@
       "name": "alexander-zverev: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2125,
+      "rating": 2124,
       "rating_status": "published"
     },
     {
       "name": "alexander-zverev: no duplicate match in history",
       "result": "PASS"
+    },
+    {
+      "name": "alexander-zverev: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:202",
+        "clay:127",
+        "grass:35"
+      ],
+      "sum": 364,
+      "overall": 731,
+      "bad": []
     },
     {
       "name": "gustavo-heide: meaningful match history",
@@ -204,7 +252,7 @@
       "name": "gustavo-heide: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 1434,
+      "rating": 1433,
       "rating_status": "published"
     },
     {
@@ -212,10 +260,21 @@
       "result": "PASS"
     },
     {
+      "name": "gustavo-heide: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:6",
+        "clay:6"
+      ],
+      "sum": 12,
+      "overall": 33,
+      "bad": []
+    },
+    {
       "name": "roger-federer: meaningful match history",
       "result": "PASS",
-      "matches": 823,
-      "span": "2007-01-15..2021-07-11",
+      "matches": 843,
+      "span": "2000-07-09..2021-07-11",
       "sources": [
         "espn",
         "rolandgarros",
@@ -242,7 +301,7 @@
       "name": "roger-federer: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 2091,
+      "rating": 2089,
       "rating_status": "published"
     },
     {
@@ -250,10 +309,22 @@
       "result": "PASS"
     },
     {
+      "name": "roger-federer: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:172",
+        "clay:66",
+        "grass:102"
+      ],
+      "sum": 340,
+      "overall": 843,
+      "bad": []
+    },
+    {
       "name": "david-ferrer: meaningful match history",
       "result": "PASS",
-      "matches": 745,
-      "span": "2007-01-08..2019-05-08",
+      "matches": 749,
+      "span": "2005-07-03..2019-05-08",
       "sources": [
         "espn",
         "wimbledon"
@@ -279,12 +350,24 @@
       "name": "david-ferrer: tour",
       "result": "PASS",
       "tour": "ATP",
-      "rating": 1711,
+      "rating": 1708,
       "rating_status": "published"
     },
     {
       "name": "david-ferrer: no duplicate match in history",
       "result": "PASS"
+    },
+    {
+      "name": "david-ferrer: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:103",
+        "clay:60",
+        "grass:41"
+      ],
+      "sum": 204,
+      "overall": 749,
+      "bad": []
     },
     {
       "name": "UI 1440 /players/carlos-alcaraz",

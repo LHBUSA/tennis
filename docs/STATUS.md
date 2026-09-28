@@ -1,4 +1,28 @@
-# Status — 2026-09-27 21:10 UTC (production snapshot)
+# Status — 2026-09-28 13:00 UTC (production snapshot)
+
+**2026-09-28 — Phase 5 contextual expansion (evidence: `docs/evidence/context-coverage-latest.json`,
+`source-canary-latest.json`, `production-canary-latest.json`, `dna-v2-qa-latest.json`, `dna-v2-wta-qa-latest.json`,
+`dna-v2-surface-qa-latest.json`; registries `data/context/*.json`).**
+- Official WTA player history: all 3,523 players of the backfill population complete (73 with an empty list; one
+  "TBD" placeholder removed from the graph). WS 484,831 / WD 138,373 canonical matches (ITF included).
+- Context layer (migration 20260928000100): source mappings with evidence (WTA 8,518 editions / 2,189 tournaments
+  official_id; ESPN WTA editions 1,309 mapped / 8 unresolved / 5 ambiguous; ESPN ATP 1,250 / 8; 114 combined-event
+  identity links), sourced edition attributes, draw slots, player source records, disagreement log.
+- Edition consolidation: 9,942 ESPN rows left in ESPN "shadow" editions merged (956 duplicates) or moved (8,986);
+  656 shadow editions removed. 0 duplicate canonical matches in any edition (WS/WD/MS/MD).
+- Surface: WS 99.8% sourced (official WTA calendar + Slam feeds); MS 34.8% (Slams + 112 combined events).
+  ProTennisLive draw sheets are challenged from Cloudflare egress: ATP draw-sheet surfaces not applied.
+- Brackets: 721 WTA main draws proven from official WTA draw sheets (28,128 slots, 94.6% of player slots resolved;
+  surfaces 414/414 and seeds 6,565/6,571 agree with the official record). ESPN brackets unavailable.
+- WTA /records + /year (top 200) and ESPN season stats + event log (top 150 each tour) stored as reported;
+  /records vs derived (singles + doubles, tour level): 216/602 exact, 402 within 2 matches; 386 logged disagreements.
+- Tennis DNA v2: memory-safe build (was failing: 1102 exceededMemory), surface Match DNA (hard/clay/grass),
+  incremental inputs live (`dna2:mode=auto`, shadow verification to 2026-10-05; production hashes equal).
+  WTA PBE Rating (margin variant) 0.6061 vs ranking 0.6470 log loss (7,313 matches); surface ratings published
+  for both tours.
+- Incident 2026-09-28 00:24 UTC: ~2-3 min of PostgREST 5xx on tkmln (all tennis reads) caused by our own
+  backfill load; see RELEASE.md "Incidents".
+
 
 **2026-09-27 evening — WTA history (evidence: `docs/evidence/wta-coverage-latest.json`, `espn-wta-discovery-latest.json`,
 `dna-v2-backtest-latest.json`, `dna-v2-wta-qa-latest.json`).** Women's singles 9,368 -> 101,340 and doubles 2,715 -> 25,345

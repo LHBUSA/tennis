@@ -1,0 +1,1194 @@
+{
+ "generated_at": "2026-09-28T12:46:23.054Z",
+ "history_backfill": {
+  "population": 3523,
+  "players_with_completion_record": 3523,
+  "rows_founded": 605054,
+  "attached_to_other_rows": 11391,
+  "held_open": 20329,
+  "duplicate_candidates_held": 24,
+  "conflicts": 25,
+  "open_holds_by_reason": [
+   {
+    "event": "WS",
+    "reason": "score_invalid",
+    "n": 14591
+   },
+   {
+    "event": "WS",
+    "reason": "winner_disagrees_with_score",
+    "n": 2031
+   },
+   {
+    "event": "WS",
+    "reason": "unmapped_round",
+    "n": 1404
+   },
+   {
+    "event": "WD",
+    "reason": "winner_disagrees_with_score",
+    "n": 1018
+   },
+   {
+    "event": "WS",
+    "reason": "unmapped_reason",
+    "n": 381
+   },
+   {
+    "event": "WD",
+    "reason": "unmapped_round",
+    "n": 283
+   },
+   {
+    "event": "WD",
+    "reason": "unmapped_reason",
+    "n": 233
+   },
+   {
+    "event": "WS",
+    "reason": "other",
+    "n": 175
+   },
+   {
+    "event": "WD",
+    "reason": "score_invalid",
+    "n": 130
+   },
+   {
+    "event": "WD",
+    "reason": "other",
+    "n": 59
+   },
+   {
+    "event": "WS",
+    "reason": "duplicate_candidate",
+    "n": 24
+   }
+  ]
+ },
+ "mappings": [
+  {
+   "entity_type": "edition",
+   "provider": "espn_atp",
+   "status": "mapped",
+   "method": "espn_founded",
+   "confidence": "high",
+   "n": 1217
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_atp",
+   "status": "mapped",
+   "method": "shared_matches",
+   "confidence": "high",
+   "n": 33
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_atp",
+   "status": "unresolved",
+   "method": "shared_matches",
+   "confidence": null,
+   "n": 8
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_wta",
+   "status": "ambiguous",
+   "method": "shared_matches",
+   "confidence": null,
+   "n": 5
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_wta",
+   "status": "mapped",
+   "method": "espn_founded",
+   "confidence": "high",
+   "n": 44
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_wta",
+   "status": "mapped",
+   "method": "shared_matches",
+   "confidence": "high",
+   "n": 1262
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_wta",
+   "status": "mapped",
+   "method": "shared_matches",
+   "confidence": "medium",
+   "n": 3
+  },
+  {
+   "entity_type": "edition",
+   "provider": "espn_wta",
+   "status": "unresolved",
+   "method": "shared_matches",
+   "confidence": null,
+   "n": 8
+  },
+  {
+   "entity_type": "edition",
+   "provider": "wta",
+   "status": "mapped",
+   "method": "official_id",
+   "confidence": "high",
+   "n": 8518
+  },
+  {
+   "entity_type": "edition",
+   "provider": "wta_combined",
+   "status": "mapped",
+   "method": "combined_event",
+   "confidence": "high",
+   "n": 114
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "espn_atp",
+   "status": "mapped",
+   "method": "mapped_editions",
+   "confidence": "high",
+   "n": 127
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "espn_atp",
+   "status": "mapped",
+   "method": "mapped_editions",
+   "confidence": "medium",
+   "n": 32
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "espn_wta",
+   "status": "ambiguous",
+   "method": "mapped_editions",
+   "confidence": null,
+   "n": 27
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "espn_wta",
+   "status": "mapped",
+   "method": "mapped_editions",
+   "confidence": "high",
+   "n": 175
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "espn_wta",
+   "status": "mapped",
+   "method": "mapped_editions",
+   "confidence": "medium",
+   "n": 97
+  },
+  {
+   "entity_type": "tournament",
+   "provider": "wta",
+   "status": "mapped",
+   "method": "official_id",
+   "confidence": "high",
+   "n": 2189
+  }
+ ],
+ "attributes": [
+  {
+   "attribute": "indoor",
+   "source": "wta",
+   "method": "combined_event",
+   "n": 113
+  },
+  {
+   "attribute": "indoor",
+   "source": "wta",
+   "method": "direct",
+   "n": 8501
+  },
+  {
+   "attribute": "level",
+   "source": "wta",
+   "method": "direct",
+   "n": 8518
+  },
+  {
+   "attribute": "surface",
+   "source": "wta",
+   "method": "combined_event",
+   "n": 114
+  },
+  {
+   "attribute": "surface",
+   "source": "wta",
+   "method": "direct",
+   "n": 8509
+  },
+  {
+   "attribute": "surface",
+   "source": "wta-draws",
+   "method": "draw_sheet",
+   "n": 414
+  }
+ ],
+ "surface": {
+  "totals": [
+   {
+    "event_type": "MS",
+    "matches": 53481,
+    "with_surface": 18612
+   },
+   {
+    "event_type": "WS",
+    "matches": 484831,
+    "with_surface": 484062
+   }
+  ],
+  "by_year": [
+   {
+    "year": 1979,
+    "event_type": "MS",
+    "matches": 4,
+    "with_surface": 4,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1980,
+    "event_type": "MS",
+    "matches": 7,
+    "with_surface": 7,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1981,
+    "event_type": "MS",
+    "matches": 4,
+    "with_surface": 4,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1982,
+    "event_type": "MS",
+    "matches": 4,
+    "with_surface": 4,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1983,
+    "event_type": "MS",
+    "matches": 1,
+    "with_surface": 1,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1984,
+    "event_type": "MS",
+    "matches": 2,
+    "with_surface": 2,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1985,
+    "event_type": "MS",
+    "matches": 3,
+    "with_surface": 3,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1986,
+    "event_type": "MS",
+    "matches": 2,
+    "with_surface": 2,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1987,
+    "event_type": "MS",
+    "matches": 6,
+    "with_surface": 6,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1988,
+    "event_type": "MS",
+    "matches": 4,
+    "with_surface": 4,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1988,
+    "event_type": "WS",
+    "matches": 3,
+    "with_surface": 3,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1989,
+    "event_type": "MS",
+    "matches": 3,
+    "with_surface": 3,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1990,
+    "event_type": "MS",
+    "matches": 2,
+    "with_surface": 2,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1990,
+    "event_type": "WS",
+    "matches": 1,
+    "with_surface": 1,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1991,
+    "event_type": "MS",
+    "matches": 5,
+    "with_surface": 5,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1991,
+    "event_type": "WS",
+    "matches": 1,
+    "with_surface": 1,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1992,
+    "event_type": "MS",
+    "matches": 8,
+    "with_surface": 8,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1992,
+    "event_type": "WS",
+    "matches": 3,
+    "with_surface": 3,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1993,
+    "event_type": "MS",
+    "matches": 9,
+    "with_surface": 9,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1993,
+    "event_type": "WS",
+    "matches": 4,
+    "with_surface": 4,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1994,
+    "event_type": "MS",
+    "matches": 9,
+    "with_surface": 9,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1994,
+    "event_type": "WS",
+    "matches": 9,
+    "with_surface": 9,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1995,
+    "event_type": "MS",
+    "matches": 9,
+    "with_surface": 9,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1995,
+    "event_type": "WS",
+    "matches": 9,
+    "with_surface": 9,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1996,
+    "event_type": "MS",
+    "matches": 5,
+    "with_surface": 5,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1996,
+    "event_type": "WS",
+    "matches": 12,
+    "with_surface": 12,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1997,
+    "event_type": "MS",
+    "matches": 10,
+    "with_surface": 10,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1997,
+    "event_type": "WS",
+    "matches": 23,
+    "with_surface": 23,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1998,
+    "event_type": "MS",
+    "matches": 7,
+    "with_surface": 7,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1998,
+    "event_type": "WS",
+    "matches": 37,
+    "with_surface": 37,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1999,
+    "event_type": "MS",
+    "matches": 11,
+    "with_surface": 11,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 1999,
+    "event_type": "WS",
+    "matches": 24,
+    "with_surface": 24,
+    "sourced_direct": 0,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2000,
+    "event_type": "MS",
+    "matches": 11,
+    "with_surface": 11,
+    "sourced_direct": 11,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2000,
+    "event_type": "WS",
+    "matches": 1832,
+    "with_surface": 1832,
+    "sourced_direct": 61,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2001,
+    "event_type": "MS",
+    "matches": 19,
+    "with_surface": 19,
+    "sourced_direct": 19,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2001,
+    "event_type": "WS",
+    "matches": 2640,
+    "with_surface": 2640,
+    "sourced_direct": 84,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2002,
+    "event_type": "MS",
+    "matches": 19,
+    "with_surface": 19,
+    "sourced_direct": 19,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2002,
+    "event_type": "WS",
+    "matches": 3453,
+    "with_surface": 3453,
+    "sourced_direct": 177,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2003,
+    "event_type": "MS",
+    "matches": 19,
+    "with_surface": 19,
+    "sourced_direct": 19,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2003,
+    "event_type": "WS",
+    "matches": 4466,
+    "with_surface": 4466,
+    "sourced_direct": 400,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2004,
+    "event_type": "MS",
+    "matches": 35,
+    "with_surface": 35,
+    "sourced_direct": 35,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2004,
+    "event_type": "WS",
+    "matches": 5778,
+    "with_surface": 5778,
+    "sourced_direct": 1011,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2005,
+    "event_type": "MS",
+    "matches": 42,
+    "with_surface": 42,
+    "sourced_direct": 42,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2005,
+    "event_type": "WS",
+    "matches": 7090,
+    "with_surface": 7090,
+    "sourced_direct": 1584,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2006,
+    "event_type": "MS",
+    "matches": 52,
+    "with_surface": 52,
+    "sourced_direct": 52,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2006,
+    "event_type": "WS",
+    "matches": 9260,
+    "with_surface": 9260,
+    "sourced_direct": 3135,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2007,
+    "event_type": "MS",
+    "matches": 2501,
+    "with_surface": 480,
+    "sourced_direct": 480,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2007,
+    "event_type": "WS",
+    "matches": 11460,
+    "with_surface": 11460,
+    "sourced_direct": 5261,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2008,
+    "event_type": "MS",
+    "matches": 2407,
+    "with_surface": 458,
+    "sourced_direct": 458,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2008,
+    "event_type": "WS",
+    "matches": 12280,
+    "with_surface": 12258,
+    "sourced_direct": 5601,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2009,
+    "event_type": "MS",
+    "matches": 2414,
+    "with_surface": 467,
+    "sourced_direct": 467,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2009,
+    "event_type": "WS",
+    "matches": 13556,
+    "with_surface": 13541,
+    "sourced_direct": 7470,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2010,
+    "event_type": "MS",
+    "matches": 2429,
+    "with_surface": 485,
+    "sourced_direct": 485,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2010,
+    "event_type": "WS",
+    "matches": 15201,
+    "with_surface": 15201,
+    "sourced_direct": 8980,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2011,
+    "event_type": "MS",
+    "matches": 2416,
+    "with_surface": 483,
+    "sourced_direct": 483,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2011,
+    "event_type": "WS",
+    "matches": 16924,
+    "with_surface": 16877,
+    "sourced_direct": 10706,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2012,
+    "event_type": "MS",
+    "matches": 2333,
+    "with_surface": 490,
+    "sourced_direct": 490,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2012,
+    "event_type": "WS",
+    "matches": 17320,
+    "with_surface": 17254,
+    "sourced_direct": 12336,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2013,
+    "event_type": "MS",
+    "matches": 2345,
+    "with_surface": 475,
+    "sourced_direct": 475,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2013,
+    "event_type": "WS",
+    "matches": 20242,
+    "with_surface": 20214,
+    "sourced_direct": 15515,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2014,
+    "event_type": "MS",
+    "matches": 2339,
+    "with_surface": 484,
+    "sourced_direct": 484,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2014,
+    "event_type": "WS",
+    "matches": 23542,
+    "with_surface": 23542,
+    "sourced_direct": 18082,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2015,
+    "event_type": "MS",
+    "matches": 2429,
+    "with_surface": 506,
+    "sourced_direct": 506,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2015,
+    "event_type": "WS",
+    "matches": 24957,
+    "with_surface": 24957,
+    "sourced_direct": 20285,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2016,
+    "event_type": "MS",
+    "matches": 2439,
+    "with_surface": 780,
+    "sourced_direct": 489,
+    "sourced_combined": 291
+   },
+   {
+    "year": 2016,
+    "event_type": "WS",
+    "matches": 25985,
+    "with_surface": 25985,
+    "sourced_direct": 21765,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2017,
+    "event_type": "MS",
+    "matches": 2415,
+    "with_surface": 787,
+    "sourced_direct": 496,
+    "sourced_combined": 291
+   },
+   {
+    "year": 2017,
+    "event_type": "WS",
+    "matches": 26944,
+    "with_surface": 26944,
+    "sourced_direct": 23830,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2018,
+    "event_type": "MS",
+    "matches": 2511,
+    "with_surface": 993,
+    "sourced_direct": 526,
+    "sourced_combined": 467
+   },
+   {
+    "year": 2018,
+    "event_type": "WS",
+    "matches": 27258,
+    "with_surface": 27258,
+    "sourced_direct": 24378,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2019,
+    "event_type": "MS",
+    "matches": 2487,
+    "with_surface": 1054,
+    "sourced_direct": 523,
+    "sourced_combined": 531
+   },
+   {
+    "year": 2019,
+    "event_type": "WS",
+    "matches": 24817,
+    "with_surface": 24786,
+    "sourced_direct": 22259,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2020,
+    "event_type": "MS",
+    "matches": 1229,
+    "with_surface": 545,
+    "sourced_direct": 388,
+    "sourced_combined": 157
+   },
+   {
+    "year": 2020,
+    "event_type": "WS",
+    "matches": 8480,
+    "with_surface": 8480,
+    "sourced_direct": 8451,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2021,
+    "event_type": "MS",
+    "matches": 2472,
+    "with_surface": 977,
+    "sourced_direct": 550,
+    "sourced_combined": 427
+   },
+   {
+    "year": 2021,
+    "event_type": "WS",
+    "matches": 21449,
+    "with_surface": 21316,
+    "sourced_direct": 19999,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2022,
+    "event_type": "MS",
+    "matches": 3637,
+    "with_surface": 1585,
+    "sourced_direct": 920,
+    "sourced_combined": 665
+   },
+   {
+    "year": 2022,
+    "event_type": "WS",
+    "matches": 28226,
+    "with_surface": 28084,
+    "sourced_direct": 24526,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2023,
+    "event_type": "MS",
+    "matches": 3783,
+    "with_surface": 1726,
+    "sourced_direct": 905,
+    "sourced_combined": 821
+   },
+   {
+    "year": 2023,
+    "event_type": "WS",
+    "matches": 31545,
+    "with_surface": 31498,
+    "sourced_direct": 25796,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2024,
+    "event_type": "MS",
+    "matches": 3837,
+    "with_surface": 1835,
+    "sourced_direct": 853,
+    "sourced_combined": 982
+   },
+   {
+    "year": 2024,
+    "event_type": "WS",
+    "matches": 34989,
+    "with_surface": 34878,
+    "sourced_direct": 26102,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2025,
+    "event_type": "MS",
+    "matches": 3678,
+    "with_surface": 1814,
+    "sourced_direct": 911,
+    "sourced_combined": 903
+   },
+   {
+    "year": 2025,
+    "event_type": "WS",
+    "matches": 37422,
+    "with_surface": 37350,
+    "sourced_direct": 36933,
+    "sourced_combined": 0
+   },
+   {
+    "year": 2026,
+    "event_type": "MS",
+    "matches": 3068,
+    "with_surface": 1876,
+    "sourced_direct": 888,
+    "sourced_combined": 988
+   },
+   {
+    "year": 2026,
+    "event_type": "WS",
+    "matches": 27589,
+    "with_surface": 27534,
+    "sourced_direct": 27015,
+    "sourced_combined": 0
+   }
+  ]
+ },
+ "draw_slots": [
+  {
+   "source": "wta-draws",
+   "year": 2012,
+   "editions": 44,
+   "slots": 1408,
+   "resolved": 1168,
+   "seeded": 344
+  },
+  {
+   "source": "wta-draws",
+   "year": 2013,
+   "editions": 52,
+   "slots": 1664,
+   "resolved": 1403,
+   "seeded": 410
+  },
+  {
+   "source": "wta-draws",
+   "year": 2014,
+   "editions": 51,
+   "slots": 1856,
+   "resolved": 1569,
+   "seeded": 458
+  },
+  {
+   "source": "wta-draws",
+   "year": 2015,
+   "editions": 25,
+   "slots": 800,
+   "resolved": 698,
+   "seeded": 193
+  },
+  {
+   "source": "wta-draws",
+   "year": 2016,
+   "editions": 49,
+   "slots": 1568,
+   "resolved": 1424,
+   "seeded": 381
+  },
+  {
+   "source": "wta-draws",
+   "year": 2017,
+   "editions": 39,
+   "slots": 1632,
+   "resolved": 1407,
+   "seeded": 404
+  },
+  {
+   "source": "wta-draws",
+   "year": 2018,
+   "editions": 41,
+   "slots": 1792,
+   "resolved": 1525,
+   "seeded": 436
+  },
+  {
+   "source": "wta-draws",
+   "year": 2019,
+   "editions": 36,
+   "slots": 1664,
+   "resolved": 1411,
+   "seeded": 398
+  },
+  {
+   "source": "wta-draws",
+   "year": 2020,
+   "editions": 11,
+   "slots": 512,
+   "resolved": 425,
+   "seeded": 123
+  },
+  {
+   "source": "wta-draws",
+   "year": 2021,
+   "editions": 44,
+   "slots": 1760,
+   "resolved": 1573,
+   "seeded": 428
+  },
+  {
+   "source": "wta-draws",
+   "year": 2022,
+   "editions": 50,
+   "slots": 2016,
+   "resolved": 1838,
+   "seeded": 490
+  },
+  {
+   "source": "wta-draws",
+   "year": 2023,
+   "editions": 61,
+   "slots": 2496,
+   "resolved": 2245,
+   "seeded": 609
+  },
+  {
+   "source": "wta-draws",
+   "year": 2024,
+   "editions": 43,
+   "slots": 1824,
+   "resolved": 1600,
+   "seeded": 445
+  },
+  {
+   "source": "wta-draws",
+   "year": 2025,
+   "editions": 89,
+   "slots": 3680,
+   "resolved": 3305,
+   "seeded": 895
+  },
+  {
+   "source": "wta-draws",
+   "year": 2026,
+   "editions": 86,
+   "slots": 3456,
+   "resolved": 3143,
+   "seeded": 840
+  }
+ ],
+ "source_records": [
+  {
+   "provider": "espn",
+   "kind": "season_record",
+   "rows": 592,
+   "players": 296
+  },
+  {
+   "provider": "wta",
+   "kind": "career_records",
+   "rows": 200,
+   "players": 200
+  },
+  {
+   "provider": "wta",
+   "kind": "season_stats",
+   "rows": 2000,
+   "players": 200
+  }
+ ],
+ "espn_eventlog_coverage": [
+  {
+   "league": "atp",
+   "season": "2025",
+   "players": 148,
+   "competitions_played": 6416,
+   "held_in_graph": 5845,
+   "with_stats": 147
+  },
+  {
+   "league": "atp",
+   "season": "2026",
+   "players": 148,
+   "competitions_played": 6171,
+   "held_in_graph": 5414,
+   "with_stats": 147
+  },
+  {
+   "league": "wta",
+   "season": "2025",
+   "players": 148,
+   "competitions_played": 8415,
+   "held_in_graph": 7486,
+   "with_stats": 129
+  },
+  {
+   "league": "wta",
+   "season": "2026",
+   "players": 148,
+   "competitions_played": 8134,
+   "held_in_graph": 7268,
+   "with_stats": 129
+  }
+ ],
+ "disagreements": [
+  {
+   "source": "wta:records",
+   "field": "career_record:hard",
+   "entity_type": "player",
+   "n": 152
+  },
+  {
+   "source": "wta:records",
+   "field": "career_record:clay",
+   "entity_type": "player",
+   "n": 137
+  },
+  {
+   "source": "wta:records",
+   "field": "career_record:grass",
+   "entity_type": "player",
+   "n": 88
+  },
+  {
+   "source": "wta:records",
+   "field": "career_record:carpet",
+   "entity_type": "player",
+   "n": 9
+  },
+  {
+   "source": "wta-draws",
+   "field": "seed",
+   "entity_type": "draw_slot",
+   "n": 4
+  },
+  {
+   "source": "wta_history",
+   "field": "status",
+   "entity_type": "match",
+   "n": 1
+  }
+ ],
+ "consolidation_changes": [
+  {
+   "kind": "duplicate_merged",
+   "source_family": "espn",
+   "n": 1380
+  },
+  {
+   "kind": "duplicate_merged",
+   "source_family": "repair",
+   "n": 4399
+  },
+  {
+   "kind": "duplicate_merged",
+   "source_family": "wta_history",
+   "n": 3
+  },
+  {
+   "kind": "edition_merged",
+   "source_family": "espn",
+   "n": 245
+  },
+  {
+   "kind": "edition_moved",
+   "source_family": "espn",
+   "n": 1325
+  }
+ ],
+ "identity_open": [
+  {
+   "provider": "espn",
+   "status": "unresolved",
+   "n": 774
+  },
+  {
+   "provider": "espn",
+   "status": "ambiguous",
+   "n": 16
+  }
+ ]
+}

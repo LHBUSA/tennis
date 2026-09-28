@@ -24,15 +24,15 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
-## Current production (2026-09-26 23:30 UTC)
+## Current production (2026-09-28 13:00 UTC)
 
 | Component | Current | Rollback target |
 |---|---|---|
 | Vercel `tennis` (tennis.propbetedge.ai) | main HEAD — this docs commit on top of ac58f10 (ac58f10 = `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W`) | `dpl_9Nu5cZfbDNMiXN9DV6DP5183sU6W` (ac58f10), then `dpl_F3CxdfsLu57sAHAMtAontuesuk4V` (e21d468) |
 | tennis-web | 8d6db251-db10-44ff-b664-492d046a4741 | 6334502d-2f1d-4286-8124-c45a35d4bd52 |
-| tennis-api | b62a1197-7797-4b6e-b504-8154746fa1f2 (0.4.2, 2026-09-27) | faa97c86-6523-4c76-a435-f0d6ee25392e |
-| tennis-ingest | 3424ea51-284a-4105-b780-03baf5de8a97 (ESPN WTA + wta_history, 2026-09-27) | 2a3dbb91-c906-4141-b49d-85f5b7c62c9e (pre-WTA lanes) |
-| tennis-live | 3cfd7fd6-e635-4d55-aeab-4849200e0096 | c38a77b3-1d6a-49ff-ad46-6eeddec98068 |
+| tennis-api | bdf4fa97-dd15-421a-983f-3b9b109ff9ac (0.5.0: match_dna.by_surface, edition draws + surface_provenance, inList encoding) | b62a1197-7797-4b6e-b504-8154746fa1f2 (0.4.2) |
+| tennis-ingest | 8ec09873-52dc-43f1-baef-0f22b97a3ffe (Phase 5: context lanes, batched writer, memory-safe + incremental DNA) | 3424ea51-284a-4105-b780-03baf5de8a97 (pre-Phase-5; ignores dna2:mode, OOMs on the current ledger — prefer a forward fix) |
+| tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 (INGEST_ADMIN_TOKEN rotated 2026-09-28) | do not roll back past 26ac259c (restores the rotated token) |
 | tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (**PUBLISH**; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
 
 Rows below are the historical deploy log; the table above is authoritative for what is running.
@@ -68,3 +68,24 @@ Rows below are the historical deploy log; the table above is authoritative for w
 
 | 2026-09-27 | tennis-ingest | 2c847ddb → 6b50aaaf → cd0b48cb → 80626532 → b7bb32b6 → 378789fb → 28091310 → 7a11da5d → efe93023 → 3424ea51 | 2a3dbb91 | espn_wta + espn_wta_rankings, wta_history (sharded), dedupe fixes + self-heal, ESPN lists dated to effective Monday |
 | 2026-09-27 | tennis-api | b62a1197 (0.4.2) | faa97c86 | ESPN list semantics (effective Monday) |
+
+| 2026-09-28 | Supabase tkmln | migration 20260928000100_tennis_context_layer applied (owner-approved) | — | additive tables |
+| 2026-09-28 | tennis-ingest | 3fe712aa … 8ec09873 (16 deploys) | 3424ea51 | completion ledger, context jobs, WTA records, ESPN extras, edition merge, draw-sheet route, batched writer, DNA memory + incremental |
+| 2026-09-28 | tennis-api | 1814d765 (0.5.0) → 248cc6e5 → bdf4fa97 | b62a1197 | surface DNA, draws, inList encoding |
+
+## Incidents
+
+**2026-09-28 00:24-00:26 UTC — tkmln PostgREST 503/520/521/525 (PGRST002), all tennis reads failed ~2-3 min.**
+Cause: our own load — 8 concurrent wta_history admin shards (~4k store requests per run each), the espn_extras lane,
+the edition-merge lane and a 64-chunk SQL dump through the Management API at once. Recovered ~20 s after the load
+was stopped. NFL / UFC share tkmln and may have seen the same window. Changes: shard drivers with a circuit breaker
+(3 store failures stop all shards), a production read watchdog during backfills, max 5 heavy writers, no SQL dumps
+while backfills run; the history writer later went from ~450 to ~40 store requests per page (writeGroups).
+
+**2026-09-28 02:15-04:30 UTC — 4,392 WD + 7 WS duplicate canonical matches.** The batched writer's candidate query
+filtered by participant key; `inList` did not URL-encode, so doubles keys "D:a+b" arrived as "D:a b" and matched
+nothing. Fixed (inList encodes + & # % and spaces; 4897b04), repaired by a logged merge (4,399 rows,
+tennis_source_changes duplicate_merged / repair), 2,967 stale holds resolved. 0 duplicate groups after.
+
+**Credential hygiene 2026-09-28:** a prefix of INGEST_ADMIN_TOKEN appeared in a local process listing; the token was
+rotated on tennis-ingest and tennis-live.

@@ -73,7 +73,8 @@ if (anyMatch) {
   }
 }
 add('API unknown route 404', (await get(`${API}/v1/nope`)).status === 404, {});
-add('API ATP rankings stated unavailable (not faked)', (await get(`${API}/v1/rankings?tour=atp`)).body?.data === null, {});
+// since 2026-09-27 the ATP list is served from a SECONDARY source: it must say so, never claim to be official
+{ const r = (await get(`${API}/v1/rankings?tour=atp`)).body; const sem = String(r?.meta?.semantics || ''); add('API ATP rankings labelled secondary, never official', r?.data === null || (/secondary source/i.test(sem) && /not an official ATP feed/i.test(sem)), { rows: r?.data?.rows?.length ?? null }); }
 add('API picks not fabricated', (await get(`${API}/v1/pbe-picks`)).body?.data === null, {});
 
 // ---- 4. canonical integrity (SQL) ---------------------------------------------------------------------
