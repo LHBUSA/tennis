@@ -1,0 +1,195 @@
+{
+ "run_at": "2026-09-28T14:15:24.957Z",
+ "candidate": "https://4ebfb7f1-tennis-api.sales-fd3.workers.dev",
+ "production": "https://tennis-api.propbetedge.ai",
+ "pass": 34,
+ "fail": 0,
+ "checks": [
+  {
+   "name": "health: candidate is tennis-api 0.6.0",
+   "result": "PASS",
+   "version": "0.6.0"
+  },
+  {
+   "name": "health: new routes advertised",
+   "result": "PASS"
+  },
+  {
+   "name": "unchanged /v1/today",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/live",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/tournaments",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/rankings?tour=wta&type=singles&limit=50",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/rankings?tour=atp&type=singles&limit=50",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players?q=sinner",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/men",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/slams",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/schedule",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/search?q=alcaraz",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/jannik-sinner",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/jannik-sinner/dna",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/carlos-alcaraz/dna",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/iga-swiatek/dna",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/aryna-sabalenka/dna",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/players/aryna-sabalenka/profile",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/h2h/jannik-sinner/carlos-alcaraz",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/coverage",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/credits",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "unchanged /v1/sources",
+   "result": "PASS",
+   "status": 200
+  },
+  {
+   "name": "leaders metric=pbe_rating&tour=atp: deterministic across 3 reads",
+   "result": "PASS",
+   "qualified": [
+    261,
+    261,
+    261
+   ],
+   "db": null
+  },
+  {
+   "name": "leaders metric=pbe_rating&tour=wta: deterministic across 3 reads and equal to the database count",
+   "result": "PASS",
+   "qualified": [
+    2190,
+    2190,
+    2190
+   ],
+   "db": 2190
+  },
+  {
+   "name": "leaders metric=hold_rate&tour=wta: deterministic across 3 reads",
+   "result": "PASS",
+   "qualified": [
+    465,
+    465,
+    465
+   ],
+   "db": null
+  },
+  {
+   "name": "leaders metric=match_win_rate&tour=atp: deterministic across 3 reads",
+   "result": "PASS",
+   "qualified": [
+    573,
+    573,
+    573
+   ],
+   "db": null
+  },
+  {
+   "name": "unknown route is 404",
+   "result": "PASS"
+  },
+  {
+   "name": "matchups list answers",
+   "result": "PASS",
+   "matchups": 0,
+   "tours": []
+  },
+  {
+   "name": "matchups: every listed match is upcoming (start within the last 6 h or later)",
+   "result": "PASS"
+  },
+  {
+   "name": "matchups: no duplicate match in the list",
+   "result": "PASS"
+  },
+  {
+   "name": "matchups: probability only when status published",
+   "result": "PASS"
+  },
+  {
+   "name": "matchups: probabilities are complementary",
+   "result": "PASS"
+  },
+  {
+   "name": "matchup on a completed match: probability withheld (not upcoming)",
+   "result": "PASS",
+   "status": "fixture_not_upcoming"
+  },
+  {
+   "name": "players-to-watch: answers (UNAVAILABLE until the first Phase 6 build) and never lists an unvalidated tour",
+   "result": "PASS",
+   "freshness": "UNAVAILABLE",
+   "tours": []
+  }
+ ]
+}
