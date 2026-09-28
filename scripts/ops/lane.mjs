@@ -15,7 +15,9 @@ const budget = Number(opt('budget', 8));
 const shards = Math.min(5, Math.max(1, Number(opt('shards', 1))));
 const maxRuns = Number(opt('max-runs', 1000));
 const write = opt('write', null);
-const BASE = 'https://tennis-ingest.sales-fd3.workers.dev';
+// --base targets an uploaded version's preview URL (version canaries); default = the deployed Worker
+const BASE = (opt('base', 'https://tennis-ingest.sales-fd3.workers.dev') || '').replace(/\/+$/, '');
+if (!/^https:\/\/([a-z0-9]+-)?tennis-ingest\.sales-fd3\.workers\.dev$/.test(BASE)) { console.error('refusing: --base must be a tennis-ingest workers.dev URL'); process.exit(2); }
 const TOKEN = fs.readFileSync('D:/Workers/secrets/tennis-ingest-admin-token', 'utf8').trim();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const STORE = /postgrest 5\d\d|PGRST00\d|error code: 5\d\d|Network connection lost|timed out|fetch failed/i;
@@ -39,6 +41,7 @@ async function shard(k) {
     if (err === 'db_paused') { log(`shard ${k} db paused until ${d.paused_until} (${d.reason})`); await sleep(Math.max(30e3, Date.parse(d.paused_until) - Date.now())); continue; }
     if (err === 'concurrency_ceiling' || err === 'tick_in_progress') { await sleep(30e3); continue; }
     const r = d.result || {};
+    if (process.env.LANE_JSON) fs.writeFileSync(process.env.LANE_JSON, JSON.stringify(body));
     log(`shard ${k}`, d.ok ? 'ok' : 'FAIL', r.position != null ? `pos ${r.position}/${r.queue ?? r.list}` : '', err ? String(err).slice(0, 140) : '', `store ${d.store_requests ?? '-'}`);
     if (err) {
       if (STORE.test(err)) { storeFails += 1; if (storeFails >= 3) { log(`shard ${k} stopped: 3 consecutive store errors`); return; } await sleep(120e3); continue; }

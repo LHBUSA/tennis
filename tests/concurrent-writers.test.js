@@ -10,10 +10,20 @@ const E = '00000000-0000-4000-8000-00000000c001';
 const E2 = '00000000-0000-4000-8000-00000000c002';
 const side = (ids) => ids.map((id) => ({ provider: 'wta', provider_id: id, tour_id: { provider: 'wta', provider_id: id }, gender: 'F' }));
 const sm = (provider, id, A, B, extra = {}) => ({ type: 'match', provider, provider_match_id: id, event_type: A.length === 2 ? 'WD' : 'WS', stage: 'main', round_code: '2', format_key: 'BO3_TB7', status: 'completed', winner_side: 'A', end_reason: 'completed', sets: [{ games: { A: 6, B: 3 }, tiebreak: null, is_match_tiebreak: false }, { games: { A: 6, B: 4 }, tiebreak: null, is_match_tiebreak: false }], sides: { A: side(A), B: side(B) }, seeds: {}, entry: {}, warnings: [], ...extra });
+// Deterministic race: the first N tennis_matches writes wait until N writers have arrived, so every writer has done
+// its read-then-check before anyone inserts (without it the interleaving depended on timing: a Vercel build once ran
+// the writers one after the other and the race never happened).
+class BarrierStore extends MemStore {
+  constructor(n) { super(); this.n = n; this.arrived = 0; this.open = new Promise((r) => { this.release = r; }); }
+  async upsert(table, rows, o) {
+    if (table === 'tennis_matches' && this.arrived < this.n) { this.arrived += 1; if (this.arrived >= this.n) this.release(); await this.open; }
+    return super.upsert(table, rows, o);
+  }
+}
 const naturalGroups = (s) => { const g = new Map(); for (const m of s.rows('tennis_matches')) { const k = `${m.edition_id}|${m.natural_key}`; g.set(k, (g.get(k) || 0) + 1); } return [...g.values()].filter((n) => n > 1).length; };
 
 test('two writers racing on the same singles match (different source ids) leave ONE row; both ids point at it', async () => {
-  const s = new MemStore();
+  const s = new BarrierStore(2);
   const [a, b] = await Promise.all([
     writeGroups(s, [{ edition: { edition_id: E }, sourceMatches: [sm('wta_history', 'h-R32-10-20', ['10'], ['20'])] }], { dedupe: true }),
     writeGroups(s, [{ edition: { edition_id: E }, sourceMatches: [sm('wta_history', 'h-R16-10-20', ['10'], ['20'])] }], { dedupe: true })
@@ -25,7 +35,7 @@ test('two writers racing on the same singles match (different source ids) leave 
 });
 
 test('five concurrent writers, overlapping doubles + singles across two editions: zero duplicate natural keys', async () => {
-  const s = new MemStore();
+  const s = new BarrierStore(5);
   const pages = Array.from({ length: 5 }, (_, w) => [
     { edition: { edition_id: E }, sourceMatches: [sm('wta_history', `d-${w}`, ['1', '2'], ['3', '4']), sm('wta_history', `s-${w}`, ['1'], ['3'])] },
     { edition: { edition_id: E2 }, sourceMatches: [sm('wta_history', `d2-${w}`, ['1', '2'], ['3', '4'])] }
