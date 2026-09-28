@@ -95,6 +95,13 @@ export async function historyPage(ctx, wtaId, page) {
   const r = await fetchRun(ctx, hist.playerMatches, { id: wtaId, page, pageSize: PAGE });
   if (r.state !== 'PASS') {
     if (r.state === 'DEGRADED' && (r.error === 'zero_records' || r.http_status === 404)) return { state: 'END' };
+    // HTTP 200 with an EMPTY body (observed 1022815): the player has no match list — absent, recorded for audit
+    if (r.http_status === 200 && r.bytes === 0) {
+      const empty = new Set((await ctx.kv.get('wh:empty', 'json')) || []);
+      empty.add(String(wtaId));
+      await ctx.kv.put('wh:empty', JSON.stringify([...empty]));
+      return { state: 'END', empty_body: true };
+    }
     throw new Error(`wta history ${wtaId} p${page}: ${r.state} ${r.error || ''}`.trim());
   }
   const body = r.records[0];

@@ -221,3 +221,20 @@ test('precedence never turns a played match into "not played": an official walko
   const r2 = await writeMatches(s2, [sm('wta_history', '1026-2008-WS-M-R16-10-20', '2', '10', '20', { status: 'walkover', end_reason: 'walkover', sets: [] })], { edition_id: E }, { dedupe: true });
   assert.equal(r2.taken_over, 1);
 });
+
+test('history: an HTTP 200 with an empty body ends that player (no match list), recorded for audit', async () => {
+  const { historyPage } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV, MemStore } = await import('./helpers/memstore.js');
+  const kv = new MemKV();
+  const ctx = { kv, store: new MemStore(), env: {}, upstream: 0, log: [], client: { stats: {}, async get(url) { return { url, status: 200, ok: true, body: '', bytes: 0, content_type: 'application/json', fetched_at: new Date().toISOString(), latency_ms: 1 }; } } };
+  const r = await historyPage(ctx, '1022815', 0);
+  assert.equal(r.state, 'END'); assert.equal(r.empty_body, true);
+  assert.deepEqual(JSON.parse(await kv.get('wh:empty')), ['1022815']);
+});
+
+test('history: a 200 with a body that drifted is NOT treated as an empty history (it fails loudly)', async () => {
+  const { historyPage } = await import('../workers/tennis-ingest/src/wta-history-job.js');
+  const { MemKV, MemStore } = await import('./helpers/memstore.js');
+  const ctx = { kv: new MemKV(), store: new MemStore(), env: {}, upstream: 0, log: [], client: { stats: {}, async get(url) { return { url, status: 200, ok: true, body: '{"unexpected":true}', bytes: 19, content_type: 'application/json', fetched_at: new Date().toISOString(), latency_ms: 1 }; } } };
+  await assert.rejects(historyPage(ctx, '1', 0), /shape_drift/);
+});
