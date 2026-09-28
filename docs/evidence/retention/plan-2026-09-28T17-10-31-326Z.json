@@ -1,0 +1,298 @@
+{
+ "mode": "plan",
+ "today": "2026-10-12",
+ "run_at": "2026-09-28T17:10:31.326Z",
+ "max_dates_per_run": 3,
+ "versions": {
+  "1": {
+   "cutoff": "2026-09-28",
+   "protected": [
+    {
+     "as_of": "2025-02-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-03-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-04-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-05-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-06-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-07-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-08-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-09-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-10-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-11-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2025-12-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-01-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-02-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-03-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-04-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-05-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-06-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-07-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-08-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-09-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-09-28",
+     "why": "newest"
+    }
+   ],
+   "eligible": [
+    {
+     "as_of": "2026-09-26",
+     "rows": 1967,
+     "est_bytes": 2264560
+    },
+    {
+     "as_of": "2026-09-27",
+     "rows": 2510,
+     "est_bytes": 3023344
+    }
+   ],
+   "eligible_rows": 4477,
+   "eligible_est_bytes": 5287904,
+   "first_run_dates": [
+    "2026-09-26",
+    "2026-09-27"
+   ],
+   "all_dates": [
+    {
+     "as_of": "2025-02-01",
+     "rows": 286
+    },
+    {
+     "as_of": "2025-03-01",
+     "rows": 546
+    },
+    {
+     "as_of": "2025-04-01",
+     "rows": 803
+    },
+    {
+     "as_of": "2025-05-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-06-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-07-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-08-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-09-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-10-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-11-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2025-12-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2026-01-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2026-02-01",
+     "rows": 874
+    },
+    {
+     "as_of": "2026-03-01",
+     "rows": 866
+    },
+    {
+     "as_of": "2026-04-01",
+     "rows": 862
+    },
+    {
+     "as_of": "2026-05-01",
+     "rows": 862
+    },
+    {
+     "as_of": "2026-06-01",
+     "rows": 862
+    },
+    {
+     "as_of": "2026-07-01",
+     "rows": 860
+    },
+    {
+     "as_of": "2026-08-01",
+     "rows": 849
+    },
+    {
+     "as_of": "2026-09-01",
+     "rows": 846
+    },
+    {
+     "as_of": "2026-09-26",
+     "rows": 1967
+    },
+    {
+     "as_of": "2026-09-27",
+     "rows": 2510
+    },
+    {
+     "as_of": "2026-09-28",
+     "rows": 3284
+    }
+   ]
+  },
+  "2": {
+   "cutoff": "2026-09-28",
+   "protected": [
+    {
+     "as_of": "2026-08-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-09-01",
+     "why": "monthly"
+    },
+    {
+     "as_of": "2026-09-28",
+     "why": "newest"
+    }
+   ],
+   "eligible": [
+    {
+     "as_of": "2026-09-27",
+     "rows": 18395,
+     "est_bytes": 71446512
+    }
+   ],
+   "eligible_rows": 18395,
+   "eligible_est_bytes": 71446512,
+   "first_run_dates": [
+    "2026-09-27"
+   ],
+   "all_dates": [
+    {
+     "as_of": "2026-08-01",
+     "rows": 12032
+    },
+    {
+     "as_of": "2026-09-01",
+     "rows": 2285
+    },
+    {
+     "as_of": "2026-09-27",
+     "rows": 18395
+    },
+    {
+     "as_of": "2026-09-28",
+     "rows": 37386
+    }
+   ]
+  }
+ },
+ "sizes": {
+  "total_bytes": 478732288,
+  "table_bytes": 472006656,
+  "db_bytes": 9067949203,
+  "live": 94241,
+  "dead": 6144,
+  "last_autovacuum": "2026-09-28 15:41:27.474804+00",
+  "last_vacuum": null,
+  "autovacuum_count": 3
+ },
+ "invariants": [
+  {
+   "dv": "1",
+   "name": "latest protected",
+   "pass": true
+  },
+  {
+   "dv": "1",
+   "name": "every date within 14 days protected",
+   "pass": true
+  },
+  {
+   "dv": "1",
+   "name": "earliest date of every month protected (month-start archive)",
+   "pass": true
+  },
+  {
+   "dv": "2",
+   "name": "latest protected",
+   "pass": true
+  },
+  {
+   "dv": "2",
+   "name": "every date within 14 days protected",
+   "pass": true
+  },
+  {
+   "dv": "2",
+   "name": "earliest date of every month protected (month-start archive)",
+   "pass": true
+  }
+ ]
+}
