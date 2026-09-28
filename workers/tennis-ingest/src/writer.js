@@ -386,7 +386,11 @@ async function crossSource(store, editionId, normalized, holds, captureId) {
     // a re-listing with the sides the other way round: participant rows are replaced, not merged
     if (owner?.parts?.A && owner.parts.A !== x.n.match.participants.A) x.reorient = true;
     if (!owner || owner.source_family === provider) { write.push(x); continue; }
-    if (sourcePriority(provider) > sourcePriority(owner.source_family)) { x.takeover = owner.source_family; write.push(x); continue; }
+    // precedence never turns a match with games on the board into "not played": a higher-precedence walkover
+    // against a played lower-precedence row attaches and is held as a disagreement (observed AO 2016 WD, ESPN
+    // 0-6 3-6 vs WTA history reason D)
+    const playedOwner = ['completed', 'retired'].includes(owner.status) && /[1-9]/.test(String(winnerGames(owner.score_text, owner.winner_side) || '').replace(/(RET|W\/O|DEF|ABD)/g, ''));
+    if (sourcePriority(provider) > sourcePriority(owner.source_family) && !(x.n.match.status === 'walkover' && playedOwner)) { x.takeover = owner.source_family; write.push(x); continue; }
     attach.push(x);
     const ownWinner = owner.winner_side ? owner.parts[owner.winner_side] : null;
     const ourWinner = x.n.match.winner_side ? x.n.match.participants[x.n.match.winner_side] : null;

@@ -205,3 +205,19 @@ test('history backfill: a queue rebuild keeps the population and adds only new o
   await wtaHistoryStep({ kv, store }, { pages: 0 });
   assert.deepEqual(JSON.parse(await kv.get('wh:queue')), ['p1', 'p2', 'n9']);
 });
+
+test('precedence never turns a played match into "not played": an official walkover against a scored ESPN row attaches and is held', async () => {
+  const s = new MemStore();
+  await writeMatches(s, [sm('espn', '154-2016:67243', '2', '10', '20')], { edition_id: E }, { dedupe: true });
+  const wo = sm('wta_history', '901-2016-WS-M-R32-10-20', '2', '10', '20', { status: 'walkover', end_reason: 'walkover', sets: [] });
+  const r = await writeMatches(s, [wo], { edition_id: E }, { dedupe: true });
+  assert.equal(r.taken_over, 0); assert.equal(r.attached, 1);
+  const row = s.rows('tennis_matches')[0];
+  assert.equal(row.status, 'completed'); assert.equal(row.source_family, 'espn');
+  assert.ok(s.rows('tennis_ingest_holds').some((h) => h.entity_type === 'cross_source' && /walkover/.test(h.problems.join(' '))));
+  // a 0-0 retirement is not "played": the official walkover takes it over
+  const s2 = new MemStore();
+  await writeMatches(s2, [sm('espn', '278-2008:12236', '2', '10', '20', { status: 'retired', end_reason: 'retirement', retired_side: 'B', sets: [{ games: { A: 0, B: 0 }, tiebreak: null, is_match_tiebreak: false }] })], { edition_id: E }, { dedupe: true });
+  const r2 = await writeMatches(s2, [sm('wta_history', '1026-2008-WS-M-R16-10-20', '2', '10', '20', { status: 'walkover', end_reason: 'walkover', sets: [] })], { edition_id: E }, { dedupe: true });
+  assert.equal(r2.taken_over, 1);
+});

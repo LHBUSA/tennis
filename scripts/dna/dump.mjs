@@ -31,4 +31,6 @@ for (const h of '0123456789abcdef') {
   process.stdout.write(`${h}:${rows.length} `);
 }
 save('matches', matches);
+// merge log (rows deleted by the writer / edition consolidation) so an incremental build can be replayed
+save('changes', sql("select id, entity_id, observed_at from tennis_source_changes where entity_type = 'match' and kind = 'duplicate_merged' and observed_at >= now() - interval '3 days' order by id"));
 fs.writeFileSync(path.join(dir, 'meta.json'), JSON.stringify({ dumped_at: new Date().toISOString(), matches: matches.length }));

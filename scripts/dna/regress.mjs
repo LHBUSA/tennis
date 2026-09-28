@@ -44,10 +44,12 @@ class FakeStore {
       const gt = p.match_id ? p.match_id.slice(3) : '';
       const since = p.updated_at ? p.updated_at.slice(3) : null;
       const et = p.event_type?.startsWith('eq.') ? [p.event_type.slice(3)] : ['MS', 'WS'];
-      const rows = D.matches.filter((m) => m.match_id > gt && et.includes(m.event_type) && (!since || m.updated_at > decodeURIComponent(since)));
+      // timestamps compared as instants (the SQL dump prints '2026-09-27 23:16:00+00'; PostgREST compares server-side)
+      const cut = since ? Date.parse(decodeURIComponent(since)) : null;
+      const rows = D.matches.filter((m) => m.match_id > gt && et.includes(m.event_type) && (cut == null || Date.parse(String(m.updated_at).replace(' ', 'T').replace(/\+00$/, 'Z')) > cut));
       return rows.slice(0, Number(p.limit || 1000));
     }
-    if (table === 'tennis_source_changes') { const since = decodeURIComponent(p.observed_at.slice(3)); return page(D.changes.filter((c) => c.observed_at > since), p); }
+    if (table === 'tennis_source_changes') { const cut = Date.parse(decodeURIComponent(p.observed_at.slice(3))); return page(D.changes.filter((c) => Date.parse(String(c.observed_at).replace(' ', 'T').replace(/\+00$/, 'Z')) > cut), p); }
     throw new Error(`fake store: unexpected select ${table}`);
   }
   async count(table, query) {
