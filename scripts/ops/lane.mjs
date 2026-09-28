@@ -15,6 +15,7 @@ const budget = Number(opt('budget', 8));
 const shards = Math.min(5, Math.max(1, Number(opt('shards', 1))));
 const maxRuns = Number(opt('max-runs', 1000));
 const write = opt('write', null);
+const dry = opt('dry', null);
 // --base targets an uploaded version's preview URL (version canaries); default = the deployed Worker
 const BASE = (opt('base', 'https://tennis-ingest.sales-fd3.workers.dev') || '').replace(/\/+$/, '');
 if (!/^https:\/\/([a-z0-9]+-)?tennis-ingest\.sales-fd3\.workers\.dev$/.test(BASE)) { console.error('refusing: --base must be a tennis-ingest workers.dev URL'); process.exit(2); }
@@ -31,9 +32,10 @@ async function shard(k) {
     const q = new URLSearchParams({ lane, budget: String(budget) });
     if (shards > 1) { q.set('shard', String(k)); q.set('shards', String(shards)); }
     if (write != null) q.set('write', write);
+    if (dry != null) q.set('dry', dry);
     let body = null;
     try {
-      const res = await fetch(`${BASE}/v1/runs?${q}${resume}`, { method: 'POST', headers: { authorization: `Bearer ${TOKEN}` }, signal: AbortSignal.timeout(295e3) });
+      const res = await fetch(`${BASE}/v1/runs?${q}${resume}`, { method: 'POST', headers: { authorization: `Bearer ${TOKEN}` }, signal: AbortSignal.timeout(Number(opt('timeout', 295)) * 1000) });
       body = await res.json();
     } catch (e) { body = { data: { ok: false, error: String(e?.message || e) } }; }
     const d = body?.data || {};

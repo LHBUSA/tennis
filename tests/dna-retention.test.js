@@ -50,3 +50,17 @@ test('run: deletes only planned dates of the right version, bounded per run; dry
   assert.deepEqual(left, ['1|2026-09-01', '1|2026-09-30', '2|2026-09-01', '2|2026-09-30']);
   assert.ok(await kv.get('dna:retention:last'));
 });
+
+test('measurement build (dry=full) computes everything and writes nothing: no upsert, no KV put, non-GET refused', async () => {
+  const { dryFullBuild } = await import('../workers/tennis-ingest/src/index.js');
+  const s = new MemStore();
+  await s.upsert('tennis_players', [{ pbe_player_id: 'p1', gender: 'M', status: 'active' }]);
+  const kv = new MemKV();
+  const contents = () => JSON.stringify([...s.t].filter(([, rows]) => rows.length).sort());
+  const before = contents();
+  const r = await dryFullBuild({ store: s, kv, env: {}, steps: [], log: [] }, ['2026-09-28'], {});
+  assert.equal(r.dry, 'full');
+  assert.equal(contents(), before, 'no table changed');
+  assert.equal(await kv.get('dna:v2:summary'), null, 'KV untouched');
+  assert.ok(r.would.kv_puts >= 1);
+});

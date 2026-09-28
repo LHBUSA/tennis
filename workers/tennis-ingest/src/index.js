@@ -68,6 +68,26 @@ async function step(ctx, name, fn) {
   }
 }
 
+/**
+ * Measurement run (admin, dry=full): the COMPLETE DNA v2 build (both passes, surfaces, profiles, watch) with every
+ * write discarded — database upserts, KV puts and R2 cache puts become no-ops that only count what they would write.
+ * Used to measure a candidate version's CPU / wall on production inputs before it is deployed.
+ */
+export async function dryFullBuild(ctx, asOfs, params) {
+  const would = { upsert_rows: {}, kv_puts: 0, r2_puts: 0 };
+  const store = new Proxy(ctx.store, { get(t, k) {
+    if (k === 'upsert' || k === 'insert') return async (table, rows) => { would.upsert_rows[table] = (would.upsert_rows[table] || 0) + rows.length; return []; };
+    if (k === 'req') return async (method, path, o) => { if (method !== 'GET') throw new Error(`dry run refused ${method} ${path.split('?')[0]}`); return t.req(method, path, o); };
+    const v = t[k]; return typeof v === 'function' ? v.bind(t) : v;
+  } });
+  const kv = { get: (...a) => ctx.kv.get(...a), list: (...a) => ctx.kv.list(...a), put: async () => { would.kv_puts += 1; }, delete: async () => {} };
+  const src = ctx.env.TENNIS_SOURCE;
+  const env = { ...ctx.env, TENNIS_SOURCE: src ? { get: (...a) => src.get(...a), head: (...a) => src.head(...a), list: (...a) => src.list(...a), put: async () => { would.r2_puts += 1; } } : src };
+  const t0 = Date.now();
+  const r = await buildDnaV2({ ...ctx, store, kv, env }, { ...(asOfs.length ? { asOfs } : {}), write: true, mode: params.mode === 'auto' ? 'auto' : 'full' });
+  return { dry: 'full', ms: Date.now() - t0, would, snapshots: r.snapshots, ratings: r.ratings, phase_ms: r.phase_ms, inputs: r.inputs, tours: Object.fromEntries(Object.entries(r.tours).map(([k, x]) => [k, { matches: x.matches, published: x.published, surface_published: x.surface_published, variant: x.variant, population: x.population, surfaces: x.surfaces }])) };
+}
+
 export async function tick(env, { force = {}, only = null, budget = null, params = {} } = {}) {
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
@@ -366,7 +386,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => (params.dry === 'full' ? dryFullBuild(ctx, asOfs, params) : buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' })) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
@@ -432,7 +452,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume'), mode: url.searchParams.get('mode') } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume'), mode: url.searchParams.get('mode'), dry: url.searchParams.get('dry') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
