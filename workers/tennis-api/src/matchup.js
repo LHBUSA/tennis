@@ -153,6 +153,9 @@ export function serveReturn(ta, tb) {
     note: 'serve-vs-return rows compare one player’s service points won with the service points the opponent’s returns ALLOW (1 - return points won); positive favours the server. Context only.' };
 }
 
+/** A stored score is written side A first; for a meeting list it is shown winner first ("6-1 6-4", not "1-6 4-6"). */
+export const winnerScore = (score, winnerSide) => (!score || winnerSide !== 'B' ? score : String(score).replace(/(\d+)-(\d+)/g, '$2-$1'));
+
 async function h2hBlock(store, pa, pb) {
   const ka = `S:${pa}`;
   const kb = `S:${pb}`;
@@ -164,19 +167,23 @@ async function h2hBlock(store, pa, pb) {
   for (let i = 0; i < ids.length; i += 250) shared.push(...await store.select('tennis_match_participants', `select=match_id&participant_key=eq.${kb}&match_id=${inList(ids.slice(i, i + 250))}`));
   const mids = shared.map((r) => r.match_id);
   const rows = mids.length ? await store.select('tennis_matches', `select=match_id,status,winner_side,score_text,round,scheduled_at,event_type,tennis_tournament_editions(year,surface,end_date,tennis_tournaments(slug,name))&match_id=${inList(mids)}&event_type=in.(MS,WS)`) : [];
-  const done = rows.filter((m) => ['completed', 'retired', 'walkover'].includes(m.status)).map((m) => ({ id: m.match_id, won_by: m.winner_side === sideA.get(m.match_id) ? 'A' : 'B', status: m.status, score: m.score_text, round: m.round, date: (m.scheduled_at || m.tennis_tournament_editions?.end_date || '').slice(0, 10) || null, tournament: m.tennis_tournament_editions?.tennis_tournaments?.name || null, slug: m.tennis_tournament_editions?.tennis_tournaments?.slug || null, year: m.tennis_tournament_editions?.year || null, surface: m.tennis_tournament_editions?.surface || null }))
+  const done = rows.filter((m) => ['completed', 'retired', 'walkover'].includes(m.status)).map((m) => ({ id: m.match_id, won_by: m.winner_side === sideA.get(m.match_id) ? 'A' : 'B', status: m.status, score: winnerScore(m.score_text, m.winner_side), round: m.round, date: (m.scheduled_at || m.tennis_tournament_editions?.end_date || '').slice(0, 10) || null, tournament: m.tennis_tournament_editions?.tennis_tournaments?.name || null, slug: m.tennis_tournament_editions?.tennis_tournaments?.slug || null, year: m.tennis_tournament_editions?.year || null, surface: m.tennis_tournament_editions?.surface || null }))
     .sort((x, y) => (x.date < y.date ? 1 : -1));
   return { model_input: false, record: { A: done.filter((m) => m.won_by === 'A').length, B: done.filter((m) => m.won_by === 'B').length }, meetings: done.slice(0, 10), total: done.length, note: 'head-to-head is descriptive and deliberately NOT a model feature (small samples, old meetings); coverage is the stored ledger' };
 }
 
-async function travelBlock(store, recent, m) {
-  const last = recent.find((r) => r.day < (m.scheduled_at || '').slice(0, 10));
-  if (!last) return null;
-  const row = (await store.select('tennis_matches', `select=tennis_tournament_editions(edition_id,city,country,end_date,tennis_tournaments(name))&match_id=eq.${last.match_id}`))[0]?.tennis_tournament_editions;
-  if (!row) return null;
+/** The player's previous EVENT (the last stored match at a different edition than this one) and where it was held. */
+async function travelBlock(store, recent, m, editionId) {
+  const before = recent.filter((r) => r.day < (m.scheduled_at || '').slice(0, 10)).slice(0, 12);
+  if (!before.length) return null;
+  const rows = await store.select('tennis_matches', `select=match_id,edition_id,tennis_tournament_editions(city,country,end_date,tennis_tournaments(name))&match_id=${inList(before.map((r) => r.match_id))}`);
+  const byId = new Map(rows.map((r) => [r.match_id, r]));
+  const prev = before.map((r) => ({ r, x: byId.get(r.match_id) })).find(({ x }) => x && x.edition_id !== editionId);
+  if (!prev) return { previous_event: null, note: 'no earlier event in the player’s recent stored matches' };
+  const row = prev.x.tennis_tournament_editions || {};
   const here = m.tournament;
   const same = row.city && here?.city ? row.city === here.city && row.country === here.country : null;
-  return { previous_event: row.tennis_tournaments?.name || null, previous_city: row.city || null, previous_country: row.country || null, previous_match: last.day, this_city: here?.city || null, this_country: here?.country || null, same_city: same, country_change: row.country && here?.country ? row.country !== here.country : null,
+  return { previous_event: row.tennis_tournaments?.name || null, previous_city: row.city || null, previous_country: row.country || null, previous_match: prev.r.day, this_city: here?.city || null, this_country: here?.country || null, same_city: same, country_change: row.country && here?.country ? row.country !== here.country : null,
     note: 'locations as the tournament sources publish them; no distance, time-zone or jet-lag estimate is made' };
 }
 
@@ -229,7 +236,7 @@ async function detail(store, env, id) {
   const recentOf = (s, pid) => { const seen = new Set(); return [...since(pid), ...(s?.all?.recent || [])].filter((r) => (seen.has(r.match_id) ? false : seen.add(r.match_id))); };
   const ra = recentOf(a, pa.id);
   const rb = recentOf(b, pb.id);
-  const [ta, tb] = await Promise.all([travelBlock(store, [...(a?.all?.recent || [])], m), travelBlock(store, [...(b?.all?.recent || [])], m)]);
+  const [ta, tb] = await Promise.all([travelBlock(store, [...(a?.all?.recent || [])], m, rows[0].edition_id), travelBlock(store, [...(b?.all?.recent || [])], m, rows[0].edition_id)]);
   const data = {
     as_of: asOf, tour: t, matchup_version: MATCHUP_VERSION, match: m, fixture,
     model, why: explain(m, model, ctx),

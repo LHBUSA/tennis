@@ -110,7 +110,7 @@ export const matchup = mount(async (root, { params }, signal) => {
           ${cmpRow('Matches, last 7 days', c.rest?.A?.matches_7d, c.rest?.B?.matches_7d, (v) => `${v}`)}
           ${cmpRow('Sets, last 7 days', c.rest?.A?.sets_7d, c.rest?.B?.sets_7d, (v) => `${v}`)}
           ${cmpRow('Matches, last 14 days', c.rest?.A?.matches_14d, c.rest?.B?.matches_14d, (v) => `${v}`)}
-          ${cmpRow('Previous event', c.travel?.A ? `${c.travel.A.previous_event || ''}${c.travel.A.previous_city ? ` (${c.travel.A.previous_city})` : ''}` : null, c.travel?.B ? `${c.travel.B.previous_event || ''}${c.travel.B.previous_city ? ` (${c.travel.B.previous_city})` : ''}` : null, (v) => v)}
+          ${cmpRow('Previous event', c.travel?.A?.previous_event ? `${c.travel.A.previous_event}${c.travel.A.previous_city ? ` · ${c.travel.A.previous_city}` : ''}` : null, c.travel?.B?.previous_event ? `${c.travel.B.previous_event}${c.travel.B.previous_city ? ` · ${c.travel.B.previous_city}` : ''}` : null, (v) => v)}
         </tbody></table></div>
         <p class="note">${c.rest?.basis || ''}. Travel shows only where the sources place each event; no distance or jet-lag estimate is made.</p></section>
     </div>

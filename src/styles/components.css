@@ -637,3 +637,13 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
   .ptw li { grid-template-columns: 22px 32px 1fr; }
   .ptw b { grid-column: 3; text-align: left; }
 }
+/* Phase 6 comparison / split / H2H tables: wrap instead of truncating (labels and scores must stay readable at 320-390) */
+.mu-tbl th, .mu-tbl td, .split-tbl th, .split-tbl td, .mu-h2h .tbl th, .mu-h2h .tbl td { white-space: normal; overflow-wrap: anywhere; text-overflow: clip; line-height: 1.35; vertical-align: top; }
+.mu-tbl th:first-child, .mu-tbl td:first-child { width: 46%; }
+.split-tbl th:first-child { width: 34%; }
+@media (max-width: 560px) {
+  .mu-tbl th:first-child, .mu-tbl td:first-child { width: 42%; }
+  .split-tbl th:first-child { width: 40%; }
+  .mu-tbl th, .mu-tbl td, .split-tbl th, .split-tbl td, .mu-h2h .tbl th, .mu-h2h .tbl td { padding: 8px 5px; font-size: 13px; }
+  .mu-h2h .tbl td.tabnum { font-size: 12.5px; }
+}

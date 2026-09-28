@@ -89,3 +89,11 @@ test('fixture state: only upcoming (or live) matches are priced; finished, cance
   assert.equal(fixtureState({ status: 'in_progress', scheduled_at: at(-1) }, now), 'live');
   assert.equal(fixtureState({ status: 'scheduled', scheduled_at: null }, now), 'undated');
 });
+
+test('H2H scores are shown winner first (stored side-A orientation flipped when B won)', async () => {
+  const { winnerScore } = await import('../workers/tennis-api/src/matchup.js');
+  assert.equal(winnerScore('1-6 4-6', 'B'), '6-1 6-4');
+  assert.equal(winnerScore('6-7(7) 7-6(2) 6-3 6-4', 'A'), '6-7(7) 7-6(2) 6-3 6-4');
+  assert.equal(winnerScore('3-6 7-6(4) 2-1 RET', 'B'), '6-3 6-7(4) 1-2 RET');
+  assert.equal(winnerScore(null, 'B'), null);
+});
