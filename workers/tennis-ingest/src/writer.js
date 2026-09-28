@@ -51,6 +51,8 @@ export async function upsertPlayersFull(store, members, provider) {
     });
   }
   const rows = [...byId.values()];
+  // one lock order for every writer (concurrent backfill shards upsert overlapping players): no deadlock cycles
+  rows.sort((a, b) => (a.pbe_player_id < b.pbe_player_id ? -1 : a.pbe_player_id > b.pbe_player_id ? 1 : 0));
   await store.upsert('tennis_players', rows, { onConflict: 'pbe_player_id' });
   await store.upsert('tennis_player_external_ids', rows.map((r) => { const [p, e] = splitExt(r.founding_external_key); return { provider: p, external_id: e, pbe_player_id: r.pbe_player_id, method: 'founding', evidence: [r.founding_external_key] }; }), { onConflict: 'provider,external_id', ignore: true });
   return rows.length;
