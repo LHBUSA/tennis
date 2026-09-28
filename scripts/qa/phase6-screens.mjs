@@ -26,7 +26,7 @@ const done = sinner?.match_dna?.recent?.[0]?.match_id;
 const list = (await j('/v1/matchups'))?.matchups || [];
 const upcoming = list.map((x) => x.match.id);
 const PATHS = ['/players/jannik-sinner/dna', '/players/carlos-alcaraz/dna', '/players/aryna-sabalenka/dna', '/players/iga-swiatek/dna', '/players/jannik-sinner', '/matchups', '/matchups?tour=atp', '/matchups?tour=wta',
-  ...upcoming.slice(0, 3).map((id) => `/matchups/${id}`), ...(done ? [`/matchups/${done}`] : []), '/players-to-watch', '/players-to-watch?tour=wta', '/dna?metric=pbe_rating&tour=wta', '/', '/labs'];
+  ...upcoming.slice(0, 3).map((id) => `/matchups/${id}`), ...(done ? [`/matchups/${done}`] : []), '/players-to-watch', '/players-to-watch?tour=wta', ...(process.env.QA_EXTRA ? process.env.QA_EXTRA.split(',') : []), '/dna?metric=pbe_rating&tour=wta', '/', '/labs'];
 const WIDTHS = [[1440, 'desktop'], [1024, 'tablet'], [390, 'mobile'], [320, 'narrow']];
 
 const browser = await chromium.launch({ executablePath: CHROME, headless: true });
