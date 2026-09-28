@@ -7,6 +7,7 @@
 // - server refusals back off: db_paused waits until the pause ends, concurrency_ceiling / tick_in_progress wait 30 s;
 //   3 consecutive store errors in one shard stop that shard; a data error on one item stops that shard only
 import fs from 'node:fs';
+import https from 'node:https';
 
 const [lane, ...rest] = process.argv.slice(2);
 if (!lane) { console.error('usage: lane.mjs <lane> [--budget N] [--shards K] [--max-runs N] [--write 0]'); process.exit(2); }
@@ -16,6 +17,9 @@ const shards = Math.min(5, Math.max(1, Number(opt('shards', 1))));
 const maxRuns = Number(opt('max-runs', 1000));
 const write = opt('write', null);
 const dry = opt('dry', null);
+// --version <id>: pin this request to a version attached to the deployment (e.g. at 0%) via Version Overrides
+const PIN = opt('version', null);
+if (PIN && !/^[0-9a-f-]{36}$/.test(PIN)) { console.error('--version must be a version id'); process.exit(2); }
 // --base targets an uploaded version's preview URL (version canaries); default = the deployed Worker
 const BASE = (opt('base', 'https://tennis-ingest.sales-fd3.workers.dev') || '').replace(/\/+$/, '');
 if (!/^https:\/\/([a-z0-9]+-)?tennis-ingest\.sales-fd3\.workers\.dev$/.test(BASE)) { console.error('refusing: --base must be a tennis-ingest workers.dev URL'); process.exit(2); }
@@ -35,9 +39,17 @@ async function shard(k) {
     if (dry != null) q.set('dry', dry);
     let body = null;
     try {
-      const res = await fetch(`${BASE}/v1/runs?${q}${resume}`, { method: 'POST', headers: { authorization: `Bearer ${TOKEN}` }, signal: AbortSignal.timeout(Number(opt('timeout', 295)) * 1000) });
-      body = await res.json();
-    } catch (e) { body = { data: { ok: false, error: String(e?.message || e) } }; }
+      // node:https (not fetch): undici gives up after 300 s without response headers, shorter than a full DNA build
+      body = await new Promise((resolve, reject) => {
+        const req = https.request(`${BASE}/v1/runs?${q}${resume}`, { method: 'POST', headers: { authorization: `Bearer ${TOKEN}`, ...(PIN ? { 'Cloudflare-Workers-Version-Overrides': `tennis-ingest="${PIN}"` } : {}) } }, (res) => {
+          let buf = ''; res.setEncoding('utf8'); res.on('data', (c) => { buf += c; });
+          res.on('end', () => { try { resolve(JSON.parse(buf)); } catch { reject(new Error(`HTTP ${res.statusCode}: ${buf.slice(0, 200)}`)); } });
+        });
+        req.setTimeout(Number(opt('timeout', 295)) * 1000, () => req.destroy(new Error('client timeout')));
+        req.on('error', reject);
+        req.end();
+      });
+    } catch (e) { body = { data: { ok: false, error: `${String(e?.message || e)}${e?.cause ? ` (${e.cause.code || e.cause.message || e.cause})` : ""}` } }; }
     const d = body?.data || {};
     const err = d.error || d.result?.error || null;
     if (err === 'db_paused') { log(`shard ${k} db paused until ${d.paused_until} (${d.reason})`); await sleep(Math.max(30e3, Date.parse(d.paused_until) - Date.now())); continue; }

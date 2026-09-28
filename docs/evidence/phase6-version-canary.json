@@ -1,6 +1,6 @@
 {
- "run_at": "2026-09-28T14:15:24.957Z",
- "candidate": "https://4ebfb7f1-tennis-api.sales-fd3.workers.dev",
+ "run_at": "2026-09-28T15:33:11.946Z",
+ "candidate": "https://tennis-api.propbetedge.ai",
  "production": "https://tennis-api.propbetedge.ai",
  "pass": 34,
  "fail": 0,
