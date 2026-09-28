@@ -74,7 +74,7 @@ export function surfaceTable(md) {
   const cell = (m) => (m.value == null ? html`<span class="note">—</span>` : html`<b class="tabnum">${m.record && m.record.W != null ? `${m.record.W}–${m.record.L}` : fmtMetric(m)}</b><small class="note">${m.percentile != null ? `${ORD(m.percentile)} pct` : STATUS[m.status] || m.confidence}</small>`);
   const keys = S[0].metrics.map((m) => [m.key, m.label]);
   return html`<section class="mod"><header class="mod-h"><h2>By surface</h2><span class="mod-k">${md.tour} players on each surface · surface from the tournament's own record</span></header>
-    <div class="tbl-wrap"><table class="tbl dna-tbl"><thead><tr><th>Metric</th>${S.map((s) => html`<th class="n">${s.surface[0].toUpperCase()}${s.surface.slice(1)}</th>`)}</tr></thead><tbody>
+    <div class="tbl-wrap"><table class="tbl surf-tbl"><thead><tr><th>Metric</th>${S.map((s) => html`<th class="n">${s.surface[0].toUpperCase()}${s.surface.slice(1)}</th>`)}</tr></thead><tbody>
     <tr><th scope="row" style="text-align:left">Record</th>${S.map((s) => html`<td class="n tabnum">${s.form?.career ? `${s.form.career.W}–${s.form.career.L}` : '—'}</td>`)}</tr>
     <tr><th scope="row" style="text-align:left">Surface PBE Rating</th>${S.map((s) => html`<td class="n">${s.rating ? (s.rating.status === 'not_validated' ? html`<span class="note">not published</span>` : html`<b class="tabnum">${s.rating.value}</b><small class="note">${s.rating.percentile != null ? `${ORD(s.rating.percentile)} pct` : `${s.rating.rated_matches} matches`}</small>`) : '—'}</td>`)}</tr>
     <tr><th scope="row" style="text-align:left">Last 10</th>${S.map((s) => html`<td class="n tabnum">${s.form?.last10 ? `${s.form.last10.W}–${s.form.last10.L}` : '—'}</td>`)}</tr>

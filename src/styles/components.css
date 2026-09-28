@@ -559,3 +559,8 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .dna-tbl th[scope='row'], .dna-tbl td:last-child { white-space: normal; }
 .dna-tbl th[scope='row'] { min-width: 8.5em; }
 @media (max-width: 560px) { .dna-tbl th:nth-child(4), .dna-tbl td:nth-child(4) { display: none; } .dna-tbl th, .dna-tbl td { padding: 8px 5px; } }
+/* surface Match DNA: one column per surface; value above its percentile, every column kept on phones */
+.surf-tbl th[scope='row'] { text-transform: capitalize; white-space: normal; min-width: 7.5em; }
+.surf-tbl td { white-space: nowrap; vertical-align: top; }
+.surf-tbl td small { display: block; }
+@media (max-width: 560px) { .surf-tbl th, .surf-tbl td { padding: 8px 4px; font-size: 0.9em; } .surf-tbl th[scope='row'] { min-width: 6.5em; } }
