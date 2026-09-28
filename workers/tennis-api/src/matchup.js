@@ -43,6 +43,21 @@ async function snapshots(store, pids, asOf, { detail = false } = {}) {
   return out;
 }
 
+/**
+ * Is this match still a matchup to price? Only a scheduled match whose start is less than STALE_H hours ago (or
+ * in progress). A finished / cancelled match would be priced with ratings that already contain its own result, and a
+ * 'scheduled' row long past its start (no result stored yet, or a cancellation the source never reported) is stale.
+ */
+export const STALE_H = 6;
+export function fixtureState(m, now = Date.now()) {
+  if (m.status === 'in_progress') return 'live';
+  if (m.status !== 'scheduled') return 'not_upcoming';
+  const at = m.scheduled_at ? Date.parse(m.scheduled_at) : NaN;
+  if (!Number.isFinite(at)) return 'undated';
+  return at < now - STALE_H * 3600e3 ? 'stale' : 'upcoming';
+}
+const FIXTURE_REASON = { not_upcoming: 'this match is no longer upcoming: a pre-match probability is not shown after the result (today’s ratings already contain it)', stale: `the start time passed more than ${STALE_H} hours ago and no result is stored yet: the fixture is stale, so no probability is shown`, undated: 'the source has not published a start time for this match' };
+
 const playerOf = (m, side) => m.sides?.[side]?.players?.length === 1 ? m.sides[side].players[0] : null;
 const tourOfMatch = (m) => (m.event_type === 'MS' ? 'ATP' : m.event_type === 'WS' ? 'WTA' : null);
 
@@ -173,7 +188,7 @@ async function upcoming(store, env, url) {
   const to = new Date(now + 7 * 86400e3).toISOString();
   const et = tour === 'ATP' ? 'eq.MS' : tour === 'WTA' ? 'eq.WS' : 'in.(MS,WS)';
   const rows = await store.select('tennis_matches', `select=${MATCH}&status=eq.scheduled&event_type=${et}&scheduled_at=gte.${from}&scheduled_at=lte.${to}&order=scheduled_at.asc&limit=300`);
-  const ms = rows.map(shapeMatch).filter((m) => playerOf(m, 'A') && playerOf(m, 'B'));
+  const ms = rows.map(shapeMatch).filter((m) => playerOf(m, 'A') && playerOf(m, 'B') && fixtureState(m, now) === 'upcoming');
   const [summary, asOf] = await Promise.all([buildSummary(env), latestV2AsOf(store)]);
   const snaps = await snapshots(store, [...new Set(ms.flatMap((m) => [playerOf(m, 'A').id, playerOf(m, 'B').id]))], asOf);
   const list = ms.map((m) => {
@@ -203,7 +218,9 @@ async function detail(store, env, id) {
   const a = snaps.get(pa.id);
   const b = snaps.get(pb.id);
   const surface = ['hard', 'clay', 'grass'].includes(m.tournament?.surface) ? m.tournament.surface : null;
-  const model = modelBlock(summary?.tours?.[t], a, b, surface);
+  const fixture = fixtureState(m);
+  const priced = modelBlock(summary?.tours?.[t], a, b, surface);
+  const model = ['upcoming', 'live'].includes(fixture) ? priced : { status: `fixture_${fixture}`, probability: null, model: priced.model, ratings: priced.ratings, rating_edge: priced.rating_edge, reason: FIXTURE_REASON[fixture] };
   const ctx = contextBlock(a, b, surface);
   const day = (m.scheduled_at || new Date().toISOString()).slice(0, 10);
   // rest: the stored recent list (matches before as_of) + this edition's results since as_of
@@ -214,7 +231,7 @@ async function detail(store, env, id) {
   const rb = recentOf(b, pb.id);
   const [ta, tb] = await Promise.all([travelBlock(store, [...(a?.all?.recent || [])], m), travelBlock(store, [...(b?.all?.recent || [])], m)]);
   const data = {
-    as_of: asOf, tour: t, matchup_version: MATCHUP_VERSION, match: m,
+    as_of: asOf, tour: t, matchup_version: MATCHUP_VERSION, match: m, fixture,
     model, why: explain(m, model, ctx),
     context: { ...ctx, serve_return: serveReturn(tech.get(pa.id), tech.get(pb.id)), rest: { A: restBlock(ra, day), B: restBlock(rb, day), basis: 'completed singles matches in the stored ledger before the match day' }, travel: { A: ta, B: tb } },
     h2h

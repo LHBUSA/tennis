@@ -9,7 +9,7 @@
 // A pause never touches the live cron lanes (current-season ESPN / WTA / Slam feeds); it only refuses admin bulk runs
 // and the history rotation.
 
-export const BULK_LANES = new Set(['wta_history', 'edition_merge', 'espn_extras', 'wta_records', 'wta_edition_facts', 'dna_v2']);
+export const BULK_LANES = new Set(['wta_history', 'edition_merge', 'espn_extras', 'wta_records', 'wta_edition_facts', 'dna_v2', 'dna_retention']);
 export const MAX_HEAVY = 5;
 const HEALTH = 'db:health';
 const ERRS = 'db:errs';

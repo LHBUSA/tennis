@@ -26,6 +26,7 @@ import { wtaEditionFactsStep, drawSheet } from './context-jobs.js';
 import { wtaRecordsStep } from './wta-records-job.js';
 import { espnExtrasStep } from './espn-extras-job.js';
 import { editionMergeStep } from './edition-merge-job.js';
+import { runRetention } from './dna-retention.js';
 import { BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
@@ -323,6 +324,18 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     return { as_of: r.as_of, snapshots: r.snapshots, ratings: r.ratings, ms: r.ms, phase_ms: r.phase_ms, inputs: r.inputs, published: Object.fromEntries(Object.entries(r.tours).map(([t, x]) => [t, x.published])) };
   });
 
+  // 5d. daily snapshot retention (14 daily + 1 monthly per definition version), after the day's builds; never while the
+  // database guard has bulk work paused
+  await step(ctx, 'dna_retention', async () => {
+    const day = iso(started);
+    if ((await kv.get('dna:retention:day')) === day) return 'fresh';
+    if (await pausedReason(kv)) return 'db_paused';
+    if ((await kv.get('dna2:last')) !== day) return 'waiting_for_build';
+    const r = await runRetention(ctx, { today: day });
+    await kv.put('dna:retention:day', day);
+    return { deleted: Object.fromEntries(Object.entries(r.versions).map(([v, x]) => [v, x.deleted])), remaining: Object.fromEntries(Object.entries(r.versions).map(([v, x]) => [v, x.remaining_after_run])) };
+  });
+
   // 6. weekly identity jobs
   await step(ctx, 'identity', async () => {
     // one Wikidata page per tick: a small reserved allowance so history backfill can never starve identity
@@ -353,7 +366,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' }) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' }) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;

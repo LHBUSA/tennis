@@ -552,3 +552,38 @@ test('upcoming fixtures: a future-dated competition without a result is a schedu
   await writeMatches(s, [done], { edition_id: E }, { dedupe: true });
   assert.equal(s.rows('tennis_matches').length, 1); assert.equal(s.rows('tennis_matches')[0].status, 'completed');
 });
+
+test('fixture lifecycle: repeat passes, postponement, result and walkover all land on ONE deterministic row', async () => {
+  const { MemStore } = await import('./helpers/memstore.js');
+  const comp = (id, date, notes = []) => ({ id, date, type: { text: "Men's Singles" }, round: { description: 'Round 2' }, court: { description: 'Court 1' }, notes,
+    competitors: [{ order: 1, id: '11', name: 'Alpha Ones', athlete: { $ref: 'x/athletes/11?' }, winner: notes.length ? true : undefined }, { order: 2, id: '22', name: 'Beta Twos', athlete: { $ref: 'x/athletes/22?' }, winner: notes.length ? false : undefined }] });
+  const ev = (c) => ({ id: '998-2026', name: 'Test Open', date: '2026-10-05T00:00Z', endDate: '2026-10-11T00:00Z', season: { year: 2026 }, competitions: [c] });
+  const E = { edition_id: '00000000-0000-4000-8000-0000000fe002' };
+  const pass = async (s, c, now) => writeMatches(s, espn.parseEspnEvent(ev(c), { idMap: allResolve(), now }).matches, E, { dedupe: true });
+  const t0 = Date.parse('2026-09-28T12:00:00Z');
+  const a = new MemStore();
+  await pass(a, comp('7', '2026-10-06T10:00Z'), t0);
+  await pass(a, comp('7', '2026-10-06T10:00Z'), t0 + 3600e3);
+  assert.equal(a.rows('tennis_matches').length, 1, 'a re-read fixture never duplicates');
+  const id = a.rows('tennis_matches')[0].match_id;
+  const nk = a.rows('tennis_matches')[0].natural_key;
+  await pass(a, comp('7', '2026-10-07T12:00Z'), t0 + 7200e3);
+  assert.equal(a.rows('tennis_matches').length, 1);
+  assert.equal(a.rows('tennis_matches')[0].scheduled_at, '2026-10-07T12:00:00.000Z', 'a postponement moves the start on the same row');
+  // start passed, no result yet: nothing written (the row keeps its last observed state; Matchup DNA treats it as stale)
+  const skipped = espn.parseEspnEvent(ev(comp('7', '2026-10-07T12:00Z')), { idMap: allResolve(), now: Date.parse('2026-10-07T20:00:00Z') });
+  assert.equal(skipped.matches.length, 0);
+  await pass(a, comp('7', '2026-10-07T12:00Z', [{ text: 'Alpha Ones (USA) bt Beta Twos (GBR) 6-3 6-4' }]), Date.parse('2026-10-08T00:00:00Z'));
+  const done = a.rows('tennis_matches');
+  assert.equal(done.length, 1);
+  assert.equal(done[0].match_id, id, 'the result lands on the fixture row');
+  assert.equal(done[0].status, 'completed');
+  assert.equal(done[0].natural_key, nk);
+  // identity is deterministic: an independent store reading only the result mints the same match id
+  const b = new MemStore();
+  await pass(b, comp('7', '2026-10-07T12:00Z', [{ text: 'Alpha Ones (USA) bt Beta Twos (GBR) 6-3 6-4' }]), Date.parse('2026-10-08T00:00:00Z'));
+  assert.equal(b.rows('tennis_matches')[0].match_id, id);
+  // a final row never goes back to scheduled (a stale fixture re-read is held, not written)
+  await pass(a, comp('7', '2026-10-09T12:00Z'), Date.parse('2026-10-08T00:00:00Z'));
+  assert.equal(a.rows('tennis_matches')[0].status, 'completed');
+});

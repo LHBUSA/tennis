@@ -76,3 +76,16 @@ test('serve/return only from medium/high technical DNA of BOTH players; otherwis
   assert.equal(serveReturn(t(0.66, 0.40), t(0.62, 0.36, 'low')).available, false);
   assert.equal(serveReturn(null, t(0.62, 0.36)).available, false);
 });
+
+test('fixture state: only upcoming (or live) matches are priced; finished, cancelled and stale fixtures never are', async () => {
+  const { fixtureState, STALE_H } = await import('../workers/tennis-api/src/matchup.js');
+  const now = Date.parse('2026-10-01T12:00:00Z');
+  const at = (h) => new Date(now + h * 3600e3).toISOString();
+  assert.equal(fixtureState({ status: 'scheduled', scheduled_at: at(20) }, now), 'upcoming');
+  assert.equal(fixtureState({ status: 'scheduled', scheduled_at: at(-(STALE_H - 1)) }, now), 'upcoming', 'just started, result not in yet');
+  assert.equal(fixtureState({ status: 'scheduled', scheduled_at: at(-(STALE_H + 1)) }, now), 'stale');
+  assert.equal(fixtureState({ status: 'completed', scheduled_at: at(-30) }, now), 'not_upcoming');
+  assert.equal(fixtureState({ status: 'cancelled', scheduled_at: at(5) }, now), 'not_upcoming');
+  assert.equal(fixtureState({ status: 'in_progress', scheduled_at: at(-1) }, now), 'live');
+  assert.equal(fixtureState({ status: 'scheduled', scheduled_at: null }, now), 'undated');
+});
