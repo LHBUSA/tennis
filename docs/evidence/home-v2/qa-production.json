@@ -1,0 +1,645 @@
+{
+  "base": "https://tennis.propbetedge.ai",
+  "at": "2026-09-29T23:04:50.082Z",
+  "pass": true,
+  "expect_next": true,
+  "results": [
+    {
+      "width": 320,
+      "pass": true,
+      "fail": [],
+      "height": 7492,
+      "cls": 0.0138,
+      "arrows": 0,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 566,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 381,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1211,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1651,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 375,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 1118,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 360,
+      "pass": true,
+      "fail": [],
+      "height": 7206,
+      "cls": 0.016,
+      "arrows": 0,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 566,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 381,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1125,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1598,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 355,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 1047,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 390,
+      "pass": true,
+      "fail": [],
+      "height": 7052,
+      "cls": 0.0165,
+      "arrows": 0,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 566,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 381,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1098,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1577,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 342,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 993,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 430,
+      "pass": true,
+      "fail": [],
+      "height": 6857,
+      "cls": 0.0171,
+      "arrows": 0,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 566,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 381,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1064,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1505,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 342,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 957,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 768,
+      "pass": true,
+      "fail": [],
+      "height": 6077,
+      "cls": 0.0007,
+      "arrows": 5,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 524,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 340,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1201,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1422,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 321,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 594,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 1024,
+      "pass": true,
+      "fail": [],
+      "height": 5459,
+      "cls": 0.0005,
+      "arrows": 5,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 470,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 285,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 1160,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 1368,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 246,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 540,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    },
+    {
+      "width": 1440,
+      "pass": true,
+      "fail": [],
+      "height": 4076,
+      "cls": 0.0006,
+      "arrows": 4,
+      "hero_photo": "https://tennis-api.propbetedge.ai/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+      "sections": {
+        "h-tours": {
+          "h": 470,
+          "wait": false,
+          "text": 1150
+        },
+        "h-players": {
+          "h": 285,
+          "wait": false,
+          "text": 835
+        },
+        "h-news": {
+          "h": 666,
+          "wait": false,
+          "text": 702
+        },
+        "h-dna": {
+          "h": 561,
+          "wait": false,
+          "text": 1391
+        },
+        "h-cast": {
+          "h": 246,
+          "wait": false,
+          "text": 1360
+        },
+        "h-cov": {
+          "h": 426,
+          "wait": false,
+          "text": 1143
+        }
+      }
+    }
+  ],
+  "links": [
+    {
+      "href": "/schedule",
+      "status": 200
+    },
+    {
+      "href": "/pbecast",
+      "status": 200
+    },
+    {
+      "href": "/news",
+      "status": 200
+    },
+    {
+      "href": "/players/elena-rybakina",
+      "status": 200
+    },
+    {
+      "href": "/players",
+      "status": 200
+    },
+    {
+      "href": "/tournaments",
+      "status": 200
+    },
+    {
+      "href": "/dna",
+      "status": 200
+    },
+    {
+      "href": "/matches/a17cbfb9-384f-55a1-88e3-9459df071a4a",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/kinoshita-group-japan-open-tennis-championships/2026",
+      "status": 200
+    },
+    {
+      "href": "/players/jiri-lehecka",
+      "status": 200
+    },
+    {
+      "href": "/players/zizou-bergs",
+      "status": 200
+    },
+    {
+      "href": "/players/valentin-vacherot",
+      "status": 200
+    },
+    {
+      "href": "/players/alexander-blockx",
+      "status": 200
+    },
+    {
+      "href": "/matches/857f6982-06a7-5b9d-977b-8f35e65cfec1",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/china-open/2026",
+      "status": 200
+    },
+    {
+      "href": "/players/karen-khachanov",
+      "status": 200
+    },
+    {
+      "href": "/players/felix-auger-aliassime",
+      "status": 200
+    },
+    {
+      "href": "/matches/2d6ae6e7-3257-5943-987d-c49087f73cfd",
+      "status": 200
+    },
+    {
+      "href": "/players/alejandro-tabilo",
+      "status": 200
+    },
+    {
+      "href": "/players/tommy-paul",
+      "status": 200
+    },
+    {
+      "href": "/matches/c7442c16-f8d3-55a0-8a12-46238fff5e22",
+      "status": 200
+    },
+    {
+      "href": "/players/tomas-martin-etcheverry",
+      "status": 200
+    },
+    {
+      "href": "/players/stefanos-tsitsipas",
+      "status": 200
+    },
+    {
+      "href": "/matches/5a9e6232-15cc-57ef-99c5-a6e672bce1d4",
+      "status": 200
+    },
+    {
+      "href": "/players/arthur-fils",
+      "status": 200
+    },
+    {
+      "href": "/players/luca-van-assche",
+      "status": 200
+    },
+    {
+      "href": "/matches/5e0a1f1d-8e20-593e-9ea0-0b73db92028c",
+      "status": 200
+    },
+    {
+      "href": "/players/brandon-nakashima",
+      "status": 200
+    },
+    {
+      "href": "/players/evan-king",
+      "status": 200
+    },
+    {
+      "href": "/players/theo-arribage",
+      "status": 200
+    },
+    {
+      "href": "/players/albano-olivetti",
+      "status": 200
+    },
+    {
+      "href": "/matches/de558424-e179-5234-8411-4da9fd25f312",
+      "status": 200
+    },
+    {
+      "href": "/players/lucas-miedler",
+      "status": 200
+    },
+    {
+      "href": "/players/neil-oberleitner",
+      "status": 200
+    },
+    {
+      "href": "/players/alex-michelsen",
+      "status": 200
+    },
+    {
+      "href": "/matches/da0eb611-19b9-5379-901d-4c4e02b1f4c0",
+      "status": 200
+    },
+    {
+      "href": "/players/theodore-winegar",
+      "status": 200
+    },
+    {
+      "href": "/players/jean-julien-rojer",
+      "status": 200
+    },
+    {
+      "href": "/players/david-stevenson",
+      "status": 200
+    },
+    {
+      "href": "/players/marcus-willis",
+      "status": 200
+    },
+    {
+      "href": "/matches/3469b89a-530e-5c0e-a58b-f7eb96211a37",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/jingshan-125/2026",
+      "status": 200
+    },
+    {
+      "href": "/players/alevtina-ibragimova",
+      "status": 200
+    },
+    {
+      "href": "/players/kyoka-okamura",
+      "status": 200
+    },
+    {
+      "href": "/matches/6b0dbb6b-a2e2-5017-af8c-233c6f512074",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/adana-125/2026",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/aito-hangzhou-open/2026",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/chengdu-open/2026",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/us-open/2026",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/wimbledon/2026",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/roland-garros/2026",
+      "status": 200
+    },
+    {
+      "href": "/players/alexander-zverev",
+      "status": 200
+    },
+    {
+      "href": "/players/ben-shelton",
+      "status": 200
+    },
+    {
+      "href": "/players/aryna-sabalenka",
+      "status": 200
+    },
+    {
+      "href": "/players/jannik-sinner",
+      "status": 200
+    },
+    {
+      "href": "/players/linda-noskova",
+      "status": 200
+    },
+    {
+      "href": "/players/karolina-muchova",
+      "status": 200
+    },
+    {
+      "href": "/players/carlos-alcaraz",
+      "status": 200
+    },
+    {
+      "href": "/players/jessica-pegula",
+      "status": 200
+    },
+    {
+      "href": "/players/coco-gauff",
+      "status": 200
+    },
+    {
+      "href": "/players/mirra-andreeva",
+      "status": 200
+    },
+    {
+      "href": "/news/preston-knocks-out-no-1-seed-ostapenko-at-seoul-a13d52",
+      "status": 200
+    },
+    {
+      "href": "/matches/2c1e8372-7e87-5a14-82ed-f7eccdbd8bfd",
+      "status": 200
+    },
+    {
+      "href": "/players/taylah-preston/dna",
+      "status": 200
+    },
+    {
+      "href": "/tournaments/seoul/2026",
+      "status": 200
+    },
+    {
+      "href": "/news/fernandez-recovers-from-a-set-down-to-beat-chwalinska-at-singapore-d2aa0b",
+      "status": 200
+    },
+    {
+      "href": "/news/chan-wu-win-the-seoul-doubles-title-515846",
+      "status": 200
+    },
+    {
+      "href": "/news/grabher-wins-the-tolentino-125-title-05e84d",
+      "status": 200
+    },
+    {
+      "href": "/dna?metric=pbe_rating&tour=atp",
+      "status": 200
+    },
+    {
+      "href": "/players/novak-djokovic",
+      "status": 200
+    },
+    {
+      "href": "/dna?metric=pbe_rating&tour=wta",
+      "status": 200
+    },
+    {
+      "href": "/dna?metric=hold_rate&tour=wta",
+      "status": 200
+    },
+    {
+      "href": "/players/reese-brantmeier",
+      "status": 200
+    },
+    {
+      "href": "/dna?metric=return_games_won&tour=wta",
+      "status": 200
+    },
+    {
+      "href": "/players/urszula-radwanska",
+      "status": 200
+    },
+    {
+      "href": "/players/maja-chwalinska",
+      "status": 200
+    },
+    {
+      "href": "/players/irina-bara",
+      "status": 200
+    },
+    {
+      "href": "/methodology",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/f535855a-6463-54f7-a023-7f954d4fad72",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/9eb81d55-faee-5ea3-921a-e55dd56bebcb",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/814bd840-c5aa-5972-af1a-9651606e7da3",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/86f126b1-58aa-5140-9451-977d0493dd01",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/bfd9443e-9790-5032-b194-489056015c43",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/31c06a7d-3962-5057-abab-cbd3cdd891fe",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/df0e1dbe-9e8f-522f-b0ee-566aa86bf6fd",
+      "status": 200
+    },
+    {
+      "href": "/pbecast/9e786a8e-9dac-5f02-adba-8bb070547c50",
+      "status": 200
+    },
+    {
+      "href": "/sources",
+      "status": 200
+    }
+  ]
+}

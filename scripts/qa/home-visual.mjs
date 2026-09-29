@@ -103,7 +103,8 @@ for (const w of WIDTHS) {
   if (errors.length) fail.push(`console errors: ${errors.slice(0, 3).join(' | ')}`);
   if (cls >= 0.1) fail.push(`CLS ${cls.toFixed(3)}`);
   for (const a of arrowResults) if (!a.ok) fail.push(`rail arrow did not scroll (${a.before}->${a.after}->${a.back})`);
-  if (SHOTS.has(w)) await page.screenshot({ path: `${OUT}/home-${w}.png`, fullPage: true });
+  // full-page capture stitches the page: pin the sticky header in place for the image only (checks above ran unmodified)
+  if (SHOTS.has(w)) { const st = await page.addStyleTag({ content: '.hdr{position:relative!important;top:auto!important}' }); await page.evaluate(() => scrollTo(0, 0)); await page.screenshot({ path: `${OUT}/home-${w}.png`, fullPage: true }); await st.evaluate((n) => n.remove()); }
   if (w === 1440) {
     await page.locator('.hm-hero').screenshot({ path: `${OUT}/hero-1440.png` });
     await page.locator('#h-tours').evaluate((e) => e.closest('section').id = 'qa-tours');
