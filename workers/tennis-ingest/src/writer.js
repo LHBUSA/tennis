@@ -299,7 +299,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     }
     await store.upsert('tennis_match_external_ids', keep.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
     await store.upsert('tennis_match_participants', keep.flatMap((x) => ['A', 'B'].map((side) => ({ match_id: x.id, side, participant_key: x.n.match.participants[side], seed: x.sm.seeds?.[side] ?? null, entry_type: x.sm.entry?.[side] || null }))), { onConflict: 'match_id,side' });
-    const sets = keep.flatMap((x) => (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s) })));
+    const sets = keep.flatMap((x) => (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s, x.n.match.status) })));
     await store.upsert('tennis_sets', sets, { onConflict: 'match_id,set_no' });
     // a score correction that removed a set: delete the stale tail (only for matches whose score changed)
     for (const x of keep.filter((k) => k.prev && k.prev.score_text !== k.n.match.score_text)) await store.del('tennis_sets', `match_id=eq.${x.id}&set_no=gt.${(x.n.match.sets || []).length}`);
@@ -531,8 +531,12 @@ async function writeSnapshotEvents(store, keep, captureId) {
   return rows.length;
 }
 
-function setWinner(s) {
-  if (s.is_match_tiebreak && s.tiebreak) return s.tiebreak.A > s.tiebreak.B ? 'A' : 'B';
+function setWinner(s, status = null) {
+  if (s.is_match_tiebreak && s.tiebreak) {
+    // a match tiebreak still being played (live) has no winner yet
+    if (status === 'in_progress' && !(Math.max(s.tiebreak.A, s.tiebreak.B) >= 10 && Math.abs(s.tiebreak.A - s.tiebreak.B) >= 2)) return null;
+    return s.tiebreak.A > s.tiebreak.B ? 'A' : 'B';
+  }
   const { A, B } = s.games;
   if (Math.max(A, B) >= 6 && (Math.abs(A - B) >= 2 || Math.max(A, B) === 7)) return A > B ? 'A' : 'B';
   return null; // unfinished set (retirement / live)

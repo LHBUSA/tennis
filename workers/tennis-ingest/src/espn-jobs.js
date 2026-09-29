@@ -12,6 +12,7 @@ import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, editionId, snapshotId, slugify } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
 import { resolveEspnIdentity, wikidataEspnMap, wikidataNameIndex } from '../../shared/canonical/espn-identity.js';
+import { liveOwnedSet, noteCurrentEvent } from './espn-live.js';
 
 const now = () => new Date().toISOString();
 const K = { state: 'bf:espn', ath: 'espn:ath', wd: 'espn:wd', status: 'espn:status', rank: 'bf:espnrank', held: 'espn:held' };
@@ -208,6 +209,8 @@ export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups 
   // WTA: the official WTA edition of the same event (proven by shared player pairs) owns the rows; else ESPN's
   const mapped = league === 'wta' ? await mapOfficialEdition(ctx.store, parsed, idMap) : null;
   const ed = mapped || await writeEspnEdition(ctx.store, parsed.edition);
+  // tennis-live owns this edition right now (its heartbeat is fresh): never a second concurrent writer
+  if ((await liveOwnedSet(ctx.kv)).has(ed.edition_id)) return { event: eventId, league, state: 'OWNED_BY_LIVE', final: false, start_date: parsed.edition.start_date, end_date: parsed.edition.end_date, name: parsed.edition.name, edition_id: ed.edition_id };
   const w = await writeMatches(ctx.store, parsed.matches, ed, { captureId: res.capture?.capture_id || null, dedupe: true });
   // ESPN carries no match statistics
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${ed.edition_id}&source_family=eq.espn&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
@@ -216,7 +219,7 @@ export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups 
   const heldSet = new Set((await ctx.kv.get(lk.held, 'json')) || []);
   if (unresolvedHeld) heldSet.add(eventId); else heldSet.delete(eventId);
   await ctx.kv.put(lk.held, JSON.stringify([...heldSet]));
-  return { event: eventId, league, state: 'PASS', final, start_date: parsed.edition.start_date, name: parsed.edition.name, year: parsed.edition.year, slam: parsed.edition.slam, edition_mapping: mapped ? mapped.evidence : null, matches: parsed.matches.length, ...w, skipped, identity: outcomes, player_facts_filled: facts };
+  return { event: eventId, league, state: 'PASS', final, start_date: parsed.edition.start_date, end_date: parsed.edition.end_date, edition_id: ed.edition_id, name: parsed.edition.name, year: parsed.edition.year, slam: parsed.edition.slam, edition_mapping: mapped ? mapped.evidence : null, matches: parsed.matches.length, ...w, skipped, identity: outcomes, player_facts_filled: facts };
 }
 
 // ---- lane: current season first, then history back to the floor year ---------------------------------
@@ -266,6 +269,8 @@ export async function espnLaneStep(ctx, { budget = 20, today = iso(new Date()), 
     const r = await espnEventStep(ctx, id, { lookups: Math.max(1, budget - spent() - 1), league });
     out.runs.push(r);
     if (r.state === 'IDENTITY_PENDING') break;
+    // ATP live discovery reads current events from here (espn-live.js currentLiveEvents)
+    if (league === 'atp') await noteCurrentEvent(ctx.kv, today, r);
     st.cur.queue.shift();
     if (r.final || r.state === 'ABSENT') st.cur.done = [...new Set([...st.cur.done, id])];
     else if (r.start_date && r.start_date > today) st.cur.future = { ...(st.cur.future || {}), [id]: r.start_date };

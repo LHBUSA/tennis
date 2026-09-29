@@ -1,12 +1,25 @@
 # TennisCast — live state contract
 
 `tournament → match → set → game → point`, one engine for live and replay
-(`workers/shared/canonical/scoring.js`). Status: engine built and tested. **Live source in production:** `tennis-live` polls every WTA/WTA 125/
-Slam-women edition with a match in progress about every 18 s; each observation is written through the
-canonical writer and every observed change (score, status, winner) is recorded in `tennis_source_changes`
-— the observed-state stream a replay is built from. This is observation granularity, not point-by-point:
-points between two observations are never filled in. True point-by-point exists only in the AO match
-centre (not adapted yet).
+(`workers/shared/canonical/scoring.js`). Status: engine built and tested.
+
+**Live sources in production (2026-09-29, tour-aware router `workers/tennis-live/src/router.js`):**
+
+| Router source | Upstream | Tour / events | Granularity | Discovery |
+|---|---|---|---|---|
+| `wta` | official WTA live-scoring feed (api.wtatennis.com) | WTA, WTA 125, Slam women: WS, WD | point score + server | ingest `matches` step (WTA calendar editions) |
+| `espn` | ESPN core API, ATP league — SECONDARY, not an official ATP feed | ATP events: MS, MD, XD | set/game score only (competition status + per-competitor linescores); ESPN publishes no point score or server — null, never invented | ingest `espn_live` step (current ATP events recorded by the espn_atp lane) |
+
+`tennis-live` polls every edition in `live:editions` about every 18-20 s through its router provider; every
+observation goes parse -> normalizeMatch -> the ONE canonical writer (tennis_matches, tennis_sets,
+`score_snapshot` rows in tennis_match_events, tennis_source_changes). Ownership: `live:heartbeat` + `live:owned`;
+while the heartbeat is fresh, neither the ingest `matches`/`espn_live` steps nor the espn_atp/espn_wta lanes write an
+owned edition. An edition whose live state has no legitimate source stays scheduled / result-only. US Open live
+remains unavailable (upstream challenges Cloudflare egress; not bypassed). ESPN live rows must be re-observed within
+20 minutes to count as live in `/v1/live` (WTA rows: 12 h, unchanged).
+
+This is observation granularity, not point-by-point: points (or, for ESPN, games) between two observations are never
+filled in. True point-by-point exists only in the AO match centre (not adapted yet).
 
 ## Rules
 

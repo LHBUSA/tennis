@@ -1064,7 +1064,9 @@
           "espn.wta.event",
           "espn.wta.rankings",
           "espn.atp.season_stats",
-          "espn.atp.eventlog"
+          "espn.atp.eventlog",
+          "espn.atp.status",
+          "espn.atp.linescores"
         ],
         "audited": "2026-09-27",
         "file": "docs/evidence/espn-atp-discovery-latest.json",

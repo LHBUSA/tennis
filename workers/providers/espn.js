@@ -174,12 +174,89 @@ export function competitorAthletes(c) {
   return /^\d+$/.test(id) ? [id] : null;
 }
 
+// ---- live state (tennis-live ESPN provider) -------------------------------------------------------------
+/** /competitors/{a}/linescores -> [{ period, games, tiebreak }] by period. value = games in that set; tiebreak = that
+ *  side's tiebreak points when ESPN prints them. Empty before the first game. */
+export function parseEspnLinescores(j) {
+  if (!Array.isArray(j?.items)) return null;
+  return j.items
+    .filter((x) => Number.isInteger(x.period) && x.period > 0 && Number.isFinite(x.value) && x.value >= 0)
+    .map((x) => ({ period: x.period, games: Number(x.value), tiebreak: Number.isFinite(x.tiebreak) ? Number(x.tiebreak) : null }))
+    .sort((a, b) => a.period - b.period);
+}
+
+/**
+ * Format of a match still in progress, only where the event/year rules leave no doubt; otherwise null (stored
+ * 'unknown'; the result line proves the format when the match ends). Non-Slam: singles BO3_TB7, doubles DOUBLES_TOUR.
+ * Slams 2022+: men's main-draw singles BO5_FINAL_TB10, other singles BO3_FINAL_TB10; Slam doubles vary by event -> null.
+ */
+export function espnLiveFormat({ et, slamKey = null, year, stage }) {
+  const doubles = !SINGLES.has(et);
+  if (!slamKey) return doubles ? 'DOUBLES_TOUR' : 'BO3_TB7';
+  if (doubles || year < 2022) return null;
+  return et === 'MS' && stage === 'main' ? 'BO5_FINAL_TB10' : 'BO3_FINAL_TB10';
+}
+
+function sideMembers(sideIds, et, idMap, warnings) {
+  return sideIds.map((aid) => {
+    let x = idMap[aid] || null;
+    // a women's event resolved to an ATP id (or the reverse) is a crosswalk error: unresolved, never written
+    if (x && et !== 'XD' && x.provider !== (et.startsWith('W') ? 'wta' : 'atp')) { warnings.push(`tour_mismatch:${aid}`); x = null; }
+    return {
+      provider: 'espn', provider_id: aid, tour_id: x ? { provider: x.provider, provider_id: x.provider_id } : null,
+      tour_id_evidence: x?.evidence || null, tour_id_method: x?.method || null,
+      first_name: x?.first_name || null, last_name: x?.last_name || null, country: x?.country || null,
+      gender: et === 'XD' ? x?.gender || null : et.startsWith('W') ? 'F' : 'M'
+    };
+  });
+}
+
+/**
+ * One in-progress competition -> SourceMatch (status in_progress). lv = { A: linescores, B: linescores, period,
+ * observed_at }. Sets must be contiguous from set 1 with both sides' games; a doubles third period after split sets
+ * under DOUBLES_TOUR is the match tiebreak (points). Returns null when the observation cannot be proven.
+ */
+function liveSourceMatch({ c, cs, ids, et, ev, slam, qual, idMap, lv, pmid }) {
+  let rd = espnRound(c.round, qual);
+  if (rd?.stage === 'round_robin' && slam) rd = null;
+  if (!rd || !Array.isArray(lv?.A) || !Array.isArray(lv?.B)) return null;
+  const periods = [...new Set([...lv.A, ...lv.B].map((x) => x.period))].sort((a, b) => a - b);
+  if (periods.some((p, i) => p !== i + 1) || periods.length > 5) return null;
+  const format_key = espnLiveFormat({ et, slamKey: slam?.key || null, year: ev.year, stage: rd.stage });
+  const sets = [];
+  for (const p of periods) {
+    const a = lv.A.find((x) => x.period === p);
+    const b = lv.B.find((x) => x.period === p);
+    if (!a || !b) return null;
+    const split = sets.length === 2 && (sets[0].games.A > sets[0].games.B) !== (sets[1].games.A > sets[1].games.B);
+    if (format_key === 'DOUBLES_TOUR' && p === 3 && split) {
+      const done = Math.max(a.games, b.games) >= 10 && Math.abs(a.games - b.games) >= 2;
+      sets.push({ games: { A: done && a.games > b.games ? 1 : 0, B: done && b.games > a.games ? 1 : 0 }, tiebreak: { A: a.games, B: b.games, winner_points_derived: false }, is_match_tiebreak: true });
+      continue;
+    }
+    const tb = a.tiebreak != null && b.tiebreak != null ? { A: a.tiebreak, B: b.tiebreak, winner_points_derived: false } : null;
+    sets.push({ games: { A: a.games, B: b.games }, tiebreak: tb, is_match_tiebreak: false });
+  }
+  const warnings = [];
+  const sides = { A: sideMembers(ids[0], et, idMap, warnings), B: sideMembers(ids[1], et, idMap, warnings) };
+  const at = c.date && Math.abs(Number(String(c.date).slice(0, 4)) - ev.year) <= 1 ? Date.parse(c.date) : NaN;
+  return {
+    type: 'match', provider: 'espn', provider_match_id: pmid, provider_event: { id: `${ev.tid}-${ev.year}`, year: ev.year },
+    event_type: et, stage: rd.stage, round_code: rd.code, format_key, status: 'in_progress',
+    winner_side: null, end_reason: null, retired_side: null, withdrawn_side: null, sets,
+    live: { point: null, server: null, granularity: 'game', period: Number.isInteger(lv.period) ? lv.period : null },
+    sides, seeds: { A: Number.isInteger(cs[0].tournamentSeed) ? cs[0].tournamentSeed : null, B: Number.isInteger(cs[1].tournamentSeed) ? cs[1].tournamentSeed : null }, entry: { A: null, B: null },
+    court_name: c.court?.description || null, scheduled_at: Number.isFinite(at) ? new Date(at).toISOString() : null, match_day: c.date ? espnDay(c.date) : null,
+    started_at: null, source_updated_at: lv.observed_at || null, warnings
+  };
+}
+
 /**
  * Parse one event payload into edition facts + provider-neutral SourceMatch records.
  * idMap: espn athlete id -> { provider, provider_id, evidence, method, first_name, last_name, gender }.
  * Returns { edition, matches, skipped: [{ id, reason }], athletes: [ids], needsStatus: [compIds] }.
  */
-export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'atp', now = Date.now() } = {}) {
+export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'atp', now = Date.now(), live = {} } = {}) {
   const ev = splitEventId(json?.id);
   if (!ev) return { edition: null, matches: [], skipped: [{ id: json?.id ?? null, reason: 'bad_event_id' }], athletes: [], needsStatus: [] };
   const slamDef = ESPN_SLAMS[ev.tid] || null;
@@ -213,6 +290,13 @@ export function parseEspnEvent(json, { idMap = {}, statusById = {}, league = 'at
     if (ids.some((x) => !x) || ids.some((x) => x.length !== (SINGLES.has(et) ? 1 : 2))) { out.skipped.push({ id: pmid, reason: 'competitor_ids' }); continue; }
     for (const x of ids.flat()) out.athletes.add(x);
     const note = (c.notes || []).map((n) => n.text).find((t) => / bt /.test(String(t)));
+    if (!note && live[c.id]) {
+      // LIVE (tennis-live ESPN provider): the competition's own status said in progress and its linescores were read in
+      // the same observation. Game-level state only: ESPN publishes no point score or server (never invented).
+      const m = liveSourceMatch({ c, cs, ids, et, ev, slam, qual: qual[et] || 0, idMap, lv: live[c.id], pmid });
+      if (m) out.matches.push(m); else out.skipped.push({ id: pmid, reason: 'live_unproven' });
+      continue;
+    }
     if (!note) {
       // an UPCOMING fixture (Phase 6 Matchup DNA): no result line and a start still in the future is unambiguous; a
       // past start without a result (live, cancelled, unreported) stays unwritten — never guessed
@@ -395,7 +479,14 @@ export const espnCompetitionStatus = {
   key: 'espn.atp.status', family: 'espn', capabilities: ['withdrawals_ret_wo'], parser_version: PARSER, cadence: { class: 'history', idle_s: 86400 * 30 },
   request: ({ eventId, compId, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/events/${eventId}/competitions/${compId}/status`, headers: J }),
   shape: (body) => { const j = safeJson(body); return j ? requirePaths(j, ['type.name']) : ['not_json']; },
-  parse: (body) => { const j = safeJson(body); return [{ name: j.type.name, completed: !!j.type.completed }]; }
+  parse: (body) => { const j = safeJson(body); return [{ name: j.type.name, completed: !!j.type.completed, period: Number.isInteger(j.period) ? j.period : null }]; }
+};
+
+export const espnLinescores = {
+  key: 'espn.atp.linescores', family: 'espn', capabilities: ['live_state', 'set_game_scoring'], parser_version: PARSER, cadence: { class: 'live', idle_s: 20 },
+  request: ({ eventId, compId, competitorId, league = 'atp' }) => ({ url: `${CORE}/leagues/${league}/events/${eventId}/competitions/${compId}/competitors/${competitorId}/linescores`, headers: J }),
+  shape: (body) => { const j = safeJson(body); if (!j) return ['not_json']; return Array.isArray(j.items) ? [] : ['missing_items']; },
+  parse: (body) => { const rows = parseEspnLinescores(safeJson(body)); return rows ? [{ rows }] : []; }
 };
 
 export const espnAthlete = {
@@ -445,7 +536,7 @@ export const espnEventLog = {
   parse: (body) => { const j = safeJson(body); return j?.events ? [parseEspnEventLog(j)] : []; }
 };
 
-export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek, espnSeasonStats, espnEventLog];
+export const ADAPTERS = [espnSeasonEvents, espnEvent, espnCompetitionStatus, espnAthlete, espnRankingWeek, espnSeasonStats, espnEventLog, espnLinescores];
 
 /** The same adapters bound to the WTA league (distinct run-ledger keys; identical parsing). */
 const bind = (a, league, key) => ({ ...a, key, request: (p = {}) => a.request({ ...p, league }) });
@@ -457,4 +548,4 @@ export const WTA = Object.freeze({
   seasonStats: bind(espnSeasonStats, 'wta', 'espn.wta.season_stats'),
   eventLog: bind(espnEventLog, 'wta', 'espn.wta.eventlog')
 });
-export const ATP = Object.freeze({ seasonEvents: espnSeasonEvents, event: espnEvent, status: espnCompetitionStatus, rankingWeek: espnRankingWeek, seasonStats: espnSeasonStats, eventLog: espnEventLog });
+export const ATP = Object.freeze({ seasonEvents: espnSeasonEvents, event: espnEvent, status: espnCompetitionStatus, rankingWeek: espnRankingWeek, seasonStats: espnSeasonStats, eventLog: espnEventLog, linescores: espnLinescores });

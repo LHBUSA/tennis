@@ -1,8 +1,9 @@
 // tennis-live — TennisCast live runtime. docs/TENNISCAST.md.
 //
 // Cron every minute. For editions that tennis-ingest last saw with a match in progress (KV
-// `live:editions`), poll the source ~every 20 s inside the invocation and write through the SAME tested
-// writer as ingest. Every observed score/state change lands in tennis_source_changes, which is the
+// `live:editions`), poll the source that owns the edition's live state (router.js: official WTA feed for WTA
+// editions, the secondary ESPN ATP feed for ATP events) ~every 20 s inside the invocation and write through the
+// SAME tested writer as ingest. Every observed score/state change lands in tennis_source_changes, which is the
 // replayable observed-state stream. Nothing is interpolated between observations: if the source jumps
 // from 30-15 to a new game, that jump is what we record.
 //
@@ -13,15 +14,16 @@ import { json } from '../../shared/envelope.js';
 import { health } from '../../shared/health.js';
 import { SourceClient } from '../../shared/http.js';
 import { storeFromEnv } from '../../shared/store/postgrest.js';
-import * as wta from '../../providers/wta.js';
-import { editionMatches } from '../../tennis-ingest/src/jobs.js';
+import { providerFor, livePolicies, LIVE_PROVIDERS } from './router.js';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 const ROUNDS = 3;          // polls per minute per live edition
 const GAP_MS = 18000;      // spacing between rounds
-const MAX_EDITIONS = 6;
+const MAX_EDITIONS = 8;
+const BUDGET_MS = 50000;  // no round starts that could not finish inside the minute (the next cron owns it)
 
-export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs = BUDGET_MS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+  const t0 = Date.now();
   const store = storeFromEnv(env);
   const kv = env.TENNIS_STATE;
   if (!store || !kv) return { ok: false, error: 'not_configured' };
@@ -34,20 +36,25 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, sleep = 
     await kv.put('tennis-live:last_run', JSON.stringify(s));
     return s;
   }
-  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: { ...wta.WTA_POLICY, retries: 2 } } }), log: [], upstream: 0 };
+  const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0 };
   const out = [];
   let stillLive = editions;
   for (let i = 0; i < rounds && stillLive.length; i += 1) {
-    if (i) await sleep(gapMs);
+    if (i) {
+      if (Date.now() - t0 + gapMs > budgetMs) break;
+      await sleep(gapMs);
+    }
     const next = [];
     for (const ed of stillLive) {
-      const r = await editionMatches(ctx, ed).catch((e) => ({ state: 'ERROR', error: String(e?.message || e).slice(0, 200) }));
-      out.push({ round: i, event: `${ed.event_id}-${ed.year}`, state: r.state, written: r.written, changes: r.changes, live: r.live, error: r.error });
+      let provider;
+      let r;
+      try { provider = providerFor(ed); r = await provider.observe(ctx, ed); } catch (e) { r = { state: 'ERROR', error: String(e?.message || e).slice(0, 200) }; }
+      out.push({ round: i, source: provider?.key || null, event: ed.source === 'espn' ? ed.event_id : `${ed.event_id}-${ed.year}`, state: r.state, written: r.written, changes: r.changes, live: r.live, error: r.error });
       if (r.state === 'PASS' && r.live) next.push(ed);
     }
     stillLive = next;
   }
-  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out };
+  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out };
   await kv.put('tennis-live:last_run', JSON.stringify(s));
   return s;
 }
@@ -55,7 +62,7 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, sleep = 
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname.replace(/\/+$/, '') || '/';
-    if (path === '/health' || path === '/') return json(await health({ worker: 'tennis-live', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY'], extra: { cron: '* * * * *', cadence_s: GAP_MS / 1000 } }), { headers: { 'cache-control': 'no-store' } });
+    if (path === '/health' || path === '/') return json(await health({ worker: 'tennis-live', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY'], extra: { cron: '* * * * *', cadence_s: GAP_MS / 1000, providers: Object.values(LIVE_PROVIDERS).map((p) => ({ source: p.key, tour: p.tour, events: p.events, granularity: p.granularity, official: p.official })) } }), { headers: { 'cache-control': 'no-store' } });
     if (path === '/v1/live/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });

@@ -19,6 +19,7 @@ import * as slams from '../../providers/slams.js';
 import * as open from '../../providers/open.js';
 import * as espn from '../../providers/espn.js';
 import { espnAtpStep, espnWtaStep, espnRankingStep } from './espn-jobs.js';
+import { espnLiveScan, espnLiveObserve, liveOwnedSet } from './espn-live.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { buildDnaV2 } from './dna-v2-job.js';
 import { wtaHistoryStep } from './wta-history-job.js';
@@ -32,7 +33,7 @@ import { STORE_5XX, BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
-export const VERSION = '0.3.0';
+export const VERSION = '0.4.0';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
 const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
 const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
@@ -209,8 +210,7 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
   await step(ctx, 'matches', async () => {
     const out = [];
     // editions tennis-live is actively polling are its to write while its heartbeat is fresh
-    const hb = await kv.get('live:heartbeat');
-    const owned = hb && Date.now() - Date.parse(hb) < 150 * 1000 ? new Set((await kv.get('live:owned', 'json')) || []) : new Set();
+    const owned = await liveOwnedSet(kv);
     const prevLive = new Map(((await kv.get('live:editions', 'json')) || []).map((e) => [e.edition_id, e]));
     for (const ed of active.slice(0, 12)) {
       if (owned.has(ed.edition_id)) { out.push({ event: `${ed.event_id}-${ed.year}`, state: 'OWNED_BY_LIVE' }); if (prevLive.has(ed.edition_id)) live.push(prevLive.get(ed.edition_id)); continue; }
@@ -224,11 +224,21 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
         continue;
       }
       out.push({ event: `${ed.event_id}-${ed.year}`, ...r });
-      if (r.live) live.push({ ...ed, live: r.live });
+      if (r.live) live.push({ ...ed, source: 'wta', live: r.live });
     }
-    await kv.put('live:editions', JSON.stringify(live), { expirationTtl: 900 });
     return out;
   });
+
+  // 2b. ATP live discovery (secondary ESPN feed, game-level): current ATP events with a competition in progress are
+  // handed to tennis-live through the same live:editions list (router source 'espn'); owned editions are never written
+  await step(ctx, 'espn_live', async () => {
+    const owned = await liveOwnedSet(kv);
+    const prevLive = new Map(((await kv.get('live:editions', 'json')) || []).map((e) => [e.edition_id, e]));
+    const r = await espnLiveScan(ctx, { today, owned, prevLive });
+    live.push(...r.live);
+    return { events: r.events, live: r.live.length, out: r.out };
+  });
+  await kv.put('live:editions', JSON.stringify(live), { expirationTtl: 900 });
 
   // 3. stats
   await step(ctx, 'stats', () => pendingStats(ctx, 20));
@@ -445,7 +455,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), candidate_probe: () => candidateProbe(ctx, params), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => (params.dry === 'full' ? dryFullBuild(ctx, asOfs, params) : buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' })) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), candidate_probe: () => candidateProbe(ctx, params), espn_live: async () => { const owned = await liveOwnedSet(ctx.kv); const dry = params.write === '0'; if (/^\d+-\d{4}$/.test(params.event || '')) return espnLiveObserve(ctx, params.event, { owned, dry }); return espnLiveScan(ctx, { today: iso(new Date()), owned, prevLive: new Map(), dry }); }, dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => (params.dry === 'full' ? dryFullBuild(ctx, asOfs, params) : buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' })) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;

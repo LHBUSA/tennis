@@ -1,12 +1,12 @@
 {
-  "run_at": "2026-09-27T23:57:12.361Z",
+  "run_at": "2026-09-29T12:51:45.919Z",
   "runner": "scripts/canary/run.mjs (local workstation egress)",
   "user_agent": "PropBetEdge-Tennis/0.1 (+https://tennis.propbetedge.ai/sources)",
   "client_stats": {
-    "requests": 37,
+    "requests": 1,
     "not_modified": 0,
     "retries": 0,
-    "blocked": 3
+    "blocked": 0
   },
   "results": [
     {
@@ -577,6 +577,36 @@
       "latency_ms": null,
       "record_count": null,
       "error": "blocked 200 challenge_page https://www.itftennis.com/tennis/api/TournamentApi/GetCalendar?circuitCode=MT&searchString=&skip=0&take=10&nationCodes=&zoneCodes=&dateFrom=2026-09-21&dateTo=2026-10-05&indoorOutdoor=&categories=&isOrderAscending=true&orderField=startDate&surfaceCodes=",
+      "drift": null
+    },
+    {
+      "key": "espn.atp.status",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/186263/status",
+      "http_status": 200,
+      "bytes": 276,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "4aee273887b0c660e56e613b58ce799b7efb012dd5af210d0f438552bd2f2c78",
+      "attempts": 1,
+      "latency_ms": 283,
+      "record_count": 1,
+      "error": null,
+      "drift": null
+    },
+    {
+      "key": "espn.atp.linescores",
+      "family": "espn",
+      "state": "PASS",
+      "url": "https://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/186263/competitors/3491-3718/linescores",
+      "http_status": 200,
+      "bytes": 693,
+      "content_type": "application/json;charset=utf-8",
+      "sha256": "9508b49212477ac03e4b5f3d9ae27f839e45932dff0fa5d6a50d390bd9945204",
+      "attempts": 1,
+      "latency_ms": 264,
+      "record_count": 1,
+      "error": null,
       "drift": null
     }
   ]

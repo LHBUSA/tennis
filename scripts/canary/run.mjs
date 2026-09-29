@@ -56,6 +56,9 @@ export const CANARIES = [
   { adapter: espnResults, key: 'espn.atp.event', params: { id: '154-2026' } },
   { adapter: espnResults, key: 'espn.atp.event@2008', params: { id: '154-2008' } },
   { adapter: espn.espnSeasonEvents, params: { year: 2026 } },
+  // live-state inputs of the tennis-live ESPN provider: competition status + per-competitor linescores (games per set)
+  { adapter: espn.espnCompetitionStatus, params: { eventId: '959-2026', compId: '186263' } },
+  { adapter: espn.espnLinescores, params: { eventId: '959-2026', compId: '186263', competitorId: '3491-3718' } },
   { adapter: espn.espnAthlete, params: { id: '3623' } },
   { adapter: espn.espnRankingWeek, params: { season: 2026, week: 38 } },
   { adapter: espn.espnRankingWeek, key: 'espn.atp.rankings@2010', params: { season: 2010, week: 10 } },

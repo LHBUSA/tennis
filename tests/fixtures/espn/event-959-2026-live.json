@@ -1,0 +1,276 @@
+{
+ "_capture": {
+  "source": "sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026",
+  "fetched_at": "2026-09-29T12:40:00Z",
+  "note": "trimmed to 3 competitions (MS scheduled 09-30 03:00Z, MD scheduled 09-30 05:30Z, MS with a result line); links/odds/refs removed"
+ },
+ "id": "959-2026",
+ "name": "China Open",
+ "shortName": "China Open",
+ "date": "2026-09-27T04:00Z",
+ "endDate": "2026-10-12T03:59Z",
+ "status": {
+  "type": {
+   "id": "2",
+   "name": "STATUS_IN_PROGRESS",
+   "state": "in",
+   "completed": false,
+   "description": "In Progress"
+  }
+ },
+ "location": {
+  "city": "Beijing",
+  "country": " China PR"
+ },
+ "competitions": [
+  {
+   "id": "186260",
+   "date": "2026-09-29T03:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "previewAvailable": false,
+   "recapAvailable": false,
+   "conversationAvailable": true,
+   "commentaryAvailable": false,
+   "pickcenterAvailable": true,
+   "summaryAvailable": true,
+   "liveAvailable": false,
+   "ticketsAvailable": false,
+   "onWatchESPN": false,
+   "recent": false,
+   "bracketAvailable": true,
+   "highlightsAvailable": false,
+   "gameSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "linescoreSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "statsSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "venue": {
+    "address": {
+     "summary": "Beijing, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "3811",
+     "type": "athlete",
+     "order": 1,
+     "name": "Tomas Machac",
+     "winner": false,
+     "linescores": {
+      "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/186260/competitors/3811/linescores?lang=en&region=us"
+     }
+    },
+    {
+     "id": "10427",
+     "type": "athlete",
+     "order": 2,
+     "name": "Arthur Gea",
+     "winner": true,
+     "linescores": {
+      "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/186260/competitors/10427/linescores?lang=en&region=us"
+     }
+    }
+   ],
+   "notes": [
+    {
+     "type": "Qualifying Final - Brad Drewett",
+     "text": "Arthur Gea (FRA) bt Tomas Machac (CZE) 6-3 6-4"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/186260/status?lang=en&region=us"
+   },
+   "tournamentId": 959,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 14,
+    "description": "Qualifying Final",
+    "abbreviation": "QUAL"
+   },
+   "court": {
+    "description": "Brad Drewett"
+   }
+  },
+  {
+   "id": "183447",
+   "date": "2026-09-30T03:00Z",
+   "type": {
+    "id": "1",
+    "text": "Men's Singles",
+    "slug": "mens-singles",
+    "type": "singles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "previewAvailable": false,
+   "recapAvailable": false,
+   "conversationAvailable": true,
+   "commentaryAvailable": false,
+   "pickcenterAvailable": true,
+   "summaryAvailable": true,
+   "liveAvailable": false,
+   "ticketsAvailable": false,
+   "onWatchESPN": false,
+   "recent": false,
+   "bracketAvailable": true,
+   "highlightsAvailable": false,
+   "gameSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "linescoreSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "statsSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "venue": {
+    "address": {
+     "summary": "Beijing, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2367",
+     "type": "athlete",
+     "order": 1,
+     "name": "Karen Khachanov"
+    },
+    {
+     "id": "3209",
+     "type": "athlete",
+     "order": 2,
+     "name": "Felix Auger-Aliassime",
+     "tournamentSeed": 2
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/183447/status?lang=en&region=us"
+   },
+   "tournamentId": 959,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Capital Group Diamond"
+   }
+  },
+  {
+   "id": "183472",
+   "date": "2026-09-30T05:30Z",
+   "type": {
+    "id": "3",
+    "text": "Men's Doubles",
+    "slug": "mens-doubles",
+    "type": "doubles"
+   },
+   "timeValid": true,
+   "neutralSite": false,
+   "previewAvailable": false,
+   "recapAvailable": false,
+   "conversationAvailable": true,
+   "commentaryAvailable": false,
+   "pickcenterAvailable": true,
+   "summaryAvailable": true,
+   "liveAvailable": false,
+   "ticketsAvailable": false,
+   "onWatchESPN": false,
+   "recent": false,
+   "bracketAvailable": true,
+   "highlightsAvailable": false,
+   "gameSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "linescoreSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "statsSource": {
+    "id": "0",
+    "description": "none",
+    "state": "none"
+   },
+   "venue": {
+    "address": {
+     "summary": "Beijing, China PR"
+    },
+    "indoor": false
+   },
+   "competitors": [
+    {
+     "id": "2865-10073",
+     "type": "team",
+     "order": 1,
+     "name": "Alexander Bublik/Shang Juncheng"
+    },
+    {
+     "id": "3700-3511",
+     "type": "team",
+     "order": 2,
+     "name": "Francisco Cerundolo/Arthur Rinderknech"
+    }
+   ],
+   "status": {
+    "$ref": "http://sports.core.api.espn.com/v2/sports/tennis/leagues/atp/events/959-2026/competitions/183472/status?lang=en&region=us"
+   },
+   "tournamentId": 959,
+   "format": {
+    "regulation": {
+     "periods": 5,
+     "displayName": "Set",
+     "slug": "set"
+    }
+   },
+   "round": {
+    "roundType": 1,
+    "description": "Round 1",
+    "abbreviation": "1ST"
+   },
+   "court": {
+    "description": "Brad Drewett"
+   }
+  }
+ ]
+}
