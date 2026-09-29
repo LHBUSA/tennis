@@ -113,6 +113,24 @@ export async function matchDnaLeaders(store, { metric, tour, limit }) {
   const [latest] = await store.select('tennis_dna_snapshots', `select=as_of,tennis_players!inner(gender)&definition_version=eq.2&surface=eq.all&tennis_players.gender=eq.${g}&order=as_of.desc&limit=1`);
   if (!latest) return null;
   const col = metric === 'pbe_rating' ? 'metrics->_rating' : `metrics->${metric}`;
+  const def0 = MATCH_DEFINITIONS[metric];
+  // Fast path (2026-09-29): the database filters, orders and limits; the same-tour qualified count and publication
+  // flag are the ones the build stored on every snapshot (population_qualified / comparative_published). The full
+  // scan below paged ~20k WTA rows with OFFSET: 44 s cold on the /dna default view.
+  if (metric !== 'pbe_rating' && def0) {
+    try {
+      const top = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&${col}->>comparable=eq.true&${col}->>confidence=in.(medium,high)&${col}->value=not.is.null&order=${col}->value.${def0.lower_is_better ? 'asc' : 'desc'},pbe_player_id.asc&limit=${Math.max(1, limit)}`);
+      const m0 = top[0]?.m;
+      if (!top.length || Number.isFinite(m0?.population_qualified)) {
+        const qualified = m0?.population_qualified ?? 0;
+        const published = !!m0?.comparative_published && qualified >= COMPARATIVE_MIN;
+        return {
+          metric, tour, as_of: latest.as_of, definition_version: 2, definition: def0.doc, published, qualified, threshold: COMPARATIVE_MIN,
+          rows: published ? top.map((r, i) => ({ rank: i + 1, player: shapePlayer(r.tennis_players), value: r.m.value, numerator: r.m.numerator ?? null, denominator: r.m.denominator ?? null, sample_matches: r.m.sample_matches ?? null, confidence: r.m.confidence ?? null })) : []
+        };
+      }
+    } catch { /* fall through to the full scan */ }
+  }
   const rows = [];
   for (let off = 0; ; off += 1000) {
     const page = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&order=pbe_player_id.asc&limit=1000&offset=${off}`);
