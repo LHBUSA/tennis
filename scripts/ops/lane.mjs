@@ -66,6 +66,8 @@ async function shard(k) {
     storeFails = 0; dataFails = 0;
     resume = Number.isInteger(r.position) && Number.isInteger(r.page) ? `&resume=${r.position}:${r.page}` : '';
     if (r.done) { log(`shard ${k} done`); return; }
+    // --once: one-shot lanes (probes, dry runs) stop after the first answered run (busy answers above still retry)
+    if (rest.includes('--once')) return;
     await sleep(8e3);
   }
 }

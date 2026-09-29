@@ -101,12 +101,13 @@ export async function espnMapProbe(ctx, params) {
     const keys = [...new Set([...pairs].flatMap((p) => p.split('~')))];
     const lo = Date.parse(e.start_date) - 3 * 86400e3;
     const hi = Date.parse(e.end_date) + 3 * 86400e3;
-    const t0 = Date.now(); const legacy = await legacyOfficialEditionMatches(store, e.year, keys); const legacyMs = Date.now() - t0;
-    const t1 = Date.now(); const next = await officialEditionMatches(store, e.year, lo, hi, keys); const newMs = Date.now() - t1;
+    const timed = async (f) => { const t = Date.now(); try { return { v: await f(), ms: Date.now() - t }; } catch (err) { return { error: String(err?.message || err).slice(0, 160), ms: Date.now() - t }; } };
+    const L = params.legacy === '0' ? { skipped: true } : await timed(() => legacyOfficialEditionMatches(store, e.year, keys));
+    const N = await timed(() => officialEditionMatches(store, e.year, lo, hi, keys));
     const flat = (t) => JSON.stringify([...t.values()].map((x) => [x.edition_id, x.hit, x.source_family, x.surface ?? null, x.indoor ?? null, x.name ?? null]).sort());
-    const a = tallyEditions(legacy, pairs, lo, hi);
-    const b = tallyEditions(next, pairs, lo, hi);
-    out.push({ edition: edId, name: e.name, pairs: pairs.size, keys: keys.length, legacy_rows: legacy.size, new_rows: next.size, legacy_ms: legacyMs, new_ms: newMs, tally_equal: flat(a) === flat(b), candidate_editions: b.size, top_hit: Math.max(0, ...[...b.values()].map((x) => x.hit)) });
+    const a = L.v ? tallyEditions(L.v, pairs, lo, hi) : null;
+    const b = N.v ? tallyEditions(N.v, pairs, lo, hi) : null;
+    out.push({ edition: edId, name: e.name, pairs: pairs.size, keys: keys.length, legacy_rows: L.v?.size ?? null, new_rows: N.v?.size ?? null, legacy_ms: L.ms ?? null, new_ms: N.ms, legacy_error: L.error || null, new_error: N.error || null, tally_equal: a && b ? flat(a) === flat(b) : null, candidate_editions: b?.size ?? null, top_hit: b ? Math.max(0, ...[...b.values()].map((x) => x.hit)) : null });
   }
   return { probe: 'espn_map', read_only: true, cases: out };
 }
@@ -118,9 +119,10 @@ export async function historyProbe(ctx, params) {
     const mem = await store.select('tennis_participant_members', `select=participant_key&pbe_player_id=eq.${pid}`);
     const mine = new Set(mem.map((m) => m.participant_key));
     if (!mine.size) { out.push({ player: pid, keys: 0, legacy_rows: 0, new_rows: 0, equal: true }); continue; }
-    const t0 = Date.now(); const legacy = await legacyPlayerRows(store, mine); const legacyMs = Date.now() - t0;
-    const t1 = Date.now(); const next = await playerRows(store, mine); const newMs = Date.now() - t1;
-    out.push({ player: pid, keys: mine.size, doubles_keys: [...mine].filter((k) => k.startsWith('D:')).length, legacy_rows: legacy.length, new_rows: next.length, legacy_ms: legacyMs, new_ms: newMs, equal: JSON.stringify(legacy) === JSON.stringify(next) });
+    const timed = async (f) => { const t = Date.now(); try { return { v: await f(), ms: Date.now() - t }; } catch (err) { return { error: String(err?.message || err).slice(0, 160), ms: Date.now() - t }; } };
+    const L = params.legacy === '0' ? { skipped: true } : await timed(() => legacyPlayerRows(store, mine));
+    const N = await timed(() => playerRows(store, mine));
+    out.push({ player: pid, keys: mine.size, doubles_keys: [...mine].filter((k) => k.startsWith('D:')).length, legacy_rows: L.v?.length ?? null, new_rows: N.v?.length ?? null, legacy_ms: L.ms ?? null, new_ms: N.ms, legacy_error: L.error || null, new_error: N.error || null, equal: L.v && N.v ? JSON.stringify(L.v) === JSON.stringify(N.v) : null });
   }
   return { probe: 'history', read_only: true, cases: out };
 }
