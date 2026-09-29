@@ -1,18 +1,19 @@
 {
-  "generated_at": "2026-09-29T17:50:50.116Z",
+  "generated_at": "2026-09-29T18:37:00.683Z",
   "windows": {
     "24h": {
-      "distribution": {
-        "detected": 44,
-        "wire": 29,
-        "brief": 2,
-        "full": 0,
-        "deep": 0,
+      "event_window": {
+        "basis": "events whose tennis_news_events.detected_at falls in the last 24 h (event clock)",
+        "events_detected": 44,
+        "classified_wire": 29,
+        "classified_brief": 2,
+        "classified_full": 0,
+        "classified_deep": 0,
+        "events_resulting_in_article": 2,
+        "queued_for_article": 0,
         "held": 0,
         "duplicates": 13,
-        "below_bar_legacy": 0,
-        "queued": 0,
-        "published": 2,
+        "legacy_below_bar": 0,
         "by_desk": {
           "atp": {
             "events": 16,
@@ -36,36 +37,59 @@
             "events": 0,
             "published": 0
           }
-        },
-        "articles": {
-          "published_articles": 12,
-          "brief": 12,
-          "full": 0,
-          "deep": 0,
-          "revised": 7
         }
       },
+      "article_activity": {
+        "basis": "articles whose first_published_at falls in the last 24 h (publication clock); backfill = first published after (i.e. by) the V3 reclassification (class_history stage reclassify_v3); revised = revised_at in the window",
+        "newly_published_live": 0,
+        "backfill_articles_created": 12,
+        "articles_revised": 7,
+        "historical_articles_preserved": 5,
+        "brief": 12,
+        "full": 0,
+        "deep": 0,
+        "total_published": 17
+      },
       "latency": {
-        "source_to_detect_min": {
-          "live_events": 11,
-          "p50": 0.9,
-          "p95": 1.7,
-          "catch_up_events": 20,
-          "without_any_source_clock": 9,
-          "basis": "first observation of the terminal status (fallback source_updated_at)"
+        "basis": "source -> detect = first observation of the terminal status (tennis_source_changes; fallback source_updated_at) -> tennis_news_events.detected_at; match START time is never used",
+        "current_live_slo": {
+          "since": "2026-09-29T16:50:00Z",
+          "definition": "events detected under the current production ingestion/news architecture (V3 cutover 2026-09-29T16:50:00Z; detection query time-bounded + keyset from 2026-09-29T18:22:00Z)",
+          "source_to_detect_min": {
+            "events": 1,
+            "p50": 0.9,
+            "p95": 0.9,
+            "over_5_min": 0
+          },
+          "detect_to_publish_min": {
+            "stories": 0,
+            "p50": null,
+            "p95": null,
+            "note": "no naturally eligible event has been detected and published since the V3 cutover yet"
+          }
+        },
+        "historical_observed": {
+          "note": "audit only: never used to claim current service health",
+          "source_to_detect_min": {
+            "live_events": 11,
+            "p50": 0.9,
+            "p95": 1.7,
+            "catch_up_events": 20,
+            "without_any_source_clock": 9
+          },
+          "over_5_min": [],
+          "detect_to_publish_min": {
+            "stories": 0,
+            "p50": null,
+            "p95": null,
+            "launch_batch_excluded": 0,
+            "v3_backfill_excluded": 2
+          }
         },
         "detect_to_wire_min": {
           "p50": 0,
           "p95": 0,
           "basis": "the live wire is a read projection of detected events: visible on detection (API cache <= 2 min)"
-        },
-        "detect_to_publish_min": {
-          "stories": 0,
-          "p50": null,
-          "p95": null,
-          "launch_batch_excluded": 0,
-          "v3_backfill_excluded": 2,
-          "note": "live pipeline only; stories == 0 means no event has been detected and published since the V3 cutover yet"
         }
       },
       "intelligence": {
@@ -86,17 +110,18 @@
       }
     },
     "7d": {
-      "distribution": {
-        "detected": 128,
-        "wire": 82,
-        "brief": 14,
-        "full": 1,
-        "deep": 0,
+      "event_window": {
+        "basis": "events whose tennis_news_events.detected_at falls in the last 168 h (event clock)",
+        "events_detected": 128,
+        "classified_wire": 82,
+        "classified_brief": 14,
+        "classified_full": 1,
+        "classified_deep": 0,
+        "events_resulting_in_article": 17,
+        "queued_for_article": 0,
         "held": 0,
         "duplicates": 29,
-        "below_bar_legacy": 0,
-        "queued": 0,
-        "published": 17,
+        "legacy_below_bar": 0,
         "by_desk": {
           "atp": {
             "events": 38,
@@ -120,36 +145,90 @@
             "events": 3,
             "published": 0
           }
-        },
-        "articles": {
-          "published_articles": 17,
-          "brief": 16,
-          "full": 1,
-          "deep": 0,
-          "revised": 7
         }
       },
+      "article_activity": {
+        "basis": "articles whose first_published_at falls in the last 168 h (publication clock); backfill = first published after (i.e. by) the V3 reclassification (class_history stage reclassify_v3); revised = revised_at in the window",
+        "newly_published_live": 5,
+        "backfill_articles_created": 12,
+        "articles_revised": 7,
+        "historical_articles_preserved": 0,
+        "brief": 16,
+        "full": 1,
+        "deep": 0,
+        "total_published": 17
+      },
       "latency": {
-        "source_to_detect_min": {
-          "live_events": 18,
-          "p50": 1.6,
-          "p95": 278.4,
-          "catch_up_events": 69,
-          "without_any_source_clock": 33,
-          "basis": "first observation of the terminal status (fallback source_updated_at)"
+        "basis": "source -> detect = first observation of the terminal status (tennis_source_changes; fallback source_updated_at) -> tennis_news_events.detected_at; match START time is never used",
+        "current_live_slo": {
+          "since": "2026-09-29T16:50:00Z",
+          "definition": "events detected under the current production ingestion/news architecture (V3 cutover 2026-09-29T16:50:00Z; detection query time-bounded + keyset from 2026-09-29T18:22:00Z)",
+          "source_to_detect_min": {
+            "events": 1,
+            "p50": 0.9,
+            "p95": 0.9,
+            "over_5_min": 0
+          },
+          "detect_to_publish_min": {
+            "stories": 0,
+            "p50": null,
+            "p95": null,
+            "note": "no naturally eligible event has been detected and published since the V3 cutover yet"
+          }
+        },
+        "historical_observed": {
+          "note": "audit only: never used to claim current service health",
+          "source_to_detect_min": {
+            "live_events": 18,
+            "p50": 1.6,
+            "p95": 278.4,
+            "catch_up_events": 69,
+            "without_any_source_clock": 33
+          },
+          "over_5_min": [
+            {
+              "event_id": "title:48ee6282b99f8756fcf6",
+              "detected_at": "2026-09-27 08:18:58.478+00",
+              "delay_min": 15.4,
+              "classification": "news_late: detection query truncation (\"updated in 6 h, limit 400\", no ORDER BY) crowded out by bulk historical rewrites; fixed by time-bounded keyset selection"
+            },
+            {
+              "event_id": "comeback:d2aa0b9da3eb03f8653f",
+              "detected_at": "2026-09-26 16:56:05.785+00",
+              "delay_min": 278.4,
+              "classification": "migration/backfill: newsroom first detection run (launch catch-up)"
+            },
+            {
+              "event_id": "doubles_title:4c60fd618db463e617c2",
+              "detected_at": "2026-09-26 16:56:05.785+00",
+              "delay_min": 68.6,
+              "classification": "migration/backfill: newsroom first detection run (launch catch-up)"
+            },
+            {
+              "event_id": "deciding_tiebreak:648538da6cd5a210c211",
+              "detected_at": "2026-09-28 10:16:14.39+00",
+              "delay_min": 199.9,
+              "classification": "news_late: detection query truncation (\"updated in 6 h, limit 400\", no ORDER BY) crowded out by bulk historical rewrites; fixed by time-bounded keyset selection"
+            },
+            {
+              "event_id": "doubles_title:c8c05950b8b51772b57e",
+              "detected_at": "2026-09-27 08:18:58.478+00",
+              "delay_min": 19.4,
+              "classification": "news_late: detection query truncation (\"updated in 6 h, limit 400\", no ORDER BY) crowded out by bulk historical rewrites; fixed by time-bounded keyset selection"
+            }
+          ],
+          "detect_to_publish_min": {
+            "stories": 2,
+            "p50": 0.5,
+            "p95": 0.5,
+            "launch_batch_excluded": 3,
+            "v3_backfill_excluded": 12
+          }
         },
         "detect_to_wire_min": {
           "p50": 0,
           "p95": 0,
           "basis": "the live wire is a read projection of detected events: visible on detection (API cache <= 2 min)"
-        },
-        "detect_to_publish_min": {
-          "stories": 2,
-          "p50": 0.5,
-          "p95": 0.5,
-          "launch_batch_excluded": 3,
-          "v3_backfill_excluded": 12,
-          "note": "live pipeline only; stories == 0 means no event has been detected and published since the V3 cutover yet"
         }
       },
       "intelligence": {
