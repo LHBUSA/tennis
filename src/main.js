@@ -6,6 +6,7 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
+import './styles/news.css';
 import './styles/pbecast.css';
 import './styles/pbecast-v2.css';
 import './styles/pbecast-v3.css';

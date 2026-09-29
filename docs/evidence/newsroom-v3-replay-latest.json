@@ -1,20 +1,20 @@
 {
   "summary": {
-    "generated_at": "2026-09-29T16:48:36.517Z",
+    "generated_at": "2026-09-29T16:52:36.073Z",
     "days": 7,
-    "mode": "preliminary (facts only)",
+    "mode": "final (frozen-packet evidence via worker dry run)",
     "events": 126,
     "by_class": {
-      "wire": 81,
-      "brief": 16,
+      "wire": 83,
+      "brief": 14,
       "full": 1,
       "deep": 0,
       "duplicate": 28
     },
     "by_class_and_tour": {
       "atp": {
-        "wire": 33,
-        "brief": 5,
+        "wire": 35,
+        "brief": 3,
         "full": 0,
         "deep": 0,
         "duplicate": 11
@@ -41,7 +41,7 @@
         "duplicate": 0
       }
     },
-    "would_create_articles": 14,
+    "would_create_articles": 12,
     "existing_articles": 5,
     "titles": [
       {
@@ -141,7 +141,7 @@
         "tier": "250",
         "materiality": 40,
         "old_state": "below_threshold",
-        "class": "brief"
+        "class": "wire"
       },
       {
         "tournament": "Chengdu Open",
@@ -150,7 +150,7 @@
         "tier": "250",
         "materiality": 40,
         "old_state": "below_threshold",
-        "class": "brief"
+        "class": "wire"
       },
       {
         "tournament": "Chengdu Open",
@@ -195,7 +195,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:74d84d49-df9a-59ef-9ef7-af6e824f9093",
@@ -213,11 +214,19 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "deciding_tiebreak: deciding tiebreak with significance (late round at a 500 event) -> brief"
+        "deciding_tiebreak: deciding tiebreak with significance (late round at a 500 event) -> brief",
+        "evidence: 4 meaningful dimensions (set_detail, match_statistics, ranking_context, tournament_context) -> at most brief"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "tournament_context"
+      ],
       "would_create_article": false,
-      "existing_article": true
+      "existing_article": true,
+      "duplicate_of": null
     },
     {
       "signature": "match:2ae34baa-de9b-570d-b483-6af75d4ebb09",
@@ -240,7 +249,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": true
+      "existing_article": true,
+      "duplicate_of": null
     },
     {
       "signature": "match:7f1fb127-aeb9-52be-beca-932b7ae6167f",
@@ -263,7 +273,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7f1fb127-aeb9-52be-beca-932b7ae6167f",
@@ -307,7 +318,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:298f7b31-c79a-5839-9d08-7bdc8c4f4f62",
@@ -330,7 +342,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:3f556be1-e538-5a72-a15f-026f31e1f7f9",
@@ -396,7 +409,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:f540332d-7459-55a6-9a51-70a3dfb31d59",
@@ -418,7 +432,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7ea0b011-a09d-5073-9f70-2ff64a0b2498",
@@ -440,7 +455,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:6fcf1262-fd86-5539-b268-d6d35361e77b",
@@ -458,11 +474,23 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "comeback: comeback with significance (late round at a 500 event) -> brief"
+        "comeback: comeback with significance (late round at a 500 event) -> brief",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:e76f71bf-6323-5689-b834-482a75d77d01",
@@ -484,7 +512,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:e429f178-4e74-59cf-b3fa-5eb3ec52fd02",
@@ -506,7 +535,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:2ae34baa-de9b-570d-b483-6af75d4ebb09",
@@ -550,7 +580,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": true
+      "existing_article": true,
+      "duplicate_of": null
     },
     {
       "signature": "match:94a939de-83f4-5efc-9576-87e1ef3f39ae",
@@ -572,7 +603,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:26d01d3c-f33f-5b81-85bf-fd2e87385566",
@@ -594,7 +626,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:041b61d9-b551-5ca2-bb11-ca2b570e2f05",
@@ -639,7 +672,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:2c1e8372-7e87-5a14-82ed-f7eccdbd8bfd",
@@ -657,11 +691,24 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "seed_upset: No. 1 seed out at a 250 event -> brief"
+        "seed_upset: No. 1 seed out at a 250 event -> brief",
+        "evidence: 9 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:c618df79-61dc-5505-a62c-8773308d62dd",
@@ -683,7 +730,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:451fc41b-4c78-5eb2-90ff-cae078758c77",
@@ -705,7 +753,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:a4636d45-8382-527f-a2b4-e9f9fdc3d2ca",
@@ -773,7 +822,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:626060f2-4799-5b8e-986c-1d6082ec7436",
@@ -791,11 +841,24 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "upset: beat a top-10 player (No. 5) -> brief"
+        "upset: beat a top-10 player (No. 5) -> brief",
+        "evidence: 9 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, h2h, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "h2h",
+        "tournament_context"
+      ],
       "would_create_article": false,
-      "existing_article": true
+      "existing_article": true,
+      "duplicate_of": null
     },
     {
       "signature": "match:c97a194e-7aaa-5f17-8d06-c02f9c21509a",
@@ -817,7 +880,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:43f62d14-7261-5bb3-a10d-97bca31e0d50",
@@ -839,7 +903,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1db9e6c9-15c0-5665-9f05-2bacfd538a86",
@@ -904,11 +969,24 @@
         "upset: beat No. 18 at a 500 event -> brief",
         "comeback: routine comeback -> wire",
         "seed_upset: No. 3 seed out at a 500 event -> brief",
-        "marathon: routine marathon -> wire"
+        "marathon: routine marathon -> wire",
+        "evidence: 9 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1db9e6c9-15c0-5665-9f05-2bacfd538a86",
@@ -952,7 +1030,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:2f0b9703-15c7-5360-a498-4d789593eceb",
@@ -992,11 +1071,23 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "title: 250 singles title -> brief"
+        "title: 250 singles title -> brief",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:a4b540fe-89d4-50ac-8514-70351ba4c256",
@@ -1014,11 +1105,19 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "doubles_title: 500 doubles title -> brief"
+        "doubles_title: 500 doubles title -> brief",
+        "evidence: 4 meaningful dimensions (set_detail, match_statistics, ranking_context, tournament_context) -> at most brief"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:ae42b520-c155-5553-8e8f-198799f565c7",
@@ -1041,7 +1140,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:ae42b520-c155-5553-8e8f-198799f565c7",
@@ -1086,7 +1186,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:e364b934-2eb8-558a-aa4c-ace4eb545f02",
@@ -1131,7 +1232,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:22709c5a-0f5d-5468-8d70-3fef13e74f04",
@@ -1153,7 +1255,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "enters_top50:ab7f89ac-4307-5717-a8f9-f713727f6ea0:2026-09-28",
@@ -1175,7 +1278,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "enters_top100:4dde2f5a-d546-5b18-b6aa-7b9f3b8168ef:2026-09-28",
@@ -1197,7 +1301,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "enters_top50:bd869c3b-b327-53cd-b183-8ade95880e03:2026-09-28",
@@ -1219,7 +1324,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1a0dd784-f6fc-5c81-b25b-7e1a69c695da",
@@ -1241,7 +1347,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1897bb02-a994-5d4e-9f00-57d309a778c3",
@@ -1263,7 +1370,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:bb6748eb-50b1-5fb2-8681-69d844452e3d",
@@ -1286,7 +1394,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:3335bd2e-1174-502b-960d-923e9aedaadd",
@@ -1308,7 +1417,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:bb6748eb-50b1-5fb2-8681-69d844452e3d",
@@ -1352,7 +1462,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:c452b6be-c8bf-501e-ac06-f9858d18bfca",
@@ -1370,11 +1481,23 @@
       "preliminary": "full",
       "class": "full",
       "reasons": [
-        "title: 500 singles title -> full"
+        "title: 500 singles title -> full",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "tournament_context"
+      ],
       "would_create_article": false,
-      "existing_article": true
+      "existing_article": true,
+      "duplicate_of": null
     },
     {
       "signature": "match:f50c1d46-113f-5de2-8e07-3122b9a08ac4",
@@ -1392,11 +1515,19 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief"
+        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief",
+        "evidence: 4 meaningful dimensions (set_detail, match_statistics, ranking_context, tournament_context) -> at most brief"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:45b63bda-36a3-5ffe-924d-f454ef55f38e",
@@ -1414,11 +1545,23 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "title: WTA 125 singles title -> brief"
+        "title: WTA 125 singles title -> brief",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:a72c0147-6c81-58fd-aa05-0308dd888416",
@@ -1436,11 +1579,23 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "title: WTA 125 singles title -> brief"
+        "title: WTA 125 singles title -> brief",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, pre_match_expectation, recent_form, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:cd80300f-fe7e-53db-9124-de545f5898d7",
@@ -1462,7 +1617,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:2c0fa298-4c36-5716-8a79-b90c9b673289",
@@ -1484,7 +1640,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:f185149b-b33b-543c-b4ab-8702320f1fec",
@@ -1506,7 +1663,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1fbbc9bb-9a94-500b-a9cc-15c22af61be1",
@@ -1525,11 +1683,23 @@
       "class": "brief",
       "reasons": [
         "title: WTA 125 singles title -> brief",
-        "comeback: routine comeback -> wire"
+        "comeback: routine comeback -> wire",
+        "evidence: 8 meaningful dimensions (set_detail, match_statistics, ranking_context, match_dna, technical_dna, recent_form, h2h, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "match_statistics",
+        "ranking_context",
+        "match_dna",
+        "technical_dna",
+        "recent_form",
+        "h2h",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1fbbc9bb-9a94-500b-a9cc-15c22af61be1",
@@ -1573,7 +1743,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:01520c56-eccd-5d15-baae-5c25221309a0",
@@ -1595,7 +1766,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:869bdc6e-803a-51be-8b64-7d2370128737",
@@ -1617,7 +1789,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:95d3c15d-a6b2-5bb5-9d58-afc79f70ae2e",
@@ -1639,7 +1812,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:0ad88e3b-fd38-5247-8742-405a05798713",
@@ -1657,11 +1831,22 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "seed_upset: No. 1 seed out at a 250 event -> brief"
+        "seed_upset: No. 1 seed out at a 250 event -> brief",
+        "evidence: 7 meaningful dimensions (set_detail, ranking_context, match_dna, pre_match_expectation, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "ranking_context",
+        "match_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:adf0846d-da4c-5991-83ff-6a490daef0b7",
@@ -1683,7 +1868,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:f4d9b5f2-5860-5945-83b0-840b780d0d61",
@@ -1706,7 +1892,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:f4d9b5f2-5860-5945-83b0-840b780d0d61",
@@ -1750,7 +1937,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7c1eb215-290a-5f9b-87a6-ae5e3498a99a",
@@ -1772,7 +1960,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:60f4a8e7-4f63-5321-8848-3df5e25bbf66",
@@ -1794,7 +1983,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b8e47e7a-5398-5e18-96b3-db27c31e14d7",
@@ -1816,7 +2006,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7a3c3574-6623-5297-b5de-d8bc9c5b4262",
@@ -1838,7 +2029,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:093c3d44-202a-51d5-8d77-39533c76f95e",
@@ -1860,7 +2052,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7e1e9112-7164-5324-b7f2-639eb71dc6ee",
@@ -1882,7 +2075,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:8245f0b0-a6ea-55aa-9b7b-aaaad44fe95e",
@@ -1904,7 +2098,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:07aa571d-e7dc-5046-9d69-1a817c37285c",
@@ -1926,7 +2121,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:750f799b-a512-5a6c-b330-dbf7cd9f7fd4",
@@ -1948,7 +2144,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:ed9a0b92-b2d5-5ae1-9eba-c8d5e1b17c09",
@@ -1970,7 +2167,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:70738b5d-059c-5847-beba-b7d6a097ef9c",
@@ -1992,7 +2190,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b9e76a69-61d1-52c0-8b80-1db3f215781f",
@@ -2014,7 +2213,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:9f5b4b1e-b59a-5840-9ab0-50bb70aaca4c",
@@ -2036,7 +2236,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:1acf3f48-bf28-5cf1-8206-1fa825ec9e8e",
@@ -2058,7 +2259,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:d111d111-3f1a-5f7e-add7-0e266f776c22",
@@ -2081,7 +2283,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:d111d111-3f1a-5f7e-add7-0e266f776c22",
@@ -2125,7 +2328,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:3cf81af5-f27c-5b3a-ae17-0676f4d60c13",
@@ -2147,7 +2351,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:72b5e46a-2758-5fc1-8977-74b1cf8595d2",
@@ -2169,7 +2374,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:811051c9-e9e5-5572-82cc-b34da670fc85",
@@ -2191,7 +2397,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:82e91689-5b84-5eaf-86ea-48bac070c770",
@@ -2213,7 +2420,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:a14428f7-6961-59a6-82a1-9fea5600b93b",
@@ -2235,7 +2443,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:2ba4ba89-35e3-5b59-ac7c-dddfbc9ea0ce",
@@ -2257,7 +2466,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b9bc2f87-2a9d-5a6a-a81a-c4ed7b298925",
@@ -2279,7 +2489,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b186095c-95cd-529d-8d6d-4a62b18ab903",
@@ -2301,7 +2512,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:0ad88e3b-fd38-5247-8742-405a05798713",
@@ -2320,9 +2532,19 @@
       "class": "duplicate",
       "reasons": [
         "upset: No. 19 upset in an early round of a smaller event -> wire",
-        "seed_upset: No. 1 seed out at a 250 event -> brief"
+        "seed_upset: No. 1 seed out at a 250 event -> brief",
+        "evidence: 7 meaningful dimensions (set_detail, ranking_context, match_dna, pre_match_expectation, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "ranking_context",
+        "match_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": false,
       "existing_article": false,
       "duplicate_of": "seed_upset:f6fb5996b81e0f65ae19"
@@ -2389,13 +2611,20 @@
       "old_state": "below_threshold",
       "detected_at": "2026-09-29 13:01:37.709+00",
       "preliminary": "brief",
-      "class": "brief",
+      "class": "wire",
       "reasons": [
-        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief"
+        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief",
+        "evidence: 2 meaningful dimensions (set_detail, tournament_context) -> at most wire",
+        "capped_by_evidence (brief -> wire)"
       ],
-      "evidence_dimensions": null,
-      "would_create_article": true,
-      "existing_article": false
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "tournament_context"
+      ],
+      "would_create_article": false,
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:09e78b3c-3252-57dd-8646-961590c56d8f",
@@ -2417,7 +2646,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b6dae453-c9cb-58ac-a42b-241121b80ddc",
@@ -2439,7 +2669,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:653805a7-c5a0-5289-9133-d8d312f877b7",
@@ -2462,7 +2693,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:653805a7-c5a0-5289-9133-d8d312f877b7",
@@ -2500,13 +2732,20 @@
       "old_state": "below_threshold",
       "detected_at": "2026-09-29 13:01:37.709+00",
       "preliminary": "brief",
-      "class": "brief",
+      "class": "wire",
       "reasons": [
-        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief"
+        "doubles_title: 250 doubles title (needs 4 evidence dimensions) -> brief",
+        "evidence: 2 meaningful dimensions (set_detail, tournament_context) -> at most wire",
+        "capped_by_evidence (brief -> wire)"
       ],
-      "evidence_dimensions": null,
-      "would_create_article": true,
-      "existing_article": false
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "tournament_context"
+      ],
+      "would_create_article": false,
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:66e2c500-da67-5161-b26d-875c3a218b40",
@@ -2528,7 +2767,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:c743033c-345a-5f09-a928-860a155bd5a3",
@@ -2550,7 +2790,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:dcc78d33-af75-5e12-812c-27a67ee738e1",
@@ -2573,7 +2814,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:dcc78d33-af75-5e12-812c-27a67ee738e1",
@@ -2617,7 +2859,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:60a3d0ce-bc93-5e29-afd5-e4d54562fdae",
@@ -2661,7 +2904,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:c1ca6e6c-ebfe-51af-aab6-f4b5d4607b10",
@@ -2684,7 +2928,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:c1ca6e6c-ebfe-51af-aab6-f4b5d4607b10",
@@ -2729,7 +2974,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:ac55896e-b200-54fe-8ee9-da57a9a00ec2",
@@ -2774,7 +3020,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:f16e4dc4-b7ac-509f-93b2-57627c7c1258",
@@ -2819,7 +3066,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:e795da27-ef17-5b01-aba6-89b9f5d70ac5",
@@ -2864,7 +3112,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:a8bc5eac-fade-53f5-9a6e-e41656e9e767",
@@ -2909,7 +3158,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:284a1dc8-a350-566b-9107-65d013a0390b",
@@ -2927,11 +3177,22 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "title: 250 singles title -> brief"
+        "title: 250 singles title -> brief",
+        "evidence: 7 meaningful dimensions (set_detail, ranking_context, match_dna, pre_match_expectation, recent_form, draw_path, tournament_context) -> at most deep"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "ranking_context",
+        "match_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "draw_path",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:b22b8b9c-6508-56c6-a043-e5fd6ca3af7f",
@@ -2949,11 +3210,21 @@
       "preliminary": "brief",
       "class": "brief",
       "reasons": [
-        "title: 250 singles title -> brief"
+        "title: 250 singles title -> brief",
+        "evidence: 6 meaningful dimensions (set_detail, ranking_context, match_dna, pre_match_expectation, recent_form, tournament_context) -> at most full"
       ],
-      "evidence_dimensions": null,
+      "evidence_dimensions": [
+        "result",
+        "set_detail",
+        "ranking_context",
+        "match_dna",
+        "pre_match_expectation",
+        "recent_form",
+        "tournament_context"
+      ],
       "would_create_article": true,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     },
     {
       "signature": "match:7db8e105-c589-5f2d-b44d-d2e835c656ca",
@@ -2975,7 +3246,8 @@
       ],
       "evidence_dimensions": null,
       "would_create_article": false,
-      "existing_article": false
+      "existing_article": false,
+      "duplicate_of": null
     }
   ]
 }

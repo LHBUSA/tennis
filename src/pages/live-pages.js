@@ -11,7 +11,7 @@ import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, 
 import { track } from '../analytics.js';
 import { liveEntry } from '../lib/pbecast-live.js';
 import { replayList } from './men.js';
-import { card as storyCard, editorialPicture } from './news.js';
+import { storyRow, wireList, editorialPicture } from './news.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -101,7 +101,7 @@ export const tournament = mountWith((root, { params }, signal) => {
   track('tennis_tournament_open', { tournament_id: `${params.slug}-${params.year}` });
   shell(root, { eyebrow: `Tournament · ${params.year}`, heading: title(params.slug) });
   // stories live outside the polled body so the 2-minute refresh never hides them
-  root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section class="mod" data-stories hidden style="margin-top:18px"><header class="mod-h"><h2>Tennis intelligence</h2><span class="mod-k">stories from this tournament</span></header><div class="nw-grid" data-stories-list></div></section>');
+  root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section class="mod" data-stories hidden style="margin-top:18px"><header class="mod-h"><h2>Latest from this event</h2><span class="mod-k">stories and live wire from this tournament</span></header><div data-stories-list></div></section>');
   fillStories(root, `tournament=${params.slug}&year=${params.year}`, signal);
   const qual = params.event === 'qualifying';
   const want = Object.entries(EVENT_SLUG).find(([, s]) => s === params.event)?.[0];
@@ -338,7 +338,7 @@ export const player = mountWith(async (root, { params }, signal) => {
       <section class="mod"><header class="mod-h"><h2>Surface record</h2></header><div class="mod-b">${Object.keys(surf).length ? html`<div class="surfrec">${Object.entries(surf).map(([s, r]) => html`<div class="${s}"><span>${s}</span><b>${r.W}–${r.L}</b></div>`)}</div><p class="note">Singles matches in the PropBetEdge store (${f.matches_in_store} total, coverage-limited).</p>` : html`<p class="note">No results in the store yet.</p>`}</div></section>
     </div>`}
     <section class="mod"><header class="mod-h"><h2>Ranking history</h2>${p.gender === 'M' ? html`<span class="mod-k">ATP singles · secondary source</span>` : ''}</header><div class="mod-b">${rankSpark(p.ranking_history || [], p.gender === 'M' ? 'atp_singles' : 'wta_singles')}</div></section>
-    <section class="mod" data-stories hidden><header class="mod-h"><h2>Tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header><div class="nw-grid" data-stories-list></div></section>
+    <section class="mod" data-stories hidden><header class="mod-h"><h2>Tennis intelligence</h2><a class="mod-k" href="/news">Newsroom →</a></header><div data-stories-list></div></section>
     ${md?.recent?.length ? html`<section class="mod"><header class="mod-h"><h2>Match history</h2><span class="mod-k">singles · last ${md.recent.length}</span></header>${historyTable(md)}</section>` : html`<section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>`}
     ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
     <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
@@ -346,13 +346,16 @@ export const player = mountWith(async (root, { params }, signal) => {
   fillStories(root, `player=${p.id}`, signal);
 });
 
-/** Published stories for a player (by canonical id) or a tournament edition; hidden when there are none. */
+/** Stories + live-wire items for a player (by canonical id) or a tournament edition (newsroom V3); hidden when neither
+ *  exists. Stories are ruled rows (no tile wall); the wire shows the deterministic fact cards for the same filter. */
 function fillStories(root, query, signal) {
-  api(`/v1/news?${query}&limit=4`, { signal }).then((r) => {
-    const list = r.data?.articles || [];
+  Promise.all([api(`/v1/news?${query}&limit=4`, { signal }).catch(() => null), api(`/v1/news/live?${query}&limit=8`, { signal }).catch(() => null)]).then(([r, w]) => {
+    const list = r?.data?.articles || [];
+    const wire = Array.isArray(w?.data?.items) ? w.data.items : [];
     const box = root.querySelector('[data-stories]');
-    if (!box || !list.length) return;
-    render(box.querySelector('[data-stories-list]'), html`${list.map((a) => storyCard(a))}`);
+    const wireHtml = wireList(wire, { limit: 6, more: false });
+    if (!box || (!list.length && !wireHtml)) return;
+    render(box.querySelector('[data-stories-list]'), html`<div class="nf-int${list.length && wireHtml ? ' two' : ''}">${list.length ? html`<div>${list.map((a) => storyRow(a))}</div>` : ''}${wireHtml ? html`<div><p class="nf-w-day" style="padding-top:0">Live wire</p>${wireHtml}</div>` : ''}</div>`);
     box.hidden = false;
   }).catch(() => {});
 }

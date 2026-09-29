@@ -8,7 +8,8 @@ import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { matchList, tournamentRow, slamRow } from '../ui/render.js';
 import { replayList } from './men.js';
-import { card } from './news.js';
+import { leadStory, storyRow, wireList } from './news.js';
+import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
 
 const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
@@ -107,12 +108,18 @@ export function mount(root) {
   }).catch(() => {});
   api('/v1/rankings?tour=wta&type=singles&limit=10', { signal: ctl.signal }).then((r) => { wta = r; drawPlayers(); }).catch(() => { wta = {}; drawPlayers(); });
   api('/v1/rankings?tour=atp&type=singles&limit=10', { signal: ctl.signal }).then((r) => { atp = r; drawPlayers(); }).catch(() => { atp = {}; drawPlayers(); });
-  // a wider window than we show, so the latest ATP and WTA stories can both surface (never duplicated or held)
-  api('/v1/news?limit=20', { signal: ctl.signal }).then((r) => {
+  // newsroom V3 on the homepage: top stories (lead + majors) next to the live wire. A wider window than we show, so
+  // the latest ATP and WTA stories can both surface (never duplicated or held)
+  Promise.all([api('/v1/news?limit=20', { signal: ctl.signal }).catch(() => null), api('/v1/news/live?limit=12', { signal: ctl.signal }).catch(() => null)]).then(([r, w]) => {
     const el = $('[data-news]');
     if (!el) return;
-    const list = ensureEach(r.data?.articles || [], 5, (a) => storyTour(a));
-    render(el, html`<header class="mod-h"><h2>Latest tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header>${list.length ? html`${card(list[0], true)}${list.length > 1 ? html`<div class="nw-grid">${list.slice(1, 5).map((a) => card(a))}</div>` : ''}` : html`<p class="note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing. <a href="/news">Newsroom →</a></p>`}`);
+    const list = ensureEach(r?.data?.articles || [], 5, (a) => storyTour(a));
+    const { lead, majors } = hierarchy(list, { majors: 2 });
+    const wire = Array.isArray(w?.data?.items) ? w.data.items : [];
+    const wireHtml = wireList(wire, { limit: 6, more: false });
+    render(el, html`<header class="mod-h"><h2>Latest tennis intelligence</h2><a class="mod-k" href="/news">Newsroom →</a></header>
+      ${lead || wireHtml ? html`<div class="nf-home-top">${lead ? html`<div>${leadStory(lead)}${majors.length ? html`<div class="nf-rows">${majors.map(storyRow)}</div>` : ''}</div>` : ''}${wireHtml ? html`<div class="nf-wire nf-wire-home"><header class="nf-sec"><h2><i class="nf-pulse" aria-hidden="true"></i>Live tennis wire</h2><a href="/news">All →</a></header>${wireHtml}</div>` : ''}</div>`
+        : html`<p class="note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing. <a href="/news">Newsroom →</a></p>`}`);
   }).catch(() => {});
   return () => { ctl.abort(); clearInterval(timer); };
 }
