@@ -586,7 +586,7 @@ export const PROFILE_DEFINITIONS = Object.freeze({
   windows: 'matches in the last 5 / 10 / 20 / 52 weeks before as_of',
   vs_strength: `opponent PBE Rating before the match vs the player’s own: stronger = opponent ${STRENGTH_GAP}+ points higher, weaker = ${STRENGTH_GAP}+ lower, similar otherwise; unrated = either player below 10 rated matches`,
   vs_hand: 'opponent playing hand from the stored player bio; unknown = not sourced (never guessed)',
-  by_level: 'edition competition level as stored; unclassified = the source gives no level',
+  by_level: 'edition competition level as stored (WTA / Slam / Finals keys from the official record; ATP 1000 / 500 / 250 from the reviewed ATP tier registry, since the secondary ATP source publishes no level); unclassified = no level from the source and not in the registry',
   by_round: 'qualifying, round robin, early (R1-R2), middle (R3-R4), quarterfinal, semifinal, final',
   rating_history: 'one point per month played = the pre-match rating at the first match of that month (idle months have no point); last point = rating at as_of; peak / biggest 3-month gain and drop over established points (20+ rated matches)',
   style_archetypes: 'not available: style archetypes need point-level serve/return statistics for both players and are never derived from results'

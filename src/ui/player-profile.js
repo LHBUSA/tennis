@@ -54,7 +54,8 @@ const splitTable = (rows, min) => html`<div class="tbl-wrap"><table class="tbl s
 const STRENGTH = [['stronger', 'vs stronger (opponent rated 100+ higher)'], ['similar', 'vs similar (within 100)'], ['weaker', 'vs weaker (100+ lower)'], ['unrated', 'Opponent or player not yet rated']];
 const HAND = [['left', 'vs left-handers'], ['right', 'vs right-handers'], ['unknown', 'Opponent hand not sourced']];
 const ROUNDS = [['qualifying', 'Qualifying'], ['round_robin', 'Round robin'], ['early', 'Early rounds (R1–R2)'], ['middle', 'Middle rounds (R3–R4)'], ['quarterfinal', 'Quarterfinals'], ['semifinal', 'Semifinals'], ['final', 'Finals'], ['unknown', 'Round not recorded']];
-const LEVEL = { grand_slam: 'Grand Slams', atp_finals: 'ATP Finals', wta_finals: 'WTA Finals', olympics: 'Olympics', unclassified: 'Level not given by the source' };
+const LEVEL = { grand_slam: 'Grand Slams', atp_finals: 'ATP Finals', wta_finals: 'WTA Finals', olympics: 'Olympics', atp_1000: 'ATP Masters 1000', atp_500: 'ATP 500', atp_250: 'ATP 250', wta_1000: 'WTA 1000', wta_500: 'WTA 500', wta_250: 'WTA 250', wta_125: 'WTA 125', itf_women: 'ITF (women)', davis_cup: 'Davis Cup', united_cup: 'United Cup', billie_jean_king_cup: 'Billie Jean King Cup', unclassified: 'Level not given by the source' };
+const levelLabel = (k) => LEVEL[k] || k.replace(/_/g, ' ').replace(/^(atp|wta|itf)/i, (x) => x.toUpperCase());
 const pick = (o, keys) => keys.filter(([k]) => o?.[k]).map(([k, l]) => [l, o[k]]);
 
 /** Rolling windows + archetype / level / round splits. */
@@ -69,6 +70,6 @@ export function profileBlock(p, defs, asOf) {
       ${splitTable([...pick(p.vs_strength, STRENGTH), ...pick(p.vs_hand, HAND)], min)}
       <p class="note">${defs?.vs_strength || ''}. ${defs?.vs_hand || ''}. Style archetypes (big server, counter-puncher…) are not shown: ${String(defs?.style_archetypes || '').replace(/^not available: /, '')}.</p></section>
     <section class="mod"><header class="mod-h"><h2>Tournament level &amp; round</h2></header>
-      ${splitTable([...Object.entries(p.by_level || {}).sort((a, b) => n(b[1]) - n(a[1])).map(([k, x]) => [LEVEL[k] || k.replace(/_/g, ' '), x]), ...pick(p.by_round, ROUNDS)], min)}
+      ${splitTable([...Object.entries(p.by_level || {}).sort((a, b) => n(b[1]) - n(a[1])).map(([k, x]) => [levelLabel(k), x]), ...pick(p.by_round, ROUNDS)], min)}
       <p class="note">${defs?.by_level || ''}. Rows with fewer than ${min} matches are small samples: shown for completeness, never ranked.</p></section>`;
 }

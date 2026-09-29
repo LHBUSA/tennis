@@ -9,30 +9,34 @@
 // Finals (competition_key atp_finals) are already classified at ingest and are not listed.
 //
 // Source of the categories: the ATP Tour's published tournament categories for each season (Masters 1000 / 500 / 250),
-// reviewed by hand for 2024-2026 including the 2025 upgrades to 500 (Doha, Dallas, Munich). Every entry has an explicit
+// reviewed by hand: every tier 2024-2026; Masters 1000 since 2009; the 500s back to the season each became a 500 (or 2009);
+// the 2025 upgrades (Doha, Dallas, Munich) split by season; other 250s only 2024-2026. Every entry has an explicit
 // season range; a season outside it, or a tournament not listed (e.g. Olympics, exhibitions, anything new), is UNKNOWN
 // and falls back to the unchanged default (no level -> the 250 floor). Never guessed, never inferred from names or prize
-// money. Nothing here is published as a level on the site; it only weights newsroom materiality.
+// money. Consumers: newsroom materiality, and Match DNA's tournament-level split (in memory at build time; never written back as an
+// edition level).
 
 import { tournamentId, editionId } from './canonical/ids.js';
 
-export const REGISTRY_VERSION = 'atp-tiers/2026-09-29.1';
+export const REGISTRY_VERSION = 'atp-tiers/2026-09-29.2';
+/** Canonical level key per tier (Match DNA by_level; mirrors the WTA competition keys). */
+export const TIER_KEY = Object.freeze({ 'ATP Masters 1000': 'atp_1000', 'ATP 500': 'atp_500', 'ATP 250': 'atp_250' });
 export const TIERS = Object.freeze({ M1000: 'ATP Masters 1000', A500: 'ATP 500', A250: 'ATP 250' });
 
 // [espn tournament id, tier, first season, last season, label]
 const ROWS = [
-  // Masters 1000
-  [411, 'M1000', 2024, 2026, 'Indian Wells'], [713, 'M1000', 2024, 2026, 'Miami'], [42, 'M1000', 2024, 2026, 'Monte-Carlo'],
-  [413, 'M1000', 2024, 2026, 'Madrid'], [414, 'M1000', 2024, 2026, 'Rome'], [421, 'M1000', 2024, 2026, 'Canada (Toronto/Montreal)'],
-  [718, 'M1000', 2024, 2026, 'Cincinnati'], [315, 'M1000', 2024, 2026, 'Shanghai'], [13, 'M1000', 2024, 2026, 'Paris'],
-  // ATP 500
-  [4, 'A500', 2024, 2026, 'Rotterdam'], [375, 'A500', 2024, 2026, 'Rio de Janeiro'], [711, 'A500', 2024, 2026, 'Acapulco'],
-  [25, 'A500', 2024, 2026, 'Dubai'], [338, 'A500', 2024, 2026, 'Barcelona'], [942, 'A500', 2024, 2026, 'Hamburg'],
-  [27, 'A500', 2024, 2026, 'Halle'], [129, 'A500', 2024, 2026, "Queen's Club (London)"], [888, 'A500', 2024, 2026, 'Washington'],
-  [5, 'A500', 2024, 2026, 'Tokyo'], [959, 'A500', 2024, 2026, 'Beijing'], [10, 'A500', 2024, 2026, 'Vienna'], [23, 'A500', 2024, 2026, 'Basel'],
+  // Masters 1000 (the nine events unchanged since the 2009 calendar; seasons without an edition simply match nothing)
+  [411, 'M1000', 2009, 2026, 'Indian Wells'], [713, 'M1000', 2009, 2026, 'Miami'], [42, 'M1000', 2009, 2026, 'Monte-Carlo'],
+  [413, 'M1000', 2009, 2026, 'Madrid'], [414, 'M1000', 2009, 2026, 'Rome'], [421, 'M1000', 2009, 2026, 'Canada (Toronto/Montreal)'],
+  [718, 'M1000', 2009, 2026, 'Cincinnati'], [315, 'M1000', 2009, 2026, 'Shanghai'], [13, 'M1000', 2009, 2026, 'Paris'],
+  // ATP 500 (first season as a 500 where it is later than 2009: Rio 2014, Halle / Queen's / Vienna 2015, the 2025 upgrades)
+  [4, 'A500', 2009, 2026, 'Rotterdam'], [375, 'A500', 2014, 2026, 'Rio de Janeiro'], [711, 'A500', 2009, 2026, 'Acapulco'],
+  [25, 'A500', 2009, 2026, 'Dubai'], [338, 'A500', 2009, 2026, 'Barcelona'], [942, 'A500', 2009, 2026, 'Hamburg'],
+  [27, 'A500', 2015, 2026, 'Halle'], [129, 'A500', 2015, 2026, "Queen's Club (London)"], [888, 'A500', 2009, 2026, 'Washington'],
+  [5, 'A500', 2009, 2026, 'Tokyo'], [959, 'A500', 2009, 2026, 'Beijing'], [10, 'A500', 2015, 2026, 'Vienna'], [23, 'A500', 2009, 2026, 'Basel'],
   [119, 'A500', 2025, 2026, 'Doha'], [836, 'A500', 2025, 2026, 'Dallas'], [12, 'A500', 2025, 2026, 'Munich'],
   // ATP 250
-  [119, 'A250', 2024, 2024, 'Doha'], [836, 'A250', 2024, 2024, 'Dallas'], [12, 'A250', 2024, 2024, 'Munich'],
+  [119, 'A250', 2009, 2024, 'Doha'], [836, 'A250', 2022, 2024, 'Dallas'], [12, 'A250', 2009, 2024, 'Munich'],
   [970, 'A250', 2024, 2026, 'Brisbane'], [925, 'A250', 2024, 2026, 'Auckland'], [971, 'A250', 2024, 2026, 'Hong Kong'],
   [611, 'A250', 2024, 2026, 'Adelaide'], [29, 'A250', 2024, 2026, 'Montpellier'], [518, 'A250', 2024, 2024, 'Cordoba'],
   [299, 'A250', 2024, 2026, 'Buenos Aires'], [110, 'A250', 2024, 2025, 'Marseille'], [296, 'A250', 2024, 2026, 'Delray Beach'],

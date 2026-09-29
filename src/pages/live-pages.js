@@ -262,20 +262,34 @@ function playerHero(p, meta, tab, md = null) {
 }
 
 const ORD = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
-const PCT_NOTE = { missing: '—', player_sample_low: 'Sample too small', peer_sample_not_mature: 'Peer sample not mature' };
+const PCT_NOTE = { missing: 'no value', player_sample_low: 'Sample too small', peer_sample_not_mature: 'comparison building' };
 /** Tennis DNA publication contract: individual measurements always; a metric percentile only with enough same-tour
  *  peers; the full comparative view (radar, bars) only once the tour gate opens. */
 function dnaSection(d) {
   const byKey = Object.fromEntries((d.dimensions || []).map((x) => [x.key, x]));
   const cmp = d.comparative || { published: false };
   const rows = Object.values(d.metrics || {}).filter((m) => m && m.metric_key);
-  return html`<section class="mod"><header class="mod-h"><h2>Tennis DNA</h2><span class="mod-k">v${d.definition_version} · ${d.tour} singles · as of ${fmtDate(d.as_of)}</span></header>
+  return html`<section class="mod"><header class="mod-h"><h2>Technical DNA — ${cmp.published ? 'published' : 'coverage building'}</h2><span class="mod-k">v${d.definition_version} · ${d.tour} singles · as of ${fmtDate(d.as_of)}</span></header>
+    ${cmp.published ? '' : html`<p class="dna-status"><b>TECHNICAL DNA — COVERAGE BUILDING.</b> ${cmp.qualified} of ${cmp.threshold} ${d.tour} players currently meet the full comparative standard, so the tour radar, strengths and leaderboard are held (the gate is not lowered). The individual measurements below are real; each metric's ${d.tour} percentile appears as soon as at least 10 ${d.tour} players have a medium-confidence sample for it. ATP and WTA are never compared.</p>`}
     ${cmp.published ? html`<div class="dna-wrap"><div>${dnaRadar(d.dimensions)}<p class="note">Percentile vs ${d.percentile_basis}.</p></div><div>${dnaBars(d.dimensions)}</div></div>` : ''}
     <div class="tbl-wrap"><table class="tbl dna-tbl"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n hide-s">Sample</th><th>Confidence</th><th>${d.tour} percentile</th></tr></thead><tbody>
-      ${rows.map((m) => { const x = byKey[m.metric_key]; return html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${m.value == null ? '—' : pct(m.value)}</td><td class="n hide-s">${m.numerator == null ? '' : `${m.numerator}/${m.denominator} · `}${m.sample_matches ?? 0} matches</td><td><span class="conf c-${m.confidence}">${m.confidence}</span></td><td>${x?.percentile != null ? html`<b>${ORD(x.percentile)}</b>` : html`<span class="note">${x ? PCT_NOTE[x.percentile_status] || '—' : '—'}</span>`}</td></tr>`; })}
+      ${rows.map((m) => { const x = byKey[m.metric_key]; return html`<tr><th scope="row" style="text-align:left">${m.metric_key.replace(/_/g, ' ')}</th><td class="n">${m.value == null ? '—' : pct(m.value)}</td><td class="n hide-s">${m.numerator == null ? '' : `${m.numerator}/${m.denominator} · `}${m.sample_matches ?? 0} matches</td><td><span class="conf c-${m.confidence}">${m.confidence}</span></td><td>${x?.percentile != null ? html`<b>${ORD(x.percentile)}</b>` : html`<span class="note">${x ? (x.percentile_status === 'peer_sample_not_mature' ? `${d.tour} comparison building` : PCT_NOTE[x.percentile_status] || 'no value') : 'measurement only'}</span>`}</td></tr>`; })}
     </tbody></table></div>
-    ${cmp.published ? '' : html`<p class="dna-status"><b>${d.tour} peer comparison still building.</b> ${cmp.qualified} of ${cmp.threshold} players currently meet the full comparative-DNA standard, so the tour radar, strengths and leaderboard are not shown yet. A metric's percentile appears once at least 10 ${d.tour} players have a medium-confidence sample for it. ATP and WTA are never compared.</p>`}
+    <p class="note">“measurement only” = a descriptive rate with no tour percentile by definition (both tours).</p>
   </section>`;
+}
+
+/** Surface rating history: a chart where a validated surface rating has stored history; otherwise the explicit reason. */
+function surfaceHistorySection(md) {
+  const S = (md.by_surface || []).filter((x) => x.rating);
+  if (!S.length) return '';
+  const cap = (x) => `${x.surface[0].toUpperCase()}${x.surface.slice(1)}`;
+  const charted = (x) => x.profile?.rating_history && x.rating.status !== 'not_validated';
+  const why = (x) => (x.rating.status === 'not_validated' ? `not published — the ${md.tour} surface model has not passed its out-of-sample validation gate`
+    : !x.profile?.rating_history ? `no history chart: the ${x.surface} rating is not established (${x.rating.rated_matches ?? 0} rated ${x.surface} matches; a chart needs 20+ and a ${x.surface} match in the last 365 days)` : '');
+  return html`<section class="mod"><header class="mod-h"><h2>Surface rating history</h2><span class="mod-k">pre-match surface ratings · months played on the surface</span></header>
+    ${S.some(charted) ? html`<div class="surf-charts">${S.filter(charted).map((x) => html`<div class="surf-chart ${x.surface}"><h3 class="sub-h">${cap(x)}</h3>${ratingChart(x.profile.rating_history, { label: `${x.surface} rating history` })}</div>`)}</div>` : ''}
+    ${S.filter((x) => !charted(x)).map((x) => html`<p class="note"><b>${cap(x)}:</b> ${why(x)}.</p>`)}</section>`;
 }
 
 export const player = mountWith(async (root, { params }, signal) => {
@@ -302,7 +316,7 @@ export const player = mountWith(async (root, { params }, signal) => {
         <section class="mod"><header class="mod-h"><h2>Form</h2><span class="mod-k">as of ${fmtDate(md.as_of)}</span></header><div class="mod-b">${formBlock(md.form)}</div></section>
         ${md.families.map((f) => familyTable(f, md.tour))}
         ${surfaceTable(md)}
-        ${(md.by_surface || []).some((x) => x.profile?.rating_history && x.rating && x.rating.status !== 'not_validated') ? html`<section class="mod"><header class="mod-h"><h2>Surface rating history</h2><span class="mod-k">pre-match surface ratings · months played on the surface</span></header><div class="surf-charts">${md.by_surface.filter((x) => x.profile?.rating_history && x.rating && x.rating.status !== 'not_validated').map((x) => html`<div class="surf-chart ${x.surface}"><h3 class="sub-h">${x.surface[0].toUpperCase()}${x.surface.slice(1)}</h3>${ratingChart(x.profile.rating_history, { label: `${x.surface} rating history` })}</div>`)}</div></section>` : ''}` : ''}
+        ${surfaceHistorySection(md)}` : ''}
       <h2 class="sec">Technical DNA <small>serve · return · pressure from match statistics</small></h2>
       ${d ? dnaSection(d) : html`<p class="dna-status" data-tech-status="unavailable"><b>Technical serve/return DNA is still building</b> for ${p.name}: it needs matches with published serve/return statistics.${md ? ' Match DNA above is complete and unaffected.' : ''}</p>`}
       ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}

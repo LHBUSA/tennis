@@ -1,81 +1,1396 @@
 {
-  "generated_at": "2026-09-27T20:40:22.376Z",
-  "role": "Tennis DNA v2 build summary (production, tennis-ingest dna_v2); ESPN lists dated to their effective Monday",
+  "generated_at": "2026-09-29T15:22:25.559Z",
+  "role": "Tennis DNA v2 build summary (production, tennis-ingest dna_v2, KV dna:v2:summary built 2026-09-29T03:44:57.836Z); ESPN lists dated to their effective Monday",
+  "note": "Refreshed 2026-09-29. Change since 2026-09-27: ATP surface_published false -> true under the UNCHANGED gate (surface blend must beat the overall rating out of sample): ATP blended log loss 0.5898 < overall 0.5921 on 10388 matches (more stored-surface ATP history since the 2026-09-27 build).",
   "builder": "tennis-ingest dna-v2-job 1.0",
   "definition_version": 2,
   "rating_method_version": 1,
   "as_of": [
-    "2026-09-27"
+    "2026-09-29",
+    "2026-07-01"
   ],
-  "ledger": 153259,
+  "ledger": 536309,
   "tours": {
     "ATP": {
-      "matches": 52879,
-      "first_day": "2006-12-31",
-      "last_day": "2026-09-27",
+      "mismatched_rows": 0,
+      "matches": 53102,
+      "first_day": "1998-07-05",
+      "last_day": "2026-09-28",
       "ranking_lists": 809,
       "variant": "standard",
       "published": true,
-      "surface_published": false,
+      "surface_published": true,
       "backtest": {
         "standard": {
-          "matches": 34401,
-          "log_loss": 0.6184,
-          "brier": 0.2148,
-          "accuracy": 0.6547,
+          "matches": 34429,
+          "log_loss": 0.6183,
+          "brier": 0.2147,
+          "accuracy": 0.6548,
           "coin_log_loss": 0.6931,
           "vs_rank": {
-            "rank_model_fit_matches": 10625,
-            "matches": 15640,
-            "rating_log_loss": 0.6327,
+            "rank_model_fit_matches": 10631,
+            "matches": 15649,
+            "rating_log_loss": 0.6326,
             "rank_log_loss": 0.6391,
-            "rating_brier": 0.2214,
+            "rating_brier": 0.2213,
             "rank_brier": 0.2246,
-            "rating_accuracy": 0.6358,
+            "rating_accuracy": 0.6361,
             "rank_accuracy": 0.6221,
             "rank_model_c": 0.7
           },
           "surface_blend": {
-            "matches": 4635,
-            "blended_log_loss": 0.5381,
-            "overall_log_loss": 0.5345
+            "matches": 10388,
+            "blended_log_loss": 0.5898,
+            "overall_log_loss": 0.5921
+          },
+          "calibration": {
+            "band": 0.05,
+            "basis": "out-of-sample matches (both players >= minPrior rated matches) by favourite probability band and stored edition surface",
+            "overall": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 4993,
+                  "predicted": 0.5247,
+                  "observed": 0.5141
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 5015,
+                  "predicted": 0.5748,
+                  "observed": 0.5446
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 4775,
+                  "predicted": 0.625,
+                  "observed": 0.5939
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 4473,
+                  "predicted": 0.6741,
+                  "observed": 0.6416
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 4177,
+                  "predicted": 0.7248,
+                  "observed": 0.6794
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 3614,
+                  "predicted": 0.7741,
+                  "observed": 0.7227
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 2947,
+                  "predicted": 0.8245,
+                  "observed": 0.7743
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 2252,
+                  "predicted": 0.8733,
+                  "observed": 0.8171
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 1506,
+                  "predicted": 0.9234,
+                  "observed": 0.8858
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 677,
+                  "predicted": 0.9673,
+                  "observed": 0.938
+                }
+              ],
+              "unknown": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 3225,
+                  "predicted": 0.5247,
+                  "observed": 0.5073
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 3203,
+                  "predicted": 0.5748,
+                  "observed": 0.5376
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 3035,
+                  "predicted": 0.625,
+                  "observed": 0.5865
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 2766,
+                  "predicted": 0.6742,
+                  "observed": 0.6396
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 2566,
+                  "predicted": 0.7244,
+                  "observed": 0.6761
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 2205,
+                  "predicted": 0.7741,
+                  "observed": 0.7283
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 1769,
+                  "predicted": 0.8245,
+                  "observed": 0.7603
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 1252,
+                  "predicted": 0.8726,
+                  "observed": 0.7843
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 791,
+                  "predicted": 0.923,
+                  "observed": 0.866
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 317,
+                  "predicted": 0.9669,
+                  "observed": 0.9148
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 1035,
+                  "predicted": 0.5246,
+                  "observed": 0.5372
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 1017,
+                  "predicted": 0.575,
+                  "observed": 0.5526
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 973,
+                  "predicted": 0.625,
+                  "observed": 0.6033
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 980,
+                  "predicted": 0.6735,
+                  "observed": 0.65
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 895,
+                  "predicted": 0.7253,
+                  "observed": 0.6804
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 814,
+                  "predicted": 0.7744,
+                  "observed": 0.7187
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 626,
+                  "predicted": 0.8244,
+                  "observed": 0.7971
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 548,
+                  "predicted": 0.874,
+                  "observed": 0.8631
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 387,
+                  "predicted": 0.9239,
+                  "observed": 0.8992
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 185,
+                  "predicted": 0.967,
+                  "observed": 0.9568
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 416,
+                  "predicted": 0.5246,
+                  "observed": 0.5288
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 487,
+                  "predicted": 0.5739,
+                  "observed": 0.5832
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 459,
+                  "predicted": 0.625,
+                  "observed": 0.5991
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 453,
+                  "predicted": 0.6747,
+                  "observed": 0.6446
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 445,
+                  "predicted": 0.7252,
+                  "observed": 0.6921
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 371,
+                  "predicted": 0.7732,
+                  "observed": 0.7035
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 339,
+                  "predicted": 0.8245,
+                  "observed": 0.7758
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 255,
+                  "predicted": 0.8742,
+                  "observed": 0.8471
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 208,
+                  "predicted": 0.9237,
+                  "observed": 0.9183
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 99,
+                  "predicted": 0.9693,
+                  "observed": 0.9798
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 317,
+                  "predicted": 0.5257,
+                  "observed": 0.489
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 308,
+                  "predicted": 0.5761,
+                  "observed": 0.5292
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 308,
+                  "predicted": 0.6244,
+                  "observed": 0.6299
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 274,
+                  "predicted": 0.6743,
+                  "observed": 0.6277
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 271,
+                  "predicted": 0.7254,
+                  "observed": 0.6863
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 224,
+                  "predicted": 0.7753,
+                  "observed": 0.7143
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 213,
+                  "predicted": 0.8253,
+                  "observed": 0.8216
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 197,
+                  "predicted": 0.8749,
+                  "observed": 0.8579
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 120,
+                  "predicted": 0.9242,
+                  "observed": 0.9167
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 76,
+                  "predicted": 0.9671,
+                  "observed": 0.9342
+                }
+              ]
+            },
+            "surface_blend": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 1529,
+                  "predicted": 0.5251,
+                  "observed": 0.5193
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 1472,
+                  "predicted": 0.5753,
+                  "observed": 0.5652
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 1517,
+                  "predicted": 0.6243,
+                  "observed": 0.6104
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 1336,
+                  "predicted": 0.6748,
+                  "observed": 0.6587
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 1178,
+                  "predicted": 0.7245,
+                  "observed": 0.6969
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 1077,
+                  "predicted": 0.7739,
+                  "observed": 0.7623
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 854,
+                  "predicted": 0.8232,
+                  "observed": 0.7857
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 667,
+                  "predicted": 0.8728,
+                  "observed": 0.8876
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 523,
+                  "predicted": 0.9247,
+                  "observed": 0.9159
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 235,
+                  "predicted": 0.9658,
+                  "observed": 0.9574
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 915,
+                  "predicted": 0.5248,
+                  "observed": 0.5279
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 928,
+                  "predicted": 0.5752,
+                  "observed": 0.5733
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 977,
+                  "predicted": 0.624,
+                  "observed": 0.6172
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 830,
+                  "predicted": 0.6752,
+                  "observed": 0.6518
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 716,
+                  "predicted": 0.7247,
+                  "observed": 0.6872
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 678,
+                  "predicted": 0.7741,
+                  "observed": 0.7493
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 565,
+                  "predicted": 0.8231,
+                  "observed": 0.7699
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 415,
+                  "predicted": 0.8727,
+                  "observed": 0.8795
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 321,
+                  "predicted": 0.924,
+                  "observed": 0.9003
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 149,
+                  "predicted": 0.9661,
+                  "observed": 0.953
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 403,
+                  "predicted": 0.5254,
+                  "observed": 0.5236
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 338,
+                  "predicted": 0.5749,
+                  "observed": 0.4941
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 328,
+                  "predicted": 0.625,
+                  "observed": 0.5915
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 314,
+                  "predicted": 0.6733,
+                  "observed": 0.6656
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 310,
+                  "predicted": 0.7249,
+                  "observed": 0.7194
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 275,
+                  "predicted": 0.7742,
+                  "observed": 0.8
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 202,
+                  "predicted": 0.8233,
+                  "observed": 0.797
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 164,
+                  "predicted": 0.8728,
+                  "observed": 0.9024
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 129,
+                  "predicted": 0.9245,
+                  "observed": 0.9225
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 59,
+                  "predicted": 0.9654,
+                  "observed": 0.9831
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 211,
+                  "predicted": 0.526,
+                  "observed": 0.4739
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 206,
+                  "predicted": 0.5764,
+                  "observed": 0.6456
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 212,
+                  "predicted": 0.6243,
+                  "observed": 0.6085
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 192,
+                  "predicted": 0.6758,
+                  "observed": 0.6771
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 152,
+                  "predicted": 0.7222,
+                  "observed": 0.6974
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 124,
+                  "predicted": 0.7726,
+                  "observed": 0.75
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 87,
+                  "predicted": 0.8238,
+                  "observed": 0.8621
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 88,
+                  "predicted": 0.8733,
+                  "observed": 0.8977
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 73,
+                  "predicted": 0.9278,
+                  "observed": 0.9726
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 27,
+                  "predicted": 0.9653,
+                  "observed": 0.9259
+                }
+              ]
+            }
           }
         },
         "margin": {
-          "matches": 34401,
-          "log_loss": 0.6212,
-          "brier": 0.2155,
-          "accuracy": 0.6566,
+          "matches": 34429,
+          "log_loss": 0.621,
+          "brier": 0.2154,
+          "accuracy": 0.6568,
           "coin_log_loss": 0.6931,
           "vs_rank": {
-            "rank_model_fit_matches": 10625,
-            "matches": 15640,
-            "rating_log_loss": 0.6356,
+            "rank_model_fit_matches": 10631,
+            "matches": 15649,
+            "rating_log_loss": 0.6354,
             "rank_log_loss": 0.6391,
             "rating_brier": 0.2221,
             "rank_brier": 0.2246,
-            "rating_accuracy": 0.6383,
+            "rating_accuracy": 0.6385,
             "rank_accuracy": 0.6221,
             "rank_model_c": 0.7
           },
           "surface_blend": {
-            "matches": 4635,
-            "blended_log_loss": 0.535,
-            "overall_log_loss": 0.5343
+            "matches": 10388,
+            "blended_log_loss": 0.5899,
+            "overall_log_loss": 0.5938
+          },
+          "calibration": {
+            "band": 0.05,
+            "basis": "out-of-sample matches (both players >= minPrior rated matches) by favourite probability band and stored edition surface",
+            "overall": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 4555,
+                  "predicted": 0.525,
+                  "observed": 0.5194
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 4664,
+                  "predicted": 0.5749,
+                  "observed": 0.5392
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 4385,
+                  "predicted": 0.6246,
+                  "observed": 0.5888
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 4392,
+                  "predicted": 0.6746,
+                  "observed": 0.6264
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 3993,
+                  "predicted": 0.7251,
+                  "observed": 0.6792
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 3767,
+                  "predicted": 0.7743,
+                  "observed": 0.6984
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 3174,
+                  "predicted": 0.8245,
+                  "observed": 0.7524
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 2641,
+                  "predicted": 0.8734,
+                  "observed": 0.7997
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 1857,
+                  "predicted": 0.923,
+                  "observed": 0.874
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1001,
+                  "predicted": 0.9684,
+                  "observed": 0.9311
+                }
+              ],
+              "unknown": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 2940,
+                  "predicted": 0.5246,
+                  "observed": 0.5204
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 2970,
+                  "predicted": 0.5748,
+                  "observed": 0.5239
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 2815,
+                  "predicted": 0.6244,
+                  "observed": 0.5829
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 2764,
+                  "predicted": 0.6745,
+                  "observed": 0.6161
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 2461,
+                  "predicted": 0.7253,
+                  "observed": 0.6867
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 2268,
+                  "predicted": 0.7744,
+                  "observed": 0.6962
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 1942,
+                  "predicted": 0.8247,
+                  "observed": 0.7472
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 1514,
+                  "predicted": 0.8732,
+                  "observed": 0.7748
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 975,
+                  "predicted": 0.9229,
+                  "observed": 0.8585
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 480,
+                  "predicted": 0.9678,
+                  "observed": 0.9042
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 938,
+                  "predicted": 0.5254,
+                  "observed": 0.5171
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 948,
+                  "predicted": 0.5752,
+                  "observed": 0.5717
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 889,
+                  "predicted": 0.6252,
+                  "observed": 0.6052
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 947,
+                  "predicted": 0.6742,
+                  "observed": 0.6378
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 843,
+                  "predicted": 0.7242,
+                  "observed": 0.6607
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 869,
+                  "predicted": 0.7747,
+                  "observed": 0.7135
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 665,
+                  "predicted": 0.8241,
+                  "observed": 0.7504
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 604,
+                  "predicted": 0.873,
+                  "observed": 0.8411
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 483,
+                  "predicted": 0.9226,
+                  "observed": 0.8903
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 274,
+                  "predicted": 0.9684,
+                  "observed": 0.9489
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 391,
+                  "predicted": 0.5266,
+                  "observed": 0.5703
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 462,
+                  "predicted": 0.5751,
+                  "observed": 0.5628
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 410,
+                  "predicted": 0.6247,
+                  "observed": 0.6122
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 397,
+                  "predicted": 0.6759,
+                  "observed": 0.6423
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 436,
+                  "predicted": 0.7246,
+                  "observed": 0.6697
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 403,
+                  "predicted": 0.7736,
+                  "observed": 0.6923
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 342,
+                  "predicted": 0.8241,
+                  "observed": 0.769
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 304,
+                  "predicted": 0.8742,
+                  "observed": 0.7993
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 244,
+                  "predicted": 0.924,
+                  "observed": 0.9016
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 143,
+                  "predicted": 0.9699,
+                  "observed": 0.979
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 286,
+                  "predicted": 0.5247,
+                  "observed": 0.4476
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 284,
+                  "predicted": 0.5755,
+                  "observed": 0.5528
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 271,
+                  "predicted": 0.6243,
+                  "observed": 0.5609
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 284,
+                  "predicted": 0.6741,
+                  "observed": 0.6655
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 253,
+                  "predicted": 0.7266,
+                  "observed": 0.6838
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 227,
+                  "predicted": 0.7725,
+                  "observed": 0.674
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 225,
+                  "predicted": 0.8248,
+                  "observed": 0.7778
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 219,
+                  "predicted": 0.8751,
+                  "observed": 0.8584
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 155,
+                  "predicted": 0.923,
+                  "observed": 0.8774
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 104,
+                  "predicted": 0.9695,
+                  "observed": 0.9423
+                }
+              ]
+            },
+            "surface_blend": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 1351,
+                  "predicted": 0.525,
+                  "observed": 0.5204
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 1356,
+                  "predicted": 0.5751,
+                  "observed": 0.5796
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 1361,
+                  "predicted": 0.6242,
+                  "observed": 0.6076
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 1323,
+                  "predicted": 0.6747,
+                  "observed": 0.6311
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 1170,
+                  "predicted": 0.7251,
+                  "observed": 0.6846
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 1104,
+                  "predicted": 0.7742,
+                  "observed": 0.7301
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 985,
+                  "predicted": 0.8241,
+                  "observed": 0.7838
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 751,
+                  "predicted": 0.8744,
+                  "observed": 0.8549
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 620,
+                  "predicted": 0.9243,
+                  "observed": 0.8968
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 367,
+                  "predicted": 0.9682,
+                  "observed": 0.9619
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 817,
+                  "predicted": 0.5248,
+                  "observed": 0.5239
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 862,
+                  "predicted": 0.5753,
+                  "observed": 0.5974
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 870,
+                  "predicted": 0.6243,
+                  "observed": 0.6046
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 810,
+                  "predicted": 0.6744,
+                  "observed": 0.6432
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 731,
+                  "predicted": 0.7249,
+                  "observed": 0.6689
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 681,
+                  "predicted": 0.7743,
+                  "observed": 0.7225
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 644,
+                  "predicted": 0.8246,
+                  "observed": 0.7655
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 464,
+                  "predicted": 0.8742,
+                  "observed": 0.8405
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 389,
+                  "predicted": 0.9238,
+                  "observed": 0.892
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 226,
+                  "predicted": 0.9685,
+                  "observed": 0.9513
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 347,
+                  "predicted": 0.5246,
+                  "observed": 0.5187
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 320,
+                  "predicted": 0.5754,
+                  "observed": 0.5219
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 283,
+                  "predicted": 0.6234,
+                  "observed": 0.5724
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 330,
+                  "predicted": 0.6748,
+                  "observed": 0.6212
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 274,
+                  "predicted": 0.7261,
+                  "observed": 0.7007
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 286,
+                  "predicted": 0.7741,
+                  "observed": 0.7552
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 247,
+                  "predicted": 0.8227,
+                  "observed": 0.8097
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 191,
+                  "predicted": 0.8745,
+                  "observed": 0.8796
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 156,
+                  "predicted": 0.9256,
+                  "observed": 0.8974
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 88,
+                  "predicted": 0.9693,
+                  "observed": 0.9886
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 187,
+                  "predicted": 0.5266,
+                  "observed": 0.508
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 174,
+                  "predicted": 0.5737,
+                  "observed": 0.5977
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 208,
+                  "predicted": 0.625,
+                  "observed": 0.6683
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 183,
+                  "predicted": 0.6758,
+                  "observed": 0.5956
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 165,
+                  "predicted": 0.7246,
+                  "observed": 0.7273
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 137,
+                  "predicted": 0.7745,
+                  "observed": 0.7153
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 94,
+                  "predicted": 0.8249,
+                  "observed": 0.8404
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 96,
+                  "predicted": 0.8754,
+                  "observed": 0.875
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 75,
+                  "predicted": 0.9239,
+                  "observed": 0.92
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 53,
+                  "predicted": 0.9653,
+                  "observed": 0.9623
+                }
+              ]
+            }
           }
         }
       },
       "population": {
-        "match_win_rate": 571,
-        "set_win_rate": 570,
-        "game_win_rate": 598,
+        "match_win_rate": 573,
+        "set_win_rate": 572,
+        "game_win_rate": 601,
         "straight_sets_win_rate": 417,
-        "avg_game_diff": 568,
-        "avg_set_diff": 568,
+        "avg_game_diff": 569,
+        "avg_set_diff": 569,
         "deciding_set_win_rate": 433,
-        "tiebreak_win_rate": 439,
+        "tiebreak_win_rate": 440,
         "close_match_win_rate": 441,
-        "comeback_win_rate": 523,
+        "comeback_win_rate": 525,
         "first_set_conversion": 428,
         "deciding_set_dependence": 0,
         "top10_win_rate": 251,
@@ -84,91 +1399,1846 @@
         "top100_win_rate": 448,
         "outside100_loss_rate": 439,
         "avg_opponent_rank": 495,
-        "wins_above_expectation": 483,
+        "wins_above_expectation": 485,
         "pbe_rating": 261
+      },
+      "surfaces": {
+        "hard": {
+          "players": 510,
+          "population": {
+            "match_win_rate": 287,
+            "set_win_rate": 315,
+            "game_win_rate": 347,
+            "straight_sets_win_rate": 141,
+            "avg_game_diff": 282,
+            "avg_set_diff": 282,
+            "deciding_set_win_rate": 116,
+            "tiebreak_win_rate": 166,
+            "close_match_win_rate": 131,
+            "comeback_win_rate": 218,
+            "first_set_conversion": 142,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 70,
+            "top25_win_rate": 162,
+            "top50_win_rate": 172,
+            "top100_win_rate": 208,
+            "outside100_loss_rate": 59,
+            "avg_opponent_rank": 233,
+            "wins_above_expectation": 245,
+            "pbe_rating": 162
+          }
+        },
+        "clay": {
+          "players": 411,
+          "population": {
+            "match_win_rate": 169,
+            "set_win_rate": 189,
+            "game_win_rate": 220,
+            "straight_sets_win_rate": 61,
+            "avg_game_diff": 164,
+            "avg_set_diff": 164,
+            "deciding_set_win_rate": 32,
+            "tiebreak_win_rate": 50,
+            "close_match_win_rate": 34,
+            "comeback_win_rate": 83,
+            "first_set_conversion": 55,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 33,
+            "top25_win_rate": 79,
+            "top50_win_rate": 77,
+            "top100_win_rate": 108,
+            "outside100_loss_rate": 3,
+            "avg_opponent_rank": 133,
+            "wins_above_expectation": 138,
+            "pbe_rating": 90
+          }
+        },
+        "grass": {
+          "players": 427,
+          "population": {
+            "match_win_rate": 115,
+            "set_win_rate": 168,
+            "game_win_rate": 206,
+            "straight_sets_win_rate": 34,
+            "avg_game_diff": 110,
+            "avg_set_diff": 110,
+            "deciding_set_win_rate": 2,
+            "tiebreak_win_rate": 58,
+            "close_match_win_rate": 6,
+            "comeback_win_rate": 32,
+            "first_set_conversion": 35,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 7,
+            "top25_win_rate": 29,
+            "top50_win_rate": 30,
+            "top100_win_rate": 54,
+            "outside100_loss_rate": 0,
+            "avg_opponent_rank": 65,
+            "wins_above_expectation": 80,
+            "pbe_rating": 46
+          }
+        }
       }
     },
     "WTA": {
-      "matches": 100380,
-      "first_day": "2000-06-18",
-      "last_day": "2026-09-27",
-      "ranking_lists": 824,
-      "variant": "standard",
+      "mismatched_rows": 0,
+      "matches": 483207,
+      "first_day": "1988-03-13",
+      "last_day": "2026-09-28",
+      "ranking_lists": 825,
+      "variant": "margin",
       "published": true,
       "surface_published": true,
       "backtest": {
         "standard": {
-          "matches": 27916,
-          "log_loss": 0.61,
-          "brier": 0.2114,
-          "accuracy": 0.6608,
+          "matches": 104632,
+          "log_loss": 0.5419,
+          "brier": 0.1832,
+          "accuracy": 0.718,
           "coin_log_loss": 0.6931,
           "vs_rank": {
-            "rank_model_fit_matches": 3829,
-            "matches": 5742,
-            "rating_log_loss": 0.6268,
-            "rank_log_loss": 0.6462,
-            "rating_brier": 0.2193,
-            "rank_brier": 0.228,
-            "rating_accuracy": 0.6351,
-            "rank_accuracy": 0.6045,
+            "rank_model_fit_matches": 4886,
+            "matches": 7318,
+            "rating_log_loss": 0.608,
+            "rank_log_loss": 0.6468,
+            "rating_brier": 0.2113,
+            "rank_brier": 0.2281,
+            "rating_accuracy": 0.6539,
+            "rank_accuracy": 0.6209,
             "rank_model_c": 0.55
           },
           "surface_blend": {
-            "matches": 24061,
-            "blended_log_loss": 0.6083,
-            "overall_log_loss": 0.6112
+            "matches": 100120,
+            "blended_log_loss": 0.5452,
+            "overall_log_loss": 0.5441
+          },
+          "calibration": {
+            "band": 0.05,
+            "basis": "out-of-sample matches (both players >= minPrior rated matches) by favourite probability band and stored edition surface",
+            "overall": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 15137,
+                  "predicted": 0.525,
+                  "observed": 0.5221
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 14768,
+                  "predicted": 0.5749,
+                  "observed": 0.5819
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 14182,
+                  "predicted": 0.6248,
+                  "observed": 0.6403
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 13401,
+                  "predicted": 0.6747,
+                  "observed": 0.6983
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 11977,
+                  "predicted": 0.7245,
+                  "observed": 0.7526
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 10702,
+                  "predicted": 0.7743,
+                  "observed": 0.816
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 9194,
+                  "predicted": 0.8242,
+                  "observed": 0.8692
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 7419,
+                  "predicted": 0.8739,
+                  "observed": 0.9213
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 5275,
+                  "predicted": 0.9235,
+                  "observed": 0.9625
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2577,
+                  "predicted": 0.9685,
+                  "observed": 0.988
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 8303,
+                  "predicted": 0.5251,
+                  "observed": 0.5243
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 8061,
+                  "predicted": 0.5748,
+                  "observed": 0.5885
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 7857,
+                  "predicted": 0.6247,
+                  "observed": 0.6338
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 7367,
+                  "predicted": 0.6747,
+                  "observed": 0.6936
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 6597,
+                  "predicted": 0.7246,
+                  "observed": 0.7478
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 5863,
+                  "predicted": 0.7743,
+                  "observed": 0.8115
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 4988,
+                  "predicted": 0.8244,
+                  "observed": 0.8627
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 4099,
+                  "predicted": 0.8738,
+                  "observed": 0.9178
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 2971,
+                  "predicted": 0.9232,
+                  "observed": 0.9623
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1464,
+                  "predicted": 0.969,
+                  "observed": 0.9891
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 6132,
+                  "predicted": 0.5248,
+                  "observed": 0.5194
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 6011,
+                  "predicted": 0.5751,
+                  "observed": 0.5751
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 5700,
+                  "predicted": 0.6249,
+                  "observed": 0.65
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 5471,
+                  "predicted": 0.6748,
+                  "observed": 0.7052
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 4862,
+                  "predicted": 0.7244,
+                  "observed": 0.76
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 4370,
+                  "predicted": 0.7743,
+                  "observed": 0.8247
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 3854,
+                  "predicted": 0.8241,
+                  "observed": 0.8796
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 3036,
+                  "predicted": 0.8742,
+                  "observed": 0.9325
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 2093,
+                  "predicted": 0.924,
+                  "observed": 0.9637
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1050,
+                  "predicted": 0.968,
+                  "observed": 0.9867
+                }
+              ],
+              "carpet": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 192,
+                  "predicted": 0.5253,
+                  "observed": 0.5365
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 219,
+                  "predicted": 0.5748,
+                  "observed": 0.5571
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 172,
+                  "predicted": 0.6253,
+                  "observed": 0.6628
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 160,
+                  "predicted": 0.6733,
+                  "observed": 0.7563
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 194,
+                  "predicted": 0.724,
+                  "observed": 0.7835
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 162,
+                  "predicted": 0.7768,
+                  "observed": 0.784
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 138,
+                  "predicted": 0.8231,
+                  "observed": 0.9348
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 118,
+                  "predicted": 0.8719,
+                  "observed": 0.8729
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 96,
+                  "predicted": 0.9212,
+                  "observed": 0.9792
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 29,
+                  "predicted": 0.9661,
+                  "observed": 0.9655
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 477,
+                  "predicted": 0.5252,
+                  "observed": 0.5178
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 453,
+                  "predicted": 0.5746,
+                  "observed": 0.5673
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 423,
+                  "predicted": 0.6241,
+                  "observed": 0.6288
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 382,
+                  "predicted": 0.6739,
+                  "observed": 0.6728
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 303,
+                  "predicted": 0.7233,
+                  "observed": 0.7294
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 291,
+                  "predicted": 0.7741,
+                  "observed": 0.7835
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 199,
+                  "predicted": 0.8232,
+                  "observed": 0.7839
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 154,
+                  "predicted": 0.8726,
+                  "observed": 0.8312
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 108,
+                  "predicted": 0.9245,
+                  "observed": 0.9259
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 30,
+                  "predicted": 0.9661,
+                  "observed": 1
+                }
+              ],
+              "unknown": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 33,
+                  "predicted": 0.5255,
+                  "observed": 0.4545
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 24,
+                  "predicted": 0.5723,
+                  "observed": 0.5417
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 30,
+                  "predicted": 0.6271,
+                  "observed": 0.5333
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 21,
+                  "predicted": 0.673,
+                  "observed": 0.5714
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 21,
+                  "predicted": 0.7233,
+                  "observed": 0.619
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 16,
+                  "predicted": 0.7745,
+                  "observed": 1
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 15,
+                  "predicted": 0.8176,
+                  "observed": 0.8667
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 12,
+                  "predicted": 0.8734,
+                  "observed": 0.9167
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 7,
+                  "predicted": 0.9185,
+                  "observed": 1
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 4,
+                  "predicted": 0.9606,
+                  "observed": 1
+                }
+              ]
+            },
+            "surface_blend": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 15142,
+                  "predicted": 0.5251,
+                  "observed": 0.5345
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 14885,
+                  "predicted": 0.5749,
+                  "observed": 0.5917
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 14208,
+                  "predicted": 0.6246,
+                  "observed": 0.6455
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 13210,
+                  "predicted": 0.6747,
+                  "observed": 0.7078
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 11702,
+                  "predicted": 0.7246,
+                  "observed": 0.7659
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 10175,
+                  "predicted": 0.7746,
+                  "observed": 0.825
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 8342,
+                  "predicted": 0.8242,
+                  "observed": 0.8801
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 6339,
+                  "predicted": 0.8739,
+                  "observed": 0.9367
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 4314,
+                  "predicted": 0.9231,
+                  "observed": 0.9659
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1803,
+                  "predicted": 0.9676,
+                  "observed": 0.9895
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 8411,
+                  "predicted": 0.525,
+                  "observed": 0.5342
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 8245,
+                  "predicted": 0.575,
+                  "observed": 0.5926
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 7943,
+                  "predicted": 0.6247,
+                  "observed": 0.6419
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 7357,
+                  "predicted": 0.6747,
+                  "observed": 0.7049
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 6548,
+                  "predicted": 0.7247,
+                  "observed": 0.7567
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 5665,
+                  "predicted": 0.7748,
+                  "observed": 0.8182
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 4690,
+                  "predicted": 0.8242,
+                  "observed": 0.8723
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 3700,
+                  "predicted": 0.874,
+                  "observed": 0.9295
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 2547,
+                  "predicted": 0.9232,
+                  "observed": 0.9631
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1100,
+                  "predicted": 0.9685,
+                  "observed": 0.9927
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 6204,
+                  "predicted": 0.5254,
+                  "observed": 0.5361
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 6116,
+                  "predicted": 0.5748,
+                  "observed": 0.588
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 5823,
+                  "predicted": 0.6245,
+                  "observed": 0.6507
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 5456,
+                  "predicted": 0.6747,
+                  "observed": 0.713
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 4851,
+                  "predicted": 0.7245,
+                  "observed": 0.7788
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 4250,
+                  "predicted": 0.7745,
+                  "observed": 0.8346
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 3477,
+                  "predicted": 0.8243,
+                  "observed": 0.893
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 2535,
+                  "predicted": 0.8738,
+                  "observed": 0.9471
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 1745,
+                  "predicted": 0.9231,
+                  "observed": 0.9702
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 701,
+                  "predicted": 0.9662,
+                  "observed": 0.9843
+                }
+              ],
+              "carpet": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 136,
+                  "predicted": 0.5257,
+                  "observed": 0.5294
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 135,
+                  "predicted": 0.5748,
+                  "observed": 0.6593
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 138,
+                  "predicted": 0.6229,
+                  "observed": 0.6594
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 93,
+                  "predicted": 0.6723,
+                  "observed": 0.6989
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 79,
+                  "predicted": 0.7248,
+                  "observed": 0.7848
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 81,
+                  "predicted": 0.7749,
+                  "observed": 0.8765
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 57,
+                  "predicted": 0.8229,
+                  "observed": 0.9474
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 39,
+                  "predicted": 0.8715,
+                  "observed": 0.9487
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 7,
+                  "predicted": 0.9256,
+                  "observed": 1
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2,
+                  "predicted": 0.9518,
+                  "observed": 1
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 391,
+                  "predicted": 0.5234,
+                  "observed": 0.5192
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 389,
+                  "predicted": 0.5749,
+                  "observed": 0.6067
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 304,
+                  "predicted": 0.6254,
+                  "observed": 0.6316
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 304,
+                  "predicted": 0.6739,
+                  "observed": 0.6875
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 224,
+                  "predicted": 0.7229,
+                  "observed": 0.75
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 179,
+                  "predicted": 0.7737,
+                  "observed": 0.7877
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 118,
+                  "predicted": 0.8232,
+                  "observed": 0.7797
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 65,
+                  "predicted": 0.8726,
+                  "observed": 0.9385
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 15,
+                  "predicted": 0.9167,
+                  "observed": 0.9333
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 0,
+                  "predicted": null,
+                  "observed": null
+                }
+              ]
+            }
           }
         },
         "margin": {
-          "matches": 27916,
-          "log_loss": 0.6108,
-          "brier": 0.2114,
-          "accuracy": 0.6617,
+          "matches": 104632,
+          "log_loss": 0.5353,
+          "brier": 0.181,
+          "accuracy": 0.721,
           "coin_log_loss": 0.6931,
           "vs_rank": {
-            "rank_model_fit_matches": 3829,
-            "matches": 5742,
-            "rating_log_loss": 0.6267,
-            "rank_log_loss": 0.6462,
-            "rating_brier": 0.2191,
-            "rank_brier": 0.228,
-            "rating_accuracy": 0.6365,
-            "rank_accuracy": 0.6045,
+            "rank_model_fit_matches": 4886,
+            "matches": 7318,
+            "rating_log_loss": 0.6059,
+            "rank_log_loss": 0.6468,
+            "rating_brier": 0.2104,
+            "rank_brier": 0.2281,
+            "rating_accuracy": 0.6551,
+            "rank_accuracy": 0.6209,
             "rank_model_c": 0.55
           },
           "surface_blend": {
-            "matches": 24061,
-            "blended_log_loss": 0.6073,
-            "overall_log_loss": 0.6121
+            "matches": 100120,
+            "blended_log_loss": 0.5371,
+            "overall_log_loss": 0.5377
+          },
+          "calibration": {
+            "band": 0.05,
+            "basis": "out-of-sample matches (both players >= minPrior rated matches) by favourite probability band and stored edition surface",
+            "overall": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 13039,
+                  "predicted": 0.5249,
+                  "observed": 0.5199
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 12825,
+                  "predicted": 0.5746,
+                  "observed": 0.5733
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 12696,
+                  "predicted": 0.6248,
+                  "observed": 0.623
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 12203,
+                  "predicted": 0.675,
+                  "observed": 0.6761
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 11704,
+                  "predicted": 0.7247,
+                  "observed": 0.7241
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 10654,
+                  "predicted": 0.7747,
+                  "observed": 0.7801
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 10022,
+                  "predicted": 0.8247,
+                  "observed": 0.8365
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 8812,
+                  "predicted": 0.8742,
+                  "observed": 0.8869
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 7466,
+                  "predicted": 0.9238,
+                  "observed": 0.9437
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 5211,
+                  "predicted": 0.9718,
+                  "observed": 0.9825
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 7137,
+                  "predicted": 0.5247,
+                  "observed": 0.5233
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 6992,
+                  "predicted": 0.5745,
+                  "observed": 0.5774
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 7074,
+                  "predicted": 0.6248,
+                  "observed": 0.6196
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 6691,
+                  "predicted": 0.6751,
+                  "observed": 0.6739
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 6408,
+                  "predicted": 0.7247,
+                  "observed": 0.7164
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 5903,
+                  "predicted": 0.7745,
+                  "observed": 0.7757
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 5442,
+                  "predicted": 0.8247,
+                  "observed": 0.8324
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 4873,
+                  "predicted": 0.8744,
+                  "observed": 0.881
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 4122,
+                  "predicted": 0.924,
+                  "observed": 0.944
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2928,
+                  "predicted": 0.972,
+                  "observed": 0.9822
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 5291,
+                  "predicted": 0.5252,
+                  "observed": 0.5211
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 5244,
+                  "predicted": 0.5749,
+                  "observed": 0.5686
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 5041,
+                  "predicted": 0.6249,
+                  "observed": 0.6306
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 4982,
+                  "predicted": 0.6751,
+                  "observed": 0.6776
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 4774,
+                  "predicted": 0.7247,
+                  "observed": 0.7359
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 4305,
+                  "predicted": 0.7749,
+                  "observed": 0.7863
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 4135,
+                  "predicted": 0.8248,
+                  "observed": 0.8462
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 3619,
+                  "predicted": 0.874,
+                  "observed": 0.8964
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 3058,
+                  "predicted": 0.9235,
+                  "observed": 0.9483
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2130,
+                  "predicted": 0.9718,
+                  "observed": 0.9831
+                }
+              ],
+              "carpet": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 169,
+                  "predicted": 0.5252,
+                  "observed": 0.4556
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 176,
+                  "predicted": 0.5751,
+                  "observed": 0.642
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 170,
+                  "predicted": 0.6251,
+                  "observed": 0.5588
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 147,
+                  "predicted": 0.6752,
+                  "observed": 0.7211
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 164,
+                  "predicted": 0.7252,
+                  "observed": 0.7744
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 162,
+                  "predicted": 0.7749,
+                  "observed": 0.7901
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 164,
+                  "predicted": 0.8249,
+                  "observed": 0.8171
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 128,
+                  "predicted": 0.8749,
+                  "observed": 0.9219
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 131,
+                  "predicted": 0.9238,
+                  "observed": 0.9237
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 69,
+                  "predicted": 0.9689,
+                  "observed": 0.9855
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 417,
+                  "predicted": 0.5257,
+                  "observed": 0.4676
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 388,
+                  "predicted": 0.574,
+                  "observed": 0.5361
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 384,
+                  "predicted": 0.623,
+                  "observed": 0.6172
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 359,
+                  "predicted": 0.6733,
+                  "observed": 0.6852
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 338,
+                  "predicted": 0.7228,
+                  "observed": 0.6864
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 273,
+                  "predicted": 0.7754,
+                  "observed": 0.7692
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 263,
+                  "predicted": 0.8237,
+                  "observed": 0.7795
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 179,
+                  "predicted": 0.8736,
+                  "observed": 0.8212
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 143,
+                  "predicted": 0.9233,
+                  "observed": 0.8601
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 76,
+                  "predicted": 0.9678,
+                  "observed": 0.9737
+                }
+              ],
+              "unknown": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 25,
+                  "predicted": 0.5234,
+                  "observed": 0.6
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 25,
+                  "predicted": 0.5718,
+                  "observed": 0.52
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 27,
+                  "predicted": 0.6223,
+                  "observed": 0.5926
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 24,
+                  "predicted": 0.6787,
+                  "observed": 0.5417
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 20,
+                  "predicted": 0.7259,
+                  "observed": 0.6
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 11,
+                  "predicted": 0.7737,
+                  "observed": 0.8182
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 18,
+                  "predicted": 0.8224,
+                  "observed": 0.8333
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 13,
+                  "predicted": 0.8738,
+                  "observed": 1
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 12,
+                  "predicted": 0.9241,
+                  "observed": 0.9167
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 8,
+                  "predicted": 0.9716,
+                  "observed": 1
+                }
+              ]
+            },
+            "surface_blend": {
+              "all": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 13072,
+                  "predicted": 0.5252,
+                  "observed": 0.5303
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 12931,
+                  "predicted": 0.5751,
+                  "observed": 0.5817
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 12578,
+                  "predicted": 0.625,
+                  "observed": 0.6236
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 12004,
+                  "predicted": 0.6748,
+                  "observed": 0.6878
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 11369,
+                  "predicted": 0.7244,
+                  "observed": 0.7337
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 10462,
+                  "predicted": 0.7748,
+                  "observed": 0.7932
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 9386,
+                  "predicted": 0.8245,
+                  "observed": 0.8411
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 7978,
+                  "predicted": 0.8743,
+                  "observed": 0.9034
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 6320,
+                  "predicted": 0.9238,
+                  "observed": 0.9514
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 4020,
+                  "predicted": 0.9707,
+                  "observed": 0.9836
+                }
+              ],
+              "hard": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 7245,
+                  "predicted": 0.5251,
+                  "observed": 0.527
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 7190,
+                  "predicted": 0.5751,
+                  "observed": 0.5821
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 6966,
+                  "predicted": 0.6251,
+                  "observed": 0.6194
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 6724,
+                  "predicted": 0.6747,
+                  "observed": 0.6859
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 6370,
+                  "predicted": 0.7244,
+                  "observed": 0.7273
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 5828,
+                  "predicted": 0.7748,
+                  "observed": 0.7855
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 5263,
+                  "predicted": 0.8246,
+                  "observed": 0.8322
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 4516,
+                  "predicted": 0.8742,
+                  "observed": 0.8966
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 3694,
+                  "predicted": 0.9237,
+                  "observed": 0.9475
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2410,
+                  "predicted": 0.971,
+                  "observed": 0.9834
+                }
+              ],
+              "clay": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 5363,
+                  "predicted": 0.5254,
+                  "observed": 0.5333
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 5290,
+                  "predicted": 0.575,
+                  "observed": 0.5805
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 5190,
+                  "predicted": 0.6247,
+                  "observed": 0.6262
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 4923,
+                  "predicted": 0.675,
+                  "observed": 0.6941
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 4675,
+                  "predicted": 0.7245,
+                  "observed": 0.7405
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 4368,
+                  "predicted": 0.7748,
+                  "observed": 0.8063
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 3889,
+                  "predicted": 0.8245,
+                  "observed": 0.8519
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 3304,
+                  "predicted": 0.8745,
+                  "observed": 0.915
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 2553,
+                  "predicted": 0.9242,
+                  "observed": 0.9577
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 1603,
+                  "predicted": 0.9704,
+                  "observed": 0.9838
+                }
+              ],
+              "carpet": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 112,
+                  "predicted": 0.5243,
+                  "observed": 0.5179
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 116,
+                  "predicted": 0.5753,
+                  "observed": 0.5517
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 127,
+                  "predicted": 0.624,
+                  "observed": 0.7323
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 94,
+                  "predicted": 0.6716,
+                  "observed": 0.617
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 82,
+                  "predicted": 0.7211,
+                  "observed": 0.8049
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 75,
+                  "predicted": 0.7741,
+                  "observed": 0.7733
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 71,
+                  "predicted": 0.8244,
+                  "observed": 0.9155
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 59,
+                  "predicted": 0.8746,
+                  "observed": 0.9492
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 26,
+                  "predicted": 0.9211,
+                  "observed": 0.9615
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 5,
+                  "predicted": 0.9655,
+                  "observed": 1
+                }
+              ],
+              "grass": [
+                {
+                  "from": 0.5,
+                  "to": 0.55,
+                  "matches": 352,
+                  "predicted": 0.525,
+                  "observed": 0.5568
+                },
+                {
+                  "from": 0.55,
+                  "to": 0.6,
+                  "matches": 335,
+                  "predicted": 0.5743,
+                  "observed": 0.603
+                },
+                {
+                  "from": 0.6,
+                  "to": 0.65,
+                  "matches": 295,
+                  "predicted": 0.6258,
+                  "observed": 0.6305
+                },
+                {
+                  "from": 0.65,
+                  "to": 0.7,
+                  "matches": 263,
+                  "predicted": 0.6752,
+                  "observed": 0.6426
+                },
+                {
+                  "from": 0.7,
+                  "to": 0.75,
+                  "matches": 242,
+                  "predicted": 0.7253,
+                  "observed": 0.7438
+                },
+                {
+                  "from": 0.75,
+                  "to": 0.8,
+                  "matches": 191,
+                  "predicted": 0.7738,
+                  "observed": 0.733
+                },
+                {
+                  "from": 0.8,
+                  "to": 0.8500000000000001,
+                  "matches": 163,
+                  "predicted": 0.824,
+                  "observed": 0.8405
+                },
+                {
+                  "from": 0.8500000000000001,
+                  "to": 0.9,
+                  "matches": 99,
+                  "predicted": 0.874,
+                  "observed": 0.798
+                },
+                {
+                  "from": 0.9,
+                  "to": 0.95,
+                  "matches": 47,
+                  "predicted": 0.9189,
+                  "observed": 0.9149
+                },
+                {
+                  "from": 0.95,
+                  "to": 1,
+                  "matches": 2,
+                  "predicted": 0.9612,
+                  "observed": 1
+                }
+              ]
+            }
           }
         }
       },
       "population": {
-        "match_win_rate": 1080,
-        "set_win_rate": 1025,
-        "game_win_rate": 1075,
-        "straight_sets_win_rate": 619,
-        "avg_game_diff": 1062,
-        "avg_set_diff": 1062,
-        "deciding_set_win_rate": 639,
-        "tiebreak_win_rate": 481,
-        "close_match_win_rate": 643,
-        "comeback_win_rate": 985,
-        "first_set_conversion": 638,
+        "match_win_rate": 5295,
+        "set_win_rate": 4858,
+        "game_win_rate": 5005,
+        "straight_sets_win_rate": 3234,
+        "avg_game_diff": 5228,
+        "avg_set_diff": 5228,
+        "deciding_set_win_rate": 2701,
+        "tiebreak_win_rate": 2072,
+        "close_match_win_rate": 2731,
+        "comeback_win_rate": 4970,
+        "first_set_conversion": 3292,
         "deciding_set_dependence": 0,
-        "top10_win_rate": 238,
-        "top25_win_rate": 350,
-        "top50_win_rate": 379,
-        "top100_win_rate": 471,
-        "outside100_loss_rate": 952,
-        "avg_opponent_rank": 571,
-        "wins_above_expectation": 860,
-        "pbe_rating": 547
+        "top10_win_rate": 251,
+        "top25_win_rate": 371,
+        "top50_win_rate": 400,
+        "top100_win_rate": 549,
+        "outside100_loss_rate": 4804,
+        "avg_opponent_rank": 730,
+        "wins_above_expectation": 4138,
+        "pbe_rating": 2186
+      },
+      "surfaces": {
+        "hard": {
+          "players": 7028,
+          "population": {
+            "match_win_rate": 3751,
+            "set_win_rate": 3447,
+            "game_win_rate": 3590,
+            "straight_sets_win_rate": 2333,
+            "avg_game_diff": 3698,
+            "avg_set_diff": 3698,
+            "deciding_set_win_rate": 1836,
+            "tiebreak_win_rate": 1321,
+            "close_match_win_rate": 1848,
+            "comeback_win_rate": 3290,
+            "first_set_conversion": 2391,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 192,
+            "top25_win_rate": 300,
+            "top50_win_rate": 334,
+            "top100_win_rate": 443,
+            "outside100_loss_rate": 3381,
+            "avg_opponent_rank": 562,
+            "wins_above_expectation": 3092,
+            "pbe_rating": 1649
+          }
+        },
+        "clay": {
+          "players": 6758,
+          "population": {
+            "match_win_rate": 3393,
+            "set_win_rate": 3083,
+            "game_win_rate": 3229,
+            "straight_sets_win_rate": 2054,
+            "avg_game_diff": 3343,
+            "avg_set_diff": 3343,
+            "deciding_set_win_rate": 1618,
+            "tiebreak_win_rate": 1066,
+            "close_match_win_rate": 1626,
+            "comeback_win_rate": 2899,
+            "first_set_conversion": 2085,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 86,
+            "top25_win_rate": 193,
+            "top50_win_rate": 226,
+            "top100_win_rate": 331,
+            "outside100_loss_rate": 3054,
+            "avg_opponent_rank": 424,
+            "wins_above_expectation": 2693,
+            "pbe_rating": 1321
+          }
+        },
+        "grass": {
+          "players": 1014,
+          "population": {
+            "match_win_rate": 442,
+            "set_win_rate": 415,
+            "game_win_rate": 453,
+            "straight_sets_win_rate": 233,
+            "avg_game_diff": 435,
+            "avg_set_diff": 435,
+            "deciding_set_win_rate": 173,
+            "tiebreak_win_rate": 75,
+            "close_match_win_rate": 182,
+            "comeback_win_rate": 289,
+            "first_set_conversion": 230,
+            "deciding_set_dependence": 0,
+            "top10_win_rate": 18,
+            "top25_win_rate": 109,
+            "top50_win_rate": 118,
+            "top100_win_rate": 164,
+            "outside100_loss_rate": 240,
+            "avg_opponent_rank": 193,
+            "wins_above_expectation": 411,
+            "pbe_rating": 136
+          }
+        }
       }
     }
   },
-  "snapshots": 6991,
-  "ratings": 17736,
-  "ms": 87958
+  "snapshots": 58413,
+  "ratings": 54398,
+  "built_at": "2026-09-29T03:44:57.836Z"
 }

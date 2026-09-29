@@ -12,7 +12,8 @@ const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Applic
 const BASE = process.env.QA_BASE || 'https://tennis.propbetedge.ai';
 const WIDTHS = (process.env.WIDTHS || '320,360,390,430,768,1024,1440').split(',').map(Number);
 const MEN = ['carlos-alcaraz', 'jannik-sinner'];
-const WOMEN = ['iga-swiatek', 'aryna-sabalenka'];
+const WOMEN = ['iga-swiatek', 'aryna-sabalenka', 'elena-rybakina'];
+const FULL_DNA = ['PBE Rating', 'Form windows', 'Opponent archetypes', 'Tournament level & round', 'Result strength', 'Pressure', 'Opponent quality', 'By surface', 'Technical DNA'];
 const ROUTES = ['/', '/live', '/pbecast', '/news', '/news/atp', '/news/wta', '/news/grand-slams', '/players', '/tournaments', '/schedule', '/dna', '/rankings', '/rankings/men',
   ...[...MEN, ...WOMEN].flatMap((s) => [`/players/${s}`, `/players/${s}/dna`]), ...process.argv.slice(2)];
 const isMenRoute = (p) => MEN.some((s) => p.startsWith(`/players/${s}`)) || p === '/news/atp' || p === '/rankings/men';
@@ -44,7 +45,8 @@ for (const w of WIDTHS) {
       // (navigation links to the WTA lists — e.g. the rankings list switcher — are not labels on this content)
       const content = (() => { const c = (document.querySelector('#main') || document.body).cloneNode(true); c.querySelectorAll('nav, a[href^="/rankings/women"]').forEach((x) => x.remove()); return c.innerText || c.textContent || ''; })();
       const wtaOnAtp = men ? (content.match(/WTA (No\.|singles|doubles)[^\n]{0,40}/g) || []) : [];
-      return { sw: document.documentElement.scrollWidth, iw: innerWidth, broken, dnaEmpty: dnaShells.length, stuck, dupLive: liveIds.length - new Set(liveIds).size, h1, identity, wtaOnAtp, len: text.length };
+      const h2s = [...document.querySelectorAll('#main h2')].map((h) => h.textContent.trim());
+      return { sw: document.documentElement.scrollWidth, iw: innerWidth, broken, dnaEmpty: dnaShells.length, stuck, dupLive: liveIds.length - new Set(liveIds).size, h1, identity, wtaOnAtp, len: text.length, h2s, matchDnaLive: /MATCH DNA — LIVE/.test(text) };
     }, isMenRoute(path));
     const bad = [];
     if (r.sw > r.iw) bad.push(`overflow ${r.sw}>${r.iw}`);
@@ -53,6 +55,12 @@ for (const w of WIDTHS) {
     if (/^\/players\/[a-z-]+/.test(path) && (!r.h1 || !r.identity)) bad.push('missing player identity');
     if (r.dnaEmpty || (r.stuck && /dna/.test(path))) bad.push(`empty DNA shell (${r.dnaEmpty} empty, ${r.stuck} loaders)`);
     if (r.dupLive) bad.push(`${r.dupLive} duplicate live match(es)`);
+    // a full player DNA page must render the whole Match DNA architecture — never pass on page health alone
+    // (2026-09-29: a thin ATP presentation passed 147/147 because only empty-shell checks existed)
+    if (/^\/players\/[^/]+\/dna$/.test(path)) {
+      const missing = ['MATCH DNA — LIVE', ...FULL_DNA].filter((h) => (h === 'MATCH DNA — LIVE' ? !r.matchDnaLive : !r.h2s.some((x) => x.startsWith(h))));
+      if (missing.length) bad.push(`full DNA modules missing: ${missing.join(', ')}`);
+    }
     if (r.wtaOnAtp.length) bad.push(`WTA label on ATP content: ${r.wtaOnAtp.slice(0, 2).join(' | ')}`);
     if (process.env.SHOTS) await page.screenshot({ path: `qa-artifacts/gate-${w}-${path.replace(/[^a-z0-9]+/gi, '_').slice(0, 50)}.png` });
     rows.push({ width: w, path, ok: bad.length ? 'FAIL' : 'ok', chars: r.len });

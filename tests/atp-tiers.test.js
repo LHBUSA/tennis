@@ -19,7 +19,7 @@ test('registry: valid, one tier per tournament-season, the 2025 upgrades split b
   assert.deepEqual(validateRegistry(), []);
   assert.deepEqual(validateRegistry([...ATP_TIER_ROWS, { espn_tournament_id: 959, tier: 'ATP 250', from: 2026, to: 2026 }]), ['two tiers for 959:2026']);
   const doha = ATP_TIER_ROWS.filter((r) => r.espn_tournament_id === 119).map((r) => `${r.tier}:${r.from}-${r.to}`).sort();
-  assert.deepEqual(doha, ['ATP 250:2024-2024', 'ATP 500:2025-2026']);
+  assert.deepEqual(doha, ['ATP 250:2009-2024', 'ATP 500:2025-2026']);
 });
 
 test('identity: the registry resolves through the canonical ids the espn_atp lane mints (production China Open 2026 edition)', async () => {
@@ -28,7 +28,9 @@ test('identity: the registry resolves through the canonical ids the espn_atp lan
   assert.deepEqual(await atpTierForEdition(china), { tier: 'ATP 500', espn_tournament_id: 959, year: 2026, registry: REGISTRY_VERSION });
   assert.equal((await atpTierForEdition(await ed(315, 2026))).tier, 'ATP Masters 1000');
   assert.equal((await atpTierForEdition(await ed(119, 2024))).tier, 'ATP 250');
-  assert.equal(await atpTierForEdition(await ed(959, 2019)), null, 'outside the reviewed seasons: unknown');
+  assert.equal((await atpTierForEdition(await ed(959, 2019))).tier, 'ATP 500', 'Beijing has been a 500 since 2009');
+  assert.equal(await atpTierForEdition(await ed(959, 2008)), null, 'outside the reviewed seasons: unknown');
+  assert.equal(await atpTierForEdition(await ed(27, 2014)), null, 'Halle before it became a 500 (2015): not reviewed, unknown');
   assert.equal(await atpTierForEdition(await ed(771, 2024)), null, 'Olympics: not in the registry, unknown');
   assert.equal(await atpTierForEdition(null), null);
 });

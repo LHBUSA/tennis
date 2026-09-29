@@ -41,9 +41,10 @@ export function familyTable(fam, tour) {
 export function matchDnaSummary(md, slug) {
   const get = (k) => md.families.flatMap((f) => f.metrics).find((m) => m.key === k);
   const cell = (k, label) => { const m = get(k); return m ? html`<div><span>${label}</span><b class="tabnum">${m.record ? `${m.record.W}–${m.record.L}` : fmtMetric(m)}</b><small class="note">${m.percentile != null ? `${ORD(m.percentile)} pct` : m.confidence}</small></div>` : ''; };
-  return html`<section class="mod"><header class="mod-h"><h2>Match DNA</h2><a class="mod-k" href="/players/${slug}/dna">All families →</a></header>
+  return html`<section class="mod mdna-summary"><header class="mod-h"><h2><a href="/players/${slug}/dna">Match DNA</a> <span class="tag">summary</span></h2><a class="mod-k dna-cta" href="/players/${slug}/dna">Open full Tennis DNA →</a></header>
     <div class="surfrec mdna">${cell('match_win_rate', 'Match win')}${cell('set_win_rate', 'Set win')}${cell('game_win_rate', 'Games won')}${cell('deciding_set_win_rate', 'Deciding sets')}${cell('tiebreak_win_rate', 'Tiebreaks')}${cell('comeback_win_rate', 'Comebacks')}${cell('top10_win_rate', 'vs top 10')}${cell('top25_win_rate', 'vs top 25')}${cell('top50_win_rate', 'vs top 50')}</div>
-    <p class="note">${md.sample.matches} singles matches (${fmtDate(md.sample.first_day)} – ${fmtDate(md.sample.last_day)}) from the canonical match record, as of ${fmtDate(md.as_of)}. Rank-based records use the list in force when each tournament began.</p></section>`;
+    <p class="note">${md.sample.matches} singles matches (${fmtDate(md.sample.first_day)} – ${fmtDate(md.sample.last_day)}) from the canonical match record, as of ${fmtDate(md.as_of)}. Rank-based records use the list in force when each tournament began.</p>
+    <p class="dna-more"><a class="btn line" href="/players/${slug}/dna">Summary · Open full Match DNA, rating history, splits and surface intelligence →</a></p></section>`;
 }
 
 const rankTxt = (r) => (!r ? '—' : r.rank ? `No. ${r.rank}` : `>${r.outside}`);
@@ -76,8 +77,37 @@ export function surfaceTable(md) {
   return html`<section class="mod"><header class="mod-h"><h2>By surface</h2><span class="mod-k">${md.tour} players on each surface · surface from the tournament's own record</span></header>
     <div class="tbl-wrap"><table class="tbl surf-tbl"><thead><tr><th>Metric</th>${S.map((s) => html`<th class="n">${s.surface[0].toUpperCase()}${s.surface.slice(1)}</th>`)}</tr></thead><tbody>
     <tr><th scope="row" style="text-align:left">Record</th>${S.map((s) => html`<td class="n tabnum">${s.form?.career ? `${s.form.career.W}–${s.form.career.L}` : '—'}</td>`)}</tr>
-    <tr><th scope="row" style="text-align:left">Surface PBE Rating</th>${S.map((s) => html`<td class="n">${s.rating ? (s.rating.status === 'not_validated' ? html`<span class="note">not published</span>` : html`<b class="tabnum">${s.rating.value}</b><small class="note">${s.rating.percentile != null ? `${ORD(s.rating.percentile)} pct` : `${s.rating.rated_matches} matches`}</small>`) : '—'}</td>`)}</tr>
+    <tr><th scope="row" style="text-align:left">Surface PBE Rating</th>${S.map((s) => html`<td class="n">${surfaceRatingCell(s, md.tour)}</td>`)}</tr>
     <tr><th scope="row" style="text-align:left">Last 10</th>${S.map((s) => html`<td class="n tabnum">${s.form?.last10 ? `${s.form.last10.W}–${s.form.last10.L}` : '—'}</td>`)}</tr>
     ${keys.map(([k, label]) => html`<tr><th scope="row" style="text-align:left">${label}</th>${S.map((s) => html`<td class="n">${cell(s.metrics.find((m) => m.key === k))}</td>`)}</tr>`)}
-    </tbody></table></div><p class="note">Only matches whose tournament edition has a sourced surface count; a surface needs at least 5 matches. Percentiles compare ${md.tour} players on the same surface and publish per metric under the same gates as overall Match DNA.</p></section>`;
+    </tbody></table></div><p class="note">Only matches whose tournament edition has a sourced surface count; a surface needs at least 5 matches.${unsourcedNote(md)} Percentiles compare ${md.tour} players on the same surface and publish per metric under the same gates as overall Match DNA. ${surfaceGateNote(S, md.tour)}</p></section>`;
+}
+
+const RATED_MIN = 20;
+/** Surface PBE Rating cell: a value, or the explicit reason there is none — never a blank. */
+export function surfaceRatingCell(s, tour) {
+  const r = s.rating;
+  const sf = s.surface;
+  if (!r) return html`<span class="note">not rated: no rated ${sf} matches</span>`;
+  if (r.status === 'not_validated') return html`<span class="note">Not published — the ${tour} surface model has not passed its out-of-sample validation gate</span>`;
+  if (r.percentile != null) return html`<b class="tabnum">${r.value}</b><small class="note">${ORD(r.percentile)} pct</small>`;
+  const why = (r.rated_matches ?? 0) < RATED_MIN ? `${r.rated_matches ?? 0} rated ${sf} matches (${RATED_MIN} needed)` : `no rated ${sf} match in the last 365 days`;
+  return html`<b class="tabnum">${r.value}</b><small class="note">no percentile: ${why}</small>`;
+}
+
+/** How many singles results are outside the surface table because their tournament has no sourced surface. */
+function unsourcedNote(md) {
+  const career = md.form?.career;
+  const total = career ? career.W + career.L : null;
+  const placed = (md.by_surface || []).reduce((t, s) => t + (s.form?.career ? s.form.career.W + s.form.career.L : 0), 0);
+  if (total == null || total <= placed) return '';
+  return ` ${total - placed} of ${total} singles results have no sourced surface (the source publishes none for that tournament) and are left out — never inferred from a tournament name.`;
+}
+
+function surfaceGateNote(S, tour) {
+  const rated = S.filter((s) => s.rating);
+  if (!rated.length) return '';
+  return rated.some((s) => s.rating.status === 'not_validated')
+    ? `${tour} surface PBE Ratings are not published: the surface model has not beaten the overall rating out of sample.`
+    : `${tour} surface PBE Ratings are published: the ${tour} surface blend beat the overall rating out of sample (methodology). A surface percentile needs ${RATED_MIN}+ rated matches on the surface and one in the last 365 days.`;
 }

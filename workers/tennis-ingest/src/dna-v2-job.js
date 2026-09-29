@@ -3,6 +3,7 @@
 // backtest, and writes tennis_dna_snapshots (definition_version 2, surface 'all') and tennis_surface_ratings
 // (method_version 1). v1 snapshots are never touched. Deterministic: same store -> same rows.
 
+import { atpTierIndex, TIER_KEY } from '../../shared/atp-tiers.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { loadTourLedger, cachedRankRows } from './dna-cache.js';
 import { ledgerEntry, byOrder, rankIndex, ratingRun, backtest, buildMatchDna, populationIndex, applyPopulationOne, slimForPopulation, recentMatches, buildProfile, PROFILE_VERSION, MATCH_DNA_VERSION, RATING_METHOD_VERSION } from '../../shared/dna/match-dna.js';
@@ -71,6 +72,10 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   // opponent handedness for the vs-left/right split: stored bio only (unsourced = unknown, never guessed)
   const hand = new Map((await all(store, 'tennis_players', 'select=pbe_player_id,plays&plays=in.(left,right)&order=pbe_player_id.asc')).map((p) => [p.pbe_player_id, p.plays]));
   let editions = new Map((await all(store, 'tennis_tournament_editions', 'select=edition_id,start_date,end_date,competition_key,level,year&order=edition_id.asc')).map((e) => [e.edition_id, e]));
+  // ESPN ATP editions carry no level: the reviewed ATP tier registry (workers/shared/atp-tiers.js) classifies the ones it
+  // lists, in memory only, for the tournament-level split. Unlisted / unreviewed seasons stay unclassified.
+  const tiers = await atpTierIndex();
+  for (const [id, e] of editions) if (!e.competition_key && tiers.has(id)) editions.set(id, { ...e, competition_key: TIER_KEY[tiers.get(id).tier] });
   mark('players_editions');
   const lists = { ATP: await loadRankLists(ctx, 'atp_singles', { mode }), WTA: await loadRankLists(ctx, 'wta_singles', { mode }) };
   const inputs = { rank_lists: { ATP: lists.ATP.info, WTA: lists.WTA.info }, ledger: {} };
