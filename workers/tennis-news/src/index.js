@@ -18,6 +18,7 @@ import { classifyEvent, classifyStory, historyEntry, CLASSIFIER_VERSION, CLASS_R
 import { buildPacket, loadMatches, loadMatch, rankAt, PACKET_VERSION } from './packet.js';
 import { compose, slugFor, COMPOSE_VERSION } from './compose.js';
 import { buildPlan } from './plan.js';
+import { correctPreMatchRatings } from './correct.js';
 import { runGates, GATES_VERSION } from './gates.js';
 import { editorialize, costUsd, redactSecrets, EDITORIAL_VERSION } from './editorial.js';
 import { resolveHero } from '../../shared/editorial.js';
@@ -426,6 +427,8 @@ export default {
       const q = (k, d) => (url.searchParams.get(k) == null ? d : Number(url.searchParams.get(k)));
       return json({ ok: true, data: await reclassify(store, { days: Math.min(14, q('days', 7)), write: url.searchParams.get('write') === '1', offset: Math.max(0, q('offset', 0)), limit: Math.min(200, Math.max(1, q('limit', 200))) }) }); // one page: the one-story-per-signature rule sees the whole window
     }
+    // editorial correction: pre-match ratings / expectation must have been validated at the time (dry unless write=1)
+    if (path === '/v1/news/correct' && request.method === 'POST') return json({ ok: true, data: await correctPreMatchRatings(store, { write: url.searchParams.get('write') === '1' }) });
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates
       const reason = url.searchParams.get('reason');

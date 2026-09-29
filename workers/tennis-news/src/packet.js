@@ -134,24 +134,30 @@ function metricsOut(M, keys = Object.keys(MATCH_DEFINITIONS)) {
 const ratingOut = (r) => (!r ? null : r.published ? { value: r.value, percentile: Number.isFinite(r.percentile) ? r.percentile : null, rated_matches: r.rated_matches ?? null, provisional: !!r.provisional, established: !!r.established, published: true } : { published: false, status: 'not_validated', rated_matches: r.rated_matches ?? null });
 const split = (o) => (o ? Object.fromEntries(Object.entries(o).map(([k, x]) => [k, { W: x.W, L: x.L, set: x.set ?? null, game: x.game ?? null, wae: x.wae ?? null, n_rated: x.n_rated ?? null }])) : null);
 
-export async function matchDnaBefore(store, pid, date, surface = null) {
-  const snap = (await store.select('tennis_dna_snapshots', `select=as_of,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
+/** A snapshot's rating/model values were VALIDATED AT THE TIME only when the snapshot row was built before the event
+ *  started (owner rule 2026-09-29: a snapshot dated before the match but computed later by a backfill build carries
+ *  point-in-time descriptive metrics, but its publication status is today's, not the match day's). */
+export const builtBefore = (snap, startIso) => !!(snap?.built_at && startIso && Date.parse(snap.built_at) < Date.parse(startIso));
+
+export async function matchDnaBefore(store, pid, date, surface = null, startIso = `${date}T00:00:00Z`) {
+  const snap = (await store.select('tennis_dna_snapshots', `select=as_of,built_at,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
   if (!snap) return null;
   const M = snap.metrics || {};
   const P = M._profile || {};
-  const rating = ratingOut(M._rating);
-  const out = { as_of: snap.as_of, definition_version: 2, tour: M._tour || null, rating, metrics: metricsOut(M), form: M._form ? { last10: M._form.last10 || null, last20: M._form.last20 || null, current_streak: M._form.current_streak || null, career: M._form.career || null } : null };
+  const validated = builtBefore(snap, startIso);
+  const rating = validated ? ratingOut(M._rating) : null;
+  const out = { as_of: snap.as_of, built_at: snap.built_at || null, rating_validated_at_the_time: validated, rating, ...(validated ? {} : { rating_note: 'PBE Rating withheld: the snapshot was built after the event started, so its validation status is not the one in force at the time' }), metrics: metricsOut(M), form: M._form ? { last10: M._form.last10 || null, last20: M._form.last20 || null, current_streak: M._form.current_streak || null, career: M._form.career || null } : null };
   if (P.windows) out.windows = Object.fromEntries(Object.entries(P.windows).map(([k, w]) => [k, { weeks: Number(String(k).replace('w', '')), from: w.from, W: w.W, L: w.L, wae: w.wae ?? null }]));
   if (P.vs_strength) out.vs_strength = split(P.vs_strength);
   if (P.vs_hand) out.vs_hand = split(P.vs_hand);
   // recent rating trajectory: monthly pre-match ratings, only when the rating itself was published in this build
   if (rating?.published && P.rating_history?.series?.length) out.rating_trajectory = { series: P.rating_history.series.slice(-12).map(([m, r]) => ({ month: m, rating: r })), peak: P.rating_history.peak || null };
   if (surface && ['hard', 'clay', 'grass'].includes(surface)) {
-    const ss = (await store.select('tennis_dna_snapshots', `select=as_of,metrics&pbe_player_id=eq.${pid}&surface=eq.${surface}&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
+    const ss = (await store.select('tennis_dna_snapshots', `select=as_of,built_at,metrics&pbe_player_id=eq.${pid}&surface=eq.${surface}&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
     if (ss) {
       const S = ss.metrics || {};
       const sr = S._rating;
-      out.surface = { surface, as_of: ss.as_of, record: S._form?.career || null, last10: S._form?.last10 || null, metrics: metricsOut(S, SURF_KEYS), rating: sr?.published ? { value: sr.value, percentile: Number.isFinite(sr.percentile) ? sr.percentile : null, rated_matches: sr.rated_matches ?? null } : null };
+      out.surface = { surface, as_of: ss.as_of, record: S._form?.career || null, last10: S._form?.last10 || null, metrics: metricsOut(S, SURF_KEYS), rating: sr?.published && builtBefore(ss, startIso) ? { value: sr.value, percentile: Number.isFinite(sr.percentile) ? sr.percentile : null, rated_matches: sr.rated_matches ?? null } : null };
     }
   }
   if (!Object.keys(out.metrics).length && !rating) return null;
@@ -164,8 +170,8 @@ export async function matchDnaBefore(store, pid, date, surface = null) {
  * (1 / (1 + 10^((rb - ra) / 400))). Every number frozen here; prose never states it (gates ban model language):
  * it is shown only in the at-a-glance / intelligence modules, labelled as the model.
  */
-export async function expectationBefore(store, wid, lid, date) {
-  const rows = await store.select('tennis_dna_snapshots', `select=pbe_player_id,as_of,r:metrics->_rating&pbe_player_id=${inList([wid, lid])}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=20`);
+export async function expectationBefore(store, wid, lid, date, startIso = `${date}T00:00:00Z`) {
+  const rows = (await store.select('tennis_dna_snapshots', `select=pbe_player_id,as_of,built_at,r:metrics->_rating&pbe_player_id=${inList([wid, lid])}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=20`)).filter((r) => builtBefore(r, startIso));
   const byDate = new Map();
   for (const r of rows) { if (!byDate.has(r.as_of)) byDate.set(r.as_of, {}); byDate.get(r.as_of)[r.pbe_player_id] = r.r; }
   const [asOf, both] = [...byDate.entries()].find(([, x]) => x[wid] && x[lid]) || [];
@@ -280,9 +286,10 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     // Match DNA v2 (results-based) for both players + the validated pre-match expectation, frozen before the match day
     const surf = m.tournament.surface || null;
     const md = {};
-    for (const pid of [wid, lid]) { const x = await matchDnaBefore(store, pid, date, surf); if (x) md[pid] = x; }
+    const startIso = m.started_at || m.scheduled_at || `${date}T00:00:00Z`;
+    for (const pid of [wid, lid]) { const x = await matchDnaBefore(store, pid, date, surf, startIso); if (x) md[pid] = x; }
     if (Object.keys(md).length) packet.match_dna = md;
-    const exp = await expectationBefore(store, wid, lid, date);
+    const exp = await expectationBefore(store, wid, lid, date, startIso);
     if (exp) packet.expectation = { ...exp, winner_id: wid, loser_id: lid };
   }
   packet.canonical_signature = `${event.kind}:${m.id}`;

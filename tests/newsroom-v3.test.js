@@ -105,15 +105,25 @@ test('classifyStory: evidence caps depth; a tour singles title never drops below
 
 test('packet v3: Match DNA and the rating expectation are read strictly BEFORE the match day', async () => {
   const qs = [];
-  const store = { async select(t, q) { qs.push(q); if (/metrics->_rating/.test(q)) return [{ pbe_player_id: 'w', as_of: '2026-09-27', r: { value: 2000, published: true } }, { pbe_player_id: 'l', as_of: '2026-09-27', r: { value: 2200, published: true } }]; return [{ as_of: '2026-09-27', metrics: { _tour: 'ATP', _rating: { value: 2000, published: true, percentile: 80, rated_matches: 90 }, match_win_rate: { value: 0.7, confidence: 'high', record: { W: 70, L: 30 }, sample_matches: 100, comparative_published: true, percentile: 85 } } }]; } };
+  const BUILT = '2026-09-27T04:00:00Z'; // the snapshot row was built before the match started (2026-09-28)
+  const store = { async select(t, q) { qs.push(q); if (/metrics->_rating/.test(q)) return [{ pbe_player_id: 'w', as_of: '2026-09-27', built_at: BUILT, r: { value: 2000, published: true } }, { pbe_player_id: 'l', as_of: '2026-09-27', built_at: BUILT, r: { value: 2200, published: true } }]; return [{ as_of: '2026-09-27', built_at: BUILT, metrics: { _tour: 'ATP', _rating: { value: 2000, published: true, percentile: 80, rated_matches: 90 }, match_win_rate: { value: 0.7, confidence: 'high', record: { W: 70, L: 30 }, sample_matches: 100, comparative_published: true, percentile: 85 } } }]; } };
   const md = await matchDnaBefore(store, 'w', '2026-09-28', 'hard');
   assert.ok(qs.every((q) => /as_of=lt\.2026-09-28/.test(q)), 'never as_of <= match day');
   assert.equal(md.metrics.match_win_rate.pct, 70);
   assert.equal(md.rating.value, 2000);
   const e = await expectationBefore(store, 'w', 'l', '2026-09-28');
   assert.equal(e.winner_pre_match_pct, 24); assert.equal(e.winner_was_rating_underdog, true);
+  // a snapshot DATED before the match but BUILT after it started (a later backfill build): descriptive metrics stay, the
+  // rating and the expectation are withheld — their validation status is not the one in force at the time (owner rule)
+  const late = { async select(t, q) { const rows = await store.select(t, q); return rows.map((r) => ({ ...r, built_at: '2026-09-28T15:00:00Z' })); } };
+  const mdLate = await matchDnaBefore(late, 'w', '2026-09-28', 'hard', '2026-09-28T09:00:00Z');
+  assert.equal(mdLate.metrics.match_win_rate.pct, 70);
+  assert.equal(mdLate.rating, null);
+  assert.equal(mdLate.rating_validated_at_the_time, false);
+  assert.match(mdLate.rating_note, /built after the event started/);
+  assert.equal(await expectationBefore(late, 'w', 'l', '2026-09-28', '2026-09-28T09:00:00Z'), null);
   // an unvalidated rating yields no expectation
-  const s2 = { async select() { return [{ pbe_player_id: 'w', as_of: '2026-09-27', r: { value: 2000, published: false } }, { pbe_player_id: 'l', as_of: '2026-09-27', r: { value: 2200, published: true } }]; } };
+  const s2 = { async select() { return [{ pbe_player_id: 'w', as_of: '2026-09-27', built_at: BUILT, r: { value: 2000, published: false } }, { pbe_player_id: 'l', as_of: '2026-09-27', built_at: BUILT, r: { value: 2200, published: true } }]; } };
   assert.equal(await expectationBefore(s2, 'w', 'l', '2026-09-28'), null);
   // gates hold a snapshot dated on/after the match day
   const p = packet();
@@ -212,4 +222,18 @@ test('round labels handle both notations (WTA prefixed, ESPN/Slam unprefixed)', 
   assert.equal(roundLabel('Q-2'), 'qualifying round 2');
   assert.equal(roundLabel('2'), 'round 2');
   assert.equal(roundLabel('M-1'), 'round 1');
+});
+
+test('correction: a pre-match rating from a snapshot built after the event is withheld; built-before stays', async () => {
+  const { correctPacket } = await import('../workers/tennis-news/src/correct.js');
+  const packet = { match_dna: { w: { as_of: '2026-09-01', rating: { value: 2600, published: true }, rating_trajectory: { series: [] }, metrics: { match_win_rate: { pct: 70 } } } }, expectation: { as_of: '2026-09-01', winner_id: 'w', loser_id: 'l', winner_pre_match_pct: 24 } };
+  const after = { async select() { return [{ built_at: '2026-09-27T13:46:42Z' }]; } };
+  const r = await correctPacket(after, packet, '2026-09-26T09:43:57Z');
+  assert.deepEqual(r.changes.sort(), ['expectation', 'match_dna.w.rating']);
+  assert.equal(r.packet.match_dna.w.rating, null);
+  assert.equal(r.packet.match_dna.w.metrics.match_win_rate.pct, 70, 'descriptive point-in-time metrics are kept');
+  assert.equal(r.packet.expectation, undefined);
+  assert.ok(packet.expectation, 'the original packet object is not mutated');
+  const before = { async select() { return [{ built_at: '2026-09-02T04:00:00Z' }]; } };
+  assert.deepEqual((await correctPacket(before, packet, '2026-09-26T09:43:57Z')).changes, []);
 });
