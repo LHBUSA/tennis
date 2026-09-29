@@ -68,7 +68,7 @@ export function wireRow(w, { tz } = {}) {
   // day-precision items (results whose end time is not served) show FINAL instead of a clock time
   // historical items (recorded long after the event, or linked to a backfilled story) show the EVENT date, never a fresh time
   const hist = w.freshness?.historical && w.freshness.event_at ? new Date(w.freshness.event_at) : null;
-  const time = hist && Number.isFinite(hist.getTime()) ? `Match ${hist.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })}` : w.day_only ? 'Final' : d && Number.isFinite(d.getTime()) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(tz ? { timeZone: tz } : {}) }) : '';
+  const time = hist && Number.isFinite(hist.getTime()) ? `Match ${hist.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).replace(' ', ' ')}` : w.day_only ? 'Final' : d && Number.isFinite(d.getTime()) ? d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', ...(tz ? { timeZone: tz } : {}) }) : '';
   const day = d && Number.isFinite(d.getTime()) ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(tz ? { timeZone: tz } : {}) }) : '';
   const order = { article: 0, match: 1, tournament: 2, player: 3 };
   const served = (w.links || []).filter((l) => l && l.href && order[l.rel] != null);

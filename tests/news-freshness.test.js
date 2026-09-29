@@ -50,6 +50,6 @@ test('wire items: late catch-ups and backfill-linked items carry the EVENT date,
   const now = wireFreshness({ detected_at: '2026-09-29T17:48:47Z', class_history: [] }, { scheduled_at: '2026-09-29T14:31:00Z' }, null);
   assert.equal(now.historical, false);
   const row = wireRow({ headline: 'Lloyd Harris knocks out No. 1 seed Vacherot', detected_at: '2026-09-29T10:44:00Z', freshness: late, links: [] });
-  assert.equal(row.time, 'Match Sep 24');
+  assert.equal(row.time, 'Match Sep 24', 'the date never splits across lines');
   assert.notEqual(wireRow({ headline: 'x', detected_at: '2026-09-29T17:48:47Z', freshness: now, links: [] }).time.slice(0, 6), 'Match ');
 });
