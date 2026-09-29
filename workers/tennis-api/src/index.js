@@ -63,7 +63,7 @@ async function todayView(store) {
   const d = today();
   const eds = await editionsInWindow(store, d, d, false);
   const ids = eds.map((e) => e.edition_id);
-  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&order=source_updated_at.desc.nullslast&limit=600`) : [];
+  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast&limit=600`) : [];
   const tourOf = new Map(eds.map((e) => [e.edition_id, e.tour]));
   const shaped = matches.map((m) => ({ ...shapeMatch(m), tour: tourOf.get(m.edition_id) || null }));
   const data = {
@@ -93,7 +93,7 @@ async function tournament(store, slug, year) {
   const e = await store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_status,source_family,competition_key,updated_at,tennis_tournaments(slug,name),tennis_venues(slug,city,country,venue_name,precision)&tournament_id=eq.${t[0].tournament_id}&year=eq.${year}`);
   if (!e.length) return null;
   const [matches, slots, attrs] = await Promise.all([
-    store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&limit=1000`),
+    store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${e[0].edition_id}&status=neq.superseded&limit=1000`),
     store.select('tennis_draw_slots', `select=event_type,draw,position,participant_key,bye,seed,entry_type,source,source_ref,capture_id&edition_id=eq.${e[0].edition_id}&order=event_type.asc,draw.asc,position.asc&limit=1000`),
     store.select('tennis_edition_attributes', `select=attribute,value,source,method,source_ref&edition_id=eq.${e[0].edition_id}`)
   ]);
@@ -174,7 +174,7 @@ async function player(store, slug) {
     store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date,source_family)&pbe_player_id=eq.${p.pbe_player_id}&order=tennis_ranking_snapshots(ranking_date).desc&limit=1000`),
     playerMatchIds(store, p.pbe_player_id)
   ]);
-  const recent = mp.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(mp.map((x) => x.match_id).slice(0, 60))}&order=scheduled_at.desc.nullslast,source_updated_at.desc.nullslast&limit=25`) : [];
+  const recent = mp.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(mp.map((x) => x.match_id).slice(0, 60))}&status=neq.superseded&order=scheduled_at.desc.nullslast,source_updated_at.desc.nullslast&limit=25`) : [];
   const hist = ranks.map((r) => ({ list: r.tennis_ranking_snapshots.list_key, date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points, source: r.tennis_ranking_snapshots.source_family })).sort((a, b) => (a.date < b.date ? 1 : -1));
   const latest = {};
   for (const r of hist) if (!latest[r.list]) latest[r.list] = { rank: r.rank, points: r.points, date: r.date, secondary_source: r.source === 'espn' };
@@ -225,7 +225,7 @@ async function h2h(store, a, b) {
   const bySide = new Map();
   for (const r of mp) { if (!bySide.has(r.match_id)) bySide.set(r.match_id, {}); bySide.get(r.match_id)[r.participant_key] = r.side; }
   const ids = [...bySide].filter(([, v]) => v[ka] && v[kb]).map(([k]) => k);
-  const rows = ids.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(ids)}&order=source_updated_at.desc.nullslast`) : [];
+  const rows = ids.length ? await store.select('tennis_matches', `select=${MATCH}&match_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast`) : [];
   const meetings = rows.map(shapeMatch);
   const won = (m, key) => FINAL.includes(m.status) && m.winner_side === bySide.get(m.id)[key];
   const record = { [pa.slug]: meetings.filter((m) => won(m, ka)).length, [pb.slug]: meetings.filter((m) => won(m, kb)).length };

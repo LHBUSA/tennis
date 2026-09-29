@@ -56,6 +56,16 @@ test('matches: a final result must name a winner; walkover without winner reject
   await pg.query(`insert into tennis_matches (event_type, round, format_key, status, source_family) values ('MD', 'R1', 'DOUBLES_TOUR', 'scheduled', 'wimbledon')`);
 });
 
+test('supersession tombstone: superseded needs superseded_by (another row), and superseded_by needs superseded', async () => {
+  const pg = await db();
+  const a = (await pg.query(`insert into tennis_matches (event_type, round, format_key, status, winner_side, source_family) values ('WS', 'M-1', 'BO3_TB7', 'completed', 'A', 'wta') returning match_id`)).rows[0].match_id;
+  const b = (await pg.query(`insert into tennis_matches (event_type, round, format_key, status, source_family) values ('WS', 'M-1', 'BO3_TB7', 'in_progress', 'wta') returning match_id`)).rows[0].match_id;
+  await rejects(pg, `update tennis_matches set status = 'superseded' where match_id = '${b}'`, /check/i);
+  await rejects(pg, `update tennis_matches set superseded_by = '${a}' where match_id = '${b}'`, /check/i);
+  await rejects(pg, `update tennis_matches set status = 'superseded', superseded_by = '${b}' where match_id = '${b}'`, /check/i);
+  await pg.query(`update tennis_matches set status = 'superseded', superseded_by = '${a}', natural_key = null where match_id = '${b}'`);
+});
+
 test('picks are append-only and must lock before the match starts', async () => {
   const pg = await db();
   await pg.query(`insert into tennis_players (pbe_player_id, founding_external_key, full_name) values ('${U(1)}', 'wta:1', 'P')`);

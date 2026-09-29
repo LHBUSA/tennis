@@ -43,7 +43,7 @@ export function stages(matches, event = 'MS') {
 }
 
 async function editionMatches(store, editionId, extra = '') {
-  return (await store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${editionId}${extra}&limit=1000`)).map(shapeMatch);
+  return (await store.select('tennis_matches', `select=${MATCH}&edition_id=eq.${editionId}&status=neq.superseded${extra}&limit=1000`)).map(shapeMatch);
 }
 
 // Every query below is bounded by construction (tests/men-api.test.js): Grand Slam editions are resolved FIRST

@@ -430,7 +430,7 @@ async function crossSource(store, normalized, holds, captureId) {
   for (const id of await candidateMatchIds(store, keys, eds)) cand.add(id);
   const ids = [...cand];
   const rows = [];
-  for (let i = 0; i < ids.length; i += 150) rows.push(...(await store.select('tennis_matches', `select=match_id,edition_id,event_type,round,status,score_text,winner_side,source_family,scheduled_at&match_id=${inList(ids.slice(i, i + 150))}`)));
+  for (let i = 0; i < ids.length; i += 150) rows.push(...(await store.select('tennis_matches', `select=match_id,edition_id,event_type,round,status,score_text,winner_side,source_family,scheduled_at&status=neq.superseded&match_id=${inList(ids.slice(i, i + 150))}`)));
   const inPass = rows.filter((m) => eds.includes(m.edition_id));
   const byIdAll = new Map(inPass.map((m) => [m.match_id, { ...m, parts: {} }]));
   const pids = [...byIdAll.keys()];

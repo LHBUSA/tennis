@@ -15,7 +15,7 @@ export function roundLabel(code) {
 
 export const surfaceClass = (s) => (s ? `surf-${s}` : '');
 export const cap = (s) => String(s || '').replace(/^./, (c) => c.toUpperCase());
-const STATUS = { in_progress: 'Live', scheduled: 'Upcoming', completed: 'Final', retired: 'Ret.', walkover: 'W/O', suspended: 'Suspended' };
+const STATUS = { superseded: 'Duplicate record (superseded)', in_progress: 'Live', scheduled: 'Upcoming', completed: 'Final', retired: 'Ret.', walkover: 'W/O', suspended: 'Suspended' };
 export const statusLabel = (s) => STATUS[s] || s;
 
 export function fmtDate(d) {

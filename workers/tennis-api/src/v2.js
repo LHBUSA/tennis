@@ -210,7 +210,7 @@ export async function schedule(store, url) {
   const types = G && E ? G.filter((t) => E.includes(t)) : G || E;
   const eventQ = types ? `&event_type=in.(${(types.length ? types : ['none']).join(',')})` : '';
   const includeMatches = view === 'today' || view === 'tomorrow' || statusF;
-  const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=500`) : [];
+  const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=500`) : [];
   const surf = url.searchParams.get('surface');
   const tour = url.searchParams.get('tour');
   const keepEd = (e) => (!surf || e.surface === surf) && keepTour(tour, e.tour);
