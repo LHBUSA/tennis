@@ -1,0 +1,118 @@
+/* PropBetEdge Tennis — V4 visual identity: premium night-session tennis.
+   Layers (back to front):
+     1. .tn-backdrop  fixed page layer: soft arena light + a perspective court floor drawn in faint lines. On wide screens it
+        is masked to the page MARGINS (outside the 1280px content column) so court lines never sit under reading text; on
+        narrow screens it is off (the bands carry the identity there).
+     2. .tn-band      night-session header band on data pages (and the newsroom masthead / player band): floodlight
+        gradients over deep court green + faint court geometry; text is on-dark (#f3f6f1 on #06201a, > 15:1).
+     3. surface accent html[data-surface=hard|clay|grass] -> --surf; small accents only (band rule, chip, article badge);
+        unknown surface = neutral gold (never guessed).
+   Page intensity: home keeps its photo hero; the newsroom band is the most intense; data-page bands medium; articles only
+   a slim accent (reading first). prefers-contrast: more / forced-colors / print remove the decorative layers. */
+
+:root {
+  --surf: var(--gold-bright);
+  --surf-ink: var(--gold);
+  /* court geometry (doubles court 23.77 x 10.97 m, 1 unit = 1 cm): baselines, doubles + singles sidelines, service boxes,
+     centre service line, centre marks and the net — as ink lines (paper) and light lines (night bands) */
+  --tn-court-ink: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -20 2417 1137'%3E%3Cg fill='none' stroke='rgb(15,77,56)' stroke-opacity='.16' stroke-width='6'%3E%3Crect x='0' y='0' width='2377' height='1097'/%3E%3Cpath d='M0 137H2377M0 960H2377M548 137V960M1829 137V960M548 548H1829M0 548H30M2347 548H2377'/%3E%3Cpath d='M1188 -20V1117' stroke-width='9' stroke-dasharray='18 10'/%3E%3C/g%3E%3C/svg%3E");
+  --tn-court-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-20 -20 2417 1137'%3E%3Cg fill='none' stroke='rgb(243,246,241)' stroke-opacity='.13' stroke-width='5'%3E%3Crect x='0' y='0' width='2377' height='1097'/%3E%3Cpath d='M0 137H2377M0 960H2377M548 137V960M1829 137V960M548 548H1829M0 548H30M2347 548H2377'/%3E%3Cpath d='M1188 -20V1117' stroke-width='8' stroke-dasharray='18 10'/%3E%3C/g%3E%3C/svg%3E");
+  --tn-night: linear-gradient(180deg, #051a14 0%, #08291f 58%, #0b3326 100%);
+  --tn-flood: radial-gradient(1100px 360px at 50% -12%, rgba(255, 244, 205, 0.14), transparent 62%), radial-gradient(520px 260px at 8% -8%, rgba(150, 205, 255, 0.10), transparent 70%), radial-gradient(520px 260px at 92% -8%, rgba(150, 205, 255, 0.10), transparent 70%);
+}
+html[data-surface='hard'] { --surf: var(--hard); --surf-ink: #245a95; }
+html[data-surface='clay'] { --surf: var(--clay); --surf-ink: #9a4520; }
+html[data-surface='grass'] { --surf: var(--grass); --surf-ink: #2f7040; }
+
+/* 1. page backdrop ------------------------------------------------------------------------------------------ */
+/* html paints the paper; body stays transparent so the z-index:-1 backdrop is not covered by body's own background */
+body { background: transparent; }
+/* the page frame fills the viewport while data loads, so the footer never jumps up into view and back down (CLS) */
+main.main { min-height: 100vh; }
+/* while a data page loads, the band's meta line says so and the body placeholder paints nothing: when the band grows to
+   fit the real heading/meta, no painted content below it moves (CLS) */
+.tn-after-band [data-body] > .loading:only-child, .nf-body > .loading:only-child { visibility: hidden; }
+/* a page's related-stories block waits for the page body (else it paints first and is shoved down when the body lands) */
+.tn-after-band [data-body]:has(> .loading:only-child) ~ [data-stories] { display: none; }
+.tn-band .meta:empty::before { content: 'Loading…'; color: var(--on-dark-2); }
+/* newsroom masthead: the "Updated …" stamp must not re-wrap the masthead when it lands */
+.nf-mast .nf-date [data-updated] { display: block; min-height: 1.35em; }
+.tn-backdrop { position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden; display: none; }
+.tn-backdrop::before { content: ''; position: absolute; inset: 0; background: radial-gradient(900px 420px at 50% -6%, rgba(217, 180, 74, 0.10), transparent 70%), radial-gradient(700px 500px at 0% 100%, rgba(15, 77, 56, 0.07), transparent 70%), radial-gradient(700px 500px at 100% 100%, rgba(15, 77, 56, 0.07), transparent 70%); }
+.tn-backdrop::after { content: ''; position: absolute; left: 50%; bottom: -6vh; width: 1900px; height: 880px; margin-left: -950px; background: var(--tn-court-ink) center / contain no-repeat; transform: perspective(1100px) rotateX(62deg); transform-origin: 50% 100%; }
+@media (min-width: 1100px) {
+  .tn-backdrop { display: block; -webkit-mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 660px), transparent calc(50% - 600px), transparent calc(50% + 600px), #000 calc(50% + 660px)); mask-image: linear-gradient(90deg, #000 0, #000 calc(50% - 660px), transparent calc(50% - 600px), transparent calc(50% + 600px), #000 calc(50% + 660px)); }
+}
+
+/* 2. night-session band -------------------------------------------------------------------------------------- */
+.tn-band { position: relative; isolation: isolate; overflow: hidden; background: var(--tn-flood), var(--tn-night); color: var(--on-dark); border-bottom: 3px solid var(--surf); }
+.tn-band::before { content: ''; position: absolute; left: 50%; top: 18%; width: 1500px; height: 690px; margin-left: -750px; z-index: -1; background: var(--tn-court-light) center / contain no-repeat; transform: perspective(900px) rotateX(58deg); transform-origin: 50% 0; opacity: 0.9; }
+.tn-band .page { padding-top: clamp(26px, 4vw, 44px); padding-bottom: clamp(20px, 3vw, 30px); }
+.tn-band .eyebrow { color: #e6c96a; }
+.tn-band h1 { color: var(--on-dark); text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35); }
+.tn-band .lede, .tn-band .meta, .tn-band .meta span:not(.fresh) { color: var(--on-dark-2); }
+.tn-band a { color: var(--on-dark); }
+.tn-band .chips .chip { background: rgba(243, 246, 241, 0.08); border-color: rgba(243, 246, 241, 0.22); color: var(--on-dark); }
+.tn-band .chips .chip.on, .tn-band .chips .chip[aria-current='page'] { background: var(--gold-bright); border-color: var(--gold-bright); color: var(--night); }
+.tn-after-band { padding-top: 22px; }
+.tn-band .fresh { background: var(--paper); border-color: transparent; }
+.meta-sem { margin: 0 0 14px; }
+.surf-slot { margin-left: 12px; }
+/* the surface chip sits inline in the eyebrow row and the meta row keeps one line reserved: the band never changes height when data lands (CLS) */
+.tn-band .meta { min-height: 1.6em; }
+.surf-chip { display: inline-flex; align-items: center; gap: 7px; margin: 0; padding: 3px 9px; vertical-align: 1px; border-radius: 999px; font: 800 12px/1 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; color: var(--on-dark); background: rgba(243, 246, 241, 0.08); border: 1px solid rgba(243, 246, 241, 0.22); }
+.surf-chip::before { content: ''; width: 10px; height: 10px; border-radius: 2px; background: var(--surf); box-shadow: 0 0 0 2px rgba(243, 246, 241, 0.25); }
+
+/* newsroom masthead = the most intense band (the news IS the hero: short, dense, floodlit) */
+.nf-mast { position: relative; isolation: isolate; overflow: hidden; background: var(--tn-flood), var(--tn-night); border-bottom: 3px solid var(--gold-bright); }
+.nf-mast::before { content: ''; position: absolute; left: 50%; top: 22%; width: 1500px; height: 690px; margin-left: -750px; z-index: -1; background: var(--tn-court-light) center / contain no-repeat; transform: perspective(900px) rotateX(58deg); transform-origin: 50% 0; }
+.nf-mast-in { border-bottom-color: rgba(217, 180, 74, 0.55); }
+.nf-mast .nf-brand, .nf-mast .nf-brand a { color: var(--on-dark); }
+.nf-mast .nf-brand span { color: var(--gold-bright); }
+.nf-mast .nf-date { color: var(--on-dark-2); }
+.nf-mast .nf-desks a { color: var(--on-dark-2); }
+.nf-mast .nf-desks a:hover { color: var(--on-dark); }
+.nf-mast .nf-desks a[aria-current='page'] { color: var(--on-dark); border-bottom-color: var(--gold-bright); }
+.nf-mast .nf-desks a.is-empty { color: #b3c3ba; }
+.nf-mast .nf-desks small { background: rgba(243, 246, 241, 0.12); color: var(--on-dark); }
+
+/* player band (existing photo band): court geometry over the photo's dark wash */
+.ph-band { position: relative; isolation: isolate; border-bottom: 3px solid var(--gold-bright); }
+.ph-band::after { content: ''; position: absolute; inset: 0; z-index: -1; background: var(--tn-court-light) 50% 120% / min(1500px, 170vw) auto no-repeat; opacity: 0.55; pointer-events: none; }
+
+/* home hero: a floodlit court line under the photo hero's edge (the photo stays the hero) */
+.hero { border-bottom: 3px solid var(--gold-bright); }
+/* below desktop the photo hero fills the first screen, so the home's async modules (live, results, news, leaders) land
+   below the fold instead of shoving visible content around (CLS) */
+@media (max-width: 1099px) { .hero { min-height: calc(100svh - 60px); display: grid; align-content: center; } }
+
+/* articles: reading first — only the surface accent on the TENNIS badge and a slim top rule */
+html[data-page='news-article'] .main { border-top: 3px solid var(--surf); }
+html[data-page='news-article']:not([data-surface='neutral']) .nwm-sport { background: var(--surf); color: #fff; }
+
+/* section headings on data pages pick up a restrained court-line underline */
+.page .sec { position: relative; }
+
+/* 3. accessibility + output ---------------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+  .tn-backdrop { display: none !important; }
+  .tn-band::before, .nf-mast::before, .ph-band::after { display: none; }
+  .tn-band, .nf-mast { background: #04140f; }
+}
+@media (forced-colors: active) { .tn-backdrop, .tn-band::before, .nf-mast::before, .ph-band::after { display: none; } }
+@media print { .tn-backdrop, .tn-band::before, .nf-mast::before, .ph-band::after { display: none; } .tn-band, .nf-mast { background: none; color: #000; } }
+.tn-band .page-h { margin-bottom: 0; }
+
+/* home: Tennis DNA leaders (population stated on every board; held tours say "comparison building") */
+.lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.lb-card { min-width: 0; background: var(--white); border: 1px solid var(--rule); border-top: 3px solid var(--court-700); padding: 14px 16px 12px; }
+.lb-card h3 { margin: 0 0 8px; font: 800 15px/1.2 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.lb-list { list-style: none; margin: 0; padding: 0; }
+.lb-list li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--rule); font-size: 14.5px; }
+.lb-list a { color: var(--ink); font-weight: 650; overflow-wrap: anywhere; }
+.lb-list b, .lb-r { font: 700 13px/1 var(--f-data); color: var(--court-700); }
+.lb-r { color: var(--muted); }
+.lb-tour + .lb-tour { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--rule-2); }
+.lb-tk { margin: 0 0 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12.5px; font-weight: 700; }
+.lb-tk b { font-size: 13.5px; color: var(--ink); }
+.lb-pop { margin: 6px 0 0; font-size: 12.5px; line-height: 1.45; color: var(--muted); }

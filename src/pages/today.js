@@ -11,6 +11,7 @@ import { replayList } from './men.js';
 import { leadStory, storyRow, wireList } from './news.js';
 import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
+import { leaderBoard } from '../lib/v4.js';
 
 const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
 
@@ -42,6 +43,7 @@ export function mount(root) {
       <section data-results></section>
       <section class="mod" data-pbecast><header class="mod-h"><h2>PBEcast</h2><a class="mod-k" href="/pbecast">All casts and replays →</a></header><p class="loading">Loading…</p></section>
       <section class="mod" data-news><header class="mod-h"><h2>Latest tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header><p class="loading">Loading…</p></section>
+      <section class="mod lb" data-leaders aria-labelledby="lb-h"><header class="mod-h"><h2 id="lb-h">Tennis DNA leaders</h2><a class="mod-k" href="/dna">All Tennis DNA →</a></header><p class="loading">Loading…</p></section>
       <section class="mod"><header class="mod-h"><h2>Featured players</h2><a class="mod-k" href="/players">All players →</a></header><div class="mod-b" data-players><p class="loading">Loading…</p></div></section>
       <section class="mod"><header class="mod-h"><h2>Tournament coverage</h2><a class="mod-k" href="/tournaments">All tournaments →</a></header><div class="mod-b" data-tours><p class="loading">Loading…</p></div></section>
       <section class="mod"><header class="mod-h"><h2>Coverage today</h2></header><div class="mod-b"><p><b>ATP Tour</b> — tournaments, results (2007 on), fixtures and the weekly ATP singles list (top 100–150), all from a secondary source (ESPN), labelled as such and never presented as official ATP data; live ATP scores are set and game level from that source, without point-by-point. <b>WTA Tour and WTA 125</b> — official live scores with point score, results, match statistics and official WTA singles and doubles rankings. <b>Grand Slams</b> — one tournament with every event: men’s and women’s singles and doubles, mixed doubles and qualifying; the Australian Open complete with point-by-point, the Wimbledon archive and Roland-Garros. <b>Tennis DNA</b> — results-based Match DNA for ATP and WTA players, each tour compared only with itself. ATP Challenger, ITF and official ATP feeds are not yet acquirable — we show nothing rather than something unsourced. <a href="/sources">Sources →</a></p></div></section>
@@ -121,5 +123,23 @@ export function mount(root) {
       ${lead || wireHtml ? html`<div class="nf-home-top">${lead ? html`<div>${leadStory(lead)}${majors.length ? html`<div class="nf-rows">${majors.map(storyRow)}</div>` : ''}</div>` : ''}${wireHtml ? html`<div class="nf-wire nf-wire-home"><header class="nf-sec"><h2><i class="nf-pulse" aria-hidden="true"></i>Live tennis wire</h2><a href="/news">All →</a></header>${wireHtml}</div>` : ''}</div>`
         : html`<p class="note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing. <a href="/news">Newsroom →</a></p>`}`);
   }).catch(() => {});
+  // Tennis DNA leaders: every board states its qualification population; a tour whose comparison population is not
+  // published yet shows "comparison building" (never a leaderboard from an incomplete population). ATP and WTA never pooled.
+  const BOARDS = [['pbe_rating', 'PBE Rating', (v) => String(v)], ['hold_rate', 'Serve · hold rate', (v) => `${(v * 100).toFixed(1)}%`], ['return_games_won', 'Return · break rate', (v) => `${(v * 100).toFixed(1)}%`]];
+  Promise.all(BOARDS.flatMap(([m]) => ['atp', 'wta'].map((t) => api(`/v1/dna/leaders?metric=${m}&tour=${t}&limit=5`, { signal: ctl.signal }).then((r) => r?.data || null).catch(() => null)))).then((res) => {
+    const el = $('[data-leaders]');
+    if (!el) return;
+    // one card per metric; inside it ATP and WTA as separate top-3 boards, each with its own population line
+    const tourBoard = ([m, , fmt], t, d) => {
+      const b = leaderBoard(d, { tour: t });
+      const T = t.toUpperCase();
+      return html`<div class="lb-tour"><p class="lb-tk"><span class="nf-tour nf-tour-${t}">${T}</span>${b.show ? html`<a href="/dna?metric=${m}&tour=${t}">Full board →</a>` : html`<b>${T} comparison building</b>`}</p>
+        ${b.show ? html`<ol class="lb-list">${b.rows.slice(0, 3).map((r) => html`<li><span class="lb-r">${r.rank}</span>${r.player?.slug ? html`<a href="/players/${r.player.slug}">${r.player.name}</a>` : html`<span>${r.player?.name || ''}</span>`}<b>${fmt(r.value)}</b></li>`)}</ol>` : ''}
+        <p class="lb-pop">${b.note}</p></div>`;
+    };
+    render(el, html`<header class="mod-h"><h2 id="lb-h">Tennis DNA leaders</h2><a class="mod-k" href="/dna">All Tennis DNA →</a></header>
+      <div class="lb-grid">${BOARDS.map((B, i) => html`<div class="lb-card"><h3>${B[1]}</h3>${tourBoard(B, 'atp', res[i * 2])}${tourBoard(B, 'wta', res[i * 2 + 1])}</div>`)}</div>
+      <p class="note">Singles only, from our canonical results and match statistics. Each board shows who qualifies for it. <a href="/methodology">Definitions and confidence rules →</a></p>`);
+  });
   return () => { ctl.abort(); clearInterval(timer); };
 }

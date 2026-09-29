@@ -7,9 +7,11 @@
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
+import { depthInserts } from '../ui/news-modules.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
 import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh } from '../lib/newsroom.js';
+import { newsPlan, previewPick, setPageSurface } from '../lib/v4.js';
 
 export const DESKS = [['all', 'All'], ['atp', 'ATP'], ['wta', 'WTA'], ['grand-slams', 'Grand Slams'], ['doubles', 'Doubles'], ['rankings', 'Rankings'], ['challenger', 'Challenger'], ['itf', 'ITF']];
 const KIND = KIND_LABEL;
@@ -72,7 +74,8 @@ function cardArt(a, lead) {
 }
 
 const who = (a) => (a.team && a.team.length ? a.team : a.player ? [a.player] : []);
-const kicker = (a) => html`${a.story_class && CLASS_LABEL[a.story_class] ? html`<span class="nf-cls nf-cls-${a.story_class}">${CLASS_LABEL[a.story_class]}</span>` : ''}<span class="nf-kind">${KIND[a.story_type] || 'Story'}</span>${a.tournament?.name ? html`<span class="nf-ev">${tLabel(a.tournament)}</span>` : ''}${a.status && a.status !== 'published' ? html` <b class="nw-held">HELD: ${a.hold_reason || ''}</b>` : ''}`;
+const TOUR_MARK = { atp: 'ATP', wta: 'WTA', 'grand-slams': 'Slam' };
+const kicker = (a) => html`${TOUR_MARK[a.desk] ? html`<span class="nf-tour nf-tour-${a.desk}">${TOUR_MARK[a.desk]}</span>` : ''}${a.story_class && CLASS_LABEL[a.story_class] ? html`<span class="nf-cls nf-cls-${a.story_class}">${CLASS_LABEL[a.story_class]}</span>` : ''}<span class="nf-kind">${KIND[a.story_type] || 'Story'}</span>${a.tournament?.name ? html`<span class="nf-ev">${tLabel(a.tournament)}</span>` : ''}${a.status && a.status !== 'published' ? html` <b class="nw-held">HELD: ${a.hold_reason || ''}</b>` : ''}`;
 
 /** Research links for a story (only links that resolve from the card itself). */
 function researchLinks(a) {
@@ -225,12 +228,13 @@ export function hub(root, ctx) {
   const dateLine = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   render(root, html`<div class="nf">
     <header class="nf-mast"><div class="page nf-mast-in">
-      <p class="nf-brand"><a href="/news">PropBetEdge Tennis <span>Newsroom</span></a></p>
+      <h1 class="nf-brand"><a href="/news">PropBetEdge Tennis <span>Newsroom</span></a></h1>
       <p class="nf-date"><time>${dateLine}</time> <span data-updated></span></p></div>
       <div class="page"><nav class="nf-desks" aria-label="Desks" data-desks>${DESKS.filter(([k]) => !['itf', 'challenger'].includes(k)).map(([k, l]) => html`<a href="${deskHref(k)}" ${k === desk ? raw('aria-current="page"') : ''}>${l}</a>`)}</nav></div></header>
     <div class="page nf-body" data-body><p class="loading">Loading the newsroom…</p></div></div>`);
   const Q = (p) => api(withPreview(p), { signal: ctl.signal }).catch(() => null);
-  Promise.all([Q('/v1/news?limit=60'), Q('/v1/news/live?limit=80'), Q('/v1/today'), Q('/v1/players-to-watch')]).then(([nr, lr, tr, pr]) => {
+  const wantPreviews = ['all', 'atp', 'wta'].includes(desk);
+  Promise.all([Q('/v1/news?limit=60'), Q('/v1/news/live?limit=80'), Q('/v1/today'), Q('/v1/players-to-watch'), wantPreviews ? Q('/v1/matchups?limit=40') : null]).then(([nr, lr, tr, pr, mr]) => {
     const body = root.querySelector('[data-body]');
     if (!body) return;
     const all = nr?.data?.articles || [];
@@ -247,24 +251,56 @@ export function hub(root, ctx) {
     const latestAt = [latestFresh(stories), wire[0]?.detected_at].filter(Boolean).sort().at(-1);
     const upd = root.querySelector('[data-updated]');
     if (upd && latestAt) upd.textContent = `· Updated ${ago(latestAt)}`;
-    const { lead, majors, rest } = hierarchy(stories);
-    const [feature, ...rows] = rest;
+    // V4 hierarchy: HERO (lead + a 2-4 story support grid) -> current tournaments -> latest intelligence | players moving
+    // -> ATP rail | WTA rail -> what's next | notable results. Every story appears once (newsPlan); every module hides when
+    // it has nothing real to show; the wire is bounded (no endless page).
+    const { lead, majors, rest } = hierarchy(stories, { majors: 4 });
+    const plan = newsPlan(rest, { desk, latest: 5, rail: 4 });
+    const [feature, ...rows] = plan.latest;
+    const moreRows = desk === 'all' ? plan.more : rows.slice(ROWS_SHOWN);
+    const shownRows = desk === 'all' ? rows : rows.slice(0, ROWS_SHOWN);
     const narrow = typeof matchMedia === 'function' && matchMedia('(max-width: 700px)').matches;
-    const wireBlock = wire.length ? wireList(wire, { limit: narrow ? 8 : 14 }) : fallbackWire.length ? wireList(fallbackWire, { limit: narrow ? 6 : 10 }) : '';
-    const wireTitle = wire.length ? 'Live tennis wire' : 'Latest results';
-    const wireNote = wire.length ? 'Facts as our data records them, newest first: results, upsets, titles, ranking moves. Stories link where one is published.' : 'Completed matches from our canonical record, newest first.';
+    const wireBlock = wire.length ? wireList(wire, { limit: narrow ? 6 : 8 }) : fallbackWire.length ? wireList(fallbackWire, { limit: narrow ? 6 : 8 }) : '';
+    const wireNote = wire.length ? 'Facts as our data records them, newest first. Stories link where one is published.' : 'Completed matches from our canonical record, newest first.';
+    const previews = previewPick((mr?.data?.matchups || []).filter((x) => !deskTour || String(x.tour || '').toLowerCase() === deskTour), { limit: 4 });
+    const tMod = tournamentsModule(today, deskTour);
+    const mMod = moversModule(pr?.data, wireAll, deskTour);
+    const latestSec = feature ? html`<section class="nf-latest" aria-labelledby="nf-lat-h"><header class="nf-sec"><h2 id="nf-lat-h">Latest intelligence</h2>${desk !== 'all' ? html`<a href="/news">All tennis news →</a>` : ''}</header>${featureStory(feature)}${shownRows.length ? html`<div class="nf-rows">${shownRows.map((a) => storyRow(a))}</div>` : ''}${moreRows.length ? html`<div class="nf-rows">${moreRows.map((a) => html`<div class="nf-row-more" hidden>${storyRow(a)}</div>`)}</div><button type="button" class="nf-w-btn" data-rows-more>Show ${moreRows.length} more stories</button>` : ''}</section>` : '';
+    const wireSec = wireBlock ? html`<section class="nf-wire" aria-labelledby="nf-wire-h"><header class="nf-sec"><h2 id="nf-wire-h"><i class="nf-pulse" aria-hidden="true"></i>Notable results</h2><span>${wireNote}</span></header>${wireBlock}</section>` : '';
     render(body, html`
-      ${lead ? html`<section class="nf-top" aria-label="Top stories"><div class="nf-top-lead">${leadStory(lead)}</div>${majors.length ? html`<div class="nf-top-majors">${majors.map((a, i) => majorStory(a, i === 0 && heroKey(a) !== heroKey(lead)))}</div>` : ''}</section>` : ''}
-      ${wireBlock ? html`<section class="nf-wire" aria-labelledby="nf-wire-h"><header class="nf-sec"><h2 id="nf-wire-h"><i class="nf-pulse" aria-hidden="true"></i>${wireTitle}</h2><span>${wireNote}</span></header>${wireBlock}</section>` : ''}
-      ${feature ? html`<section class="nf-latest" aria-labelledby="nf-lat-h"><header class="nf-sec"><h2 id="nf-lat-h">Latest intelligence</h2>${desk !== 'all' ? html`<a href="/news">All tennis news →</a>` : ''}</header>${featureStory(feature)}${rows.length ? html`<div class="nf-rows">${rows.map((a, i) => (i < ROWS_SHOWN ? storyRow(a) : html`<div class="nf-row-more" hidden>${storyRow(a)}</div>`))}</div>${rows.length > ROWS_SHOWN ? html`<button type="button" class="nf-w-btn" data-rows-more>Show ${rows.length - ROWS_SHOWN} more stories</button>` : ''}` : ''}</section>` : ''}
-      ${!lead && !wireBlock ? html`<section class="nf-mod nf-empty"><p class="empty-h">Nothing on the ${DESK_LABEL[desk] || desk} desk right now.</p><p class="nf-note">Stories and wire items appear only when a real event in our data passes every factual check. ${res0(nr)}</p><p class="nf-research"><a href="/news">All tennis news →</a> <a href="/schedule">Today’s schedule →</a> <a href="/rankings">Rankings →</a></p></section>` : ''}
-      <div class="nf-band">${tournamentsModule(today, deskTour)}${moversModule(pr?.data, wireAll, deskTour)}</div>`);
+      ${lead ? html`<section class="nf-top" aria-label="Top stories"><div class="nf-top-lead">${leadStory(lead)}</div>${majors.length ? html`<div class="nf-top-majors nf-grid-${Math.min(4, majors.length)}">${majors.map((a, i) => majorStory(a, i < 2 && heroKey(a) !== heroKey(lead)))}</div>` : ''}</section>` : ''}
+      ${tMod ? html`<div class="nf-strip">${tMod}</div>` : ''}
+      ${latestSec || mMod ? html`<div class="nf-duo${mMod ? '' : ' nf-duo-one'}">${latestSec || html`<div></div>`}${mMod ? html`<aside class="nf-side" aria-label="Players moving">${mMod}</aside>` : ''}</div>` : ''}
+      ${plan.atp.length || plan.wta.length ? html`<div class="nf-rails">${railModule('atp', plan.atp)}${railModule('wta', plan.wta)}</div>` : ''}
+      ${previews.length || wireSec ? html`<div class="nf-duo nf-duo-even${previews.length && wireSec ? '' : ' nf-duo-one'}">${previews.length ? previewsModule(previews) : ''}${wireSec}</div>` : ''}
+      ${!lead && !wireBlock ? html`<section class="nf-mod nf-empty"><p class="empty-h">Nothing on the ${DESK_LABEL[desk] || desk} desk right now.</p><p class="nf-note">Stories and wire items appear only when a real event in our data passes every factual check. ${res0(nr)}</p><p class="nf-research"><a href="/news">All tennis news →</a> <a href="/schedule">Today’s schedule →</a> <a href="/rankings">Rankings →</a></p></section>` : ''}`);
     body.querySelector('[data-rows-more]')?.addEventListener('click', (e) => { body.querySelectorAll('.nf-row-more').forEach((x) => { x.hidden = false; }); e.currentTarget.remove(); });
     body.querySelector('[data-wire-more]')?.addEventListener('click', (e) => { body.querySelectorAll('.nf-w-more').forEach((x) => { x.hidden = false; }); e.currentTarget.remove(); });
   }).catch(() => {});
   return () => ctl.abort();
 }
 const ROWS_SHOWN = 10;
+
+/** A tour rail (ATP / WTA): that tour's stories not already shown above, compact rows; nothing when empty. */
+function railModule(tour, list) {
+  if (!list.length) return '';
+  const T = tour.toUpperCase();
+  return html`<section class="nf-rail nf-rail-${tour}" aria-labelledby="nf-rail-${tour}"><header class="nf-sec"><h2 id="nf-rail-${tour}"><i class="nf-tour-dot nf-tour-${tour}" aria-hidden="true"></i>${T} desk</h2><a href="/news/${tour}">All ${T} →</a></header><div class="nf-rows">${list.map((a) => storyRow(a))}</div></section>`;
+}
+
+const PV_ROUND = { Q: 'Quarterfinal', S: 'Semifinal', F: 'Final' };
+const pvRound = (r) => (/^\d+$/.test(String(r)) ? `Round ${r}` : PV_ROUND[String(r).split('-').pop()] || String(r));
+/** What's next: real scheduled singles matchups only (API /v1/matchups), soonest first. */
+function previewsModule(list) {
+  const t = (iso) => new Date(iso).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' });
+  const side = (s) => (s?.players || []).map((p) => html`<span class="nf-pv-p">${avatar(p, { px: 28 })}<b>${p.name}</b>${s.seed ? html`<small>[${s.seed}]</small>` : ''}</span>`);
+  return html`<section class="nf-prev" aria-labelledby="nf-prev-h"><header class="nf-sec"><h2 id="nf-prev-h">What’s next</h2><a href="/matchups">All matchups →</a></header>
+    <ul class="nf-pv">${list.map((x) => { const m = x.match; const tr = String(x.tour || '').toLowerCase(); return html`<li>
+      <p class="nf-pv-k">${tr ? html`<span class="nf-tour nf-tour-${tr}">${tr.toUpperCase()}</span> ` : ''}${shortName(m.tournament?.name || '')}${m.round ? ` · ${pvRound(m.round)}` : ''} · <time datetime="${m.scheduled_at}">${t(m.scheduled_at)}</time></p>
+      <p class="nf-pv-v">${side(m.sides?.A)}<i>vs</i>${side(m.sides?.B)}</p>
+      <p class="nf-research"><a href="/matchups/${m.id}">Matchup DNA →</a>${m.tournament?.slug ? html`<a href="/tournaments/${m.tournament.slug}/${m.tournament.year}">Tournament →</a>` : ''}</p></li>`; })}</ul>
+    <p class="nf-note">Scheduled singles matches from the order of play our sources publish; times in your time zone.</p></section>`;
+}
 /** Identity of a card's hero image (so a major never repeats the lead's photo right below it). */
 const heroKey = (a) => { const i = a?.media?.hero?.images?.[0]; return i ? i.player_id || i.square || i.id || i.caption || JSON.stringify(i).slice(0, 80) : null; };
 const res0 = (r) => (r?.meta?.semantics ? `${r.meta.semantics}.` : '');
@@ -457,6 +493,7 @@ export function article(root, ctx) {
     const a = res.data;
     if (!a) { render(body, html`<div class="page"><div class="mod"><p class="empty-h">Story not found.</p><p class="note"><a href="/news">All tennis news →</a></p></div></div>`); return; }
     document.title = `${a.headline} | PropBetEdge Tennis`;
+    setPageSurface((a.evidence?.tournament || a.tournament)?.surface);
     setIndexable(a.status === 'published' && !previewQ());
     track('tennis_news_open', { route: '/news/:slug', event_type: a.story_type });
     const mods = a.plan?.modules || [];
@@ -477,6 +514,7 @@ export function article(root, ctx) {
     const dataCharts = charts.filter((c) => c.id !== 'dna_comparison' && c.id !== 'ranking_trajectory');
     const dataBlock = [...dataCharts.slice(0, 2).map(chart), dataCharts.length > 2 ? html`<details class="nf-more-data"><summary>More match numbers (${dataCharts.length - 2})</summary>${dataCharts.slice(2).map(chart)}</details>` : ''];
     const inserts = { what_happened: [sb ? scoreboard(sb) : ''], match_data: dataBlock, dna: charts.filter((c) => c.id === 'dna_comparison').map(chart), h2h: [get('h2h') ? h2hMod(get('h2h')) : ''], path: [get('path') ? pathMod(get('path')) : ''], trajectory: charts.filter((c) => c.id === 'ranking_trajectory').map(chart) };
+    Object.assign(inserts, depthInserts(mods, inserts, { sections: a.sections || [], parts, W, charts, chart })); // V4 data modules (src/ui/news-modules.js)
     const sections = a.sections || [];
     const placed = new Set(Object.entries(inserts).filter(([id]) => sections.some((s) => s.id === id)).map(([id]) => id));
     const leftovers = Object.entries(inserts).filter(([id]) => !placed.has(id)).flatMap(([, v]) => v).filter(Boolean);

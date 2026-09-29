@@ -28,12 +28,12 @@
   --ink: #16201b;
   --ink-2: #33403a;
   --muted: #5d6862;
-  --faint: #7c8580;
+  --faint: #626b66; /* V4: darkened from #7c8580 for AA on white and paper */
   --on-dark: #f3f6f1;
   --on-dark-2: #c9d6cf;
 
   /* PropBetEdge gold (restrained) */
-  --gold: #9a7414;        /* text-safe on white */
+  --gold: #86650f;        /* text-safe on white, paper and paper-2 (V4: was #9a7414, 4.3:1 on white) */
   --gold-bright: #d9b44a; /* marks on green */
   --gold-soft: #f6eed7;
 

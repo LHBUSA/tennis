@@ -12,15 +12,26 @@ import { track } from '../analytics.js';
 import { liveEntry } from '../lib/pbecast-live.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
+import { setPageSurface } from '../lib/v4.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
+/** Data-page frame: a full-bleed night-session band (V4 identity, src/styles/theme.css) holds the page header; the body
+ *  follows on the reading surface. Pages with a sourced surface add a surface chip to the band ([data-surf]). */
 function shell(root, { eyebrow, heading, lede = '', chips = null }) {
-  render(root, html`<div class="page">
-    <header class="page-h"><p class="eyebrow">${eyebrow}</p><h1>${heading}</h1>${lede ? html`<p class="lede">${lede}</p>` : ''}
+  render(root, html`<header class="tn-band"><div class="page page-h">
+    <p class="eyebrow">${eyebrow}<span class="surf-slot" data-surf hidden></span></p><h1>${heading}</h1>${lede ? html`<p class="lede">${lede}</p>` : ''}
     ${chips ? html`<nav class="chips" aria-label="Views">${chips.map(([h, l, on]) => html`<a class="chip${on ? ' on' : ''}" href="${h}" ${on ? html`aria-current="page"` : ''}>${l}</a>`)}</nav>` : ''}
-    <p class="meta" data-meta></p></header>
-    <div data-body><p class="loading">Loading…</p></div></div>`);
+    <p class="meta" data-meta></p></div></header>
+    <div class="page tn-after-band"><div data-body><p class="loading">Loading…</p></div></div>`);
+}
+
+/** Sourced-surface context for a data page: <html data-surface> + a chip in the band; unknown surface shows nothing. */
+function markSurface(root, surface) {
+  const a = setPageSurface(surface);
+  const slot = root.querySelector('[data-surf]');
+  if (!slot) return;
+  if (a.label) { render(slot, html`<span class="surf-chip">${a.label}</span>`); slot.hidden = false; } else slot.hidden = true;
 }
 
 async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'This data could not be loaded right now. Please try again shortly.' } = {}) {
@@ -30,11 +41,14 @@ async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'Thi
     const body = root.querySelector('[data-body]');
     const meta = root.querySelector('[data-meta]');
     if (!body) return;
-    if (meta) render(meta, html`${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span>`);
+    // the band keeps one line (freshness badge); the source semantics sit at the top of the body, so a long note never
+    // grows the band and pushes content that already painted (CLS)
+    if (meta) render(meta, html`${freshnessBadge(res.meta)}`);
+    const sem = res.meta?.semantics ? html`<p class="note meta-sem">${res.meta.semantics}</p>` : '';
     // an API failure is an error state, never "nothing stored"
-    if (resultState(res) === 'error') { render(body, errorModule(res.meta, errorNote)); return; }
+    if (resultState(res) === 'error') { render(body, html`${sem}${errorModule(res.meta, errorNote)}`); return; }
     const out = res.data != null ? draw(res.data, res.meta) : null;
-    render(body, out || emptyModule(res.meta, note));
+    render(body, html`${sem}${out || emptyModule(res.meta, note)}`);
   };
   await run();
   if (!poll) return () => {};
@@ -109,6 +123,7 @@ export const tournament = mountWith((root, { params }, signal) => {
     const e = d.edition;
     const h = root.querySelector('.page-h h1');
     if (h && e.tournament) h.textContent = e.tournament;
+    markSurface(root, e.surface);
     // editorial hero (licensed photo of this edition / this tournament's venue), mounted once above the page
     const hm = d.media?.hero?.images?.[0];
     if (hm?.derivatives && !root.querySelector('.tnx-hero')) root.insertAdjacentHTML('afterbegin', String(html`<figure class="tnx-hero nwx-hero">${editorialPicture(hm, { hero: true, alt: hm.caption })}<figcaption class="page">${hm.caption}. Photo: <a href="${hm.source_page}" rel="noopener nofollow" target="_blank">${hm.author || 'Author'} / ${hm.license}</a></figcaption></figure>`));
@@ -154,6 +169,7 @@ export const match = mountWith((root, { params }, signal) => {
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
     const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${nm('A')} vs ${nm('B')}`;
+    markSurface(root, m.surface || m.tournament?.surface);
     const vs = (s) => html`<div class="vs-side">${(m.sides?.[s]?.players || []).map((p) => html`<a href="/players/${p.slug}">${avatar(p, { size: 'square', px: 112, eager: true })}<b>${p.name}</b></a>`)}</div>`;
     const A = m.statistics?.A, B = m.statistics?.B;
     return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>
@@ -388,7 +404,7 @@ export const dna = mountWith((root, _c, signal) => {
   const val = (r) => (metric === 'pbe_rating' ? r.value : metric === 'wins_above_expectation' ? `${r.value >= 0 ? '+' : ''}${Number(r.value).toFixed(3)}` : pct(r.value));
   const board = (d, t, limit) => {
     const T = t.toUpperCase();
-    if (d.published === false) return html`<div class="mod"><p class="empty-h">${T} comparison for this metric is still building.</p><p class="note">This leaderboard opens once ${d.threshold} ${T} players qualify for this metric (currently ${d.qualified})${metric === 'pbe_rating' ? ' and the rating has passed its backtest for this tour' : ''}. Each player's own measurements are already on their Tennis DNA page${isMatch ? '' : ', next to their Match DNA'}. ATP and WTA are separate populations and are never compared.</p></div>`;
+    if (d.published === false) return html`<div class="mod"><p class="empty-h">${T} comparison building.</p><p class="note">This leaderboard opens once ${d.threshold} ${T} players qualify for this metric (currently ${d.qualified})${metric === 'pbe_rating' ? ' and the rating has passed its backtest for this tour' : ''}. Each player's own measurements are already on their Tennis DNA page${isMatch ? '' : ', next to their Match DNA'}. ATP and WTA are separate populations and are never compared.</p></div>`;
     return html`<p class="note">${d.definition} · ${T} singles · as of ${fmtDate(d.as_of)} · ${d.qualified} qualified players</p>
     ${d.rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:44px">#</th><th>Player</th><th class="n" style="width:84px">Value</th><th class="n hide-s" style="width:120px">Sample</th></tr></thead><tbody>${d.rows.slice(0, limit).map((r) => html`<tr><td class="rk-n">${r.rank}</td><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player?.slug}/dna">${r.player?.name}</a></span></td><td class="n">${val(r)}</td><td class="n hide-s">${r.numerator != null && metric !== 'wins_above_expectation' ? `${r.numerator}/${r.denominator} · ` : ''}${r.sample_matches}m</td></tr>`)}</tbody></table></div>` : html`<div class="mod"><p class="empty-h">No ${T} player has a medium-confidence sample for this metric yet.</p><p class="note">Small samples are never ranked.</p></div>`}`;
   };

@@ -28,6 +28,7 @@ const NAV_GROUP = { men: 'players', 'player-sub': 'players', player: 'players', 
 
 export function shellHtml() {
   return html`
+  <div class="tn-backdrop" aria-hidden="true"></div>
   <header class="hdr" data-hdr>
     <div class="hdr-in">
       <a class="brand" href="/" aria-label="PropBetEdge Tennis — home">

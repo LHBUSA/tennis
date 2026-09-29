@@ -7,6 +7,8 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/news.css';
+import './styles/news-modules.css';
+import './styles/theme.css';
 import './styles/pbecast.css';
 import './styles/pbecast-v2.css';
 import './styles/pbecast-v3.css';
@@ -17,6 +19,7 @@ import { shellHtml, markActiveNav, wireDrawer } from './ui/shell.js';
 import { wireCopy } from './ui/share.js';
 import { wireImageFallback } from './ui/avatar.js';
 import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
+import { setPageSurface } from './lib/v4.js';
 
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
@@ -75,6 +78,10 @@ async function go(pathname) {
   if (!(initial && r.route.ssr)) setMeta(routeMeta(r));
   markActiveNav(app, r.id);
   closeDrawer(false);
+  // V4 visual system: page type drives band/backdrop intensity; the surface accent starts neutral and a page with a
+  // sourced surface (tournament, match, article) sets it after its data loads
+  document.documentElement.dataset.page = r.id;
+  setPageSurface(null);
   unmount = mod.mount(main, r);
   if (initial) { initial = false; setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600); }
 }
