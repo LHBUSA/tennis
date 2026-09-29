@@ -64,7 +64,7 @@ export const PAGE_SPECS = {
   }),
   rankings: () => ({
     eyebrow: 'Rankings', heading: 'Rankings',
-    lede: 'Official ATP and WTA singles and doubles rankings, archived weekly so history is ours. Any projection is labeled PBE PROJECTED RANK — never an official ranking.',
+    lede: 'Official WTA singles and doubles lists and the ATP singles list carried by a secondary source (not an official ATP feed), archived weekly so history is ours. Any projection is labeled PBE PROJECTED RANK — never an official ranking.',
     links: [['/rankings/men', 'ATP singles'], ['/rankings/women', 'WTA singles'], ['/rankings/men/doubles', 'ATP doubles'], ['/rankings/women/doubles', 'WTA doubles']],
     modules: [{ key: 'rankings', title: 'Latest snapshots', endpoint: '/v1/rankings', note: 'No ranking snapshot is stored yet.' }]
   }),

@@ -42,7 +42,7 @@ export function mount(root) {
   render(root, html`<section class="men-hero"><div class="page">
       <p class="eyebrow">PropBetEdge Tennis</p>
       <h1>MEN'S TENNIS</h1>
-      <p class="lede">Grand Slam match intelligence, player analytics, PBEcast replays and historical coverage.</p>
+      <p class="lede">Men’s tennis inside PropBetEdge Tennis — the same product as the women’s game: ATP Tour results, Grand Slam draws, Match DNA, player analytics and PBEcast.</p>
       <p class="men-totals" data-totals></p>
       <div class="hero-cta"><a class="btn" href="#replays">PBEcast replays</a><a class="btn ghost" href="/tournaments/australian-open/2026/mens-singles">Australian Open 2026</a><a class="btn ghost" href="/players?gender=men">Men’s players</a></div>
     </div></section>
@@ -79,9 +79,10 @@ export function mount(root) {
         <ul class="men-cov-l">
           <li class="ok"><b>Grand Slam coverage</b><span>Australian Open (complete, with statistics and point-by-point), Wimbledon archive, Roland-Garros.</span></li>
           <li class="ok"><b>Player profiles and photos</b><span>Every men’s player we hold has a canonical profile; photos only with a proven identity and an open licence.</span></li>
-          <li class="${d.dna.published ? 'ok' : 'wait'}"><b>Men’s Tennis DNA</b><span>${d.dna.published ? 'Published.' : `Not published yet · ${d.dna.qualified}/${d.dna.threshold} players have a meaningful sample.`}</span></li>
-          <li class="ok"><b>ATP Tour results</b><span>From 2007, from a secondary source behind official Grand Slam data: results, rounds and scores; no match statistics or surface yet.</span></li>
-          <li class="wait"><b>ATP singles rankings</b><span>Weekly top 100–150 lists (2007 on) from a secondary source, dated when that source updated them — not an official ATP feed.</span></li>
+          <li class="${d.match_dna?.published ? 'ok' : 'wait'}"><b>Match DNA (ATP)</b><span>${d.match_dna?.published ? `Published · ${n(d.match_dna.qualified)} ATP players with a meaningful sample, compared only with other ATP players.` : d.match_dna ? `Building · ${n(d.match_dna.qualified)}/${d.match_dna.threshold} ATP players qualify.` : 'Status unavailable right now.'} <a href="/dna">Tennis DNA →</a></span></li>
+          <li class="${d.dna.published ? 'ok' : 'wait'}"><b>Technical serve/return DNA (ATP)</b><span>${d.dna.published ? 'Published.' : `Still building · ${d.dna.qualified}/${d.dna.threshold} ATP players have enough match statistics. Match DNA is shown meanwhile.`}</span></li>
+          <li class="ok"><b>ATP Tour results and fixtures</b><span>From 2007, from a secondary source (ESPN) behind official Grand Slam data: results, rounds, scores and published fixtures; no match statistics, tournament level or surface from that source. Live ATP scores are set and game level from the same source.</span></li>
+          <li class="ok"><b>ATP singles list</b><span>Weekly top 100–150 lists (2007 on) from a secondary source, dated when that source updated them — not an official ATP feed.</span></li>
           <li class="no"><b>ATP Challenger and official ATP ranking feeds</b><span>Not yet available — no legitimate source.</span></li>
         </ul><p class="note"><a href="/sources">Source details →</a></p></section>`);
   }).catch(() => {});

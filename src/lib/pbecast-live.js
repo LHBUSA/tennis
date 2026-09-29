@@ -3,7 +3,9 @@
 // order over canonical data (never random), so a refresh or a poll never swaps the viewer's match.
 
 const LEVEL = { 'Grand Slam': 0, 'WTA Finals': 1, 'WTA 1000': 2, 'WTA 500': 3, 'WTA 250': 4, 'WTA 125': 5 };
-const levelRank = (lvl) => LEVEL[lvl] ?? (/1000/.test(lvl || '') ? 2 : /500/.test(lvl || '') ? 3 : /250/.test(lvl || '') ? 4 : /125/.test(lvl || '') ? 5 : 6);
+// a tour-level event whose source publishes no level (ATP Tour editions from the secondary source) ranks with
+// the 250 tier: never behind a 125 event just because its level is unknown
+const levelRank = (lvl) => (lvl == null ? 4 : LEVEL[lvl] ?? (/1000/.test(lvl) ? 2 : /500/.test(lvl) ? 3 : /250/.test(lvl) ? 4 : /125/.test(lvl) ? 5 : 6));
 const roundRank = (code) => {
   const [stage, r] = String(code || '').split('-');
   const k = { F: 0, S: 1, Q: 2 }[r] ?? (Number(r) ? 10 - Number(r) : 9);

@@ -16,7 +16,8 @@ export const DNA_DIMENSIONS = [
 ];
 const LOWER_IS_BETTER = new Set(['double_fault_rate']);
 
-import { matchDna, matchDnaLeaders, V2_METRICS } from './dna2.js';
+import { coveredEditions, keepTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
+import { matchDna, matchDnaLeaders, pbecastMatchDna, V2_METRICS } from './dna2.js';
 
 // offset paging is only exact over a stable order: every caller's query names one (a page boundary over an unordered
 // scan can skip or repeat rows, which made leader counts drift between requests until 2026-09-28)
@@ -78,6 +79,33 @@ async function storedDna(store, pid, surface = 'all') {
 async function gatedPair(store, pid, surf) {
   const all = await dnaWithPercentiles(store, pid, 'all');
   return { all, surface: surf ? await storedDna(store, pid, surf) : null };
+}
+
+/** Technical DNA (v1) status for one player: published / building (stored, tour gate not passed) / unavailable. */
+export function technicalStatus(all) {
+  if (!all) return { status: 'unavailable', message: 'No technical serve/return DNA yet: it needs matches with published match statistics.' };
+  if (all.comparative?.published) return { status: 'published', message: `${all.tour} technical DNA is published` };
+  return { status: 'building', message: `Technical serve/return DNA is still building: ${all.comparative?.qualified ?? 0} of ${all.comparative?.threshold ?? DNA_MIN_QUALIFIED} ${all.tour} players meet the full comparative standard. Individual measurements are shown; a metric's percentile appears once 10 same-tour peers qualify.` };
+}
+
+/**
+ * PBEcast DNA contract (pbecast-dna/2, 2026-09-29). Match DNA v2 (results-based, same-tour population, surface
+ * context) is the primary comparison; technical DNA v1 (serve/return from match statistics) is an additional module
+ * with its gates unchanged. One never suppresses the other. `A.all` / `A.surface` are kept for older clients.
+ */
+export async function pbecastDna(store, a, b, surf) {
+  const side = async (p) => {
+    const [pair, md] = await Promise.all([gatedPair(store, p.id, surf), pbecastMatchDna(store, p.id, p.gender, surf)]);
+    return { ...pair, match_dna: md, technical: { ...technicalStatus(pair.all), definition_version: 1 } };
+  };
+  const [A, B] = await Promise.all([side(a), side(b)]);
+  const tours = [A.match_dna?.tour, B.match_dna?.tour].filter(Boolean);
+  return {
+    contract: 'pbecast-dna/2', A, B, surface: surf,
+    match_dna: { A: A.match_dna, B: B.match_dna, definition_version: 2, same_tour: tours.length === 2 ? tours[0] === tours[1] : null },
+    technical_dna: { A: { ...A.technical, data: A.all }, B: { ...B.technical, data: B.all }, definition_version: 1 },
+    note: 'stored Tennis DNA snapshots (as_of exclusive); values are never recomputed in the browser; each player is compared within their own tour population (ATP and WTA are never pooled)'
+  };
 }
 
 /**
@@ -142,12 +170,7 @@ export async function pbecast(store, id) {
   if (singles) {
     const [a, b] = [m.sides.A.players[0], m.sides.B.players[0]];
     const surf = ['hard', 'clay', 'grass'].includes(m.tournament?.surface) ? m.tournament.surface : null;
-    dna = {
-      A: await gatedPair(store, a.id, surf),
-      B: await gatedPair(store, b.id, surf),
-      surface: surf,
-      note: 'stored Tennis DNA snapshots (as_of exclusive); values are never recomputed in the browser'
-    };
+    dna = await pbecastDna(store, a, b, surf);
     const ka = `S:${a.id}`; const kb = `S:${b.id}`;
     const mp = await store.select('tennis_match_participants', `select=match_id,side,participant_key&participant_key=${inList([ka, kb])}&limit=2000`);
     const by = new Map();
@@ -160,7 +183,7 @@ export async function pbecast(store, id) {
   const data = {
     contract: 'pbecast/1.0.0', match: { ...m, players }, mode,
     quality: hasPoints ? 'point_event' : snaps.length ? 'score_snapshot' : null,
-    cadence_note: hasPoints ? 'every point as published by the source' : 'periodic observation of the source (about every 18 seconds while live); changes between two observations are shown as one update',
+    cadence_note: hasPoints ? 'every point as published by the source' : m.source === 'espn' ? 'game-level observation of a secondary source (ESPN; not an official ATP feed) about every 20 seconds while live — it publishes set and game scores only, so no point score or server is shown; changes between two observations are shown as one update' : 'periodic observation of the source (about every 18 seconds while live); changes between two observations are shown as one update',
     events, moments: keyMoments(events), control: matchControl(hasPoints ? gamesFromPoints(points).map((g) => ({ event_detail: { game_won: { winner: g.winner, result: g.result } } })) : events),
     games: hasPoints ? gamesFromPoints(points) : null,
     statistics: stats.length ? Object.fromEntries(stats.map((s) => [s.side, s.stats])) : null,
@@ -174,9 +197,10 @@ export async function schedule(store, url) {
   const view = url.searchParams.get('view') || 'today';
   const d = today();
   const win = { today: [d, d], tomorrow: [addDays(d, 1), addDays(d, 1)], week: [d, addDays(d, 6)], upcoming: [addDays(d, 1), addDays(d, 45)] }[view] || [d, d];
-  const lv = TOUR_LEVELS;
-  const eds = await store.select('tennis_tournament_editions', `select=edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_status,source_family,updated_at,venue_id,tennis_tournaments(slug,name),tennis_venues(slug,city,country,venue_name,precision)&start_date=lte.${win[1]}&end_date=gte.${win[0]}&level=${inList(lv)}&order=start_date.asc&limit=200`);
+  // every covered tour (tours.js): official WTA levels + Grand Slams + ESPN ATP Tour editions
+  const eds = await coveredEditions(store, win[0], win[1], { extra: 'venue_id,tennis_tournaments(slug,name),tennis_venues(slug,city,country,venue_name,precision)', limit: 200 });
   const ids = eds.map((e) => e.edition_id);
+  const tourOf = new Map(eds.map((e) => [e.edition_id, e.tour]));
   const statusF = url.searchParams.get('status');
   const statusQ = statusF === 'live' ? '&status=eq.in_progress' : statusF === 'scheduled' ? '&status=eq.scheduled' : statusF === 'completed' ? `&status=${inList(FINAL)}` : '';
   const eventF = url.searchParams.get('event');
@@ -186,14 +210,17 @@ export async function schedule(store, url) {
   const types = G && E ? G.filter((t) => E.includes(t)) : G || E;
   const eventQ = types ? `&event_type=in.(${(types.length ? types : ['none']).join(',')})` : '';
   const includeMatches = view === 'today' || view === 'tomorrow' || statusF;
-  const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=300`) : [];
+  const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=500`) : [];
   const surf = url.searchParams.get('surface');
   const tour = url.searchParams.get('tour');
-  const keepEd = (e) => (!surf || e.surface === surf) && (!tour || (tour === 'grand-slam' ? e.level === 'Grand Slam' : tour === 'wta-125' ? e.level === 'WTA 125' : tour === 'wta' ? /^WTA (1000|500|250|Finals)$/.test(e.level) : true));
-  const shaped = matches.map(shapeMatch).filter((mm) => keepEd({ surface: mm.tournament?.surface, level: mm.tournament?.level }));
-  const tournaments = eds.filter(keepEd).map((e) => ({ ...shapeEdition({ ...e }), status: e.source_status, venue: e.tennis_venues || null }));
-  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled'), completed: shaped.filter((x) => FINAL.includes(x.status)).slice(0, 60), completed_total: shaped.filter((x) => FINAL.includes(x.status)).length, filters: { tours: ['wta', 'wta-125', 'grand-slam'], surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'], genders: ['men', 'women', 'mixed'] } },
-    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): covered sources only — women: WTA Tour, WTA 125 and Grand Slams; men and mixed: supported Grand Slam sources. Start times are shown only when the source publishes a full timestamp.`, degraded: ['ATP Tour, ATP Challenger and ITF schedules are not yet acquirable'] });
+  const keepEd = (e) => (!surf || e.surface === surf) && keepTour(tour, e.tour);
+  const shaped = matches.map((m) => ({ ...shapeMatch(m), tour: tourOf.get(m.edition_id) || null })).filter((mm) => keepEd({ surface: mm.tournament?.surface, tour: mm.tour }));
+  const tournaments = eds.filter(keepEd).map((e) => ({ ...shapeEdition({ ...e }), tour: e.tour, status: e.source_status, venue: e.tennis_venues || null }));
+  const at = (x) => x.scheduled_at || '9';
+  const seen = (x) => x.source_updated_at || x.updated_at || '';
+  const done = shaped.filter((x) => FINAL.includes(x.status)).sort((a, b) => seen(b).localeCompare(seen(a)));
+  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled').sort((a, b) => at(a).localeCompare(at(b))), completed: done.slice(0, 60), completed_total: done.length, filters: { tours: TOUR_FILTERS, surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'], genders: ['men', 'women', 'mixed'] }, coverage: TOUR_COVERAGE },
+    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): ATP Tour (secondary source: fixtures once that source lists them), WTA Tour and WTA 125 (official), Grand Slams (every event). Start times are shown only when the source publishes a full timestamp. See coverage for what each tour's schedule, live and ranking layers are.`, degraded: ['ATP Challenger and ITF schedules are not yet acquirable; ATP Tour tournament level and surface are not published by its secondary source'] });
 }
 
 // ---- DNA ----------------------------------------------------------------------------------------------
@@ -239,7 +266,14 @@ async function profile(store, slug) {
   const key = `S:${p.pbe_player_id}`;
   const mp = await store.select('tennis_match_participants', `select=match_id,side&participant_key=eq.${key}&limit=2000`);
   const side = new Map(mp.map((r) => [r.match_id, r.side]));
-  const ms = mp.length ? await allRows(store, 'tennis_matches', `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(pbe_player_id,slug,full_name,nationality,gender,' + MEDIA + ')'})))&match_id=${inList([...side.keys()].slice(0, 900))}&order=source_updated_at.desc.nullslast,match_id.asc`) : [];
+  // id lists in groups of 150: one in.() of 900 uuids overflows the request line (postgrest 400 for every player with a
+  // long career — Djokovic, Zverev, Sabalenka — until 2026-09-29)
+  const ids = [...side.keys()].slice(0, 900);
+  const sel = `select=match_id,status,winner_side,surface,source_updated_at,round,score_text,edition_id,tennis_tournament_editions(year,name,level,start_date,end_date,tennis_tournaments(slug,name)),tennis_match_participants(side,tennis_participants(tennis_participant_members(${'tennis_players(pbe_player_id,slug,full_name,nationality,gender,' + MEDIA + ')'})))`;
+  const groups = [];
+  for (let i = 0; i < ids.length; i += 150) groups.push(ids.slice(i, i + 150));
+  const ms = (await Promise.all(groups.map((g) => store.select('tennis_matches', `${sel}&match_id=${inList(g)}&order=match_id.asc`)))).flat()
+    .sort((x, y) => (y.source_updated_at || '').localeCompare(x.source_updated_at || '') || (x.match_id < y.match_id ? -1 : 1));
   const finals = ms.filter((m) => FINAL.includes(m.status) && m.status !== 'walkover');
   const result = (m) => (m.winner_side === side.get(m.match_id) ? 'W' : 'L');
   const surf = {};

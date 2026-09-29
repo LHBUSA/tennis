@@ -16,7 +16,7 @@ export const VERSION = '0.1.0';
 let wasmReady = null;
 const ready = () => (wasmReady ||= initWasm(wasm));
 
-import { headFor, apiGet, ROUND, fmtD, newsEntities } from './heads.js';
+import { headFor, apiGet, ROUND, fmtD, newsEntities, playerRank } from './heads.js';
 
 async function shellTemplate(env) {
   // The shell names the deployment's hashed entry script. A long-lived copy outlives the Vercel deployment
@@ -55,8 +55,8 @@ async function cardSvg(env, path) {
   if ((m = /^\/og\/player\/([a-z0-9-]+)(\/dna)?\.png$/.exec(path))) {
     const p = await apiGet(env, `/v1/players/${m[1]}`);
     if (!p) return null;
-    const ws = p.rankings?.wta_singles;
-    return playerCard({ name: p.name, rank: ws?.rank, list: ws ? 'WTA SINGLES' : '', nationality: p.nationality, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square), label: m[2] ? 'TENNIS DNA' : 'PLAYER', note: m[2] ? 'Serve · Return · Pressure — measured, with samples' : null });
+    const rk = playerRank(p);
+    return playerCard({ name: p.name, rank: rk?.rank, list: rk?.card || '', nationality: p.nationality, jpegB64: await jpeg(env, p.photo?.square_jpg || p.photo?.square), label: m[2] ? 'TENNIS DNA' : 'PLAYER', note: m[2] ? 'Match DNA · same-tour percentiles, with samples' : null });
   }
   if ((m = /^\/og\/(match|pbecast)\/([0-9a-f-]{36})\.png$/.exec(path))) {
     const x = await apiGet(env, `/v1/matches/${m[2]}`);
@@ -107,8 +107,11 @@ async function ogImage(env, ctx, request, path) {
 async function sitemap(env) {
   // every indexable static route from the one route table (so /men, /rankings, ... can never be forgotten)
   const urls = STATIC_ROUTES.filter((r) => r.index).map((r) => canonicalUrl(r.path));
-  const r = await apiGet(env, '/v1/rankings?tour=wta&type=singles&limit=500');
-  for (const x of r?.rows || []) urls.push(canonicalUrl(`/players/${x.player.slug}`));
+  // ranked players of both tours (ATP list from the secondary source), then Slam draws
+  for (const tour of ['wta', 'atp']) {
+    const r = await apiGet(env, `/v1/rankings?tour=${tour}&type=singles&limit=500`);
+    for (const x of r?.rows || []) if (x.player?.slug) urls.push(canonicalUrl(`/players/${x.player.slug}`));
+  }
   // men: players in the newest Grand Slam main draws + every men's Grand Slam edition we hold
   const mp = await apiGet(env, '/v1/men/players');
   for (const x of mp?.rows || []) urls.push(canonicalUrl(`/players/${x.player.slug}`));

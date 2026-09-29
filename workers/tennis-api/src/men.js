@@ -7,6 +7,7 @@ import { envelope, notConfigured } from '../../shared/envelope.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { MATCH, FINAL, PLAYER, shapeMatch, shapeEdition, shapePlayer, maxTime, families } from './shape.js';
 import { allRows, tourDnaStatus } from './v2.js';
+import { matchDnaLeaders } from './dna2.js';
 
 const ok = (data, { rows = [], source = null, policy, semantics, degraded = [] }) => envelope(data, { source: source || families(rows), source_updated_at: maxTime(rows), policy, semantics, degraded });
 // completed Grand Slam editions change only when a backfill adds rows: judged over weeks, not minutes
@@ -116,9 +117,10 @@ export async function latestAtpList(store, limit = RANK_LIMIT) {
 }
 
 export async function men(store) {
-  const [eds, pbp, dna, atp, total, ms, md, xd] = await Promise.all([
+  const [eds, pbp, dna, atp, total, ms, md, xd, mdna] = await Promise.all([
     slamEditions(store), pbpMatchIds(store), tourDnaStatus(store, 'M'), atpCoverage(store),
-    store.count('tennis_matches', 'event_type=in.(MS,MD)'), store.count('tennis_matches', 'event_type=eq.MS'), store.count('tennis_matches', 'event_type=eq.MD'), store.count('tennis_matches', 'event_type=eq.XD')
+    store.count('tennis_matches', 'event_type=in.(MS,MD)'), store.count('tennis_matches', 'event_type=eq.MS'), store.count('tennis_matches', 'event_type=eq.MD'), store.count('tennis_matches', 'event_type=eq.XD'),
+    matchDnaLeaders(store, { metric: 'match_win_rate', tour: 'atp', limit: 0 }).catch(() => null)
   ]);
   const counted = await countedEditions(store, eds, pbp);
   const withMen = counted.filter((e) => e.counts.ms_main + e.counts.md > 0);
@@ -147,7 +149,7 @@ export async function men(store) {
     replays = m.filter((x) => pbp.has(x.id) && ['completed', 'retired'].includes(x.status)).sort((a, b) => (a.event_type === b.event_type ? 0 : a.event_type === 'MS' ? -1 : 1) || (ROUND_DEPTH[b.round] || 0) - (ROUND_DEPTH[a.round] || 0)).slice(0, 10);
   }
   const totals = { matches: total, ms, md, xd, point_by_point: pbp.size, editions: eds.length };
-  return ok({ totals, latest_edition: latest, editions: withMen, archive_editions: archive, recent, featured: featured.slice(0, 12), replays, replay_edition: pbpEdition, dna: { published: dna.ready, qualified: dna.qualified, threshold: dna.threshold ?? 30 }, atp_tour: { available: atp.matches > 0, ...atp } },
+  return ok({ totals, latest_edition: latest, editions: withMen, archive_editions: archive, recent, featured: featured.slice(0, 12), replays, replay_edition: pbpEdition, dna: { published: dna.ready, qualified: dna.qualified, threshold: dna.threshold ?? 30, layer: 'technical_v1' }, match_dna: mdna ? { published: mdna.published, qualified: mdna.qualified, threshold: mdna.threshold, as_of: mdna.as_of, definition_version: 2, basis: 'ATP singles players with a medium/high-confidence match win % (results-based Match DNA)' } : null, atp_tour: { available: atp.matches > 0, ...atp } },
     { rows: eds, source: ['ausopen', 'wimbledon', 'rolandgarros', 'espn'], policy: ARCHIVE, semantics: `men's coverage in the canonical store: Grand Slam draws (official feeds) plus ATP Tour results ${atp.first_year ?? ''}–${atp.last_year ?? ''} from a secondary source; per-event counts for the ${SLAM_COUNTED} newest Grand Slam editions`, degraded: [NOT_ATP] });
 }
 

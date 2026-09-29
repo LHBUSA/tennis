@@ -76,10 +76,13 @@ export function matchList(matches, opts) {
   return html`<div class="mcs">${matches.map((m) => matchCard(m, opts))}</div>`;
 }
 
+/** Category label: the source's own level, else the tour we proved (ATP editions carry no level from ESPN). */
+export const tourLabel = (t) => t?.level || (t?.tour === 'atp' ? 'ATP Tour' : '');
+
 export function tournamentRow(t) {
   const where = [t.city, t.country].filter(Boolean).join(', ');
   return html`<a class="tr ${surfaceClass(t.surface)}" href="/tournaments/${t.slug}/${t.year}">
-    <span class="tr-l">${t.level || ''}${t.surface ? ` · ${t.surface}` : ''}${t.indoor ? ' · indoor' : ''}</span>
+    <span class="tr-l">${tourLabel(t)}${t.surface ? ` · ${t.surface}` : ''}${t.indoor ? ' · indoor' : ''}</span>
     <b>${t.tournament}</b>
     <span class="tr-d">${fmtRange(t.start_date, t.end_date)}${where ? ` · ${where}` : ''}</span>
     ${t.status === 'live' || t.status === 'inProgress' ? html`<span class="st st-in_progress">Live</span>` : ''}

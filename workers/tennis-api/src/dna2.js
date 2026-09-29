@@ -43,17 +43,50 @@ export async function surfaceDna(store, pid) {
   });
 }
 
+/** One stored v2 metric -> served shape (percentile only where that metric's same-tour comparison is published). */
+function metricOut(k, m = {}) {
+  const d = MATCH_DEFINITIONS[k];
+  return { key: k, label: d.label || k, doc: d.doc, value: m.value ?? null, unit: d.unit, numerator: m.numerator ?? null, denominator: m.denominator ?? null, sample_matches: m.sample_matches ?? 0, confidence: m.confidence || 'insufficient', percentile: m.comparative_published ? m.percentile ?? null : null, population_qualified: m.population_qualified ?? 0, comparative_published: !!m.comparative_published, lower_is_better: !!d.lower_is_better, record: m.record || null, status: statusOf(m) };
+}
+const ratingOut = (r) => (r ? { ...r, status: !r.published ? 'not_validated' : r.provisional ? 'provisional' : 'published' } : null);
+
+// PBEcast comparison order: result strength, pressure, opponent quality (every key is a stored v2 metric)
+export const PBECAST_MATCH_KEYS = ['match_win_rate', 'set_win_rate', 'game_win_rate', 'straight_sets_win_rate', 'deciding_set_win_rate', 'tiebreak_win_rate', 'close_match_win_rate', 'comeback_win_rate', 'top10_win_rate', 'top25_win_rate', 'top50_win_rate', 'wins_above_expectation'];
+
+/**
+ * Compact Match DNA for PBEcast (definition_version 2): the player's latest stored snapshot + the match surface's
+ * snapshot. Same stored values and gates as /v1/players/:slug/dna; nothing is recomputed. A PBE Rating whose tour
+ * has not passed its backtest is reported as not_validated WITHOUT its value.
+ */
+export async function pbecastMatchDna(store, pid, gender, surf = null) {
+  const snap = await latestV2(store, pid);
+  if (!snap) return null;
+  const M = snap.metrics || {};
+  const tour = M._tour || tourOf(gender);
+  const gate = (r) => (!r ? null : r.status === 'not_validated' ? { status: 'not_validated', rated_matches: r.rated_matches ?? null } : r);
+  const rating = gate(ratingOut(M._rating));
+  let surface = null;
+  if (surf) {
+    const s = (await surfaceDna(store, pid)).find((x) => x.surface === surf);
+    if (s) surface = { surface: s.surface, as_of: s.as_of, sample: s.sample, rating: s.rating?.status === 'not_validated' ? { status: 'not_validated' } : s.rating, form: s.form, metrics: s.metrics.filter((m) => ['match_win_rate', 'set_win_rate', 'tiebreak_win_rate', 'deciding_set_win_rate', 'top10_win_rate'].includes(m.key)) };
+  }
+  const f = M._form || null;
+  return {
+    definition_version: 2, as_of: snap.as_of, tour, sample: snap.provenance?.sample || null, rating,
+    form: f ? { last10: f.last10 || null, last20: f.last20 || null, current_streak: f.current_streak || null, career: f.career || null, rolling20: f.rolling20 || null } : null,
+    surface_record: M._surface_record || null, surface,
+    metrics: PBECAST_MATCH_KEYS.map((k) => metricOut(k, M[k])),
+    gates: { percentile_min_peers: PERCENTILE_MIN_PEERS, comparative_min: COMPARATIVE_MIN, basis: `${tour} singles players with a stored v2 snapshot on ${snap.as_of}; ATP and WTA are never pooled` }
+  };
+}
+
 /** Match DNA block for one player (null when no v2 snapshot). Opponent names and tournaments are joined for the recent list. */
 export async function matchDna(store, player) {
   const snap = await latestV2(store, player.pbe_player_id);
   if (!snap) return null;
   const M = snap.metrics || {};
   const families = FAMILIES.map(([key, label]) => {
-    const metrics = Object.entries(MATCH_DEFINITIONS).filter(([, d]) => d.family === key).map(([k, d]) => {
-      const m = M[k] || {};
-      const status = m.value == null ? 'missing' : !m.comparable ? 'descriptive' : !['medium', 'high'].includes(m.confidence) ? 'player_sample_low' : !m.comparative_published ? 'population_building' : m.percentile == null ? 'peer_sample_not_mature' : 'published';
-      return { key: k, label: d.label || k, doc: d.doc, value: m.value ?? null, unit: d.unit, numerator: m.numerator ?? null, denominator: m.denominator ?? null, sample_matches: m.sample_matches ?? 0, confidence: m.confidence || 'insufficient', percentile: m.comparative_published ? m.percentile ?? null : null, population_qualified: m.population_qualified ?? 0, comparative_published: !!m.comparative_published, lower_is_better: !!d.lower_is_better, record: m.record || null, status };
-    });
+    const metrics = Object.entries(MATCH_DEFINITIONS).filter(([, d]) => d.family === key).map(([k]) => metricOut(k, M[k]));
     return { key, label, metrics, published: metrics.filter((x) => x.comparative_published).length };
   });
   const recent = M._recent || [];
@@ -64,7 +97,7 @@ export async function matchDna(store, player) {
   ]);
   const P = new Map(opps.map((o) => [o.pbe_player_id, shapePlayer(o)]));
   const E = new Map(eds.map((e) => [e.match_id, e.tennis_tournament_editions]));
-  const rating = M._rating ? { ...M._rating, status: !M._rating.published ? 'not_validated' : M._rating.provisional ? 'provisional' : 'published' } : null;
+  const rating = ratingOut(M._rating);
   return {
     definition_version: 2, as_of: snap.as_of, tour: M._tour || tourOf(player.gender), sample: snap.provenance?.sample || null,
     rating, form: M._form || null, surface_record: M._surface_record || null, families,

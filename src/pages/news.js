@@ -81,7 +81,7 @@ export function hub(root, ctx) {
   track('tennis_news_open', { route: location.pathname });
   render(root, html`<div class="page nw">
     <header class="page-h"><p class="eyebrow">PropBetEdge Tennis</p><h1>Tennis News</h1>
-      <p class="lede">Stories built from our own match, ranking and Tennis DNA data. Every number is checked against a frozen evidence packet before anything is published, and a quiet day publishes nothing.</p>
+      <p class="lede">ATP, WTA and Grand Slam stories built from our own match, ranking and Tennis DNA data. Every number is checked against a frozen evidence packet before anything is published, and a quiet day publishes nothing.</p>
       <nav class="chips" aria-label="Desks">${DESKS.map(([k, l]) => html`<a class="chip${k === desk ? ' on' : ''}" href="${k === 'all' ? '/news' : `/news/${k}`}${previewQ() ? `?preview=${previewQ()}` : ''}" ${k === desk ? raw('aria-current="page"') : ''}>${l}</a>`)}</nav></header>
     <div data-body><p class="loading">Loading…</p></div></div>`);
   api(withPreview(desk === 'all' ? '/v1/news' : `/v1/news/${desk}`), { signal: ctl.signal }).then((res) => {
@@ -89,7 +89,7 @@ export function hub(root, ctx) {
     if (!body) return;
     const list = res.data?.articles || [];
     if (!list.length) {
-      render(body, html`<div class="mod nw-empty"><p class="empty-h">No stories on this desk yet.</p><p class="note">${res.meta?.semantics || ''} Stories appear only when a real event in our data (an upset, a title, a ranking milestone…) passes every factual gate. Men’s stories come from supported Grand Slam sources (ATP and Grand Slams desks); Challenger and ITF desks fill as those sources come online.</p><p class="note"><a href="/schedule">Today’s schedule →</a> · <a href="/men">Men’s tennis →</a> · <a href="/rankings">Rankings →</a></p></div>`);
+      render(body, html`<div class="mod nw-empty"><p class="empty-h">No stories on this desk yet.</p><p class="note">${res.meta?.semantics || ''} Stories appear only when a real event in our data (an upset, a title, a ranking milestone…) passes every factual gate. ATP Tour stories use results and the ATP singles list from a secondary source and say so; WTA stories use official WTA data; Grand Slam stories cover every event of the tournament. Challenger and ITF desks fill as those sources come online.</p><p class="note"><a href="/schedule">Today’s schedule →</a> · <a href="/news">All tennis news →</a> · <a href="/rankings">Rankings →</a></p></div>`);
       return;
     }
     const [lead, ...rest] = list;
@@ -194,13 +194,16 @@ function storyChips(a, people, t) {
     ${t?.slug ? html`<a class="nwv-chip nwm-tchip" href="/tournaments/${t.slug}/${t.year}"><span><b>${t.name} ${t.year}</b></span></a>` : ''}</nav>`;
 }
 
+// ranking list labels by the list actually held (never a WTA label on an ATP list); the ATP list is secondary-source
+export const RANK_LIST = { wta_singles: 'WTA singles', wta_doubles: 'WTA doubles', atp_singles: 'ATP singles' };
+
 /** Four-player (or two-player) matchup card after the opening section: real photos only. */
 function matchup(a, parts, W) {
   if (!parts || !W) return '';
   const L = W === 'A' ? 'B' : 'A';
   const col = (side, label) => html`<div class="nwm-mu-side"><p class="nwm-mu-l">${label}</p>${(parts[side]?.players || []).filter((p) => p.slug).map((p) => {
     const ph = photoOf(a, p);
-    return html`<a class="nwm-mu-p" href="/players/${p.slug}">${ph ? html`<img src="${ph.portrait || ph.square}" alt="${p.name}" width="120" height="150" loading="lazy" decoding="async">` : ''}<span><b>${p.name}</b><small>${[p.nationality, p.rank ? `${p.rank.list === 'wta_doubles' ? 'WTA doubles' : 'WTA singles'} No. ${p.rank.rank}` : null].filter(Boolean).join(' · ')}</small><em>View player →</em></span></a>`;
+    return html`<a class="nwm-mu-p" href="/players/${p.slug}">${ph ? html`<img src="${ph.portrait || ph.square}" alt="${p.name}" width="120" height="150" loading="lazy" decoding="async">` : ''}<span><b>${p.name}</b><small>${[p.nationality, p.rank && RANK_LIST[p.rank.list] ? `${RANK_LIST[p.rank.list]} No. ${p.rank.rank}` : null].filter(Boolean).join(' · ')}</small><em>View player →</em></span></a>`;
   })}${parts[side]?.seed ? html`<p class="nwm-mu-seed">Seed ${parts[side].seed}</p>` : ''}</div>`;
   return html`<section class="nwm-mu" aria-label="The matchup">${col(W, 'Won')}${col(L, 'Lost')}</section>`;
 }
@@ -219,6 +222,7 @@ function railLinks(a, people, t, replay) {
   const lists = [...new Set(people.map((p) => p.rank?.list).filter(Boolean))];
   if (lists.includes('wta_doubles')) links.push(['/rankings/women/doubles', 'WTA doubles rankings', 'Official list, archived weekly']);
   if (lists.includes('wta_singles')) links.push(['/rankings/women', 'WTA singles rankings', 'Official list, archived weekly']);
+  if (lists.includes('atp_singles')) links.push(['/rankings/men', 'ATP singles list', 'Secondary-source list (not an official ATP feed), archived weekly']);
   return links;
 }
 

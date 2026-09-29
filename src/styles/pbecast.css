@@ -123,3 +123,7 @@
 @media (prefers-reduced-motion: reduce) {
   .court-wrap::after, .court-wrap .c-srv circle, .court-wrap .c-srv-ring, .sb .chg { animation: none !important; }
 }
+/* Tennis DNA in PBEcast: Match DNA v2 primary, technical v1 additional (2026-09-29) */
+.cmp2 small.muted { color: var(--muted); font-weight: 500; }
+.dna-match-h { margin-top: 0; }
+.dna-tech-h { margin-top: 22px; }

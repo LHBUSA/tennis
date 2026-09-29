@@ -15,6 +15,7 @@ import { avatar, nat } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { freshnessBadge, emptyModule } from '../ui/state.js';
 import { eventLabel, roundLabel, fmtDuration, pct, cap, statusLabel } from '../ui/render.js';
+import { fmtMetric } from '../ui/match-dna.js';
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
@@ -124,16 +125,49 @@ function statsPanel(st) {
   return html`<table class="cmp2"><tbody>${rows.map(([l, a, b, p]) => html`<tr><td class="n">${f(a, p)}</td><th scope="row">${l}</th><td>${f(b, p)}</td></tr>`)}</tbody></table>`;
 }
 
-function dnaCompare(data, m) {
-  // individual measurements always; a percentile only where that metric has enough same-tour peers
-  const building = [data.dna?.A?.all, data.dna?.B?.all].find((x) => x?.comparative && !x.comparative.published);
+const ORDN = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
+const MD_STATUS = { missing: 'no sample', descriptive: 'descriptive', player_sample_low: 'small sample', population_building: 'tour comparison building', peer_sample_not_mature: 'peers building' };
+
+/** Technical DNA v1 (serve/return from match statistics): an additional module; its gates are unchanged. */
+function technicalCompare(data, m) {
   const A = data.dna?.A?.all?.dimensions, B = data.dna?.B?.all?.dimensions;
-  if (!A && !B) return html`<p class="note">No stored Tennis DNA for these players yet.</p>`;
+  const tech = data.dna?.technical_dna;
+  const building = [tech?.A, tech?.B].find((x) => x && x.status !== 'published');
+  const head = html`<h3 class="sub-h dna-tech-h">Technical serve/return DNA <small>v1 · from match statistics</small></h3>`;
+  if (!A && !B) return html`${head}<p class="note dna-tech-status" data-tech-status="unavailable">Technical serve/return DNA is still building for these players: it needs matches with published serve/return statistics.</p>`;
   const dims = (A || B).map((d, i) => ({ label: d.label, a: A?.[i], b: B?.[i] }));
   const v = (x) => (x?.value == null ? '—' : pct(x.value));
-  return html`<table class="cmp2 dna-cmp"><thead><tr><th class="n">${sideName(m, 'A')}</th><th></th><th>${sideName(m, 'B')}</th></tr></thead><tbody>${dims.map((d) => html`<tr><td class="n">${v(d.a)}${d.a?.percentile != null ? html` <small>${d.a.percentile}th</small>` : ''}</td><th scope="row">${d.label}</th><td>${v(d.b)}${d.b?.percentile != null ? html` <small>${d.b.percentile}th</small>` : ''}</td></tr>`)}</tbody></table>
-    ${building ? html`<p class="note">${building.comparative.status}. Percentiles appear per metric once 10 same-tour peers qualify.</p>` : ''}
-    <p class="note">Stored Tennis DNA v1 as of ${data.dna?.A?.all?.as_of || data.dna?.B?.all?.as_of || '—'} (exclusive). Percentiles only where the metric sample is medium or high confidence. <a href="/methodology">Definitions</a>.</p>`;
+  return html`${head}<table class="cmp2 dna-cmp dna-tech"><thead><tr><th class="n">${sideName(m, 'A')}</th><th></th><th>${sideName(m, 'B')}</th></tr></thead><tbody>${dims.map((d) => html`<tr><td class="n">${v(d.a)}${d.a?.percentile != null ? html` <small>${d.a.percentile}th</small>` : ''}</td><th scope="row">${d.label}</th><td>${v(d.b)}${d.b?.percentile != null ? html` <small>${d.b.percentile}th</small>` : ''}</td></tr>`)}</tbody></table>
+    ${building ? html`<p class="note dna-tech-status" data-tech-status="${building.status}">Technical serve/return DNA is still building${data.dna?.A?.all?.comparative?.qualified != null ? html` (${data.dna.A.all.comparative.qualified} of ${data.dna.A.all.comparative.threshold} ${data.dna.A.all.tour} players meet the full standard)` : ''}. Individual measurements are shown; a percentile appears per metric once 10 same-tour peers qualify.</p>` : ''}
+    <p class="note">Stored technical DNA v1 as of ${data.dna?.A?.all?.as_of || data.dna?.B?.all?.as_of || '—'} (exclusive). <a href="/methodology">Definitions</a>.</p>`;
+}
+
+/** Match DNA v2 is the primary comparison: stored results-based metrics, each player within their own tour. */
+function dnaCompare(data, m) {
+  const MA = data.dna?.match_dna?.A || data.dna?.A?.match_dna || null;
+  const MB = data.dna?.match_dna?.B || data.dna?.B?.match_dna || null;
+  if (!MA && !MB) {
+    // older API (no match_dna) or neither player has a v2 snapshot: technical module only
+    if (!data.dna?.A?.all && !data.dna?.B?.all) return html`<p class="note">No stored Tennis DNA for these players yet.</p>`;
+    return technicalCompare(data, m);
+  }
+  const keys = (MA || MB).metrics.map((x) => [x.key, x.label]);
+  const get = (md, k) => md?.metrics?.find((x) => x.key === k) || null;
+  const cell = (x) => (!x || x.value == null ? html`—` : html`<span title="${x.record && x.record.W != null ? `${x.record.W}–${x.record.L}` : x.numerator != null ? `${x.numerator}/${x.denominator}` : ''} · ${x.confidence}">${fmtMetric(x)}</span>${x.percentile != null ? html` <small>${ORDN(x.percentile)}</small>` : x.status !== 'published' ? html` <small class="muted">${MD_STATUS[x.status] || ''}</small>` : ''}`);
+  const rating = (md) => (!md?.rating ? '—' : md.rating.status === 'not_validated' ? html`<small class="muted">not published</small>` : html`${md.rating.value}${md.rating.percentile != null ? html` <small>${ORDN(md.rating.percentile)}</small>` : ''}`);
+  const form = (md) => (md?.form?.last10 ? html`${md.form.last10.W}–${md.form.last10.L}${md.form.current_streak ? html` <small>${md.form.current_streak.result}${md.form.current_streak.length}</small>` : ''}` : '—');
+  const surf = data.dna?.surface;
+  const sCell = (md) => { const s = md?.surface; const mw = s?.metrics?.find((x) => x.key === 'match_win_rate'); return s?.form?.career ? html`${s.form.career.W}–${s.form.career.L}${mw?.percentile != null ? html` <small>${ORDN(mw.percentile)}</small>` : ''}` : '—'; };
+  const tours = [...new Set([MA?.tour, MB?.tour].filter(Boolean))];
+  return html`<h3 class="sub-h dna-match-h">Match DNA <small>v2 · results-based · ${tours.join(' / ')} population</small></h3>
+    <table class="cmp2 dna-cmp dna-match"><thead><tr><th class="n">${sideName(m, 'A')}</th><th></th><th>${sideName(m, 'B')}</th></tr></thead><tbody>
+      ${MA?.rating || MB?.rating ? html`<tr><td class="n">${rating(MA)}</td><th scope="row">PBE Rating</th><td>${rating(MB)}</td></tr>` : ''}
+      <tr><td class="n">${form(MA)}</td><th scope="row">Last 10</th><td>${form(MB)}</td></tr>
+      ${surf && (MA?.surface || MB?.surface) ? html`<tr><td class="n">${sCell(MA)}</td><th scope="row">${cap(surf)} record</th><td>${sCell(MB)}</td></tr>` : ''}
+      ${keys.map(([k, label]) => html`<tr><td class="n">${cell(get(MA, k))}</td><th scope="row">${label}</th><td>${cell(get(MB, k))}</td></tr>`)}
+    </tbody></table>
+    <p class="note">Match DNA v2 as of ${MA?.as_of || MB?.as_of} from ${[MA, MB].filter(Boolean).map((x) => `${x.sample?.matches ?? '—'}`).join(' and ')} stored singles results. Percentiles only where that metric’s ${tours.join('/')} comparison is published; ATP and WTA are never pooled.${!MA || !MB ? ' One player has no Match DNA snapshot yet.' : ''}</p>
+    ${technicalCompare(data, m)}`;
 }
 
 /** LIVE MATCHES switcher: every live court, deterministic order; the current court is marked. */
@@ -382,7 +416,7 @@ export function mount(root, { params, live = null }) {
         <div class="grid-2">
           <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${sideName(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${sideName(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
           <section class="mod"><header class="mod-h"><h2>Serve &amp; return</h2></header><div class="mod-b">${statsPanel(data.statistics)}</div></section>
-          <section class="mod"><header class="mod-h"><h2>Player DNA</h2></header><div class="mod-b">${dnaCompare(data, m)}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Tennis DNA</h2></header><div class="mod-b">${dnaCompare(data, m)}</div></section>
           <section class="mod"><header class="mod-h"><h2>Head to head</h2></header><div class="mod-b">${data.h2h ? html`<p class="h2h-big tabnum">${sideName(m, 'A')} <b>${data.h2h.A}</b> – <b>${data.h2h.B}</b> ${sideName(m, 'B')}</p>${data.h2h.meetings.length ? html`<ul class="opp">${data.h2h.meetings.map((x) => html`<li><a href="/matches/${x.id}">${x.year || ''} ${x.tournament || ''}</a><b>${x.score || ''}</b></li>`)}</ul>` : ''}<p class="note">${data.h2h.basis}.</p>` : html`<p class="note">Head-to-head is shown for singles.</p>`}</div></section>
         </div>
         <div class="pbc-actions">${shareBar({ url: `${location.origin}/pbecast/${m.id}`, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}</div>
@@ -541,5 +575,5 @@ export function mount(root, { params, live = null }) {
   return () => { ctl.abort(); clearTimer(); clearInterval(poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
-export const __test = { eventText, MODE_LABEL };
+export const __test = { eventText, MODE_LABEL, dnaCompare };
 void raw;

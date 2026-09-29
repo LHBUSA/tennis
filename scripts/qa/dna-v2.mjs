@@ -9,7 +9,8 @@ import { chromium } from 'playwright-core';
 const API = 'https://tennis-api.propbetedge.ai';
 const BASE = process.env.BASE || 'https://tennis.propbetedge.ai';
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
-const PLAYERS = (process.env.PLAYERS || 'carlos-alcaraz,jannik-sinner,novak-djokovic,alexander-zverev,gustavo-heide,roger-federer,david-ferrer').split(',');
+const PLAYERS = (process.env.PLAYERS || 'carlos-alcaraz,jannik-sinner,novak-djokovic,alexander-zverev,iga-swiatek,aryna-sabalenka,gustavo-heide,roger-federer,david-ferrer').split(',');
+const pbecastSeen = new Set();
 const TECH = new Set(['ace_rate', 'double_fault_rate', 'first_serve_in', 'first_serve_won', 'second_serve_won', 'service_points_won', 'hold_rate', 'break_points_saved', 'return_points_won', 'first_return_won', 'second_return_won', 'return_games_won', 'break_points_converted']);
 const sql = (q) => { const out = execFileSync('pwsh', ['-NoProfile', '-File', 'scripts/db/run_sql.ps1', '-Query', q], { encoding: 'utf8', maxBuffer: 64 << 20 }); const at = ['[', '{'].map((c) => out.indexOf(c)).filter((x) => x >= 0); if (!at.length) return []; const v = JSON.parse(out.slice(Math.min(...at))); return Array.isArray(v) ? v : [v]; };
 const checks = [];
@@ -42,11 +43,24 @@ for (const slug of PLAYERS) {
   const S = md.by_surface || [];
   const sBad = S.filter((x) => !['hard', 'clay', 'grass'].includes(x.surface) || x.sample.matches < 5 || x.sample.matches > md.sample.matches || x.metrics.some((m) => m.percentile != null && (!['medium', 'high'].includes(m.confidence))) || (x.rating && x.rating.status === 'published' && md.rating?.status === 'not_validated'));
   add(`${slug}: surface Match DNA coherent`, sBad.length === 0, { surfaces: S.map((x) => `${x.surface}:${x.sample.matches}`), sum: S.reduce((t, x) => t + x.sample.matches, 0), overall: md.sample.matches, bad: sBad.map((x) => x.surface) });
+  // profile (form, surface record, opponents): long careers must not overflow the request (postgrest 400 until 2026-09-29)
+  const pf = await (await fetch(`${API}/v1/players/${slug}/profile?qa=${Date.now()}`)).json();
+  add(`${slug}: profile loads`, pf.ok === true && Array.isArray(pf.data?.top_opponents), { error: pf.meta?.degraded?.[0] || null, opponents: pf.data?.top_opponents?.length ?? null });
+  // PBEcast DNA contract (pbecast-dna/2): Match DNA v2 for both players of the most recent singles match, technical v1 separate
+  const mid = md.recent.find((r) => r.opponent && !pbecastSeen.has(r.match_id))?.match_id;
+  if (mid) {
+    pbecastSeen.add(mid);
+    const pc = await (await fetch(`${API}/v1/pbecast/${mid}?qa=${Date.now()}`)).json();
+    const d = pc.data?.dna;
+    const sides = ['A', 'B'].map((s) => d?.match_dna?.[s]);
+    add(`${slug}: PBEcast Match DNA v2 (${mid})`, d?.contract === 'pbecast-dna/2' && sides.some((x) => x?.definition_version === 2) && sides.filter(Boolean).every((x) => x.tour === expectTour), { tours: sides.map((x) => x?.tour ?? null), technical: ['A', 'B'].map((s) => d?.technical_dna?.[s]?.status ?? null) });
+    add(`${slug}: PBEcast rating gate (no value when not validated)`, sides.filter(Boolean).every((x) => !x.rating || x.rating.status !== 'not_validated' || x.rating.value === undefined));
+  }
 }
 
 const browser = await chromium.launch({ executablePath: CHROME, headless: true });
 for (const [w, h] of [[1440, 900], [390, 844]]) {
-  for (const route of [...PLAYERS.flatMap((s) => [`/players/${s}`, `/players/${s}/dna`]), '/dna?metric=match_win_rate&tour=atp', '/dna?metric=pbe_rating&tour=atp']) {
+  for (const route of [...PLAYERS.flatMap((s) => [`/players/${s}`, `/players/${s}/dna`]), '/dna', '/dna?metric=match_win_rate&tour=atp', '/dna?metric=pbe_rating&tour=atp', '/dna?metric=match_win_rate&tour=wta']) {
     const page = await browser.newPage({ viewport: { width: w, height: h } });
     const errors = [];
     page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text().slice(0, 140)); });
@@ -61,7 +75,9 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     if (/\/dna$/.test(route) && !/MATCH DNA — LIVE/i.test(r.text)) fails.push('match_dna_missing');
     if (/\/dna$/.test(route) && !/by surface/i.test(r.text)) fails.push('surface_table_missing');
     if (/\/players\/[^/]+$/.test(route) && !/Match DNA/i.test(r.text)) fails.push('overview_match_dna_missing');
-    if (/^\/dna\?/.test(route) && !/qualified players/.test(r.text)) fails.push('leaderboard_missing');
+    if (/^\/dna/.test(route) && !/qualified players/.test(r.text)) fails.push('leaderboard_missing');
+    if (route === '/dna' && !(/\bATP\b/.test(r.text) && /\bWTA\b/.test(r.text))) fails.push('hub_not_both_tours');
+    if (/No Tennis DNA|No stored Tennis DNA/i.test(r.text)) fails.push('empty_dna_shell');
     add(`UI ${w} ${route}`, !fails.length, { fails });
     await page.close();
   }

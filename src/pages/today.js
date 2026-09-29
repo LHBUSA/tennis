@@ -9,6 +9,9 @@ import { avatar } from '../ui/avatar.js';
 import { matchList, tournamentRow, slamRow } from '../ui/render.js';
 import { replayList } from './men.js';
 import { card } from './news.js';
+import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
+
+const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
 
 export function mount(root) {
   const ctl = new AbortController();
@@ -27,7 +30,7 @@ export function mount(root) {
         </div>
         <p class="eyebrow">PropBetEdge Tennis</p>
         <h1 id="hero-h">Global Tennis Intelligence</h1>
-        <p class="hero-sub">Singles, doubles and mixed — live scores, Grand Slam match data, point-by-point PBEcast replays and player analytics, built on a data graph PropBetEdge collects, normalizes and owns.</p>
+        <p class="hero-sub">ATP, WTA and the Grand Slams in one product — singles, doubles and mixed: live scores, results, PBEcast, Match DNA and player analytics, built on a data graph PropBetEdge collects, normalizes and owns.</p>
         <p class="open-build__note">Follow along as we build PropBetEdge Tennis in public. The data is real and live; the product is still being finished.</p>
         <div class="hero-cta"><a class="btn" href="/live">Live now</a><a class="btn ghost" href="/pbecast">PBEcast</a><a class="btn ghost" href="/news">News</a><a class="btn ghost" href="/players">Players</a><a class="btn ghost" href="/tournaments">Tournaments</a></div>
         <p class="hero-strip" data-strip>Checking live matches…</p>
@@ -40,16 +43,18 @@ export function mount(root) {
       <section class="mod" data-news><header class="mod-h"><h2>Latest tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header><p class="loading">Loading…</p></section>
       <section class="mod"><header class="mod-h"><h2>Featured players</h2><a class="mod-k" href="/players">All players →</a></header><div class="mod-b" data-players><p class="loading">Loading…</p></div></section>
       <section class="mod"><header class="mod-h"><h2>Tournament coverage</h2><a class="mod-k" href="/tournaments">All tournaments →</a></header><div class="mod-b" data-tours><p class="loading">Loading…</p></div></section>
-      <section class="mod"><header class="mod-h"><h2>Coverage today</h2></header><div class="mod-b"><p>WTA Tour, WTA 125 and Grand Slam events — live, results, statistics and official WTA rankings. Grand Slams add men’s singles, men’s doubles and mixed doubles: the Australian Open complete with point-by-point, the Wimbledon archive and Roland-Garros. ATP Tour results from 2007 and weekly ATP singles rankings (top 100–150) come from a secondary source, always behind official Grand Slam data. ATP Challenger, ITF and official ATP ranking feeds are not yet acquirable — we show nothing rather than something unsourced. <a href="/sources">Sources →</a></p></div></section>
+      <section class="mod"><header class="mod-h"><h2>Coverage today</h2></header><div class="mod-b"><p><b>ATP Tour</b> — tournaments, results (2007 on), fixtures and the weekly ATP singles list (top 100–150), all from a secondary source (ESPN), labelled as such and never presented as official ATP data; live ATP scores are set and game level from that source, without point-by-point. <b>WTA Tour and WTA 125</b> — official live scores with point score, results, match statistics and official WTA singles and doubles rankings. <b>Grand Slams</b> — one tournament with every event: men’s and women’s singles and doubles, mixed doubles and qualifying; the Australian Open complete with point-by-point, the Wimbledon archive and Roland-Garros. <b>Tennis DNA</b> — results-based Match DNA for ATP and WTA players, each tour compared only with itself. ATP Challenger, ITF and official ATP feeds are not yet acquirable — we show nothing rather than something unsourced. <a href="/sources">Sources →</a></p></div></section>
     </div>`);
   const $ = (s) => root.querySelector(s);
   let today = null;
   let slams = null;
   let wta = null;
+  let atp = null;
   const drawResults = () => {
     const el = $('[data-results]');
     if (!el) return;
-    const cur = today?.latest_results || [];
+    // availability-aware: when both men's and women's results exist, the cut shows both (tests/one-product.test.js)
+    const cur = ensureEach(today?.latest_results || [], 6, menWomen);
     const finals = slams?.finals || [];
     render(el, cur.length || finals.length ? html`<h2 class="sec">Latest results</h2>
       ${cur.length ? html`<p class="sec-sub">Tournaments in progress</p>${matchList(cur.slice(0, 6))}` : ''}
@@ -65,11 +70,16 @@ export function mount(root) {
   };
   const drawPlayers = () => {
     const el = $('[data-players]');
-    if (!el || !slams || !wta) return;
+    if (!el || !slams || !wta || !atp) return;
     const out = [];
     const seen = new Set();
     for (const f of slams.data?.featured || []) if (!seen.has(f.player.id)) { seen.add(f.player.id); out.push({ player: f.player, note: f.note }); }
-    for (const r of (wta.data?.rows || []).slice(0, 6)) if (!seen.has(r.player.id)) { seen.add(r.player.id); out.push({ player: r.player, note: `WTA No. ${r.rank}` }); }
+    // ATP and WTA as peers: the two lists interleave (No. 1 ATP, No. 1 WTA, ...)
+    const w = (wta.data?.rows || []).slice(0, 6);
+    const a = (atp.data?.rows || []).slice(0, 6);
+    for (let i = 0; i < 6; i += 1) {
+      for (const [r, note] of [[a[i], (x) => `ATP No. ${x.rank} · secondary-source list`], [w[i], (x) => `WTA No. ${x.rank}`]]) if (r?.player && !seen.has(r.player.id)) { seen.add(r.player.id); out.push({ player: r.player, note: note(r) }); }
+    }
     render(el, out.length ? html`<ul class="men-feat">${out.slice(0, 12).map((f) => html`<li><a href="/players/${f.player.slug}">${avatar(f.player, { size: 'square', px: 64 })}<span><b>${f.player.name}</b><small>${f.note}</small></span></a></li>`)}</ul>` : html`<p class="note">No players yet.</p>`);
   };
   const refresh = async () => {
@@ -79,7 +89,7 @@ export function mount(root) {
     render($('[data-strip]'), d ? html`${d.live.length ? html`<i class="dot"></i>` : ''}<b>${d.live.length ? `LIVE NOW · ${d.live.length} MATCH${d.live.length === 1 ? '' : 'ES'}` : 'NO MATCH LIVE RIGHT NOW'}</b><span>· ${d.tournaments.length} tournament${d.tournaments.length === 1 ? '' : 's'} in progress</span>` : html`Live data unavailable right now.`);
     if (!d) return;
     today = d;
-    render($('[data-live]'), d.live.length ? html`<h2 class="sec">Live now <small>WATCH PBECAST for the live court</small></h2>${matchList(d.live.slice(0, 6))}` : d.upcoming.length ? html`<h2 class="sec">Up next</h2>${matchList(d.upcoming.slice(0, 6))}` : '');
+    render($('[data-live]'), d.live.length ? html`<h2 class="sec">Live now <small>WATCH PBECAST for the live court</small></h2>${matchList(ensureEach(d.live, 6, menWomen))}` : d.upcoming.length ? html`<h2 class="sec">Up next</h2>${matchList(ensureEach(d.upcoming, 6, menWomen))}` : '');
     drawResults();
     drawTours();
   };
@@ -95,11 +105,13 @@ export function mount(root) {
     if (s) { slams = { ...r, finals: s.finals, editions: s.editions }; drawResults(); drawTours(); }
     drawPlayers();
   }).catch(() => {});
-  api('/v1/rankings?tour=wta&type=singles&limit=10', { signal: ctl.signal }).then((r) => { wta = r; drawPlayers(); }).catch(() => {});
-  api('/v1/news?limit=5', { signal: ctl.signal }).then((r) => {
+  api('/v1/rankings?tour=wta&type=singles&limit=10', { signal: ctl.signal }).then((r) => { wta = r; drawPlayers(); }).catch(() => { wta = {}; drawPlayers(); });
+  api('/v1/rankings?tour=atp&type=singles&limit=10', { signal: ctl.signal }).then((r) => { atp = r; drawPlayers(); }).catch(() => { atp = {}; drawPlayers(); });
+  // a wider window than we show, so the latest ATP and WTA stories can both surface (never duplicated or held)
+  api('/v1/news?limit=20', { signal: ctl.signal }).then((r) => {
     const el = $('[data-news]');
     if (!el) return;
-    const list = r.data?.articles || [];
+    const list = ensureEach(r.data?.articles || [], 5, (a) => storyTour(a));
     render(el, html`<header class="mod-h"><h2>Latest tennis intelligence</h2><a class="mod-k" href="/news">All news →</a></header>${list.length ? html`${card(list[0], true)}${list.length > 1 ? html`<div class="nw-grid">${list.slice(1, 5).map((a) => card(a))}</div>` : ''}` : html`<p class="note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing. <a href="/news">Newsroom →</a></p>`}`);
   }).catch(() => {});
   return () => { ctl.abort(); clearInterval(timer); };

@@ -15,6 +15,18 @@ export async function apiGet(env, path) {
 const card = (path, v) => ({ url: `${SITE}/og/${path}.png${v ? `?v=${encodeURIComponent(v)}` : ''}`, type: 'image/png', width: 1200, height: 630 });
 const names = (m, s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
 
+/**
+ * The singles list a player's head/card names: WTA singles (official) for women, ATP singles (secondary-source
+ * list, never called official) for men. Null when the player holds neither.
+ */
+export function playerRank(p) {
+  const w = p?.rankings?.wta_singles;
+  if (w?.rank) return { rank: w.rank, date: w.date, label: 'WTA singles', card: 'WTA SINGLES', secondary: false };
+  const a = p?.rankings?.atp_singles;
+  if (a?.rank) return { rank: a.rank, date: a.date, label: 'ATP singles', card: 'ATP SINGLES · SECONDARY SOURCE', secondary: true };
+  return null;
+}
+
 /** Data-backed head for a resolved route. Returns meta overrides (or {} to keep the route default). */
 const DESK_SECTION = { wta: 'WTA', atp: 'ATP', 'grand-slams': 'Grand Slams', challenger: 'Challenger', itf: 'ITF', doubles: 'Doubles', rankings: 'Rankings' };
 /** Schema context for a story, strictly from its frozen evidence (players with canonical slugs only). */
@@ -50,18 +62,18 @@ export async function headFor(env, r, url = null) {
   if (id === 'player' || id === 'player-sub') {
     const p = await apiGet(env, `/v1/players/${params.slug}`);
     if (!p) return { robots: NOINDEX_ROBOTS, title: 'Player not found | PropBetEdge Tennis' };
-    const ws = p.rankings?.wta_singles;
-    const rankTxt = ws ? `WTA No. ${ws.rank} (list of ${fmtD(ws.date)})` : null;
+    const rk = playerRank(p);
+    const rankTxt = rk ? `${rk.label} No. ${rk.rank} (list of ${fmtD(rk.date)}${rk.secondary ? ', secondary source' : ''})` : null;
     const dna = id === 'player-sub' && params.tab === 'dna';
     const facts = [rankTxt, p.nationality, p.dob ? `born ${fmtD(p.dob)}` : null].filter(Boolean).join(' · ');
     const canonical = canonicalUrl(dna ? `/players/${p.slug}/dna` : `/players/${p.slug}`);
     return {
-      // men have no official ranking source: their heads never mention a ranking
-      title: `${p.name} — ${dna ? 'Tennis DNA' : p.gender === 'M' ? 'Profile, Grand Slam Results & Matches' : 'Profile, Ranking & Matches'} | PropBetEdge Tennis`,
-      description: `${p.name}${facts ? ` — ${facts}` : ''}. ${dna ? 'Serve, return and pressure metrics with samples and confidence.' : p.gender === 'M' ? 'Grand Slam results, recent matches, surface record, head-to-head and PBEcast replays.' : 'Ranking history, recent results, surface record, head-to-head and Tennis DNA.'}`,
-      robots: ws || p.recent_matches?.length ? INDEX_ROBOTS : NOINDEX_ROBOTS,
+      // one product: men and women get the same head; a ranking is named only with the list it comes from
+      title: `${p.name} — ${dna ? 'Tennis DNA' : 'Profile, Ranking & Matches'} | PropBetEdge Tennis`,
+      description: `${p.name}${facts ? ` — ${facts}` : ''}. ${dna ? 'Match DNA from results with same-tour percentiles, plus serve and return metrics where match statistics exist — samples and confidence on every number.' : 'Ranking history, recent results, surface record, head-to-head, Match DNA and PBEcast.'}`,
+      robots: rk || p.recent_matches?.length ? INDEX_ROBOTS : NOINDEX_ROBOTS,
       type: 'profile',
-      image: { ...card(dna ? `player/${p.slug}/dna` : `player/${p.slug}`, `${ws?.date || ''}${p.photo ? 'p' : 'm'}`), alt: `${p.name} — PropBetEdge Tennis ${dna ? 'Tennis DNA' : 'player'} card` },
+      image: { ...card(dna ? `player/${p.slug}/dna` : `player/${p.slug}`, `${rk?.date || ''}${p.photo ? 'p' : 'm'}`), alt: `${p.name} — PropBetEdge Tennis ${dna ? 'Tennis DNA' : 'player'} card` },
       jsonld: [personLd(p, canonicalUrl(`/players/${p.slug}`)), breadcrumb([['PropBetEdge Tennis', '/'], ['Players', '/players'], [p.name, `/players/${p.slug}`]])]
     };
   }
@@ -72,7 +84,7 @@ export async function headFor(env, r, url = null) {
     const where = [e.city, e.country].filter(Boolean).join(', ');
     return {
       title: `${e.tournament} ${e.year} — Results, Schedule & Draw | PropBetEdge Tennis`,
-      description: `${e.tournament} ${e.year}${e.level ? ` (${e.level})` : ''}${e.surface ? ` on ${e.surface}` : ''}${where ? ` in ${where}` : ''}, ${fmtD(e.start_date)}–${fmtD(e.end_date)}: ${d.matches.length} matches with live scores, results and PBEcast.`,
+      description: `${e.tournament} ${e.year}${e.level || e.tour === 'atp' ? ` (${e.level || 'ATP Tour'})` : ''}${e.surface ? ` on ${e.surface}` : ''}${where ? ` in ${where}` : ''}, ${fmtD(e.start_date)}–${fmtD(e.end_date)}: ${d.matches.length} matches with live scores, results and PBEcast.`,
       robots: d.matches.length && id === 'tournament' ? INDEX_ROBOTS : NOINDEX_ROBOTS,
       image: { ...card(`tournament/${params.slug}/${params.year}`, `${d.matches.length}`), alt: `${e.tournament} ${e.year} — PropBetEdge Tennis` },
       jsonld: [breadcrumb([['PropBetEdge Tennis', '/'], ['Tournaments', '/tournaments'], [`${e.tournament} ${e.year}`, `/tournaments/${params.slug}/${params.year}`]]), itemListLd(`${e.tournament} ${e.year} matches`, d.matches.slice(0, 50).map((m) => [`${names(m, 'A')} vs ${names(m, 'B')}`, `/matches/${m.id}`]))]

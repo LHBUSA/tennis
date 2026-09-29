@@ -18,7 +18,7 @@ export const MORE_NAV = [
   { href: '/matchups', label: 'Matchups', note: 'This week’s singles matches with PBE Rating win probabilities', id: 'matchups' },
   { href: '/players-to-watch', label: 'Players to Watch', note: 'Weekly rating risers, fallers and emerging players', id: 'players-to-watch' },
   { href: '/schedule', label: 'Schedule', note: 'Today, tomorrow and this week — men, women and mixed', id: 'schedule' },
-  { href: '/rankings', label: 'Rankings', note: 'Official WTA lists, archived weekly; ATP status', id: 'rankings' },
+  { href: '/rankings', label: 'Rankings', note: 'ATP singles (secondary source) and official WTA lists, archived weekly', id: 'rankings' },
   { href: '/methodology', label: 'Methodology', note: 'Tennis DNA formulas, samples, as-of rules' },
   { href: '/sources', label: 'Sources', note: 'Where every number comes from' },
   { href: '/credits', label: 'Photo credits', note: 'Every player photo, its author and license' }

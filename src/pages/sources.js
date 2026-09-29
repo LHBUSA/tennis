@@ -4,6 +4,7 @@ import { html, render } from '../lib/dom.js';
 import registry from '../../data/source-registry/sources.json';
 import canary from '../../docs/evidence/source-canary-latest.json';
 import { coverageMatrix } from './coverage.js';
+import { TOUR_COVERAGE } from '../../workers/shared/tour-coverage.js';
 
 const VERDICT_LABEL = { PASS: 'Pass', DEGRADED: 'Degraded', NOT_AVAILABLE: 'Not available', BLOCKED_BY_ACCESS_CONTROL: 'Blocked (not evaded)', UNVERIFIED: 'Unverified', COMMERCIAL_REFERENCE_ONLY: 'Commercial — reference only' };
 
@@ -18,6 +19,9 @@ export function mount(root) {
       <p class="lede">PropBetEdge Tennis builds its own data layer from public, first-party tennis sources — no paid sports-data feed. Every source below was probed with real requests; nothing is marked PASS because documentation says it exists. Sources that refuse automated access are recorded and left alone.</p>
       <p class="note">Registry ${registry.updated_at} · Canary run ${canary.run_at || 'not yet run'}${canary.runner ? ` · ${canary.runner}` : ''}</p>
     </header>
+    <section class="mod"><header class="mod-h"><h2>One product, every tour</h2></header><div class="mod-b"><div class="tbl-wrap"><table class="tbl"><thead><tr><th scope="col">Tour</th><th scope="col">Provenance</th><th scope="col">Tournaments &amp; results</th><th scope="col">Schedule</th><th scope="col">Live</th><th scope="col">Rankings</th></tr></thead>
+      <tbody>${Object.values(TOUR_COVERAGE).map((t) => html`<tr><th scope="row">${t.label}</th><td>${t.source}</td><td>${t.tournaments_results}</td><td>${t.schedule}</td><td>${t.live}</td><td>${t.rankings}</td></tr>`)}</tbody></table></div>
+      <p class="note">ATP Tour data comes from a secondary source and is labelled that way everywhere; PropBetEdge has no official ATP feed. ATP Challenger and ITF are not yet covered.</p></div></section>
     <section class="mod"><header class="mod-h"><h2>Coverage</h2></header><div class="mod-b">${coverageMatrix(registry)}</div></section>
     ${groups.map((g) => html`<section class="mod src-group">
       <header class="mod-h"><h2>${fam[g] || g}</h2></header>
