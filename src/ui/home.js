@@ -36,6 +36,8 @@ export function wireRails(root, signal) {
     const [p, n] = nav.querySelectorAll('button');
     p.disabled = t.scrollLeft <= 2;
     n.disabled = t.scrollLeft >= t.scrollWidth - t.clientWidth - 2;
+    r.classList.toggle('more-start', over && !p.disabled);
+    r.classList.toggle('more-end', over && !n.disabled);
   };
   const all = () => root.querySelectorAll('[data-rail]').forEach(sync);
   root.addEventListener('click', (e) => {

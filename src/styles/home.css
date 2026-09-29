@@ -85,7 +85,13 @@
 
 /* ---------------------------------------------------------------- rails */
 .hm-rail { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
-.hm-track { display: grid; grid-auto-flow: column; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 10px; scrollbar-width: thin; scrollbar-color: var(--rule-2) transparent; }
+.hm-track { display: grid; grid-auto-flow: column; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 6px; scrollbar-width: none; -ms-overflow-style: none; }
+.hm-track::-webkit-scrollbar { display: none; }
+/* no scrollbars: the edge with more content fades out (state set by wireRails), arrows on >= 768px, swipe + a partly
+   visible next card on phones */
+.hm-rail.more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+.hm-rail.more-start .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px); mask-image: linear-gradient(90deg, transparent, #000 56px); }
+.hm-rail.more-start.more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
 .hm-track > * { scroll-snap-align: start; min-width: 0; }
 .hm-nav { display: flex; gap: 8px; }
 .hm-nav[hidden] { display: none; }
@@ -227,13 +233,13 @@
   .hm-intro h2 { grid-column: 1; }
   .hm-intro p { grid-column: 1; margin: 0; }
   .hm-more { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
-  .hm-nav { display: none !important; }
-  .hm-rail { grid-template-columns: minmax(0, 1fr); }
   .hm-hero-in { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); min-height: 440px; }
   .hm-hero-media { min-height: 340px; }
   .hm-hero-fig figcaption { transform: translateX(-40%); }
 }
 @media (max-width: 759px) {
+  .hm-nav { display: none !important; }
+  .hm-rail { grid-template-columns: minmax(0, 1fr); }
   .hm-hero-in { grid-template-columns: minmax(0, 1fr); min-height: 0; padding-top: 32px; padding-bottom: 30px; }
   .hm-hero-media { display: none; }
   .hm-hero::before { background: linear-gradient(180deg, rgba(4, 22, 15, 0.82), rgba(4, 22, 15, 0.94)); }

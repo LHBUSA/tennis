@@ -6,7 +6,7 @@
 // tournament, players, intelligence, Tennis DNA, PBEcast and coverage sections hydrated (no skeleton left); no broken
 // images; no SVG / data-URI imagery in editorial or hero slots (monogram avatars are the approved fallback); no console
 // errors; no horizontal page overflow; no runaway section height; every VISIBLE rail arrow scrolls its rail both ways;
-// CLS < 0.1. Once: every internal link on the page answers 200. Screenshots -> docs/evidence/home-v2/ (production) or
+// no visible rail scrollbars; CLS < 0.1. Once: every internal link on the page answers 200. Screenshots -> docs/evidence/home-v2/ (production) or
 // qa-artifacts/home-v2/ (local). Read-only: GETs public pages and the public API only.
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
@@ -61,6 +61,7 @@ for (const w of WIDTHS) {
     out.heroPhoto = q('.hm-hero-photo img')?.currentSrc || null;
     out.heroCredit = (q('.hm-hero-fig figcaption small')?.textContent || '').trim();
     out.clipped = [...document.querySelectorAll('.hm-pcard b, .hm-tbot b, .hm-intro h2, .hm-hero h1')].filter((e) => vis(e) && e.scrollWidth > e.clientWidth + 2).map((e) => e.textContent.trim()).slice(0, 5);
+    out.scrollbars = [...document.querySelectorAll('.hm-track, .hm-st-list')].filter((t) => vis(t) && t.offsetHeight - t.clientHeight > 0).length;
     out.navs = [...document.querySelectorAll('.hm-nav')].filter((n) => !n.hidden && vis(n)).length;
     out.footer = vis(q('footer'));
     out.links = [...new Set([...document.querySelectorAll('main a[href^="/"]')].map((a) => a.getAttribute('href').split('#')[0]))];
@@ -97,6 +98,7 @@ for (const w of WIDTHS) {
   if (r.svgEditorial) fail.push(`${r.svgEditorial} SVG/data-URI editorial image(s)`);
   if (r.heroPhoto && !r.heroCredit) fail.push('hero photo without credit');
   if (r.clipped.length) fail.push(`clipped text: ${r.clipped.join(' | ')}`);
+  if (r.scrollbars) fail.push(`${r.scrollbars} visible rail scrollbar(s)`);
   if (!r.footer) fail.push('footer missing');
   if (errors.length) fail.push(`console errors: ${errors.slice(0, 3).join(' | ')}`);
   if (cls >= 0.1) fail.push(`CLS ${cls.toFixed(3)}`);
