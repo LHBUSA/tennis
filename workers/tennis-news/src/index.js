@@ -18,9 +18,10 @@ import { buildPlan } from './plan.js';
 import { runGates, GATES_VERSION } from './gates.js';
 import { editorialize, costUsd, redactSecrets, EDITORIAL_VERSION } from './editorial.js';
 import { resolveHero } from '../../shared/editorial.js';
+import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '1.1.0';
+export const VERSION = '1.2.0';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -43,48 +44,52 @@ async function telemetry(store, rows) {
 }
 
 // ---- detection ----------------------------------------------------------------------------------------
-function detectorInput(m, ranks) {
+export function detectorInput(m, ranks) {
   const side = (s) => {
     const x = m.sides[s] || { players: [] };
     const p0 = x.players[0];
     const r = p0 ? ranks.get(p0.id) : null;
     return { players: x.players.map((p) => ({ id: p.id, name: p.name })), rank: x.players.length === 1 ? r?.rank ?? null : null, list_date: r?.list_date ?? null, seed: x.seed, entry: x.entry };
   };
-  return { id: m.id, event_type: m.event_type, round: m.round, status: m.status, winner_side: m.winner_side, retired_side: m.status === 'retired' ? (m.winner_side === 'A' ? 'B' : 'A') : null, best_of: m.best_of, sets: m.sets.map((s) => ({ A: s.A, B: s.B, tb: !!s.tb })), duration_s: m.duration_s, started_at: m.started_at, edition: { id: m.tournament.edition_id, level: m.tournament.level, name: m.tournament.name, surface: m.tournament.surface, start_date: m.tournament.start_date }, sides: { A: side('A'), B: side('B') } };
+  return { id: m.id, event_type: m.event_type, round: m.round, status: m.status, winner_side: m.winner_side, retired_side: m.status === 'retired' ? (m.winner_side === 'A' ? 'B' : 'A') : null, best_of: m.best_of, sets: m.sets.map((s) => ({ A: s.A, B: s.B, tb: !!s.tb })), duration_s: m.duration_s, started_at: m.started_at, edition: { id: m.tournament.edition_id, level: m.tournament.level, name: m.tournament.name, surface: m.tournament.surface, start_date: m.tournament.start_date, source_family: m.tournament.source_family || null, competition_key: m.tournament.competition_key || null }, list_depth: ranks.provenance?.truncated ? ranks.provenance.depth : null, sides: { A: side('A'), B: side('B') } };
 }
 
 export async function detect(env, store, { now = new Date(), dry = false } = {}) {
   const since = new Date(now.getTime() - FRESH_H * 3600e3);
   const sinceDate = iso(since).slice(0, 10);
   // freshness is judged on the MATCH date, not on when our backfill last touched the row
-  const rows = await loadMatches(store, `status=in.(completed,retired,walkover)&event_type=in.(WS,WD,MS)&updated_at=gte.${iso(new Date(now.getTime() - 6 * 3600e3))}&limit=400`);
+  // every event type of the one tennis product: men's and women's singles, both doubles, mixed
+  const rows = await loadMatches(store, `status=in.(completed,retired,walkover)&event_type=in.(WS,MS,WD,MD,XD)&updated_at=gte.${iso(new Date(now.getTime() - 6 * 3600e3))}&limit=400`);
   const fresh = rows.filter((m) => (m.started_at ? m.started_at >= iso(since) : m.tournament.end_date >= sinceDate && m.tournament.start_date <= iso(now).slice(0, 10)));
   const byEdition = new Map();
   for (const m of fresh) { const k = `${m.tournament.edition_id}:${m.event_type}`; if (!byEdition.has(k)) byEdition.set(k, []); byEdition.get(k).push(m); }
   const candidates = [];
   for (const ms of byEdition.values()) {
-    const listKey = ms[0].event_type === 'WD' ? 'wta_doubles' : 'wta_singles';
+    // the list that legitimately applies to this event type (WS -> WTA singles, MS -> ATP singles, WD -> WTA
+    // doubles; MD/XD -> none held): an MS match never receives a WTA list, a doubles match never a singles list
+    const listKey = RANKING_LISTS[ms[0].event_type] || null;
     const pids = [...new Set(ms.flatMap((m) => ['A', 'B'].flatMap((s) => m.sides[s]?.players.map((p) => p.id) || [])))];
-    const ranks = ms[0].event_type === 'MS' ? new Map() : await rankAt(store, pids, ms[0].tournament.start_date, listKey);
+    const ranks = listKey ? await rankAt(store, pids, ms[0].tournament.start_date, listKey) : new Map();
     for (const m of ms) {
       const evs = await detectMatchEvents(detectorInput(m, ranks));
       if (!evs.length) continue;
       evs.sort((a, b) => b.materiality - a.materiality);
       const [top, ...rest] = evs;
-      top.facts = { ...top.facts, secondary_kinds: rest.map((e) => e.kind) };
+      top.facts = { ...top.facts, secondary_kinds: rest.map((e) => e.kind), event_type: m.event_type, tour: tourOf(m.event_type), rank_list: ranks.provenance ? listKey : null, rank_source_family: ranks.provenance?.source_family || null, rank_classification: ranks.provenance?.classification || null };
       candidates.push({ ...top, state: top.materiality >= PUBLISH_MIN_MATERIALITY ? 'detected' : 'below_threshold' });
       for (const e of rest) candidates.push({ ...e, state: 'duplicate', state_reason: `merged into ${top.event_id} (one story per match)` });
     }
   }
-  // ranking milestones: once per new official list
-  for (const listKey of ['wta_singles']) {
-    const snaps = await store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date&list_key=eq.${listKey}&row_count=gt.0&order=ranking_date.desc&limit=2`);
+  // ranking milestones: once per new stored list, for every tour list we hold (provenance travels in the facts;
+  // a list dated after today — ESPN weeks are dated to the Monday they take effect — waits for its date)
+  for (const listKey of MILESTONE_LISTS) {
+    const snaps = await store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date,source_family,row_count&list_key=eq.${listKey}&row_count=gt.0&ranking_date=lte.${iso(now).slice(0, 10)}&order=ranking_date.desc&limit=2`);
     if (snaps.length < 2 || snaps[0].ranking_date < sinceDate) continue;
     const kvKey = `news:rank:${listKey}:${snaps[0].ranking_date}`;
     if (!dry && env.TENNIS_STATE && (await env.TENNIS_STATE.get(kvKey))) continue;
     const [next, prev] = await Promise.all(snaps.map((s) => store.select('tennis_rankings', `select=pbe_player_id,rank&snapshot_id=eq.${s.snapshot_id}&rank=lte.150`)));
     const evs = await detectRankingEvents({ listKey, prevDate: snaps[1].ranking_date, nextDate: snaps[0].ranking_date, prev: new Map(prev.map((r) => [r.pbe_player_id, r.rank])), next: new Map(next.filter((r) => r.rank <= 100).map((r) => [r.pbe_player_id, r.rank])) });
-    for (const e of evs) candidates.push({ ...e, state: e.materiality >= PUBLISH_MIN_MATERIALITY ? 'detected' : 'below_threshold' });
+    for (const e of evs) candidates.push({ ...e, facts: { ...e.facts, tour: tourOfList(listKey), list_source_family: snaps[0].source_family || null }, state: e.materiality >= PUBLISH_MIN_MATERIALITY ? 'detected' : 'below_threshold' });
     if (!dry && env.TENNIS_STATE) await env.TENNIS_STATE.put(kvKey, iso(), { expirationTtl: 30 * 86400 });
   }
   if (dry || !candidates.length) return { scanned: rows.length, fresh: fresh.length, candidates: dry ? candidates.map((c) => ({ kind: c.kind, materiality: c.materiality, state: c.state, match_id: c.match_id || null, facts: c.facts })) : 0 };
@@ -98,6 +103,39 @@ export async function detect(env, store, { now = new Date(), dry = false } = {})
 }
 
 // ---- enrichment -----------------------------------------------------------------------------------------
+// Tour-fair claim (brief section 8). tennis_news_claim orders by materiality only, so a constant stream of WTA
+// events could keep an ATP event out of the ENRICH_LIMIT slots forever. We peek the claimable window in the RPC's
+// own order, choose slots with pickFair (slot 1 = highest materiality; then the best event of the other tour; then
+// the next highest), and claim each chosen row with a compare-and-set PATCH that repeats the RPC's eligibility
+// predicate plus the attempts value we read. A row another run claimed in between matches nothing and is skipped
+// (same outcome as FOR UPDATE SKIP LOCKED); no migration, no quota, and a tour with no candidate is simply absent.
+const PEEK = 40;
+const claimable = (nowIso) => `or=(state.eq.detected,and(state.eq.enriching,lease_expires_at.lt.${encodeURIComponent(nowIso)},attempts.lt.3))`;
+export function eventTour(ev, matchTypes = new Map()) {
+  const f = ev.evidence?.facts || {};
+  if (f.tour) return f.tour;
+  if (f.list) return tourOfList(f.list);
+  return tourOf(f.event_type || matchTypes.get(ev.match_id)) || null;
+}
+export async function claimFair(store, { limit = ENRICH_LIMIT, leaseS = LEASE_S, now = new Date() } = {}) {
+  const nowIso = now.toISOString();
+  const window = await store.select('tennis_news_events', `select=*&${claimable(nowIso)}&order=materiality.desc.nullslast,detected_at.asc&limit=${PEEK}`);
+  if (!window.length) return [];
+  // events detected before tour facts were recorded: the tour comes from the stored match's event type
+  const need = [...new Set(window.filter((e) => e.match_id && !e.evidence?.facts?.tour && !e.evidence?.facts?.event_type).map((e) => e.match_id))];
+  const types = new Map(need.length ? (await store.select('tennis_matches', `select=match_id,event_type&match_id=${inList(need)}`)).map((r) => [r.match_id, r.event_type]) : []);
+  const chosen = pickFair(window, limit, (e) => eventTour(e, types));
+  const out = [];
+  for (const ev of chosen) {
+    const rows = await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}&attempts=eq.${ev.attempts}&${claimable(nowIso)}`, {
+      body: { state: 'enriching', lease_token: crypto.randomUUID(), lease_expires_at: new Date(now.getTime() + leaseS * 1000).toISOString(), attempts: Number(ev.attempts) + 1, state_changed_at: nowIso },
+      prefer: 'return=representation'
+    });
+    if (rows?.[0]) out.push({ ...rows[0], tour: eventTour(ev, types) });
+  }
+  return out;
+}
+
 async function settle(store, ev, patch) {
   await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}&lease_token=eq.${ev.lease_token}`, { body: { ...patch, state_changed_at: iso(), lease_token: null, lease_expires_at: null }, prefer: 'return=minimal' });
 }
@@ -158,7 +196,12 @@ export async function run(env, { dry = false } = {}) {
   try { out.detect = await detect(env, store, { dry }); } catch (e) { out.detect = { error: redactSecrets(e.message) }; }
   if (dry) return out;
   let claimed = [];
-  try { claimed = (await store.req('POST', 'rpc/tennis_news_claim', { body: { p_limit: ENRICH_LIMIT, p_lease_s: LEASE_S } })) || []; } catch (e) { out.claim_error = redactSecrets(e.message); }
+  try { claimed = await claimFair(store, { limit: ENRICH_LIMIT }); } catch (e) {
+    // the tour-fair claim is an ordering refinement; the atomic RPC remains the fallback (never zero progress)
+    out.claim_fair_error = redactSecrets(e.message);
+    try { claimed = (await store.req('POST', 'rpc/tennis_news_claim', { body: { p_limit: ENRICH_LIMIT, p_lease_s: LEASE_S } })) || []; } catch (e2) { out.claim_error = redactSecrets(e2.message); }
+  }
+  out.claimed = claimed.map((c) => ({ event_id: c.event_id, tour: c.tour || null, materiality: Number(c.materiality) }));
   for (const ev of claimed) {
     try { out.enriched.push(await enrichOne(env, store, ev)); } catch (e) {
       const msg = redactSecrets(e.message).slice(0, 300);

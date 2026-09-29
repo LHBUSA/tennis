@@ -2,6 +2,7 @@
 // THE MODEL NEVER INVENTS CHART DATA: every series value below is read from the frozen packet. A module
 // whose facts are missing is omitted with a reason instead of rendered empty. One axis per chart.
 
+import { provenanceOf } from './tour.js';
 export const PLAN_VERSION = 'tennis-plan/1.0.0';
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const short = (side) => (side?.players || []).map((p) => p.last_name || String(p.name).split(' ').slice(-1)[0]).join('/');
@@ -26,7 +27,7 @@ function countChart(packet, W, L) {
 function flowChart(packet, W, L) {
   const sets = packet.match.sets || [];
   if (sets.length < 2) return null;
-  return { id: 'match_flow', type: 'grouped_bar', title: 'Games by set', unit: 'games', legend: [short(packet.participants[W]), short(packet.participants[L])], value_keys: ['w', 'l'], label_key: 'label', series: sets.map((s, i) => ({ label: s.match_tiebreak ? 'Match TB' : `Set ${i + 1}`, w: s[W], l: s[L], tb: s.tb ? `${s.tb[W]}-${s.tb[L]}` : null })), source: 'official set scores' };
+  return { id: 'match_flow', type: 'grouped_bar', title: 'Games by set', unit: 'games', legend: [short(packet.participants[W]), short(packet.participants[L])], value_keys: ['w', 'l'], label_key: 'label', series: sets.map((s, i) => ({ label: s.match_tiebreak ? 'Match TB' : `Set ${i + 1}`, w: s[W], l: s[L], tb: s.tb ? `${s.tb[W]}-${s.tb[L]}` : null })), source: packet.match_source?.classification === 'secondary' ? `set scores (secondary source: ${packet.match_source.name})` : 'official set scores' };
 }
 function dnaChart(packet, W, L) {
   const wid = packet.participants[W].players[0]?.id;
@@ -41,7 +42,8 @@ function dnaChart(packet, W, L) {
 function rankingChart(packet) {
   const h = packet.ranking_history || [];
   if (h.length < 3) return null;
-  return { id: 'ranking_trajectory', type: 'line', title: 'Official ranking by week', unit: 'rank', invert: true, label_key: 'date', value_keys: ['rank'], series: h.map((r) => ({ date: r.date, rank: r.rank })), source: 'archived official lists' };
+  const official = provenanceOf(packet)?.classification === 'official';
+  return { id: 'ranking_trajectory', type: 'line', title: official ? 'Official ranking by week' : 'Ranking by week (PropBetEdge archive)', unit: 'rank', invert: true, label_key: 'date', value_keys: ['rank'], series: h.map((r) => ({ date: r.date, rank: r.rank })), source: official ? 'archived official lists' : `archived weekly lists from a secondary source (${String(packet.ranking_provenance?.source_family || 'unknown').toUpperCase()})` };
 }
 
 export function buildPlan(packet, article) {

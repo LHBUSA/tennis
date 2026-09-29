@@ -80,6 +80,16 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   // 2. banned / unsupported claims
   for (const [re, gate] of BANNED) { const hit = text.match(re); if (hit) fail(gate, hit[0]); }
 
+  // 2a. provenance: a secondary source is never called official (ESPN-sourced ATP lists/results are real data, not
+  //     an official tour publication)
+  const rankProv = packet.ranking_provenance || null;
+  const secondaryRank = rankProv ? rankProv.classification !== 'official' : /atp_/.test(String(packet.event?.facts?.list || ''));
+  const officialRank = text.match(/\bofficial\b[^.]{0,40}\b(rank\w*|list|lists)\b|\b(ATP|WTA)\b[^.]{0,20}\bofficial\b/i);
+  if (secondaryRank && officialRank) fail('unsupported_official_claim', officialRank[0]);
+  const secondaryResult = (packet.provenance?.upstream || []).some((u) => u.classification === 'secondary' && !/list/.test(u.what));
+  const officialResult = text.match(/\bofficial\b[^.]{0,40}\b(result|results|feed|score|scores|statistics|data)\b/i);
+  if (secondaryResult && officialResult) fail('unsupported_official_claim', officialResult[0]);
+
   // 2b. rendering artifacts can never reach a reader
   const art = text.match(/\[object \w+\]|\bundefined\b|\bNaN\b|\bnull\b|$\{/);
   if (art) fail('render_artifact', art[0]);

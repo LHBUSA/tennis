@@ -5,7 +5,9 @@
 // The writer never states a reason for a retirement or withdrawal, an injury, a feeling, a motive, a
 // quote, a price or a "first"/"career-best" claim — the packet cannot prove any of those.
 
-export const COMPOSE_VERSION = 'tennis-compose/1.0.0';
+import { deskFor, provenanceOf, LIST_LABEL } from './tour.js';
+
+export const COMPOSE_VERSION = 'tennis-compose/1.1.0';
 
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const surname = (p) => p?.last_name ? p.last_name.split(' ').map((w) => (w === w.toUpperCase() ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(' ') : String(p?.name || '').split(' ').slice(-1)[0];
@@ -18,7 +20,6 @@ const durTxt = (d) => (!d ? null : d.hours ? `${d.hours} hour${d.hours === 1 ? '
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 const theEvent = (t) => `${t.name}${t.level ? ` (${t.level}${t.surface ? `, ${t.indoor ? 'indoor ' : ''}${t.surface}` : ''})` : ''}`;
 const ord = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
-const DESK = { WS: 'wta', WD: 'doubles', MS: 'grand-slams', MD: 'doubles', XD: 'doubles' };
 
 function statSentence(name, st, oName) {
   const bits = [];
@@ -71,7 +72,7 @@ function composeMatch(packet) {
     ? `${wName} advanced past the ${m.round_label} of ${theEvent(t)} by walkover: ${lName} withdrew before the match. The source does not give a reason, and we do not state one.`
     : `${wName}${!plural(w) && rankTxt(w.players[0]) ? `, ranked ${rankTxt(w.players[0])},` : ''} beat ${lName}${!plural(l) && rankTxt(l.players[0]) ? ` (${rankTxt(l.players[0])})` : ''} ${how} in the ${m.round_label} of ${theEvent(t)}${t.city && !String(t.name).startsWith(t.city) ? ` in ${t.city}` : ''}.`;
   const what = [lead];
-  if (m.status === 'retired') what.push(`${lS} did not finish the match. The official result records a retirement and no cause; we do not speculate about one.`);
+  if (m.status === 'retired') what.push(`${lS} did not finish the match. The result records a retirement and no cause; we do not speculate about one.`);
   if (m.duration && m.status !== 'walkover') what.push(`The match lasted ${durTxt(m.duration)}.`);
   sections.push({ id: 'what_happened', heading: 'What happened', paragraphs: what });
 
@@ -89,7 +90,16 @@ function composeMatch(packet) {
   const why = [];
   const lr = plural(l) ? null : l.players[0]?.rank?.rank ?? null;
   const wr = plural(w) ? null : w.players[0]?.rank?.rank ?? null;
-  if (kind === 'upset' && lr) why.push(wr ? `On the official list in force when the tournament began, ${wS} was ranked No. ${wr} and ${lS} No. ${lr}.` : `${wS} was not ranked on the official list in force when the tournament began; ${lS} was No. ${lr}.`);
+  // ranking wording follows the list's provenance: "the official WTA singles list" vs "the ATP singles list in the
+  // PropBetEdge archive" (secondary source); outside a top-N extract is never written as "not ranked"
+  const prov = provenanceOf(packet);
+  const ef = packet.event.facts || {};
+  if (kind === 'upset' && lr && prov) {
+    const rankedTxt = wr ? `${wS} was ranked No. ${wr} and ${lS} No. ${lr}` : null;
+    if (rankedTxt) why.push(`On ${prov.phrase} in force when the tournament began, ${rankedTxt}.`);
+    else if (ef.winner_outside_list) why.push(`${wS} was outside the top ${ef.winner_outside_list} of ${prov.phrase} in force when the tournament began; ${lS} was No. ${lr}.`);
+    else why.push(`${wS} was not ranked on ${prov.phrase} in force when the tournament began; ${lS} was No. ${lr}.`);
+  }
   if (kind === 'seed_upset') why.push(`${lS} was the No. ${l.seed} seed; ${wS} was unseeded.`);
   if (kind === 'qualifier_run') why.push(`${wS} entered the main draw as a ${packet.event.facts.entry === 'LL' ? 'lucky loser' : 'qualifier'}.`);
   if (kind === 'title' || kind === 'doubles_title') why.push(`The final was the last match of ${t.name} ${t.year}.`);
@@ -125,26 +135,51 @@ function composeMatch(packet) {
   // WHAT'S NEXT — only when the draw already shows it
   if (packet.next?.opponent.length) sections.push({ id: 'next', heading: "What's next", paragraphs: [`${wS} plays ${packet.next.opponent.map((o) => o.name).join(' / ')} in the ${packet.next.round_label}.`] });
 
-  sections.push({ id: 'method', heading: 'Evidence & method', paragraphs: [`Result, set scores and match statistics come from the official ${packet.provenance.upstream.map((u) => u.family.toUpperCase()).join(', ')} feed, archived by PropBetEdge. Rankings are the official list in force at the start of the tournament, not today's. Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred.`] });
+  sections.push({ id: 'method', heading: 'Evidence & method', paragraphs: [methodText(packet, prov)] });
 
   const dek = m.status === 'walkover'
     ? `${lName} withdrew before the ${m.round_label}; ${wName} ${v(w, 'moves', 'move')} on.`
     : `${wS} won ${setLine(m.sets, W)}${m.duration ? ` in ${durTxt(m.duration)}` : ''} in the ${m.round_label} of ${t.name}.`;
   const keyStat = kind === 'upset' && lr ? { label: 'Ranking gap', value: wr ? `No. ${wr} def. No. ${lr}` : `Unranked def. No. ${lr}` } : kind === 'marathon' ? { label: 'Duration', value: durTxt(m.duration) } : m.score ? { label: 'Score', value: setLine(m.sets, W) } : null;
-  return { headline: headlineFor(kind, P), dek, sections, key_stat: keyStat, story_type: kind, desk: t.level === 'Grand Slam' ? 'grand-slams' : DESK[m.event_type] || 'wta', primary_player_id: wid, player_ids: [...w.players, ...l.players].map((p) => p.id), match_id: m.id, tournament: { slug: t.slug, year: t.year, name: t.name } };
+  return { headline: headlineFor(kind, P), dek, sections, key_stat: keyStat, story_type: kind, desk: deskFor(m.event_type, t), primary_player_id: wid, player_ids: [...w.players, ...l.players].map((p) => p.id), match_id: m.id, tournament: { slug: t.slug, year: t.year, name: t.name } };
+}
+
+// Match evidence wording from the frozen provenance: a source is called official only when it is.
+function methodText(packet, prov) {
+  const up = packet.provenance?.upstream || [];
+  const result = up.find((u) => /result/.test(u.what)) || up[0] || null;
+  const stats = up.find((u) => /statistics/.test(u.what)) || null;
+  const src = (u) => (u.classification === 'secondary' ? `a secondary source (${String(u.family).toUpperCase()})` : `the official ${String(u.family).toUpperCase()} feed`);
+  const legacy = result && !result.classification; // packets frozen before provenance was recorded
+  const bits = [];
+  if (legacy) bits.push(`Result, set scores and match statistics come from the official ${up.map((u) => u.family.toUpperCase()).join(', ')} feed, archived by PropBetEdge.`);
+  else {
+    if (result) bits.push(`The result and set scores come from ${src(result)}, archived by PropBetEdge.`);
+    if (stats) bits.push(`Match statistics come from ${src(stats)}.`);
+  }
+  if (prov) bits.push(`Rankings are ${prov.phrase} in force at the start of the tournament, not today's${prov.classification === 'secondary' ? `, taken from a secondary source (${String(prov.source_family || 'unknown').toUpperCase()}) rather than an official tour release` : ''}.`);
+  bits.push('Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred.');
+  return bits.join(' ');
 }
 
 function composeRanking(packet) {
   const p = packet.player;
   const f = packet.event.facts;
   const s = surname(p);
-  const list = f.list === 'wta_singles' ? 'WTA singles' : 'WTA doubles';
-  const tier = packet.event.kind === 'new_no1' ? 'No. 1' : `the Top ${packet.event.kind.replace('enters_top', '')}`;
-  const headline = packet.event.kind === 'new_no1' ? `${p.name} is the new No. 1 in the ${list} rankings` : `${p.name} moves into ${tier} of the ${list} rankings`;
+  const prov = provenanceOf(packet);
+  const list = LIST_LABEL[f.list] || f.list;
+  const official = prov?.classification === 'official';
+  const tier = packet.event.kind === 'new_no1' ? 'No. 1' : `the Top ${f.tier ?? packet.event.kind.replace('enters_top', '')}`;
+  // official lists are "the WTA singles rankings"; a secondary-source list is "the ATP singles list" (our archive)
+  const noun = official ? `${list} rankings` : `${list} list`;
+  const headline = packet.event.kind === 'new_no1' ? `${p.name} is the new No. 1 on the ${noun}` : `${p.name} moves into ${tier} of the ${noun}`;
   const moved = f.previous_rank ? `from No. ${f.previous_rank}` : 'from outside the previous list';
+  const method = official
+    ? `Both lists are the official ${list} rankings as published, archived by PropBetEdge on their publication dates.`
+    : `Both lists are ${prov.phrase}: weekly lists from a secondary source (${String(prov.source_family || 'unknown').toUpperCase()}), not an official tour release, dated to the Monday each took effect${prov.truncated ? ` and holding the top ${prov.depth} only` : ''}.`;
   const sections = [
-    { id: 'what_happened', heading: 'What happened', paragraphs: [`${p.name} is ranked No. ${f.rank} in the ${list} list dated ${f.list_date}, up ${moved} on the list dated ${f.previous_list_date}.`] },
-    { id: 'method', heading: 'Evidence & method', paragraphs: [`Both lists are the official ${list} rankings as published, archived by PropBetEdge on their publication dates. We compare consecutive archived lists only; we make no claim about ${s}'s career-best ranking until our ranking archive covers the full career.`] }
+    { id: 'what_happened', heading: 'What happened', paragraphs: [`${p.name} is No. ${f.rank} on ${official ? `the ${list} list` : prov.phrase} dated ${f.list_date}, up ${moved} on the list dated ${f.previous_list_date}.`] },
+    { id: 'method', heading: 'Evidence & method', paragraphs: [`${method} We compare consecutive archived lists only and make no claim about ${s}'s ranking before the lists our archive holds.`] }
   ];
   if (packet.ranking_history?.length > 2) sections.splice(1, 0, { id: 'trajectory', heading: 'Ranking trajectory', paragraphs: [`Our archive holds ${packet.ranking_history.length} weekly lists for ${s} up to ${f.list_date}; the chart shows each of them.`] });
   return { headline, dek: `${s} is No. ${f.rank} on the ${list} list dated ${f.list_date}.`, sections, key_stat: { label: 'New ranking', value: `No. ${f.rank}` }, story_type: packet.event.kind, desk: 'rankings', primary_player_id: p.id, player_ids: [p.id], match_id: null, tournament: null };

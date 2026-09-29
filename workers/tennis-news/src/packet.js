@@ -6,6 +6,7 @@
 // form and head-to-head use only earlier tournaments. Families with no data are omitted, never padded.
 
 import { approvedMedia } from '../../shared/media.js';
+import { RANKING_LISTS, rankingProvenance, matchSource, tourOf, tourOfList } from './tour.js';
 
 export const PACKET_VERSION = 'tennis-packet/1.0.0';
 
@@ -53,7 +54,7 @@ export function statLines(sa, sb) {
 
 export const durationParts = (s) => (Number.isFinite(s) && s > 0 ? { hours: Math.floor(s / 3600), minutes: Math.floor((s % 3600) / 60) } : null);
 
-const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,edition_id,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)))))';
+const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,edition_id,source_family,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_family,competition_key,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)))))';
 const inList = (xs) => `in.(${xs.map((x) => `"${x}"`).join(',')})`;
 
 function shapeRow(m) {
@@ -73,9 +74,9 @@ function shapeRow(m) {
   return {
     id: m.match_id, event_type: m.event_type, round: m.round, round_label: roundLabel(m.round), round_order: ROUND_ORDER(m.round), format: m.format_key,
     best_of: /^BO5/.test(m.format_key) ? 5 : 3, status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, score: m.score_text,
-    duration_s: m.duration_s, duration: durationParts(m.duration_s), started_at: m.started_at,
+    duration_s: m.duration_s, duration: durationParts(m.duration_s), started_at: m.started_at, source_family: m.source_family || null,
     sets: (m.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((s) => ({ A: s.games_a, B: s.games_b, tb: s.tb_a == null ? null : { A: s.tb_a, B: s.tb_b }, match_tiebreak: !!s.is_match_tiebreak })),
-    tournament: { edition_id: e.edition_id, slug: e.tennis_tournaments?.slug || null, name: e.tennis_tournaments?.name || e.name, year: e.year, level: e.level, surface: e.surface, indoor: e.indoor, city: e.city, country: e.country, start_date: e.start_date, end_date: e.end_date },
+    tournament: { edition_id: e.edition_id, slug: e.tennis_tournaments?.slug || null, name: e.tennis_tournaments?.name || e.name, year: e.year, level: e.level, surface: e.surface, indoor: e.indoor, city: e.city, country: e.country, start_date: e.start_date, end_date: e.end_date, source_family: e.source_family || null, competition_key: e.competition_key || null },
     sides
   };
 }
@@ -89,13 +90,19 @@ export async function loadMatches(store, query) {
   return (await store.select('tennis_matches', `select=${MATCH_SEL}&${query}`)).map(shapeRow);
 }
 
-/** Official list in force on a date (latest list dated on/before it). */
+/**
+ * The stored list in force on a date (latest list dated on/before it). The returned Map carries `.provenance`
+ * (rankingProvenance: official vs secondary source, depth) so prose never calls a secondary list official and
+ * never calls a player outside a top-N extract "unranked".
+ */
 export async function rankAt(store, pids, date, listKey) {
-  if (!pids.length || !date) return new Map();
-  const snap = (await store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date&list_key=eq.${listKey}&ranking_date=lte.${date}&row_count=gt.0&order=ranking_date.desc&limit=1`))[0];
+  if (!listKey || !pids.length || !date) return new Map();
+  const snap = (await store.select('tennis_ranking_snapshots', `select=snapshot_id,ranking_date,source_family,row_count&list_key=eq.${listKey}&ranking_date=lte.${date}&row_count=gt.0&order=ranking_date.desc&limit=1`))[0];
   if (!snap) return new Map();
   const rows = await store.select('tennis_rankings', `select=pbe_player_id,rank,points&snapshot_id=eq.${snap.snapshot_id}&pbe_player_id=${inList(pids)}`);
-  return new Map(rows.map((r) => [r.pbe_player_id, { rank: r.rank, points: r.points, list_date: snap.ranking_date, list: listKey }]));
+  const out = new Map(rows.map((r) => [r.pbe_player_id, { rank: r.rank, points: r.points, list_date: snap.ranking_date, list: listKey, source_family: snap.source_family || null }]));
+  out.provenance = { ...rankingProvenance(listKey, snap.source_family, Number(snap.row_count)), list_date: snap.ranking_date };
+  return out;
 }
 
 const matchDate = (m) => (m.started_at ? m.started_at.slice(0, 10) : m.tournament.start_date);
@@ -131,7 +138,12 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     packet.player = { id: p.pbe_player_id, slug: p.slug, name: p.full_name, last_name: p.last_name || null, nationality: p.nationality, photo: media?.derivatives?.square?.url ? { player_id: media.pbe_player_id, square: media.derivatives.square.url, wide: media.derivatives.wide?.url || null, credit: media.attribution, license: media.license, author: media.author } : null };
     const hist = await store.select('tennis_rankings', `select=rank,points,tennis_ranking_snapshots!inner(list_key,ranking_date)&pbe_player_id=eq.${pid}&tennis_ranking_snapshots.list_key=eq.${event.facts.list}&tennis_ranking_snapshots.ranking_date=lte.${event.facts.list_date}&order=tennis_ranking_snapshots(ranking_date).desc&limit=52`);
     packet.ranking_history = hist.map((r) => ({ date: r.tennis_ranking_snapshots.ranking_date, rank: r.rank, points: r.points })).sort((a, b) => (a.date < b.date ? -1 : 1));
-    packet.provenance.upstream.push({ family: 'wta', what: `official ${event.facts.list} lists dated ${event.facts.previous_list_date} and ${event.facts.list_date}` });
+    // provenance follows the stored list's own source: an ESPN-sourced list is secondary, never "official"
+    const snap = (await store.select('tennis_ranking_snapshots', `select=source_family,row_count&list_key=eq.${event.facts.list}&ranking_date=eq.${event.facts.list_date}`))[0];
+    const fam = snap?.source_family || event.facts.list_source_family || null;
+    packet.ranking_provenance = rankingProvenance(event.facts.list, fam, snap ? Number(snap.row_count) : null);
+    packet.tour = tourOfList(event.facts.list);
+    packet.provenance.upstream.push({ family: fam || 'unknown', classification: packet.ranking_provenance.classification, what: `${event.facts.list} lists dated ${event.facts.previous_list_date} and ${event.facts.list_date}` });
     packet.canonical_signature = `${event.kind}:${pid}:${event.facts.list_date}`;
     return packet;
   }
@@ -140,17 +152,23 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
   if (!m) return null;
   const date = matchDate(m);
   const singles = m.event_type === 'WS' || m.event_type === 'MS';
-  const listKey = m.event_type === 'WS' ? 'wta_singles' : m.event_type === 'WD' ? 'wta_doubles' : null;
+  // tour-aware ranking context: WS -> WTA singles, MS -> ATP singles, WD -> WTA doubles, MD/XD -> none held
+  const listKey = RANKING_LISTS[m.event_type] || null;
   const pids = ['A', 'B'].flatMap((s) => m.sides[s]?.players.map((p) => p.id) || []);
   const ranks = listKey ? await rankAt(store, pids, m.tournament.start_date, listKey) : new Map();
   for (const s of ['A', 'B']) for (const p of m.sides[s].players) p.rank = ranks.get(p.id) || null;
   packet.match = { id: m.id, event_type: m.event_type, round: m.round, round_label: m.round_label, format: m.format, best_of: m.best_of, status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, score: m.score, sets: m.sets, duration_s: m.duration_s, duration: m.duration, started_at: m.started_at, date };
   packet.participants = m.sides;
   packet.tournament = m.tournament;
-  packet.rankings_note = listKey ? `official ${listKey.replace('_', ' ').toUpperCase()} list in force at the start of the tournament` : null;
-  packet.provenance.upstream.push({ family: 'wta', what: 'match result, set scores and statistics' });
+  packet.tour = tourOf(m.event_type);
+  packet.match_source = matchSource(m.source_family);
+  packet.ranking_provenance = ranks.provenance || null;
+  packet.rankings_note = ranks.provenance ? ranks.provenance.note : null;
 
   const statsRows = await store.select('tennis_match_stats', `select=side,stats,source_family,captured_at&match_id=eq.${m.id}`);
+  packet.provenance.upstream.push({ family: m.source_family || 'unknown', classification: packet.match_source.classification, what: 'match result and set scores' });
+  const statFams = [...new Set(statsRows.map((r) => r.source_family).filter(Boolean))];
+  if (statsRows.length) packet.provenance.upstream.push({ family: statFams.join(',') || 'unknown', classification: statFams.length && statFams.every((f) => matchSource(f).classification === 'official') ? 'official' : 'secondary', what: 'match statistics' });
   const sa = statsRows.find((r) => r.side === 'A')?.stats;
   const sb = statsRows.find((r) => r.side === 'B')?.stats;
   const lines = statLines(sa, sb);
