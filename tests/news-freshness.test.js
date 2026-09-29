@@ -2,7 +2,8 @@
 // read as breaking news — its EVENT date is the primary clock; a live story keeps its publication-relative time.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freshnessOf } from '../workers/tennis-api/src/news.js';
+import { freshnessOf, wireFreshness } from '../workers/tennis-api/src/news.js';
+import { wireRow } from '../src/lib/newsroom.js';
 import { storyClock, latestFresh } from '../src/lib/newsroom.js';
 
 // the production pattern: Birrell wins Seoul (final 2026-09-27), detected 09-27 08:18, reclassified + published 09-29 16:56
@@ -35,4 +36,20 @@ test('storyClock: a backfill shows the event date + "Added to PropBetEdge", neve
   const l = storyClock({ ...live, freshness: freshnessOf(live) }, { relative: rel });
   assert.equal(l.text, '42 min ago'); assert.equal(l.note, null);
   assert.equal(latestFresh([{ ...backfill, freshness: freshnessOf(backfill) }, { ...live, freshness: freshnessOf(live) }]), live.published_at, 'the masthead "Updated" ignores backfills');
+});
+
+test('wire items: late catch-ups and backfill-linked items carry the EVENT date, same-day items keep their time', () => {
+  const reclass = [{ stage: 'reclassify_v3', at: '2026-09-29T16:54:16Z' }];
+  // Harris R2 at Chengdu: recorded days after the match by the secondary-source lane
+  const late = wireFreshness({ detected_at: '2026-09-29T10:44:00Z', occurred_at: null, class_history: [] }, { scheduled_at: '2026-09-24T04:00:00Z' }, null);
+  assert.equal(late.historical, true);
+  // Medvedev's final: same day, but its story was published by the reclassification
+  const bf = wireFreshness({ detected_at: '2026-09-29T13:51:00Z', class_history: reclass }, { scheduled_at: '2026-09-29T11:40:00Z' }, { first_published_at: '2026-09-29T16:57:44Z' });
+  assert.equal(bf.historical, true);
+  // a normal live wire item
+  const now = wireFreshness({ detected_at: '2026-09-29T17:48:47Z', class_history: [] }, { scheduled_at: '2026-09-29T14:31:00Z' }, null);
+  assert.equal(now.historical, false);
+  const row = wireRow({ headline: 'Lloyd Harris knocks out No. 1 seed Vacherot', detected_at: '2026-09-29T10:44:00Z', freshness: late, links: [] });
+  assert.equal(row.time, 'Match Sep 24');
+  assert.notEqual(wireRow({ headline: 'x', detected_at: '2026-09-29T17:48:47Z', freshness: now, links: [] }).time.slice(0, 6), 'Match ');
 });

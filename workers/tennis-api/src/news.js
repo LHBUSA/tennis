@@ -196,6 +196,20 @@ export function wireCard(ev, { match = null, player = null, article = null } = {
   };
 }
 
+/**
+ * A wire item's clock (owner rule 2026-09-29): the wire is ordered by when WE recorded an event, but an item recorded long
+ * after it happened (a late secondary-source catch-up, or one whose story was published by the V3 reclassification
+ * backfill) is historical: its EVENT date is the clock, never a fresh time of day.
+ */
+export const WIRE_LATE_MS = 18 * 3600e3;
+export function wireFreshness(ev, match, article) {
+  const eventAt = match?.scheduled_at || match?.started_at || ev?.occurred_at || null;
+  const reclass = (Array.isArray(ev?.class_history) ? ev.class_history : []).find((h) => h?.stage === 'reclassify_v3');
+  const backfillStory = !!(article?.first_published_at && reclass?.at && Date.parse(article.first_published_at) >= Date.parse(reclass.at));
+  const late = !!(eventAt && ev?.detected_at && Date.parse(ev.detected_at) - Date.parse(eventAt) > WIRE_LATE_MS);
+  return { event_at: eventAt, historical: backfillStory || late, reason: backfillStory ? 'story published by the V3 reclassification after the event' : late ? 'recorded more than 18 h after the event' : null };
+}
+
 async function liveWire(store, url) {
   const limit = Math.min(100, Number(url.searchParams.get('limit')) || 40);
   const desk = url.searchParams.get('desk');
@@ -204,18 +218,19 @@ async function liveWire(store, url) {
   const tslug = url.searchParams.get('tournament');
   const tyear = url.searchParams.get('year');
   const pf = player && UUID.test(player) ? `&entities=cs.${encodeURIComponent(JSON.stringify([player]))}` : '';
-  const evs = await store.select('tennis_news_events', `select=event_id,kind,state,occurred_at,detected_at,match_id,article_id,entities,evidence&state=in.(${WIRE_STATES.join(',')})${pf}&order=detected_at.desc,event_id.desc&limit=${Math.min(300, limit * 3)}`);
+  const evs = await store.select('tennis_news_events', `select=event_id,kind,state,occurred_at,detected_at,match_id,article_id,entities,evidence,class_history&state=in.(${WIRE_STATES.join(',')})${pf}&order=detected_at.desc,event_id.desc&limit=${Math.min(300, limit * 3)}`);
   const mids = [...new Set(evs.map((e) => e.match_id).filter(Boolean))];
   const matches = new Map();
   for (let i = 0; i < mids.length; i += 50) for (const r of await store.select('tennis_matches', `select=${MATCH}&match_id=in.(${mids.slice(i, i + 50).join(',')})`)) matches.set(r.match_id, shapeMatch(r));
   const pids = [...new Set(evs.filter((e) => !e.match_id).map((e) => e.entities?.[0]).filter((x) => UUID.test(String(x))))];
   const players = new Map(pids.length ? (await store.select('tennis_players', `select=pbe_player_id,slug,full_name,last_name,nationality,gender,tennis_player_media(approval,derivatives,attribution,source_page_url,license,author)&pbe_player_id=in.(${pids.join(',')})`)).map((p) => [p.pbe_player_id, { id: p.pbe_player_id, slug: p.slug, name: p.full_name }]) : []);
   const aids = [...new Set(evs.map((e) => e.article_id).filter(Boolean))];
-  const articles = new Map(aids.length ? (await store.select('tennis_articles', `select=article_id,slug,story_class,status&article_id=in.(${aids.join(',')})&status=eq.published`)).map((a) => [a.article_id, a]) : []);
+  const articles = new Map(aids.length ? (await store.select('tennis_articles', `select=article_id,slug,story_class,status,first_published_at&article_id=in.(${aids.join(',')})&status=eq.published`)).map((a) => [a.article_id, a]) : []);
   const items = [];
   for (const ev of evs) {
     const card = wireCard(ev, { match: ev.match_id ? matches.get(ev.match_id) : null, player: ev.match_id ? null : players.get(ev.entities?.[0]), article: ev.article_id ? articles.get(ev.article_id) : null });
     if (!card) continue;
+    card.freshness = wireFreshness(ev, ev.match_id ? matches.get(ev.match_id) : null, ev.article_id ? articles.get(ev.article_id) : null);
     if (desk && desk !== 'all' && card.desk !== desk) continue;
     if (tour && card.tour !== tour) continue;
     if (tslug && SLUG.test(tslug) && card.tournament?.slug !== tslug) continue;
