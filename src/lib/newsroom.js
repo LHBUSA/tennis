@@ -127,3 +127,21 @@ export function longestSameRun(keys) {
   for (const k of keys || []) { run = k === prev ? run + 1 : 1; prev = k; best = Math.max(best, run); }
   return best;
 }
+
+/**
+ * The reader's clock for a story (owner rule 2026-09-29). A normal story shows its publication time; a V3 backfill (the API's
+ * freshness.is_backfill, from the lifecycle record) shows the EVENT date as the primary signal, never "N min ago", with the
+ * later publication only as a secondary "Added to PropBetEdge" note. Pure: { iso, text, note, backfill }.
+ */
+const DAY = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+export function storyClock(a, { relative = null, absolute = null } = {}) {
+  const f = a?.freshness || null;
+  const pub = a?.first_published_at || a?.published_at || a?.updated_at || null;
+  if (f?.is_backfill && f.event_at) {
+    return { iso: f.event_at, text: `Match ${DAY(f.event_at)}`, note: pub ? `Added to PropBetEdge ${DAY(pub)}` : null, backfill: true };
+  }
+  const fmt = relative || absolute || ((x) => x);
+  return { iso: pub, text: pub ? fmt(pub) : '', note: null, backfill: false };
+}
+/** Newest non-backfill publication (the masthead's "Updated" must not be driven by a historical backfill). */
+export const latestFresh = (stories) => (stories || []).filter((a) => !a?.freshness?.is_backfill).map((a) => a.published_at || a.first_published_at).filter(Boolean).sort().at(-1) || null;

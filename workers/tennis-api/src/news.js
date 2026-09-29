@@ -11,7 +11,7 @@ import { deskFor, tourOf, tourOfList, LIST_LABEL } from '../../tennis-news/src/t
 import { roundLabel } from '../../tennis-news/src/packet.js';
 
 const DESKS = ['all', 'wta', 'atp', 'grand-slams', 'challenger', 'itf', 'doubles', 'rankings'];
-const LIST = 'article_id,slug,status,headline,deck,story_type,story_class,first_published_at,revised_at,desk,primary_player_id,player_ids,match_id,tournament,key_stat,prose_origin,published_at,updated_at,hold_reason,content_plan,tennis_players!tennis_articles_primary_player_id_fkey(slug,full_name,tennis_player_media(approval,derivatives))';
+const LIST = 'article_id,slug,status,headline,deck,story_type,story_class,first_published_at,revised_at,desk,primary_player_id,player_ids,match_id,tournament,key_stat,prose_origin,published_at,updated_at,hold_reason,content_plan,tennis_players!tennis_articles_primary_player_id_fkey(slug,full_name,tennis_player_media(approval,derivatives)),tennis_news_events!tennis_articles_event_id_fkey(occurred_at,detected_at,class_history)';
 // the story's featured side, frozen at publication (winners of a match story): the faces a card may show
 const teamOf = (a) => {
   const sb = (a.content_plan?.modules || []).find((m) => m.id === 'scoreboard')?.data;
@@ -49,9 +49,23 @@ export function storyContext(a, packet = null) {
   const t = packet?.tournament || a.tournament || {};
   return { match_id: a.match_id || null, tournament: { slug: t.slug || a.tournament?.slug || null, year: t.year || a.tournament?.year || null }, surface: t.surface || null, featured_ids: W && parts?.[W] ? ids(parts[W].players) : a.primary_player_id ? [a.primary_player_id] : [], player_ids: parts ? [...ids(parts.A?.players), ...ids(parts.B?.players)] : a.player_ids || [] };
 }
+/**
+ * Which clock a reader should see (owner rule 2026-09-29): a story written long after its event by the V3 reclassification
+ * backfill must never read as breaking news. is_backfill comes from the lifecycle record — a 'reclassify_v3' entry in the
+ * event's class history — AND publication more than 6 h after detection; then the EVENT time is the primary clock.
+ */
+export const BACKFILL_LAG_MS = 6 * 3600e3;
+export function freshnessOf(a) {
+  const ev = Array.isArray(a.tennis_news_events) ? a.tennis_news_events[0] : a.tennis_news_events;
+  const pub = a.first_published_at || a.published_at || null;
+  const reclassified = (Array.isArray(ev?.class_history) ? ev.class_history : []).some((h) => h?.stage === 'reclassify_v3');
+  const lag = pub && ev?.detected_at ? Date.parse(pub) - Date.parse(ev.detected_at) : 0;
+  const isBackfill = !!(reclassified && lag > BACKFILL_LAG_MS);
+  return { basis: isBackfill ? 'event' : 'published', is_backfill: isBackfill, event_at: ev?.occurred_at || null, detected_at: ev?.detected_at || null, published_at: pub, reason: isBackfill ? 'added by the 2026-09-29 V3 reclassification, after the event' : null };
+}
 const shapeCard = (a, photos = new Map()) => {
   const d = approvedMedia(a.tennis_players?.tennis_player_media)?.derivatives;
-  return { id: a.article_id, slug: a.slug, status: a.status, headline: a.headline, dek: a.deck, story_type: a.story_type, story_class: a.story_class || null, first_published_at: a.first_published_at || null, revised_at: a.revised_at || null, desk: a.desk, match_id: a.match_id, tournament: a.tournament, key_stat: a.key_stat, published_at: a.published_at, updated_at: a.updated_at, team: teamOf(a), media: { hero: resolveHero(storyContext(a), editorial, photos) }, player: a.tennis_players ? { slug: a.tennis_players.slug, name: a.tennis_players.full_name, photo: d?.square?.url ? { square: d.square.url, wide: d.wide?.url || null } : null } : null, ...(a.status !== 'published' ? { hold_reason: a.hold_reason } : {}) };
+  return { freshness: freshnessOf(a), id: a.article_id, slug: a.slug, status: a.status, headline: a.headline, dek: a.deck, story_type: a.story_type, story_class: a.story_class || null, first_published_at: a.first_published_at || null, revised_at: a.revised_at || null, desk: a.desk, match_id: a.match_id, tournament: a.tournament, key_stat: a.key_stat, published_at: a.published_at, updated_at: a.updated_at, team: teamOf(a), media: { hero: resolveHero(storyContext(a), editorial, photos) }, player: a.tennis_players ? { slug: a.tennis_players.slug, name: a.tennis_players.full_name, photo: d?.square?.url ? { square: d.square.url, wide: d.wide?.url || null } : null } : null, ...(a.status !== 'published' ? { hold_reason: a.hold_reason } : {}) };
 };
 
 /** What a PBEcast replay of this match can honestly show: point-by-point, observed score changes, or none. */

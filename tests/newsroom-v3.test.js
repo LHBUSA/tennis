@@ -237,3 +237,28 @@ test('correction: a pre-match rating from a snapshot built after the event is wi
   const before = { async select() { return [{ built_at: '2026-09-02T04:00:00Z' }]; } };
   assert.deepEqual((await correctPacket(before, packet, '2026-09-26T09:43:57Z')).changes, []);
 });
+
+test('detection candidates: selected by match time and keyset-paged — a bulk historical rewrite cannot crowd out fresh finals', async () => {
+  const { detectionCandidates } = await import('../workers/tennis-news/src/index.js');
+  const qs = [];
+  // 1,200 ids to page through (the old query stopped at an arbitrary 400)
+  const ids = Array.from({ length: 1200 }, (_, i) => `00000000-0000-4000-8000-${String(i).padStart(12, '0')}`);
+  const store = { async select(t, q) {
+    qs.push(q);
+    if (/^select=match_id(&|,tennis_tournament_editions!inner)/.test(q)) {
+      if (/tennis_tournament_editions!inner/.test(q)) return [];
+      const after = /match_id=gt\.([0-9a-f-]+)/.exec(q)?.[1];
+      const lim = Number(/limit=(\d+)/.exec(q)[1]);
+      return ids.filter((x) => !after || x > after).slice(0, lim).map((match_id) => ({ match_id }));
+    }
+    const inIds = (/match_id=in\.\(([^)]*)\)/.exec(q)?.[1] || '').split(',').map((x) => x.replace(/"/g, '')).filter(Boolean);
+    return inIds.map((match_id) => ({ match_id, event_type: 'WS', tennis_tournament_editions: {}, tennis_sets: [], tennis_match_participants: [] }));
+  } };
+  const now = new Date('2026-09-29T12:00:00Z');
+  const rows = await detectionCandidates(store, now, { page: 500 });
+  assert.equal(rows.length, 1200, 'every candidate, never an arbitrary 400');
+  const sel = qs.filter((q) => /^select=match_id(&|,tennis_tournament_editions!inner)/.test(q));
+  assert.ok(sel.every((q) => /order=match_id\.asc/.test(q)), 'deterministic keyset order');
+  assert.ok(sel[0].includes('or=(started_at.gte.2026-09-26T12:00:00.000Z,scheduled_at.gte.2026-09-26T12:00:00.000Z)'), 'timed rows bounded by match time (72 h)');
+  assert.ok(qs.some((q) => /started_at=is\.null&scheduled_at=is\.null&tennis_tournament_editions\.end_date=gte\.2026-09-26/.test(q)), 'untimed rows bounded by edition end date');
+});

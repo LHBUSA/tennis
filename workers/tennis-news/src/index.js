@@ -61,12 +61,43 @@ export function detectorInput(m, ranks, atpTier = null) {
   return { id: m.id, event_type: m.event_type, round: m.round, status: m.status, winner_side: m.winner_side, retired_side: m.status === 'retired' ? (m.winner_side === 'A' ? 'B' : 'A') : null, best_of: m.best_of, sets: m.sets.map((s) => ({ A: s.A, B: s.B, tb: !!s.tb })), duration_s: m.duration_s, started_at: m.started_at, edition: { id: m.tournament.edition_id, level: m.tournament.level, name: m.tournament.name, surface: m.tournament.surface, start_date: m.tournament.start_date, source_family: m.tournament.source_family || null, competition_key: m.tournament.competition_key || null, atp_tier: atpTier?.tier || null, tier_registry: atpTier?.registry || null }, list_depth: ranks.provenance?.truncated ? ranks.provenance.depth : null, sides: { A: side('A'), B: side('B') } };
 }
 
+/**
+ * Finished matches that changed in the last 6 h AND belong to the freshness window — selected by MATCH time, never by
+ * updated_at churn alone. (2026-09-29 latency trace: the old query "updated in 6 h, limit 400" with no ORDER BY let a bulk
+ * historical rewrite — 500k+ rows on 2026-09-28 — crowd fresh finals out for up to 200 min.) Timed rows need
+ * started_at / scheduled_at inside the window; untimed rows (player-history results) need their edition to end inside it.
+ * Both are keyset-paged on match_id (never truncated), then loaded in full by id.
+ */
+export async function detectionCandidates(store, now = new Date(), { page = 500, maxPages = 40 } = {}) {
+  const changed = iso(new Date(now.getTime() - 6 * 3600e3));
+  const since = iso(new Date(now.getTime() - FRESH_H * 3600e3));
+  const base = `status=in.(completed,retired,walkover)&event_type=in.(WS,MS,WD,MD,XD)&updated_at=gte.${changed}`;
+  const queries = [
+    `select=match_id&${base}&or=(started_at.gte.${since},scheduled_at.gte.${since})`,
+    `select=match_id,tennis_tournament_editions!inner(end_date)&${base}&started_at=is.null&scheduled_at=is.null&tennis_tournament_editions.end_date=gte.${since.slice(0, 10)}`
+  ];
+  const ids = new Set();
+  for (const q of queries) {
+    let after = null;
+    for (let i = 0; i < maxPages; i += 1) {
+      const got = await store.select('tennis_matches', `${q}${after ? `&match_id=gt.${after}` : ''}&order=match_id.asc&limit=${page}`);
+      for (const r of got) ids.add(r.match_id);
+      if (got.length < page) break;
+      after = got.at(-1).match_id;
+    }
+  }
+  const list = [...ids];
+  const out = [];
+  for (let i = 0; i < list.length; i += 150) out.push(...(await loadMatches(store, `match_id=${inList(list.slice(i, i + 150))}`)));
+  return out;
+}
+
 export async function detect(env, store, { now = new Date(), dry = false } = {}) {
   const since = new Date(now.getTime() - FRESH_H * 3600e3);
   const sinceDate = iso(since).slice(0, 10);
   // freshness is judged on the MATCH date, not on when our backfill last touched the row
   // every event type of the one tennis product: men's and women's singles, both doubles, mixed
-  const rows = await loadMatches(store, `status=in.(completed,retired,walkover)&event_type=in.(WS,MS,WD,MD,XD)&updated_at=gte.${iso(new Date(now.getTime() - 6 * 3600e3))}&limit=400`);
+  const rows = await detectionCandidates(store, now);
   const fresh = rows.filter((m) => (m.started_at ? m.started_at >= iso(since) : m.tournament.end_date >= sinceDate && m.tournament.start_date <= iso(now).slice(0, 10)));
   const byEdition = new Map();
   for (const m of fresh) { const k = `${m.tournament.edition_id}:${m.event_type}`; if (!byEdition.has(k)) byEdition.set(k, []); byEdition.get(k).push(m); }

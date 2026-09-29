@@ -9,12 +9,13 @@ import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
-import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName } from '../lib/newsroom.js';
+import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh } from '../lib/newsroom.js';
 
 export const DESKS = [['all', 'All'], ['atp', 'ATP'], ['wta', 'WTA'], ['grand-slams', 'Grand Slams'], ['doubles', 'Doubles'], ['rankings', 'Rankings'], ['challenger', 'Challenger'], ['itf', 'ITF']];
 const KIND = KIND_LABEL;
 const joinH = (xs, sep = ' / ') => html`${xs.map((x, i) => (i ? html`${sep}${x}` : x))}`;
 const when = (iso) => (iso ? new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '');
+const clockHtml = (a, opts) => { const c = storyClock(a, opts); return c.iso ? html`<time datetime="${c.iso}"${c.backfill ? raw(' class="nf-hist"') : ''}>${c.text}</time>${c.note ? html`<span class="nf-added"> · ${c.note}</span>` : ''}` : ''; };
 const ago = (iso, now = Date.now()) => { const s = (now - Date.parse(iso || '')) / 1000; if (!Number.isFinite(s)) return ''; if (s < 90) return 'just now'; if (s < 3600) return `${Math.round(s / 60)} min ago`; if (s < 86400) return `${Math.round(s / 3600)} h ago`; return when(iso); };
 const previewQ = () => { const p = typeof location === 'undefined' ? null : new URLSearchParams(location.search).get('preview'); return p && /^[0-9a-f]{16,64}$/.test(p) ? p : null; };
 const withPreview = (path) => (previewQ() ? `${path}${path.includes('?') ? '&' : '?'}preview=${previewQ()}` : path);
@@ -95,7 +96,7 @@ export function card(a, lead = false) {
         <p class="nw-kick nf-kick">${kicker(a)}</p>
         <h2>${a.headline}</h2>
         ${a.dek ? html`<p class="nw-dek">${a.dek}</p>` : ''}
-        <p class="nw-meta">${names ? html`<span class="nw-who">${names}</span>` : ''}<time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time></p>
+        <p class="nw-meta">${names ? html`<span class="nw-who">${names}</span>` : ''}${clockHtml(a, { absolute: when })}</p>
       </div>
     </a></article>`;
 }
@@ -110,7 +111,7 @@ export function leadStory(a) {
       <p class="nf-kick">${kicker(a)}</p>
       <h2><a href="${storyHref(a)}">${a.headline}</a></h2>
       ${a.dek ? html`<p class="nf-dek">${a.dek}</p>` : ''}
-      <p class="nf-meta">${names ? html`<span>${names}</span>` : ''}<time datetime="${a.published_at || a.updated_at}">${ago(a.published_at || a.updated_at)}</time></p>
+      <p class="nf-meta">${names ? html`<span>${names}</span>` : ''}${clockHtml(a, { relative: ago })}</p>
       ${researchLinks(a)}
     </div></article>`;
 }
@@ -121,14 +122,14 @@ function majorStory(a, withImg = true) {
   return html`<article class="nf-major${v ? ' has-img' : ''}">
     ${v ? html`<a class="nf-major-img" href="${storyHref(a)}" tabindex="-1" aria-hidden="true">${v}</a>` : ''}
     <div><p class="nf-kick">${kicker(a)}</p><h3><a href="${storyHref(a)}">${a.headline}</a></h3>
-    <p class="nf-meta"><time datetime="${a.published_at || a.updated_at}">${ago(a.published_at || a.updated_at)}</time></p></div></article>`;
+    <p class="nf-meta">${clockHtml(a, { relative: ago })}</p></div></article>`;
 }
 
 /** Compact story row (latest intelligence, player/tournament integrations). */
 export function storyRow(a) {
   const names = who(a).map((p) => p.name).join(' / ');
   return html`<article class="nf-row"><p class="nf-kick">${kicker(a)}</p><h3><a href="${storyHref(a)}">${a.headline}</a></h3>
-    ${a.dek ? html`<p class="nf-row-dek">${a.dek}</p>` : ''}<p class="nf-meta">${names ? html`<span>${names}</span>` : ''}<time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time></p></article>`;
+    ${a.dek ? html`<p class="nf-row-dek">${a.dek}</p>` : ''}<p class="nf-meta">${names ? html`<span>${names}</span>` : ''}${clockHtml(a, { absolute: when })}</p></article>`;
 }
 
 /** Medium feature: the one larger treatment inside Latest intelligence. */
@@ -136,7 +137,7 @@ function featureStory(a) {
   const v = heroVisual(a.media?.hero, { card: true });
   return html`<article class="nf-feature${v ? '' : ' no-img'}">${v ? html`<a class="nf-feature-img" href="${storyHref(a)}" tabindex="-1" aria-hidden="true">${v}</a>` : ''}
     <div><p class="nf-kick">${kicker(a)}</p><h3><a href="${storyHref(a)}">${a.headline}</a></h3>${a.dek ? html`<p class="nf-row-dek">${a.dek}</p>` : ''}
-    <p class="nf-meta"><time datetime="${a.published_at || a.updated_at}">${when(a.published_at || a.updated_at)}</time></p>${researchLinks(a)}</div></article>`;
+    <p class="nf-meta">${clockHtml(a, { absolute: when })}</p>${researchLinks(a)}</div></article>`;
 }
 
 /** Live-wire list: compact chronological rows with day separators. Returns '' when there is nothing to show. */
@@ -243,7 +244,7 @@ export function hub(root, ctx) {
     const stories = all.filter(inDesk);
     const wire = wireAll.filter(inDesk);
     const fallbackWire = !wire.length && ['all', 'atp', 'wta'].includes(desk) ? resultRows(today?.latest_results, tourOf).filter((w) => desk === 'all' || w.tour === desk) : [];
-    const latestAt = [stories[0]?.published_at, wire[0]?.detected_at].filter(Boolean).sort().at(-1);
+    const latestAt = [latestFresh(stories), wire[0]?.detected_at].filter(Boolean).sort().at(-1);
     const upd = root.querySelector('[data-updated]');
     if (upd && latestAt) upd.textContent = `· Updated ${ago(latestAt)}`;
     const { lead, majors, rest } = hierarchy(stories);
@@ -493,10 +494,10 @@ export function article(root, ctx) {
         <div class="nwm-grid">
           <article class="nwm-art nw-story">
             <header class="nwm-head">
-              <div class="nwm-meta"><span class="nwm-sport">TENNIS</span>${a.story_class && CLASS_LABEL[a.story_class] ? html`<span class="nwm-cat nf-cls-${a.story_class}">${CLASS_LABEL[a.story_class]}</span>` : ''}${deskL ? html`<span class="nwm-cat">${deskL}</span>` : ''}<span class="nwm-cat">${KIND[a.story_type] || 'Story'}</span>${t?.name ? html`<span class="nwm-cat">${tLabel(t)}</span>` : ''}${a.evidence?.match?.round_label ? html`<span class="nwm-cat">${ROUND_TITLE(a.evidence.match.round_label)}</span>` : ''}<time class="nwm-date" datetime="${pub}">${when(pub)}</time></div>
+              <div class="nwm-meta"><span class="nwm-sport">TENNIS</span>${a.story_class && CLASS_LABEL[a.story_class] ? html`<span class="nwm-cat nf-cls-${a.story_class}">${CLASS_LABEL[a.story_class]}</span>` : ''}${deskL ? html`<span class="nwm-cat">${deskL}</span>` : ''}<span class="nwm-cat">${KIND[a.story_type] || 'Story'}</span>${t?.name ? html`<span class="nwm-cat">${tLabel(t)}</span>` : ''}${a.evidence?.match?.round_label ? html`<span class="nwm-cat">${ROUND_TITLE(a.evidence.match.round_label)}</span>` : ''}${clockHtml(a, { absolute: when })}</div>
               <h1>${a.headline}</h1>
               ${a.dek ? html`<p class="nwm-dek">${a.dek}</p>` : ''}
-              <p class="nwm-by">By <a href="/news">PropBetEdge Tennis Desk</a> · <time datetime="${pub}">${when(pub)}</time>${mins ? html` · ${mins} min read` : ''}${a.evidence?.frozen_at ? html` · Data as of <time datetime="${a.evidence.frozen_at}">${when(a.evidence.frozen_at)}</time>` : ''}${revised ? html` · Updated <time datetime="${revised}">${when(revised)}</time>` : ''}${a.status !== 'published' ? html` · <b class="nw-held">HELD DRAFT (not public): ${a.hold_reason || ''}</b>` : ''}</p>
+              <p class="nwm-by">By <a href="/news">PropBetEdge Tennis Desk</a> · ${a.freshness?.is_backfill ? html`Published <time datetime="${pub}">${when(pub)}</time> (added after the event)` : html`<time datetime="${pub}">${when(pub)}</time>`}${mins ? html` · ${mins} min read` : ''}${a.evidence?.frozen_at ? html` · Data as of <time datetime="${a.evidence.frozen_at}">${when(a.evidence.frozen_at)}</time>` : ''}${revised ? html` · Updated <time datetime="${revised}">${when(revised)}</time>` : ''}${a.status !== 'published' ? html` · <b class="nw-held">HELD DRAFT (not public): ${a.hold_reason || ''}</b>` : ''}</p>
               ${shareBar({ url, text: `${a.headline} — PropBetEdge Tennis` })}
             </header>
             ${storyChips(a, people, t)}
