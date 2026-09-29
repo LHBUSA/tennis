@@ -44,7 +44,7 @@ export function matchDnaSummary(md, slug) {
   return html`<section class="mod mdna-summary"><header class="mod-h"><h2><a href="/players/${slug}/dna">Match DNA</a> <span class="tag">summary</span></h2><a class="mod-k dna-cta" href="/players/${slug}/dna">Open full Tennis DNA →</a></header>
     <div class="surfrec mdna">${cell('match_win_rate', 'Match win')}${cell('set_win_rate', 'Set win')}${cell('game_win_rate', 'Games won')}${cell('deciding_set_win_rate', 'Deciding sets')}${cell('tiebreak_win_rate', 'Tiebreaks')}${cell('comeback_win_rate', 'Comebacks')}${cell('top10_win_rate', 'vs top 10')}${cell('top25_win_rate', 'vs top 25')}${cell('top50_win_rate', 'vs top 50')}</div>
     <p class="note">${md.sample.matches} singles matches (${fmtDate(md.sample.first_day)} – ${fmtDate(md.sample.last_day)}) from the canonical match record, as of ${fmtDate(md.as_of)}. Rank-based records use the list in force when each tournament began.</p>
-    <p class="dna-more"><a class="btn line" href="/players/${slug}/dna">Summary · Open full Match DNA, rating history, splits and surface intelligence →</a></p></section>`;
+    <p class="dna-more"><a class="btn green" href="/players/${slug}/dna">Summary · Open full Match DNA, rating history, splits and surface intelligence →</a></p></section>`;
 }
 
 const rankTxt = (r) => (!r ? '—' : r.rank ? `No. ${r.rank}` : `>${r.outside}`);
