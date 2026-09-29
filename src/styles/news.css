@@ -193,3 +193,5 @@
 .nwm .nw-body .nwv-credit a { color: var(--muted); }
 .nf-row-more { display: contents; }
 .nf-row-more[hidden] { display: none; }
+/* rows beyond the visible limit stay hidden until "Show more" (a display rule on the row must never defeat [hidden]) */
+.nf-wire-list [hidden], .nf-latest [hidden], [class^='nf-'][hidden], [class*=' nf-'][hidden] { display: none !important; }

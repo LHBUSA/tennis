@@ -74,6 +74,7 @@ for (const w of WIDTHS) {
       return {
         sw: document.documentElement.scrollWidth, iw: innerWidth, broken, stretched, blankHero, svgMock, cardRun,
         leadPx: lead ? px(lead, 'fontSize') : 0, majorPx: major ? px(major, 'fontSize') : 0, leadBox, majBox,
+        wireVisible: [...document.querySelectorAll('.nf-wire-list > .nf-w')].filter((e) => e.offsetParent !== null).length,
         wire: wireH.length, wireMinPx: wireH.length ? Math.min(...wireH.map((e) => px(e, 'fontSize'))) : 0,
         measure, artW: art ? art.getBoundingClientRect().width : 0, details: !!document.querySelector('details.nf-method > summary'),
         share, links, url: location.href.split('?')[0], isArticle,
@@ -84,6 +85,8 @@ for (const w of WIDTHS) {
     }, path.split('/').length > 2 && !DESKS.includes(path));
     const bad = [];
     if (r.sw > r.iw) bad.push(`overflow ${r.sw}>${r.iw}`);
+    // the wire shows a bounded window (14 desktop / 8 phone) until 'Show more': a CSS rule must never un-hide the rest
+    if (r.wireVisible > (w < 768 ? 8 : 14)) bad.push(`wire shows ${r.wireVisible} rows before 'Show more' (max ${w < 768 ? 8 : 14})`);
     if (r.broken.length) bad.push(`broken images ${r.broken.slice(0, 2).join(' ')}`);
     if (r.stretched.length) bad.push(`stretched low-res image ${r.stretched.slice(0, 2).join(' ')}`);
     if (r.blankHero) bad.push(`${r.blankHero} giant blank hero`);

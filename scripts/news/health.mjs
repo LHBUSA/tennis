@@ -53,15 +53,18 @@ function latency(h) {
     from ev join tennis_matches m on m.match_id = ev.match_id join tennis_tournament_editions x on x.edition_id = m.edition_id where ev.state <> 'duplicate')
     select event_id, extract(epoch from detected_at - coalesce(final_seen, source_updated_at)) / 60 src_to_detect_min, final_seen is not null from_status_change,
       (coalesce(final_seen, source_updated_at) < detected_at - interval '6 hours' or match_day < (detected_at::date - 2)) catch_up,
-      extract(epoch from coalesce(published_at, first_pub) - detected_at) / 60 detect_to_publish_min, (first_pub < '2026-09-27') launch_batch
+      extract(epoch from coalesce(published_at, first_pub) - detected_at) / 60 detect_to_publish_min, (first_pub < '2026-09-27') launch_batch,
+      -- V3 reclassification backfill (2026-09-29 16:50Z): events detected BEFORE the V3 cutover and published by it; their
+      -- detected_at is days old, so they are not a measure of the live pipeline
+      (detected_at < timestamptz '2026-09-29T16:50:00Z' and coalesce(published_at, first_pub) >= timestamptz '2026-09-29T16:50:00Z') v3_backfill
     from lat`);
   const q = (xs, p) => { const s = xs.filter((x) => Number.isFinite(x)).sort((a, b) => a - b); return s.length ? Math.round(s[Math.min(s.length - 1, Math.floor(p * s.length))] * 10) / 10 : null; };
   const live = rows.filter((r) => !r.catch_up && r.src_to_detect_min != null).map((r) => Number(r.src_to_detect_min));
-  const pub = rows.filter((r) => r.detect_to_publish_min != null && !r.launch_batch).map((r) => Number(r.detect_to_publish_min));
+  const pub = rows.filter((r) => r.detect_to_publish_min != null && !r.launch_batch && !r.v3_backfill).map((r) => Number(r.detect_to_publish_min));
   return {
     source_to_detect_min: { live_events: live.length, p50: q(live, 0.5), p95: q(live, 0.95), catch_up_events: rows.filter((r) => r.catch_up).length, without_any_source_clock: rows.filter((r) => r.src_to_detect_min == null).length, basis: 'first observation of the terminal status (fallback source_updated_at)' },
     detect_to_wire_min: { p50: 0, p95: 0, basis: 'the live wire is a read projection of detected events: visible on detection (API cache <= 2 min)' },
-    detect_to_publish_min: { stories: pub.length, p50: q(pub, 0.5), p95: q(pub, 0.95), launch_batch_excluded: rows.filter((r) => r.launch_batch).length }
+    detect_to_publish_min: { stories: pub.length, p50: q(pub, 0.5), p95: q(pub, 0.95), launch_batch_excluded: rows.filter((r) => r.launch_batch).length, v3_backfill_excluded: rows.filter((r) => r.v3_backfill).length, note: 'live pipeline only; stories == 0 means no event has been detected and published since the V3 cutover yet' }
   };
 }
 

@@ -147,7 +147,7 @@ export function wireList(items, { limit = 14, more = true } = {}) {
   if (!rows.length) return '';
   let lastDay = null;
   const li = (r, i) => {
-    const sep = r.day && r.day !== lastDay ? ((lastDay = r.day), html`<li class="nf-w-day" aria-hidden="true">${r.day}</li>`) : '';
+    const sep = r.day && r.day !== lastDay ? ((lastDay = r.day), html`<li class="nf-w-day${i >= limit ? ' nf-w-more' : ''}" aria-hidden="true"${i >= limit ? raw(' hidden') : ''}>${r.day}</li>`) : '';
     return html`${sep}<li class="nf-w${i >= limit ? ' nf-w-more' : ''}"${i >= limit ? raw(' hidden') : ''}><time class="nf-w-t" datetime="${r.iso || ''}">${r.time}</time>
       <div class="nf-w-b"><p class="nf-w-ev">${r.label}${r.kind ? html`<span> · ${r.kind}</span>` : ''}${r.story ? html`<span class="nf-w-story"> · Story</span>` : ''}</p>
       <p class="nf-w-h">${r.links[0]?.rel === 'article' ? html`<a href="${r.links[0].href}">${r.headline}</a>` : r.headline}</p>
