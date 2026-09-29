@@ -24,17 +24,17 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
-## Current production (verified live 2026-09-28 17:10 UTC: wrangler deployments status per Worker, Vercel production list)
+## Current production (verified live 2026-09-29 ~13:45 UTC after the ATP/WTA parity release; wrangler versions deploy per Worker, Vercel production list)
 
 | Component | Current | Rollback target |
 |---|---|---|
-| Vercel `tennis` (tennis.propbetedge.ai) | app code a30a570 (`dpl_4UZiabQJvbCoV5vEZuvsSohyDiEm`); later docs/evidence-only commits on main rebuild the same app | `dpl_ATqPbq3cci5PHH2oLUpjzDGjZgt9` (18e5537, Phase 6), then `dpl_HSTZnpH2UevGsqjusmxUTGzfgT7Z` (f70b1c4, pre-Phase-6) |
-| tennis-web | bcb45c39-33f4-42f6-8004-3acf7a03ccff (since 2026-09-27 01:10; this table said 8d6db251 until 2026-09-28 — corrected from the live deployment) | 2b611570-99c2-4a91-8a37-4e315e0290f3 |
-| tennis-api | ceba8a94-329f-4261-b381-4867a112031a (0.6.0: /v1/matchups, /v1/matchups/:id, /v1/players-to-watch, match_dna.profile, stable paging) | bdf4fa97-dd15-421a-983f-3b9b109ff9ac (0.5.0) |
-| tennis-ingest | 18cc4f6a-f194-401a-9405-090851473a09 (c0a8d15: crossSource candidate lookup edition-first — Seoul 57014 fix; read-only `candidate_probe` lane; count-based retention unchanged) | 4a84fdb1-a7da-4a1c-a709-7a8c697732aa (old lookup; same retention), then 13dafdd3 |
-| tennis-live | 26ac259c-3592-4f56-843e-5551796ee719 | forward fix only (earlier versions predate the 2026-09-28 admin-token rotation) |
-| tennis-news | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 (PUBLISH; packet pinned to DNA v1) | 9d9976ae-e487-4dda-8833-f4161feb1b51 |
-| Supabase tkmln | migration 20260928000200 applied + unique index tennis_matches_natural_key (valid) | forward fix only (drop index concurrently would restore pre-6 behaviour) |
+| Vercel `tennis` (tennis.propbetedge.ai) | main (parity release 6207869 = `dpl_6msrsN5zCzWoGew26robuC2GBr24`; later commits are Worker/QA/docs only and rebuild the same app) | `dpl_HD2KwkKBSQd2AMfmvAns6F8Mypqt` (0af2041, pre-parity) |
+| tennis-web | 4dc6a144-b0a1-48a8-ad27-61bc3c54a009 (men's rank in heads/OG with secondary-source label; ATP players in sitemap) | bcb45c39-33f4-42f6-8004-3acf7a03ccff |
+| tennis-api | 16a60626-dd8a-4b51-8041-f650a4ec1c39 (0.7.0: PBEcast match_dna + technical_dna, ATP tour in today/schedule/tournaments, profile 400 fix, v2 leaders in-database, /v1/live ESPN freshness + unlinked-row exclusion) | 70af8316 -> d87124a5 -> ceba8a94-329f-4261-b381-4867a112031a (0.6.0, pre-parity) |
+| tennis-ingest | f8feb7a8-f5e2-4b17-a1c6-98c90f68dbea (0.4.0: espn_live discovery step + admin lane, ESPN lanes skip live-owned editions, writer never merges evented rows) | 18cc4f6a-f194-401a-9405-090851473a09 (pre-parity), then 4a84fdb1 |
+| tennis-live | 608f1321-8344-4cea-ad0a-59c3798e0ea4 (0.3.0: tour-aware router wta / espn, round budget) | fdb6b9db, f1bbc38f; pre-parity 26ac259c-3592-4f56-843e-5551796ee719 (forward fix preferred: its bundled writer predates the self-heal) |
+| tennis-news | f3684a0a-97b0-41b1-ad02-2c5491fc9494 (tour-aware desks, ATP ranking context + provenance, unsupported_official_claim gate, tour-fair claim) | 786c7d6e-45ee-4ad2-a08d-9c03ad4c6585 |
+| Supabase tkmln | unchanged by the parity release (no migration) | — |
 
 All rollback targets above were confirmed to exist (`wrangler versions view`, Vercel `isRollbackCandidate`) on 2026-09-28.
 
@@ -109,6 +109,12 @@ Rows below are the historical deploy log; the table above is authoritative for w
 | 2026-09-28 | tennis-ingest | 4a84fdb1 (uploaded, version dry run: policy count-based, 0 eligible) -> 100% | 13dafdd3 | retention correction (owner-approved, retention-only); 289 tests; production dry run + proof plan 7/7 |
 
 | 2026-09-28 | tennis-ingest | 18cc4f6a (dark probe: 7 active editions + 2 veteran histories, candidate sets identical to the old query) -> 100% | 4a84fdb1 | Seoul timeout fix; 4 ticks 0 errors; holds / external ids / natural keys unchanged |
+| 2026-09-29 | tennis-api | d87124a5 (preview canary: ATP editions in today/schedule/tournaments, Djokovic/Zverev/Sabalenka profiles 200, PBEcast match_dna 12/12 on an ATP match) -> 70af8316 (leaders in-database, identical output, 44 s -> 3.7 s cold) -> 16a60626 (live: unlinked orphans excluded) | ceba8a94 | ATP/WTA parity |
+| 2026-09-29 | tennis-ingest | dec6494c (candidate: espn_live dry run from CF egress resolved China Open + Japan Open editions) -> f8feb7a8 | 18cc4f6a | ATP live discovery; ticks complete 15-60 s, all steps ok |
+| 2026-09-29 | tennis-live | f1bbc38f -> fdb6b9db -> 608f1321 | 26ac259c | tour-aware router; f1bbc38f failed one WTA edition per round (self-heal DELETE on append-only events) for ~5 min -> fixed in 4c821d3 |
+| 2026-09-29 | tennis-news | f3684a0a (dry run: ATP candidates detected with atp_singles context) | 786c7d6e | tour-aware newsroom |
+| 2026-09-29 | tennis-web | 4dc6a144 (preview heads: men's rank with secondary-source label) | bcb45c39 | one product |
+| 2026-09-29 | Vercel | dpl_6msrsN5z (6207869) | dpl_HD2KwkKB (0af2041) | one product; one-product QA PASS, browser gate 147/147 |
 
 ## Incidents
 

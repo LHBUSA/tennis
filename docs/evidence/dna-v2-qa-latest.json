@@ -1,11 +1,11 @@
 {
-  "checked_at": "2026-09-28T12:51:33.531Z",
-  "result": "PASS",
+  "checked_at": "2026-09-29T13:36:49.187Z",
+  "result": "FAIL",
   "checks": [
     {
       "name": "no duplicate canonical singles matches (edition + event + stage + pair)",
-      "result": "PASS",
-      "duplicate_groups": 0
+      "result": "FAIL",
+      "duplicate_groups": 17
     },
     {
       "name": "v2 snapshots: tour always the player's own (ATP/WTA never mixed)",
@@ -15,8 +15,8 @@
     {
       "name": "v1 technical snapshots preserved",
       "result": "PASS",
-      "v1_rows": 24143,
-      "latest": "2026-09-28"
+      "v1_rows": 27427,
+      "latest": "2026-09-29"
     },
     {
       "name": "carlos-alcaraz: meaningful match history",
@@ -70,6 +70,28 @@
       "bad": []
     },
     {
+      "name": "carlos-alcaraz: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "carlos-alcaraz: PBEcast Match DNA v2 (cf419503-30c0-56f4-aa98-bf8b68af05a5)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "building",
+        "building"
+      ]
+    },
+    {
+      "name": "carlos-alcaraz: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
       "name": "jannik-sinner: meaningful match history",
       "result": "PASS",
       "matches": 425,
@@ -119,6 +141,28 @@
       "sum": 244,
       "overall": 425,
       "bad": []
+    },
+    {
+      "name": "jannik-sinner: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "jannik-sinner: PBEcast Match DNA v2 (3b575ebe-cacc-5642-af27-3c143142052e)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "building",
+        "building"
+      ]
+    },
+    {
+      "name": "jannik-sinner: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
     },
     {
       "name": "novak-djokovic: meaningful match history",
@@ -172,6 +216,28 @@
       "bad": []
     },
     {
+      "name": "novak-djokovic: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "novak-djokovic: PBEcast Match DNA v2 (85d03bc5-83a9-55b3-aec8-e29c59f5fe64)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "building",
+        "building"
+      ]
+    },
+    {
+      "name": "novak-djokovic: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
       "name": "alexander-zverev: meaningful match history",
       "result": "PASS",
       "matches": 731,
@@ -223,6 +289,172 @@
       "bad": []
     },
     {
+      "name": "alexander-zverev: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "alexander-zverev: PBEcast Match DNA v2 (beb556ad-c439-57bb-8805-c9b177391bd0)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "building",
+        "building"
+      ]
+    },
+    {
+      "name": "alexander-zverev: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
+      "name": "iga-swiatek: meaningful match history",
+      "result": "PASS",
+      "matches": 530,
+      "span": "2016-10-30..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "iga-swiatek: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "iga-swiatek: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "iga-swiatek: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "iga-swiatek: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2798,
+      "rating_status": "published"
+    },
+    {
+      "name": "iga-swiatek: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "iga-swiatek: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:302",
+        "clay:184",
+        "grass:41"
+      ],
+      "sum": 527,
+      "overall": 530,
+      "bad": []
+    },
+    {
+      "name": "iga-swiatek: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "iga-swiatek: PBEcast Match DNA v2 (95f54035-2649-5566-8331-36042655ed88)",
+      "result": "PASS",
+      "tours": [
+        "WTA",
+        "WTA"
+      ],
+      "technical": [
+        "published",
+        "published"
+      ]
+    },
+    {
+      "name": "iga-swiatek: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
+      "name": "aryna-sabalenka: meaningful match history",
+      "result": "PASS",
+      "matches": 736,
+      "span": "2012-11-11..2026-09-13",
+      "sources": [
+        "espn",
+        "wta",
+        "wta_history"
+      ]
+    },
+    {
+      "name": "aryna-sabalenka: opponent rank never from a later list",
+      "result": "PASS",
+      "checked": 40,
+      "leaks": 0
+    },
+    {
+      "name": "aryna-sabalenka: no technical metric in Match DNA",
+      "result": "PASS",
+      "metrics": 19
+    },
+    {
+      "name": "aryna-sabalenka: confidence/percentile coherent",
+      "result": "PASS",
+      "incoherent": []
+    },
+    {
+      "name": "aryna-sabalenka: tour",
+      "result": "PASS",
+      "tour": "WTA",
+      "rating": 2870,
+      "rating_status": "published"
+    },
+    {
+      "name": "aryna-sabalenka: no duplicate match in history",
+      "result": "PASS"
+    },
+    {
+      "name": "aryna-sabalenka: surface Match DNA coherent",
+      "result": "PASS",
+      "surfaces": [
+        "hard:499",
+        "clay:160",
+        "grass:69"
+      ],
+      "sum": 728,
+      "overall": 736,
+      "bad": []
+    },
+    {
+      "name": "aryna-sabalenka: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "aryna-sabalenka: PBEcast Match DNA v2 (90f925fd-2d7a-524c-b026-3db698d91661)",
+      "result": "PASS",
+      "tours": [
+        "WTA",
+        "WTA"
+      ],
+      "technical": [
+        "published",
+        "published"
+      ]
+    },
+    {
+      "name": "aryna-sabalenka: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
       "name": "gustavo-heide: meaningful match history",
       "result": "PASS",
       "matches": 33,
@@ -269,6 +501,28 @@
       "sum": 12,
       "overall": 33,
       "bad": []
+    },
+    {
+      "name": "gustavo-heide: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "gustavo-heide: PBEcast Match DNA v2 (f8c9c000-1027-5358-8efa-218e3744a393)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "building",
+        "building"
+      ]
+    },
+    {
+      "name": "gustavo-heide: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
     },
     {
       "name": "roger-federer: meaningful match history",
@@ -321,6 +575,28 @@
       "bad": []
     },
     {
+      "name": "roger-federer: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "roger-federer: PBEcast Match DNA v2 (0588c641-f02f-562b-83c8-c28503634256)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "unavailable",
+        "building"
+      ]
+    },
+    {
+      "name": "roger-federer: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
       "name": "david-ferrer: meaningful match history",
       "result": "PASS",
       "matches": 749,
@@ -370,6 +646,28 @@
       "bad": []
     },
     {
+      "name": "david-ferrer: profile loads",
+      "result": "PASS",
+      "error": null,
+      "opponents": 8
+    },
+    {
+      "name": "david-ferrer: PBEcast Match DNA v2 (fd75b4bf-7935-572d-8b61-caf243db3e50)",
+      "result": "PASS",
+      "tours": [
+        "ATP",
+        "ATP"
+      ],
+      "technical": [
+        "unavailable",
+        "building"
+      ]
+    },
+    {
+      "name": "david-ferrer: PBEcast rating gate (no value when not validated)",
+      "result": "PASS"
+    },
+    {
       "name": "UI 1440 /players/carlos-alcaraz",
       "result": "PASS",
       "fails": []
@@ -410,6 +708,26 @@
       "fails": []
     },
     {
+      "name": "UI 1440 /players/iga-swiatek",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/iga-swiatek/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/aryna-sabalenka",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /players/aryna-sabalenka/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
       "name": "UI 1440 /players/gustavo-heide",
       "result": "PASS",
       "fails": []
@@ -440,12 +758,25 @@
       "fails": []
     },
     {
+      "name": "UI 1440 /dna",
+      "result": "FAIL",
+      "fails": [
+        "match_dna_missing",
+        "surface_table_missing"
+      ]
+    },
+    {
       "name": "UI 1440 /dna?metric=match_win_rate&tour=atp",
       "result": "PASS",
       "fails": []
     },
     {
       "name": "UI 1440 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 1440 /dna?metric=match_win_rate&tour=wta",
       "result": "PASS",
       "fails": []
     },
@@ -490,6 +821,26 @@
       "fails": []
     },
     {
+      "name": "UI 390 /players/iga-swiatek",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/iga-swiatek/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/aryna-sabalenka",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /players/aryna-sabalenka/dna",
+      "result": "PASS",
+      "fails": []
+    },
+    {
       "name": "UI 390 /players/gustavo-heide",
       "result": "PASS",
       "fails": []
@@ -520,12 +871,25 @@
       "fails": []
     },
     {
+      "name": "UI 390 /dna",
+      "result": "FAIL",
+      "fails": [
+        "match_dna_missing",
+        "surface_table_missing"
+      ]
+    },
+    {
       "name": "UI 390 /dna?metric=match_win_rate&tour=atp",
       "result": "PASS",
       "fails": []
     },
     {
       "name": "UI 390 /dna?metric=pbe_rating&tour=atp",
+      "result": "PASS",
+      "fails": []
+    },
+    {
+      "name": "UI 390 /dna?metric=match_win_rate&tour=wta",
       "result": "PASS",
       "fails": []
     }
