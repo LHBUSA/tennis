@@ -4,7 +4,7 @@
 
 import { parseScore } from '../../shared/canonical/scoring.js';
 
-export const GATES_VERSION = 'tennis-gates/3.0.0';
+export const GATES_VERSION = 'tennis-gates/4.0.0';
 
 const SKIP_KEY = /(^|_)(id|ids|url|slug|hash|key|token|image|square|wide|thumb|portrait|jpg|photo|source_page|license|capture|event_id|built_at|detector|version)$/i;
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -155,6 +155,9 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   // 9. additive value (V3): prose must add to the visuals and to itself, never restate them
   for (const f of additiveValueFailures(article, plan)) fail(f.gate, f.detail);
 
+  // 10. V4 tennis-intelligence grounding: every serve/return/development claim needs the family that proves it
+  for (const f of intelligenceFailures(text, packet)) fail(f.gate, f.detail);
+
   return { version: GATES_VERSION, pass: failures.length === 0, failures, checked_at: now, words, numbers_checked: numberTokens(text).length };
 }
 
@@ -202,5 +205,48 @@ export function additiveValueFailures(article, plan = null) {
       if (hit / nums.length >= 0.8) { out.push({ gate: 'chart_narration', detail: `${x.id} reads out ${c.id} (${hit}/${nums.length} figures)` }); break; }
     }
   }
+  return out;
+}
+
+// ---- V4 intelligence grounding (tennis-gates/4.0.0) --------------------------------------------------------------
+const WORDNUM = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12 };
+const sidesOf = (packet) => (packet.stats ? [packet.stats.A, packet.stats.B] : []);
+/**
+ * unsupported_stat_family: serve/return vocabulary without stored match statistics (or the specific count).
+ * unsupported_momentum:    "momentum" (never provable) / turning-point language without an observed game sequence.
+ * sequence_claim:        "first/opening/early break" needs a first break from a complete observed sequence.
+ * run_claim:               "N straight/consecutive games" must equal the observed longest run (complete sequence only).
+ * clean_hold_claim:        "never dropped serve", "did not face a break point", "saved every break point" must be true
+ *                          for a player in the statistics.
+ */
+export function intelligenceFailures(text, packet) {
+  const out = [];
+  const f = (gate, detail) => out.push({ gate, detail });
+  const hasStats = !!packet.stats;
+  const dev = packet.match_development || null;
+  const stat = text.match(/\b(aces?|double[- ]faults?|first[- ]serve|second[- ]serve|break[- ]points?|service games?|return games?|return points|service points)\b/i);
+  if (stat && !hasStats) f('unsupported_stat_family', stat[0]);
+  if (/\bunforced errors?\b/i.test(text) && !sidesOf(packet).some((s) => Number.isFinite(s?.unforced_errors))) f('unsupported_stat_family', 'unforced errors');
+  if (/\b\d+\s+winners\b/i.test(text) && !sidesOf(packet).some((s) => Number.isFinite(s?.winners))) f('unsupported_stat_family', 'winners count');
+  const broke = text.match(/\b(broke|broken|breaks? of serve|break of serve|broke back)\b/i);
+  if (broke && !hasStats && !(dev && dev.breaks?.length)) f('unsupported_stat_family', broke[0]);
+  // order claims need the whole sequence: stats totals and partial live coverage cannot say which break came first
+  const first = text.match(/\b(first break|opening break|broke first|early break)\b/i);
+  if (first && !dev?.first_break) f('sequence_claim', first[0]);
+  const mo = text.match(/\bmomentum\b/i);
+  if (mo) f('unsupported_momentum', mo[0]);
+  const tp = text.match(/\b(turning point|turned the match|swung the match|swing of the match|shifted the match)\b/i);
+  if (tp && !(dev && (dev.breaks?.length || dev.longest_run))) f('unsupported_momentum', tp[0]);
+  for (const m of text.matchAll(/\b(\d+|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve)\s+(straight|consecutive|successive|unanswered)\s+games\b/gi)) {
+    const n = /^\d+$/.test(m[1]) ? Number(m[1]) : WORDNUM[m[1].toLowerCase()];
+    if (!(dev?.complete && dev.longest_run && dev.longest_run.games === n)) f('run_claim', m[0]);
+  }
+  const S = sidesOf(packet);
+  const never = text.match(/\b(never|without)\s+(being\s+)?(dropp(ed|ing)\s+(her|his|their)?\s*serve|broken|losing\s+(her|his|their)?\s*serve)|\bheld\s+(every|all)\s+(of\s+)?(her|his|their)\s+service\s+games\b/i);
+  if (never && !S.some((s) => s?.service_games_held?.d && s.service_games_held.n === s.service_games_held.d)) f('clean_hold_claim', never[0]);
+  const noBp = text.match(/\b(did not|didn't|never)\s+face\s+a\s+break\s+point\b/i);
+  if (noBp && !S.some((s) => s?.break_points_faced === 0)) f('clean_hold_claim', noBp[0]);
+  const allSaved = text.match(/\bsaved\s+(every|all)\s+(of\s+)?(the\s+|her\s+|his\s+|their\s+)?(\d+\s+)?break\s+points?\b/i);
+  if (allSaved && !S.some((s) => s?.break_points_saved?.d && s.break_points_saved.n === s.break_points_saved.d)) f('clean_hold_claim', allSaved[0]);
   return out;
 }

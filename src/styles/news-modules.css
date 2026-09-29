@@ -1,0 +1,33 @@
+/* Tennis newsroom V4 data modules (src/ui/news-modules.js). Mobile-first; existing tokens only. */
+.nwd { margin: 18px 0; }
+.nwd-t { width: 100%; border-collapse: collapse; font: 500 14px/1.35 var(--f-ui); color: var(--ink); }
+.nwd-t caption { text-align: left; color: var(--gold); font: 800 11.5px/1 var(--f-display); letter-spacing: 0.2em; text-transform: uppercase; padding-bottom: 8px; }
+.nwd-t caption small { letter-spacing: 0.04em; text-transform: none; color: var(--muted); font: 500 12px var(--f-ui); }
+.nwd-t th, .nwd-t td { padding: 7px 6px; border-top: 1px solid var(--rule); text-align: right; font-variant-numeric: tabular-nums; }
+.nwd-t thead th { border-top: 0; color: var(--muted); font-weight: 600; font-size: 12.5px; }
+.nwd-t th[scope="row"], .nwd-t thead th:first-child { text-align: left; font-weight: 600; }
+.nwd-t td b { font: 700 14px var(--f-data); }
+.nwd-t td small { color: var(--faint); font: 500 11.5px var(--f-data); }
+.nwd-t td.lead b { color: var(--win); }
+.nwd-src { margin-top: 6px; color: var(--faint); font-size: 12px; }
+.nwd-note { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; }
+.nwd-tiles { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.nwd-tiles li { border: 1px solid var(--rule); border-radius: var(--r); padding: 10px; background: var(--white); min-width: 0; }
+.nwd-tl { display: block; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
+.nwd-tv { display: flex; gap: 6px; align-items: baseline; margin-top: 4px; font: 700 20px var(--f-data); }
+.nwd-tv b:first-child { color: var(--win); }
+.nwd-tv i { color: var(--faint); font-style: normal; font-size: 14px; }
+.nwd-breaks { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.nwd-breaks li { border-radius: 999px; padding: 4px 10px; font-size: 13px; border: 1px solid var(--rule); }
+.nwd-breaks li.w { border-color: var(--win); }
+.nwd-breaks li.l { border-color: var(--loss); }
+.nwd-at { color: var(--muted); font: 600 12px var(--f-data); }
+.nwd-pcs { display: grid; gap: 12px; margin-top: 10px; }
+.nwd-pc h3 { margin: 0 0 6px; font: 700 17px var(--f-display); }
+.nwd-pc dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; font-size: 14px; }
+.nwd-pc dt { color: var(--muted); }
+.nwd-pc dd { margin: 0; min-width: 0; }
+@media (min-width: 640px) {
+  .nwd-tiles { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
+  .nwd-pcs { grid-template-columns: 1fr 1fr; }
+}

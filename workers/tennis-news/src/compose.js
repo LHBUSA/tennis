@@ -7,7 +7,7 @@
 
 import { deskFor, provenanceOf, LIST_LABEL } from './tour.js';
 
-export const COMPOSE_VERSION = 'tennis-compose/3.0.0';
+export const COMPOSE_VERSION = 'tennis-compose/4.0.0';
 const RANKC = { brief: 1, full: 2, deep: 3 };
 const atLeastC = (c, min) => (RANKC[c] || 2) >= RANKC[min];
 
@@ -91,7 +91,32 @@ function composeMatch(packet, storyClass = 'full') {
       paras.push(`The clearest separation came on ${g.label}: ${wS} won ${g.a}% of them and ${lS} ${g.b}%${g.a >= g.b ? '' : ', the one area where the loser held the edge'}.`);
     }
     if (sw.break_points_converted?.d && sl.break_points_converted?.d) paras.push(`The break points decided more than the totals: ${wS} converted ${sw.break_points_converted.n} of ${sw.break_points_converted.d}, ${lS} ${sl.break_points_converted.n} of ${sl.break_points_converted.d}.`);
+    // V4 serve story in games: holds are what a set is built on (only where the source counts service games)
+    if (sw.service_games_held?.d && sl.service_games_held?.d) {
+      const cleaner = sw.service_games_held.pct >= sl.service_games_held.pct;
+      paras.push(`Across the match ${wS} held ${sw.service_games_held.n} of ${sw.service_games_held.d} service games and ${lS} ${sl.service_games_held.n} of ${sl.service_games_held.d}${cleaner ? '' : `, so the result came despite ${lS} holding a larger share`}.`);
+    }
     if (paras.length) sections.push({ id: 'match_data', heading: 'The match in numbers', paragraphs: storyClass === 'brief' ? paras.slice(0, 1) : paras });
+  }
+
+  // HOW THE MATCH DEVELOPED (V4) — only from OBSERVED games (point events or live score snapshots), never from the final score
+  const dev = packet.match_development;
+  if (atLeastC(storyClass, 'full') && dev && m.status !== 'walkover' && (dev.breaks.length || dev.longest_run)) {
+    const side = (x) => (x === W ? wS : lS);
+    const where = (b) => `set ${b.set}${Number.isFinite(b.game) ? `, game ${b.game}` : ''}`;
+    const devParas = [];
+    const basis = dev.source === 'point_by_point' ? 'the point-by-point data' : dev.complete ? 'the live score we observed game by game' : 'the part of the match we observed live';
+    if (dev.first_break) devParas.push(`In ${basis}, the first break of serve went to ${side(dev.first_break.by)} in ${where(dev.first_break)}.`);
+    // partial coverage: name the breaks we SAW, never call one the first (unobserved games may hold earlier breaks)
+    else if (dev.breaks.length) devParas.push(`In ${basis}, ${dev.breaks.slice(0, 3).map((b) => `${side(b.by)} broke in ${where(b)}`).join(', ')}.`);
+    if (dev.breaks_total) { const times = (n) => (n === 0 ? 'not at all' : n === 1 ? 'once' : n === 2 ? 'twice' : `${n} times`); devParas.push(`${wS} broke serve ${times(dev.breaks_total[W])} and ${lS} ${times(dev.breaks_total[L])}.`); }
+    if (dev.longest_run) devParas.push(`The longest run of the match was ${dev.longest_run.games} straight games to ${side(dev.longest_run.side)}${dev.longest_run.from_set === dev.longest_run.to_set ? ` in set ${dev.longest_run.from_set}` : `, from set ${dev.longest_run.from_set} into set ${dev.longest_run.to_set}`}.`);
+    const perSet = packet.stats_by_set;
+    if (perSet?.length >= 2) {
+      const widest = perSet.filter((r) => r.points_won.A != null && r.points_won.B != null).map((r) => ({ set: r.set, w: r.points_won[W], l: r.points_won[L], gap: Math.abs(r.points_won[W] - r.points_won[L]) })).sort((x, y) => y.gap - x.gap)[0];
+      if (widest && widest.gap > 0) devParas.push(`The widest points margin in a single set came in set ${widest.set}, where ${widest.w >= widest.l ? wS : lS} won ${Math.max(widest.w, widest.l)} points to ${Math.min(widest.w, widest.l)}.`);
+    }
+    if (devParas.length >= 2) sections.push({ id: 'match_development', heading: 'How the match turned', paragraphs: [devParas.join(' ')] });
   }
 
   // WHY IT MATTERED

@@ -8,8 +8,9 @@
 import { approvedMedia } from '../../shared/media.js';
 import { RANKING_LISTS, rankingProvenance, matchSource, tourOf, tourOfList } from './tour.js';
 import { MATCH_DEFINITIONS } from '../../shared/dna/match-dna.js';
+import { gamesFromPoints } from '../../shared/canonical/events.js';
 
-export const PACKET_VERSION = 'tennis-packet/3.0.0';
+export const PACKET_VERSION = 'tennis-packet/4.0.0';
 
 // Round codes come prefixed from the WTA feed ('M-S', 'Q-2') and unprefixed from the Slam/ESPN feeds ('S', 'Q', '2',
 // 'Q-2' for qualifying): an unprefixed 'Q' is a main-draw QUARTERFINAL, never a qualifying round.
@@ -54,15 +55,82 @@ export function statLines(sa, sb) {
       return_points_won: ratio(o.service_points - oServWon, o.service_points),
       break_points_saved: ratio(s.break_points_saved, s.break_points_faced),
       break_points_converted: bpConv ? { ...bpConv, pct: pct(bpConv.n, bpConv.d) } : null,
-      total_points_won: s.total_points_won ?? null
+      total_points_won: s.total_points_won ?? null,
+      // V4 serve/return story: games, not just points (only where the source counts service games)
+      service_games_held: Number.isFinite(s.service_games) && Number.isFinite(s.break_points_faced) && Number.isFinite(s.break_points_saved) ? ratio(s.service_games - (s.break_points_faced - s.break_points_saved), s.service_games) : null,
+      return_games_won: Number.isFinite(o.service_games) && Number.isFinite(o.break_points_faced) && Number.isFinite(o.break_points_saved) ? ratio(o.break_points_faced - o.break_points_saved, o.service_games) : null,
+      break_points_faced: Number.isFinite(s.break_points_faced) ? s.break_points_faced : null,
+      break_chances: Number.isFinite(o.break_points_faced) ? o.break_points_faced : null,
+      // richer feeds (Slam match centres) also count these; absent elsewhere, never estimated
+      winners: Number.isFinite(s.winners) ? s.winners : null,
+      unforced_errors: Number.isFinite(s.unforced_errors) ? s.unforced_errors : null,
+      net_points_won: Number.isFinite(s.net_points) && s.net_points > 0 && Number.isFinite(s.net_points_won) ? ratio(s.net_points_won, s.net_points) : null
     };
   };
   return { A: side(sa, sb), B: side(sb, sa) };
 }
 
+/**
+ * Per-set serve/return breakdown from the source's own per-set totals (both sides must carry the same sets).
+ * Breaks in a set = the opponent's break points faced minus saved in that set. null when not stored.
+ */
+export function perSetLines(sa, sb) {
+  const a = Array.isArray(sa?.per_set) ? sa.per_set : null;
+  const b = Array.isArray(sb?.per_set) ? sb.per_set : null;
+  if (!a?.length || !b?.length) return null;
+  const rows = [];
+  for (const x of a) {
+    const y = b.find((r) => r.set_no === x.set_no);
+    if (!y) return null;
+    const brk = (o) => (Number.isFinite(o.break_points_faced) && Number.isFinite(o.break_points_saved) ? o.break_points_faced - o.break_points_saved : null);
+    const served = (t) => (Number.isFinite(t.first_serve_points_won) && Number.isFinite(t.second_serve_points_won) ? ratio(t.first_serve_points_won + t.second_serve_points_won, t.service_points) : null);
+    rows.push({ set: x.set_no, points_won: { A: Number.isFinite(x.total_points_won) ? x.total_points_won : null, B: Number.isFinite(y.total_points_won) ? y.total_points_won : null }, breaks: { A: brk(y), B: brk(x) }, service_points_won: { A: served(x), B: served(y) } });
+  }
+  return rows.sort((p, q) => p.set - q.set);
+}
+
+/**
+ * MATCH DEVELOPMENT from OBSERVED events only — never reconstructed from a final score.
+ *   point_by_point: every game from point events (complete sequence);
+ *   observed_score: games seen game-by-game by the live score snapshots (complete only when every game was seen).
+ * Returns { source, complete, games_observed, breaks: [{ set, game, by, server }], breaks_by_set, longest_run, first_break } or null.
+ * longest_run is only derived from a complete sequence.
+ */
+export function developmentFrom(games, { source, totalGames }) {
+  if (!games?.length) return null;
+  const breaks = games.map((g, i) => ({ ...g, idx: i })).filter((g) => g.result === 'break' && g.winner && g.server).map((g) => ({ set: g.set, game: g.game ?? null, by: g.winner, server: g.server }));
+  const bySet = {};
+  for (const b of breaks) { bySet[b.set] ||= { set: b.set, A: 0, B: 0 }; bySet[b.set][b.by] += 1; }
+  const complete = Number.isFinite(totalGames) && games.length === totalGames;
+  let run = null;
+  if (complete) {
+    let cur = null;
+    for (const g of games) {
+      if (cur && cur.side === g.winner) { cur.games += 1; cur.to_set = g.set; } else { if (cur && (!run || cur.games > run.games)) run = cur; cur = { side: g.winner, games: 1, from_set: g.set, to_set: g.set }; }
+    }
+    if (cur && (!run || cur.games > run.games)) run = cur;
+    if (run && run.games < 3) run = null;
+  }
+  // totals and the FIRST break are only provable when the WHOLE match was observed when the sequence is complete (point-by-point is always complete)
+  const breaks_total = complete || source === 'point_by_point' ? { A: breaks.filter((x) => x.by === 'A').length, B: breaks.filter((x) => x.by === 'B').length } : null;
+  return { source, complete, games_observed: games.length, breaks, breaks_by_set: Object.values(bySet).sort((a, b) => a.set - b.set), breaks_total, longest_run: run, first_break: complete || source === 'point_by_point' ? breaks[0] || null : null };
+}
+
+async function matchDevelopment(store, m) {
+  const totalGames = (m.sets || []).reduce((t, x) => t + (x.match_tiebreak ? 1 : (x.A || 0) + (x.B || 0)), 0);
+  const pts = await store.select('tennis_match_events', `select=event_sequence,set_number,game_number,server_side,winner_side,state&match_id=eq.${m.id}&quality=eq.point_event&order=event_sequence.asc&limit=2000`);
+  if (pts.length) {
+    const games = gamesFromPoints(pts.filter((e) => e.state?.sets)).map((g, i) => ({ ...g, game: null, i }));
+    return developmentFrom(games, { source: 'point_by_point', totalGames });
+  }
+  const snaps = await store.select('tennis_match_events', `select=event_sequence,event_detail&match_id=eq.${m.id}&quality=eq.score_snapshot&order=event_sequence.asc&limit=1000`);
+  const games = snaps.map((e) => e.event_detail?.game_won).filter((g) => g && g.winner && g.server).map((g) => ({ set: g.set, game: g.game ?? null, winner: g.winner, server: g.server, result: g.result || (g.winner === g.server ? 'hold' : 'break') }));
+  return developmentFrom(games, { source: 'observed_score', totalGames });
+}
+
 export const durationParts = (s) => (Number.isFinite(s) && s > 0 ? { hours: Math.floor(s / 3600), minutes: Math.floor((s % 3600) / 60) } : null);
 
-const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,edition_id,source_family,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_family,competition_key,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)))))';
+const MATCH_SEL = 'match_id,event_type,round,format_key,status,winner_side,end_reason,score_text,duration_s,started_at,scheduled_at,edition_id,source_family,tennis_tournament_editions(edition_id,year,name,level,surface,indoor,start_date,end_date,city,country,source_family,competition_key,tennis_tournaments(slug,name)),tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak,winner_side),tennis_match_participants(side,seed,entry_type,participant_key,tennis_participants(tennis_participant_members(slot,tennis_players(pbe_player_id,slug,full_name,last_name,nationality,tennis_player_media(pbe_player_id,approval,derivatives,attribution,license,author,source_page_url)))))';
 const inList = (xs) => `in.(${xs.map((x) => `"${x}"`).join(',')})`;
 
 function shapeRow(m) {
@@ -82,7 +150,7 @@ function shapeRow(m) {
   return {
     id: m.match_id, event_type: m.event_type, round: m.round, round_label: roundLabel(m.round), round_order: ROUND_ORDER(m.round), format: m.format_key,
     best_of: /^BO5/.test(m.format_key) ? 5 : 3, status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, score: m.score_text,
-    duration_s: m.duration_s, duration: durationParts(m.duration_s), started_at: m.started_at, source_family: m.source_family || null,
+    duration_s: m.duration_s, duration: durationParts(m.duration_s), started_at: m.started_at, scheduled_at: m.scheduled_at || null, source_family: m.source_family || null,
     sets: (m.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((s) => ({ A: s.games_a, B: s.games_b, tb: s.tb_a == null ? null : { A: s.tb_a, B: s.tb_b }, match_tiebreak: !!s.is_match_tiebreak })),
     tournament: { edition_id: e.edition_id, slug: e.tennis_tournaments?.slug || null, name: e.tennis_tournaments?.name || e.name, year: e.year, level: e.level, surface: e.surface, indoor: e.indoor, city: e.city, country: e.country, start_date: e.start_date, end_date: e.end_date, source_family: e.source_family || null, competition_key: e.competition_key || null },
     sides
@@ -253,6 +321,13 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
   const sb = statsRows.find((r) => r.side === 'B')?.stats;
   const lines = statLines(sa, sb);
   if (lines) packet.stats = lines;
+  const perSet = perSetLines(sa, sb);
+  if (perSet) packet.stats_by_set = perSet;
+  // MATCH DEVELOPMENT: breaks / runs only from observed games (point events or live score snapshots)
+  if (m.status !== 'walkover') {
+    const dev = await matchDevelopment(store, m);
+    if (dev) packet.match_development = dev;
+  }
 
   if (singles) {
     const W = m.winner_side;

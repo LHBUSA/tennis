@@ -20,6 +20,22 @@ crons = ["*/2 * * * *"]
 # PUBLISH — owner-approved 2026-09-26 after the model canary passed (3/3 gpt-5.6-sol, 0 gate failures). "false" = SHADOW.
 NEWS_PUBLISH_ENABLED = "true"
 TENNIS_EDITORIAL_OPENAI_MODEL = "gpt-5.6-sol"
+# AI router (src/ai-router.js, V4). Policy is configuration: the OpenAI complimentary daily pools are SHARED across the
+# organisation (WNBA, Soccer, ...), so these are Tennis's own soft guards, not the pool limits.
+TENNIS_AI_STANDARD_MODEL = "gpt-5.6-sol"
+TENNIS_AI_FLAGSHIP_MODEL = "gpt-6-astra"
+# flagship stays OFF until the offline Astra-vs-Sol canary earns it for specific story classes
+TENNIS_AI_FLAGSHIP_ENABLED = "false"
+TENNIS_AI_FLAGSHIP_CLASSES = ""   # per-class release after the offline canary (ids: commissioned, deep_class, major_final_semifinal, major_upset_deep, major_ranking, rich_packet)
+TENNIS_AI_VOLUME_MODEL = "gpt-5.4-mini"
+TENNIS_AI_STANDARD_MAX_OUTPUT = "6000"
+TENNIS_AI_FLAGSHIP_MAX_OUTPUT = "8000"
+TENNIS_AI_STANDARD_EFFORT = "medium"
+TENNIS_AI_FLAGSHIP_EFFORT = "medium"
+TENNIS_PREMIUM_DAILY_SOFT_CAP = "300000"
+TENNIS_PREMIUM_DAILY_WARN = "250000"
+# network-wide rule: only NEW canonical stories, explicit admin re-edits and offline canaries may reach a model transport
+TENNIS_AI_ELIGIBLE_TRIGGERS = "new,admin_reedit,canary"
 
 [[kv_namespaces]]
 binding = "TENNIS_STATE"

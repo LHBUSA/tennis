@@ -21,6 +21,8 @@ import { buildPlan } from './plan.js';
 import { correctPreMatchRatings } from './correct.js';
 import { runGates, GATES_VERSION } from './gates.js';
 import { editorialize, costUsd, redactSecrets, EDITORIAL_VERSION } from './editorial.js';
+import { route, aiConfig, poolUsage, addPoolTokens, callTelemetry, poolKey, isNewCanonicalStory } from './ai-router.js';
+import { runCanary } from './canary.js';
 import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
@@ -233,9 +235,26 @@ const packetHash = async (packet) => {
 export async function upgradeArticle(store, existing, { article, ed, plan, packet, storyClass, dimensions = [], now = iso() }) {
   const prior = (await store.select('tennis_article_evidence', `select=packet,frozen_at&article_id=eq.${existing.article_id}`))[0] || null;
   const revision = { at: now, from_class: existing.story_class || null, to_class: storyClass, reason: `new evidence: ${dimensions.filter((d) => d !== 'result').join(', ')}`, prior_packet_hash: prior ? await packetHash(prior.packet) : null, prior_frozen_at: prior?.frozen_at || null, prior_headline: existing.headline, packet_hash: await packetHash(packet), prior_packet: prior?.packet || null };
-  await store.req('PATCH', `tennis_articles?article_id=eq.${existing.article_id}`, { body: { headline: article.headline, deck: article.dek, body: { sections: article.sections }, content_plan: plan, key_stat: article.key_stat, story_class: storyClass, prose_origin: ed.origin, gate_results: { gates_version: GATES_VERSION, gate: ed.gate, attempts: ed.attempts, usage: ed.usage, usd: costUsd(ed.usage) }, generator_version: COMPOSE_VERSION, editorial_version: EDITORIAL_VERSION, updated_at: now, revised_at: now, revisions: [...(existing.revisions || []), revision] }, prefer: 'return=minimal' });
+  await store.req('PATCH', `tennis_articles?article_id=eq.${existing.article_id}`, { body: { headline: article.headline, deck: article.dek, body: { sections: article.sections }, content_plan: plan, key_stat: article.key_stat, story_class: storyClass, prose_origin: ed.origin, gate_results: { gates_version: GATES_VERSION, gate: ed.gate, attempts: ed.attempts, usage: ed.usage, nominal_standard_cost_usd: costUsd(ed.usage), routing: ed.routing || null }, generator_version: COMPOSE_VERSION, editorial_version: EDITORIAL_VERSION, updated_at: now, revised_at: now, revisions: [...(existing.revisions || []), revision] }, prefer: 'return=minimal' });
   await store.req('PATCH', `tennis_article_evidence?article_id=eq.${existing.article_id}`, { body: { packet, frozen_at: now }, prefer: 'return=minimal' });
   return revision;
+}
+
+/**
+ * Routed model prose for one story (V4): route -> editorialize (attempts 1) -> per-call telemetry (stage 'cost',
+ * kind 'model_call') + Tennis's daily share of the shared pool (KV). Returns the editorialize result with .routing.
+ */
+export async function routedProse(env, store, { ev, articleId = null, storyClass, packet, baseline, gate, dims = [], trigger = 'new', attempts = 1 }) {
+  const cfg = aiConfig(env);
+  const kv = env.TENNIS_STATE || null;
+  const usage = await poolUsage(kv);
+  const routing = route({ storyClass, publishArticle: true, event: ev, packet, dims, trigger, env, usage, hasKey: !!env.OPENAI_API_KEY });
+  const onCall = async (call) => {
+    await telemetry(store, [callTelemetry({ eventId: ev.event_id, articleId, storyClass, routing, trigger, call, cfg })]);
+    await addPoolTokens(kv, routing.pool, (Number(call.usage?.input_tokens) || 0) + (Number(call.usage?.output_tokens) || 0)).catch(() => null);
+  };
+  const ed = await editorialize({ packet, baseline, gate, apiKey: env.OPENAI_API_KEY, routing, attempts, onCall });
+  return { ...ed, routing: { lane: routing.lane, model: routing.model, pool: routing.pool, reason: routing.reason, max_output_tokens: routing.max_output_tokens, reasoning_effort: routing.reasoning_effort, soft_cap: routing.soft_cap || null, flagship_eligible: !!routing.flagship_eligible, router_version: routing.router_version, pool_usage_before: usage } };
 }
 
 export async function enrichOne(env, store, ev) {
@@ -289,7 +308,10 @@ export async function enrichOne(env, store, ev) {
 
   if (existing) {
     // UPGRADE the same story: same article id, slug and first_published_at; new frozen evidence; revision recorded
-    const ed = await editorialize({ packet, baseline, gate, apiKey: env.OPENAI_API_KEY, model: env.TENNIS_EDITORIAL_OPENAI_MODEL || 'gpt-5.6-sol' });
+    // an existing canonical story is never NEW: upgrades use the deterministic baseline prose (route() refuses the
+    // 'upgrade' trigger), still through every gate; lifecycle rules unchanged
+    const ed = await routedProse(env, store, { ev, articleId: existing.article_id, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: isNewCanonicalStory(existing) ? 'new' : 'upgrade' });
+    plan.routing = ed.routing;
     const allowBaseline = storyClass === 'brief' || Number(ev.materiality) >= BASELINE_MIN_MATERIALITY;
     if (!ed.origin || (ed.origin === 'baseline' && !allowBaseline) || env.NEWS_PUBLISH_ENABLED !== 'true') {
       const why = !ed.origin ? `gates: ${ed.gate.failures.map((f) => f.gate).join(', ')}` : env.NEWS_PUBLISH_ENABLED !== 'true' ? 'shadow' : 'baseline prose below the fallback bar';
@@ -310,10 +332,11 @@ export async function enrichOne(env, store, ev) {
   await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}`, { body: { article_id: articleId }, prefer: 'return=minimal' });
   await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'packet', status: 'ok', latency_ms: Date.now() - t0, since_detect_ms: sinceDetect(), detail: { version: PACKET_VERSION, families: Object.keys(packet), class: storyClass, dimensions: story.evidence_dimensions } }]);
 
-  const ed = await editorialize({ packet, baseline, gate, apiKey: env.OPENAI_API_KEY, model: env.TENNIS_EDITORIAL_OPENAI_MODEL || 'gpt-5.6-sol' });
+  const ed = await routedProse(env, store, { ev, articleId, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: 'new' });
+  plan.routing = ed.routing;
+  // nominal standard-rate cost (never an actual bill: the org may receive complimentary tokens)
   const usd = costUsd(ed.usage);
-  if (ed.usage.input_tokens) await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'cost', status: 'ok', detail: { kind: 'cost', usd, ...ed.usage, origin: ed.origin } }]);
-  await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'editorial', status: ed.origin ? 'ok' : 'fail', latency_ms: Date.now() - t0, detail: { origin: ed.origin, attempts: ed.attempts } }]);
+  await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'editorial', status: ed.origin ? 'ok' : 'fail', latency_ms: Date.now() - t0, detail: { origin: ed.origin, attempts: ed.attempts, routing_lane: ed.routing.lane, routing_reason: ed.routing.reason, model: ed.routing.model, pool: ed.routing.pool } }]);
 
   let status = 'held';
   let hold = null;
@@ -323,7 +346,7 @@ export async function enrichOne(env, store, ev) {
   else status = 'published';
   const a = ed.article;
   const now = iso();
-  await store.req('PATCH', `tennis_articles?article_id=eq.${articleId}`, { body: { status, headline: a.headline, deck: a.dek, body: { sections: a.sections }, prose_origin: ed.origin, gate_results: { gates_version: GATES_VERSION, gate: ed.gate, attempts: ed.attempts, usage: ed.usage, usd }, hold_reason: hold, updated_at: now, published_at: status === 'published' ? now : null, first_published_at: status === 'published' ? now : null }, prefer: 'return=minimal' });
+  await store.req('PATCH', `tennis_articles?article_id=eq.${articleId}`, { body: { status, headline: a.headline, deck: a.dek, body: { sections: a.sections }, prose_origin: ed.origin, content_plan: plan, gate_results: { gates_version: GATES_VERSION, gate: ed.gate, attempts: ed.attempts, usage: ed.usage, nominal_standard_cost_usd: usd, routing: ed.routing }, hold_reason: hold, updated_at: now, published_at: status === 'published' ? now : null, first_published_at: status === 'published' ? now : null }, prefer: 'return=minimal' });
   await settle(store, ev, { state: status === 'published' ? 'published' : 'held', state_reason: hold, ...classPatch });
   await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: status === 'published' ? 'publish' : 'hold', status: status === 'published' ? 'ok' : 'skip', latency_ms: Date.now() - t0, since_detect_ms: sinceDetect(), detail: { hold, origin: ed.origin, class: storyClass, detected_to_public_ms: status === 'published' ? sinceDetect() : null } }]);
   return { event_id: ev.event_id, article_id: articleId, slug, state: status, hold, origin: ed.origin, class: storyClass };
@@ -460,6 +483,12 @@ export default {
     }
     // editorial correction: pre-match ratings / expectation must have been validated at the time (dry unless write=1)
     if (path === '/v1/news/correct' && request.method === 'POST') return json({ ok: true, data: await correctPreMatchRatings(store, { write: url.searchParams.get('write') === '1' }) });
+    // offline model canary: NEVER publishes or writes; one frozen packet per request (docs/evidence/ai-canary)
+    if (path === '/v1/news/canary' && request.method === 'POST') {
+      const models = String(url.searchParams.get('models') || '').split(',').map((x) => x.trim()).filter(Boolean);
+      return json({ ok: true, data: await runCanary(env, store, { eventId: url.searchParams.get('event_id'), models, maxOutput: Number(url.searchParams.get('max_output')) || null }) });
+    }
+    if (path === '/v1/news/ai-usage') return json({ ok: true, data: { ...(await poolUsage(env.TENNIS_STATE)), canary_premium_today: Number(await env.TENNIS_STATE?.get(poolKey('canary-premium'))) || 0, config: (({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }) => ({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }))(aiConfig(env)) } });
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates
       const reason = url.searchParams.get('reason');

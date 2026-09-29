@@ -3,7 +3,7 @@
 // whose facts are missing is omitted with a reason instead of rendered empty. One axis per chart.
 
 import { provenanceOf } from './tour.js';
-export const PLAN_VERSION = 'tennis-plan/3.0.0';
+export const PLAN_VERSION = 'tennis-plan/4.0.0';
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const short = (side) => (side?.players || []).map((p) => p.last_name || String(p.name).split(' ').slice(-1)[0]).join('/');
 
@@ -144,6 +144,107 @@ export function intelligence(packet) {
   return null;
 }
 
+// ---- V4 deterministic data modules (tennis-plan/4.0.0) -------------------------------------------------------------
+// Every value is copied from the frozen packet (numerator/denominator kept); a module appears only when its data is
+// present AND meaningful, otherwise it is listed in `omitted` with the reason. The model never supplies a value.
+const ratioCell = (x) => (x?.d ? { pct: x.pct, n: x.n, d: x.d } : null);
+const countCell = (x) => (Number.isFinite(x) ? { value: x } : null);
+function pairRows(packet, W, L, spec) {
+  const s = packet.stats;
+  return spec.map(([k, label, kind]) => {
+    const w = kind === 'count' ? countCell(s[W][k]) : ratioCell(s[W][k]);
+    const l = kind === 'count' ? countCell(s[L][k]) : ratioCell(s[L][k]);
+    return w && l ? { key: k, label, kind, w, l } : null;
+  }).filter(Boolean);
+}
+const SERVE_SPEC = [['first_serve_in', '1st serve in', 'ratio'], ['first_serve_won', '1st-serve points won', 'ratio'], ['second_serve_won', '2nd-serve points won', 'ratio'], ['service_points_won', 'Service points won', 'ratio'], ['service_games_held', 'Service games held', 'ratio'], ['break_points_saved', 'Break points saved', 'ratio'], ['aces', 'Aces', 'count'], ['double_faults', 'Double faults', 'count']];
+const RETURN_SPEC = [['first_return_won', 'Won vs 1st serve', 'ratio'], ['second_return_won', 'Won vs 2nd serve', 'ratio'], ['return_points_won', 'Return points won', 'ratio'], ['break_chances', 'Break points earned', 'count'], ['break_points_converted', 'Break points converted', 'ratio'], ['return_games_won', 'Return games won', 'ratio']];
+
+function keyNumbers(packet, W, L) {
+  if (packet.match.status === 'walkover') return null;
+  const s = packet.stats;
+  const tiles = [];
+  const t = (label, w, l, note = null) => { if (w != null && l != null) tiles.push({ label, w, l, note }); };
+  if (s) {
+    t('Total points won', s[W].total_points_won, s[L].total_points_won);
+    t('Breaks of serve', s[W].return_games_won?.n ?? s[W].break_points_converted?.n ?? null, s[L].return_games_won?.n ?? s[L].break_points_converted?.n ?? null);
+    if (s[W].break_points_converted?.d != null && s[L].break_points_converted?.d != null) t('Break points', `${s[W].break_points_converted.n}/${s[W].break_points_converted.d}`, `${s[L].break_points_converted.n}/${s[L].break_points_converted.d}`, 'converted / earned');
+    t('Winners', s[W].winners, s[L].winners);
+    t('Unforced errors', s[W].unforced_errors, s[L].unforced_errors);
+  }
+  const run = packet.match_development?.complete ? packet.match_development.longest_run : null;
+  const out = { tiles, run: run ? { side: run.side === W ? 'W' : 'L', games: run.games, from_set: run.from_set, to_set: run.to_set } : null };
+  return tiles.length >= 3 ? out : null;
+}
+
+function setBySet(packet, W, L) {
+  const m = packet.match;
+  if (m.status === 'walkover' || !(m.sets || []).length) return null;
+  const perSet = packet.stats_by_set || null;
+  const dev = packet.match_development;
+  const devBreaks = dev && (dev.complete || dev.source === 'point_by_point') ? dev.breaks_by_set : null;
+  const rows = m.sets.map((x, i) => {
+    const set = i + 1;
+    const ps = perSet?.find((r) => r.set === set) || null;
+    const db = devBreaks ? devBreaks.find((r) => r.set === set) || { A: 0, B: 0 } : null;
+    const breaks = ps && ps.breaks.A != null && ps.breaks.B != null ? { w: ps.breaks[W], l: ps.breaks[L], source: 'match statistics' } : db ? { w: db[W], l: db[L], source: dev.source === 'point_by_point' ? 'point-by-point' : 'observed live score' } : null;
+    return { set, match_tiebreak: !!x.match_tiebreak, games: x.match_tiebreak ? null : { w: x[W], l: x[L] }, tiebreak: x.tb ? { w: x.tb[W], l: x.tb[L] } : null, winner: x.match_tiebreak && x.tb ? (x.tb[W] > x.tb[L] ? 'W' : 'L') : x[W] > x[L] ? 'W' : x[L] > x[W] ? 'L' : null, points_won: ps && ps.points_won.A != null && ps.points_won.B != null ? { w: ps.points_won[W], l: ps.points_won[L] } : null, breaks };
+  });
+  return { rows, status: m.status };
+}
+
+function developmentModule(packet, W) {
+  const d = packet.match_development;
+  if (!d || (!d.breaks.length && !d.longest_run)) return null;
+  const rel = (side) => (side === W ? 'W' : 'L');
+  return { source: d.source, complete: d.complete, games_observed: d.games_observed, breaks: d.breaks.map((b) => ({ set: b.set, game: b.game, by: rel(b.by) })), first_break: d.first_break ? { set: d.first_break.set, game: d.first_break.game, by: rel(d.first_break.by) } : null, longest_run: d.complete && d.longest_run ? { by: rel(d.longest_run.side), games: d.longest_run.games, from_set: d.longest_run.from_set, to_set: d.longest_run.to_set } : null };
+}
+
+function playerContext(packet, W, L) {
+  const out = {};
+  for (const [side, rel] of [[W, 'W'], [L, 'L']]) {
+    const players = packet.participants[side]?.players || [];
+    if (players.length !== 1) continue;
+    const p = players[0];
+    const md = packet.match_dna?.[p.id];
+    const form = (packet.recent_form?.[p.id] || []).map((r) => ({ result: r.result, opponent: (r.opponent || []).map((o) => o.name).join(' / ') || null, tournament: r.tournament, year: r.year, round_label: r.round_label, score: r.score }));
+    const c = {
+      name: p.name, slug: p.slug,
+      rank: Number.isFinite(p.rank?.rank) ? { rank: p.rank.rank, list_date: p.rank.list_date } : null,
+      surface: md?.surface?.record && md.surface.record.W + md.surface.record.L ? { surface: md.surface.surface, W: md.surface.record.W, L: md.surface.record.L } : null,
+      year: md?.windows?.['52w'] && md.windows['52w'].W + md.windows['52w'].L ? { W: md.windows['52w'].W, L: md.windows['52w'].L } : null,
+      form: form.length ? form : null
+    };
+    if ([c.rank, c.surface, c.year, c.form].filter(Boolean).length) out[rel] = c;
+  }
+  const h = packet.h2h?.prior_meetings?.length ? { wins: packet.h2h.wins, losses: packet.h2h.losses, meetings: packet.h2h.prior_meetings.length, coverage_from: packet.h2h.coverage_from } : null;
+  const facts = Object.values(out).reduce((t, c) => t + [c.rank, c.surface, c.year, c.form].filter(Boolean).length, 0) + (h ? 1 : 0);
+  return facts >= 2 ? { players: out, h2h: h, rank_phrase: packet.ranking_provenance?.phrase || null } : null;
+}
+
+/**
+ * All V4 data modules for a frozen packet (PURE; exported for the offline canary / QA). Returns
+ * { modules: [{ id, title, data }], omitted: [{ id, reason }] }.
+ */
+export function buildModules(packet) {
+  const modules = [];
+  const omitted = [];
+  const add = (id, title, data, reason) => (data ? modules.push({ id, title, data }) : omitted.push({ id, reason }));
+  if (!packet?.match) return { modules, omitted: [{ id: 'match_modules', reason: 'not a match story' }] };
+  const W = packet.match.winner_side;
+  const L = other(W);
+  const noStats = packet.match.status === 'walkover' ? 'walkover: no points played' : 'no match statistics stored for this match';
+  add('key_numbers', 'Match control', keyNumbers(packet, W, L), packet.stats && packet.match.status !== 'walkover' ? 'fewer than three comparable key numbers' : noStats);
+  add('set_by_set', 'Set by set', setBySet(packet, W, L), 'no sets played');
+  const sp = packet.stats && packet.match.status !== 'walkover' ? pairRows(packet, W, L, SERVE_SPEC) : [];
+  add('serve_profile', 'Serve profile', sp.length >= 3 ? { rows: sp } : null, packet.stats && packet.match.status !== 'walkover' ? 'fewer than three serve measures for both players' : noStats);
+  const rp = packet.stats && packet.match.status !== 'walkover' ? pairRows(packet, W, L, RETURN_SPEC) : [];
+  add('return_pressure', 'Return pressure', rp.length >= 3 ? { rows: rp } : null, packet.stats && packet.match.status !== 'walkover' ? 'fewer than three return measures for both players' : noStats);
+  add('match_development', 'How the match developed', developmentModule(packet, W), 'no observed game-by-game sequence (point events or live score) for this match');
+  add('player_context', 'Player context', playerContext(packet, W, L), 'fewer than two context facts (ranking, surface, form, H2H) in the packet');
+  return { modules, omitted };
+}
+
 function rankingChart(packet) {
   const h = packet.ranking_history || [];
   if (h.length < 3) return null;
@@ -173,6 +274,9 @@ export function buildPlan(packet, article) {
     add('path', 'Path through the draw', packet.draw_path || null, 'no earlier rounds stored for this tournament');
     add('form', 'Recent form', packet.recent_form && Object.values(packet.recent_form).some((x) => x.length) ? packet.recent_form : null, 'no earlier results stored');
     add('next', "What's next", packet.next || null, 'the next match is not in the draw yet');
+    const v4 = buildModules(packet);
+    modules.push(...v4.modules);
+    omitted.push(...v4.omitted);
   } else {
     add('player', 'Player', packet.player, 'no player');
     const r = rankingChart(packet);

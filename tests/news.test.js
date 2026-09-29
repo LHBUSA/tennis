@@ -120,9 +120,9 @@ test('hybrid editorial: model prose that passes is used; a hallucinating model f
   assert.equal(ok.origin, 'model', JSON.stringify(ok.attempts));
   assert.equal(ok.article.sections.at(-1).id, 'method', 'the method section stays code-owned');
   const hallucinated = { ...good, sections: [{ id: 'what_happened', heading: 'x', paragraphs: ['Alpha fired 19 aces and Beta, nursing a wrist injury, faded late in the Test Open quarterfinal.'] }] };
-  const fb = await editorialize({ packet: p, baseline, gate, apiKey: 'test', model: 'gpt-5.6-sol', fetchImpl: fakeFetch(hallucinated) });
+  const fb = await editorialize({ packet: p, baseline, gate, apiKey: 'test', model: 'gpt-5.6-sol', attempts: 2, fetchImpl: fakeFetch(hallucinated) }); // explicit admin repair: 2 attempts (automatic runs: 1)
   assert.equal(fb.origin, 'baseline', 'model output failing gates is never published; the fact-safe baseline is used');
-  assert.equal(fb.attempts.length, 2, 'one corrective retry');
+  assert.equal(fb.attempts.length, 2, 'one corrective retry when a repair explicitly allows it');
   const none = await editorialize({ packet: p, baseline, gate, apiKey: null, model: 'gpt-5.6-sol' });
   assert.equal(none.origin, 'baseline');
   assert.match(none.attempts[0].skipped, /OPENAI_API_KEY/);
