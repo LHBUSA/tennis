@@ -146,9 +146,25 @@ export function playerCard(f, i) {
 
 export function dnaColumn([metric, title, fmt], boards) {
   return html`<div class="hm-dna-col"><h3>${title}</h3>${boards.map(({ tour, b }) => html`<div class="hm-dna-tour">
-    <p class="hm-dna-k"><span class="hm-tag hm-tag-${tour}">${tour.toUpperCase()}</span>${b.show ? html`<a href="/dna?metric=${metric}&tour=${tour}">Full board →</a>` : html`<b>Comparison building</b>`}</p>
-    ${b.show ? html`<ol>${b.rows.slice(0, 3).map((r) => html`<li><span class="hm-dna-r tabnum">${r.rank}</span>${r.player ? avatar(r.player, { px: 32 }) : ''}${r.player?.slug ? html`<a href="/players/${r.player.slug}">${r.player.name}</a>` : html`<span>${r.player?.name || ''}</span>`}<b class="tabnum">${fmt(r.value)}</b></li>`)}</ol>` : ''}
-    <p class="hm-dna-pop">${b.note}</p></div>`)}</div>`;
+    <p class="hm-dna-k"><span class="hm-tag hm-tag-${tour}">${tour.toUpperCase()}</span>${b.show ? html`<a href="/dna?metric=${metric}&tour=${tour}">Full board →</a>` : ''}</p>
+    ${b.show ? html`<ol>${b.rows.slice(0, 3).map((r) => html`<li><span class="hm-dna-r tabnum">${r.rank}</span>${r.player ? avatar(r.player, { px: 32 }) : ''}${r.player?.slug ? html`<a href="/players/${r.player.slug}">${r.player.name}</a>` : html`<span>${r.player?.name || ''}</span>`}<b class="tabnum">${fmt(r.value)}</b></li>`)}</ol>
+    <p class="hm-dna-pop">${b.note}</p>` : thresholdPanel(tour, b)}</div>`)}</div>`;
+}
+
+/**
+ * Rejection-first null state: a held board shows WHY — the served qualified count against the board's own threshold, as
+ * a progress bar. The numbers are the API's (leaders payload qualified / threshold); nothing is estimated or projected.
+ */
+export function thresholdPanel(tour, b) {
+  const T = tour.toUpperCase();
+  if (b.population == null || !b.threshold) return html`<div class="hm-cal"><p class="hm-cal-k">${T} board unavailable</p><p class="hm-dna-pop">${b.note}</p></div>`;
+  const pct = Math.max(0, Math.min(100, Math.round((b.population / b.threshold) * 100)));
+  return html`<div class="hm-cal">
+    <p class="hm-cal-k"><i aria-hidden="true"></i>Awaiting data threshold</p>
+    <div class="hm-cal-bar" role="progressbar" aria-label="${T} players meeting the comparison standard" aria-valuemin="0" aria-valuemax="${b.threshold}" aria-valuenow="${b.population}"><span style="width:${pct}%"></span></div>
+    <p class="hm-cal-n"><b class="tabnum">${b.population}</b> of <b class="tabnum">${b.threshold}</b> ${T} players meet the comparison standard</p>
+    <p class="hm-cal-why">The board publishes only once ${b.threshold} qualify — never from a partial field.</p>
+  </div>`;
 }
 
 // ---------------------------------------------------------------- PBEcast
@@ -161,11 +177,16 @@ export function pbecastLive(m) {
 
 export function replayCard(m, edition) {
   const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.last_name || p.name).join(' / ');
-  const w = m.winner_side;
+  const sets = m.sets || [];
+  const cell = (x, s) => {
+    if (x.match_tiebreak && x.tb) return html`<td class="${x.winner === s ? 'w' : ''}">${x.tb[s]}</td>`;
+    const tb = x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : '';
+    return html`<td class="${x.winner === s ? 'w' : ''}">${x[s]}${tb}</td>`;
+  };
+  const row = (s) => html`<tr class="${m.winner_side === s ? 'won' : ''}"><th scope="row">${m.winner_side === s ? html`<i class="hm-win" aria-label="Winner"></i>` : ''}${nm(s)}</th>${sets.map((x) => cell(x, s))}</tr>`;
   return html`<a class="hm-card hm-replay" href="/pbecast/${m.id}">
     <span class="hm-rk-l">${eventLabel(m.event_type)} · ${roundLabel(m.round)}</span>
-    <b><span class="${w === 'A' ? 'won' : ''}">${nm('A')}</span> v <span class="${w === 'B' ? 'won' : ''}">${nm('B')}</span></b>
-    <span class="tabnum hm-rs">${m.score || ''}</span>
+    ${sets.length ? html`<table class="hm-box tabnum"><caption class="sr">${nm('A')} v ${nm('B')}, ${m.score || ''}</caption>${row('A')}${row('B')}</table>` : html`<b>${nm('A')} v ${nm('B')}</b><span class="tabnum hm-rs">${m.score || ''}</span>`}
     <small>${edition ? `${tournamentName(edition)} ${edition.year}` : ''}${m.duration_s ? ` · ${fmtDuration(m.duration_s)}` : ''}</small>
     <em>Replay ▸</em></a>`;
 }

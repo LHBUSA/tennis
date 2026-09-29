@@ -58,7 +58,7 @@ export function leaderBoard(d, { tour, min = 30 } = {}) {
   const q = Number(d.qualified) || 0;
   const threshold = Number(d.threshold) || min;
   const held = d.published === false || q < threshold || !(d.rows || []).length;
-  if (held) return { show: false, rows: [], population: q, note: `${T} comparison building: ${q} of ${threshold} players meet the comparison standard.` };
+  if (held) return { show: false, rows: [], population: q, threshold, note: `${T} comparison building: ${q} of ${threshold} players meet the comparison standard.` };
   // the board's own population rule when it states one ("... among players with 20+ rated matches ..."), else the v1 gate
   const rule = /\bamong (.+)$/.exec(String(d.definition || ''))?.[1] || 'players with a medium- or high-confidence sample';
   return { show: true, rows: d.rows, population: q, note: `${T} singles ${rule} (${q.toLocaleString('en-US')} qualified${d.as_of ? `, as of ${d.as_of}` : ''}); ATP and WTA are never pooled.` };

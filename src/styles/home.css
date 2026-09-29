@@ -85,7 +85,7 @@
 
 /* ---------------------------------------------------------------- rails */
 .hm-rail { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
-.hm-track { display: grid; grid-auto-flow: column; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 6px; scrollbar-width: none; -ms-overflow-style: none; }
+.hm-track { position: relative; display: grid; grid-auto-flow: column; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 6px; scrollbar-width: none; -ms-overflow-style: none; }
 .hm-track::-webkit-scrollbar { display: none; }
 /* no scrollbars: the edge with more content fades out (state set by wireRails), arrows on >= 768px, swipe + a partly
    visible next card on phones */
@@ -103,7 +103,7 @@
 .hm-rail-match .hm-track { grid-auto-columns: 300px; }
 .hm-rail-t .hm-track { grid-auto-columns: 260px; }
 .hm-rail-p .hm-track { grid-auto-columns: 150px; }
-.hm-rail-r .hm-track { grid-auto-columns: 250px; }
+.hm-rail-r .hm-track { grid-auto-columns: 280px; }
 
 /* ---------------------------------------------------------------- cards (shared) */
 .hm-card { background: var(--home-panel); border: 1px solid var(--home-rule); border-radius: var(--home-r); box-shadow: var(--home-shadow); }
@@ -195,19 +195,37 @@
 .hm-dna-r { color: var(--on-dark-2); font-family: var(--f-data); font-size: 12px; }
 .hm-dna-pop { margin: 8px 0 0; font-size: 11.5px; line-height: 1.4; color: var(--on-dark-2); }
 
+/* rejection-first null state: served qualified count vs the board's threshold */
+.hm-cal { display: grid; gap: 8px; min-height: 118px; align-content: start; padding: 12px; border-radius: 10px; border: 1px dashed rgba(217, 180, 74, 0.45); background: repeating-linear-gradient(135deg, rgba(243, 246, 241, 0.025) 0 8px, transparent 8px 16px); }
+.hm-cal-k { margin: 0; display: flex; align-items: center; gap: 8px; color: var(--gold-bright); font: 800 13px/1 var(--f-display); letter-spacing: 0.14em; text-transform: uppercase; }
+.hm-cal-k i { width: 7px; height: 7px; border-radius: 50%; border: 2px solid var(--gold-bright); }
+.hm-cal-bar { height: 6px; border-radius: 3px; background: rgba(243, 246, 241, 0.12); overflow: hidden; }
+.hm-cal-bar span { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--court-500), var(--gold-bright)); }
+.hm-cal-n { margin: 0; color: var(--on-dark); font-size: 13px; }
+.hm-cal-n b { color: var(--gold-bright); font-family: var(--f-data); }
+.hm-cal-why { margin: 0; color: var(--on-dark-2); font-size: 11.5px; line-height: 1.4; }
+
 /* PBEcast */
 .hm-cast.hm-dark { background: linear-gradient(180deg, var(--night), #041510); }
 .hm-cast-live { display: grid; gap: 6px; margin-bottom: 16px; padding: 18px; border-radius: var(--home-r); background: linear-gradient(120deg, rgba(200, 51, 47, 0.18), transparent 60%), rgba(243, 246, 241, 0.05); border: 1px solid rgba(200, 51, 47, 0.45); color: var(--on-dark); text-decoration: none; }
 .hm-cast-live b { font: 800 clamp(22px, 2.4vw, 30px)/1.05 var(--f-display); text-transform: uppercase; }
 .hm-cast-live b span { color: var(--on-dark-2); font-weight: 600; }
 .hm-cast-live em { font-style: normal; color: var(--gold-bright); font: 800 13px/1 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; }
-.hm-replay { display: grid; gap: 6px; padding: 14px; background: rgba(243, 246, 241, 0.05); border-color: rgba(243, 246, 241, 0.14); box-shadow: none; color: var(--on-dark); text-decoration: none; }
+.hm-replay { position: relative; display: grid; gap: 6px; padding: 14px; background: rgba(243, 246, 241, 0.05); border-color: rgba(243, 246, 241, 0.14); box-shadow: none; color: var(--on-dark); text-decoration: none; }
 .hm-replay:hover { border-color: var(--gold-bright); }
 .hm-rk-l { font: 700 11px/1.2 var(--f-ui); letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-dark-2); }
 .hm-replay b { font: 800 19px/1.1 var(--f-display); text-transform: uppercase; overflow-wrap: anywhere; }
 .hm-replay b .won { color: var(--gold-bright); }
 .hm-rs { font-family: var(--f-data); font-size: 13px; color: var(--on-dark); }
 .hm-replay small { color: var(--on-dark-2); font-size: 12px; }
+.hm-box { width: 100%; border-collapse: collapse; font-family: var(--f-data); font-size: 13px; color: var(--on-dark-2); }
+.hm-box th { text-align: left; font: 600 14px/1.25 var(--f-ui); color: var(--on-dark-2); padding: 5px 8px 5px 0; max-width: 0; width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm-box tr.won th { color: var(--on-dark); font-weight: 800; }
+.hm-box td { width: 22px; padding: 5px 0 5px 6px; text-align: center; border-left: 1px solid rgba(243, 246, 241, 0.1); }
+.hm-box td.w { color: var(--on-dark); font-weight: 700; }
+.hm-box sup { font-size: 9px; margin-left: 1px; color: var(--on-dark-2); }
+.hm-box tr + tr th, .hm-box tr + tr td { border-top: 1px solid rgba(243, 246, 241, 0.12); }
+.hm-win { display: inline-block; width: 0; height: 0; margin-right: 6px; border: 4px solid transparent; border-left: 6px solid var(--gold-bright); vertical-align: 1px; }
 .hm-replay em { font-style: normal; color: var(--gold-bright); font: 800 12px/1 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; }
 
 /* coverage */
