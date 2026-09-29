@@ -257,6 +257,38 @@ export async function routedProse(env, store, { ev, articleId = null, storyClass
   return { ...ed, routing: { lane: routing.lane, model: routing.model, pool: routing.pool, reason: routing.reason, max_output_tokens: routing.max_output_tokens, reasoning_effort: routing.reasoning_effort, soft_cap: routing.soft_cap || null, flagship_eligible: !!routing.flagship_eligible, router_version: routing.router_version, pool_usage_before: usage } };
 }
 
+/**
+ * PRODUCTION-PATH canary (V4 release gate, owner 2026-09-29): ONE model call through the deployed path — route()
+ * (trigger 'canary', allow-listed) -> Responses API -> deterministic gates -> model_call telemetry row -> Tennis premium
+ * KV pool counter — on a stored article's frozen packet. Unlike /v1/news/canary (offline A/B, separate canary counter)
+ * this proves the live accounting. It NEVER writes articles, evidence or events: routedProse only records telemetry and
+ * the pool counter. ?dry=1 returns the routing decision with no model call. Refuses any lane but STANDARD_EDITORIAL.
+ */
+export async function routedCanary(env, store, { eventId, dry = false } = {}) {
+  if (!eventId) return { error: 'event_id required' };
+  const enc = encodeURIComponent(eventId);
+  const ev = (await store.select('tennis_news_events', `select=*&event_id=eq.${enc}`))[0];
+  if (!ev) return { error: 'no such event' };
+  const a = (await store.select('tennis_articles', `select=article_id,slug,story_class,tennis_article_evidence(packet,frozen_at)&event_id=eq.${enc}`))[0];
+  if (!a) return { error: 'no stored article (frozen packet) for this event' };
+  const evd = Array.isArray(a.tennis_article_evidence) ? a.tennis_article_evidence[0] : a.tennis_article_evidence;
+  const packet = evd?.packet;
+  if (!packet) return { error: 'no frozen packet stored for this article' };
+  const storyClass = a.story_class || 'full';
+  const kv = env.TENNIS_STATE || null;
+  const before = await poolUsage(kv);
+  const routing = route({ storyClass, publishArticle: true, event: ev, packet, dims: [], trigger: 'canary', env, usage: before, hasKey: !!env.OPENAI_API_KEY });
+  const head = { event_id: eventId, article_id: a.article_id, slug: a.slug, story_class: storyClass, frozen_at: evd.frozen_at || null, trigger: 'canary', routing: { lane: routing.lane, model: routing.model, pool: routing.pool, reason: routing.reason, router_version: routing.router_version } };
+  if (routing.lane !== 'STANDARD_EDITORIAL') return { ...head, refused: `lane ${routing.lane} (the release canary only proves STANDARD_EDITORIAL)`, model_calls: 0 };
+  if (dry) return { ...head, dry: true, model_calls: 0, pool_usage: before };
+  const baseline = compose(packet, { storyClass });
+  const plan = buildPlan(packet, baseline);
+  const gate = (x) => runGates(x, packet, { plan });
+  const ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass, packet, baseline, gate, dims: [], trigger: 'canary', attempts: 1 });
+  const after = await poolUsage(kv);
+  return { ...head, model_calls: ed.attempts.filter((x) => !x.skipped).length, origin: ed.origin, attempts: ed.attempts, usage: ed.usage, pool_before: before, pool_after: after, draft: { headline: ed.article?.headline || null, published: false } };
+}
+
 export async function enrichOne(env, store, ev) {
   const t0 = Date.now();
   const sinceDetect = () => Date.now() - Date.parse(ev.detected_at);
@@ -488,6 +520,8 @@ export default {
       const models = String(url.searchParams.get('models') || '').split(',').map((x) => x.trim()).filter(Boolean);
       return json({ ok: true, data: await runCanary(env, store, { eventId: url.searchParams.get('event_id'), models, maxOutput: Number(url.searchParams.get('max_output')) || null }) });
     }
+    // production-path release canary: one routed call, telemetry + premium counter, never writes articles (?dry=1: routing only)
+    if (path === '/v1/news/canary-routed' && request.method === 'POST') return json({ ok: true, data: await routedCanary(env, store, { eventId: url.searchParams.get('event_id'), dry: url.searchParams.get('dry') === '1' }) });
     if (path === '/v1/news/ai-usage') return json({ ok: true, data: { ...(await poolUsage(env.TENNIS_STATE)), canary_premium_today: Number(await env.TENNIS_STATE?.get(poolKey('canary-premium'))) || 0, config: (({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }) => ({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }))(aiConfig(env)) } });
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates
