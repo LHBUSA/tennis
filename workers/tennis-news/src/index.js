@@ -8,6 +8,7 @@
 // Cron */2: detect new events from our own graph, then enrich up to ENRICH_LIMIT claimed events under a
 // lease. NEWS_PUBLISH_ENABLED != "true" is SHADOW mode: everything is written as HOLD (reason "shadow").
 
+import { atpTierForEdition } from '../../shared/atp-tiers.js';
 import { json } from '../../shared/envelope.js';
 import { health } from '../../shared/health.js';
 import { storeFromEnv, inList } from '../../shared/store/postgrest.js';
@@ -44,14 +45,14 @@ async function telemetry(store, rows) {
 }
 
 // ---- detection ----------------------------------------------------------------------------------------
-export function detectorInput(m, ranks) {
+export function detectorInput(m, ranks, atpTier = null) {
   const side = (s) => {
     const x = m.sides[s] || { players: [] };
     const p0 = x.players[0];
     const r = p0 ? ranks.get(p0.id) : null;
     return { players: x.players.map((p) => ({ id: p.id, name: p.name })), rank: x.players.length === 1 ? r?.rank ?? null : null, list_date: r?.list_date ?? null, seed: x.seed, entry: x.entry };
   };
-  return { id: m.id, event_type: m.event_type, round: m.round, status: m.status, winner_side: m.winner_side, retired_side: m.status === 'retired' ? (m.winner_side === 'A' ? 'B' : 'A') : null, best_of: m.best_of, sets: m.sets.map((s) => ({ A: s.A, B: s.B, tb: !!s.tb })), duration_s: m.duration_s, started_at: m.started_at, edition: { id: m.tournament.edition_id, level: m.tournament.level, name: m.tournament.name, surface: m.tournament.surface, start_date: m.tournament.start_date, source_family: m.tournament.source_family || null, competition_key: m.tournament.competition_key || null }, list_depth: ranks.provenance?.truncated ? ranks.provenance.depth : null, sides: { A: side('A'), B: side('B') } };
+  return { id: m.id, event_type: m.event_type, round: m.round, status: m.status, winner_side: m.winner_side, retired_side: m.status === 'retired' ? (m.winner_side === 'A' ? 'B' : 'A') : null, best_of: m.best_of, sets: m.sets.map((s) => ({ A: s.A, B: s.B, tb: !!s.tb })), duration_s: m.duration_s, started_at: m.started_at, edition: { id: m.tournament.edition_id, level: m.tournament.level, name: m.tournament.name, surface: m.tournament.surface, start_date: m.tournament.start_date, source_family: m.tournament.source_family || null, competition_key: m.tournament.competition_key || null, atp_tier: atpTier?.tier || null, tier_registry: atpTier?.registry || null }, list_depth: ranks.provenance?.truncated ? ranks.provenance.depth : null, sides: { A: side('A'), B: side('B') } };
 }
 
 export async function detect(env, store, { now = new Date(), dry = false } = {}) {
@@ -70,8 +71,10 @@ export async function detect(env, store, { now = new Date(), dry = false } = {})
     const listKey = RANKING_LISTS[ms[0].event_type] || null;
     const pids = [...new Set(ms.flatMap((m) => ['A', 'B'].flatMap((s) => m.sides[s]?.players.map((p) => p.id) || [])))];
     const ranks = listKey ? await rankAt(store, pids, ms[0].tournament.start_date, listKey) : new Map();
+    // ESPN ATP editions carry no level: the reviewed registry's tier (null when unknown) weights materiality
+    const atpTier = ['MS', 'MD', 'XD'].includes(ms[0].event_type) && !ms[0].tournament.level ? await atpTierForEdition(ms[0].tournament.edition_id) : null;
     for (const m of ms) {
-      const evs = await detectMatchEvents(detectorInput(m, ranks));
+      const evs = await detectMatchEvents(detectorInput(m, ranks, atpTier));
       if (!evs.length) continue;
       evs.sort((a, b) => b.materiality - a.materiality);
       const [top, ...rest] = evs;

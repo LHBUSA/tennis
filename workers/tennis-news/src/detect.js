@@ -5,7 +5,7 @@
 // materiality score. A kind is only emitted when the stored facts PROVE it; kinds that need history we do
 // not hold yet are listed in GATED_KINDS with the reason, never approximated.
 
-export const DETECTOR_VERSION = 'tennis-detect/1.1.0';
+export const DETECTOR_VERSION = 'tennis-detect/1.2.0';
 
 // Kinds that need career-complete history. Our match history starts 2024-12; ranking history is still
 // backfilling. "First" and "career-high" claims are unprovable until coverage says otherwise.
@@ -18,7 +18,7 @@ export const GATED_KINDS = Object.freeze({
   dna_movement: 'needs mature historical DNA snapshots'
 });
 
-const TOUR_WEIGHT = { 'Grand Slam': 30, 'WTA 1000': 22, 'WTA 500': 15, 'WTA 250': 10, 'WTA 125': 6 };
+const TOUR_WEIGHT = { 'Grand Slam': 30, 'WTA 1000': 22, 'WTA 500': 15, 'WTA 250': 10, 'WTA 125': 6, 'ATP Masters 1000': 22, 'ATP 500': 15, 'ATP 250': 10 };
 const levelWeight = (level) => TOUR_WEIGHT[level] ?? (/1000/.test(level || '') ? 22 : /500/.test(level || '') ? 15 : /250/.test(level || '') ? 10 : 5);
 /**
  * Materiality weight of the edition. ESPN (secondary ATP source) publishes no tournament level; its ATP league lists
@@ -27,6 +27,8 @@ const levelWeight = (level) => TOUR_WEIGHT[level] ?? (/1000/.test(level || '') ?
  */
 export function tourWeight(edition = {}, eventType = null) {
   if (edition.level) return levelWeight(edition.level);
+  // reviewed ATP tier registry (workers/shared/atp-tiers.js): same scale as the WTA levels; unknown -> the default below
+  if (edition.atp_tier) return levelWeight(edition.atp_tier);
   if (edition.competition_key === 'grand_slam') return TOUR_WEIGHT['Grand Slam'];
   if (edition.competition_key === 'atp_finals') return 22;
   if (edition.source_family === 'espn' && ['MS', 'MD', 'XD'].includes(eventType)) return 10;
@@ -62,7 +64,7 @@ export async function detectMatchEvents(m) {
   const ids = [...w.players, ...l.players].map((p) => p.id);
   const asOf = m.id;
   const base = tourWeight(m.edition || {}, m.event_type) + (isMain(m.round) ? ROUND_WEIGHT[roundOf(m.round)] || 0 : 0);
-  const push = async (kind, materiality, facts) => out.push({ kind, event_id: await eventId(kind, [m.id], asOf), match_id: m.id, entity_ids: ids, occurred_at: m.started_at || m.edition?.start_date || null, materiality: clamp(materiality), facts, detector: DETECTOR_VERSION });
+  const push = async (kind, materiality, facts) => out.push({ kind, event_id: await eventId(kind, [m.id], asOf), match_id: m.id, entity_ids: ids, occurred_at: m.started_at || m.edition?.start_date || null, materiality: clamp(materiality), facts: m.edition?.atp_tier ? { ...facts, edition_tier: m.edition.atp_tier, tier_registry: m.edition.tier_registry } : facts, detector: DETECTOR_VERSION });
 
   if (m.status === 'walkover') {
     // a withdrawal is news only at the top of the draw; the reason is never stated (not in the source)
