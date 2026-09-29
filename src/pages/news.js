@@ -120,7 +120,7 @@ export function leadStory(a) {
 }
 
 /** MAJOR story: smaller scale, text-led with a small photo. */
-function majorStory(a, withImg = true) {
+export function majorStory(a, withImg = true) {
   const v = withImg ? heroVisual(a.media?.hero, { card: true }) : '';
   return html`<article class="nf-major${v ? ' has-img' : ''}">
     ${v ? html`<a class="nf-major-img" href="${storyHref(a)}" tabindex="-1" aria-hidden="true">${v}</a>` : ''}

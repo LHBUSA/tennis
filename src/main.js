@@ -9,6 +9,7 @@ import './styles/components.css';
 import './styles/news.css';
 import './styles/news-modules.css';
 import './styles/theme.css';
+import './styles/home.css';
 import './styles/pbecast.css';
 import './styles/pbecast-v2.css';
 import './styles/pbecast-v3.css';
