@@ -39,11 +39,14 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0 };
   const out = [];
   let stillLive = editions;
+  let lastRoundMs = 0;
   for (let i = 0; i < rounds && stillLive.length; i += 1) {
     if (i) {
-      if (Date.now() - t0 + gapMs > budgetMs) break;
+      // the next round must FINISH inside the budget: elapsed + gap + the last round's own duration
+      if (Date.now() - t0 + gapMs + lastRoundMs > budgetMs) break;
       await sleep(gapMs);
     }
+    const r0 = Date.now();
     const next = [];
     for (const ed of stillLive) {
       let provider;
@@ -53,6 +56,7 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
       if (r.state === 'PASS' && r.live) next.push(ed);
     }
     stillLive = next;
+    lastRoundMs = Date.now() - r0;
   }
   const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out };
   await kv.put('tennis-live:last_run', JSON.stringify(s));
