@@ -1,11 +1,17 @@
 {
-  "checked_at": "2026-09-29T13:36:49.187Z",
-  "result": "FAIL",
+  "checked_at": "2026-09-29T14:32:16.347Z",
+  "result": "PASS",
   "checks": [
     {
       "name": "no duplicate canonical singles matches (edition + event + stage + pair)",
-      "result": "FAIL",
-      "duplicate_groups": 17
+      "result": "PASS",
+      "duplicate_groups": 0
+    },
+    {
+      "name": "superseded rows point at a live survivor and hold no natural key",
+      "result": "PASS",
+      "superseded": 2,
+      "bad": 0
     },
     {
       "name": "v2 snapshots: tour always the player's own (ATP/WTA never mixed)",
@@ -759,11 +765,8 @@
     },
     {
       "name": "UI 1440 /dna",
-      "result": "FAIL",
-      "fails": [
-        "match_dna_missing",
-        "surface_table_missing"
-      ]
+      "result": "PASS",
+      "fails": []
     },
     {
       "name": "UI 1440 /dna?metric=match_win_rate&tour=atp",
@@ -872,11 +875,8 @@
     },
     {
       "name": "UI 390 /dna",
-      "result": "FAIL",
-      "fails": [
-        "match_dna_missing",
-        "surface_table_missing"
-      ]
+      "result": "PASS",
+      "fails": []
     },
     {
       "name": "UI 390 /dna?metric=match_win_rate&tour=atp",

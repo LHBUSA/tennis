@@ -32,7 +32,36 @@ Release: main 3a734be, 8aa2197, 6207869, 4c821d3, then Worker/QA follow-ups. Ver
 - scripts/qa/browser-gate.mjs: PASS 147 checks (21 routes x 320/360/390/430/768/1024/1440).
 - scripts/qa/dna-v2.mjs: UI checks pass; data check FAIL — 17 duplicate canonical singles groups (below).
 
-## Open data defects (pre-existing, not created by this release)
+## Follow-up (same day, second pass)
+
+### China Open duplicates — FIXED (c71aa64, live b61c99e9 / ingest 80c60a07)
+- Cause: the pre-natural-key tennis-live bundle (26ac259c) wrote the official WTA rows without a natural_key (invisible
+  to the unique index) next to ESPN WTA-league fixtures; the current writer's key then collided and rejected the
+  OFFICIAL row on every write (15 official fixtures frozen since 12:57Z; their live scores would have been dropped).
+- Fix: writer fixture identity (sameFixture): our own higher-precedence row absorbs a lower-precedence row of the same
+  fixture (same edition/event/stage/pair; rounds veto only within one notation; scheduled times within 36 h when both
+  known; a stored result is never dropped; evented rows never touched). Regression tests reproduce 1 and 15 pairs.
+- Production: 15 duplicate_merged; 15 survivors all official (wta) rows with natural_key; 15 ESPN ids moved onto
+  them; 0 ids or rows left behind; China Open duplicate groups 0.
+
+### Adana orphans — TOMBSTONED (migration 20260929000100, applied)
+- Not deletable: tennis_match_events is append-only (trigger) and references tennis_matches without ON DELETE; each
+  orphan holds 1 observed event.
+- New explicit state: status 'superseded' + superseded_by (checked both-or-neither, never itself), natural_key
+  cleared. c69ab2e1 -> cc53d141, 4d49ce38 -> db28134a, logged kind 'superseded'. Writer candidates and API list
+  readers exclude superseded rows. Constraints added NOT VALID then validated; ledger row recorded.
+
+### ATP news tiers — LIVE (2727246, news c28cf9ec)
+- workers/shared/atp-tiers.js (atp-tiers/2026-09-29.1): Masters 1000 / 500 / 250 per ESPN tournament id with season
+  ranges (2025 upgrades split), resolved via editionId(tournamentId('espn:<tid>'), year) — verified equal to the
+  production China Open 2026 edition 81fb3ab5. Unknown events keep the 250 floor. Publish bar 60 unchanged.
+- Materiality parity: ATP 500 title 63 = WTA 500 title 63; ATP/WTA 250 title 58 (below 60 for both tours).
+- Audit re-run (dry run on the candidate, 72 h window): 72 candidates, 38 ATP, 20 WTA. Top ATP: two 250 titles
+  (Chengdu, Hangzhou) at 58, an upset at 48 — none qualifies, exactly as a WTA 250 title does not. No ATP story is
+  published yet because none has qualified; the Tokyo / Beijing (ATP 500) and Shanghai (1000) results will be
+  weighted on the same scale as WTA 500 / 1000.
+
+## Defects found in the first pass (superseded by the follow-up above)
 - China Open 2026 WS: 15 pairs of scheduled rows — ESPN WTA-league fixture (round '1', written 09:54) and the official
   WTA row (round 'M-7'). crossSource does not map WTA's opaque round ids to ESPN round numbers for fixtures, so neither
   takes over the other. Schedule can list both until the match is played.

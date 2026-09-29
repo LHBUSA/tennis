@@ -17,8 +17,11 @@ const checks = [];
 const add = (name, pass, detail = {}) => { checks.push({ name, result: pass ? 'PASS' : 'FAIL', ...detail }); console.log(`${pass ? 'PASS' : 'FAIL'} ${name} ${JSON.stringify(detail).slice(0, 220)}`); };
 
 // global data checks
-const [dup] = sql(`with k as (select m.edition_id, m.event_type, case when m.round like 'Q-%' then 'q' when m.round='RR' then 'rr' else 'm' end st, least(a.participant_key,b.participant_key) x, greatest(a.participant_key,b.participant_key) y from tennis_matches m join tennis_match_participants a on a.match_id=m.match_id and a.side='A' join tennis_match_participants b on b.match_id=m.match_id and b.side='B' where m.event_type in ('MS','WS')) select count(*) groups from (select 1 from k group by edition_id, event_type, st, x, y having count(*) > 1) d`);
+const [dup] = sql(`with k as (select m.edition_id, m.event_type, case when m.round like 'Q-%' then 'q' when m.round='RR' then 'rr' else 'm' end st, least(a.participant_key,b.participant_key) x, greatest(a.participant_key,b.participant_key) y from tennis_matches m join tennis_match_participants a on a.match_id=m.match_id and a.side='A' join tennis_match_participants b on b.match_id=m.match_id and b.side='B' where m.event_type in ('MS','WS') and m.status <> 'superseded') select count(*) groups from (select 1 from k group by edition_id, event_type, st, x, y having count(*) > 1) d`);
 add('no duplicate canonical singles matches (edition + event + stage + pair)', Number(dup.groups) === 0, { duplicate_groups: Number(dup.groups) });
+// tombstones (migration 20260929000100): every superseded row points at an existing, non-superseded survivor
+const [tomb] = sql(`select count(*) n, count(*) filter (where s.match_id is null or s.status = 'superseded' or t.natural_key is not null) bad from tennis_matches t left join tennis_matches s on s.match_id = t.superseded_by where t.status = 'superseded'`);
+add('superseded rows point at a live survivor and hold no natural key', Number(tomb.bad) === 0, { superseded: Number(tomb.n), bad: Number(tomb.bad) });
 const [mix] = sql(`select count(*) n from tennis_dna_snapshots s join tennis_players p using (pbe_player_id) where s.definition_version=2 and ((p.gender='M' and s.metrics->>'_tour'<>'ATP') or (p.gender='F' and s.metrics->>'_tour'<>'WTA'))`);
 add('v2 snapshots: tour always the player\'s own (ATP/WTA never mixed)', Number(mix.n) === 0, { mismatched: Number(mix.n) });
 const [v1] = sql(`select count(*) n, max(as_of) as_of from tennis_dna_snapshots where definition_version=1`);
