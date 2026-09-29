@@ -24,7 +24,7 @@ const sql = (q) => {
 // no ORDER BY" query was crowded out by bulk historical rewrites) is recorded too. The newsroom's first detection run was
 // 2026-09-26T16:56:05Z (every event it found was a launch catch-up).
 const CURRENT_ARCH_FROM = '2026-09-29T16:50:00Z';
-const DETECTION_FIX_AT = process.env.DETECTION_FIX_AT || '2026-09-29T19:00:00Z';
+const DETECTION_FIX_AT = process.env.DETECTION_FIX_AT || '2026-09-29T18:22:00Z';
 const FIRST_RUN = Date.parse('2026-09-26T16:56:05Z');
 function classifyOutlier(r) {
   const t = Date.parse(r.detected_at);

@@ -28,11 +28,14 @@ const byRich = [...details].sort((a, b) => richness(b) - richness(a));
 const rich = byRich[0]?.slug || null;
 const thin = byRich.at(-1)?.slug || null;
 const ARTICLES = details.map((d) => `/news/${d.slug}`);
+// V3 backfills (API freshness.is_backfill): their cards and article meta must show the EVENT date, never publication-relative time
+const BACKFILL = details.filter((d) => d.freshness?.is_backfill).map((d) => d.slug);
 
 const fails = [];
 const rows = [];
 const report = [];
 const linkSet = new Set();
+let histChecked = 0;
 const fail = (w, path, msg) => fails.push(`${w}px ${path}: ${msg}`);
 
 const browser = await chromium.launch({ executablePath: CHROME });
@@ -83,7 +86,29 @@ for (const w of WIDTHS) {
         h3: [...document.querySelectorAll('#main h3')].map((h) => h.textContent.trim().replace(/\s+/g, ' ')).slice(0, 20)
       };
     }, path.split('/').length > 2 && !DESKS.includes(path));
+    const clocks = await page.evaluate(([bf, here]) => {
+      const out = [];
+      let hist = 0;
+      for (const a of document.querySelectorAll('#main a[href^="/news/"]')) {
+        const slug = a.getAttribute('href').split('/')[2];
+        if (!bf.includes(slug) || slug === here) continue;
+        const box = a.closest('article, li') || a.parentElement;
+        const t = box?.querySelector('time');
+        if (!t) continue;
+        hist += 1;
+        const txt = t.textContent.trim();
+        if (/ago|just now/i.test(txt) || !/^Match /.test(txt)) out.push(`${slug}: "${txt}"`);
+      }
+      if (bf.includes(here)) {
+        const t = document.querySelector('.nwm-meta time');
+        hist += 1;
+        if (!t || !/^Match /.test(t.textContent.trim())) out.push(`article meta: "${t?.textContent.trim() || 'none'}"`);
+      }
+      return { hist, bad: [...new Set(out)] };
+    }, [BACKFILL, path.split('/')[2] || '']);
+    histChecked += clocks.hist;
     const bad = [];
+    if (clocks.bad.length) bad.push(`backfilled story shown as fresh: ${clocks.bad.slice(0, 3).join(' | ')}`);
     if (r.sw > r.iw) bad.push(`overflow ${r.sw}>${r.iw}`);
     // the wire shows a bounded window (14 desktop / 8 phone) until 'Show more': a CSS rule must never un-hide the rest
     if (r.wireVisible > (w < 768 ? 8 : 14)) bad.push(`wire shows ${r.wireVisible} rows before 'Show more' (max ${w < 768 ? 8 : 14})`);
@@ -133,5 +158,5 @@ const md = [`# Newsroom V3 UI — ${new Date().toISOString()}`, '', `Base ${BASE
 fs.mkdirSync('docs/evidence', { recursive: true });
 fs.writeFileSync('docs/evidence/news-v3-ui-latest.md', md.join('\n') + '\n');
 console.log(`pages ${DESKS.length + ARTICLES.length} x widths ${WIDTHS.length} = ${rows.length} checks; links ${checks.length}`);
-console.log(fails.length ? `NEWS V3 UI: FAIL (${fails.length})\n${fails.slice(0, 60).join('\n')}` : `NEWS V3 UI: PASS (${rows.length} page x width checks)`);
+console.log(fails.length ? `NEWS V3 UI: FAIL (${fails.length})\n${fails.slice(0, 60).join('\n')}` : `NEWS V3 UI: PASS (${rows.length} page x width checks; ${histChecked} backfilled-story clocks verified; ${BACKFILL.length} backfill articles)`);
 process.exitCode = fails.length ? 1 : 0;
