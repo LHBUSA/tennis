@@ -28,6 +28,9 @@ import { espnExtrasStep } from './espn-extras-job.js';
 import { editionMergeStep } from './edition-merge-job.js';
 import { runRetention } from './dna-retention.js';
 import { candidateMatchIds } from './writer.js';
+import { officialEditionMatches, tallyEditions } from './espn-jobs.js';
+import { playerRows } from './wta-history-job.js';
+import { legacyOfficialEditionMatches, legacyPlayerRows } from './participant-first-legacy.js';
 import { STORE_5XX, BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
@@ -80,6 +83,47 @@ async function step(ctx, name, fn) {
  * participant-first query side by side and reports counts, timings and set equality. Writes nothing.
  */
 export async function runProbe(ctx, params) { return candidateProbe(ctx, params); }
+
+/**
+ * READ-ONLY parity probes for the two other participant-first queries (2026-09-28).
+ * espn_map_probe: for each edition id, the event window + its WS pairs as input; old vs new candidate maps -> the SAME
+ *   tally (edition -> pair hits) and decision. history_probe: for each player id, old vs new player rows (identical
+ *   rows in identical order). Timings per path; no writes.
+ */
+export async function espnMapProbe(ctx, params) {
+  const store = ctx.store;
+  const out = [];
+  for (const edId of (params.editions || '').split(',').filter((x) => /^[0-9a-f-]{36}$/.test(x))) {
+    const [e] = await store.select('tennis_tournament_editions', `select=edition_id,year,start_date,end_date,name&edition_id=eq.${edId}`);
+    if (!e?.start_date || !e?.end_date) { out.push({ edition: edId, skipped: 'no dates' }); continue; }
+    const ms = await store.select('tennis_matches', `select=match_id,tennis_match_participants(participant_key)&edition_id=eq.${edId}&event_type=eq.WS&limit=1000`);
+    const pairs = new Set(ms.map((m) => m.tennis_match_participants.map((p) => p.participant_key)).filter((k) => k.length === 2).map((k) => [...k].sort().join('~')));
+    const keys = [...new Set([...pairs].flatMap((p) => p.split('~')))];
+    const lo = Date.parse(e.start_date) - 3 * 86400e3;
+    const hi = Date.parse(e.end_date) + 3 * 86400e3;
+    const t0 = Date.now(); const legacy = await legacyOfficialEditionMatches(store, e.year, keys); const legacyMs = Date.now() - t0;
+    const t1 = Date.now(); const next = await officialEditionMatches(store, e.year, lo, hi, keys); const newMs = Date.now() - t1;
+    const flat = (t) => JSON.stringify([...t.values()].map((x) => [x.edition_id, x.hit, x.source_family, x.surface ?? null, x.indoor ?? null, x.name ?? null]).sort());
+    const a = tallyEditions(legacy, pairs, lo, hi);
+    const b = tallyEditions(next, pairs, lo, hi);
+    out.push({ edition: edId, name: e.name, pairs: pairs.size, keys: keys.length, legacy_rows: legacy.size, new_rows: next.size, legacy_ms: legacyMs, new_ms: newMs, tally_equal: flat(a) === flat(b), candidate_editions: b.size, top_hit: Math.max(0, ...[...b.values()].map((x) => x.hit)) });
+  }
+  return { probe: 'espn_map', read_only: true, cases: out };
+}
+
+export async function historyProbe(ctx, params) {
+  const store = ctx.store;
+  const out = [];
+  for (const pid of (params.player || '').split(',').filter((x) => /^[0-9a-f-]{36}$/.test(x))) {
+    const mem = await store.select('tennis_participant_members', `select=participant_key&pbe_player_id=eq.${pid}`);
+    const mine = new Set(mem.map((m) => m.participant_key));
+    if (!mine.size) { out.push({ player: pid, keys: 0, legacy_rows: 0, new_rows: 0, equal: true }); continue; }
+    const t0 = Date.now(); const legacy = await legacyPlayerRows(store, mine); const legacyMs = Date.now() - t0;
+    const t1 = Date.now(); const next = await playerRows(store, mine); const newMs = Date.now() - t1;
+    out.push({ player: pid, keys: mine.size, doubles_keys: [...mine].filter((k) => k.startsWith('D:')).length, legacy_rows: legacy.length, new_rows: next.length, legacy_ms: legacyMs, new_ms: newMs, equal: JSON.stringify(legacy) === JSON.stringify(next) });
+  }
+  return { probe: 'history', read_only: true, cases: out };
+}
 async function candidateProbe(ctx, params) {
   const store = ctx.store;
   let eds = (params.editions || '').split(',').filter((x) => /^[0-9a-f-]{36}$/.test(x));
@@ -445,7 +489,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const b = Math.max(1, Math.min(Number(budget) || 20, 120));
   const day = /^\d{4}-\d{2}-\d{2}$/;
   const asOfs = String(params.as_of || '').split(',').filter((d) => day.test(d));
-  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), candidate_probe: () => candidateProbe(ctx, params), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => (params.dry === 'full' ? dryFullBuild(ctx, asOfs, params) : buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' })) };
+  const fns = { espn_atp: () => espnAtpStep(ctx, { budget: b }), espn_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40) }), espn_wta: () => espnWtaStep(ctx, { budget: b }), wta_history: () => wtaHistoryStep(ctx, { admin: true, resume: /^\d+:\d+$/.test(params.resume || '') ? { i: Number(params.resume.split(':')[0]), page: Number(params.resume.split(':')[1]) } : null, pages: Math.min(b, 8), shard: Math.max(0, Number(params.shard) || 0), shards: Math.min(8, Math.max(1, Number(params.shards) || 1)) }), espn_wta_rankings: () => espnRankingStep(ctx, { weeks: Math.min(b, 40), league: 'wta' }), wta_edition_facts: () => wtaEditionFactsStep(ctx, { pages: Math.min(b, 10) }), wta_records: () => wtaRecordsStep(ctx, { budget: Math.min(b, 60) }), espn_extras: () => espnExtrasStep(ctx, { budget: Math.min(b, 120) }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), edition_merge: () => editionMergeStep(ctx, { items: Math.min(b, 60), dry: params.write === '0' }), candidate_probe: () => candidateProbe(ctx, params), espn_map_probe: () => espnMapProbe(ctx, params), history_probe: () => historyProbe(ctx, params), dna_retention: () => runRetention(ctx, { today: iso(new Date()), write: params.write === '1' }), dna_v2: () => (params.dry === 'full' ? dryFullBuild(ctx, asOfs, params) : buildDnaV2(ctx, { ...(asOfs.length ? { asOfs } : {}), write: params.write !== '0', mode: params.mode === 'auto' ? 'auto' : 'full' })) };
   if (!fns[lane]) return { ok: false, error: 'unknown lane', lanes: Object.keys(fns) };
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;

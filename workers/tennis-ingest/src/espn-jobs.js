@@ -456,6 +456,68 @@ async function reconcile(ctx, list, idMap, idc, official, league) {
  * canonical Slam edition; the one holding the most of the event's resolved singles pairs wins when that is at
  * least max(2, 30%) of them and no other candidate ties. No proof -> null (the ESPN edition is used).
  */
+/**
+ * Candidate step of mapOfficialEdition (2026-09-28, bounded): the women's singles matches of the incoming players in
+ * the same-year editions whose dates overlap [lo, hi] and whose source is not espn -> match_id -> { keys, m }.
+ * EDITION-FIRST: the editions of that window are read first (one small query), then their WS matches with only the
+ * incoming participants embedded (!inner), ordered by (edition_id, match_id), editions in groups of 8, keyset paging.
+ * The previous form read every WS participant row of the players for the whole year through an inner LATERAL ordered
+ * by match_id (mean 844 ms, max 7.9 s against the 8 s statement timeout). The tally below applies the same window /
+ * source rules, so the decision is unchanged; matches of editions outside the window are simply not fetched.
+ */
+export async function officialEditionMatches(store, year, lo, hi, keys, { edGroup = 8, keyBatch = 60, page = 1000 } = {}) {
+  const byMatch = new Map();
+  if (!keys.length) return byMatch;
+  const day = (t) => new Date(t).toISOString().slice(0, 10);
+  const eds = [];
+  for (let after = null; ;) {
+    const r = await store.select('tennis_tournament_editions', `select=edition_id,year,start_date,end_date,source_family,surface,indoor,name&year=eq.${year}&start_date=lte.${day(hi)}&end_date=gte.${day(lo)}${after ? `&edition_id=gt.${after}` : ''}&order=edition_id.asc&limit=${page}`);
+    eds.push(...r);
+    if (r.length < page) break;
+    after = r.at(-1).edition_id;
+  }
+  // espn editions are never a mapping target (the tally skips them); a null source is kept, as before
+  const meta = new Map(eds.filter((x) => x.source_family !== 'espn').map((x) => [x.edition_id, x]));
+  const ids = [...meta.keys()];
+  const sel = 'select=match_id,edition_id,event_type,tennis_match_participants!inner(participant_key)';
+  const take = (rows) => { for (const r of rows) { if (!byMatch.has(r.match_id)) byMatch.set(r.match_id, { keys: [], m: { edition_id: r.edition_id, event_type: r.event_type, tennis_tournament_editions: meta.get(r.edition_id) } }); byMatch.get(r.match_id).keys.push(...r.tennis_match_participants.map((p) => p.participant_key)); } };
+  for (let i = 0; i < keys.length; i += keyBatch) {
+    const kf = `tennis_match_participants.participant_key=${inList(keys.slice(i, i + keyBatch))}`;
+    for (let g = 0; g < ids.length; g += edGroup) {
+      const group = ids.slice(g, g + edGroup);
+      const rows = await store.select('tennis_matches', `${sel}&event_type=eq.WS&edition_id=${inList(group)}&${kf}&order=edition_id.asc,match_id.asc&limit=${page}`);
+      take(rows);
+      if (rows.length < page) continue;
+      // a full page: finish each edition of the group with a single-edition keyset (never OFFSET); the Map dedupes
+      for (const ed of group) {
+        for (let after = null; ;) {
+          const more = await store.select('tennis_matches', `${sel}&event_type=eq.WS&edition_id=eq.${ed}&${kf}${after ? `&match_id=gt.${after}` : ''}&order=match_id.asc&limit=${page}`);
+          for (const r of more) if (!rows.some((x) => x.match_id === r.match_id)) take([r]);
+          if (more.length < page) break;
+          after = more.at(-1).match_id;
+        }
+      }
+    }
+  }
+  for (const v of byMatch.values()) v.keys = [...new Set(v.keys)];
+  return byMatch;
+}
+
+/** Per candidate edition: how many of the event's resolved singles pairs it already holds (window + source rules). */
+export function tallyEditions(byMatch, pairs, lo, hi) {
+  const tally = new Map();
+  for (const { keys: ks, m } of byMatch.values()) {
+    const ed = m.tennis_tournament_editions;
+    if (!ed || ed.source_family === 'espn' || !ed.start_date || !ed.end_date) continue;
+    if (!(Date.parse(ed.start_date) <= hi && Date.parse(ed.end_date) >= lo)) continue;
+    if (ks.length !== 2 || !pairs.has([...ks].sort().join('~'))) continue;
+    const t = tally.get(m.edition_id) || { edition_id: m.edition_id, surface: ed.surface, indoor: ed.indoor, name: ed.name, source_family: ed.source_family, hit: 0 };
+    t.hit += 1;
+    tally.set(m.edition_id, t);
+  }
+  return tally;
+}
+
 export async function mapOfficialEdition(store, parsed, idMap) {
   const e = parsed.edition;
   if (!e.start_date || !e.end_date) return null;
@@ -473,24 +535,8 @@ export async function mapOfficialEdition(store, parsed, idMap) {
   // candidate editions found THROUGH the players: their women's singles matches of that year, grouped by edition
   // (a date-window scan of editions drowns in same-fortnight ITF events)
   const keys = [...new Set([...pairs].flatMap((p) => p.split('~')))];
-  const byMatch = new Map();
-  for (let i = 0; i < keys.length; i += 60) {
-    for (let off = 0; ; off += 1000) {
-      const rows = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,tennis_tournament_editions!inner(year,start_date,end_date,source_family,surface,indoor,name))&participant_key=${inList(keys.slice(i, i + 60))}&tennis_matches.event_type=eq.WS&tennis_matches.tennis_tournament_editions.year=eq.${e.year}&order=match_id.asc&limit=1000&offset=${off}`);
-      for (const r of rows) { if (!byMatch.has(r.match_id)) byMatch.set(r.match_id, { keys: [], m: r.tennis_matches }); byMatch.get(r.match_id).keys.push(r.participant_key); }
-      if (rows.length < 1000) break;
-    }
-  }
-  const tally = new Map();
-  for (const { keys: ks, m } of byMatch.values()) {
-    const ed = m.tennis_tournament_editions;
-    if (!ed || ed.source_family === 'espn' || !ed.start_date || !ed.end_date) continue;
-    if (!(Date.parse(ed.start_date) <= hi && Date.parse(ed.end_date) >= lo)) continue;
-    if (ks.length !== 2 || !pairs.has([...ks].sort().join('~'))) continue;
-    const t = tally.get(m.edition_id) || { edition_id: m.edition_id, surface: ed.surface, indoor: ed.indoor, name: ed.name, source_family: ed.source_family, hit: 0 };
-    t.hit += 1;
-    tally.set(m.edition_id, t);
-  }
+  const byMatch = await officialEditionMatches(store, e.year, lo, hi, keys);
+  const tally = tallyEditions(byMatch, pairs, lo, hi);
   if (e.slam) {
     const slam = Object.values(espn.ESPN_SLAMS).find((x) => x.key === e.slam);
     const sid = await editionId(await tournamentId(`slam:${slam.key}`), e.year);

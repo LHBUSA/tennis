@@ -36,17 +36,32 @@ async function buildQueue(ctx, prev = []) {
   return [...new Set([...prev, ...top])];
 }
 
+/**
+ * Every participant row of the player's keys with its match (2026-09-28, bounded): ONE key per statement (equality on
+ * tennis_match_participants_key) with a match_id keyset, never OFFSET, then sorted by match_id -- the exact rows and
+ * order of the previous single query over the whole key list (which the planner could run as a walk of the whole
+ * participants primary key under ORDER BY match_id + LIMIT: mean 631 ms, max 7.3 s). Each statement is bounded by one
+ * key's career (a player's singles key, or one doubles partnership).
+ */
+export async function playerRows(store, mine, { page = 1000 } = {}) {
+  const rows = [];
+  for (const key of mine) {
+    for (let after = null; ;) {
+      const part = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,round,source_family,tennis_tournament_editions(start_date,end_date,source_family),tennis_match_participants(participant_key))&participant_key=eq.${encodeURIComponent(key)}${after ? `&match_id=gt.${after}` : ''}&order=match_id.asc&limit=${page}`);
+      rows.push(...part);
+      if (part.length < page) break;
+      after = part.at(-1).match_id;
+    }
+  }
+  return rows.sort((a, b) => (a.match_id < b.match_id ? -1 : a.match_id > b.match_id ? 1 : a.participant_key < b.participant_key ? -1 : 1));
+}
+
 /** The player's existing canonical matches in ANY edition: `${event}|${stage}|${opponentKey}` -> [{ match_id, edition_id, source, start, end }]. */
 async function playerIndex(store, pid) {
   const mem = await store.select('tennis_participant_members', `select=participant_key&pbe_player_id=eq.${pid}`);
   if (!mem.length) return new Map();
   const mine = new Set(mem.map((m) => m.participant_key));
-  const rows = [];
-  for (let off = 0; ; off += 1000) {
-    const page = await store.select('tennis_match_participants', `select=match_id,participant_key,tennis_matches!inner(edition_id,event_type,round,source_family,tennis_tournament_editions(start_date,end_date,source_family),tennis_match_participants(participant_key))&participant_key=${inList([...mine])}&order=match_id.asc&limit=1000&offset=${off}`);
-    rows.push(...page);
-    if (page.length < 1000) break;
-  }
+  const rows = await playerRows(store, mine);
   const idx = new Map();
   for (const r of rows) {
     const m = r.tennis_matches;

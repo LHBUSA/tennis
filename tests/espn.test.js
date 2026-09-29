@@ -467,27 +467,30 @@ test('WTA: an ESPN women\'s match attaches to the official WTA row (round M-F ==
 
 test('WTA: ESPN event mapped to the official edition only when shared singles pairs prove it (found through the players)', async () => {
   const { mapOfficialEdition } = await import('../workers/tennis-ingest/src/espn-jobs.js');
+  const { MemStore } = await import('./helpers/memstore.js');
   const official = '00000000-0000-4000-8000-00000000e0f1';
   const nextWeek = '00000000-0000-4000-8000-00000000e0f2';
+  const espnEd = '00000000-0000-4000-8000-00000000e0f3';
   const pid = (x) => mintPlayerId('wta', x);
-  const ed = (id, start, end, src = 'wta', name = 'Madrid (WTA)') => ({ edition_id: id, event_type: 'WS', tennis_tournament_editions: { year: 2025, start_date: start, end_date: end, source_family: src, surface: 'clay', indoor: false, name } });
-  const rows = [];
+  const s = new MemStore();
+  s.rows('tennis_tournament_editions').push(
+    { edition_id: official, year: 2025, start_date: '2025-04-21', end_date: '2025-05-04', source_family: 'wta', surface: 'clay', indoor: false, name: 'Madrid (WTA)' },
+    { edition_id: nextWeek, year: 2025, start_date: '2025-05-06', end_date: '2025-05-18', source_family: 'wta', surface: 'clay', indoor: false, name: 'Rome (WTA)' },
+    { edition_id: espnEd, year: 2025, start_date: '2025-04-21', end_date: '2025-05-04', source_family: 'espn', surface: null, indoor: null, name: 'ESPN copy' });
   let k = 0;
-  const add = (a, b, m) => { k += 1; rows.push({ match_id: `m${k}`, participant_key: a, tennis_matches: m }, { match_id: `m${k}`, participant_key: b, tennis_matches: m }); };
-  for (const [a, b] of [['1', '2'], ['3', '4'], ['5', '6']]) add(`S:${await pid(a)}`, `S:${await pid(b)}`, ed(official, '2025-04-21', '2025-05-04'));
-  add(`S:${await pid('1')}`, `S:${await pid('2')}`, ed(nextWeek, '2025-05-06', '2025-05-18', 'wta', 'Rome (WTA)')); // same pair, next tournament
-  add(`S:${await pid('3')}`, `S:${await pid('4')}`, ed('espn-ed', '2025-04-21', '2025-05-04', 'espn', 'ESPN copy'));
-  const writes = [];
-  const store = { select: async (t, q) => (t === 'tennis_match_participants' && /offset=0/.test(q) ? rows : []), upsert: async (t, r) => { writes.push([t, r]); return []; } };
+  const add = (a, b, edition) => { k += 1; const id = `m${k}`; s.rows('tennis_matches').push({ match_id: id, edition_id: edition, event_type: 'WS' }); s.rows('tennis_match_participants').push({ match_id: id, side: 'A', participant_key: a }, { match_id: id, side: 'B', participant_key: b }); };
+  for (const [a, b] of [['1', '2'], ['3', '4'], ['5', '6']]) add(`S:${await pid(a)}`, `S:${await pid(b)}`, official);
+  add(`S:${await pid('1')}`, `S:${await pid('2')}`, nextWeek); // same pair, next tournament
+  add(`S:${await pid('3')}`, `S:${await pid('4')}`, espnEd);
   const mk = (a, b) => ({ event_type: 'WS', sides: { A: [{ provider_id: a }], B: [{ provider_id: b }] } });
   const idMap = Object.fromEntries(['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((x) => [x, { provider: 'wta', provider_id: x }]));
   const parsed = { edition: { espn_event_id: '413-2025', year: 2025, start_date: '2025-04-22', end_date: '2025-05-04', slam: null }, matches: [mk('1', '2'), mk('3', '4'), mk('6', '5'), mk('7', '8')] };
-  const hit = await mapOfficialEdition(store, parsed, idMap);
+  const hit = await mapOfficialEdition(s, parsed, idMap);
   assert.equal(hit.edition_id, official, 'the next-week edition (dates outside the window) and ESPN copies never qualify');
   assert.equal(hit.surface, 'clay');
   assert.match(hit.evidence, /^3 of 4/);
-  assert.deepEqual(writes[0][1][0], { provider: 'espn_wta', external_id: '413-2025', edition_id: official });
-  const none = await mapOfficialEdition({ ...store, select: async () => rows.slice(0, 2) }, { ...parsed, matches: [mk('7', '8'), mk('1', '9')] }, idMap);
+  assert.deepEqual(s.rows('tennis_edition_external_ids')[0], { provider: 'espn_wta', external_id: '413-2025', edition_id: official });
+  const none = await mapOfficialEdition(s, { ...parsed, edition: { ...parsed.edition, espn_event_id: '414-2025' }, matches: [mk('7', '8'), mk('1', '9'), mk('1', '2')] }, idMap);
   assert.equal(none, null, 'one shared pair is not proof');
 });
 
