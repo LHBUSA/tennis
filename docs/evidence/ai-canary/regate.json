@@ -1,0 +1,187 @@
+{
+  "gates_version": "tennis-gates/4.0.1",
+  "generated_at": "2026-09-29T19:56:27.787Z",
+  "summary": {
+    "gpt-5.6-sol": {
+      "packets": 10,
+      "pass_at_run": 5,
+      "pass_now": 7
+    },
+    "gpt-6-astra": {
+      "packets": 10,
+      "pass_at_run": 7,
+      "pass_now": 9
+    }
+  },
+  "rows": [
+    {
+      "file": "01-title_c6c3a0767627972dd20c.json",
+      "category": "major match",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": false,
+      "gate_now": false,
+      "failures_now": [
+        "chart_narration: match_data reads out serve_comparison (4/4 figures)"
+      ]
+    },
+    {
+      "file": "01-title_c6c3a0767627972dd20c.json",
+      "category": "major match",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "02-upset_251a8bd4234b941e8882.json",
+      "category": "upset",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": false,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "02-upset_251a8bd4234b941e8882.json",
+      "category": "upset",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "03-comeback_d2aa0b9da3eb03f8653f.json",
+      "category": "routine match",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": false,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "03-comeback_d2aa0b9da3eb03f8653f.json",
+      "category": "routine match",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "04-seed_upset_a13d52bdb0dfada5e973.json",
+      "category": "player form",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "04-seed_upset_a13d52bdb0dfada5e973.json",
+      "category": "player form",
+      "model": "gpt-6-astra",
+      "gate_at_run": false,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "05-title_e660028e96db8d00025e.json",
+      "category": "ranking movement",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": false,
+      "gate_now": false,
+      "failures_now": [
+        "chart_narration: what_happened reads out match_flow (4/4 figures)",
+        "chart_narration: why_it_mattered reads out match_flow (5/6 figures)"
+      ]
+    },
+    {
+      "file": "05-title_e660028e96db8d00025e.json",
+      "category": "ranking movement",
+      "model": "gpt-6-astra",
+      "gate_at_run": false,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "06-title_48ee6282b99f8756fcf6.json",
+      "category": "tournament intelligence",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "06-title_48ee6282b99f8756fcf6.json",
+      "category": "tournament intelligence",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "07-seed_upset_f6fb5996b81e0f65ae19.json",
+      "category": "ATP",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": false,
+      "gate_now": false,
+      "failures_now": [
+        "chart_narration: what_happened reads out match_flow (4/4 figures)"
+      ]
+    },
+    {
+      "file": "07-seed_upset_f6fb5996b81e0f65ae19.json",
+      "category": "ATP",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "08-title_05137b105c38c7c3ac07.json",
+      "category": "WTA",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "08-title_05137b105c38c7c3ac07.json",
+      "category": "WTA",
+      "model": "gpt-6-astra",
+      "gate_at_run": false,
+      "gate_now": false,
+      "failures_now": [
+        "chart_narration: why_it_mattered reads out match_flow (4/4 figures)"
+      ]
+    },
+    {
+      "file": "09-title_b7901075d5a1699e136c.json",
+      "category": "rich packet",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "09-title_b7901075d5a1699e136c.json",
+      "category": "rich packet",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "10-doubles_title_4c60fd618db463e617c2.json",
+      "category": "thin but publishable",
+      "model": "gpt-5.6-sol",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    },
+    {
+      "file": "10-doubles_title_4c60fd618db463e617c2.json",
+      "category": "thin but publishable",
+      "model": "gpt-6-astra",
+      "gate_at_run": true,
+      "gate_now": true,
+      "failures_now": []
+    }
+  ]
+}

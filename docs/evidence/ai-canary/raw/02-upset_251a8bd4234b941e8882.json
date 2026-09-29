@@ -1,0 +1,181 @@
+{
+  "category": "upset",
+  "substitution": null,
+  "wall_ms": 33148,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "upset:251a8bd4234b941e8882",
+  "slug": "prozorova-beats-no-18-eala-in-the-singapore-round-2-251a8b",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "upset",
+  "frozen_at": "2026-09-29T16:55:06.442564+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "draw_path",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 17010
+  },
+  "baseline": {
+    "headline": "Prozorova beats No. 18 Eala in the Singapore round 2",
+    "words": 86,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6752,
+        "cached_input_tokens": 1094,
+        "output_tokens": 2349,
+        "reasoning_tokens": 1799
+      },
+      "response_id": "resp_017408e65599d38c016abc14e9539487d288f502ecac5ce061",
+      "latency_ms": 32639,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "numeric_grounding",
+            "detail": "10 not in packet. In: \"The archived pre-match form samples added context to that separation: Prozorova had 5 wins and 5 losses over her last 10 matches, while Eala had 8 wins and 2 lo\""
+          }
+        ]
+      },
+      "headline": "Prozorova completes three-set Singapore upset of Eala",
+      "dek": "The No. 180 player recovered to win 4-6, 7-5, 6-3 in 3 hours 9 minutes at the indoor hard-court WTA 500.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Prozorova advances in Singapore",
+          "paragraphs": [
+            "Tatiana Prozorova eliminated No. 3 seed Alexandra Eala in round 2, completing a demanding comeback after dropping the opening set. The official result sent Prozorova through with her 2nd win of the tournament, following her round 1 victory over Sofia Costoulas.",
+            "The best-of-3 match was completed without a retirement. It extended Prozorova’s run at an event where both of her matches have required a deciding set."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A major ranking upset",
+          "paragraphs": [
+            "On the official WTA singles list in force at the start of the tournament, Prozorova was No. 180 and Eala was No. 18. Eala’s seeding and ranking made this the defining upset of the Singapore round 2 results.",
+            "The archived pre-match form samples added context to that separation: Prozorova had 5 wins and 5 losses over her last 10 matches, while Eala had 8 wins and 2 losses. Prozorova overturned that contrast on the court rather than allowing Eala’s stronger recent results to dictate the match."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "First-serve strength offset second-serve pressure",
+          "paragraphs": [
+            "The official serve numbers show why the contest stayed tight. Prozorova won 64.1% of her first-serve points, compared with Eala’s 52.2%. That stronger production gave Prozorova a foundation even though she won only 31.1% behind her second serve.",
+            "Eala attacked that second serve effectively, winning 68.9% of those return points. Prozorova nevertheless handled the larger break-point burden more successfully, saving 64.7% of the chances she faced; Eala saved 41.7%."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "Conversion separated a match full of return pressure",
+          "paragraphs": [
+            "Both players produced sustained return pressure, but Prozorova used her opportunities more efficiently. She converted 58.3% of her break points, while Eala converted 35.3%. That edge in conversion, combined with Prozorova’s stronger first-serve results, explains how she survived Eala’s advantage against the second serve and completed the upset."
+          ]
+        }
+      ],
+      "words": 269,
+      "section_count": 4,
+      "evidence_families_used": [
+        "stats",
+        "dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 5,
+        "paragraphs_with_4plus_numbers": 2,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": 0.030699
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6752,
+        "cached_input_tokens": 1094,
+        "output_tokens": 720,
+        "reasoning_tokens": 136
+      },
+      "response_id": "resp_0c18430aec300bc2016abc14e94d2487d28cf7a28bead163e2",
+      "latency_ms": 17726,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Prozorova ousts Eala in Singapore comeback",
+      "dek": "Tatiana Prozorova won 4-6, 7-5, 6-3 in round 2, completing the upset in 3 hours 9 minutes.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A seeded exit in Singapore",
+          "paragraphs": [
+            "The indoor-hard WTA 500 event lost its No. 3 seed as Alexandra Eala fell to an opponent ranked well below her at the start of the tournament. On the official WTA singles list in force when the tournament began, Prozorova was No. 180 and Eala No. 18.",
+            "The ranking contrast framed the upset, but the match statistics show a narrower contest: Prozorova had the stronger return performance overall despite Eala’s pronounced advantage against second serves."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Pressure converted, not just created",
+          "paragraphs": [
+            "Prozorova’s service foundation was her first delivery: she won 64.1% of those points, compared with Eala’s 52.2%. That advantage mattered because her second serve was considerably more exposed. Eala repeatedly found success there, but that return strength did not extend equally across Prozorova’s service game.",
+            "Eala won 68.9% of second-serve return points against Prozorova’s 53.7%. The distinction is important: the loser was more effective in that specific exchange, while Prozorova’s stronger returns against the first serve helped her win a larger share of return points overall.",
+            "The break-point figures show how Prozorova made that pressure count. She converted 58.3% of her opportunities, compared with Eala’s 35.3%, and saved 64.7% of the break points she faced. Her success was not built on avoiding danger, but on limiting its consequences."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "Another recovery in the draw",
+          "paragraphs": [
+            "Prozorova had already come from a set down against Sofia Costoulas in round 1. That earlier recovery included a tiebreak; against Eala, she again overturned an opening-set loss to keep her Singapore run going.",
+            "The tournament also provides a contrast with Prozorova’s recent archived results, which include defeats to Kristina Liutova in US Open qualifying and Anastasia Zakharova at Landisville. In Singapore, she has followed her win over Costoulas by eliminating a seeded opponent."
+          ]
+        }
+      ],
+      "words": 277,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 4,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

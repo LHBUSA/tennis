@@ -1,0 +1,174 @@
+{
+  "category": "ATP",
+  "substitution": null,
+  "wall_ms": 19350,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "seed_upset:f6fb5996b81e0f65ae19",
+  "slug": "harris-knocks-out-no-1-seed-vacherot-at-chengdu-open-f6fb59",
+  "story_class": "brief",
+  "desk": "atp",
+  "story_type": "seed_upset",
+  "frozen_at": "2026-09-29T16:59:55.700603+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "version",
+    "built_at",
+    "draw_path",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 16461
+  },
+  "baseline": {
+    "headline": "Harris knocks out No. 1 seed Vacherot at Chengdu Open",
+    "words": 36,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6471,
+        "cached_input_tokens": 1094,
+        "output_tokens": 1299,
+        "reasoning_tokens": 791
+      },
+      "response_id": "resp_06f50193497e32d5016abc155d0db087d2aeb886d21904384f",
+      "latency_ms": 18823,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "unsupported_first_or_record",
+            "detail": "record"
+          },
+          {
+            "gate": "chart_narration",
+            "detail": "what_happened reads out match_flow (4/4 figures)"
+          }
+        ]
+      },
+      "headline": "Harris knocks out No. 1 seed Vacherot at Chengdu Open",
+      "dek": "The unseeded Lloyd Harris won 6-4, 7-6(5) in round 2, removing the top seed from the ATP 250 draw.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Harris closes it in straight sets",
+          "paragraphs": [
+            "Lloyd Harris beat Valentin Vacherot 6-4, 7-6(5) in round 2 of the Chengdu Open. Harris took the opening set and then secured the completed best-of-3 match by winning the second-set tiebreak.",
+            "The victory continued a run through both qualifying and the main draw for Harris. Before facing Vacherot, he had beaten Kenta Miyoshi 6-3, 7-5 in qualifying round 1, Alexis Galarneau by the same score in qualifying round 2 and Aleksandar Kovacevic 6-3, 6-4 in round 1. The win over Vacherot was his 4th of the tournament."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "The top seed is out",
+          "paragraphs": [
+            "Vacherot entered as the No. 1 seed, while Harris was unseeded. On the ATP singles list in the PropBetEdge archive in force at the start of the tournament, Vacherot was No. 19 and Harris was No. 136. That made the result a clear reversal of the draw’s seeding and the tournament-entry rankings.",
+            "Harris also prevented Vacherot from extending the match to a deciding set. The second-set tiebreak therefore carried the immediate consequence: Harris advanced in straight sets and the highest seed exited the ATP 250 event."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "A notable result against a top-25 opponent",
+          "paragraphs": [
+            "Harris entered the match with an 11-25 record against top-25 opponents in our archive. Beating the No. 19 player added another strong-opponent win to a category in which his losses had outweighed his wins before the match.",
+            "The matchup had no prior meetings in our records, which cover matches from 2024-12-29. With no earlier head-to-head evidence separating them, Harris established control through the opening set and settled the match in the tiebreak rather than allowing Vacherot another set to respond."
+          ]
+        }
+      ],
+      "words": 253,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 1,
+        "max_numbers_in_a_paragraph": 12,
+        "paragraphs_with_4plus_numbers": 3,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": 0.019848
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6471,
+        "cached_input_tokens": 1094,
+        "output_tokens": 734,
+        "reasoning_tokens": 236
+      },
+      "response_id": "resp_0799cc54a268f878016abc155d0ecc87d2a5ad26b1f7595813",
+      "latency_ms": 17449,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Harris knocks out No. 1 seed Vacherot at Chengdu Open",
+      "dek": "Harris won 6-4, 7-6(5) in round 2, extending a Chengdu run that began in qualifying.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A qualifier removes the top seed",
+          "paragraphs": [
+            "Lloyd Harris closed out Valentin Vacherot in a tiebreak to keep his Chengdu Open campaign moving without a deciding set. The unseeded winner had come through qualifying; Vacherot leaves the ATP 250 event as its top seed.",
+            "The ranking contrast gives the result its significance. Harris stood at No. 136 and Vacherot at No. 19 on the ATP singles list in the PropBetEdge archive in force at the start of the tournament. That list comes from secondary source ESPN."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A run built through qualifying",
+          "paragraphs": [
+            "This was Harris’s 4th win of the tournament. His route ran through Kenta Miyoshi and Alexis Galarneau in qualifying, then Aleksandar Kovacevic in the main draw before Vacherot.",
+            "The draw path shows a consistent feature: Harris completed each of those earlier matches in straight sets, too. Against Vacherot, the closing set required a tiebreak, but Harris again finished without extending the match to a decider."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "Recent results add context",
+          "paragraphs": [
+            "Harris’s pre-match Tennis DNA snapshot contained 11 wins and 25 losses against top 25 opponents in our archive. Beating Vacherot adds a higher-ranked opponent to a Chengdu run that had already taken Harris from qualifying into the main draw.",
+            "His recent-form snapshot also showed a 7-3 win-loss mark. Vacherot’s corresponding mark was 4-6. Those archived results do not explain the tiebreak, but they show why the ranking and seeding contrast is not the whole story: Harris had the stronger recent win-loss return entering this match."
+          ]
+        }
+      ],
+      "words": 229,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 4,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

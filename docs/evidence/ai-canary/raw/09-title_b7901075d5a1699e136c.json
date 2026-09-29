@@ -1,0 +1,169 @@
+{
+  "category": "rich packet",
+  "substitution": null,
+  "wall_ms": 21307,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "title:b7901075d5a1699e136c",
+  "slug": "cengiz-wins-the-ankara-125-title-b79010",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "title",
+  "frozen_at": "2026-09-29T16:59:06.484571+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 13360
+  },
+  "baseline": {
+    "headline": "Cengiz wins the Ankara 125 title",
+    "words": 66,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 5686,
+        "cached_input_tokens": 1094,
+        "output_tokens": 1368,
+        "reasoning_tokens": 850
+      },
+      "response_id": "resp_04cea0a2a10954bf016abc158ea5ac87d2b133322ce39a0f7e",
+      "latency_ms": 20328,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Cengiz wins the Ankara 125 title",
+      "dek": "Cengiz won 2-6, 6-4, 7-5 in 2 hours 5 minutes in the final of Ankara 125.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Cengiz completes the comeback",
+          "paragraphs": [
+            "Berfu Cengiz recovered after dropping the opening set to beat Teodora Kostovic in the WTA 125 hard-court final. Cengiz answered the 2-6 start by taking the next two sets 6-4 and 7-5, completing the turnaround in the deciding set.",
+            "The rankings added weight to the result. Cengiz was No. 307 and Kostovic No. 159 on the official WTA singles list in force at the start of the tournament. Kostovic was the No. 5 seed, while Cengiz was unseeded."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Return volume offset Kostovic’s serve advantage",
+          "paragraphs": [
+            "The official match statistics show that Kostovic was stronger behind her first serve, winning 71% of those points compared with Cengiz’s 61.3%. She also finished with 6 aces to Cengiz’s 1 and won 95 total points against Cengiz’s 87, but those advantages did not decide the match.",
+            "Cengiz created the greater volume of return pressure. She earned 12 break-point opportunities and converted 50%, while Kostovic earned 8 and converted 75%. That left both players with 6 conversions despite Kostovic’s higher efficiency. Cengiz also won 63.6% of her second-serve return points, giving her a route into Kostovic’s service games when the first serve missed."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A title secured from a set down",
+          "paragraphs": [
+            "The victory closed Ankara 125 and gave Cengiz the title after she had fallen behind by a set. It also followed the pattern of her only previous meeting with Kostovic in our records: Cengiz won that clay-court match 7-6(3), 6-3 at Kursumlijska Banja 23.",
+            "This final required a different route. Kostovic held the statistical edge on first-serve points and total points, but Cengiz’s pressure on the second serve and larger supply of break chances proved enough to turn the match over three sets."
+          ]
+        }
+      ],
+      "words": 264,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 1,
+        "max_numbers_in_a_paragraph": 7,
+        "paragraphs_with_4plus_numbers": 4,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": 0.019557
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 5686,
+        "cached_input_tokens": 1094,
+        "output_tokens": 784,
+        "reasoning_tokens": 231
+      },
+      "response_id": "resp_0d511e4e917ca2b9016abc158ea45487d2abf96b91235b5007",
+      "latency_ms": 20712,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Cengiz comes back to win Ankara 125 title",
+      "dek": "Berfu Cengiz beat Teodora Kostovic 2-6, 6-4, 7-5 in the hard-court final, completing the match in 2 hours 5 minutes.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A title across the ranking gap",
+          "paragraphs": [
+            "Berfu Cengiz entered Ankara at No. 307 on the official WTA singles list in force at the start of the tournament. Teodora Kostovic stood at No. 159 on that same list and was seeded No. 5. The WTA 125 trophy went to the lower-ranked player.",
+            "The result was not built on an overall points advantage. Kostovic won 95 points to Cengiz’s 87, a reminder that the final’s aggregate totals and its set-by-set outcome told different stories."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second-serve returns kept Cengiz competitive",
+          "paragraphs": [
+            "The serve numbers show why Kostovic remained difficult to beat: she won 71% of points behind her first serve, compared with Cengiz’s 61.3%. Cengiz nevertheless landed her first delivery more often, limiting her exposure to a second serve that was also vulnerable.",
+            "Cengiz found a productive route on return when Kostovic missed her first serve. She won 63.6% of second-serve return points, countering Kostovic’s stronger results behind the first delivery.",
+            "That pressure produced 12 break-point opportunities for Cengiz. She converted 6, matching Kostovic’s conversion total despite being less efficient with her chances. The distinction was opportunity creation rather than superior conversion: Cengiz gave herself more chances to disrupt Kostovic’s service games."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A different finish from Gran Canaria",
+          "paragraphs": [
+            "Cengiz’s recent results included a final defeat to Laura Pigossi at Gran Canaria and opening-round losses in Antalya and Valencia. Ankara supplied a title after those setbacks, with this final ending differently from her previous listed championship match.",
+            "The prior meeting in our records also went to Cengiz, on clay at Kursumlijska Banja 23. This time she beat Kostovic on hard court, with a title at stake."
+          ]
+        }
+      ],
+      "words": 254,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 4,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

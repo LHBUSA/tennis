@@ -1,0 +1,52 @@
+{
+  "title:c6c3a0767627972dd20c": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "major match"
+  },
+  "upset:251a8bd4234b941e8882": {
+    "A": "gpt-5.6-sol",
+    "B": "gpt-6-astra",
+    "category": "upset"
+  },
+  "comeback:d2aa0b9da3eb03f8653f": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "routine match"
+  },
+  "seed_upset:a13d52bdb0dfada5e973": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "player form"
+  },
+  "title:e660028e96db8d00025e": {
+    "A": "gpt-5.6-sol",
+    "B": "gpt-6-astra",
+    "category": "ranking movement"
+  },
+  "title:48ee6282b99f8756fcf6": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "tournament intelligence"
+  },
+  "seed_upset:f6fb5996b81e0f65ae19": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "ATP"
+  },
+  "title:05137b105c38c7c3ac07": {
+    "A": "gpt-6-astra",
+    "B": "gpt-5.6-sol",
+    "category": "WTA"
+  },
+  "title:b7901075d5a1699e136c": {
+    "A": "gpt-5.6-sol",
+    "B": "gpt-6-astra",
+    "category": "rich packet"
+  },
+  "doubles_title:4c60fd618db463e617c2": {
+    "A": "gpt-5.6-sol",
+    "B": "gpt-6-astra",
+    "category": "thin but publishable"
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "category": "thin but publishable",
+  "substitution": null,
+  "wall_ms": 19239,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "doubles_title:4c60fd618db463e617c2",
+  "slug": "jorge-jorge-win-the-porto-125-doubles-title-4c60fd",
+  "story_class": "brief",
+  "desk": "doubles",
+  "story_type": "doubles_title",
+  "frozen_at": "2026-09-26T21:49:32.412094+00:00",
+  "packet_version": "tennis-packet/1.0.0",
+  "families_in_packet": [
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "provenance",
+    "tournament",
+    "participants",
+    "rankings_note",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 4539
+  },
+  "baseline": {
+    "headline": "Jorge/Jorge win the Porto 125 doubles title",
+    "words": 58,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 2692,
+        "cached_input_tokens": 1094,
+        "output_tokens": 938,
+        "reasoning_tokens": 459
+      },
+      "response_id": "resp_07987f207fd042fe016abc15a3f18487d28852a310bb413ede",
+      "latency_ms": 16041,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Jorge/Jorge claim Porto 125 doubles title in deciding tiebreak",
+      "dek": "Francisca Jorge and Matilde Jorge defeated Ariana Arseneault and Raphaelle Lacasse 6-3, 3-6, [10-3] after the teams split the opening sets.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Jorge pair close out the final",
+          "paragraphs": [
+            "Francisca Jorge and Matilde Jorge won the Porto 125 doubles title by beating Ariana Arseneault and Raphaelle Lacasse in the final on the hard court. The fourth seeds took the opening set, lost the second and controlled the deciding tiebreak to complete the victory in 1 hour 32 minutes.",
+            "The result completed the last match of Porto 125 2026, with the Portuguese pair finishing as champions after a final in which each team won a set by the same margin."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second-serve points created the separation",
+          "paragraphs": [
+            "The serve numbers show Jorge/Jorge were more effective after both the first and second deliveries. They won 68.4% of their first-serve points, compared with 60.5% for Arseneault/Lacasse.",
+            "The wider gap came behind the second serve. Jorge/Jorge won 47.4% of those points, while Arseneault/Lacasse won 36.8%. That advantage was reinforced on return, where the champions won 63.2% of the points played against a second serve.",
+            "Neither pair separated itself through break-point conversions alone: both teams converted 3. Jorge/Jorge instead built the stronger overall points profile, winning 62 total points and 61.4% of their service points."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A title settled after two contrasting sets",
+          "paragraphs": [
+            "The final changed direction across the opening sets, but the deciding tiebreak produced the clearest scoreline of the match. Jorge/Jorge followed their second-set loss by allowing Arseneault/Lacasse only 3 points in that final phase.",
+            "The victory gave Francisca Jorge and Matilde Jorge the WTA 125 doubles title in Porto and closed a completed final that required the deciding tiebreak to separate the teams."
+          ]
+        }
+      ],
+      "words": 237,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match",
+        "stats",
+        "tournament"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 1,
+        "numbers_repeated_across_sections": 1,
+        "max_numbers_in_a_paragraph": 3,
+        "paragraphs_with_4plus_numbers": 0,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": 0.011514
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 2692,
+        "cached_input_tokens": 1094,
+        "output_tokens": 755,
+        "reasoning_tokens": 228
+      },
+      "response_id": "resp_03c7d9e00d71a6fb016abc15a3f06c87d2adb107937e66031f",
+      "latency_ms": 18693,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Jorge/Jorge win the Porto 125 doubles title",
+      "dek": "Francisca Jorge and Matilde Jorge defeated Ariana Arseneault and Raphaelle Lacasse 6-3, 3-6, [10-3] in a final lasting 1 hour 32 minutes.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A title settled in the match tiebreak",
+          "paragraphs": [
+            "Francisca Jorge and Matilde Jorge, seeded 4, secured the WTA 125 hard-court doubles title in Porto, giving the Portuguese pair a tournament victory in their home country against Canadian opponents Ariana Arseneault and Raphaelle Lacasse.",
+            "Arseneault/Lacasse answered the opening-set loss by taking the next set. That sent the final to a deciding match tiebreak rather than another full set, and Jorge/Jorge took it [10-3]. The decisive separation therefore came after the teams had matched each other in the completed sets."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Serve effectiveness, not ace production",
+          "paragraphs": [
+            "The serve numbers show why ace production alone would give a misleading picture. Jorge/Jorge finished without an ace, while Arseneault/Lacasse hit 4. Yet the champions won a greater share of points behind both their first and second serves.",
+            "Both teams put 66.7% of their first serves in play, so the distinction was what happened after those deliveries landed, not how often they landed. Behind the second serve, Jorge/Jorge won 47.4% of points against 36.8% for Arseneault/Lacasse. Neither team won a majority in that category, but the champions were less exposed."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "Return pressure beyond the conversions",
+          "paragraphs": [
+            "Jorge/Jorge also won a larger share of return points, with their strongest return yield coming against second serves. That gave them an advantage across the return exchanges even though both teams converted 3 break points.",
+            "Arseneault/Lacasse actually converted a higher proportion of their opportunities. The distinction is useful: conversion efficiency did not separate the champions from the runners-up in the same way that broader serve and return effectiveness did."
+          ]
+        }
+      ],
+      "words": 239,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match",
+        "stats"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 3,
+        "paragraphs_with_4plus_numbers": 0,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

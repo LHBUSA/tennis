@@ -1,0 +1,177 @@
+{
+  "category": "player form",
+  "substitution": null,
+  "wall_ms": 24211,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "seed_upset:a13d52bdb0dfada5e973",
+  "slug": "preston-knocks-out-no-1-seed-ostapenko-at-seoul-a13d52",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "seed_upset",
+  "frozen_at": "2026-09-29T17:03:15.360599+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "draw_path",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 14727
+  },
+  "baseline": {
+    "headline": "Preston knocks out No. 1 seed Ostapenko at Seoul",
+    "words": 60,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6124,
+        "cached_input_tokens": 1094,
+        "output_tokens": 1498,
+        "reasoning_tokens": 1025
+      },
+      "response_id": "resp_0e98035929c366ec016abc151eb9d887d298779149e105d68b",
+      "latency_ms": 23716,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Preston removes top seed Ostapenko in Seoul",
+      "dek": "The unseeded No. 94 controlled the service-point battle in a 6-4, 6-1 victory at the WTA 250.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Preston advances in straight sets",
+          "paragraphs": [
+            "Taylah Preston defeated Jelena Ostapenko in round 2 on Seoul’s hard courts, completing the match in 1 hour 17 minutes. Preston took the opening set 6-4 and closed the completed best-of-3 contest with a 6-1 second set.",
+            "On the official WTA singles list in force at the start of the tournament, Preston was No. 94 and Ostapenko was No. 32. Preston entered unseeded, while Ostapenko held the No. 1 seed at the WTA 250."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Service points created the separation",
+          "paragraphs": [
+            "The official match statistics show Preston won 67.9% of her service points, compared with Ostapenko’s 52.6%. Preston’s first serve was especially effective when it landed, producing an 81.3% success rate.",
+            "Preston also limited the damage behind her second serve, winning 50% of those points. Ostapenko won 40% behind hers and finished with 10 double faults, giving Preston repeated opportunities to attack.",
+            "That pressure carried into the break-point numbers. Preston converted 4 of 8 chances, while Ostapenko converted 1 of 8. Preston also saved 7 of the 8 break points she faced, preventing Ostapenko from turning return pressure into enough service breaks."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A seeded exit and another Seoul win",
+          "paragraphs": [
+            "The result removed the tournament’s highest seed and gave Preston her 2nd win of the event. She had already beaten Himeno Sakatsume in round 1 before facing Ostapenko.",
+            "The players had no prior meetings in our records, so this match established their archived head-to-head. More immediately, Preston’s combination of stronger service-point production and more efficient break-point conversion supplied the decisive statistical edge against the higher-ranked player."
+          ]
+        }
+      ],
+      "words": 241,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match",
+        "stats",
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 8,
+        "paragraphs_with_4plus_numbers": 3,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": 0.021404
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6124,
+        "cached_input_tokens": 1094,
+        "output_tokens": 700,
+        "reasoning_tokens": 175
+      },
+      "response_id": "resp_0709a5c22e6fa8d8016abc151ebc9887d28d6f9d527f0dd9f5",
+      "latency_ms": 16659,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "wrong_winner",
+            "detail": "Ostapenko in Seoul\nTaylah Preston beat"
+          }
+        ]
+      },
+      "headline": "Preston knocks out No. 1 seed Ostapenko in Seoul",
+      "dek": "Taylah Preston beat Jelena Ostapenko 6-4, 6-1 in 1 hour 17 minutes to advance from round 2.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A ranking gap overcome",
+          "paragraphs": [
+            "Preston entered Seoul unseeded and ranked No. 94, with Ostapenko at No. 32 on the official WTA singles list in force at the start of the tournament. Their meeting on the outdoor hard courts at the WTA 250 event ended with Preston advancing and the top seed eliminated.",
+            "The scoreline was clear, but the statistics show that Preston still had pressure to manage. The distinction was not simply creating opportunities: she was more effective at converting them and at protecting her own serve."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Serve quality and conversion separate them",
+          "paragraphs": [
+            "Ostapenko landed just 38.6% of her first serves, leaving her second serve heavily exposed. Preston won 60% of points returning that delivery, while Ostapenko's 10 double faults added to the cost. Preston's return success targeted the part of Ostapenko's service game used most often.",
+            "Preston had a stronger foundation behind her own first delivery, winning 81.3% of those points. Her second serve was less productive, but she saved 7 of 8 break points. That resistance kept Ostapenko's opportunities from translating into comparable scoreboard gains.",
+            "At the other end, Preston converted 50% of her break chances, compared with Ostapenko's 12.5%. The conversion figures explain why a match in which each player had openings finished so decisively in Preston's favour."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A sharper finish to the Seoul path",
+          "paragraphs": [
+            "Preston had needed a deciding set to get past Himeno Sakatsume in the preceding round. Against Ostapenko, she completed the job in straight sets. Her Seoul progress also contrasts with her most recent archived appearance at the US Open, where a win over Alycia Parks was followed by defeat to Taylor Townsend."
+          ]
+        }
+      ],
+      "words": 253,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna",
+        "dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 3,
+        "paragraphs_with_4plus_numbers": 0,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

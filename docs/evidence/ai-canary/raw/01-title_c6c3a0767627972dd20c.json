@@ -1,0 +1,202 @@
+{
+  "category": "major match",
+  "substitution": null,
+  "wall_ms": 35758,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "title:c6c3a0767627972dd20c",
+  "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+  "story_class": "full",
+  "desk": "wta",
+  "story_type": "title",
+  "frozen_at": "2026-09-28T07:08:21.751675+00:00",
+  "packet_version": "tennis-packet/1.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "draw_path",
+    "provenance",
+    "tournament",
+    "recent_form",
+    "participants",
+    "rankings_note",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 11210
+  },
+  "baseline": {
+    "headline": "Fernandez wins the Singapore title",
+    "words": 113,
+    "gate_pass": false
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 5027,
+        "cached_input_tokens": 0,
+        "output_tokens": 2163,
+        "reasoning_tokens": 1290
+      },
+      "response_id": "resp_0ee88fa5a002a135016abc14c6cc7887d2b331d90c5205a6e9",
+      "latency_ms": 34764,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "chart_narration",
+            "detail": "match_data reads out serve_comparison (4/4 figures)"
+          }
+        ]
+      },
+      "headline": "Fernandez wins the Singapore title",
+      "dek": "Fernandez won 7-5, 6-0 in 1 hour 38 minutes in the final of Singapore.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Fernandez closes with a shutout set",
+          "paragraphs": [
+            "Leylah Fernandez defeated Talia Gibson 7-5, 6-0 to complete the WTA 500 indoor-hard event in Singapore. The No. 6 seed came through a competitive opening set before Gibson failed to win a game in the second.",
+            "The completed final lasted 1 hour 38 minutes. It was the last match of Singapore 2026 and Fernandez’s 2nd victory of the tournament in the stored draw path. There was no prior meeting between Fernandez and Gibson in our records."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Serve and return created the separation",
+          "paragraphs": [
+            "The serve numbers show a wide gap in effectiveness. Fernandez won 62.3% of her service points, while Gibson won 46.4%. Fernandez also had the stronger first-serve outcome, winning 66.7% of those points compared with Gibson’s 51.4%.",
+            "The difference remained when the first serve missed. Fernandez won 55% of her second-serve points; Gibson won 40.6%. That gave Fernandez a more stable base in her service games while leaving Gibson exposed whenever rallies began behind the second serve.",
+            "Fernandez applied more return pressure, earning 12 break points to Gibson’s 5. She converted 50% of her chances, compared with Gibson’s 40%, allowing Fernandez to turn the larger supply of opportunities into control of the score.",
+            "Gibson could not compensate on return. Fernandez won 53.6% of her return points, whereas Gibson won 37.7%. Fernandez finished with 5 aces and Gibson with 2, another indication that Fernandez obtained more direct value from her delivery."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A title secured from the No. 6 seed line",
+          "paragraphs": [
+            "Fernandez entered Singapore at No. 31 on the official WTA SINGLES list in force at the start of the tournament. Gibson was No. 63 on that same list. Fernandez’s ranking position and No. 6 seeding supplied the tournament context, but the final was settled by her advantage across both service and return points.",
+            "The result completed Fernandez’s Singapore run with the title rather than merely extending it. With no further match listed after the final, the consequence is definitive: she ended the WTA 500 event as champion."
+          ]
+        },
+        {
+          "id": "surface",
+          "heading": "Stored profiles did not capture the size of the final gap",
+          "paragraphs": [
+            "The stored Technical DNA showed Gibson with a 72.5% hold rate and Fernandez at 68.5%. In the final, however, Fernandez produced the stronger service-point performance and faced fewer break opportunities, so the pre-match service profile did not carry through to this matchup.",
+            "Return performance offered a different signal. Fernandez’s stored return-points-won figure was 44.6%, narrowly above Gibson’s 43.9%. Fernandez then made return play the clearest part of her advantage in the final, especially by creating the larger pool of break chances.",
+            "The second-serve matchup was particularly important on the indoor hard court. Fernandez’s stored second-serve figure was 45.1%, but she won 55% in the final. Gibson entered with a stored figure of 46.2% and won 40.6% against Fernandez."
+          ]
+        },
+        {
+          "id": "path",
+          "heading": "A turnaround in the semifinal, control in the final",
+          "paragraphs": [
+            "Fernandez reached the title match by beating Maja Chwalinska 1-6, 6-4, 6-2 in the semifinal. That required her to respond after losing the opening set and complete the match across three sets.",
+            "The final followed a different shape. Fernandez did not need a deciding set against Gibson, moving from the tight 7-5 opener to a 6-0 second set. The contrast between those matches shows two distinct routes through the closing rounds: recovery in the semifinal and sustained statistical superiority in the championship match."
+          ]
+        }
+      ],
+      "words": 513,
+      "section_count": 5,
+      "evidence_families_used": [
+        "match",
+        "stats",
+        "dna",
+        "draw_path",
+        "tournament"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 3,
+        "max_numbers_in_a_paragraph": 6,
+        "paragraphs_with_4plus_numbers": 8,
+        "paragraphs": 13
+      },
+      "nominal_standard_cost": 0.027914
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 5027,
+        "cached_input_tokens": 0,
+        "output_tokens": 1210,
+        "reasoning_tokens": 336
+      },
+      "response_id": "resp_099cbc71167e5e12016abc14c6ca1087d2837ace87dab20522",
+      "latency_ms": 34393,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Fernandez wins Singapore title with decisive return advantage",
+      "dek": "Leylah Fernandez beat Talia Gibson 7-5, 6-0 in 1 hour 38 minutes to win the indoor-hard WTA 500 final.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A wildcard entry delivers the title",
+          "paragraphs": [
+            "Fernandez arrived in Singapore as a wildcard and the No. 6 seed. Her championship adds a title-winning finish to a recent hard-court schedule that included wins in Montreal and at the US Open, alongside defeats at Cincinnati and the US Open.",
+            "There were no previous meetings between Fernandez and Gibson in our records, so the archive offered no direct matchup history to frame this final. The evidence from Singapore itself is clearer: Fernandez combined more productive serving with return pressure that Gibson could not match."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Pressure on both deliveries",
+          "paragraphs": [
+            "The serve numbers show why Gibson had difficulty protecting her games. She won 51.4% of points behind her first serve and 40.6% behind her second. Landing the first delivery therefore offered only limited protection; Fernandez was competitive against it and had the stronger share of exchanges when Gibson needed another delivery.",
+            "Fernandez’s own second serve provided a meaningful contrast. She won 55% of those points, keeping that part of her service game on the positive side of the ledger. Gibson could apply pressure, but Fernandez was less exposed when her first serve did not land.",
+            "That distinction carried through to the opportunities on return. Fernandez generated 12 break points and converted 6. Her advantage was not simply that she won return points in volume: she repeatedly brought Gibson’s service games to a point where they could change hands, then converted those chances.",
+            "Gibson converted 2 of 5 break points, so this was not a final in which Fernandez’s serve went untouched. The difference was the frequency of the pressure. Gibson made use of some openings, while Fernandez created a much larger supply and turned that sustained return threat into the more consequential advantage."
+          ]
+        },
+        {
+          "id": "surface",
+          "heading": "The final departed from the stored profile",
+          "paragraphs": [
+            "The stored Technical DNA gives useful context without explaining every exchange. Gibson’s service-games-held figure was 72.5%, compared with Fernandez’s 68.5%. That profile did not translate into a serving advantage for Gibson in the final. It is a reminder that an aggregate describes a player’s sample, not the outcome of a particular matchup.",
+            "The return profiles were closer, with Fernandez holding the higher return-points-won figure. Her 53.6% in the final was above her stored 44.6%, showing how much more productive her return was in this match than across that broader sample.",
+            "Those DNA figures are not identified as indoor-hard-only statistics. They offer a reference for the performance, rather than evidence that the Singapore surface caused the separation between the players."
+          ]
+        },
+        {
+          "id": "path",
+          "heading": "A different task from the semifinal",
+          "paragraphs": [
+            "The supplied Singapore draw path shows Fernandez beating Maja Chwalinska 1-6 6-4 6-2 in the semifinal. That required a recovery after losing the opening set; the final did not require the same route through the score. Her title-clinching performance followed a match in which she had already demonstrated a different way to win.",
+            "Her recent hard-court results also resist a simple description of uninterrupted form. At the US Open, Fernandez beat Shuai Zhang and Mananchaya Sawangkaew before losing to Jessica Pegula. Gibson’s recent results included a Cincinnati win over Lilli Tagger and defeats against Aryna Sabalenka, Lizette Cabrera and Donna Vekic. Singapore supplied a new endpoint for those contrasting recent sequences: Fernandez finished with the trophy, Gibson as the finalist."
+          ]
+        }
+      ],
+      "words": 517,
+      "section_count": 4,
+      "evidence_families_used": [
+        "stats",
+        "dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 6,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 11
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "category": "routine match",
+  "substitution": null,
+  "wall_ms": 20335,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "comeback:d2aa0b9da3eb03f8653f",
+  "slug": "fernandez-recovers-from-a-set-down-to-beat-chwalinska-at-singapore-d2aa0b",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "comeback",
+  "frozen_at": "2026-09-29T17:02:48.636956+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 16623
+  },
+  "baseline": {
+    "headline": "Fernandez recovers from a set down to beat Chwalinska at Singapore",
+    "words": 58,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6590,
+        "cached_input_tokens": 1094,
+        "output_tokens": 1132,
+        "reasoning_tokens": 675
+      },
+      "response_id": "resp_098dc09eee967ee1016abc150a76f087d29699e10baad755ef",
+      "latency_ms": 18783,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "unsupported_first_or_record",
+            "detail": "record"
+          }
+        ]
+      },
+      "headline": "Fernandez turns Singapore semifinal around against Chwalinska",
+      "dek": "The sixth seed recovered from a 1-6 opening set to win 1-6, 6-4, 6-2 in 2 hours 8 minutes on Singapore’s indoor hard court.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Fernandez answers a one-sided opening set",
+          "paragraphs": [
+            "Leylah Fernandez defeated Maja Chwalinska in the completed semifinal of the WTA 500 event in Singapore. Fernandez entered as the sixth seed and Chwalinska as the fifth seed.",
+            "Fernandez was No. 31 and Chwalinska No. 25 on the official WTA singles list in force at the start of the tournament. The ranking gap and the opening set both pointed in Chwalinska’s direction, but Fernandez took the next two sets to complete the comeback."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second-serve points created the separation",
+          "paragraphs": [
+            "The serve numbers show the clearest distinction behind the second delivery. Fernandez won 44.4% of her second-serve points, while Chwalinska won 33.3%. Fernandez also claimed 66.7% of the points played against Chwalinska’s second serve, giving her a productive route into return games.",
+            "Both players converted 5 of 8 break points. That matching conversion line shows that neither lacked opportunities; the stronger work around Chwalinska’s second serve helped Fernandez turn pressure into a winning three-set pattern."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A comeback that cut against their archive profiles",
+          "paragraphs": [
+            "Fernandez’s pre-match record in our archive showed a 15.4% comeback win rate across 39 matches in which she lost the opening set. Chwalinska’s profile showed an 87.3% match win rate across 55 matches after winning the first set. This result ran against both patterns.",
+            "The overall points remained close despite the sharp swings between sets: Fernandez won 72 points and Chwalinska 69. Fernandez’s advantage was not broad dominance across the match, but better production in the later sets after Chwalinska controlled the opener."
+          ]
+        }
+      ],
+      "words": 231,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 4,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": 0.018327
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6590,
+        "cached_input_tokens": 1094,
+        "output_tokens": 735,
+        "reasoning_tokens": 215
+      },
+      "response_id": "resp_0d15786fe91e080a016abc150b7cc487d281673835b3796690",
+      "latency_ms": 19763,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Fernandez recovers from a set down to beat Chwalinska in Singapore",
+      "dek": "Second-serve returns provided the clearest statistical edge in a semifinal that was otherwise closely balanced.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Fernandez overturns the opening set",
+          "paragraphs": [
+            "Leylah Fernandez beat Maja Chwalinska 1-6, 6-4, 6-2 in the Singapore semifinal, recovering from a heavily one-sided opening set at the indoor-hard WTA 500 tournament. The match lasted 2 hours 8 minutes.",
+            "The result put Fernandez above an opponent who began the tournament ahead of her on the ranking list. Fernandez stood at No. 31 and Chwalinska at No. 25 on the official WTA singles list in force at the start of the tournament."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second serves made the separation",
+          "paragraphs": [
+            "The serve numbers show that Fernandez's advantage was not built on a substantial difference behind the first serve: the players won a similar share of those points. Chwalinska landed her first serve more often, but was more exposed whenever she had to use her second delivery.",
+            "Fernandez won 44.4% of her second-serve points against Chwalinska's 33.3%. Neither player made that delivery a secure source of points, but Fernandez's return pressure extracted more from it.",
+            "Conversion did not separate them: each converted 5 of 8 break-point opportunities. That balance matters when reading the scoreline. Fernandez won the closing sets clearly, yet the match-wide figures do not describe sustained dominance.",
+            "The total-points comparison reinforces that distinction: Fernandez finished with 72 to Chwalinska's 69. Her recovery produced a decisive closing set without a similarly broad advantage across the match as a whole."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A different finish on hard courts",
+          "paragraphs": [
+            "Fernandez's recent hard-court results included losses to Jessica Pegula at the US Open and Xiyu Wang in Cincinnati after winning the opening set. Singapore supplied the reverse outcome: she recovered from the initial deficit rather than surrendering an early lead."
+          ]
+        }
+      ],
+      "words": 253,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 9,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

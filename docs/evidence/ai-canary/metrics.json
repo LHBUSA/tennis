@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-09-29T19:47:00.687Z",
+  "base": "https://tennis-news.sales-fd3.workers.dev",
+  "models": [
+    "gpt-5.6-sol",
+    "gpt-6-astra"
+  ],
+  "metrics": {
+    "gpt-5.6-sol": {
+      "packets": 10,
+      "completed": 10,
+      "gate_pass": 5,
+      "avg_input_tokens": 5859,
+      "avg_output_tokens": 1512,
+      "avg_reasoning_tokens": 973,
+      "median_latency_ms": 20328,
+      "median_words": 255,
+      "nominal_standard_cost_usd": 0.2134
+    },
+    "gpt-6-astra": {
+      "packets": 10,
+      "completed": 10,
+      "gate_pass": 7,
+      "avg_input_tokens": 5859,
+      "avg_output_tokens": 785,
+      "avg_reasoning_tokens": 213,
+      "median_latency_ms": 18060,
+      "median_words": 253,
+      "nominal_standard_cost_usd": "rate not configured (TENNIS_AI_RATES)"
+    }
+  }
+}

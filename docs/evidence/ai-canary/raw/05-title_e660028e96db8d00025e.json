@@ -1,0 +1,189 @@
+{
+  "category": "ranking movement",
+  "substitution": "no stored packet for \"ranking movement\": substituted the remaining ATP story (no ranking article has ever been published, so no ranking packet exists)",
+  "wall_ms": 20085,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "title:e660028e96db8d00025e",
+  "slug": "davidovich-fokina-wins-the-chengdu-open-title-e66002",
+  "story_class": "brief",
+  "desk": "atp",
+  "story_type": "title",
+  "frozen_at": "2026-09-29T16:58:22.200881+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "version",
+    "built_at",
+    "draw_path",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "expectation",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 16569
+  },
+  "baseline": {
+    "headline": "Davidovich Fokina wins the Chengdu Open title",
+    "words": 38,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6491,
+        "cached_input_tokens": 1094,
+        "output_tokens": 1376,
+        "reasoning_tokens": 852
+      },
+      "response_id": "resp_06b426ac5887a3b1016abc1536f24087d2afaa1db35fc61d0c",
+      "latency_ms": 19505,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "unsupported_first_or_record",
+            "detail": "record"
+          },
+          {
+            "gate": "chart_narration",
+            "detail": "what_happened reads out match_flow (4/4 figures)"
+          },
+          {
+            "gate": "chart_narration",
+            "detail": "why_it_mattered reads out match_flow (5/6 figures)"
+          }
+        ]
+      },
+      "headline": "Davidovich Fokina wins the Chengdu Open title",
+      "dek": "The No. 2 seed defeated Hubert Hurkacz 6-4, 7-6(7), completing his Chengdu run with another straight-sets victory.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Davidovich Fokina closes out the final",
+          "paragraphs": [
+            "Alejandro Davidovich Fokina defeated Hubert Hurkacz 6-4, 7-6(7) in the Chengdu Open final. After taking the opening set, Davidovich Fokina secured the completed straight-sets result through a second-set tiebreak.",
+            "Davidovich Fokina was the No. 2 seed and Hurkacz the No. 5 seed. On the ATP singles list in the PropBetEdge archive in force at the start of the tournament, Davidovich Fokina was No. 29 and Hurkacz was No. 46."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "Three wins delivered the Chengdu title",
+          "paragraphs": [
+            "The final was the last match of the Chengdu Open 2026 and gave Davidovich Fokina his 3rd win of the tournament. His archived draw path shows a 6-1, 7-5 quarterfinal victory over Alexandre Muller followed by a 4-6, 6-4, 6-3 semifinal win over Nikoloz Basilashvili.",
+            "That route required Davidovich Fokina to win in contrasting ways before the final: he advanced in straight sets against Muller, recovered after losing the opening set against Basilashvili and then completed the title match without allowing Hurkacz to force a deciding set."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "The result strengthened his showing against a top-50 opponent",
+          "paragraphs": [
+            "The opponent context adds weight to the result. Davidovich Fokina entered the match with 67 wins and 107 losses against top-50 players in his own pre-match record in our archive. Hurkacz’s No. 46 place on the tournament-start list put this final within that category.",
+            "The closing set also mattered to the shape of the victory. Davidovich Fokina had already secured the only set won by a two-game margin, then prevailed in the tiebreak to prevent the best-of-3 final from extending to a deciding set. There were no previous meetings between the players in our records, whose coverage starts 2024-12-29."
+          ]
+        }
+      ],
+      "words": 255,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match_dna",
+        "draw_path",
+        "tournament"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 2,
+        "max_numbers_in_a_paragraph": 12,
+        "paragraphs_with_4plus_numbers": 5,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": 0.020643
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6491,
+        "cached_input_tokens": 1094,
+        "output_tokens": 725,
+        "reasoning_tokens": 202
+      },
+      "response_id": "resp_0b09c109fef99806016abc15370e8887d2958c1d9b2a725c96",
+      "latency_ms": 18060,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "unsupported_market",
+            "detail": "-107"
+          },
+          {
+            "gate": "unsupported_first_or_record",
+            "detail": "record"
+          }
+        ]
+      },
+      "headline": "Davidovich Fokina wins the Chengdu Open title",
+      "dek": "Alejandro Davidovich Fokina beat Hubert Hurkacz 6-4, 7-6(7) to claim the ATP 250 title.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "A tiebreak finish",
+          "paragraphs": [
+            "Alejandro Davidovich Fokina settled the Chengdu Open final by taking the closing tiebreak 9 points to 7 against Hubert Hurkacz. The tiebreak kept the match from reaching a deciding set, giving Davidovich Fokina a straight-sets finish after his semifinal had required a comeback.",
+            "Davidovich Fokina entered the tournament at No. 29 and Hurkacz at No. 46 on the ATP singles list in the PropBetEdge archive, in force at the start of the tournament. That list comes from the secondary source ESPN."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "From a semifinal comeback to the trophy",
+          "paragraphs": [
+            "The route to the title demanded different kinds of results. Davidovich Fokina beat Alexandre Muller in straight sets in the quarterfinal, then lost the opening set against Nikoloz Basilashvili in the semifinal before recovering to advance.",
+            "Against Hurkacz, he did not need to recover a set deficit. Instead, he followed an opening-set win by taking the longer closing set. The contrast with the semifinal is the clearest feature of his title run: he advanced by reversing a deficit, then completed the tournament without another deciding set."
+          ]
+        },
+        {
+          "id": "analysis",
+          "heading": "A useful result against a top-50 opponent",
+          "paragraphs": [
+            "Davidovich Fokina's pre-match Tennis DNA shows a 67-107 record against top-50 opponents in our archive. Beating Hurkacz therefore adds a title-winning result in an opponent category where his archived losses had outnumbered his wins.",
+            "Hurkacz brought a different profile, with a 97-86 record against top-50 opposition in the same pre-match archive. That context gives the final more substance than the ranking order alone: Davidovich Fokina beat an opponent whose own results in that category had been positive."
+          ]
+        }
+      ],
+      "words": 244,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match_dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 3,
+        "paragraphs_with_4plus_numbers": 0,
+        "paragraphs": 6
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

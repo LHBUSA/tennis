@@ -262,3 +262,25 @@ test('detection candidates: selected by match time and keyset-paged — a bulk h
   assert.ok(sel[0].includes('or=(started_at.gte.2026-09-26T12:00:00.000Z,scheduled_at.gte.2026-09-26T12:00:00.000Z)'), 'timed rows bounded by match time (72 h)');
   assert.ok(qs.some((q) => /started_at=is\.null&scheduled_at=is\.null&tennis_tournament_editions\.end_date=gte\.2026-09-26/.test(q)), 'untimed rows bounded by edition end date');
 });
+
+test('gate precision (canary 2026-09-29): true packet facts pass; the real violations are still held', async () => {
+  const { runGates: gates } = await import('../workers/tennis-news/src/gates.js');
+  const p = packet();
+  const A = p.participants.A.players[0].id;
+  const B = p.participants.B.players[0].id;
+  const art = (...paras) => ({ headline: 'Alta beats Baja for the Singapore Open title', dek: 'Ana Alta won 6-4 7-6(5) in the final.', primary_player_id: A, player_ids: [A, B],
+    sections: [{ heading: 'What happened', paragraphs: ['Ana Alta beat Bea Baja 6-4 7-6(5) to win the Singapore Open title on hard courts, closing the final in straight sets.', ...paras] }] });
+  const fails = (a) => gates(a, p).failures.map((f) => f.gate);
+  // true facts that were held before
+  assert.ok(!fails(art('Alta carried a 67-107 record against top-50 opponents in our archive into the week.')).includes('unsupported_market'), 'W-L record is not odds');
+  assert.ok(!fails(art('Her pre-match record in our archive framed the result.')).includes('unsupported_first_or_record'));
+  assert.ok(!fails(art('Bea Baja reached the final as the top seed but could not hold her serve late in the second set.')).includes('wrong_winner'), 'the losing finalist did reach the final');
+  // still held
+  assert.ok(fails(art('Alta was a -110 favourite with the books.')).includes('unsupported_market'));
+  assert.ok(fails(art('Alta set a record with the win.')).includes('unsupported_first_or_record'));
+  assert.ok(fails(art('Bea Baja beat Alta in the opening set only to fade.')).includes('wrong_winner'));
+  assert.ok(fails(art('Bea Baja reached the quarterfinals of the doubles event.')).includes('wrong_winner'), 'a different round is not this match');
+  const nf = gates(art('Over her last 10 matches, Alta had built steady form.'), p).failures.filter((f) => f.gate === 'numeric_grounding');
+  assert.equal(nf.length, 0, 'a form window size is not a statistic');
+  assert.ok(gates(art('Alta hit 17 aces in the final.'), p).failures.some((f) => f.gate === 'numeric_grounding'), 'an unsupported number is still held');
+});

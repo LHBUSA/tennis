@@ -1,0 +1,183 @@
+{
+  "category": "WTA",
+  "substitution": null,
+  "wall_ms": 30233,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "title:05137b105c38c7c3ac07",
+  "slug": "timofeeva-wins-the-porto-125-title-05137b",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "title",
+  "frozen_at": "2026-09-29T16:57:54.361495+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "draw_path",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 14521
+  },
+  "baseline": {
+    "headline": "Timofeeva wins the Porto 125 title",
+    "words": 64,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6166,
+        "cached_input_tokens": 1094,
+        "output_tokens": 2098,
+        "reasoning_tokens": 1552
+      },
+      "response_id": "resp_046c15c7b06998c5016abc15707d7c87d2b5d695e4966673fe",
+      "latency_ms": 29268,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Timofeeva wins the Porto 125 title",
+      "dek": "Timofeeva won 7-6(8), 6-2 in 1 hour 58 minutes in the final of Porto 125.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Timofeeva completes the title run",
+          "paragraphs": [
+            "Top seed Maria Timofeeva defeated qualifier Reese Brantmeier in straight sets on Porto’s outdoor hard court, completing her run through the WTA 125 event. The opening set went to a tiebreak before Timofeeva controlled the second.",
+            "Timofeeva was No. 88 and Brantmeier No. 385 on the official WTA singles list in force at the start of the tournament. The result closed the gap between their starting positions in the draw: Timofeeva entered as the top seed, while Brantmeier came through qualifying."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "First-serve and return pressure made the difference",
+          "paragraphs": [
+            "The official match statistics show the clearest separation behind first serves. Timofeeva won 65.4% of those points, compared with Brantmeier’s 51.9%, giving the champion the stronger base in her service games.",
+            "The second-serve figures ran the other way, with Brantmeier winning 55.6% and Timofeeva 52.9%. That makes Timofeeva’s advantage on first-serve points, rather than a broad edge across both serves, the central service feature of the match.",
+            "Timofeeva also won 46.9% of her return points, while Brantmeier won 37.7%. That greater return yield produced more sustained pressure across the match.",
+            "The opportunity count reflected that pressure: Timofeeva earned 9 break points and converted 3, while Brantmeier earned 3. Timofeeva’s advantage came from creating more chances rather than a higher conversion rate."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A five-win week ends with the trophy",
+          "paragraphs": [
+            "The final was the last match of Porto 125 2026 and gave Timofeeva her 5th win of the tournament. Her route included victories over Sofia Johnson, Kajsa Rinaldo Persson and Gabriela Knutson before a semifinal win over Mia Pohankova.",
+            "The championship match also continued the pattern of Timofeeva taking the opening set and closing in straight sets, after Brantmeier had pushed that opening set deep into a tiebreak."
+          ]
+        }
+      ],
+      "words": 270,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna",
+        "draw_path",
+        "tournament"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 1,
+        "max_numbers_in_a_paragraph": 3,
+        "paragraphs_with_4plus_numbers": 0,
+        "paragraphs": 8
+      },
+      "nominal_standard_cost": 0.027457
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6166,
+        "cached_input_tokens": 1094,
+        "output_tokens": 762,
+        "reasoning_tokens": 195
+      },
+      "response_id": "resp_0b89dd255a0d1e89016abc15706a6c87d28b3cb75dbf2df090",
+      "latency_ms": 16381,
+      "gate": {
+        "pass": false,
+        "failures": [
+          {
+            "gate": "wrong_winner",
+            "detail": "Brantmeier reached"
+          },
+          {
+            "gate": "chart_narration",
+            "detail": "why_it_mattered reads out match_flow (4/4 figures)"
+          }
+        ]
+      },
+      "headline": "Timofeeva wins the Porto 125 title",
+      "dek": "Maria Timofeeva beat Reese Brantmeier 7-6(8), 6-2, with stronger first-serve results and more opportunities on return.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Top seed finishes the job",
+          "paragraphs": [
+            "No. 1 seed Maria Timofeeva completed her title run on the outdoor hard courts in Porto by defeating qualifier Reese Brantmeier in a final lasting 1 hour 58 minutes. The victory closed out her week at the WTA 125 event.",
+            "Timofeeva was No. 88 and Brantmeier No. 385 on the official WTA singles list in force at the start of the tournament. Brantmeier reached the title match as a qualifier, but Timofeeva’s more productive serve-and-return combination separated them in the final."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "More chances, not better conversion",
+          "paragraphs": [
+            "The serve numbers show where Timofeeva found her advantage: she won 65.4% of points behind her first serve, compared with Brantmeier’s 51.9%. Brantmeier actually had the better second-serve success rate, so this was not a uniform advantage across every part of the service contest.",
+            "Timofeeva also landed 75.4% of her first serves. That gave her more frequent access to the delivery on which she was most effective, rather than leaving the match to be decided by second-serve exchanges.",
+            "On return, Timofeeva earned 9 break points to Brantmeier’s 3. Their conversion rates were identical: the important distinction was how often Timofeeva created an opening, not greater efficiency when an opportunity arrived."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A title run with a semifinal test",
+          "paragraphs": [
+            "Timofeeva’s route included straight-set victories over Sofia Johnson, Kajsa Rinaldo Persson and Gabriela Knutson before Mia Pohankova took her to a deciding set in the semifinal.",
+            "She came through that match 6-2, 6-7(3), 6-3, then finished the tournament without needing a deciding set against Brantmeier. The final completed a title run that included both decisive wins and a longer semifinal examination."
+          ]
+        }
+      ],
+      "words": 252,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match",
+        "stats"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 7,
+        "paragraphs_with_4plus_numbers": 2,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}

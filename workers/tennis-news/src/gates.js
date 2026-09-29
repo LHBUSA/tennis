@@ -4,7 +4,7 @@
 
 import { parseScore } from '../../shared/canonical/scoring.js';
 
-export const GATES_VERSION = 'tennis-gates/4.0.0';
+export const GATES_VERSION = 'tennis-gates/4.0.1';
 
 const SKIP_KEY = /(^|_)(id|ids|url|slug|hash|key|token|image|square|wide|thumb|portrait|jpg|photo|source_page|license|capture|event_id|built_at|detector|version)$/i;
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -42,7 +42,7 @@ const BANNED = [
   // unsupported cause / health / mind-reading — the packet can never prove these
   [/\b(injur\w*|ill(ness)?|medical|physio|trainer|pain|cramp\w*|blister\w*|fatigue\w*|sick|strain\w*|surgery|hurt)\b/i, 'unsupported_medical'],
   [/\b(mental(ly)?|motivat\w*|confiden\w*|nerves|nervous|emotion\w*|frustrat\w*|angry|hungry|desperate|determined|composure|belief)\b/i, 'unsupported_mentality'],
-  [/\b(odds|favou?rite|underdog|bet|bets|betting|bettors?|wager\w*|sportsbook|moneyline|spread|line moved)\b|[+-]\d{3}\b/i, 'unsupported_market'],
+  [/\b(odds|favou?rite|underdog|bet|bets|betting|bettors?|wager\w*|sportsbook|moneyline|spread|line moved)\b|(?<![\d\w-])[+-]\d{3}\b/i, 'unsupported_market'],
   [/\b(first|maiden|debut)\s+(title|final|trophy|semifinal|quarterfinal|win over)|career[- ](high|best)|personal best|record\b|all-time|historic/i, 'unsupported_first_or_record'],
   [/[“”"]/, 'unsupported_quote'],
   [/\b(our model|win probability|projected|fair price|edge of)\b/i, 'unsupported_model'],
@@ -51,6 +51,15 @@ const BANNED = [
   [/\b(\d{1,2}(st|nd|rd|th)\s+percentile|percentile|top\s+\d{1,2}\s*(%|per\s*cent)|(best|highest|lowest|worst|strongest|weakest)\s+(on|in)\s+(the\s+)?(tour|wta|atp|field)|among\s+the\s+(best|elite|top)\b|above[- ]average|below[- ]average|tour[- ]average|tour[- ]leading|league[- ]leading)/i, 'unsupported_comparative'],
   [/\b(in the world of|it remains to be seen|only time will tell|a testament to|speaks volumes|make no mistake|at the end of the day|the perfect storm|sent shockwaves|stunned the world)\b/i, 'cliche']
 ];
+
+// Win-loss records are packet data, not record-breaking claims (canary 2026-09-29: "a 67-107 record against top-50
+// opponents", "pre-match record in our archive" were held as unsupported records). Only these phrasings are exempt.
+const WL_RECORD = /\b\d{1,4}-\d{1,4}\s+record\b|\brecord\s+(of|at)\s+\d{1,4}-\d{1,4}\b|\b(pre-match|win-loss|W-L|head-to-head|H2H|surface|season|career)\s+record\b|\brecord\s+(in|from)\s+(our|the)\s+(archive|PropBetEdge)\b/gi;
+// Form windows (last 10 matches, last 20 matches, 52 weeks) are the definition of the stored window, not a statistic.
+const WINDOW = (t) => new RegExp(`\\blast\\s+${t}\\s+(matches|results|weeks)\\b|\\b${t}[- ]week\\b|\\b(over|in)\\s+(the\\s+)?(previous|past|last)\\s+${t}\\s+(matches|weeks)\\b`, 'i');
+const WINDOW_SIZES = new Set(['10', '20', '52']);
+// The losing finalist (semifinalist, quarterfinalist) did reach THIS match's round: "X reached the final" is true.
+const ROUND_REACHED = { F: 'final|title match|championship match|title decider', S: 'semi-?finals?|last four', Q: 'quarter-?finals?|last eight' };
 
 function prose(article) {
   return [article.headline, article.dek, ...article.sections.flatMap((s) => [s.heading, ...s.paragraphs])].join('\n');
@@ -71,6 +80,7 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
         for (const t of numberTokens(sentence)) {
           const n = Number(t);
           if ((Number.isInteger(n) && n >= 0 && n <= 5) || (n >= 1990 && n <= 2100 && Number.isInteger(n))) continue;
+          if (WINDOW_SIZES.has(t) && WINDOW(t).test(sentence)) continue;
           if (!allowed.has(t)) fail('numeric_grounding', `${t} not in packet. In: "${sentence.slice(0, 160)}"`);
         }
       }
@@ -78,7 +88,7 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   }
 
   // 2. banned / unsupported claims
-  for (const [re, gate] of BANNED) { const hit = text.match(re); if (hit) fail(gate, hit[0]); }
+  for (const [re, gate] of BANNED) { const hit = (gate === 'unsupported_first_or_record' ? text.replace(WL_RECORD, ' ') : text).match(re); if (hit) fail(gate, hit[0]); }
 
   // 2a. provenance: a secondary source is never called official (ESPN-sourced ATP lists/results are real data, not
   //     an official tour publication)
@@ -113,9 +123,11 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
     for (const p of packet.participants[L]?.players || []) {
       const sn = (p.last_name || p.name.split(' ').slice(-1)[0]).split(' ')[0];
       const nm = sn.charAt(0) + sn.slice(1).toLowerCase();
-      const re = new RegExp(`\\b(${nm}|${p.name})\\b[^.]{0,40}?\\b(beat|beats|defeated|defeats|won the match|wins the|edged|edges|outlasted|outlasts|advanced|advances|knocked out|reaches|reached)\\b`, 'i');
+      const re = new RegExp(`\\b(${nm}|${p.name})\\b[^.\\n]{0,40}?\\b(beat|beats|defeated|defeats|won the match|wins the|edged|edges|outlasted|outlasts|advanced|advances|knocked out|reaches|reached)\\b`, 'i');
       const hit = text.match(re);
-      if (hit && !new RegExp(`\\b(against|by|to|over)\\b`, 'i').test(hit[0].slice(nm.length))) fail('wrong_winner', hit[0].slice(0, 120));
+      const rd = ROUND_REACHED[String(m.round || '').split('-').pop()];
+      const reachedThisRound = hit && /\breach(ed|es)\b/i.test(hit[0]) && rd && new RegExp(`\\breach(ed|es)\\s+(the\\s+)?(${rd})\\b`, 'i').test(text.slice(text.indexOf(hit[0])));
+      if (hit && !reachedThisRound && !new RegExp(`\\b(against|by|to|over)\\b`, 'i').test(hit[0].slice(nm.length))) fail('wrong_winner', hit[0].slice(0, 120));
     }
     // 5. score: stored sets re-validated against the stored score text with the canonical parser
     if (m.status !== 'walkover' && m.score) {

@@ -1,0 +1,174 @@
+{
+  "category": "tournament intelligence",
+  "substitution": "no stored packet for \"tournament intelligence\": substituted a tournament-concluding title story (no tournament-intelligence feature packet exists)",
+  "wall_ms": 17999,
+  "canary_version": "tennis-ai-canary/1.0.0",
+  "event_id": "title:48ee6282b99f8756fcf6",
+  "slug": "birrell-wins-the-seoul-title-48ee62",
+  "story_class": "brief",
+  "desk": "wta",
+  "story_type": "title",
+  "frozen_at": "2026-09-29T16:56:06.181419+00:00",
+  "packet_version": "tennis-packet/3.0.0",
+  "families_in_packet": [
+    "dna",
+    "h2h",
+    "tour",
+    "event",
+    "match",
+    "stats",
+    "version",
+    "built_at",
+    "match_dna",
+    "provenance",
+    "tournament",
+    "corrections",
+    "recent_form",
+    "match_source",
+    "participants",
+    "rankings_note",
+    "ranking_provenance",
+    "canonical_signature"
+  ],
+  "identical": {
+    "instructions": "editorial SYSTEM",
+    "schema": "tennis_article",
+    "max_output_tokens": 8000,
+    "reasoning_effort": "medium",
+    "attempts": 1,
+    "input_chars": 16670
+  },
+  "baseline": {
+    "headline": "Birrell wins the Seoul title",
+    "words": 54,
+    "gate_pass": true
+  },
+  "results": [
+    {
+      "model": "gpt-5.6-sol",
+      "model_reported": "gpt-5.6-sol",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6591,
+        "cached_input_tokens": 1094,
+        "output_tokens": 902,
+        "reasoning_tokens": 438
+      },
+      "response_id": "resp_05a4bd04a72f5c5b016abc154b06e087d2bc42d29e9275cfaa",
+      "latency_ms": 13526,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Birrell wins the Seoul title",
+      "dek": "The No. 2 seed defeated Maya Joint 6-4, 6-2 in the WTA 250 final, completing the victory in 1 hour 23 minutes.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Birrell closes out Seoul in straight sets",
+          "paragraphs": [
+            "Kimberly Birrell defeated Maya Joint 6-4, 6-2 in the Seoul final on hard court. Birrell, the No. 2 seed, completed the match in 1 hour 23 minutes against the No. 5 seed.",
+            "Birrell was No. 60 and Joint No. 99 on the official WTA singles list in force at the start of the tournament. The completed final was the last match of Seoul 2026."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second-serve points created the separation",
+          "paragraphs": [
+            "The sharpest statistical divide came behind the second serve. Birrell won 50% of those points, while Joint won 30.4%, leaving Joint exposed whenever she missed her first delivery.",
+            "Birrell also won 66.7% of her first-serve points and finished with 61.1% of all service points despite recording 0 aces. Her advantage came from sustained effectiveness across the service exchanges rather than free points from aces.",
+            "The return numbers show how consistently Birrell applied pressure. She won 57.4% of her return points and converted 60% of her break-point opportunities. Joint won 38.9% of her return points, limiting her chances to disrupt Birrell’s service games."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A title decided through control on serve and return",
+          "paragraphs": [
+            "The result gave Birrell the Seoul WTA 250 title and ended the tournament with a straight-sets victory over another seeded player. Her superiority behind both first and second serves was reinforced by a more productive return performance.",
+            "Joint generated 6 break-point opportunities and converted 3, but Birrell created 10 and converted 6. That combination—stronger service-point production and more frequent return pressure—provided the clearest explanation for the final score."
+          ]
+        }
+      ],
+      "words": 234,
+      "section_count": 3,
+      "evidence_families_used": [
+        "match",
+        "stats",
+        "match_dna",
+        "dna",
+        "tournament"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 8,
+        "paragraphs_with_4plus_numbers": 2,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": 0.016028
+    },
+    {
+      "model": "gpt-6-astra",
+      "model_reported": "gpt-6-astra",
+      "ok": true,
+      "pool": "premium",
+      "usage": {
+        "input_tokens": 6591,
+        "cached_input_tokens": 1094,
+        "output_tokens": 722,
+        "reasoning_tokens": 180
+      },
+      "response_id": "resp_07119f536818d8f5016abc154b08b887d29d911d9b4596cc82",
+      "latency_ms": 17268,
+      "gate": {
+        "pass": true,
+        "failures": []
+      },
+      "headline": "Birrell wins Seoul title with decisive return pressure",
+      "dek": "Kimberly Birrell beat Maya Joint 6-4, 6-2 in 1 hour 23 minutes to claim the hard-court WTA 250 title.",
+      "sections": [
+        {
+          "id": "what_happened",
+          "heading": "Birrell finishes on top",
+          "paragraphs": [
+            "Kimberly Birrell completed Seoul’s title match with a straight-sets victory over Maya Joint, converting sustained pressure on return into the championship. The result closed the tournament without the final needing a deciding set.",
+            "Birrell entered as the No. 2 seed and Joint as the No. 5 seed. On the official WTA singles list in force at the start of the tournament, Birrell was No. 60 and Joint No. 99."
+          ]
+        },
+        {
+          "id": "match_data",
+          "heading": "Second serves made the separation",
+          "paragraphs": [
+            "The serve numbers show why Birrell had more room to work. She won 50% of points behind her second serve, while Joint managed 30.4%. Birrell’s second delivery was contestable, but Joint’s left her substantially more exposed.",
+            "Birrell also had the stronger foundation behind her first serve, winning 66.7% of those points against Joint’s 51.6%. Her advantage was not built on aces: she finished with none. Instead, she won a greater share of points behind each delivery.",
+            "On return, Birrell converted 6 of 10 break-point opportunities. Joint created chances of her own, and Birrell saved 50% of the break points she faced. This was not a final in which the champion’s serve went untouched; Birrell’s broader return pressure outweighed the openings she conceded."
+          ]
+        },
+        {
+          "id": "why_it_mattered",
+          "heading": "A different hard-court outcome",
+          "paragraphs": [
+            "The title contrasts with Birrell’s recent archived hard-court results: losses to Kamilla Rakhimova in Cincinnati and Viktorija Golubic in Montreal. Seoul supplied a championship outcome after those early exits.",
+            "Joint’s recent hard-court results included a US Open win over Liudmila Samsonova before a loss to Elina Svitolina. Here, her run ended in the final against a player who consistently extracted more from both serve and return."
+          ]
+        }
+      ],
+      "words": 257,
+      "section_count": 3,
+      "evidence_families_used": [
+        "stats",
+        "match_dna",
+        "dna"
+      ],
+      "diagnostics": {
+        "repeated_5grams": 0,
+        "numbers_repeated_across_sections": 0,
+        "max_numbers_in_a_paragraph": 4,
+        "paragraphs_with_4plus_numbers": 1,
+        "paragraphs": 7
+      },
+      "nominal_standard_cost": null
+    }
+  ]
+}
