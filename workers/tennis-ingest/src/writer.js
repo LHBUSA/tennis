@@ -395,6 +395,27 @@ export async function candidateMatchIds(store, keys, eds, { page = 1000, keyBatc
   return out;
 }
 
+/**
+ * Same real-world fixture? Called only for two rows that already share edition + event type + stage + participant pair
+ * (a pair meets at most once per stage of one event). Provider round notations differ (WTA 'M-7' is an opaque round id,
+ * ESPN '1' a round number), so rounds only veto when both are the same notation family and disagree (Q/S/F letters, or
+ * two plain round numbers). Scheduled times, when both are known, must be within FIXTURE_TOLERANCE_MS. A stored result
+ * is never dropped for a fixture that has none.
+ */
+export const FIXTURE_TOLERANCE_MS = 36 * 3600e3;
+export function sameFixture(row, x) {
+  const r1 = String(row.round || '').replace(/^M-/, '');
+  const r2 = String(x.n.match.round_code || '').replace(/^M-/, '');
+  const rawWta = (r) => /^M-/.test(String(r || ''));
+  if (/^[QSF]$/.test(r1) && /^[QSF]$/.test(r2) && r1 !== r2) return false;
+  if (!rawWta(row.round) && !rawWta(x.n.match.round_code) && /^\d+$/.test(r1) && /^\d+$/.test(r2) && r1 !== r2) return false;
+  const t1 = row.scheduled_at ? Date.parse(row.scheduled_at) : NaN;
+  const t2 = x.sm.scheduled_at ? Date.parse(x.sm.scheduled_at) : NaN;
+  if (Number.isFinite(t1) && Number.isFinite(t2) && Math.abs(t1 - t2) > FIXTURE_TOLERANCE_MS) return false;
+  if (FINAL.has(row.status) && !FINAL.has(x.n.match.status)) return false;
+  return true;
+}
+
 async function crossSource(store, normalized, holds, captureId) {
   const provider = normalized[0].sm.provider;
   const eds = [...new Set(normalized.map((x) => x.ed.edition_id))];
@@ -409,7 +430,7 @@ async function crossSource(store, normalized, holds, captureId) {
   for (const id of await candidateMatchIds(store, keys, eds)) cand.add(id);
   const ids = [...cand];
   const rows = [];
-  for (let i = 0; i < ids.length; i += 150) rows.push(...(await store.select('tennis_matches', `select=match_id,edition_id,event_type,round,status,score_text,winner_side,source_family&match_id=${inList(ids.slice(i, i + 150))}`)));
+  for (let i = 0; i < ids.length; i += 150) rows.push(...(await store.select('tennis_matches', `select=match_id,edition_id,event_type,round,status,score_text,winner_side,source_family,scheduled_at&match_id=${inList(ids.slice(i, i + 150))}`)));
   const inPass = rows.filter((m) => eds.includes(m.edition_id));
   const byIdAll = new Map(inPass.map((m) => [m.match_id, { ...m, parts: {} }]));
   const pids = [...byIdAll.keys()];
@@ -464,6 +485,14 @@ async function crossSource(store, normalized, holds, captureId) {
           merges.push({ from: target, into: others[0].match_id, provider });
           target = others[0].match_id;
         }
+      } else if (others.length === 1 && sourcePriority(others[0].source_family) < sourcePriority(mine?.source_family || provider) && sameFixture(others[0], x)) {
+        // the reverse (2026-09-29, China Open WS): our own higher-precedence row and a LOWER-precedence row (an ESPN
+        // fixture) hold the same fixture -> the lower row is absorbed into ours (its ids move here, it is removed, logged).
+        // Never an evented row (append-only), never a lower row that already carries a result our row does not.
+        const lower = others[0];
+        const evented = (await store.select('tennis_match_events', `select=event_id&match_id=eq.${lower.match_id}&limit=1`)).length > 0;
+        if (evented) holds.push({ provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [`duplicate_candidate:absorb_blocked_append_only_events:${lower.match_id}->${target}`], payload: slim(x.sm), capture_id: captureId });
+        else merges.push({ from: lower.match_id, into: target, provider: lower.source_family });
       }
     }
     // 2. the same match from another source, by natural key
