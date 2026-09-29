@@ -107,7 +107,7 @@ export async function espnMapProbe(ctx, params) {
     const flat = (t) => JSON.stringify([...t.values()].map((x) => [x.edition_id, x.hit, x.source_family, x.surface ?? null, x.indoor ?? null, x.name ?? null]).sort());
     const a = L.v ? tallyEditions(L.v, pairs, lo, hi) : null;
     const b = N.v ? tallyEditions(N.v, pairs, lo, hi) : null;
-    out.push({ edition: edId, name: e.name, pairs: pairs.size, keys: keys.length, legacy_rows: L.v?.size ?? null, new_rows: N.v?.size ?? null, legacy_ms: L.ms ?? null, new_ms: N.ms, legacy_error: L.error || null, new_error: N.error || null, tally_equal: a && b ? flat(a) === flat(b) : null, candidate_editions: b?.size ?? null, top_hit: b ? Math.max(0, ...[...b.values()].map((x) => x.hit)) : null });
+    out.push({ edition: edId, name: e.name, pairs: pairs.size, keys: keys.length, legacy_rows: L.v?.size ?? null, new_rows: N.v?.size ?? null, legacy_ms: L.ms ?? null, new_ms: N.ms, legacy_error: L.error || null, new_error: N.error || null, tally_equal: a && b ? flat(a) === flat(b) : null, candidate_editions: b?.size ?? null, top_hit: b ? Math.max(0, ...[...b.values()].map((x) => x.hit)) : null, tally: b ? [...b.values()].map((x) => [x.edition_id, x.hit]).sort() : null });
   }
   return { probe: 'espn_map', read_only: true, cases: out };
 }
