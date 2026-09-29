@@ -41,7 +41,9 @@ for (const w of WIDTHS) {
       const h1 = document.querySelector('h1')?.textContent?.trim() || '';
       const identity = !!document.querySelector('#main img[alt], #main .av, #main [class*="avatar"], #main [class*="initials"]');
       // WTA-only labels on ATP content: a men's page naming a WTA list/number for the player
-      const wtaOnAtp = men ? (text.match(/WTA (No\.|singles|doubles)[^\n]{0,40}/g) || []) : [];
+      // (navigation links to the WTA lists — e.g. the rankings list switcher — are not labels on this content)
+      const content = (() => { const c = (document.querySelector('#main') || document.body).cloneNode(true); c.querySelectorAll('nav, a[href^="/rankings/women"]').forEach((x) => x.remove()); return c.innerText || c.textContent || ''; })();
+      const wtaOnAtp = men ? (content.match(/WTA (No\.|singles|doubles)[^\n]{0,40}/g) || []) : [];
       return { sw: document.documentElement.scrollWidth, iw: innerWidth, broken, dnaEmpty: dnaShells.length, stuck, dupLive: liveIds.length - new Set(liveIds).size, h1, identity, wtaOnAtp, len: text.length };
     }, isMenRoute(path));
     const bad = [];
