@@ -40,7 +40,10 @@ export function isGenuinelyLive(m, now = Date.now()) {
 }
 
 async function live(store) {
-  const rows = (await store.select('tennis_matches', `select=${MATCH}&status=eq.in_progress&order=updated_at.desc&limit=200`)).filter((m) => isGenuinelyLive(m));
+  // a row no source links to any more (its external ids moved to the surviving row of a duplicate pair) can never be
+  // observed again: it is not live (2026-09-29: two 0-0 Adana rows from 09:10 shown next to their finished duplicates)
+  const rows = (await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&status=eq.in_progress&order=updated_at.desc&limit=200`))
+    .filter((m) => isGenuinelyLive(m) && (m.tennis_match_external_ids || []).length > 0);
   return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server only where the source publishes them (official WTA feed), game-level state from the secondary ESPN feed for ATP events' });
 }
 

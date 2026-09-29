@@ -72,8 +72,9 @@ for (const [w, h] of [[1440, 900], [390, 844]]) {
     if (r.broken) fails.push(`broken_images:${r.broken}`);
     if (errors.length) fails.push(`console:${errors[0]}`);
     if (/could not be loaded|Could not load/i.test(r.text)) fails.push('error_state');
-    if (/\/dna$/.test(route) && !/MATCH DNA — LIVE/i.test(r.text)) fails.push('match_dna_missing');
-    if (/\/dna$/.test(route) && !/by surface/i.test(r.text)) fails.push('surface_table_missing');
+    // player DNA tabs only (the /dna hub is checked by its own metric routes)
+    if (/^\/players\/[^/]+\/dna$/.test(route) && !/MATCH DNA — LIVE/i.test(r.text)) fails.push('match_dna_missing');
+    if (/^\/players\/[^/]+\/dna$/.test(route) && !/by surface/i.test(r.text)) fails.push('surface_table_missing');
     if (/\/players\/[^/]+$/.test(route) && !/Match DNA/i.test(r.text)) fails.push('overview_match_dna_missing');
     if (/^\/dna/.test(route) && !/qualified players/.test(r.text)) fails.push('leaderboard_missing');
     if (route === '/dna' && !(/\bATP\b/.test(r.text) && /\bWTA\b/.test(r.text))) fails.push('hub_not_both_tours');
