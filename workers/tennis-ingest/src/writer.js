@@ -456,8 +456,14 @@ async function crossSource(store, normalized, holds, captureId) {
       const mine = byId.get(target);
       const rn2 = (r) => String(r || '').replace(/^M-/, '');
       if (others.length === 1 && sourcePriority(others[0].source_family) >= sourcePriority(mine?.source_family || provider) && !(others[0].round && x.n.match.round_code && /^[QSF]$/.test(rn2(others[0].round)) && /^[QSF]$/.test(rn2(x.n.match.round_code)) && rn2(others[0].round) !== rn2(x.n.match.round_code))) {
-        merges.push({ from: target, into: others[0].match_id, provider });
-        target = others[0].match_id;
+        // a row with observed events can never be removed or re-pointed (tennis_match_events is append-only): it keeps
+        // its own id and the duplicate pair is held for review (2026-09-29: the merge's DELETE failed a whole live round)
+        const evented = (await store.select('tennis_match_events', `select=event_id&match_id=eq.${target}&limit=1`)).length > 0;
+        if (evented) holds.push({ provider, entity_type: 'match', external_id: x.sm.provider_match_id, problems: [`duplicate_candidate:merge_blocked_append_only_events:${target}->${others[0].match_id}`], payload: slim(x.sm), capture_id: captureId });
+        else {
+          merges.push({ from: target, into: others[0].match_id, provider });
+          target = others[0].match_id;
+        }
       }
     }
     // 2. the same match from another source, by natural key

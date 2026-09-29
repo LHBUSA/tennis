@@ -128,6 +128,20 @@ test('self-heal: a row found by its own id that duplicates an official row in th
   assert.ok(s.rows('tennis_source_changes').some((c) => c.kind === 'duplicate_merged'));
 });
 
+test('self-heal never merges a row with observed events (append-only): it keeps its id, the pair is held, the write lands', async () => {
+  const s = new MemStore();
+  const OTHER = '00000000-0000-4000-8000-00000000e779';
+  await writeMatches(s, [sm('espn', '414-2026:1', 'Q-1', '10', '20', { stage: 'qualifying' })], { edition_id: OTHER }, { dedupe: true });
+  await writeMatches(s, [sm('wta', '0709-2026-RS033', 'Q-', '10', '20', { stage: 'qualifying' })], { edition_id: E });
+  const lower = s.rows('tennis_matches').find((m) => m.source_family === 'espn').match_id;
+  await s.insert('tennis_match_events', [{ event_id: 'ev-1', match_id: lower, quality: 'score_snapshot', event_sequence: 0 }]);
+  const r = await writeMatches(s, [sm('espn', '414-2026:1', 'Q-1', '10', '20', { stage: 'qualifying' })], { edition_id: E }, { dedupe: true });
+  assert.equal(r.merged, 0);
+  assert.equal(s.rows('tennis_matches').length, 2, 'no row removed');
+  assert.equal(s.rows('tennis_match_events').length, 1, 'no event deleted');
+  assert.ok(s.rows('tennis_ingest_holds').some((h) => h.problems.some((p) => p.startsWith('duplicate_candidate:merge_blocked_append_only_events'))));
+});
+
 test('history backfill: completion ledger skips finished players across shard layouts; resume page; deadlock retry; cron yields to admin', async () => {
   const { wtaHistoryStep, ADMIN_FLAG } = await import('../workers/tennis-ingest/src/wta-history-job.js');
   const { MemKV } = await import('./helpers/memstore.js');
