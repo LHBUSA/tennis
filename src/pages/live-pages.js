@@ -319,7 +319,7 @@ export const player = mountWith(async (root, { params }, signal) => {
         ${surfaceHistorySection(md)}` : ''}
       <h2 class="sec">Technical DNA <small>serve · return · pressure from match statistics</small></h2>
       ${d ? dnaSection(d) : html`<p class="dna-status" data-tech-status="unavailable"><b>Technical serve/return DNA is still building</b> for ${p.name}: it needs matches with published serve/return statistics.${md ? ' Match DNA above is complete and unaffected.' : ''}</p>`}
-      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span><b>${pct(x.metrics.hold_rate?.value)}</b><small class="note">hold · ${x.matches_considered} matches</small></div>`)}</div></section>` : ''}
+      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span>${x.metrics.hold_rate?.value != null ? html`<b>${pct(x.metrics.hold_rate.value)}</b><small class="note">hold · ${x.matches_considered} matches</small>` : html`<b class="note">building</b><small class="note">hold rate needs more ${s} matches with serve statistics (${x.matches_considered} so far)</small>`}</div>`)}</div></section>` : ''}
       <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
     return;
   }

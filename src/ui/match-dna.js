@@ -88,11 +88,11 @@ const RATED_MIN = 20;
 export function surfaceRatingCell(s, tour) {
   const r = s.rating;
   const sf = s.surface;
-  if (!r) return html`<span class="note">not rated: no rated ${sf} matches</span>`;
-  if (r.status === 'not_validated') return html`<span class="note">Not published — the ${tour} surface model has not passed its out-of-sample validation gate</span>`;
+  if (!r) return html`<span class="note why">not rated · no rated ${sf} matches</span>`;
+  if (r.status === 'not_validated') return html`<span class="note why">Not published — the ${tour} surface model has not passed its out-of-sample validation gate</span>`;
   if (r.percentile != null) return html`<b class="tabnum">${r.value}</b><small class="note">${ORD(r.percentile)} pct</small>`;
   const why = (r.rated_matches ?? 0) < RATED_MIN ? `${r.rated_matches ?? 0} rated ${sf} matches (${RATED_MIN} needed)` : `no rated ${sf} match in the last 365 days`;
-  return html`<b class="tabnum">${r.value}</b><small class="note">no percentile: ${why}</small>`;
+  return html`<b class="tabnum">${r.value}</b><small class="note why">no percentile · ${why}</small>`;
 }
 
 /** How many singles results are outside the surface table because their tournament has no sourced surface. */

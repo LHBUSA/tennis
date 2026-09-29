@@ -655,3 +655,5 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 /* player Overview / Tennis DNA tabs: an unmistakable selected state */
 .tabs[aria-label='Player sections'] a { border-radius: 10px 10px 0 0; }
 .tabs[aria-label='Player sections'] a[aria-current='page'] { background: var(--court-700); color: var(--on-dark); border-color: var(--gold-bright); }
+/* By surface: reason text wraps inside its own cell (it ran into the next column at 1440) */
+.surf-tbl td .why { display: block; white-space: normal; max-width: 22ch; margin-left: auto; line-height: 1.3; }

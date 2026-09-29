@@ -11,11 +11,11 @@ const surf = (surface, rating, W = 30, L = 10) => ({ surface, rating, form: { ca
 
 test('Surface PBE Rating cell: value + percentile, or the exact reason — never blank', () => {
   assert.match(str(surfaceRatingCell(surf('hard', { value: 2137, percentile: 99, status: 'published', rated_matches: 116 }), 'ATP')), /2137.*99th pct/s);
-  assert.match(str(surfaceRatingCell(surf('clay', { value: 2200, percentile: null, status: 'published', rated_matches: 61 }), 'ATP')), /2200.*no percentile: no rated clay match in the last 365 days/s);
+  assert.match(str(surfaceRatingCell(surf('clay', { value: 2200, percentile: null, status: 'published', rated_matches: 61 }), 'ATP')), /2200.*no percentile · no rated clay match in the last 365 days/s);
   assert.match(str(surfaceRatingCell(surf('grass', { value: 1500, percentile: null, status: 'published', rated_matches: 12 }), 'ATP')), /12 rated grass matches \(20 needed\)/);
   assert.match(str(surfaceRatingCell(surf('hard', { value: 2000, status: 'not_validated' }), 'ATP')), /Not published — the ATP surface model has not passed its out-of-sample validation gate/);
   assert.doesNotMatch(str(surfaceRatingCell(surf('hard', { value: 2000, status: 'not_validated' }), 'ATP')), /2000/, 'an unvalidated rating value is never shown');
-  assert.match(str(surfaceRatingCell(surf('grass', null), 'WTA')), /not rated: no rated grass matches/);
+  assert.match(str(surfaceRatingCell(surf('grass', null), 'WTA')), /not rated · no rated grass matches/);
 });
 
 test('By surface: discloses results without a sourced surface and states the surface-model gate for the tour', () => {
