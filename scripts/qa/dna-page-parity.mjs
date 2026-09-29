@@ -90,11 +90,13 @@ for (const w of WIDTHS) {
   page.on('console', (m) => m.type() === 'error' && errs.push(m.text().slice(0, 120)));
   for (const [slug, tour] of PLAYERS) {
     await page.goto(`${BASE}/players/${slug}/dna`, { waitUntil: 'load' });
-    const r = await readPage(page);
+    let r = await readPage(page);
+    // one reload when nothing rendered within the wait (a slow cold API read), recorded — never silently skipped
+    if (!r.h2.length) { console.log(`note: ${slug} @${w} rendered nothing in 30 s; reloading once`); await page.reload({ waitUntil: 'load' }); r = await readPage(page); r.reloaded = true; }
     const shot = `${SHOTS}/${slug}-dna-${w}.png`;
     await page.screenshot({ path: shot, fullPage: true });
     assertFull(`${slug} /dna @${w}`, r, data[slug], tour);
-    report.push({ title: `${slug} — full Tennis DNA @${w}px`, shot, path: r.path, current: r.current, h2: r.h2, h3: r.h3 });
+    report.push({ title: `${slug} — full Tennis DNA @${w}px${r.reloaded ? ' (after one reload)' : ''}`, shot, path: r.path, current: r.current, h2: r.h2, h3: r.h3 });
   }
   check(`console @${w}`, 'no console errors', errs.length === 0, errs.slice(0, 3).join(' | '));
   await page.close();
@@ -129,7 +131,7 @@ for (const [slug, tour] of [['carlos-alcaraz', 'ATP'], ['elena-rybakina', 'WTA']
 await browser.close();
 
 // 3. same architecture across tours (h2 sequence of the full page, 1440)
-const seq = (slug) => report.find((x) => x.title === `${slug} — full Tennis DNA @1440px`).h2.filter((h) => CORE.some((c) => h.startsWith(c))).map((h) => CORE.find((c) => h.startsWith(c)));
+const seq = (slug) => report.find((x) => x.title.startsWith(`${slug} — full Tennis DNA @1440px`)).h2.filter((h) => CORE.some((c) => h.startsWith(c))).map((h) => CORE.find((c) => h.startsWith(c)));
 const ref = seq('elena-rybakina');
 for (const [slug] of PLAYERS) check(`${slug}`, 'same module sequence as Rybakina', JSON.stringify(seq(slug)) === JSON.stringify(ref), `${seq(slug)} vs ${ref}`);
 
