@@ -52,7 +52,7 @@ function distribution(h) {
       'grand_slams', json_build_object('events', count(*) filter (where slam and state <> 'duplicate'), 'published', count(*) filter (where slam and state = 'published')),
       'rankings', json_build_object('events', count(*) filter (where ranking and state <> 'duplicate'), 'published', count(*) filter (where ranking and state = 'published'))) by_desk
     from ev`);
-  const [a] = sql(`with art as (select a.first_published_at, a.revised_at, a.story_class, (exists (select 1 from jsonb_array_elements(e.class_history) x where x->>'stage' = 'reclassify_v3') and a.first_published_at - e.detected_at > interval '6 hours') backfill
+  const [a] = sql(`with art as (select a.first_published_at, a.revised_at, a.story_class, exists (select 1 from jsonb_array_elements(e.class_history) x where x->>'stage' = 'reclassify_v3' and (x->>'at')::timestamptz <= a.first_published_at) backfill
       from tennis_articles a join tennis_news_events e on e.event_id = a.event_id where a.status = 'published')
     select count(*) filter (where first_published_at > now() - interval '${h} hours' and not backfill) newly_published_live,
       count(*) filter (where first_published_at > now() - interval '${h} hours' and backfill) backfill_articles_created,
@@ -63,7 +63,7 @@ function distribution(h) {
       count(*) filter (where first_published_at > now() - interval '${h} hours' and story_class = 'deep') deep,
       count(*) total_published from art`);
   const ew = { basis: `events whose tennis_news_events.detected_at falls in the last ${h} h (event clock)`, events_detected: r.detected, classified_wire: r.wire, classified_brief: r.brief, classified_full: r.full, classified_deep: r.deep, events_resulting_in_article: r.published, queued_for_article: r.queued, held: r.held, duplicates: r.duplicates, legacy_below_bar: r.below_bar_legacy, by_desk: r.by_desk };
-  const aa = { basis: `articles whose first_published_at falls in the last ${h} h (publication clock); backfill = V3 reclassification (class_history stage reclassify_v3) published more than 6 h after detection; revised = revised_at in the window`, ...a };
+  const aa = { basis: `articles whose first_published_at falls in the last ${h} h (publication clock); backfill = first published after (i.e. by) the V3 reclassification (class_history stage reclassify_v3); revised = revised_at in the window`, ...a };
   return { event_window: ew, article_activity: aa };
 }
 
