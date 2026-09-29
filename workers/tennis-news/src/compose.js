@@ -7,7 +7,9 @@
 
 import { deskFor, provenanceOf, LIST_LABEL } from './tour.js';
 
-export const COMPOSE_VERSION = 'tennis-compose/1.1.0';
+export const COMPOSE_VERSION = 'tennis-compose/3.0.0';
+const RANKC = { brief: 1, full: 2, deep: 3 };
+const atLeastC = (c, min) => (RANKC[c] || 2) >= RANKC[min];
 
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const surname = (p) => p?.last_name ? p.last_name.split(' ').map((w) => (w === w.toUpperCase() ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(' ') : String(p?.name || '').split(' ').slice(-1)[0];
@@ -51,7 +53,7 @@ function headlineFor(k, P) {
   }
 }
 
-function composeMatch(packet) {
+function composeMatch(packet, storyClass = 'full') {
   const m = packet.match;
   const t = packet.tournament;
   const W = m.winner_side;
@@ -76,14 +78,20 @@ function composeMatch(packet) {
   if (m.duration && m.status !== 'walkover') what.push(`The match lasted ${durTxt(m.duration)}.`);
   sections.push({ id: 'what_happened', heading: 'What happened', paragraphs: what });
 
-  // MATCH DATA
+  // THE MATCH IN NUMBERS — one analytical point, not a narration of the charts beside it: which serve/return line
+  // separated the players most, and how the break points went (the charts carry every other number)
   if (packet.stats && m.status !== 'walkover') {
     const sw = packet.stats[W];
     const sl = packet.stats[L];
-    const paras = [statSentence(wS, sw, lS), statSentence(lS, sl, wS)].filter(Boolean);
-    if (sw.return_points_won && sl.return_points_won) paras.push(`On return, ${wS} won ${sw.return_points_won.pct}% of points against serve (${sw.return_points_won.n} of ${sw.return_points_won.d}); ${lS} won ${sl.return_points_won.pct}% (${sl.return_points_won.n} of ${sl.return_points_won.d}).`);
-    if (Number.isFinite(sw.total_points_won) && Number.isFinite(sl.total_points_won)) paras.push(`Across the match ${wS} won ${sw.total_points_won} points to ${lS}'s ${sl.total_points_won}.`);
-    if (paras.length) sections.push({ id: 'match_data', heading: 'Match data', paragraphs: paras });
+    const LINES = [['first_serve_won', 'points behind the first serve'], ['second_serve_won', 'points behind the second serve'], ['first_return_won', 'returns against the first serve'], ['second_return_won', 'returns against the second serve'], ['service_points_won', 'service points'], ['return_points_won', 'return points']];
+    const gaps = LINES.filter(([k]) => sw[k]?.pct != null && sl[k]?.pct != null).map(([k, label]) => ({ k, label, a: sw[k].pct, b: sl[k].pct, gap: Math.abs(sw[k].pct - sl[k].pct) })).sort((x, y) => y.gap - x.gap);
+    const paras = [];
+    if (gaps.length) {
+      const g = gaps[0];
+      paras.push(`The clearest separation came on ${g.label}: ${wS} won ${g.a}% of them and ${lS} ${g.b}%${g.a >= g.b ? '' : ', the one area where the loser held the edge'}.`);
+    }
+    if (sw.break_points_converted?.d && sl.break_points_converted?.d) paras.push(`The break points decided more than the totals: ${wS} converted ${sw.break_points_converted.n} of ${sw.break_points_converted.d}, ${lS} ${sl.break_points_converted.n} of ${sl.break_points_converted.d}.`);
+    if (paras.length) sections.push({ id: 'match_data', heading: 'The match in numbers', paragraphs: storyClass === 'brief' ? paras.slice(0, 1) : paras });
   }
 
   // WHY IT MATTERED
@@ -108,34 +116,61 @@ function composeMatch(packet) {
   if (packet.draw_path?.matches.length) why.push(`It was ${wS}'s ${ord(packet.draw_path.matches.length + 1)} win of the tournament.`);
   if (why.length) sections.push({ id: 'why_it_mattered', heading: 'Why it mattered', paragraphs: why });
 
-  // TENNIS DNA (stored snapshot before the match)
+  // WHAT THE RESULT SAYS — results-based Match DNA v2 frozen before the match (full/deep); never a percentile or a
+  // tour comparison in prose (the gates hold those), only the player's own stored record
   const wid = w.players[0]?.id;
   const lid = l.players[0]?.id;
-  const dW = packet.dna?.[wid];
-  const dL = packet.dna?.[lid];
-  if (dW && dL) {
-    const shared = Object.keys(dW.metrics).filter((k) => dL.metrics[k]);
-    const pick = shared.filter((k) => ['service_points_won', 'return_points_won', 'hold_rate', 'break_rate'].includes(k)).slice(0, 2);
-    const LABEL = { service_points_won: 'service points won', return_points_won: 'return points won', hold_rate: 'service games held', break_rate: 'return games broken' };
-    if (pick.length) sections.push({ id: 'dna', heading: 'Tennis DNA', paragraphs: [`Going in, the stored Tennis DNA snapshots (dated ${dW.as_of} and ${dL.as_of}, built only from earlier matches) had ${pick.map((k) => `${wS} at ${dW.metrics[k].pct}% ${LABEL[k] || k} against ${dL.metrics[k].pct}% for ${lS}`).join(', and ')}.`] });
+  const mW = packet.match_dna?.[wid];
+  const mL = packet.match_dna?.[lid];
+  if (atLeastC(storyClass, 'full') && mW) {
+    const read = [];
+    const mw = mW.metrics?.match_win_rate;
+    const t10 = mW.metrics?.top10_win_rate;
+    const y = mW.windows?.['52w'];
+    if (mw?.record) read.push(`Going into the match, ${wS}'s Match DNA (a snapshot dated ${mW.as_of}, built only from earlier results) showed ${mw.record.W}-${mw.record.L} in singles in our archive${y && y.W + y.L ? `, ${y.W}-${y.L} over the previous ${y.weeks} weeks` : ''}.`);
+    if (t10?.record && t10.record.W + t10.record.L) read.push(`Against top-10 opponents it was ${t10.record.W}-${t10.record.L}.`);
+    const dec = mW.metrics?.deciding_set_win_rate;
+    if ((kind === 'comeback' || kind === 'deciding_tiebreak') && dec?.record) read.push(`${wS} had won ${dec.record.W} of ${dec.record.W + dec.record.L} deciding sets in our archive before this one.`);
+    if (mL?.metrics?.match_win_rate?.record) read.push(`${lS} came in at ${mL.metrics.match_win_rate.record.W}-${mL.metrics.match_win_rate.record.L}.`);
+    if (read.length >= 2) sections.push({ id: 'player_read', heading: `What the result says about ${wS}`, paragraphs: [read.join(' ')] });
+  }
+
+  // SURFACE AND MATCHUP CONTEXT — sourced surface only (never inferred from a tournament name)
+  if (atLeastC(storyClass, 'full') && t.surface) {
+    const sW = mW?.surface?.record;
+    const sL = mL?.surface?.record;
+    const bits = [];
+    if (sW && sW.W + sW.L) bits.push(`On ${t.surface} courts ${wS} was ${sW.W}-${sW.L} in our archive before this match`);
+    if (sL && sL.W + sL.L) bits.push(`${lS} ${sL.W}-${sL.L}`);
+    const dW = packet.dna?.[wid];
+    const dL = packet.dna?.[lid];
+    let tech = null;
+    if (dW && dL) {
+      const shared = Object.keys(dW.metrics).filter((k) => dL.metrics[k]);
+      const pick = shared.filter((k) => ['service_points_won', 'return_points_won', 'hold_rate', 'break_rate'].includes(k)).slice(0, 2);
+      const LABEL = { service_points_won: 'service points won', return_points_won: 'return points won', hold_rate: 'service games held', break_rate: 'return games broken' };
+      if (pick.length) tech = `From match statistics, the stored Technical DNA had ${pick.map((k) => `${wS} at ${dW.metrics[k].pct}% ${LABEL[k] || k} against ${dL.metrics[k].pct}% for ${lS}`).join(', and ')}.`;
+    }
+    const paras = [bits.length ? `${bits.join('; ')}.` : null, tech].filter(Boolean);
+    if (paras.length) sections.push({ id: 'surface', heading: 'Surface and matchup context', paragraphs: paras });
   }
 
   // HEAD-TO-HEAD
-  if (packet.h2h?.prior_meetings.length) {
+  if (atLeastC(storyClass, 'full') && packet.h2h?.prior_meetings.length) {
     const h = packet.h2h;
     const last = h.prior_meetings[0];
     sections.push({ id: 'h2h', heading: 'Head-to-head', paragraphs: [`In our archive (from ${h.coverage_from}), ${wS} and ${lS} had met ${h.prior_meetings.length} time${h.prior_meetings.length === 1 ? '' : 's'} before, with ${wS} winning ${h.wins}. Their previous meeting in our records was at ${last.tournament} ${last.year}, a ${last.result === 'W' ? 'win' : 'loss'} for ${wS} (${last.score}).`] });
   }
 
   // PATH THROUGH THE DRAW
-  if (packet.draw_path?.matches.length) {
-    sections.push({ id: 'path', heading: 'Path through the draw', paragraphs: [packet.draw_path.matches.map((r) => `${cap(r.round_label)}: ${r.result === 'W' ? 'beat' : 'lost to'} ${r.opponent.map((o) => o.name).join(' / ')}${r.score ? ` ${r.score}` : ''}`).join('. ') + '.'] });
+  if (atLeastC(storyClass, 'full') && packet.draw_path?.matches.length) {
+    sections.push({ id: 'path', heading: `Path through ${t.name}`, paragraphs: [packet.draw_path.matches.map((r) => `${cap(r.round_label)}: ${r.result === 'W' ? 'beat' : 'lost to'} ${r.opponent.map((o) => o.name).join(' / ')}${r.score ? ` ${r.score}` : ''}`).join('. ') + '.'] });
   }
 
   // WHAT'S NEXT — only when the draw already shows it
-  if (packet.next?.opponent.length) sections.push({ id: 'next', heading: "What's next", paragraphs: [`${wS} plays ${packet.next.opponent.map((o) => o.name).join(' / ')} in the ${packet.next.round_label}.`] });
+  if (packet.next?.opponent.length) sections.push({ id: 'next', heading: 'What comes next', paragraphs: [`${wS} plays ${packet.next.opponent.map((o) => o.name).join(' / ')} in the ${packet.next.round_label}.`] });
 
-  sections.push({ id: 'method', heading: 'Evidence & method', paragraphs: [methodText(packet, prov)] });
+  sections.push({ id: 'method', heading: 'Source & method', paragraphs: [methodText(packet, prov)] });
 
   const dek = m.status === 'walkover'
     ? `${lName} withdrew before the ${m.round_label}; ${wName} ${v(w, 'moves', 'move')} on.`
@@ -158,11 +193,11 @@ function methodText(packet, prov) {
     if (stats) bits.push(`Match statistics come from ${src(stats)}.`);
   }
   if (prov) bits.push(`Rankings are ${prov.phrase} in force at the start of the tournament, not today's${prov.classification === 'secondary' ? `, taken from a secondary source (${String(prov.source_family || 'unknown').toUpperCase()}) rather than an official tour release` : ''}.`);
-  bits.push('Tennis DNA values are stored snapshots built from matches before this one. Nothing in this story is estimated or inferred.');
+  bits.push('Match DNA and Technical DNA values are stored snapshots built only from matches before this one. Nothing in this story is estimated or inferred.');
   return bits.join(' ');
 }
 
-function composeRanking(packet) {
+function composeRanking(packet, storyClass = 'full') {
   const p = packet.player;
   const f = packet.event.facts;
   const s = surname(p);
@@ -179,14 +214,20 @@ function composeRanking(packet) {
     : `Both lists are ${prov.phrase}: weekly lists from a secondary source (${String(prov.source_family || 'unknown').toUpperCase()}), not an official tour release, dated to the Monday each took effect${prov.truncated ? ` and holding the top ${prov.depth} only` : ''}.`;
   const sections = [
     { id: 'what_happened', heading: 'What happened', paragraphs: [`${p.name} is No. ${f.rank} on ${official ? `the ${list} list` : prov.phrase} dated ${f.list_date}, up ${moved} on the list dated ${f.previous_list_date}.`] },
-    { id: 'method', heading: 'Evidence & method', paragraphs: [`${method} We compare consecutive archived lists only and make no claim about ${s}'s ranking before the lists our archive holds.`] }
+    { id: 'method', heading: 'Source & method', paragraphs: [`${method} We compare consecutive archived lists only and make no claim about ${s}'s ranking before the lists our archive holds.`] }
   ];
+  const md = packet.match_dna?.[p.id];
+  const mw = md?.metrics?.match_win_rate;
+  const y = md?.windows?.['52w'];
+  if (atLeastC(storyClass, 'full') && mw?.record) sections.splice(1, 0, { id: 'player_read', heading: `What the results say about ${s}`, paragraphs: [`${s}'s results-based Match DNA (snapshot dated ${md.as_of}, built before the list) showed ${mw.record.W}-${mw.record.L} in singles in our archive${y && y.W + y.L ? `, ${y.W}-${y.L} over the previous ${y.weeks} weeks` : ''}.`] });
   if (packet.ranking_history?.length > 2) sections.splice(1, 0, { id: 'trajectory', heading: 'Ranking trajectory', paragraphs: [`Our archive holds ${packet.ranking_history.length} weekly lists for ${s} up to ${f.list_date}; the chart shows each of them.`] });
   return { headline, dek: `${s} is No. ${f.rank} on the ${list} list dated ${f.list_date}.`, sections, key_stat: { label: 'New ranking', value: `No. ${f.rank}` }, story_type: packet.event.kind, desk: 'rankings', primary_player_id: p.id, player_ids: [p.id], match_id: null, tournament: null };
 }
 
-export function compose(packet) {
-  return { ...(packet.match ? composeMatch(packet) : composeRanking(packet)), compose_version: COMPOSE_VERSION };
+/** storyClass (brief | full | deep) sets the depth: sections appear only when the class calls for them AND the frozen
+ *  packet supports them; nothing is padded to reach a length. */
+export function compose(packet, { storyClass = 'full' } = {}) {
+  return { ...(packet.match ? composeMatch(packet, storyClass) : composeRanking(packet, storyClass)), story_class: storyClass, compose_version: COMPOSE_VERSION };
 }
 
 export function slugFor(article, packet) {

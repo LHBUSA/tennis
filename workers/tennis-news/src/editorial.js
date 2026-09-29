@@ -7,7 +7,7 @@
 // same gates the baseline passes are run on its output. Failure -> deterministic baseline (if it passes)
 // or HOLD. Gates are never relaxed for model prose.
 
-export const EDITORIAL_VERSION = 'tennis-editorial/1.0.0';
+export const EDITORIAL_VERSION = 'tennis-editorial/3.0.0';
 const API = 'https://api.openai.com/v1/responses';
 const CALL_TIMEOUT_MS = 90_000;
 export const USD_PER_MTOK = { input: 1.25, output: 10 }; // same account pricing constant UFC records
@@ -26,6 +26,8 @@ HARD FACT RULES — a violation means the story is held:
 - The winner is participants[match.winner_side]. Never reverse it.
 
 STYLE: clear, specific, confident, no clichés ("a testament to", "only time will tell", "make no mistake"...), no hype, no filler. Lead with what happened, then why it mattered, then the serve/return story the statistics actually show, then context (form, draw path, H2H, Tennis DNA) only where the packet has it. Charts and scoreboards are rendered separately by code next to your sections — refer to them naturally ("the serve numbers show...") but never restate long tables.
+
+ADD VALUE (held if broken): a chart already shows its numbers — explain the relationship the evidence supports instead of reading figures out (never 4+ figures from one chart in a paragraph). No section may restate the headline and dek. No two sections may make the same analytical point. Match DNA (packet.match_dna) is each player's own record in our archive before the match: use the records (W-L) to explain what the result says about the player; never write percentiles, tour comparisons or the rating model's probabilities (those are shown in code-rendered modules).
 
 OUTPUT: JSON only, matching the schema. sections[].id must be one of the ALLOWED SECTION IDS, in a sensible order; omit sections the packet cannot support. Do not write the "method" section — it is supplied by code.`;
 
@@ -86,12 +88,13 @@ export function modelPacket(packet) {
   return JSON.parse(JSON.stringify(packet, (k, v) => (/^(square|wide|square_jpg|source_page|credit|license|author|photo|data_url|built_at|detector|edition_id)$/.test(k) ? undefined : v)));
 }
 
+const WORDS = { brief: ['220-600', '150-400'], full: ['450-900', '250-600'], deep: ['700-1300', '350-800'] };
 export function buildInput(packet, baseline, correction = null) {
   const allowed = baseline.sections.map((s) => s.id).filter((id) => id !== 'method');
   const extra = ['analysis'];
   return [
     `Write the PropBetEdge Tennis story for this ${packet.event.kind.replace(/_/g, ' ')} event.`,
-    `ACCEPTANCE: ${packet.match ? '350-900' : '150-450'} words across your sections; at least ${packet.match ? 3 : 1} sections; every number from the packet.`,
+    `STORY CLASS: ${baseline.story_class || 'full'}. ACCEPTANCE: ${WORDS[baseline.story_class || 'full'][packet.match ? 0 : 1]} words across your sections; at least ${packet.match ? (baseline.story_class === 'brief' ? 2 : 3) : 1} sections; every number from the packet. A brief is a tight news story: what happened and why it matters, nothing padded.`,
     `ALLOWED SECTION IDS: ${[...allowed, ...extra].join(', ')}`,
     correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\nFix only these problems.` : '',
     `FACT-SAFE BASELINE (every fact here is verified; you may reorganise and deepen the writing, but you may not add facts beyond the packet):\n${JSON.stringify({ headline: baseline.headline, dek: baseline.dek, sections: baseline.sections.filter((s) => s.id !== 'method') })}`,

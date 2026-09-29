@@ -4,7 +4,7 @@
 
 import { parseScore } from '../../shared/canonical/scoring.js';
 
-export const GATES_VERSION = 'tennis-gates/1.0.0';
+export const GATES_VERSION = 'tennis-gates/3.0.0';
 
 const SKIP_KEY = /(^|_)(id|ids|url|slug|hash|key|token|image|square|wide|thumb|portrait|jpg|photo|source_page|license|capture|event_id|built_at|detector|version)$/i;
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -56,7 +56,7 @@ function prose(article) {
   return [article.headline, article.dek, ...article.sections.flatMap((s) => [s.heading, ...s.paragraphs])].join('\n');
 }
 
-export function runGates(article, packet, { existingSignatures = new Set(), now = new Date().toISOString() } = {}) {
+export function runGates(article, packet, { existingSignatures = new Set(), now = new Date().toISOString(), plan = null } = {}) {
   const failures = [];
   const fail = (gate, detail) => failures.push({ gate, detail });
   const text = prose(article);
@@ -134,12 +134,16 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
     //    form and H2H strictly before this tournament
     for (const p of names) if (p.rank && p.rank.list_date > packet.tournament.start_date) fail('ranking_after_event', `${p.name} list ${p.rank.list_date}`);
     for (const [pid, d] of Object.entries(packet.dna || {})) if (d.as_of > m.date) fail('dna_after_event', `${pid} ${d.as_of} > ${m.date}`);
+    // Match DNA v2 and the rating expectation: snapshots strictly BEFORE the match day (never today's rating)
+    for (const [pid, d] of Object.entries(packet.match_dna || {})) if (d.as_of >= m.date || (d.surface && d.surface.as_of >= m.date)) fail('match_dna_after_event', `${pid} ${d.as_of} >= ${m.date}`);
+    if (packet.expectation && packet.expectation.as_of >= m.date) fail('expectation_after_event', `${packet.expectation.as_of} >= ${m.date}`);
     for (const rows of Object.values(packet.recent_form || {})) for (const r of rows) if (r.date && r.date > m.date) fail('form_after_event', r.match_id);
     for (const r of packet.h2h?.prior_meetings || []) if (r.match_id === m.id || (r.date && r.date > m.date)) fail('h2h_after_event', r.match_id);
   } else {
     const f = packet.event.facts;
     if (!f.list_date || !f.previous_list_date || f.previous_list_date >= f.list_date) fail('ranking_lists', `${f.previous_list_date} -> ${f.list_date}`);
     for (const r of packet.ranking_history || []) if (r.date > f.list_date) fail('ranking_after_event', r.date);
+    for (const [pid, d] of Object.entries(packet.match_dna || {})) if (d.as_of >= f.list_date) fail('match_dna_after_event', `${pid} ${d.as_of} >= ${f.list_date}`);
   }
 
   // 7. media identity: an attached photo must be of the player it is shown for
@@ -148,5 +152,55 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   // 8. dedupe on the real-world event
   if (existingSignatures.has(packet.canonical_signature)) fail('duplicate', packet.canonical_signature);
 
+  // 9. additive value (V3): prose must add to the visuals and to itself, never restate them
+  for (const f of additiveValueFailures(article, plan)) fail(f.gate, f.detail);
+
   return { version: GATES_VERSION, pass: failures.length === 0, failures, checked_at: now, words, numbers_checked: numberTokens(text).length };
+}
+
+// ---- additive-value gates (tennis-gates/3.0.0) ---------------------------------------------------------------
+const STOP = new Set('the a an and or of in on at to for with by from as was were is are be been his her their its it that this than then over into after before against while which who'.split(' '));
+const words = (t) => String(t).toLowerCase().replace(/[^a-z0-9%.\s-]/g, ' ').split(/\s+/).filter((w) => w && !STOP.has(w));
+function jaccard(a, b) {
+  const A = new Set(words(a));
+  const B = new Set(words(b));
+  if (!A.size || !B.size) return 0;
+  let n = 0;
+  for (const x of A) if (B.has(x)) n += 1;
+  return n / (A.size + B.size - n);
+}
+const bodyParas = (article) => article.sections.filter((s) => s.id !== 'method').flatMap((s) => s.paragraphs.map((p) => ({ id: s.id, p: String(p) })));
+function chartNumbers(plan) {
+  const sets = [];
+  const charts = (plan?.modules || []).find((m) => m.id === 'charts')?.data?.charts || [];
+  for (const c of charts) {
+    const set = new Set();
+    for (const row of c.series || []) for (const k of c.value_keys || []) if (Number.isFinite(row[k])) set.add(String(Number(row[k])));
+    if (set.size) sets.push({ id: c.id, set });
+  }
+  return sets;
+}
+/**
+ * restate_headline: a section paragraph that is essentially the headline + dek again.
+ * duplicate_point:  two body paragraphs making the same point (high word overlap).
+ * chart_narration:  a paragraph that reads out an adjacent chart (4+ figures, 80%+ of them one chart's values).
+ */
+export function additiveValueFailures(article, plan = null) {
+  const out = [];
+  const head = `${article.headline} ${article.dek || ''}`;
+  const paras = bodyParas(article);
+  for (const x of paras) if (words(x.p).length >= 8 && jaccard(x.p, head) >= 0.75) out.push({ gate: 'restate_headline', detail: `${x.id}: "${x.p.slice(0, 100)}"` });
+  for (let i = 0; i < paras.length; i += 1) for (let j = i + 1; j < paras.length; j += 1) {
+    if (words(paras[i].p).length >= 12 && words(paras[j].p).length >= 12 && jaccard(paras[i].p, paras[j].p) >= 0.7) out.push({ gate: 'duplicate_point', detail: `${paras[i].id} ~ ${paras[j].id}` });
+  }
+  const charts = chartNumbers(plan);
+  if (charts.length) for (const x of paras) {
+    const nums = numberTokens(x.p).filter((t) => !(Number.isInteger(Number(t)) && Number(t) >= 0 && Number(t) <= 5));
+    if (nums.length < 4) continue;
+    for (const c of charts) {
+      const hit = nums.filter((t) => c.set.has(t)).length;
+      if (hit / nums.length >= 0.8) { out.push({ gate: 'chart_narration', detail: `${x.id} reads out ${c.id} (${hit}/${nums.length} figures)` }); break; }
+    }
+  }
+  return out;
 }

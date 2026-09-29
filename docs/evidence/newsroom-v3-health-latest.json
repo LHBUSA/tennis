@@ -1,0 +1,173 @@
+{
+  "generated_at": "2026-09-29T16:49:24.137Z",
+  "windows": {
+    "24h": {
+      "distribution": {
+        "detected": 42,
+        "wire": 0,
+        "brief": 0,
+        "full": 0,
+        "deep": 0,
+        "held": 0,
+        "duplicates": 9,
+        "below_bar_legacy": 33,
+        "queued": 0,
+        "published": 0,
+        "by_desk": {
+          "atp": {
+            "events": 19,
+            "published": 0,
+            "wire": 0
+          },
+          "wta": {
+            "events": 14,
+            "published": 0,
+            "wire": 0
+          },
+          "doubles": {
+            "events": 17,
+            "published": 0
+          },
+          "grand_slams": {
+            "events": 0,
+            "published": 0
+          },
+          "rankings": {
+            "events": 0,
+            "published": 0
+          }
+        },
+        "articles": {
+          "published_articles": 0,
+          "brief": 0,
+          "full": 0,
+          "deep": 0,
+          "revised": 0
+        }
+      },
+      "latency": {
+        "source_to_detect_min": {
+          "live_events": 10,
+          "p50": 1.1,
+          "p95": 1.7,
+          "catch_up_events": 23,
+          "without_any_source_clock": 12,
+          "basis": "first observation of the terminal status (fallback source_updated_at)"
+        },
+        "detect_to_wire_min": {
+          "p50": 0,
+          "p95": 0,
+          "basis": "the live wire is a read projection of detected events: visible on detection (API cache <= 2 min)"
+        },
+        "detect_to_publish_min": {
+          "stories": 0,
+          "p50": null,
+          "p95": null,
+          "launch_batch_excluded": 0
+        }
+      },
+      "intelligence": {
+        "articles": 0,
+        "pct": {
+          "match_dna": null,
+          "technical_dna": null,
+          "pre_match_rating": null,
+          "charts": null,
+          "h2h": null,
+          "draw_path": null,
+          "player_links": null,
+          "tournament_links": null,
+          "media_resolved": null,
+          "glance": null,
+          "intelligence_module": null
+        }
+      }
+    },
+    "7d": {
+      "distribution": {
+        "detected": 126,
+        "wire": 0,
+        "brief": 0,
+        "full": 0,
+        "deep": 0,
+        "held": 0,
+        "duplicates": 25,
+        "below_bar_legacy": 96,
+        "queued": 0,
+        "published": 5,
+        "by_desk": {
+          "atp": {
+            "events": 41,
+            "published": 0,
+            "wire": 0
+          },
+          "wta": {
+            "events": 60,
+            "published": 5,
+            "wire": 0
+          },
+          "doubles": {
+            "events": 31,
+            "published": 3
+          },
+          "grand_slams": {
+            "events": 0,
+            "published": 0
+          },
+          "rankings": {
+            "events": 3,
+            "published": 0
+          }
+        },
+        "articles": {
+          "published_articles": 5,
+          "brief": 0,
+          "full": 0,
+          "deep": 0,
+          "revised": 0
+        }
+      },
+      "latency": {
+        "source_to_detect_min": {
+          "live_events": 17,
+          "p50": 1.6,
+          "p95": 278.4,
+          "catch_up_events": 72,
+          "without_any_source_clock": 36,
+          "basis": "first observation of the terminal status (fallback source_updated_at)"
+        },
+        "detect_to_wire_min": {
+          "p50": 0,
+          "p95": 0,
+          "basis": "the live wire is a read projection of detected events: visible on detection (API cache <= 2 min)"
+        },
+        "detect_to_publish_min": {
+          "stories": 2,
+          "p50": 0.5,
+          "p95": 0.5,
+          "launch_batch_excluded": 3
+        }
+      },
+      "intelligence": {
+        "articles": 5,
+        "pct": {
+          "match_dna": 0,
+          "technical_dna": 40,
+          "pre_match_rating": 0,
+          "charts": 100,
+          "h2h": 20,
+          "draw_path": 40,
+          "player_links": 100,
+          "tournament_links": 100,
+          "media_resolved": 40,
+          "glance": 0,
+          "intelligence_module": 0
+        }
+      }
+    }
+  },
+  "starvation_flags": [
+    "no live-wire items in 7 days",
+    "ATP: 41 events, 0 published"
+  ]
+}

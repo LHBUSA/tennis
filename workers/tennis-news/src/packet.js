@@ -7,20 +7,28 @@
 
 import { approvedMedia } from '../../shared/media.js';
 import { RANKING_LISTS, rankingProvenance, matchSource, tourOf, tourOfList } from './tour.js';
+import { MATCH_DEFINITIONS } from '../../shared/dna/match-dna.js';
 
-export const PACKET_VERSION = 'tennis-packet/1.0.0';
+export const PACKET_VERSION = 'tennis-packet/3.0.0';
 
+// Round codes come prefixed from the WTA feed ('M-S', 'Q-2') and unprefixed from the Slam/ESPN feeds ('S', 'Q', '2',
+// 'Q-2' for qualifying): an unprefixed 'Q' is a main-draw QUARTERFINAL, never a qualifying round.
+export const parseRound = (code) => {
+  const s = String(code || '');
+  if (s.includes('-')) { const [stage, r] = s.split('-'); return { stage, r }; }
+  return { stage: 'M', r: s };
+};
 const ROUND_ORDER = (code) => {
-  const [stage, r] = String(code || '').split('-');
+  const { stage, r } = parseRound(code);
   const k = { Q: 5, S: 6, F: 7 }[r] ?? (Number(r) || 0);
   return (stage === 'Q' ? 0 : 10) + k;
 };
 export const roundLabel = (code, drawSize = null) => {
-  const [stage, r] = String(code || '').split('-');
-  const named = { Q: 'quarterfinal', S: 'semifinal', F: 'final' }[r];
-  if (stage === 'Q') return `qualifying round ${r}`;
+  const { stage, r } = parseRound(code);
+  const named = { Q: 'quarterfinal', S: 'semifinal', F: 'final', RR: 'round robin' }[r];
+  if (stage === 'Q') return r ? `qualifying round ${r}` : 'qualifying';
   if (named) return named;
-  return `round ${r}`;
+  return r ? `round ${r}` : 'match';
 };
 const pct = (n, d) => (Number.isFinite(n) && Number.isFinite(d) && d > 0 ? Math.round((n / d) * 1000) / 10 : null);
 const ratio = (n, d) => (Number.isFinite(n) && Number.isFinite(d) && d > 0 ? { n, d, pct: pct(n, d) } : null);
@@ -105,6 +113,70 @@ export async function rankAt(store, pids, date, listKey) {
   return out;
 }
 
+// ---- Match DNA v2 (frozen, point-in-time) -------------------------------------------------------------------
+// Snapshot as_of STRICTLY BEFORE the event day (never today's rating in an old story). Only medium/high-confidence
+// metrics; a percentile only where that metric's same-tour comparison was published in that snapshot; a PBE Rating
+// value only where the tour's rating was published (validated) in that build; a surface rating only where the tour's
+// surface model was published in that build. Families with nothing usable are omitted, never padded.
+const r1 = (x) => Math.round(x * 1000) / 10;
+const r2 = (x) => Math.round(x * 100) / 100;
+const SURF_KEYS = ['match_win_rate', 'set_win_rate', 'game_win_rate', 'tiebreak_win_rate', 'deciding_set_win_rate', 'top10_win_rate', 'top25_win_rate', 'top50_win_rate', 'wins_above_expectation'];
+function metricsOut(M, keys = Object.keys(MATCH_DEFINITIONS)) {
+  const out = {};
+  for (const k of keys) {
+    const m = M?.[k];
+    if (!m || m.value == null || !Number.isFinite(m.value) || !['medium', 'high'].includes(m.confidence)) continue;
+    const d = MATCH_DEFINITIONS[k];
+    out[k] = { label: d.label, family: d.family, value: m.value, ...(d.unit === 'ratio' ? { pct: r1(m.value) } : {}), sample_matches: m.sample_matches ?? null, confidence: m.confidence, record: m.record || null, percentile: m.comparative_published && Number.isFinite(m.percentile) ? m.percentile : null };
+  }
+  return out;
+}
+const ratingOut = (r) => (!r ? null : r.published ? { value: r.value, percentile: Number.isFinite(r.percentile) ? r.percentile : null, rated_matches: r.rated_matches ?? null, provisional: !!r.provisional, established: !!r.established, published: true } : { published: false, status: 'not_validated', rated_matches: r.rated_matches ?? null });
+const split = (o) => (o ? Object.fromEntries(Object.entries(o).map(([k, x]) => [k, { W: x.W, L: x.L, set: x.set ?? null, game: x.game ?? null, wae: x.wae ?? null, n_rated: x.n_rated ?? null }])) : null);
+
+export async function matchDnaBefore(store, pid, date, surface = null) {
+  const snap = (await store.select('tennis_dna_snapshots', `select=as_of,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
+  if (!snap) return null;
+  const M = snap.metrics || {};
+  const P = M._profile || {};
+  const rating = ratingOut(M._rating);
+  const out = { as_of: snap.as_of, definition_version: 2, tour: M._tour || null, rating, metrics: metricsOut(M), form: M._form ? { last10: M._form.last10 || null, last20: M._form.last20 || null, current_streak: M._form.current_streak || null, career: M._form.career || null } : null };
+  if (P.windows) out.windows = Object.fromEntries(Object.entries(P.windows).map(([k, w]) => [k, { weeks: Number(String(k).replace('w', '')), from: w.from, W: w.W, L: w.L, wae: w.wae ?? null }]));
+  if (P.vs_strength) out.vs_strength = split(P.vs_strength);
+  if (P.vs_hand) out.vs_hand = split(P.vs_hand);
+  // recent rating trajectory: monthly pre-match ratings, only when the rating itself was published in this build
+  if (rating?.published && P.rating_history?.series?.length) out.rating_trajectory = { series: P.rating_history.series.slice(-12).map(([m, r]) => ({ month: m, rating: r })), peak: P.rating_history.peak || null };
+  if (surface && ['hard', 'clay', 'grass'].includes(surface)) {
+    const ss = (await store.select('tennis_dna_snapshots', `select=as_of,metrics&pbe_player_id=eq.${pid}&surface=eq.${surface}&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
+    if (ss) {
+      const S = ss.metrics || {};
+      const sr = S._rating;
+      out.surface = { surface, as_of: ss.as_of, record: S._form?.career || null, last10: S._form?.last10 || null, metrics: metricsOut(S, SURF_KEYS), rating: sr?.published ? { value: sr.value, percentile: Number.isFinite(sr.percentile) ? sr.percentile : null, rated_matches: sr.rated_matches ?? null } : null };
+    }
+  }
+  if (!Object.keys(out.metrics).length && !rating) return null;
+  return out;
+}
+
+/**
+ * Pre-match expectation from the PBE Rating: only when both players have a published (validated) overall rating in
+ * the SAME stored build dated strictly before the match, neither provisional. Elo expectation of the rating method
+ * (1 / (1 + 10^((rb - ra) / 400))). Every number frozen here; prose never states it (gates ban model language):
+ * it is shown only in the at-a-glance / intelligence modules, labelled as the model.
+ */
+export async function expectationBefore(store, wid, lid, date) {
+  const rows = await store.select('tennis_dna_snapshots', `select=pbe_player_id,as_of,r:metrics->_rating&pbe_player_id=${inList([wid, lid])}&surface=eq.all&definition_version=eq.2&as_of=lt.${date}&order=as_of.desc&limit=20`);
+  const byDate = new Map();
+  for (const r of rows) { if (!byDate.has(r.as_of)) byDate.set(r.as_of, {}); byDate.get(r.as_of)[r.pbe_player_id] = r.r; }
+  const [asOf, both] = [...byDate.entries()].find(([, x]) => x[wid] && x[lid]) || [];
+  if (!asOf) return null;
+  const a = both[wid];
+  const b = both[lid];
+  if (!a?.published || !b?.published || a.provisional || b.provisional || !Number.isFinite(a.value) || !Number.isFinite(b.value)) return null;
+  const p = 1 / (1 + 10 ** ((b.value - a.value) / 400));
+  return { model: 'PBE Rating (overall, chronological Elo, method v1)', as_of: asOf, winner_rating: a.value, loser_rating: b.value, winner_pre_match_pct: Math.round(p * 100), result_vs_expectation: r2(1 - p), winner_was_rating_underdog: p < 0.5, note: 'model expectation from ratings published before the match; descriptive facts are separate' };
+}
+
 const matchDate = (m) => (m.started_at ? m.started_at.slice(0, 10) : m.tournament.start_date);
 
 async function playerHistory(store, pid, limit = 60) {
@@ -144,6 +216,8 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     packet.ranking_provenance = rankingProvenance(event.facts.list, fam, snap ? Number(snap.row_count) : null);
     packet.tour = tourOfList(event.facts.list);
     packet.provenance.upstream.push({ family: fam || 'unknown', classification: packet.ranking_provenance.classification, what: `${event.facts.list} lists dated ${event.facts.previous_list_date} and ${event.facts.list_date}` });
+    const md = await matchDnaBefore(store, pid, event.facts.list_date);
+    if (md) packet.match_dna = { [pid]: md };
     packet.canonical_signature = `${event.kind}:${pid}:${event.facts.list_date}`;
     return packet;
   }
@@ -197,12 +271,19 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     // claims), so men's singles measurements are usable too. ATP and WTA are never compared.
     const dna = {};
     for (const pid of m.event_type === 'WS' || m.event_type === 'MS' ? [wid, lid] : []) {
-      const snap = (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.1&as_of=lte.${date}&order=as_of.desc&limit=1`))[0];
+      const snap = (await store.select('tennis_dna_snapshots', `select=as_of,surface,definition_version,metrics&pbe_player_id=eq.${pid}&surface=eq.all&definition_version=eq.1&as_of=lt.${date}&order=as_of.desc&limit=1`))[0];
       if (!snap) continue;
       const metrics = Object.fromEntries(Object.entries(snap.metrics || {}).filter(([, v]) => v && ['medium', 'high'].includes(v.confidence) && Number.isFinite(v.value)).map(([k, v]) => [k, { value: v.value, pct: Math.round(v.value * 1000) / 10, sample_matches: v.sample_matches, confidence: v.confidence }]));
       if (Object.keys(metrics).length) dna[pid] = { as_of: snap.as_of, definition_version: snap.definition_version, metrics };
     }
     if (Object.keys(dna).length) packet.dna = dna;
+    // Match DNA v2 (results-based) for both players + the validated pre-match expectation, frozen before the match day
+    const surf = m.tournament.surface || null;
+    const md = {};
+    for (const pid of [wid, lid]) { const x = await matchDnaBefore(store, pid, date, surf); if (x) md[pid] = x; }
+    if (Object.keys(md).length) packet.match_dna = md;
+    const exp = await expectationBefore(store, wid, lid, date);
+    if (exp) packet.expectation = { ...exp, winner_id: wid, loser_id: lid };
   }
   packet.canonical_signature = `${event.kind}:${m.id}`;
   return packet;
