@@ -1,28 +1,28 @@
 {
-  "generated_at": "2026-09-29T16:49:24.137Z",
+  "generated_at": "2026-09-29T17:50:50.116Z",
   "windows": {
     "24h": {
       "distribution": {
-        "detected": 42,
-        "wire": 0,
-        "brief": 0,
+        "detected": 44,
+        "wire": 29,
+        "brief": 2,
         "full": 0,
         "deep": 0,
         "held": 0,
-        "duplicates": 9,
-        "below_bar_legacy": 33,
+        "duplicates": 13,
+        "below_bar_legacy": 0,
         "queued": 0,
-        "published": 0,
+        "published": 2,
         "by_desk": {
           "atp": {
-            "events": 19,
-            "published": 0,
-            "wire": 0
+            "events": 16,
+            "published": 2,
+            "wire": 14
           },
           "wta": {
-            "events": 14,
+            "events": 15,
             "published": 0,
-            "wire": 0
+            "wire": 15
           },
           "doubles": {
             "events": 17,
@@ -38,20 +38,20 @@
           }
         },
         "articles": {
-          "published_articles": 0,
-          "brief": 0,
+          "published_articles": 12,
+          "brief": 12,
           "full": 0,
           "deep": 0,
-          "revised": 0
+          "revised": 7
         }
       },
       "latency": {
         "source_to_detect_min": {
-          "live_events": 10,
-          "p50": 1.1,
+          "live_events": 11,
+          "p50": 0.9,
           "p95": 1.7,
-          "catch_up_events": 23,
-          "without_any_source_clock": 12,
+          "catch_up_events": 20,
+          "without_any_source_clock": 9,
           "basis": "first observation of the terminal status (fallback source_updated_at)"
         },
         "detect_to_wire_min": {
@@ -63,52 +63,54 @@
           "stories": 0,
           "p50": null,
           "p95": null,
-          "launch_batch_excluded": 0
+          "launch_batch_excluded": 0,
+          "v3_backfill_excluded": 2,
+          "note": "live pipeline only; stories == 0 means no event has been detected and published since the V3 cutover yet"
         }
       },
       "intelligence": {
-        "articles": 0,
+        "articles": 12,
         "pct": {
-          "match_dna": null,
-          "technical_dna": null,
-          "pre_match_rating": null,
-          "charts": null,
-          "h2h": null,
-          "draw_path": null,
-          "player_links": null,
-          "tournament_links": null,
-          "media_resolved": null,
-          "glance": null,
-          "intelligence_module": null
+          "match_dna": 83.3,
+          "technical_dna": 58.3,
+          "pre_match_rating": 25,
+          "charts": 100,
+          "h2h": 8.3,
+          "draw_path": 41.7,
+          "player_links": 100,
+          "tournament_links": 100,
+          "media_resolved": 100,
+          "glance": 100,
+          "intelligence_module": 75
         }
       }
     },
     "7d": {
       "distribution": {
-        "detected": 126,
-        "wire": 0,
-        "brief": 0,
-        "full": 0,
+        "detected": 128,
+        "wire": 82,
+        "brief": 14,
+        "full": 1,
         "deep": 0,
         "held": 0,
-        "duplicates": 25,
-        "below_bar_legacy": 96,
+        "duplicates": 29,
+        "below_bar_legacy": 0,
         "queued": 0,
-        "published": 5,
+        "published": 17,
         "by_desk": {
           "atp": {
-            "events": 41,
-            "published": 0,
-            "wire": 0
+            "events": 38,
+            "published": 3,
+            "wire": 35
           },
           "wta": {
-            "events": 60,
-            "published": 5,
-            "wire": 0
+            "events": 61,
+            "published": 14,
+            "wire": 47
           },
           "doubles": {
             "events": 31,
-            "published": 3
+            "published": 5
           },
           "grand_slams": {
             "events": 0,
@@ -120,20 +122,20 @@
           }
         },
         "articles": {
-          "published_articles": 5,
-          "brief": 0,
-          "full": 0,
+          "published_articles": 17,
+          "brief": 16,
+          "full": 1,
           "deep": 0,
-          "revised": 0
+          "revised": 7
         }
       },
       "latency": {
         "source_to_detect_min": {
-          "live_events": 17,
+          "live_events": 18,
           "p50": 1.6,
           "p95": 278.4,
-          "catch_up_events": 72,
-          "without_any_source_clock": 36,
+          "catch_up_events": 69,
+          "without_any_source_clock": 33,
           "basis": "first observation of the terminal status (fallback source_updated_at)"
         },
         "detect_to_wire_min": {
@@ -145,29 +147,28 @@
           "stories": 2,
           "p50": 0.5,
           "p95": 0.5,
-          "launch_batch_excluded": 3
+          "launch_batch_excluded": 3,
+          "v3_backfill_excluded": 12,
+          "note": "live pipeline only; stories == 0 means no event has been detected and published since the V3 cutover yet"
         }
       },
       "intelligence": {
-        "articles": 5,
+        "articles": 17,
         "pct": {
-          "match_dna": 0,
-          "technical_dna": 40,
-          "pre_match_rating": 0,
+          "match_dna": 58.8,
+          "technical_dna": 52.9,
+          "pre_match_rating": 17.6,
           "charts": 100,
-          "h2h": 20,
-          "draw_path": 40,
+          "h2h": 11.8,
+          "draw_path": 41.2,
           "player_links": 100,
           "tournament_links": 100,
-          "media_resolved": 40,
-          "glance": 0,
-          "intelligence_module": 0
+          "media_resolved": 82.4,
+          "glance": 70.6,
+          "intelligence_module": 52.9
         }
       }
     }
   },
-  "starvation_flags": [
-    "no live-wire items in 7 days",
-    "ATP: 41 events, 0 published"
-  ]
+  "starvation_flags": []
 }
