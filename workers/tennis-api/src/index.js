@@ -19,9 +19,16 @@ const PREMIUM_PATHS = [
   /^\/v1\/players-to-watch(?:\/|$)/,
   /^\/v1\/dna(?:\/|$)/,
   /^\/v1\/players\/[^/]+\/dna$/,
-  /^\/v1\/pbecast(?:\/|$)/,
 ];
-const isPremiumPath = (path) => PREMIUM_PATHS.some((re) => re.test(path));
+const PUBLIC_DNA_PREVIEW_METRICS = new Set(['pbe_rating', 'hold_rate', 'return_games_won']);
+const isPremiumPath = (path, url) => {
+  if (path === '/v1/dna/leaders' && url.searchParams.get('preview') === '1') {
+    const metric = url.searchParams.get('metric') || 'hold_rate';
+    const limit = Math.min(Number(url.searchParams.get('limit')) || 5, 5);
+    return !PUBLIC_DNA_PREVIEW_METRICS.has(metric) || limit > 5;
+  }
+  return PREMIUM_PATHS.some((re) => re.test(path));
+};
 
 function corsFor(request) {
   const origin = request.headers.get('Origin') || '';
@@ -352,7 +359,7 @@ export default {
       if (!obj) return new Response('not found', { status: 404, headers: { 'cache-control': 'public, max-age=300' } });
       return new Response(obj.body, { headers: { 'content-type': mm[2] === 'jpg' ? 'image/jpeg' : 'image/webp', 'cache-control': 'public, max-age=31536000, immutable', 'access-control-allow-origin': '*', 'x-content-type-options': 'nosniff' } });
     }
-    const premium = isPremiumPath(path);
+    const premium = isPremiumPath(path, url);
     let membership = null;
     if (premium) {
       membership = await membershipFor(request, env);
