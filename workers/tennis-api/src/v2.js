@@ -277,7 +277,8 @@ async function playerDnaV2(store, slug, url, env) {
 
 async function dnaLeaders(store, url, env = null) {
   const metric = url.searchParams.get('metric') || 'hold_rate';
-
+  const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
+  const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
   const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);
   const cacheKey = `leaders:${metric}:${tour}:${surface}:${limit}`;
   const cached = await dnaCacheGet(env, cacheKey);
@@ -290,8 +291,6 @@ async function dnaLeaders(store, url, env = null) {
     return out;
   }
   if (!DEFINITIONS[metric]) return envelope(null, { freshness: 'ERROR', semantics: 'unknown metric' });
-  const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
-  const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
   const gate = await tourDnaStatus(store, tour === 'atp' ? 'M' : 'F');
   const asOf = gate.as_of;
   if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
