@@ -13,12 +13,40 @@ function local(freshness, semantics, degraded = []) {
 export async function api(path, { signal } = {}) {
   if (!BASE) return local('NOT_CONFIGURED', 'tennis-api is not connected to this build');
   try {
-    const res = await fetch(`${BASE}${path}`, { signal, headers: { accept: 'application/json' } });
+    const res = await fetch(`${BASE}${path}`, { signal, credentials: 'include', headers: { accept: 'application/json' } });
     const body = await res.json();
     if (!body || typeof body !== 'object' || !body.meta) return local('ERROR', 'unexpected response shape');
     return body;
   } catch (err) {
     if (err?.name === 'AbortError') throw err;
     return local('UNAVAILABLE', 'tennis-api did not respond', [String(err?.message || err)]);
+  }
+}
+
+
+export async function membershipApi({ signal } = {}) {
+  if (!BASE) return null;
+  try {
+    const res = await fetch(`${BASE}/v1/membership`, {
+      signal, credentials: 'include', cache: 'no-store',
+      headers: { accept: 'application/json' },
+    });
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function requestMagic(email, returnTo, { signal } = {}) {
+  if (!BASE) return { ok: false, message: 'Sign-in is not connected to this build.' };
+  try {
+    const res = await fetch(`${BASE}/v1/magic/request`, {
+      method: 'POST', signal, credentials: 'include', cache: 'no-store',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ email, return_to: returnTo }),
+    });
+    return await res.json();
+  } catch {
+    return { ok: false, message: 'Could not reach sign-in. Please try again.' };
   }
 }

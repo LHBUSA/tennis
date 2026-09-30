@@ -23,7 +23,7 @@ test('every worker answers /health without leaking secret values', async () => {
 });
 
 test('tennis-api data routes are NOT_CONFIGURED with null data — never a sample', async () => {
-  for (const p of ['/v1/today', '/v1/live', '/v1/players', '/v1/players/x/dna', '/v1/h2h/a/b', '/v1/rankings', '/v1/tournaments/wimbledon/2025', '/v1/pbe-picks', '/v1/news', '/v1/odds']) {
+  for (const p of ['/v1/today', '/v1/live', '/v1/players', '/v1/h2h/a/b', '/v1/rankings', '/v1/tournaments/wimbledon/2025', '/v1/pbe-picks', '/v1/news', '/v1/odds']) {
     const r = await get(api, p);
     assert.equal(r.status, 200, p);
     assert.equal(r.body.data, null, p);
@@ -32,6 +32,17 @@ test('tennis-api data routes are NOT_CONFIGURED with null data — never a sampl
   }
   assert.equal((await get(api, '/v1/nope')).status, 404);
   assert.equal((await get(api, '/v1/live', { method: 'POST' })).status, 405);
+});
+
+
+test('tennis-api premium intelligence fails closed without verified membership', async () => {
+  for (const p of ['/v1/players/x/dna', '/v1/dna/leaders', '/v1/matchups', '/v1/players-to-watch', '/v1/pbecast']) {
+    const r = await get(api, p);
+    assert.equal(r.status, 401, p);
+    assert.equal(r.body.error, 'membership_required', p);
+    assert.equal(r.body.membership?.state, 'free', p);
+    assert.equal(r.body.membership?.entitled, false, p);
+  }
 });
 
 test('tennis-api /v1/sources serves the committed registry + canary evidence', async () => {

@@ -14,7 +14,7 @@
  *   OWNER       — verified owner identity (access_source 'owner')
  */
 
-export const CONTRACT_VERSION = '1.2.0';
+export const CONTRACT_VERSION = '1.3.0';
 
 export const SPORT_LABELS = Object.freeze({ mlb: 'MLB', nfl: 'NFL', nba: 'NBA', nhl: 'NHL', wnba: 'WNBA', ufc: 'UFC', tennis: 'Tennis', soccer: 'Soccer' });
 

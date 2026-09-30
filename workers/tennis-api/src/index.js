@@ -11,7 +11,40 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.8.3';
+export const VERSION = '0.9.0';
+
+const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
+const PREMIUM_PATHS = [
+  /^\/v1\/matchups(?:\/|$)/,
+  /^\/v1\/players-to-watch(?:\/|$)/,
+  /^\/v1\/dna(?:\/|$)/,
+  /^\/v1\/players\/[^/]+\/dna$/,
+  /^\/v1\/pbecast(?:\/|$)/,
+];
+const isPremiumPath = (path) => PREMIUM_PATHS.some((re) => re.test(path));
+
+function corsFor(request) {
+  const origin = request.headers.get('Origin') || '';
+  return origin === TENNIS_ORIGIN
+    ? { 'access-control-allow-origin': TENNIS_ORIGIN, 'access-control-allow-credentials': 'true', vary: 'Origin' }
+    : { 'access-control-allow-origin': '*' };
+}
+
+async function membershipFor(request, env) {
+  if (!env.AUTH) return { authenticated: false, reason: 'auth_unavailable', membership: { sport: 'tennis', state: 'free', entitled: false } };
+  try {
+    const headers = new Headers({ accept: 'application/json', Origin: TENNIS_ORIGIN });
+    const cookie = request.headers.get('Cookie');
+    if (cookie) headers.set('Cookie', cookie);
+    const res = await env.AUTH.fetch(new Request('https://auth.propbetedge.ai/membership?sport=tennis', { method: 'GET', headers }));
+    const body = await res.json();
+    if (!res.ok || !body?.membership) return { authenticated: false, reason: 'auth_denied', membership: { sport: 'tennis', state: 'free', entitled: false } };
+    return body;
+  } catch {
+    return { authenticated: false, reason: 'auth_unavailable', membership: { sport: 'tennis', state: 'free', entitled: false } };
+  }
+}
+
 
 import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
@@ -292,10 +325,25 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'access-control-allow-origin': '*', 'access-control-allow-methods': 'GET, OPTIONS' } });
-    if (request.method !== 'GET') return json({ ok: false, error: 'method_not_allowed' }, { status: 405 });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { ...corsFor(request), 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Content-Type, Authorization' } });
+    if (path === '/v1/magic/request' && request.method === 'POST') {
+      if (!env.AUTH) return json({ ok: false, message: 'Sign-in is unavailable.' }, { status: 503, headers: { ...corsFor(request), 'cache-control': 'private, no-store' } });
+      const payload = await request.text();
+      const upstream = await env.AUTH.fetch(new Request('https://auth.propbetedge.ai/magic/request', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json', Origin: TENNIS_ORIGIN },
+        body: payload,
+      }));
+      const text = await upstream.text();
+      return new Response(text, { status: upstream.status, headers: { ...corsFor(request), 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } });
+    }
+    if (request.method !== 'GET') return json({ ok: false, error: 'method_not_allowed' }, { status: 405, headers: corsFor(request) });
+    if (path === '/v1/membership') {
+      const verdict = await membershipFor(request, env);
+      return json(verdict, { headers: { ...corsFor(request), 'cache-control': 'private, no-store' } });
+    }
     if (path === '/health' || path === '/') {
-      return json(await health({ worker: 'tennis-api', version: VERSION, env, deps: ['TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY', 'TENNIS_STATE'], extra: { routes: ['/v1/today', '/v1/live', '/v1/tournaments', '/v1/tournaments/:slug/:year', '/v1/matches/:id', '/v1/players', '/v1/players/:slug', '/v1/players/:slug/dna', '/v1/rankings', '/v1/h2h/:a/:b', '/v1/sources', '/v1/men', '/v1/men/players', '/v1/slams', '/v1/matchups', '/v1/matchups/:id', '/v1/players-to-watch'] } }), { headers: { 'cache-control': 'no-store' } });
+      return json(await health({ worker: 'tennis-api', version: VERSION, env, deps: ['TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY', 'TENNIS_STATE', 'AUTH'], extra: { routes: ['/v1/today', '/v1/live', '/v1/tournaments', '/v1/tournaments/:slug/:year', '/v1/matches/:id', '/v1/players', '/v1/players/:slug', '/v1/players/:slug/dna', '/v1/rankings', '/v1/h2h/:a/:b', '/v1/sources', '/v1/men', '/v1/men/players', '/v1/slams', '/v1/matchups', '/v1/matchups/:id', '/v1/players-to-watch'] } }), { headers: { 'cache-control': 'no-store' } });
     }
     // approved player media (generated by scripts/media/photos.mjs, provenance in tennis_player_media)
     const mm = /^\/media\/(players\/[0-9a-f-]{36}\/(?:portrait|square|thumb|wide)|editorial\/[a-z0-9-]{1,60}\/(?:wide-(?:2400|1600|1200|800|480)|std-(?:1200|800)|card))\.(webp|jpg)$/.exec(path);
@@ -304,9 +352,20 @@ export default {
       if (!obj) return new Response('not found', { status: 404, headers: { 'cache-control': 'public, max-age=300' } });
       return new Response(obj.body, { headers: { 'content-type': mm[2] === 'jpg' ? 'image/jpeg' : 'image/webp', 'cache-control': 'public, max-age=31536000, immutable', 'access-control-allow-origin': '*', 'x-content-type-options': 'nosniff' } });
     }
+    const premium = isPremiumPath(path);
+    let membership = null;
+    if (premium) {
+      membership = await membershipFor(request, env);
+      if (!membership?.membership?.entitled) {
+        return json({ ok: false, error: 'membership_required', membership: membership?.membership || null }, {
+          status: 401,
+          headers: { ...corsFor(request), 'cache-control': 'private, no-store' },
+        });
+      }
+    }
     const cache = ctx && globalThis.caches?.default;
     const ttl = (TTL.find(([re]) => re.test(path)) || [null, 30])[1];
-    const bypass = isPreview(url, env);
+    const bypass = premium || isPreview(url, env);
     // cache key carries the API version: a deploy that changes response shapes never serves the old shape
     const cacheKey = new Request(`${url.origin}${url.pathname}${url.search}${url.search ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
     if (cache && !bypass) {
@@ -321,7 +380,7 @@ export default {
     }
     if (body === undefined) return json({ ok: false, error: 'not_found' }, { status: 404 });
     if (body === null) return json(envelope(null, { freshness: 'UNAVAILABLE', semantics: 'not found in the canonical store' }), { status: 404 });
-    const res = json(body, { headers: { 'cache-control': bypass ? 'no-store' : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
+    const res = json(body, { headers: { ...corsFor(request), 'cache-control': bypass ? (premium ? 'private, no-store' : 'no-store') : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
     if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(cacheKey, res.clone()));
     return res;
   }

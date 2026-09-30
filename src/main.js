@@ -6,6 +6,7 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
+import './styles/membership.css';
 import './styles/news.css';
 import './styles/news-modules.css';
 import './styles/theme.css';
@@ -23,6 +24,7 @@ import { wireCopy } from './ui/share.js';
 import { wireImageFallback } from './ui/avatar.js';
 import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
 import { setPageSurface } from './lib/v4.js';
+import { getMembership, applyMembershipChrome, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
 
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
@@ -51,6 +53,7 @@ wireLivePulse(app);
 wireCopy(document);
 wireImageFallback(document);
 initAnalytics();
+getMembership().then((m) => applyMembershipChrome(app, m)).catch(() => {});
 document.addEventListener('click', (e) => {
   const s = e.target.closest('.share-b');
   if (s) track('tennis_share', { method: s.dataset.copy ? 'copy' : /linkedin/i.test(s.href || '') ? 'linkedin' : 'x', route: location.pathname });
@@ -75,6 +78,23 @@ async function go(pathname) {
   let r = resolveRoute(pathname);
   if (r.route.redirect) { r = resolveRoute(r.route.redirect); history.replaceState({}, '', r.path); }
   const mine = ++seq;
+  if (premiumRoute(r)) {
+    const membership = await getMembership();
+    if (mine !== seq) return;
+    if (!membership.entitled) {
+      if (unmount) unmount();
+      if (!(initial && r.route.ssr)) setMeta(routeMeta(r));
+      markActiveNav(app, r.id);
+      closeDrawer(false);
+      document.documentElement.dataset.page = r.id;
+      setPageSurface(null);
+      render(main, premiumGateHtml(membership, r));
+      wirePremiumGate(main);
+      unmount = null;
+      if (initial) { initial = false; setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600); }
+      return;
+    }
+  }
   const mod = await (PAGES[r.id] || dataPage)();
   if (mine !== seq) return;
   if (unmount) unmount();
