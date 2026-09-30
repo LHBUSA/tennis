@@ -1,3 +1,7 @@
+.hdr-access{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 11px;border:1px solid rgba(236,200,94,.5);border-radius:999px;color:var(--gold-bright);font:800 10.5px/1 var(--f-display);letter-spacing:.11em;text-transform:uppercase;white-space:nowrap}
+.hdr-access:hover{text-decoration:none;background:rgba(236,200,94,.1)}
+.hdr-access[data-state="all_access"],.hdr-access[data-state="owner"]{background:var(--gold-bright);color:var(--night);border-color:var(--gold-bright)}
+@media(max-width:1140px){.hdr-access{display:none}}
 .progate{max-width:1040px;margin:0 auto;padding:clamp(42px,7vw,88px) var(--gutter) 72px}
 .progate-kicker{font:800 12px/1 var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
 .progate h1{font:800 clamp(42px,7vw,78px)/.98 var(--f-display);letter-spacing:-.01em;color:var(--ink);max-width:12ch;margin:0 0 18px;text-transform:uppercase}
