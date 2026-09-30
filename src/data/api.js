@@ -13,7 +13,7 @@ function local(freshness, semantics, degraded = []) {
 export async function api(path, { signal } = {}) {
   if (!BASE) return local('NOT_CONFIGURED', 'tennis-api is not connected to this build');
   try {
-    const res = await fetch(`${BASE}${path}`, { signal, headers: { accept: 'application/json' } });
+    const res = await fetch(`${BASE}${path}`, { signal, credentials: 'include', headers: { accept: 'application/json' } });
     const body = await res.json();
     if (!body || typeof body !== 'object' || !body.meta) return local('ERROR', 'unexpected response shape');
     return body;
