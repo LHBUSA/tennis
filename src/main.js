@@ -24,7 +24,7 @@ import { wireCopy } from './ui/share.js';
 import { wireImageFallback } from './ui/avatar.js';
 import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
 import { setPageSurface } from './lib/v4.js';
-import { getMembership, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
+import { getMembership, applyMembershipChrome, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
 
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
@@ -53,6 +53,7 @@ wireLivePulse(app);
 wireCopy(document);
 wireImageFallback(document);
 initAnalytics();
+getMembership().then((m) => applyMembershipChrome(app, m)).catch(() => {});
 document.addEventListener('click', (e) => {
   const s = e.target.closest('.share-b');
   if (s) track('tennis_share', { method: s.dataset.copy ? 'copy' : /linkedin/i.test(s.href || '') ? 'linkedin' : 'x', route: location.pathname });
