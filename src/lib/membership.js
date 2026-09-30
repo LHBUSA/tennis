@@ -18,6 +18,18 @@ export async function getMembership({ signal } = {}) {
   }
 }
 
+export function applyMembershipChrome(root, m) {
+  const label = m?.state === 'owner' ? 'OWNER' : m?.state === 'all_access' ? 'ALL ACCESS ACTIVE' : 'ALL ACCESS';
+  for (const el of root.querySelectorAll('[data-membership-chip]')) {
+    el.textContent = label;
+    el.dataset.state = m?.state || 'free';
+    if (m?.state === 'owner' || m?.state === 'all_access') {
+      el.href = '/';
+      el.setAttribute('aria-label', m?.state === 'owner' ? 'Owner access active' : 'All Access active');
+    }
+  }
+}
+
 export function premiumRoute(route) {
   const id = route?.id || '';
   if (['matchups', 'matchup', 'players-to-watch', 'dna', 'pbecast', 'pbecast-hub'].includes(id)) return true;
