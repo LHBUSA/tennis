@@ -22,3 +22,31 @@ export async function api(path, { signal } = {}) {
     return local('UNAVAILABLE', 'tennis-api did not respond', [String(err?.message || err)]);
   }
 }
+
+
+export async function membershipApi({ signal } = {}) {
+  if (!BASE) return null;
+  try {
+    const res = await fetch(`${BASE}/v1/membership`, {
+      signal, credentials: 'include', cache: 'no-store',
+      headers: { accept: 'application/json' },
+    });
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function requestMagic(email, returnTo, { signal } = {}) {
+  if (!BASE) return { ok: false, message: 'Sign-in is not connected to this build.' };
+  try {
+    const res = await fetch(`${BASE}/v1/magic/request`, {
+      method: 'POST', signal, credentials: 'include', cache: 'no-store',
+      headers: { accept: 'application/json', 'content-type': 'application/json' },
+      body: JSON.stringify({ email, return_to: returnTo }),
+    });
+    return await res.json();
+  } catch {
+    return { ok: false, message: 'Could not reach sign-in. Please try again.' };
+  }
+}
