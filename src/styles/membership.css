@@ -20,3 +20,22 @@
 .progate-form input{width:100%;min-height:44px;border:1px solid var(--rule-2);border-radius:8px;padding:0 12px;font:inherit;background:var(--paper)}
 .progate-form .btn{margin-top:10px}
 @media(max-width:640px){.progate-grid{grid-template-columns:1fr}.progate h1{max-width:none}.progate-actions .btn{width:100%;justify-content:center}}
+
+.member-open{overflow:hidden}
+.member-panel{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px}
+.member-panel[hidden]{display:none}
+.member-panel-backdrop{position:absolute;inset:0;background:rgba(3,15,11,.72);backdrop-filter:blur(8px)}
+.member-card{position:relative;z-index:1;width:min(760px,100%);max-height:min(88vh,820px);overflow:auto;background:var(--paper);border:1px solid var(--rule);border-top:5px solid var(--gold-bright);border-radius:18px;padding:clamp(24px,4vw,38px);box-shadow:0 28px 80px rgba(0,0,0,.28)}
+.member-close{position:absolute;top:14px;right:16px;border:0;background:transparent;color:var(--ink-2);font-size:28px;line-height:1;cursor:pointer}
+.member-kicker{font:800 11px/1 var(--f-display);letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+.member-card h2{margin:0 36px 10px 0;font:800 clamp(34px,5vw,54px)/.98 var(--f-display);text-transform:uppercase;color:var(--ink)}
+.member-status{display:inline-flex;margin:0 0 22px;padding:7px 10px;border-radius:999px;background:var(--night);color:var(--gold-bright);font:800 11px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+.member-benefits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.member-benefits>div{padding:16px;border:1px solid var(--rule);border-radius:12px;background:var(--white)}
+.member-benefits b{display:block;color:var(--ink);font:800 17px/1.15 var(--f-display);margin-bottom:5px}
+.member-benefits span,.member-copy,.member-renewal,.member-new{color:var(--ink-2);font-size:14px;line-height:1.5}
+.member-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+.member-signin{display:grid;gap:10px;margin-top:20px}
+.member-signin label{display:grid;gap:7px;font-weight:700;color:var(--ink)}
+.member-signin input{min-height:44px;border:1px solid var(--rule-2);border-radius:8px;padding:0 12px;font:inherit;background:var(--white)}
+@media(max-width:640px){.member-benefits{grid-template-columns:1fr}.member-actions .btn{width:100%;justify-content:center}}
