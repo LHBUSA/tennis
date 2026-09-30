@@ -693,3 +693,24 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .tabs[aria-label='Player sections'] a[aria-current='page'] { background: var(--court-700); color: var(--on-dark); border-color: var(--gold-bright); }
 /* By surface: reason text wraps inside its own cell (it ran into the next column at 1440) */
 .surf-tbl td .why { display: block; white-space: normal; max-width: 22ch; margin-left: auto; line-height: 1.3; }
+
+/* Google Preferred Sources (src/ui/preferred-source.js): our own control, stable width, no third-party DOM. */
+.ftr-psrc { max-width: var(--max); margin: -12px auto 0; padding: 0 var(--gutter) 40px; }
+.psrc { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px 24px; padding: 18px 20px; border-radius: var(--r-lg); border: 1px solid rgba(243, 246, 241, 0.16); background: rgba(243, 246, 241, 0.04); }
+.psrc-copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.psrc-eyebrow { font: 800 11px/1.2 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--gold-bright); }
+.psrc-copy strong { font: 700 16px/1.3 var(--f-ui); color: var(--on-dark); }
+.psrc-copy span:not(.psrc-eyebrow) { font-size: 13px; line-height: 1.45; color: var(--on-dark-2); }
+.psrc .psrc-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: 999px; background: var(--on-dark); color: var(--court-900); font: 700 14px/1 var(--f-ui); white-space: nowrap; text-decoration: none; }
+.psrc .psrc-btn:hover { background: var(--white); color: var(--court-900); text-decoration: none; }
+.psrc .psrc-btn:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+.psrc--article { margin: 32px 0 8px; border-color: var(--rule); background: var(--paper-2); }
+.psrc--article .psrc-copy strong { color: var(--ink); }
+.psrc--article .psrc-copy span { color: var(--muted); }
+.psrc--article .psrc-btn { background: var(--court-900); color: var(--on-dark); }
+.psrc--article .psrc-btn:hover { background: var(--court-700); color: var(--on-dark); }
+.psrc--article .psrc-btn:focus-visible { outline-color: var(--court-500); }
+@media (max-width: 640px) {
+  .psrc { grid-template-columns: minmax(0, 1fr); padding: 16px; }
+  .psrc .psrc-btn { width: 100%; white-space: normal; text-align: center; }
+}

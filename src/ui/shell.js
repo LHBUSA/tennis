@@ -3,6 +3,7 @@
 import { html, raw } from '../lib/dom.js';
 import { NETWORK, CURRENT_SPORT, PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
 import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
+import { preferredSourceHtml } from './preferred-source.js';
 
 export const PRIMARY_NAV = [
   { href: '/', label: 'Today', id: 'today' },
@@ -100,6 +101,7 @@ export function footerHtml() {
         <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
       </nav>
     </div>
+    <div class="ftr-psrc">${preferredSourceHtml({ surface: 'footer' })}</div>
   </footer>`;
 }
 

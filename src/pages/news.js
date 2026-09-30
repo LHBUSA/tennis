@@ -10,6 +10,7 @@ import { avatar } from '../ui/avatar.js';
 import { depthInserts } from '../ui/news-modules.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
+import { preferredSourceHtml } from '../ui/preferred-source.js';
 import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh } from '../lib/newsroom.js';
 import { newsPlan, previewPick, setPageSurface } from '../lib/v4.js';
 
@@ -549,6 +550,7 @@ export function article(root, ctx) {
               ${sourceMethod(a, res.meta)}
               ${photoCredits(a, people)}
             </div>
+            ${a.status === 'published' ? preferredSourceHtml({ surface: 'article' }) : ''}
           </article>
           <aside class="nwm-rail" aria-label="Keep exploring">
             ${links.length || dnaLinks.length ? html`<section class="nwm-rbox"><h2>Keep exploring</h2><div class="nwv-links">${[...dnaLinks, ...links].map(([h, l, n]) => html`<a href="${h}"><b>${l}</b><small>${n}</small></a>`)}</div></section>` : ''}
