@@ -129,5 +129,6 @@ point-feed hold retry per parser revision, backfill cursor never skipping a bloc
 `docs/evidence/`: source-canary-latest (20 PASS, 2 BLOCKED), wimbledon-archive-latest, daviscup-stadion-latest,
 news-canary-latest (PASS 11/11), photo-pipeline-latest, espn-gap-latest (internal reference only),
 production-canary-latest, sim-backtest-latest (RESEARCH, hidden).
+Live UX 2026-09-30 (`scripts/qa/live-ux.mjs`, `docs/evidence/live-ux/`): production PASS on a real live WD match — 7 widths, no page overflow, no rail scrollbars, live scores inside cards with aligned set columns, ticker arrows / wheel / touch swipe, auto-advance pauses on hover / focus / touch and is off under reduced motion; route matrix 23 routes × 8 widths OK.
 Browser QA 2026-09-26: 26 routes × 8 widths on production — no overflow, no console errors, no broken
 images; PBEcast replay acceptance (`scripts/qa/pbecast-replay.mjs`) PASS on 3 matches × 2 widths.

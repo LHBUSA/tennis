@@ -1,0 +1,465 @@
+{
+  "base": "https://tennis.propbetedge.ai",
+  "at": "2026-09-30T15:21:32.230Z",
+  "target": {
+    "id": "4ddaadd0-24f9-56bb-83d7-13b2e4a6f2df",
+    "event_type": "WD",
+    "mode": "observed_live",
+    "events": 62
+  },
+  "live": 3,
+  "pass": true,
+  "results": [
+    {
+      "width": 1440,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 3,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": false,
+        "land": true,
+        "stageLand": true,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 121,
+        "courtW": 705,
+        "stageW": 1320,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 1024,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 2.04,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": false,
+        "land": true,
+        "stageLand": true,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 121,
+        "courtW": 522,
+        "stageW": 1024,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 768,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 2,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": true,
+        "autoState": "off-reduced-motion",
+        "overflowing": true,
+        "land": false,
+        "stageLand": false,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 121,
+        "courtW": 292,
+        "stageW": 768,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1",
+        "arrows": [
+          1,
+          199,
+          1
+        ],
+        "wheel": 199
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 430,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 1.19,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": true,
+        "land": false,
+        "stageLand": false,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 111,
+        "courtW": 238,
+        "stageW": 430,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 390,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 1.13,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": true,
+        "land": false,
+        "stageLand": false,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 111,
+        "courtW": 238,
+        "stageW": 390,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 360,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 1.13,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": true,
+        "land": false,
+        "stageLand": false,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 111,
+        "courtW": 238,
+        "stageW": 360,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    },
+    {
+      "width": 320,
+      "home": {
+        "cards": 3,
+        "live": 3,
+        "visible_cards": 1.12,
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": []
+      },
+      "pbecast": {
+        "overflow": 0,
+        "scrollbars": 0,
+        "escaped": [],
+        "misaligned": 0,
+        "overlaps": 0,
+        "tinyText": [],
+        "ticker": true,
+        "cards": 3,
+        "current": true,
+        "currentVisible": true,
+        "navShown": false,
+        "autoState": "off-reduced-motion",
+        "overflowing": true,
+        "land": false,
+        "stageLand": false,
+        "rail": [
+          "Current moment",
+          "Match pulse",
+          "Recent moments",
+          "Recent games"
+        ],
+        "scoreH": 111,
+        "courtW": 238,
+        "stageW": 320,
+        "games": [
+          "S2 · G7 BREAK Falkowska / Smith",
+          "S2 · G6 BREAK Arango / Ruzic",
+          "S2 · G5 HOLD Arango / Ruzic",
+          "S2 · G4 HOLD Falkowska / Smith",
+          "S2 · G3 BREAK Falkowska / Smith",
+          "S2 · G2 HOLD Falkowska / Smith"
+        ],
+        "groups": [
+          1,
+          4,
+          1,
+          4,
+          1,
+          2
+        ],
+        "sets": "0–1"
+      },
+      "pass": true,
+      "fail": []
+    }
+  ],
+  "auto": {
+    "width": 768,
+    "overflowing": true,
+    "running": {
+      "state": "running",
+      "moves": 2
+    },
+    "step": 304,
+    "hover": {
+      "state": "paused-hover",
+      "moved": 0
+    },
+    "focus": {
+      "state": "paused-focus",
+      "moved": 0
+    },
+    "resumed": {
+      "state": "running",
+      "moves": 5
+    },
+    "swipe": {
+      "scrollLeft": 309,
+      "state": "paused-interaction"
+    },
+    "reduced": {
+      "state": "off-reduced-motion",
+      "moves": 0,
+      "scrollLeft": 199
+    },
+    "pass": true,
+    "fail": []
+  }
+}
