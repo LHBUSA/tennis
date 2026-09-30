@@ -9,6 +9,16 @@ import { MATCH, MEDIA, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeMatc
 
 const ok = (data, { rows = [], source = null, updated = null, policy, semantics, degraded = [] }) => envelope(data, { source: source || families(rows), source_updated_at: updated ?? maxTime(rows), policy, semantics, degraded });
 
+const DNA_CACHE_VERSION = 'perf-1';
+async function dnaCacheGet(env, key) {
+  if (!env?.TENNIS_STATE) return null;
+  try { return await env.TENNIS_STATE.get(`api:${DNA_CACHE_VERSION}:${key}`, 'json'); } catch { return null; }
+}
+async function dnaCachePut(env, key, value, ttl = 21600) {
+  if (!env?.TENNIS_STATE || value == null) return;
+  try { await env.TENNIS_STATE.put(`api:${DNA_CACHE_VERSION}:${key}`, JSON.stringify(value), { expirationTtl: ttl }); } catch {}
+}
+
 // DNA dimensions shown as radar/percentiles — every one is a stored v1 metric (no proxies).
 export const DNA_DIMENSIONS = [
   ['service_points_won', 'Serve'], ['hold_rate', 'Hold'], ['first_serve_won', '1st serve won'], ['second_serve_won', '2nd serve won'],
@@ -60,7 +70,17 @@ async function population(store, asOf, surface, gender) {
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const pop = {};
   for (const [k] of Object.entries(DEFINITIONS)) pop[k] = rows.map((r) => r.metrics?.[k]).filter((m) => m && m.value != null && ['medium', 'high'].includes(m.confidence)).map((m) => m.value).sort((a, b) => a - b);
-  return { pop, players: rows.length };
+  const gateQualified = rows.filter((r) => ['medium', 'high'].includes(r.metrics?.service_points_won?.confidence)).length;
+  return { pop, players: rows.length, gateQualified };
+}
+
+async function cachedPopulation(store, env, asOf, surface, gender) {
+  const key = `dna-pop:v1:${gender}:${surface}:${asOf}`;
+  const hit = await dnaCacheGet(env, key);
+  if (hit?.pop) return hit;
+  const built = await population(store, asOf, surface, gender);
+  await dnaCachePut(env, key, built, 86400);
+  return built;
 }
 
 function percentile(sorted, v, key) {
@@ -118,12 +138,17 @@ export async function pbecastDna(store, a, b, surf) {
  *   Level 3  full comparative DNA (radar/fingerprint, strengths, watch areas, headline traits, leaderboard):
  *            only when the tour has DNA_MIN_QUALIFIED qualified players (tourDnaStatus().ready).
  */
-export async function dnaWithPercentiles(store, pid, surface = 'all') {
+export async function dnaWithPercentiles(store, pid, surface = 'all', genderHint = null, env = null) {
   const snap = await storedDna(store, pid, surface);
   if (!snap) return null;
-  const gender = (await store.select('tennis_players', `select=gender&pbe_player_id=eq.${pid}`))[0]?.gender === 'M' ? 'M' : 'F';
-  const gate = await tourDnaStatus(store, gender);
-  const { pop, players } = await population(store, snap.as_of, surface, gender);
+  const gender = genderHint === 'M' || genderHint === 'F'
+    ? genderHint
+    : (await store.select('tennis_players', `select=gender&pbe_player_id=eq.${pid}`))[0]?.gender === 'M' ? 'M' : 'F';
+  const latestAsOf = await latestAsOfForGender(store, gender);
+  const { pop, players, gateQualified } = await cachedPopulation(store, env, snap.as_of, surface, gender);
+  const gate = surface === 'all' && latestAsOf === snap.as_of
+    ? { ready: gateQualified >= DNA_MIN_QUALIFIED, qualified: gateQualified, as_of: latestAsOf, threshold: DNA_MIN_QUALIFIED, tour: TOUR_OF[gender] }
+    : await tourDnaStatus(store, gender);
   const dims = DNA_DIMENSIONS.map(([k, label]) => {
     const m = snap.metrics[k];
     const usable = m && m.value != null && ['medium', 'high'].includes(m.confidence);
@@ -224,29 +249,48 @@ export async function schedule(store, url) {
 }
 
 // ---- DNA ----------------------------------------------------------------------------------------------
-async function playerDnaV2(store, slug, url) {
+async function playerDnaV2(store, slug, url, env) {
+  const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
+  const cacheKey = `player-dna:${slug}:${surface}`;
+  const hit = await dnaCacheGet(env, cacheKey);
+  if (hit?.data) {
+    return ok(hit.data, { rows: [], source: ['pbe_derived'], updated: hit.updated || null, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: 'Tennis DNA: cached derived snapshot; match_dna = v2 Match DNA + PBE Rating; dna = v1 technical serve/return DNA' });
+  }
+
   const p = await playerBySlug(store, slug);
   if (!p) return null;
-  const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
-  const d = await dnaWithPercentiles(store, p.pbe_player_id, surface);
+  const [d, md, surfaceRows] = await Promise.all([
+    dnaWithPercentiles(store, p.pbe_player_id, surface, p.gender, env),
+    matchDna(store, p),
+    Promise.all(['hard', 'clay', 'grass'].map((s) => storedDna(store, p.pbe_player_id, s)))
+  ]);
   const surfaces = {};
-  if (d) for (const s of ['hard', 'clay', 'grass']) { const x = await storedDna(store, p.pbe_player_id, s); if (x) surfaces[s] = { as_of: x.as_of, matches_considered: x.provenance?.matches_considered ?? null, metrics: x.metrics }; }
-  const md = await matchDna(store, p);
+  ['hard', 'clay', 'grass'].forEach((s, i) => {
+    const x = surfaceRows[i];
+    if (x) surfaces[s] = { as_of: x.as_of, matches_considered: x.provenance?.matches_considered ?? null, metrics: x.metrics };
+  });
   const asOf = md?.as_of || d?.as_of || null;
-  return ok({ player: shapePlayer(p), dna: d, surfaces, match_dna: md }, { rows: [], source: ['pbe_derived'], updated: asOf ? `${asOf}T00:00:00Z` : null, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: 'Tennis DNA: match_dna = v2 Match DNA + PBE Rating from canonical results (per-metric same-tour gates); dna = v1 technical serve/return DNA from match statistics (unchanged gates)' });
+  const data = { player: shapePlayer(p), dna: d, surfaces, match_dna: md };
+  await dnaCachePut(env, cacheKey, { data, updated: asOf ? `${asOf}T00:00:00Z` : null }, 21600);
+  return ok(data, { rows: [], source: ['pbe_derived'], updated: asOf ? `${asOf}T00:00:00Z` : null, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: 'Tennis DNA: match_dna = v2 Match DNA + PBE Rating from canonical results (per-metric same-tour gates); dna = v1 technical serve/return DNA from match statistics (unchanged gates)' });
 }
 
-async function dnaLeaders(store, url) {
+async function dnaLeaders(store, url, env = null) {
   const metric = url.searchParams.get('metric') || 'hold_rate';
-  if (V2_METRICS.has(metric)) {
-    const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
-    const d = await matchDnaLeaders(store, { metric, tour, limit: Math.min(Number(url.searchParams.get('limit')) || 25, 100) });
-    if (!d) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no Match DNA snapshots stored yet' });
-    return ok(d, { rows: [], source: ['pbe_derived'], updated: `${d.as_of}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: d.published ? `${tour.toUpperCase()} singles leaders (Match DNA v2) among players whose sample is medium or high confidence; ATP and WTA are separate populations` : `${tour.toUpperCase()} ${metric}: comparison not published until ${d.threshold} players qualify (currently ${d.qualified})` });
-  }
-  if (!DEFINITIONS[metric]) return envelope(null, { freshness: 'ERROR', semantics: 'unknown metric' });
   const surface = ['hard', 'clay', 'grass'].includes(url.searchParams.get('surface')) ? url.searchParams.get('surface') : 'all';
   const tour = url.searchParams.get('tour') === 'atp' ? 'atp' : 'wta';
+  const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);
+  const cacheKey = `leaders:${metric}:${tour}:${surface}:${limit}`;
+  const cached = await dnaCacheGet(env, cacheKey);
+  if (cached) return cached;
+  if (V2_METRICS.has(metric)) {
+    const d = await matchDnaLeaders(store, { metric, tour, limit });
+    if (!d) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no Match DNA snapshots stored yet' });
+    const out = ok(d, { rows: [], source: ['pbe_derived'], updated: `${d.as_of}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: d.published ? `${tour.toUpperCase()} singles leaders (Match DNA v2) among players whose sample is medium or high confidence; ATP and WTA are separate populations` : `${tour.toUpperCase()} ${metric}: comparison not published until ${d.threshold} players qualify (currently ${d.qualified})` });
+    await dnaCachePut(env, cacheKey, out, 21600);
+    return out;
+  }
+  if (!DEFINITIONS[metric]) return envelope(null, { freshness: 'ERROR', semantics: 'unknown metric' });
   const gate = await tourDnaStatus(store, tour === 'atp' ? 'M' : 'F');
   const asOf = gate.as_of;
   if (!asOf) return envelope(null, { freshness: 'UNAVAILABLE', semantics: 'no DNA snapshots stored yet' });
@@ -254,9 +298,27 @@ async function dnaLeaders(store, url) {
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.1&tennis_players.gender=eq.${tour === 'atp' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const list = rows.map((r) => ({ player: shapePlayer(r.tennis_players), m: r.metrics?.[metric] })).filter((x) => x.m && x.m.value != null && ['medium', 'high'].includes(x.m.confidence));
   list.sort((a, b) => (LOWER_IS_BETTER.has(metric) ? a.m.value - b.m.value : b.m.value - a.m.value));
-  const limit = Math.min(Number(url.searchParams.get('limit')) || 25, 100);
-  return ok({ metric, tour, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: list.length, rows: list.slice(0, limit).map((x, i) => ({ rank: i + 1, player: x.player, value: x.m.value, numerator: x.m.numerator, denominator: x.m.denominator, sample_matches: x.m.sample_matches, confidence: x.m.confidence })) },
+  const out = ok({ metric, tour, definition: DEFINITIONS[metric].doc, surface, as_of: asOf, qualified: list.length, rows: list.slice(0, limit).map((x, i) => ({ rank: i + 1, player: x.player, value: x.m.value, numerator: x.m.numerator, denominator: x.m.denominator, sample_matches: x.m.sample_matches, confidence: x.m.confidence })) },
     { rows: [], source: ['pbe_derived'], updated: `${asOf}T00:00:00Z`, policy: { currentS: 86400 * 2, staleS: 86400 * 8 }, semantics: `${tour.toUpperCase()} singles leaders among players whose metric confidence is medium or high (small samples excluded; ATP and WTA are separate populations)` });
+  await dnaCachePut(env, cacheKey, out, 21600);
+  return out;
+}
+
+async function homeDnaPreview(store, env) {
+  const key = 'home-dna-preview';
+  const hit = await dnaCacheGet(env, key);
+  if (hit) return hit;
+  const metrics = ['pbe_rating', 'hold_rate', 'return_games_won'];
+  const tours = ['atp', 'wta'];
+  const boards = {};
+  await Promise.all(metrics.flatMap((metric) => tours.map(async (tour) => {
+    const u = new URL(`https://tennis-api.internal/v1/dna/leaders?metric=${metric}&tour=${tour}&limit=5`);
+    const r = await dnaLeaders(store, u, env);
+    boards[`${metric}:${tour}`] = r?.data || null;
+  })));
+  const out = ok({ boards }, { rows: [], source: ['pbe_derived'], updated: new Date().toISOString(), policy: { currentS: 21600, staleS: 86400 }, semantics: 'cached homepage Tennis DNA preview: PBE Rating, hold rate and break rate for ATP and WTA, capped at five rows per board' });
+  await dnaCachePut(env, key, out, 21600);
+  return out;
 }
 
 // ---- player profile (form, surface record, opponents, current tournament) ------------------------------
@@ -340,15 +402,16 @@ async function coverage(store) {
   return ok({ by_year: rows, players, approved_photos: photos, dna_snapshots: dna, ranking_snapshots: ranks }, { rows: [], source: ['pbe_warehouse'], policy: { currentS: 3600, staleS: 86400 }, semantics: 'warehouse coverage: Q1 result only, Q2 set/game score, Q3 match statistics, Q4 point-by-point, Q5 point + spatial' });
 }
 
-export async function v2Route(path, url, store) {
-  const own = /^\/v1\/(pbecast\/[0-9a-f-]{36}|schedule|dna\/leaders|players\/[a-z0-9-]+\/(dna|profile)|search|venues\/[a-z0-9-]+|matches\/[0-9a-f-]{36}\/broadcast|credits|coverage)$/.test(path);
+export async function v2Route(path, url, store, env) {
+  const own = /^\/v1\/(pbecast\/[0-9a-f-]{36}|schedule|dna\/leaders|home-dna-preview|players\/[a-z0-9-]+\/(dna|profile)|search|venues\/[a-z0-9-]+|matches\/[0-9a-f-]{36}\/broadcast|credits|coverage)$/.test(path);
   if (!own) return undefined;
   if (!store) return notConfigured('canonical store not connected to this Worker');
   let m;
   if ((m = /^\/v1\/pbecast\/([0-9a-f-]{36})$/.exec(path))) return UUID.test(m[1]) ? pbecast(store, m[1]) : null;
   if (path === '/v1/schedule') return schedule(store, url);
-  if (path === '/v1/dna/leaders') return dnaLeaders(store, url);
-  if ((m = /^\/v1\/players\/([a-z0-9-]+)\/dna$/.exec(path))) return SLUG.test(m[1]) ? playerDnaV2(store, m[1], url) : null;
+  if (path === '/v1/dna/leaders') return dnaLeaders(store, url, env);
+  if (path === '/v1/home-dna-preview') return homeDnaPreview(store, env);
+  if ((m = /^\/v1\/players\/([a-z0-9-]+)\/dna$/.exec(path))) return SLUG.test(m[1]) ? playerDnaV2(store, m[1], url, env) : null;
   if ((m = /^\/v1\/players\/([a-z0-9-]+)\/profile$/.exec(path))) return SLUG.test(m[1]) ? profile(store, m[1]) : null;
   if (path === '/v1/search') return search(store, url);
   if ((m = /^\/v1\/venues\/([a-z0-9-]+)$/.exec(path))) return venue(store, m[1]);

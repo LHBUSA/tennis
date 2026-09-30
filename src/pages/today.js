@@ -128,12 +128,16 @@ export function mount(root) {
       ? html`<div class="hm-news">${leadStory(lead)}<div class="hm-news-side">${majors.map((a) => majorStory(a))}</div></div>`
       : html`<p class="hm-note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing.</p>`);
   });
-  // Tennis DNA leaders: every board states its qualification population; a held tour says "comparison building".
-  Promise.all(BOARDS.flatMap(([m]) => ['atp', 'wta'].map((t) => api(`/v1/dna/leaders?metric=${m}&tour=${t}&limit=5&preview=1`, { signal: ctl.signal }).then((x) => x?.data || null).catch(() => null)))).then((res) => {
+  // Tennis DNA leaders: one cached payload instead of six independent API requests.
+  api('/v1/home-dna-preview', { signal: ctl.signal }).then((r) => {
     const el = $('[data-leaders]');
     if (!el) return;
-    render(el, html`<div class="hm-dna">${BOARDS.map((B, i) => dnaColumn(B, [{ tour: 'atp', b: leaderBoard(res[i * 2], { tour: 'atp' }) }, { tour: 'wta', b: leaderBoard(res[i * 2 + 1], { tour: 'wta' }) }]))}</div>
+    const boards = r?.data?.boards || {};
+    render(el, html`<div class="hm-dna">${BOARDS.map((B) => dnaColumn(B, [
+      { tour: 'atp', b: leaderBoard(boards[`${B[0]}:atp`], { tour: 'atp' }) },
+      { tour: 'wta', b: leaderBoard(boards[`${B[0]}:wta`], { tour: 'wta' }) }
+    ]))}</div>
       <p class="hm-note">Singles only, from our canonical results and match statistics. <a href="/methodology">Definitions and confidence rules →</a></p>`);
-  });
+  }).catch(() => {});
   return () => { ctl.abort(); clearInterval(timer); };
 }
