@@ -36,7 +36,10 @@ export function serveCourt(point, inTiebreak) {
 /**
  * model = { doubles, server: 'A'|'B'|null, point: {A,B}|null, tiebreak: bool, highlight: 'A'|'B'|null,
  *           ball: {x,y}|null (source coordinates only), trail: [{x,y}] (source coordinates only),
- *           serveIndicator: bool, surface: 'hard'|'clay'|'grass'|null, simulation: bool }
+ *           serveIndicator: bool, surface: 'hard'|'clay'|'grass'|null, simulation: bool,
+ *           landscape: bool }
+ * landscape: the SAME drawing turned a quarter (a proper rotation, never a mirror): side A's baseline on the left, B's on
+ * the right. Geometry, serve side and service box are unchanged; only the view is rotated (wide screens).
  * Two different balls, never confused:
  *   .c-serve-ball — SERVE INDICATOR beside the server's baseline (possession/server state, not a position);
  *   .c-ball       — TRACKED POSITION, drawn only from source coordinates.
@@ -48,7 +51,11 @@ export function courtSvg(model = {}) {
     [0, -L, 0, -L + 0.18], [0, L, 0, L - 0.18]
   ];
   const doublesAlleyOpacity = model.doubles ? 1 : 0.45;
-  let s = `<svg class="court${model.surface ? ` s-${model.surface}` : ''}" viewBox="0 0 ${VB_W.toFixed(2)} ${VB_H.toFixed(2)}" role="img" aria-label="${model.doubles ? 'Doubles' : 'Singles'} tennis court${model.server ? `, side ${model.server} serving` : ''}">`;
+  const land = !!model.landscape;
+  const [vw, vh] = land ? [VB_H, VB_W] : [VB_W, VB_H];
+  let s = `<svg class="court${model.surface ? ` s-${model.surface}` : ''}${land ? ' is-land' : ''}" viewBox="0 0 ${vw.toFixed(2)} ${vh.toFixed(2)}" role="img" aria-label="${model.doubles ? 'Doubles' : 'Singles'} tennis court${model.server ? `, side ${model.server} serving` : ''}">`;
+  // rotate +90° about the origin, then shift right by the portrait height: portrait (x, y) -> (VB_H - y, x)
+  if (land) s += `<g transform="matrix(0 1 -1 0 ${VB_H.toFixed(3)} 0)">`;
   s += `<defs><pattern id="c-tex" width="0.5" height="0.5" patternUnits="userSpaceOnUse"><rect width="0.5" height="0.25" class="c-tex-a"/></pattern>`
     + `<radialGradient id="c-sbgrad" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#f6ff9e"/><stop offset="0.55" stop-color="#d9ec3a"/><stop offset="1" stop-color="#9fb21d"/></radialGradient></defs>`;
   s += `<rect class="c-out" x="0" y="0" width="${VB_W}" height="${VB_H}" rx="0.6"/>`;
@@ -82,7 +89,8 @@ export function courtSvg(model = {}) {
   const trail = Array.isArray(model.trail) ? model.trail.filter(ok) : [];
   if (trail.length > 1) s += `<polyline class="c-trail" points="${trail.map((p) => `${X(p.x)},${Y(p.y)}`).join(' ')}"/>`;
   if (ok(model.ball)) s += `<g class="c-ball-g" data-kind="tracked"><title>Tracked position</title><circle class="c-ball" cx="${X(model.ball.x)}" cy="${Y(model.ball.y)}" r="0.2"/></g>`;
-  if (model.simulation) s += `<text class="c-sim" x="${(VB_W / 2).toFixed(2)}" y="1.6" text-anchor="middle">SIMULATION</text>`;
+  if (land) s += '</g>';
+  if (model.simulation) s += `<text class="c-sim" x="${(vw / 2).toFixed(2)}" y="1.6" text-anchor="middle">SIMULATION</text>`;
   s += '</svg>';
   return raw(s);
 }

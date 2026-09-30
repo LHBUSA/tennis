@@ -1,12 +1,11 @@
 // Homepage V2 renderers (src/pages/today.js). Every value comes from a tennis-api payload; a renderer with nothing
 // legitimate to show returns '' and the section says why. Styles: src/styles/home.css (all classes .hm-*).
 
-import { html, raw } from '../lib/dom.js';
+import { html } from '../lib/dom.js';
 import { avatar, nat } from './avatar.js';
-import { localTime, fmtRange, fmtDuration, roundLabel, eventLabel } from './render.js';
+import { localTime, fmtRange, fmtDuration, roundLabel, eventLabel, statusLabel } from './render.js';
+import { scoreGrid } from './score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort } from '../lib/home.js';
-
-const ARROW = raw('<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 
 /** Section row: intro column (title, one line, link) + body. `dark` = emerald band. */
 export function section({ id, title, sub, link, linkLabel, body, hook = 'body', dark = false, cls = '' }) {
@@ -16,43 +15,7 @@ export function section({ id, title, sub, link, linkLabel, body, hook = 'body', 
   </div></section>`;
 }
 
-/** Horizontal rail with WORKING previous/next buttons (wired by wireRails; hidden when the rail does not overflow). */
-export function rail(items, { label, cls = '' } = {}) {
-  if (!items?.length) return '';
-  return html`<div class="hm-rail ${cls}" data-rail>
-    <div class="hm-track" tabindex="0" role="region" aria-label="${label}">${items}</div>
-    <div class="hm-nav" hidden><button type="button" class="hm-arrow prev" data-dir="-1" aria-label="Previous ${label}">${ARROW}</button><button type="button" class="hm-arrow" data-dir="1" aria-label="Next ${label}">${ARROW}</button></div>
-  </div>`;
-}
-
-/** One delegated listener for every rail; nav visibility + disabled ends follow the real scroll state. */
-export function wireRails(root, signal) {
-  const sync = (r) => {
-    const t = r.querySelector('.hm-track');
-    const nav = r.querySelector('.hm-nav');
-    if (!t || !nav) return;
-    const over = t.scrollWidth - t.clientWidth > 4;
-    nav.hidden = !over;
-    const [p, n] = nav.querySelectorAll('button');
-    p.disabled = t.scrollLeft <= 2;
-    n.disabled = t.scrollLeft >= t.scrollWidth - t.clientWidth - 2;
-    r.classList.toggle('more-start', over && !p.disabled);
-    r.classList.toggle('more-end', over && !n.disabled);
-  };
-  const all = () => root.querySelectorAll('[data-rail]').forEach(sync);
-  root.addEventListener('click', (e) => {
-    const b = e.target.closest?.('.hm-arrow');
-    if (!b) return;
-    const t = b.closest('[data-rail]')?.querySelector('.hm-track');
-    if (!t) return;
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    t.scrollBy({ left: Number(b.dataset.dir) * Math.max(240, t.clientWidth * 0.85), behavior: reduce ? 'auto' : 'smooth' });
-  }, { signal });
-  root.addEventListener('scroll', (e) => { const r = e.target.closest?.('[data-rail]'); if (r) sync(r); }, { capture: true, passive: true, signal });
-  addEventListener('resize', all, { signal });
-  new MutationObserver(all).observe(root, { childList: true, subtree: true });
-  all();
-}
+export { rail, wireRails } from './rail.js';
 
 // ---------------------------------------------------------------- hero
 
@@ -87,27 +50,28 @@ export function statusBar(d, groups, next) {
 // ---------------------------------------------------------------- match cards
 
 const tag = (code) => { const t = tourTag(code); return t ? html`<span class="hm-tag hm-tag-${tourFamily(code)}">${t}</span>` : ''; };
+const SURFACE = { hard: 'Hard', clay: 'Clay', grass: 'Grass', carpet: 'Carpet' };
+const cardStatus = (m) => (m.status === 'scheduled' ? 'Upcoming' : ['completed', 'retired', 'walkover'].includes(m.status) ? 'Final' : statusLabel(m.status));
 
-function sideRow(m, s) {
-  const side = m.sides?.[s];
-  const ps = side?.players || [];
-  const live = m.status === 'in_progress';
-  const won = m.winner_side === s;
-  return html`<div class="hm-mside${won ? ' won' : ''}">
-    <span class="hm-mav">${ps.map((p) => avatar(p, { px: 30 }))}</span>
-    <span class="hm-mnm">${ps.map((p, i) => html`${i ? ' / ' : ''}${p.nationality ? nat(p.nationality) : ''}<a href="/players/${p.slug}">${p.name}</a>`)}${side?.seed ? html` <small>(${side.seed})</small>` : ''}</span>
-    ${live || m.sets?.length ? html`<span class="hm-msc tabnum">${(m.sets || []).map((x) => html`<span class="${x.winner === s ? 'w' : ''}">${x.match_tiebreak && x.tb ? x.tb[s] : x[s]}</span>`)}${live && m.live?.point ? html`<span class="pt">${m.live.point[s] ?? ''}</span>` : ''}</span>` : ''}
-  </div>`;
-}
-
+/**
+ * Match card: WHO (avatars, nationality, names) · WHERE (tour, tournament, round, level / surface / court) · WHAT the
+ * score is (scoreGrid: aligned set columns + the live point) · WHO serves · where to open PBEcast. Only served fields;
+ * a null level / surface / court is simply absent.
+ */
 export function matchCard(m) {
   const live = m.status === 'in_progress';
   const t = m.tournament;
-  const when = live ? null : m.status === 'scheduled' ? localTime(m.scheduled_at) : fmtDuration(m.duration_s);
+  const when = m.status === 'scheduled' ? localTime(m.scheduled_at) : null;
+  const surf = SURFACE[String(t?.surface || '').toLowerCase()] || null;
+  const meta = [t?.level, surf ? `${surf}${t.indoor ? ' · indoor' : ''}` : null, m.court].filter(Boolean);
+  const dur = m.status === 'scheduled' ? '' : fmtDuration(m.duration_s);
   return html`<article class="hm-card hm-match${live ? ' is-live' : ''}">
-    <header>${tag(m.tour)}${t ? html`<a class="hm-mt" href="/tournaments/${t.slug}/${t.year}" title="${tournamentName(t)}">${tournamentName(t)}</a>` : ''}<span class="hm-mr" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}${when ? html` · ${when}` : ''}</span></header>
-    ${sideRow(m, 'A')}${sideRow(m, 'B')}
-    <footer><span class="hm-ev">${eventLabel(m.event_type)}</span>${live ? html`<span class="hm-pill live"><i class="hm-dot" aria-hidden="true"></i>Live</span><a class="hm-go" href="/pbecast/${m.id}">PBEcast →</a>` : html`<span class="hm-pill">${m.status === 'scheduled' ? 'Upcoming' : 'Final'}</span>`}<a class="hm-go" href="/matches/${m.id}">Match →</a></footer>
+    <header class="hm-mh">
+      <p class="hm-mh1">${tag(m.tour)}${t ? html`<a class="hm-mt" href="/tournaments/${t.slug}/${t.year}" title="${tournamentName(t)}">${tournamentName(t)}</a>` : ''}<span class="hm-mr" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}</span></p>
+      <p class="hm-mh2">${[eventLabel(m.event_type), ...meta].join(' · ')}${when ? html` · <b>${when}</b>` : ''}</p>
+    </header>
+    ${scoreGrid(m)}
+    <footer>${live ? html`<span class="hm-pill live"><i class="hm-dot" aria-hidden="true"></i>Live</span>` : html`<span class="hm-pill">${cardStatus(m)}</span>`}${dur ? html`<span class="hm-el tabnum" title="${live ? 'Match time reported by the source at its last update' : 'Match duration'}">${dur}</span>` : ''}<span class="hm-go-wrap">${live ? html`<a class="hm-go hm-go-cast" href="/pbecast/${m.id}">PBEcast <span aria-hidden="true">→</span></a>` : ''}<a class="hm-go" href="/matches/${m.id}">Match <span aria-hidden="true">→</span></a></span></footer>
   </article>`;
 }
 

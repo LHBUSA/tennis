@@ -19,6 +19,10 @@ import { fmtMetric } from '../ui/match-dna.js';
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
+import { groupMoments, groupTransition, gamesFrom, setsWon, liveContext, pulse } from '../lib/pbecast-view.js';
+import { railNav, wireRails, revealCurrent } from '../ui/rail.js';
+import { scoreGrid } from '../ui/score-grid.js';
+import { tourTag, tourFamily, tournamentName, roundShort } from '../lib/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 
@@ -170,17 +174,27 @@ function dnaCompare(data, m) {
     ${technicalCompare(data, m)}`;
 }
 
-/** LIVE MATCHES switcher: every live court, deterministic order; the current court is marked. */
-function liveSwitcher(items) {
+/**
+ * LIVE MATCHES ticker: every live court in the deterministic order (pbecast-live.js), the current court marked and
+ * revealed on first render. A rail (src/ui/rail.js): no native scrollbar, swipe / trackpad / arrows, one-card
+ * auto-advance that pauses on hover, focus, touch and reduced motion. Every value is the /v1/live summary's own.
+ */
+function liveTicker(items) {
   if (!items.length) return '';
-  const score = (m) => (m.sets || []).map((x) => (x.match_tiebreak && x.tb ? `[${x.tb.A}-${x.tb.B}]` : `${x.A}-${x.B}`)).join(' ') + (m.live?.point ? ` · ${m.live.point.A}–${m.live.point.B}` : '');
-  const side = (m, s) => (m.sides?.[s]?.players || []);
-  return html`<nav class="pbc-switch page" aria-label="Live matches"><p class="pbc-switch-h"><span class="live-dot" aria-hidden="true"></span>Live matches <small>${items.length}</small></p>
-    <ul>${items.map(({ href, current, match: m }) => html`<li><a href="${href}" class="${current ? 'on' : ''}" ${current ? raw('aria-current="page"') : ''}>
-      <span class="sw-live">LIVE</span>
-      <span class="sw-p">${['A', 'B'].map((s) => html`<span class="sw-row">${side(m, s).map((p) => avatar(p, { px: 26 }))}<b>${side(m, s).map((p) => p.name).join(' / ')}</b></span>`)}</span>
-      <span class="sw-sc tabnum">${score(m)}</span>
-      <span class="sw-t">${m.tournament?.name || ''}${m.court ? ` · ${m.court}` : ''}</span></a></li>`)}</ul></nav>`;
+  const badge = (m) => {
+    const t = tourTag(m.tour) || m.tournament?.level || null;
+    const fam = tourFamily(m.tour) || (/^WTA/i.test(t || '') ? 'wta' : /^ATP/i.test(t || '') ? 'atp' : null);
+    return t ? html`<span class="hm-tag${fam ? ` hm-tag-${fam}` : ''}">${t}</span>` : '';
+  };
+  const card = ({ href, current, match: m }) => html`<a href="${href}" class="tk${current ? ' on' : ''}" ${current ? raw('aria-current="page"') : ''}>
+    <span class="tk-top">${current ? html`<span class="tk-now">Now showing</span>` : html`<span class="tk-live"><i aria-hidden="true"></i>Live</span>`}${badge(m)}<span class="tk-r" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}</span></span>
+    <span class="tk-t">${tournamentName(m.tournament)}${m.court ? html`<small> · ${m.court}</small>` : ''}</span>
+    ${scoreGrid(m, { px: 24, links: false })}
+    <span class="tk-go">${current ? 'On this court' : html`Open PBEcast <span aria-hidden="true">→</span>`}</span></a>`;
+  return html`<nav class="pbc-tk" aria-label="Live matches"><div class="pbc-tk-in" data-rail data-auto="4500">
+    <div class="pbc-tk-h"><p class="pbc-tk-t"><span class="live-dot" aria-hidden="true"></span>Live matches <small class="tabnum">${items.length}</small></p>${railNav('live match')}</div>
+    <ul class="hm-track pbc-tk-track" aria-label="Live matches, ${items.length}">${items.map((it) => html`<li>${card(it)}</li>`)}</ul>
+  </div></nav>`;
 }
 
 
@@ -212,46 +226,30 @@ function identity(m, s, state, final) {
   </div>`;
 }
 
-/** Observed/official game results for the strip: holds, breaks, recent games — only games with a provable winner. */
-function gamesFrom(evs, upto) {
-  const out = [];
-  for (const e of evs.slice(0, upto + 1)) {
-    const g = e.event_detail?.game_won;
-    if (g?.winner) out.push({ set: g.set, game: g.game, winner: g.winner, server: g.server || null, result: g.result || null });
-    else if (e.quality === 'point_event' && e.event_detail?.game_complete && e.winner_side) out.push({ set: e.set_number, game: e.game_number, winner: e.winner_side, server: e.server_side || null, result: e.server_side ? (e.server_side === e.winner_side ? 'hold' : 'break') : null });
-  }
-  return out;
+const timeOf = (iso) => (iso ? new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : '');
+
+/** B. MATCH PULSE: A | measure | B from provable games + published statistics, then match facts. */
+function pulsePanel(d, m, state, pos, live) {
+  const p = pulse(d, state, pos);
+  const facts = [...p.facts];
+  if (d.match.duration_s) facts.push({ key: 'time', label: live ? 'Match time' : 'Duration', value: fmtDuration(d.match.duration_s), title: live ? 'Reported by the source at its last update' : '' });
+  const lastEv = live ? d.events.at(-1) : null;
+  if (lastEv && (lastEv.event_at || lastEv.observed_at)) facts.push({ key: 'last', label: lastEv.quality === 'point_event' ? 'Last point' : 'Last observed', value: timeOf(lastEv.event_at || lastEv.observed_at) });
+  if (!p.rows.length && !facts.length) return html`<p class="note">No pulse yet: needs games with a provable winner or published statistics.</p>`;
+  return html`${facts.length ? html`<dl class="v3-facts">${facts.map((f) => html`<div class="v3-fact"${f.title ? raw(` title="${f.title}"`) : ''}><dt>${f.label}</dt><dd class="tabnum">${f.value}</dd></div>`)}</dl>` : ''}
+    ${p.rows.length ? html`<table class="v3-pulse-t"><thead><tr><th scope="col" class="n">${sideName(m, 'A')}</th><th scope="col"><span class="sr">Measure</span></th><th scope="col">${sideName(m, 'B')}</th></tr></thead><tbody>${p.rows.map((r) => html`<tr><td class="n tabnum">${r.A}</td><th scope="row">${r.label}</th><td class="tabnum">${r.B}</td></tr>`)}</tbody></table>` : ''}
+    ${p.basis ? html`<p class="v3-basis">Holds and breaks from ${p.basis} game${p.basis === 1 ? '' : 's'} with a provable server and winner${d.quality === 'point_event' ? '' : ' (several games between two observations have no provable winner and are left out)'}.</p>` : ''}`;
 }
 
-function intelStrip(d, m, state, evs, pos) {
-  const cells = [];
-  const games = gamesFrom(evs, pos);
-  for (const s of ['A', 'B']) {
-    const served = games.filter((g) => g.server === s && g.result);
-    const returned = games.filter((g) => g.server && g.server !== s && g.result);
-    if (served.length) cells.push([`${sideName(m, s)} holds`, `${served.filter((g) => g.result === 'hold').length}/${served.length}`]);
-    if (returned.length) cells.push([`${sideName(m, s)} breaks`, `${returned.filter((g) => g.result === 'break').length}/${returned.length}`]);
-  }
-  const st = d.statistics;
-  if (st?.A && st?.B) {
-    const r = (n, dd) => (n == null || !dd ? null : `${Math.round((n / dd) * 100)}%`);
-    for (const s of ['A', 'B']) {
-      const x = st[s];
-      const one = r(x.first_serve_points_won, x.first_serves_in);
-      const two = r(x.second_serve_points_won, x.service_points - x.first_serves_in);
-      if (one) cells.push([`${sideName(m, s)} 1st-serve pts`, one]);
-      if (two) cells.push([`${sideName(m, s)} 2nd-serve pts`, two]);
-      if (x.break_points_faced) cells.push([`${sideName(m, s)} BP saved`, `${x.break_points_saved}/${x.break_points_faced}`]);
-    }
-  }
-  const cur = state?.sets?.at(-1);
-  if (cur && state.status === 'in_progress') cells.push(['Set differential', `${cur.A - cur.B > 0 ? '+' : ''}${cur.A - cur.B} ${sideName(m, 'A')}`]);
-  const recent = games.slice(-6);
-  if (!cells.length && !recent.length) return '';
-  return html`<section class="pbc-intel page" aria-label="Live intelligence">
-    ${cells.map(([k, v]) => html`<div class="pi-c"><span>${k}</span><b class="tabnum">${v}</b></div>`)}
-    ${recent.length ? html`<div class="pi-c pi-recent"><span>Recent games</span><b>${recent.map((g) => html`<i class="rg s-${g.winner} ${g.result === 'break' ? 'brk' : ''}" title="Set ${g.set} game ${g.game}: ${sideName(m, g.winner)}${g.result ? ` (${g.result})` : ''}">${sideName(m, g.winner).slice(0, 3).toUpperCase()}</i>`)}</b></div>` : ''}
-  </section>`;
+/** D. RECENT GAMES: HOLD / BREAK per game with a provable winner, newest first. */
+function gamesPanel(evs, pos, m) {
+  const games = gamesFrom(evs, pos).slice(-6).reverse();
+  if (!games.length) return html`<p class="note">No game with a provable winner yet.</p>`;
+  const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
+  return html`<ol class="v3-gm">${games.map((g) => html`<li class="${g.result === 'break' ? 'brk' : ''}">
+    <span class="v3-gm-at tabnum">S${g.set ?? '—'} · G${g.game ?? '—'}</span>
+    <b class="v3-gm-k">${g.result === 'break' ? 'BREAK' : g.result === 'hold' ? 'HOLD' : 'GAME'}</b>
+    <span class="v3-gm-who">${photoOf(g.winner) ? avatar(photoOf(g.winner), { px: 22 }) : ''}<span>${sideName(m, g.winner)}</span></span></li>`)}</ol>`;
 }
 
 const RAIL_TAGS = new Set(['ACE', 'DOUBLE FAULT', 'WINNER', 'BREAK', 'GAME', 'SET', 'TIEBREAK', 'FINAL', 'RETIRED', 'START', 'SUSPENDED', 'RESUMED']);
@@ -279,24 +277,34 @@ function momentRail(evs, m, pos, isPoint) {
 
 const KEY_EVENTS = { break: 'BREAK', set_won: 'SET', tiebreak: 'TB', retired: 'RET', match_end: 'FINAL', walkover: 'W/O', suspended: 'SUSP' };
 const surnameUp = (m, s) => sideName(m, s).toUpperCase();
-const setsWon = (state, s) => (state?.sets || []).filter((x, i, a) => {
-  const done = i < a.length - 1 || ['completed', 'retired'].includes(state.status);
-  return done && (x.tb && x.A === x.B ? x.tb[s] > x.tb[s === 'A' ? 'B' : 'A'] : x[s] > x[s === 'A' ? 'B' : 'A']);
-}).length;
 
-function v3Score(m, state, prev) {
+/** Sticky broadcast scoreboard: live/replay state + set/game context, then one row per side (server first-class). */
+function v3Score(m, state, prev, { mode, order }) {
   const final = ['completed', 'retired', 'walkover'].includes(state?.status || m.status);
+  const sets = state?.sets || [];
+  const point = !final && state?.point ? state.point : null;
+  const ctx = liveContext(state);
+  const dbl = /D$/.test(m.event_type || '');
+  const cols = `12px ${dbl ? 46 : 30}px minmax(0,1fr)${' var(--v3s-set)'.repeat(sets.length)}${point ? ' var(--v3s-pt)' : ''}`;
+  const isCur = (i) => !final && i === sets.length - 1;
   const row = (s) => {
     const ps = m.players?.[s] || m.sides?.[s]?.players || [];
-    const sets = state?.sets || [];
-    return html`<div class="v3s-row${final && m.winner_side === s ? ' win' : ''}${!final && state?.server === s ? ' is-srv' : ''}">
+    const srv = !final && state?.server === s;
+    const meta = ps.map((p) => [p.nationality, p.rank ? `No. ${p.rank.rank}` : null].filter(Boolean).join(' · ')).filter(Boolean).join(' / ');
+    return html`<div class="v3s-row${final && m.winner_side === s ? ' win' : ''}${srv ? ' is-srv' : ''}" style="grid-template-columns:${cols}">
       <span class="v3s-srv" aria-hidden="true"></span>
-      <span class="v3s-n">${ps.map((p) => lastName(p)).join(' / ')}${!final && state?.server === s ? html`<span class="sr"> serving</span>` : ''}</span>
-      <span class="v3s-sets tabnum">${sets.map((x, i) => html`<b class="${prev && prev.sets?.[i]?.[s] !== x[s] ? 'chg' : ''}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`)}</span>
-      <span class="v3s-pt tabnum${prev && prev.point?.[s] !== state?.point?.[s] ? ' chg' : ''}">${!final && state?.point ? state.point[s] : ''}</span>
+      <span class="v3s-av">${ps.map((p) => avatar(p, { px: 30, eager: true }))}</span>
+      <span class="v3s-who"><span class="v3s-n">${ps.map((p) => lastName(p)).join(' / ')}${srv ? html`<span class="sr"> serving</span>` : ''}${final && m.winner_side === s ? html`<span class="sr"> winner</span>` : ''}</span>${meta ? html`<small class="v3s-meta">${meta}</small>` : ''}</span>
+      ${sets.map((x, i) => { const o = s === 'A' ? 'B' : 'A'; const won = !isCur(i) && (x.tb && x.A === x.B ? x.tb[s] > x.tb[o] : x[s] > x[o]); return html`<b class="v3s-c${won ? ' w' : ''}${isCur(i) ? ' cur' : ''}${prev && prev.sets?.[i]?.[s] !== x[s] ? ' chg' : ''}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`; })}
+      ${point ? html`<b class="v3s-pt tabnum${prev && prev.point?.[s] !== point[s] ? ' chg' : ''}">${point[s]}</b>` : ''}
     </div>`;
   };
-  return html`${row('B')}${row('A')}`;
+  const live = mode.includes('live') && !final;
+  const where = final ? statusLabel(state?.status || m.status) : ctx ? (ctx.tiebreak ? `Set ${ctx.set} · Tiebreak` : `Set ${ctx.set} · Game ${ctx.game}`) : statusLabel(state?.status || m.status);
+  return html`<div class="v3s-head" style="grid-template-columns:${cols}">
+      <span class="v3s-state">${live ? html`<span class="v3s-live"><i aria-hidden="true"></i>Live</span>` : html`<span class="v3s-rp">${mode.includes('replay') ? 'Replay' : statusLabel(m.status)}</span>`}<span class="v3s-where">${where}</span></span>
+      ${sets.map((_, i) => html`<span class="v3s-h${isCur(i) ? ' cur' : ''}" aria-hidden="true">${sets[i]?.mtb || sets[i]?.match_tiebreak ? 'MTB' : `S${i + 1}`}</span>`)}${point ? html`<span class="v3s-h pt" aria-hidden="true">PT</span>` : ''}
+    </div>${order.map(row)}`;
 }
 
 function pidShell(m, s) {
@@ -308,6 +316,7 @@ function pidShell(m, s) {
   </div>`;
 }
 
+/** A. CURRENT MOMENT: the event at the viewer's position, its score transition, server and observed time. */
 function momentPanel(e, m, state, marker = null) {
   if (!e) return html`<p class="v3-mo-empty">Waiting for the first observed event.</p>`;
   const t0 = eventText(e, m);
@@ -315,24 +324,43 @@ function momentPanel(e, m, state, marker = null) {
   const t = marker ? { ...t0, tag: marker === 'FINAL' ? 'MATCH' : marker, line: `${t0.tag}: ${t0.line}` } : t0;
   const photo = e.winner_side ? (m.players?.[e.winner_side] || m.sides?.[e.winner_side]?.players || [])[0] : null;
   const cur = state?.sets?.at(-1);
+  const final = ['completed', 'retired', 'walkover'].includes(state?.status);
   const when = e.event_at || e.observed_at;
   const speed = e.serve_speed_kmh != null ? `${Math.round(e.serve_speed_kmh)} km/h` : null;
   const rally = e.rally_length != null ? `${e.rally_length}-shot rally` : null;
+  const bits = [
+    cur ? `Set ${state.sets.length} · ${cur.A}–${cur.B}` : null,
+    state?.point && !final ? `${state.point.A}–${state.point.B}` : null,
+    state?.server && !final ? `${sideName(m, state.server)} serving` : null,
+    speed, rally
+  ].filter(Boolean);
   return html`<div class="v3-mo k-${String(t.tag).replace(/\s+/g, '-').toLowerCase()}" data-key="${e.event_id}">
     <div class="v3-mo-top"><span class="v3-mo-tag">${t.tag}</span><span class="v3-mo-q q-${t.quality}">${t.quality === 'point' ? 'POINT' : 'OBSERVED'}</span></div>
     <div class="v3-mo-body">${photo ? avatar(photo, { size: 'square', px: 44 }) : ''}<p class="v3-mo-line">${t.line}</p></div>
-    <p class="v3-mo-meta tabnum">${cur ? `Set ${state.sets.length} · ${cur.A}–${cur.B}` : ''}${state?.point && !['completed', 'retired'].includes(state.status) ? ` · ${state.point.A}–${state.point.B}` : ''}${[speed, rally].filter(Boolean).map((x) => ` · ${x}`).join('')}${when ? html` · <time datetime="${when}">${t.quality === 'point' ? '' : 'Observed '}${new Date(when).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}</time>` : ''}</p>
+    <p class="v3-mo-meta tabnum">${bits.map((x, i) => html`${i ? html`<i aria-hidden="true">·</i>` : ''}<span>${x}</span>`)}${when ? html`<i aria-hidden="true">·</i><time datetime="${when}">${t.quality === 'point' ? '' : 'Observed '}${timeOf(when)}</time>` : ''}</p>
   </div>`;
 }
 
+/**
+ * C. RECENT MOMENTS. Presentation only: consecutive observed score updates inside one game score are shown as one row
+ * (first -> last point, "observed ×N"); the stored events and the timeline are untouched (pbecast-view.js).
+ */
 function recentList(evs, pos, m) {
-  const list = evs.slice(Math.max(0, pos - 4), pos + 1).reverse();
   const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
-  return html`<ol class="v3-rc">${list.map((e, i) => { const t = eventText(e, m); const st = e.state; const when = e.event_at || e.observed_at; return html`<li class="${i === 0 ? 'on' : ''}">
+  return html`<ol class="v3-rc">${groupMoments(evs, pos, { limit: 6 }).map((g) => {
+    const e = g.event;
+    const t = eventText(e, m);
+    const games = e.state ? (e.state.sets || []).map((x) => `${x.A}-${x.B}`).join(' ') : '';
+    const move = g.grouped ? groupTransition(evs, g) : '';
+    const t0 = evs[g.first].event_at || evs[g.first].observed_at;
+    const t1 = e.event_at || e.observed_at;
+    const when = g.count > 1 && t0 && timeOf(t0) !== timeOf(t1) ? `${timeOf(t0)}–${timeOf(t1)}` : timeOf(t1);
+    return html`<li class="${g.current ? 'on' : ''}${g.count > 1 ? ' is-grp' : ''}">
     <span class="v3-rc-av">${e.winner_side && photoOf(e.winner_side) ? avatar(photoOf(e.winner_side), { px: 26 }) : ''}</span>
     <b class="v3-rc-tag t-${String(t.tag).replace(/\s+/g, '-').toLowerCase()}">${t.tag}</b>
-    <span class="v3-rc-sc tabnum">${st ? (st.sets || []).map((x) => `${x.A}-${x.B}`).join(' ') : ''}</span>
-    <span class="v3-rc-q">${t.quality === 'point' ? 'POINT' : 'OBS'}${when ? ` · ${new Date(when).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}` : ''}</span></li>`; })}</ol>`;
+    <span class="v3-rc-sc tabnum">${games}${move ? html`<small>${move}</small>` : ''}</span>
+    <span class="v3-rc-q">${g.count > 1 ? html`<em title="${g.count} consecutive observations in this game">observed ×${g.count}</em>` : t.quality === 'point' ? 'POINT' : 'OBS'}${when ? html`<span class="tabnum"> · ${when}</span>` : ''}</span></li>`;
+  })}</ol>`;
 }
 
 function timelineBar(evs, m) {
@@ -377,7 +405,22 @@ export function mount(root, { params, live = null }) {
   let lastPainted = -1;
   let ctlSig = '';
   render(root, html`<div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
-  const drawSwitch = (list) => { const el = root.querySelector('[data-switch]'); if (el) render(el, liveSwitcher(switcherItems(list, params.id))); };
+  const sw = root.querySelector('[data-switch]');
+  wireRails(sw, ctl.signal);
+  // the ticker keeps the viewer's scroll position across polls, and never re-renders under their focus
+  const drawSwitch = (list) => {
+    if (sw.contains(document.activeElement) && document.activeElement !== document.body) return;
+    const was = sw.querySelector('.hm-track')?.scrollLeft;
+    render(sw, liveTicker(switcherItems(list, params.id)));
+    const r = sw.querySelector('[data-rail]');
+    if (!r) return;
+    if (was != null) r.querySelector('.hm-track').scrollLeft = was;
+    else revealCurrent(r);
+  };
+  // wide screens show the court in landscape (the same drawing rotated): repaint when the breakpoint flips
+  const wide = matchMedia('(min-width: 1024px)');
+  const onWide = () => { if (data && ps) { ctlSig = ''; paint(false); } };
+  wide.addEventListener('change', onWide);
   const loadLive = async () => { try { const r = await api('/v1/live', { signal: ctl.signal }); if (Array.isArray(r.data)) drawSwitch(r.data); } catch { /* aborted */ } };
   if (live) drawSwitch(live);
   loadLive();
@@ -396,18 +439,22 @@ export function mount(root, { params, live = null }) {
     const title = `${sideName(m, 'A')} vs ${sideName(m, 'B')}`;
     render($('[data-pbc]'), html`
       <h1 class="sr">${title} — PBEcast</h1>
-      <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${roundLabel(m.round)} · ${eventLabel(m.event_type)}${t.surface ? ` · ${cap(t.surface)}` : ''}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
+      <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${[roundLabel(m.round), eventLabel(m.event_type), t.level, t.surface ? `${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : null, m.court].filter(Boolean).join(' · ')}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
       <div class="v3-score-wrap page"><div class="v3-score" data-score aria-live="polite"></div></div>
       <div class="v3-stage page" data-stage>
         <div class="v3-courtcol">
           ${pidShell(m, 'B')}
           <div class="v3-court" data-court></div>
           ${pidShell(m, 'A')}
+          <div class="v3-controls" data-controls></div>
         </div>
-        <section class="v3-moment" aria-label="Current moment" aria-live="polite" data-moment></section>
-        <section class="v3-recent" aria-label="Recent moments"><h2>Recent moments</h2><div data-recent></div></section>
-        <section class="v3-intel" aria-label="Live intelligence" data-intel></section>
-        <div class="v3-controls" data-controls></div>
+        <aside class="v3-rail" aria-labelledby="v3-rail-h">
+          <h2 class="v3-rail-h" id="v3-rail-h">${data.mode.includes('live') ? 'Live intelligence' : 'Match intelligence'}</h2>
+          <section class="v3-mod v3-moment" aria-label="Current moment" aria-live="polite"><h3 class="v3-mod-h">Current moment</h3><div data-moment></div></section>
+          <section class="v3-mod v3-pulse" aria-labelledby="v3-pulse-h"><h3 class="v3-mod-h" id="v3-pulse-h">Match pulse</h3><div data-intel></div></section>
+          <section class="v3-mod v3-recent" aria-labelledby="v3-recent-h"><h3 class="v3-mod-h" id="v3-recent-h">Recent moments</h3><div data-recent></div></section>
+          <section class="v3-mod v3-games" aria-labelledby="v3-games-h"><h3 class="v3-mod-h" id="v3-games-h">Recent games</h3><div data-games></div></section>
+        </aside>
         <div class="v3-timeline" data-timeline></div>
       </div>
       <p class="pbc-note page">${freshnessBadge(data.meta)} ${data.cadence_note}${data.quality === 'point_event' ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'} <a href="#pbc-more">More intelligence ↓</a></p>
@@ -453,10 +500,12 @@ export function mount(root, { params, live = null }) {
     const banner = mkNow ? (mkNow === 'FINAL' ? 'MATCH' : mkNow) : tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
 
     render($('[data-mode]'), modeBadge(data.mode, evs));
-    render($('[data-score]'), v3Score(m, state, prev));
+    const land = wide.matches;
+    render($('[data-score]'), v3Score(m, state, prev, { mode: data.mode, order: land ? ['A', 'B'] : ['B', 'A'] }));
+    $('[data-stage]')?.classList.toggle('is-land', land);
     render($('[data-court]'), html`<div class="court-wrap${data.mode.includes('live') && !final ? ' is-live' : ''}${tracked ? ' is-tracked' : ''}${sit ? ` sit-${sit.kind}` : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''}>
       ${tracked ? html`<span class="v3-tracked">TRACKED · ball position from the source</span>` : ''}
-      ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: inTiebreakScore(state.point), highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null })}
+      ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: inTiebreakScore(state.point), highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null, landscape: land })}
       ${sit ? html`<span class="court-sit k-${sit.kind}" role="status">${sit.text}${state.point && state.server ? html`<small class="tabnum">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}</small>` : ''}</span>` : !final && state.point && state.server ? html`<span class="court-pt tabnum" aria-label="Point score, server first">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}<small>server first</small></span>` : ''}
       ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(banner).replace(/\s+/g, '-').toLowerCase()}" data-k="${cur.event_id}">${banner}</span>` : ''}
       ${!final && state.server ? html`<span class="court-key"><i class="k-serve"></i> Serve indicator — not tracked position</span>` : ''}
@@ -480,7 +529,8 @@ export function mount(root, { params, live = null }) {
     }
     render($('[data-moment]'), momentPanel(cur, m, state, isPoint && cur ? pointMarker(prev || (ps.pos > 0 ? viewState(ps.pos - 1) : null), state, cur) : null));
     render($('[data-recent]'), evs.length ? recentList(evs, ps.pos, m) : html`<p class="note">No stored events for this match.</p>`);
-    render($('[data-intel]'), intelStrip(data, m, state, evs, ps.pos) || html`<p class="note">No live intelligence yet: needs games with a provable winner or published statistics.</p>`);
+    render($('[data-intel]'), pulsePanel(data, m, state, ps.pos, data.mode.includes('live')));
+    render($('[data-games]'), gamesPanel(evs, ps.pos, m));
     // controls: re-render only when their own state changes (keeps focus)
     const sig = `${ps.mode}|${ps.playing}|${ps.paused}|${ps.done}|${ps.speed}|${evs.length}|${ps.mode === 'live' ? ps.pos === evs.length - 1 : ''}`;
     if (sig !== ctlSig) { render($('[data-controls]'), evs.length ? controlsBar(ps, evs.length) : ''); ctlSig = sig; }
@@ -572,7 +622,7 @@ export function mount(root, { params, live = null }) {
   root.addEventListener('click', onClick);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); clearTimer(); clearInterval(poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };

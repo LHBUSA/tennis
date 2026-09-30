@@ -43,6 +43,18 @@
 .hdr-live i::after { content: ''; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid rgba(255, 90, 82, 0.6); animation: hdr-pulse 1.8s ease-out infinite; }
 @keyframes hdr-pulse { from { transform: scale(0.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .hdr-live i::after { animation: none; opacity: 0; } }
+.hdr-live [data-live-n] { font-family: var(--f-data); letter-spacing: 0; }
+/* narrow phones: the header must fit with the live pill shown (logo + pill + search + menu, no page overflow) */
+@media (max-width: 480px) {
+  .hdr-in { gap: 8px; }
+  .brand { gap: 8px; min-width: 0; flex: 0 1 auto; }
+  .brand img { height: 34px; }
+  .brand-text b { font-size: 17px; letter-spacing: 0.16em; }
+  .brand-text i { font-size: 10px; letter-spacing: 0.16em; }
+  .hdr-live { padding: 0 9px; gap: 6px; }
+  .hdr-search { width: 40px; }
+}
+@media (max-width: 400px) { .hdr-live-w { display: none; } .brand-sep { display: none; } .brand { gap: 6px; } }
 @media (max-width: 1140px) { .nav { display: none; } .hdr-search { margin-left: auto; } .menu-btn { display: inline-flex; } .hdr-live { margin-left: auto; } .hdr-live:not([hidden]) + .hdr-search { margin-left: 6px; } }
 @media (max-width: 380px) { .brand img { height: 32px; } .brand-text b { font-size: 18px; } .brand-text i { display: none; } }
 

@@ -87,11 +87,11 @@
 .hm-rail { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: center; }
 .hm-track { position: relative; display: grid; grid-auto-flow: column; gap: 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scroll-padding: 0 2px; padding: 2px 2px 6px; scrollbar-width: none; -ms-overflow-style: none; }
 .hm-track::-webkit-scrollbar { display: none; }
-/* no scrollbars: the edge with more content fades out (state set by wireRails), arrows on >= 768px, swipe + a partly
+/* no scrollbars (every [data-rail], src/ui/rail.js): the edge with more content fades out (state set by wireRails), arrows on >= 768px, swipe + a partly
    visible next card on phones */
-.hm-rail.more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
-.hm-rail.more-start .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px); mask-image: linear-gradient(90deg, transparent, #000 56px); }
-.hm-rail.more-start.more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
+[data-rail].more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 56px), transparent); }
+[data-rail].more-start .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px); mask-image: linear-gradient(90deg, transparent, #000 56px); }
+[data-rail].more-start.more-end .hm-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); mask-image: linear-gradient(90deg, transparent, #000 56px, #000 calc(100% - 56px), transparent); }
 .hm-track > * { scroll-snap-align: start; min-width: 0; }
 .hm-nav { display: flex; gap: 8px; }
 .hm-nav[hidden] { display: none; }
@@ -100,7 +100,7 @@
 .hm-arrow:hover:not(:disabled) { border-color: var(--court-700); color: var(--court-700); }
 .hm-arrow:disabled { opacity: 0.35; cursor: default; }
 .hm-dark .hm-arrow { background: transparent; border-color: rgba(243, 246, 241, 0.35); color: var(--on-dark); }
-.hm-rail-match .hm-track { grid-auto-columns: 300px; }
+.hm-rail-match .hm-track { grid-auto-columns: 296px; }
 .hm-rail-t .hm-track { grid-auto-columns: 260px; }
 .hm-rail-p .hm-track { grid-auto-columns: 150px; }
 .hm-rail-r .hm-track { grid-auto-columns: 280px; }
@@ -115,28 +115,62 @@
 .hm-pill.live { background: var(--live-soft); color: var(--live); }
 .hm-pill.live .hm-dot { width: 6px; height: 6px; box-shadow: none; }
 
-/* match */
-.hm-match { padding: 12px 14px 10px; display: grid; gap: 8px; }
-.hm-match.is-live { border-color: rgba(200, 51, 47, 0.45); }
-.hm-match header { display: flex; align-items: center; gap: 8px; min-width: 0; font-size: 12px; color: var(--muted); }
-.hm-mt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); text-decoration: none; font: 800 12.5px/1.2 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; }
-.hm-mr { flex: none; font-family: var(--f-data); font-size: 11px; color: var(--muted); white-space: nowrap; }
-.hm-mside { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 34px; }
-.hm-mav { display: flex; }
-.hm-mav .av { border-radius: 50%; object-fit: cover; }
-.hm-mav .av + .av { margin-left: -10px; }
-.hm-mnm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
-.hm-mnm a { color: var(--ink); text-decoration: none; font-weight: 600; }
-.hm-mnm a:hover { text-decoration: underline; }
-.hm-mnm .nat { margin-right: 6px; font-size: 10px; }
-.hm-mnm small { color: var(--muted); }
-.hm-mside.won .hm-mnm a { font-weight: 800; }
-.hm-msc { display: flex; gap: 6px; font-family: var(--f-data); font-size: 13px; color: var(--muted); }
-.hm-msc .w { color: var(--ink); font-weight: 700; }
-.hm-msc .pt { color: var(--live); font-weight: 700; }
-.hm-match footer { display: flex; align-items: center; gap: 10px; padding-top: 8px; border-top: 1px solid var(--home-rule); font-size: 12px; }
-.hm-ev { flex: 1; min-width: 0; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.hm-go { color: var(--gold); text-decoration: none; font: 800 12px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+/* match: header (tour · tournament · round / event · level · surface · court) -> scoreboard -> status + actions */
+.hm-match { padding: 13px 14px 10px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.hm-match.is-live { border-color: rgba(200, 51, 47, 0.3); box-shadow: inset 0 3px 0 var(--live), var(--home-shadow); }
+.hm-mh { display: grid; gap: 4px; min-width: 0; }
+.hm-mh1 { margin: 0; display: flex; align-items: center; gap: 8px; min-width: 0; }
+.hm-mt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); text-decoration: none; font: 800 14px/1.15 var(--f-display); letter-spacing: 0.06em; text-transform: uppercase; }
+.hm-mt:hover { text-decoration: underline; }
+.hm-mr { flex: none; font: 700 11px/1 var(--f-data); color: var(--ink-2); padding: 4px 6px; border-radius: 4px; background: var(--paper-2); white-space: nowrap; }
+.hm-mh2 { margin: 0; font-size: 12px; line-height: 1.3; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hm-mh2 b { color: var(--ink-2); font-weight: 600; }
+.hm-match footer { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 9px; border-top: 1px solid var(--home-rule); font-size: 12px; min-width: 0; }
+.hm-el { font: 600 11.5px/1 var(--f-data); color: var(--muted); white-space: nowrap; }
+.hm-go-wrap { margin-left: auto; display: flex; align-items: center; gap: 4px; flex: none; }
+.hm-go { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 8px; border-radius: 6px; color: var(--gold); text-decoration: none; font: 800 12.5px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+.hm-go:hover { background: var(--gold-soft); }
+.hm-go-cast { background: var(--court-800); color: var(--gold-bright); }
+.hm-go-cast:hover { background: var(--court-700); }
+
+/* scoreboard grid (src/ui/score-grid.js): fixed set + point columns, only the name truncates */
+.sg { --sg-set: 24px; --sg-pt: 34px; display: grid; gap: 3px; min-width: 0; }
+.sg-row { display: grid; align-items: center; column-gap: 6px; min-height: 40px; min-width: 0; }
+.sg-head { min-height: 12px; font: 700 10px/1 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--faint); }
+.sg-head .sg-c { height: auto; background: none; font: inherit; color: inherit; }
+.sg-head .sg-c.cur { color: var(--court-700); }
+.sg-head .sg-pt { color: var(--live); }
+.sg-av { display: flex; min-width: 0; }
+.sg-av .av { border-radius: 50%; object-fit: cover; flex: none; }
+.sg-av .av + .av { margin-left: -12px; box-shadow: 0 0 0 2px var(--white); }
+.sg-who { min-width: 0; display: grid; gap: 2px; }
+.sg-nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 14px/1.2 var(--f-ui); color: var(--ink); }
+.sg-nm a, .sg-nm b { color: inherit; text-decoration: none; font-weight: 600; }
+.sg-nm a:hover { text-decoration: underline; }
+.sg-row.won .sg-nm a, .sg-row.won .sg-nm b { font-weight: 800; }
+.sg-meta { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 10.5px/1.2 var(--f-data); color: var(--muted); }
+.sg-meta .nat { font-size: 10.5px; }
+.sg-meta small { font-size: 10.5px; color: var(--muted); }
+.sg.is-dbl .sg-who { gap: 1px; }
+.sg.is-dbl .sg-nm { font-size: 13.5px; line-height: 1.15; }
+.sg-nm .nat { margin-left: 3px; font-size: 10.5px; }
+.sg-nm small { font: 600 10.5px/1 var(--f-data); color: var(--muted); }
+.sg.is-dbl .sg-av .av + .av { margin-left: -50%; }
+@media (max-width: 480px) {
+  .sg { --sg-set: 21px; --sg-pt: 31px; }
+  .sg-row { column-gap: 5px; }
+  .hm-match { padding: 12px 12px 9px; }
+  /* singles names may take two lines on a phone rather than truncate to a stub */
+  .sg:not(.is-dbl) .sg-nm { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.15; }
+}
+.sg-srv { display: grid; place-items: center; }
+.sg-srv i { width: 9px; height: 9px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #f6ff9e, #d9ec3a 55%, #9fb21d); box-shadow: 0 0 0 1px #8a9a17; }
+.sg-c { position: relative; display: grid; place-items: center; height: 28px; border-radius: 5px; font: 700 14px/1 var(--f-data); font-variant-numeric: tabular-nums; color: var(--muted); }
+.sg-c.w { color: var(--ink); font-weight: 800; }
+.sg-c.cur { background: var(--court-50); color: var(--court-700); font-weight: 800; box-shadow: inset 0 0 0 1px var(--court-100); }
+.sg-c sup { position: absolute; top: 1px; right: 0; font-size: 10px; line-height: 1; font-weight: 700; }
+.sg-row .sg-pt { background: var(--court-800); color: var(--gold-bright); font-weight: 800; font-size: 13.5px; }
+.sg-head .sg-c, .sg-head .sg-c.cur, .sg-row.sg-head .sg-pt { height: auto; background: none; box-shadow: none; font: inherit; }
 
 /* tournament */
 .hm-tcard { position: relative; isolation: isolate; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; height: 176px; padding: 14px; border-radius: var(--home-r); color: var(--on-dark); text-decoration: none; background: var(--court-800); box-shadow: var(--home-shadow); box-sizing: border-box; }
@@ -269,7 +303,7 @@
   .hm-status .hm-in { gap: 12px; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; min-height: 0; }
   .hm-st-list { order: 3; flex: 1 1 100%; }
   .hm-st-cta { font-size: 12px; }
-  .hm-rail-match .hm-track { grid-auto-columns: min(300px, 86%); }
+  .hm-rail-match .hm-track { grid-auto-columns: min(320px, 86%); }
   .hm-rail-t .hm-track { grid-auto-columns: min(260px, 80%); }
   .hm-rail-p .hm-track { grid-auto-columns: 42%; }
   .hm-rail-r .hm-track { grid-auto-columns: min(250px, 80%); }
