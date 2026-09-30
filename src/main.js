@@ -6,6 +6,7 @@ import './styles/fonts.css';
 import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
+import './styles/membership.css';
 import './styles/news.css';
 import './styles/news-modules.css';
 import './styles/theme.css';
