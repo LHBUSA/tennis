@@ -325,8 +325,19 @@ export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
-    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { ...corsFor(request), 'access-control-allow-methods': 'GET, OPTIONS', 'access-control-allow-headers': 'Content-Type, Authorization' } });
-    if (request.method !== 'GET') return json({ ok: false, error: 'method_not_allowed' }, { status: 405 });
+    if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { ...corsFor(request), 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Content-Type, Authorization' } });
+    if (path === '/v1/magic/request' && request.method === 'POST') {
+      if (!env.AUTH) return json({ ok: false, message: 'Sign-in is unavailable.' }, { status: 503, headers: { ...corsFor(request), 'cache-control': 'private, no-store' } });
+      const payload = await request.text();
+      const upstream = await env.AUTH.fetch(new Request('https://auth.propbetedge.ai/magic/request', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/json', Origin: TENNIS_ORIGIN },
+        body: payload,
+      }));
+      const text = await upstream.text();
+      return new Response(text, { status: upstream.status, headers: { ...corsFor(request), 'content-type': 'application/json; charset=utf-8', 'cache-control': 'private, no-store' } });
+    }
+    if (request.method !== 'GET') return json({ ok: false, error: 'method_not_allowed' }, { status: 405, headers: corsFor(request) });
     if (path === '/v1/membership') {
       const verdict = await membershipFor(request, env);
       return json(verdict, { headers: { ...corsFor(request), 'cache-control': 'private, no-store' } });
