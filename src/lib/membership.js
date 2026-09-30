@@ -20,7 +20,7 @@ export function applyMembershipChrome(root, m) {
 
 export function premiumRoute(route) {
   const id = route?.id || '';
-  if (['matchups', 'matchup', 'players-to-watch', 'dna', 'pbecast', 'pbecast-hub'].includes(id)) return true;
+  if (['matchups', 'matchup', 'players-to-watch', 'dna'].includes(id)) return true;
   return id === 'player-sub' && /\/dna\/?$/.test(location.pathname);
 }
 
@@ -42,7 +42,7 @@ export function premiumGateHtml(m, route) {
       <div><b>Matchup DNA</b><span>Win probabilities, rating edges, surface context, form and validation history.</span></div>
       <div><b>Full Tennis DNA</b><span>Player ratings, technical serve/return profiles, confidence and comparative leaderboards.</span></div>
       <div><b>Player signals</b><span>Risers, fallers, emerging players and ranking-vs-rating gaps.</span></div>
-      <div><b>PBEcast intelligence</b><span>Live analytical court layers and deeper match context as they come online.</span></div>
+      <div><b>Pro model layers</b><span>Future proprietary probabilities, edges and validated decision models unlock automatically with All Access.</span></div>
     </div>
     ${member}
     <div class="progate-actions">
@@ -56,7 +56,7 @@ export function premiumGateHtml(m, route) {
       <button class="btn primary" type="submit">Email me a sign-in link</button>
       <p class="note" data-pro-status></p>
     </form>
-    <p class="progate-free">Still free: <a href="/news">Newsroom</a> · <a href="/live">Live</a> · <a href="/schedule">Schedule</a> · <a href="/rankings">Rankings</a> · <a href="/players">Players</a> · <a href="/tournaments">Tournaments</a></p>
+    <p class="progate-free">Always free: <a href="/live">scores & live</a> · <a href="/pbecast">PBEcast</a> · <a href="/news">Newsroom</a> · <a href="/schedule">Schedule</a> · <a href="/rankings">Rankings</a> · <a href="/players">Players</a> · <a href="/tournaments">Tournaments</a>. The homepage also keeps a limited Tennis DNA preview so readers can see the intelligence before upgrading.</p>
   </section>`;
 }
 
