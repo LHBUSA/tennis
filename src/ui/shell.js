@@ -52,7 +52,7 @@ export function shellHtml() {
         ${PRIMARY_NAV.filter((n) => !EXPLORE_IDS.has(n.id)).map((n) => html`${n.id === 'dna' ? exploreMenu() : ''}<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
       </nav>
       <a class="hdr-live" href="/live" hidden data-live-pulse><i aria-hidden="true"></i><span data-live-n></span><span class="hdr-live-w">live</span></a>
-      <a class="hdr-access" href="https://propbetedge.ai/pro" data-membership-chip>All Access</a>
+      <a class="hdr-access" href="#membership-signin" data-membership-chip>All Access · Sign in</a>
       <a class="hdr-search" href="/search" aria-label="Search players and tournaments"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></a>
       <button class="menu-btn" type="button" aria-expanded="false" aria-controls="drawer" data-menu><span></span><span></span><span></span><em class="sr">Menu</em></button>
     </div>
@@ -61,7 +61,7 @@ export function shellHtml() {
     <nav aria-label="Mobile">
       ${PRIMARY_NAV.map((n) => html`<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
       <a href="/search">Search</a>
-      <a href="https://propbetedge.ai/pro" data-membership-chip>All Access</a>
+      <a href="#membership-signin" data-membership-chip>All Access · Sign in</a>
       <p class="drawer-h">More</p>
       ${MORE_NAV.map((n) => html`<a href="${n.href}" data-nav="${n.id}">${n.label}</a>`)}
       <a href="/labs" data-nav="labs">Labs</a>
