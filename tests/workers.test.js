@@ -36,13 +36,23 @@ test('tennis-api data routes are NOT_CONFIGURED with null data — never a sampl
 
 
 test('tennis-api premium intelligence fails closed without verified membership', async () => {
-  for (const p of ['/v1/players/x/dna', '/v1/dna/leaders', '/v1/matchups', '/v1/players-to-watch', '/v1/pbecast']) {
+  for (const p of ['/v1/players/x/dna', '/v1/dna/leaders', '/v1/matchups', '/v1/players-to-watch']) {
     const r = await get(api, p);
     assert.equal(r.status, 401, p);
     assert.equal(r.body.error, 'membership_required', p);
     assert.equal(r.body.membership?.state, 'free', p);
     assert.equal(r.body.membership?.entitled, false, p);
   }
+});
+
+
+test('tennis-api keeps top-of-funnel PBEcast and capped DNA preview public', async () => {
+  const pbecast = await get(api, '/v1/pbecast');
+  assert.notEqual(pbecast.status, 401, 'PBEcast must remain public');
+  const preview = await get(api, '/v1/dna/leaders?metric=pbe_rating&tour=wta&limit=5&preview=1');
+  assert.notEqual(preview.status, 401, 'homepage DNA preview must remain public');
+  const tooDeep = await get(api, '/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=5&preview=1');
+  assert.equal(tooDeep.status, 401, 'non-preview DNA metrics stay premium');
 });
 
 test('tennis-api /v1/sources serves the committed registry + canary evidence', async () => {
