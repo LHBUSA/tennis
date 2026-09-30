@@ -1,21 +1,9 @@
 import { readMembership, ALL_ACCESS_OFFER } from './pbe-membership.js';
-
-const API = (import.meta.env?.VITE_TENNIS_API_BASE || '').replace(/\/+$/, '');
+import { membershipApi, requestMagic } from '../data/api.js';
 
 export async function getMembership({ signal } = {}) {
-  if (!API) return readMembership(null, 'tennis');
-  try {
-    const r = await fetch(`${API}/v1/membership`, {
-      signal,
-      credentials: 'include',
-      headers: { accept: 'application/json' },
-      cache: 'no-store',
-    });
-    const body = await r.json().catch(() => null);
-    return readMembership(body?.membership, 'tennis');
-  } catch {
-    return readMembership(null, 'tennis');
-  }
+  const body = await membershipApi({ signal });
+  return readMembership(body?.membership, 'tennis');
 }
 
 export function applyMembershipChrome(root, m) {
@@ -85,18 +73,8 @@ export function wirePremiumGate(root) {
     const status = form.querySelector('[data-pro-status]');
     const fd = new FormData(form);
     if (status) status.textContent = 'Sending secure sign-in link…';
-    try {
-      const r = await fetch('https://auth.propbetedge.ai/magic/request', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'content-type': 'application/json', accept: 'application/json' },
-        body: JSON.stringify({ email: fd.get('email'), return_to: location.href }),
-      });
-      const body = await r.json().catch(() => ({}));
-      if (status) status.textContent = body?.message || (r.ok ? 'Check your inbox for the sign-in link.' : 'Could not send sign-in link.');
-    } catch {
-      if (status) status.textContent = 'Could not reach sign-in. Please try again.';
-    }
+    const body = await requestMagic(fd.get('email'), location.href);
+    if (status) status.textContent = body?.message || (body?.ok ? 'Check your inbox for the sign-in link.' : 'Could not send sign-in link.');
   });
 }
 
