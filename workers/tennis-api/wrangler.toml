@@ -1,7 +1,7 @@
 # tennis-api — public read API (tennis-api.propbetedge.ai).
 # Deploy: docs/RELEASE.md. Secrets (wrangler secret put) are listed per Worker; values never in Git.
 name = "tennis-api"
-main = "src/index.js"
+main = "src/worker.js"
 compatibility_date = "2026-09-01"
 workers_dev = true
 routes = [{ pattern = "tennis-api.propbetedge.ai", custom_domain = true }]
