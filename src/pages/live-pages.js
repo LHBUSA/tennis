@@ -3,7 +3,7 @@
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
-import { matchDnaSummary, familyTable, formBlock, historyTable, ratingLine, careerBlock, surfaceTable } from '../ui/match-dna.js';
+import { matchDnaSummary, matchDnaFingerprint, familyTable, formBlock, historyTable, ratingLine, careerBlock, surfaceTable } from '../ui/match-dna.js';
 import { avatar, nat } from '../ui/avatar.js';
 import { ratingChart, profileBlock } from '../ui/player-profile.js';
 import { shareBar } from '../ui/share.js';
@@ -207,12 +207,21 @@ export const rankingsHub = mountWith((root) => {
 });
 
 // ---- players + search --------------------------------------------------------------------------------
+const ATP_DISCLOSURE = 'ATP singles list carried by a secondary source (ESPN), not an official ATP feed';
 const atpTable = (k) => html`<h2 class="sec">ATP singles <small>list dated ${fmtDate(k.ranking_date)} · ${k.rows.length}</small></h2>
   ${rankingTable(k)}
-  <p class="note">${k.disclosure || 'ATP singles list'} · dated when that source last updated it${k.previous_date ? ` · movement vs our archived list of ${fmtDate(k.previous_date)}` : ''}.</p>`;
-const menDirectory = (d) => (d.ranking?.rows?.length || d.rows.length ? html`${d.ranking?.rows?.length ? atpTable(d.ranking) : ''}${d.rows.length ? html`<h2 class="sec">Grand Slam performance <small>${d.basis.join(' · ')}</small></h2>${menTable(d, 200)}` : ''}` : null);
+  <p class="note">${k.disclosure || ATP_DISCLOSURE} · dated when that source last updated it${k.previous_date ? ` · movement vs our archived list of ${fmtDate(k.previous_date)}` : ''}.</p>`;
 const menTable = (d, limit = 500) => html`<p class="note">Men’s singles players in the newest Grand Slam main draws we hold (${d.basis.join(', ')}), by furthest round reached — not a ranking.</p>
   <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Best result</th><th class="n hide-s">Draws</th></tr></thead><tbody>${d.rows.slice(0, limit).map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.best.stage} <small class="note">· ${r.best.edition}</small></td><td class="n hide-s">${r.draws.length}</td></tr>`)}</tbody></table></div>`;
+
+// Directory loading contract (2026-09-30): the critical path is the two lightweight ranking lists (ATP singles, WTA
+// singles), rendered the moment each arrives. The Grand Slam aggregate (/v1/men/players) and featured champions
+// (/v1/slams) are enhancements requested only after the directory is on screen, and never block it.
+export const DIR_PAGE = 100;
+export const RANK_PATH = { atp: '/v1/rankings?tour=atp&type=singles&limit=200', wta: '/v1/rankings?tour=wta&type=singles&limit=200' };
+const afterPaint = (fn) => requestAnimationFrame(() => setTimeout(fn, 0));
+const norm = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
 export const players = mountWith((root, _c, signal) => {
   const gq = new URLSearchParams(location.search).get('gender');
   const g = ['men', 'women'].includes(gq) ? gq : 'all';
@@ -220,26 +229,83 @@ export const players = mountWith((root, _c, signal) => {
   shell(root, { eyebrow: 'Players', heading: g === 'men' ? 'MEN’S PLAYERS' : 'Players', lede: g === 'men' ? 'ATP singles ranking carried by a secondary source, plus PropBetEdge’s canonical profiles and Grand Slam history.' : 'One canonical identity per player across every source — men and women. Search, or browse below.', chips: [['/players', 'All', g === 'all'], ['/players?gender=men', 'Men', g === 'men'], ['/players?gender=women', 'Women', g === 'women']] });
   root.querySelector('.page-h').insertAdjacentHTML('beforeend', '<form class="search" role="search" action="/search"><label class="sr" for="q">Search players and tournaments</label><input id="q" name="q" type="search" placeholder="Search players or tournaments" autocomplete="off" minlength="2" maxlength="60"><button class="btn green" type="submit">Search</button></form>');
   const women = (d) => html`<p class="note">WTA singles · official list dated ${fmtDate(d.ranking_date)}</p>${rankingTable(d)}`;
+  if (g === 'women') return fill(root, RANK_PATH.wta, women, 'No ranking list archived yet.', signal);
   if (g === 'men') {
-    return fill(root, '/v1/men/players', menDirectory, 'No men’s players stored yet.', signal, { errorNote: 'Men’s player data could not be loaded.' });
+    root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section data-slam-perf hidden></section>');
+    // Grand Slam performance (expensive aggregate) loads only after the ATP list is on screen
+    let asked = false;
+    const enhance = () => { if (asked) return; asked = true; afterPaint(() => api('/v1/men/players', { signal }).then((r) => {
+      const el = root.querySelector('[data-slam-perf]');
+      if (!el || !r?.data?.rows?.length) return;
+      render(el, html`<h2 class="sec">Grand Slam performance <small>${r.data.basis.join(' · ')}</small></h2>${menTable(r.data, 200)}`);
+      el.hidden = false;
+    }).catch(() => {})); };
+    return fill(root, RANK_PATH.atp, (k) => { enhance(); return k.rows?.length ? atpTable(k) : null; }, 'No ATP singles list archived yet.', signal, { errorNote: 'Men’s player data could not be loaded.' });
   }
-  if (g === 'women') return fill(root, '/v1/players', women, 'No ranking list archived yet.', signal);
-  Promise.all([api('/v1/men/players', { signal }), api('/v1/players', { signal }), api('/v1/slams', { signal })]).then(([m, w, sl]) => {
-    const body = root.querySelector('[data-body]');
-    if (!body) return;
-    // one directory: every player we hold a profile for, with the context each source gives
+  // ---- All: one A–Z directory merged from both ranking lists (each drawn on arrival), then Grand Slam-only men ----
+  const body = root.querySelector('[data-body]');
+  render(body, html`<section data-featured hidden></section><div data-dir><p class="loading">Loading players…</p></div>`);
+  const src = { wta: null, atp: null, slam: null };
+  let shown = DIR_PAGE;
+  let filter = '';
+  const merged = () => {
     const all = new Map();
-    for (const r of w.data?.rows || []) all.set(r.player.id, { player: r.player, context: `WTA No. ${r.rank}`, sortKey: r.player.last_name || r.player.name });
-    for (const r of m.data?.ranking?.rows || []) if (r.player && !all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `ATP No. ${r.rank} (secondary source)`, sortKey: r.player.last_name || r.player.name });
-    for (const r of m.data?.rows || []) if (!all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `${r.best.stage} · ${r.best.edition}`, sortKey: r.player.last_name || r.player.name });
-    const rows = [...all.values()].sort((a, b) => String(a.sortKey).localeCompare(String(b.sortKey)));
-    const featured = (sl.data?.featured || []).slice(0, 8);
-    render(body, html`${featured.length ? html`<h2 class="sec">Featured <small>recent Grand Slam champions and finalists</small></h2><ul class="men-feat">${featured.map((f) => html`<li><a href="/players/${f.player.slug}">${avatar(f.player, { size: 'square', px: 64 })}<span><b>${f.player.name}</b><small>${f.note}</small></span></a></li>`)}</ul>` : ''}
-      <h2 class="sec">All players <small>${rows.length.toLocaleString('en-US')} · A–Z</small></h2>
-      ${rows.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Context</th></tr></thead><tbody>${rows.map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.context}</td></tr>`)}</tbody></table></div><p class="note">Women carry the official WTA singles ranking; men carry their ATP singles position from a list carried by a secondary source (not an official ATP feed), or their best recent Grand Slam result. Filter with Men or Women above, or search.</p>` : resultState(w) === 'error' || resultState(m) === 'error' ? errorModule(w.meta, 'Player data could not be loaded.') : emptyModule(w.meta, 'No players stored yet.')}`);
-    const meta = root.querySelector('[data-meta]');
-    if (meta) render(meta, html`${freshnessBadge(w.meta)} <span>official WTA list + ATP list from a secondary source + Grand Slam draws</span>`);
-  }).catch(() => {});
+    for (const r of src.wta?.data?.rows || []) if (r.player) all.set(r.player.id, { player: r.player, context: `WTA No. ${r.rank}` });
+    for (const r of src.atp?.data?.rows || []) if (r.player && !all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `ATP No. ${r.rank} (secondary source)` });
+    for (const r of src.slam?.data?.rows || []) if (r.player && !all.has(r.player.id)) all.set(r.player.id, { player: r.player, context: `${r.best.stage} · ${r.best.edition}` });
+    return [...all.values()].sort((a, b) => String(a.player.last_name || a.player.name).localeCompare(String(b.player.last_name || b.player.name)));
+  };
+  const listHtml = (rows, list, page) => html`${page.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Player</th><th>Context</th></tr></thead><tbody>${page.map((r) => html`<tr><td><span class="rk-p">${avatar(r.player, { px: 32 })}<a href="/players/${r.player.slug}">${r.player.name}</a> ${nat(r.player.nationality)}</span></td><td>${r.context}</td></tr>`)}</tbody></table></div>` : html`<p class="note">No player in this list matches — <a href="/search?q=${encodeURIComponent(filter.trim())}">search every player and tournament →</a></p>`}
+      ${list.length > page.length ? html`<p><button class="btn line" type="button" data-more>Show ${Math.min(DIR_PAGE, list.length - page.length)} more</button></p>` : ''}`;
+  // the filter input is rendered once and never replaced, so typing keeps focus; only the rows and counts re-render
+  const draw = () => {
+    const el = root.querySelector('[data-dir]');
+    if (!el || signal.aborted) return;
+    const settled = src.wta && src.atp;
+    const rows = merged();
+    if (!rows.length) {
+      if (settled) render(el, resultState(src.wta) === 'error' || resultState(src.atp) === 'error' ? errorModule(src.wta?.meta, 'Player data could not be loaded.') : emptyModule(src.wta?.meta, 'No players stored yet.'));
+      return;
+    }
+    if (!el.querySelector('[data-dir-rows]')) {
+      render(el, html`<h2 class="sec">All players <small data-dir-total></small></h2>
+        <div class="dir-filter"><label class="sr" for="dir-f">Filter this list by name</label><input id="dir-f" type="search" placeholder="Filter this list by name" autocomplete="off" maxlength="60"><small class="note" aria-live="polite" data-dir-count></small></div>
+        <div data-dir-rows></div>
+        <p class="note">Women carry the official WTA singles ranking; men carry their ATP singles position from a list carried by a secondary source (not an official ATP feed), or their best recent Grand Slam result. Filter with Men or Women above, or search.</p>`);
+    }
+    const f = norm(filter.trim());
+    const list = f ? rows.filter((r) => norm(r.player.name).includes(f)) : rows;
+    const page = list.slice(0, shown);
+    el.querySelector('[data-dir-total]').textContent = `${rows.length.toLocaleString('en-US')} · A–Z${settled ? '' : ' · loading the other tour…'}`;
+    el.querySelector('[data-dir-count]').textContent = f ? `${list.length} match${list.length === 1 ? '' : 'es'}` : `Showing ${page.length} of ${rows.length}`;
+    render(el.querySelector('[data-dir-rows]'), listHtml(rows, list, page));
+  };
+  body.addEventListener('input', (e) => { if (e.target.id === 'dir-f') { filter = e.target.value; shown = DIR_PAGE; draw(); } });
+  body.addEventListener('click', (e) => { if (e.target.closest('[data-more]')) { shown += DIR_PAGE; draw(); } });
+  let enhanced = false;
+  const enhance = () => {
+    if (enhanced) return;
+    enhanced = true;
+    afterPaint(() => {
+      api('/v1/men/players', { signal }).then((r) => { src.slam = r; draw(); }).catch(() => {});
+      api('/v1/slams', { signal }).then((sl) => {
+        const el = root.querySelector('[data-featured]');
+        const featured = (sl?.data?.featured || []).slice(0, 8);
+        if (!el || !featured.length) return;
+        render(el, html`<h2 class="sec">Featured <small>recent Grand Slam champions and finalists</small></h2><ul class="men-feat">${featured.map((x) => html`<li><a href="/players/${x.player.slug}">${avatar(x.player, { size: 'square', px: 64 })}<span><b>${x.player.name}</b><small>${x.note}</small></span></a></li>`)}</ul>`);
+        el.hidden = false;
+      }).catch(() => {});
+    });
+  };
+  const got = (k) => (r) => {
+    src[k] = r || {};
+    draw();
+    if (k === 'wta') { const meta = root.querySelector('[data-meta]'); if (meta && r?.meta) render(meta, html`${freshnessBadge(r.meta)} <span>official WTA list + ATP list from a secondary source + Grand Slam draws</span>`); }
+    // enhancements start once the directory has painted (first list in), never before
+    enhance();
+  };
+  api(RANK_PATH.wta, { signal }).then(got('wta')).catch(() => {});
+  api(RANK_PATH.atp, { signal }).then(got('atp')).catch(() => {});
   return () => {};
 });
 
@@ -310,22 +376,32 @@ function surfaceHistorySection(md) {
 
 export const player = mountWith(async (root, { params }, signal) => {
   render(root, html`<div class="page"><p class="loading">Loading player…</p></div>`);
-  const [pr, prof] = await Promise.all([api(`/v1/players/${params.slug}`, { signal }), api(`/v1/players/${params.slug}/profile`, { signal })]).catch(() => [null, null]);
-  if (!pr) return;
+  const tab = params.tab === 'dna' || params.tab === 'surfaces' ? 'dna' : null;
+  // every request starts now, in parallel: the hero needs only the base player; the DNA tab never needs /profile
+  const prP = api(`/v1/players/${params.slug}`, { signal }).catch(() => null);
+  const dnaP = api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
+  const profP = tab ? Promise.resolve(null) : api(`/v1/players/${params.slug}/profile`, { signal }).catch(() => null);
+  const pr = await prP;
+  if (!pr || signal.aborted) return;
   if (!pr.data) { render(root, html`<div class="page">${emptyModule(pr.meta, 'This player is not in the canonical store.')}</div>`); return; }
   const p = pr.data;
-  const f = prof?.data || null;
-  track(params.tab === 'dna' ? 'tennis_dna_open' : 'tennis_player_open', { player_id: p.id });
-  document.title = `${p.name} — ${params.tab === 'dna' ? 'Tennis DNA' : 'Profile, Rankings, Match DNA & Matches'} | PropBetEdge Tennis`;
+  track(tab ? 'tennis_dna_open' : 'tennis_player_open', { player_id: p.id });
+  document.title = `${p.name} — ${tab ? 'Tennis DNA' : 'Profile, Rankings, Match DNA & Matches'} | PropBetEdge Tennis`;
   // same rule as the tennis-web head: indexable once the player has a ranking or stored matches (overview only)
-  if (!params.tab) setIndexable(!!(p.rankings?.wta_singles || p.rankings?.atp_singles || p.recent_matches?.length));
-  if (params.tab === 'dna' || params.tab === 'surfaces') {
-    const dr = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
-    if (resultState(dr) === 'error') { render(root, html`${playerHero(p, pr.meta, 'dna')}<div class="page">${errorModule(dr?.meta, 'Tennis DNA could not be loaded.')}</div>`); return; }
+  if (!tab) setIndexable(!!(p.rankings?.wta_singles || p.rankings?.atp_singles || p.recent_matches?.length));
+  // hero paints now; the body keeps a localized loader until its own data resolves
+  render(root, html`${playerHero(p, pr.meta, tab)}<div class="page" style="padding-top:0" data-player-body><p class="loading">${tab ? 'Loading Tennis DNA…' : 'Loading Match DNA and form…'}</p></div>`);
+  const body = root.querySelector('[data-player-body]');
+  if (tab) {
+    const dr = await dnaP;
+    if (signal.aborted) return;
+    if (resultState(dr) === 'error') { render(body, html`${errorModule(dr?.meta, 'Tennis DNA could not be loaded.')}`); return; }
     const d = dr?.data?.dna;
     const md = dr?.data?.match_dna;
-    render(root, html`${playerHero(p, pr.meta, 'dna', md)}<div class="page" style="padding-top:0">
+    heroRating(root, md);
+    render(body, html`
       ${md ? html`<p class="dna-status"><b>MATCH DNA — LIVE.</b> Built from ${md.sample.matches} singles results in the canonical match record (${md.tour} population, as of ${fmtDate(md.as_of)}). Each metric publishes its ${md.tour} comparison on its own once ${md.gates.comparative_min} players qualify. <b>TECHNICAL DNA — ${d?.comparative?.published ? 'PUBLISHED' : 'COVERAGE BUILDING'}</b>: serve/return numbers exist only where detailed match statistics were published.</p>
+        ${matchDnaFingerprint(md)}
         ${md.rating ? html`<section class="mod"><header class="mod-h"><h2>PBE Rating</h2><span class="mod-k">chronological Elo · method v${md.rating.method_version}</span></header><div class="mod-b"><p class="ph-rating">${ratingLine(md.rating)}</p><p class="note">Pre-match ratings only ever use earlier results; validated against a ranking model out of sample before publication (see methodology).</p>
           ${md.rating.status !== 'not_validated' && md.profile?.rating_history ? html`<h3 class="sub-h">Rating history</h3>${ratingChart(md.profile.rating_history)}<p class="note">${md.profile_definitions?.rating_history || ''}.</p>` : ''}</div></section>` : ''}
         ${profileBlock(md.profile, md.profile_definitions, md.as_of)}
@@ -335,16 +411,19 @@ export const player = mountWith(async (root, { params }, signal) => {
         ${surfaceHistorySection(md)}` : ''}
       <h2 class="sec">Technical DNA <small>serve · return · pressure from match statistics</small></h2>
       ${d ? dnaSection(d) : html`<p class="dna-status" data-tech-status="unavailable"><b>Technical serve/return DNA is still building</b> for ${p.name}: it needs matches with published serve/return statistics.${md ? ' Match DNA above is complete and unaffected.' : ''}</p>`}
-      ${Object.keys(dr.data.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span>${x.metrics.hold_rate?.value != null ? html`<b>${pct(x.metrics.hold_rate.value)}</b><small class="note">hold · ${x.matches_considered} matches</small>` : html`<b class="note">building</b><small class="note">hold rate needs more ${s} matches with serve statistics (${x.matches_considered} so far)</small>`}</div>`)}</div></section>` : ''}
-      <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p></div>`);
+      ${Object.keys(dr?.data?.surfaces || {}).length ? html`<section class="mod"><header class="mod-h"><h2>Surface profile</h2></header><div class="surfrec">${Object.entries(dr.data.surfaces).map(([s, x]) => html`<div class="${s}"><span>${s}</span>${x.metrics.hold_rate?.value != null ? html`<b>${pct(x.metrics.hold_rate.value)}</b><small class="note">hold · ${x.matches_considered} matches</small>` : html`<b class="note">building</b><small class="note">hold rate needs more ${s} matches with serve statistics (${x.matches_considered} so far)</small>`}</div>`)}</div></section>` : ''}
+      <p class="note">How every metric is defined: <a href="/methodology">methodology</a>.</p>`);
     return;
   }
+  const [dres, prof] = await Promise.all([dnaP, profP]);
+  if (signal.aborted) return;
+  const f = prof?.data || null;
   const surf = f?.surface_record || {};
   // men's DNA is gated by population size; the gate never hides the rest of the profile
-  const dres = await api(`/v1/players/${params.slug}/dna`, { signal }).catch(() => null);
   const dnaGate = dres?.data?.dna || null;
   const md = dres?.data?.match_dna || null;
-  render(root, html`${playerHero(p, pr.meta, null, md)}<div class="page" style="padding-top:0">
+  heroRating(root, md);
+  render(body, html`
     ${md ? matchDnaSummary(md, p.slug) : ''}
     ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Technical DNA →</a> · ${dnaGate.tour} serve/return comparison is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold} players with enough match statistics).</p>` : ''}
     ${md ? html`<section class="mod"><header class="mod-h"><h2>Form</h2></header><div class="mod-b">${formBlock(md.form)}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>` : ''}
@@ -358,9 +437,16 @@ export const player = mountWith(async (root, { params }, signal) => {
     ${md?.recent?.length ? html`<section class="mod"><header class="mod-h"><h2>Match history</h2><span class="mod-k">singles · last ${md.recent.length}</span></header>${historyTable(md)}</section>` : html`<section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>`}
     ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
     <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
-  </div>`);
+  `);
   fillStories(root, `player=${p.id}`, signal);
 });
+
+/** PBE Rating line in the hero, filled once Match DNA resolves (the hero never waits for it). */
+function heroRating(root, md) {
+  const dl = root.querySelector('.ph-f');
+  if (!dl || !md?.rating || md.rating.status === 'not_validated') return;
+  dl.insertAdjacentHTML('beforeend', String(html`<div><dt>PBE Rating</dt><dd>${ratingLine(md.rating)}</dd></div>`));
+}
 
 /** Stories + live-wire items for a player (by canonical id) or a tournament edition (newsroom V3); hidden when neither
  *  exists. Stories are ruled rows (no tile wall); the wire shows the deterministic fact cards for the same filter. */

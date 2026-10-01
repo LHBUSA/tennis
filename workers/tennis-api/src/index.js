@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.9.1';
+export const VERSION = '0.9.2';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -20,11 +20,13 @@ const PREMIUM_PATHS = [
   /^\/v1\/dna(?:\/|$)/,
   /^\/v1\/players\/[^/]+\/dna$/,
 ];
-const PUBLIC_DNA_PREVIEW_METRICS = new Set(['pbe_rating', 'hold_rate', 'return_games_won']);
+// the homepage's capped free preview (3 boards x top 5) — Match DNA metrics with mature populations on both tours; must
+// match src/pages/today.js HOME_DNA_BOARDS. Technical DNA (hold / break rate) is no longer previewed: ATP is below its gate.
+const PUBLIC_DNA_PREVIEW_METRICS = new Set(['pbe_rating', 'match_win_rate', 'game_win_rate']);
 const isPremiumPath = (path, url) => {
   if (path === '/v1/dna/leaders' && url.searchParams.get('preview') === '1') {
     const metric = url.searchParams.get('metric') || 'hold_rate';
-    const limit = Math.min(Number(url.searchParams.get('limit')) || 5, 5);
+    const limit = Number(url.searchParams.get('limit')) || 5; // raw value: a capped copy could never exceed 5
     return !PUBLIC_DNA_PREVIEW_METRICS.has(metric) || limit > 5;
   }
   return PREMIUM_PATHS.some((re) => re.test(path));

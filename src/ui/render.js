@@ -124,7 +124,7 @@ export function dnaRadar(dims, other = null) {
   const ring = (f) => dims.map((_, i) => pt(i, R * f).map((v) => v.toFixed(1)).join(',')).join(' ');
   const area = (ds) => ds.map((d, i) => pt(i, R * ((d.percentile ?? 0) / 100)).map((v) => v.toFixed(1)).join(',')).join(' ');
   const labels = dims.map((d, i) => { const [x, y] = pt(i, R + 26); return `<text x="${x.toFixed(0)}" y="${y.toFixed(0)}" text-anchor="middle" dominant-baseline="middle">${d.label}${d.percentile == null ? ' (n/a)' : ''}</text>`; }).join('');
-  return raw(`<svg class="radar" viewBox="0 0 340 340" role="img" aria-label="Tennis DNA percentiles">
+  return raw(`<svg class="radar" viewBox="-50 0 440 340" role="img" aria-label="Tennis DNA percentiles">
     ${[0.25, 0.5, 0.75, 1].map((f) => `<polygon class="grid" points="${ring(f)}"/>`).join('')}
     ${dims.map((_, i) => { const [x, y] = pt(i, R); return `<line class="axis" x1="${C}" y1="${C}" x2="${x}" y2="${y}"/>`; }).join('')}
     <polygon class="area" points="${area(dims)}"/>

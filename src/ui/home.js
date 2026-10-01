@@ -108,11 +108,25 @@ export function playerCard(f, i) {
 
 // ---------------------------------------------------------------- DNA band
 
-export function dnaColumn([metric, title, fmt], boards) {
-  return html`<div class="hm-dna-col"><h3>${title}</h3>${boards.map(({ tour, b }) => html`<div class="hm-dna-tour">
-    <p class="hm-dna-k"><span class="hm-tag hm-tag-${tour}">${tour.toUpperCase()}</span>${b.show ? html`<a href="/dna?metric=${metric}&tour=${tour}">Full board →</a>` : ''}</p>
+/** One tour's board inside a DNA column: top 3 with its population note, or the held/unavailable panel. */
+export function dnaBoard(metric, tour, fmt, b) {
+  return html`<p class="hm-dna-k"><span class="hm-tag hm-tag-${tour}">${tour.toUpperCase()}</span>${b.show ? html`<a href="/dna?metric=${metric}&tour=${tour}">Full board →</a>` : ''}</p>
     ${b.show ? html`<ol>${b.rows.slice(0, 3).map((r) => html`<li><span class="hm-dna-r tabnum">${r.rank}</span>${r.player ? avatar(r.player, { px: 32 }) : ''}${r.player?.slug ? html`<a href="/players/${r.player.slug}">${r.player.name}</a>` : html`<span>${r.player?.name || ''}</span>`}<b class="tabnum">${fmt(r.value)}</b></li>`)}</ol>
-    <p class="hm-dna-pop">${b.note}</p>` : thresholdPanel(tour, b)}</div>`)}</div>`;
+    <p class="hm-dna-pop">${b.note}</p>` : thresholdPanel(tour, b)}`;
+}
+
+export function dnaColumn([metric, title, fmt], boards) {
+  return html`<div class="hm-dna-col"><h3>${title}</h3>${boards.map(({ tour, b }) => html`<div class="hm-dna-tour">${dnaBoard(metric, tour, fmt, b)}</div>`)}</div>`;
+}
+
+/**
+ * Homepage DNA module before any board has answered: the real columns and tour slots with skeleton rows, so the dark
+ * band is never an empty block. Each [data-dna-slot="metric:tour"] is replaced independently when its request resolves.
+ */
+export function dnaColumnsSkeleton(boards) {
+  const skel = (tour) => html`<p class="hm-dna-k"><span class="hm-tag hm-tag-${tour}">${tour.toUpperCase()}</span></p><ol class="hm-dna-skel" aria-hidden="true">${[1, 2, 3].map(() => html`<li><i></i><i></i><i></i><i></i></li>`)}</ol><p class="hm-dna-pop">Loading ${tour.toUpperCase()} board…</p>`;
+  return html`<div class="hm-dna">${boards.map(([metric, title]) => html`<div class="hm-dna-col"><h3>${title}</h3>${['atp', 'wta'].map((tour) => html`<div class="hm-dna-tour" data-dna-slot="${metric}:${tour}" aria-busy="true">${skel(tour)}</div>`)}</div>`)}</div>
+    <p class="hm-note">Singles only, from the canonical match record. <a href="/methodology">Definitions and confidence rules →</a></p>`;
 }
 
 /**

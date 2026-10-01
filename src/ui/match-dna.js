@@ -3,7 +3,7 @@
 // comparison in the browser.
 import { html } from '../lib/dom.js';
 import { avatar } from './avatar.js';
-import { fmtDate } from './render.js';
+import { fmtDate, dnaRadar, dnaBars } from './render.js';
 
 const ORD = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
 const STATUS = { missing: 'No sample', descriptive: 'Descriptive only', player_sample_low: 'Sample too small', population_building: 'Tour comparison building', peer_sample_not_mature: 'Peer sample not mature' };
@@ -35,6 +35,39 @@ export function familyTable(fam, tour) {
     <div class="tbl-wrap"><table class="tbl dna-tbl"><thead><tr><th>Metric</th><th class="n">Value</th><th class="n hide-s">Sample</th><th>Confidence</th><th>${tour} percentile</th></tr></thead><tbody>
     ${fam.metrics.map((m) => html`<tr><th scope="row" style="text-align:left" title="${m.doc}">${m.label}</th><td class="n tabnum">${fmtMetric(m)}</td><td class="n hide-s">${sampleText(m)}</td><td><span class="conf c-${m.confidence}">${m.confidence}</span></td><td>${m.percentile != null ? html`<b>${ORD(m.percentile)}</b>` : html`<span class="note">${STATUS[m.status] || '—'}</span>`}</td></tr>`)}
     </tbody></table></div></section>`;
+}
+
+/**
+ * Match DNA fingerprint contract (both tours, identical): fixed dimension order; a dimension is drawn only when the
+ * API published its same-tour percentile (comparative_published && percentile != null) — never a zero for a missing
+ * one. Fewer than FINGERPRINT_MIN published dimensions -> no radar, an explicit building note instead. Independent of
+ * the Technical DNA 30-player gate.
+ */
+export const FINGERPRINT_DIMS = [
+  ['match_win_rate', 'Match win'], ['set_win_rate', 'Set win'], ['game_win_rate', 'Games won'], ['deciding_set_win_rate', 'Deciding sets'],
+  ['tiebreak_win_rate', 'Tiebreaks'], ['comeback_win_rate', 'Comebacks'], ['top10_win_rate', 'vs Top 10'], ['wins_above_expectation', 'Above expectation']
+];
+export const FINGERPRINT_MIN = 5;
+export function fingerprintDims(md) {
+  const all = new Map((md?.families || []).flatMap((f) => f.metrics || []).map((m) => [m.key, m]));
+  return FINGERPRINT_DIMS.map(([key, label]) => ({ key, label, m: all.get(key) }))
+    .filter(({ m }) => m && m.comparative_published === true && Number.isFinite(m.percentile))
+    .map(({ key, label, m }) => ({ key, label, percentile: m.percentile, confidence: m.confidence, population: m.population_qualified ?? null }));
+}
+
+export function matchDnaFingerprint(md) {
+  if (!md) return '';
+  const dims = fingerprintDims(md);
+  const tour = md.tour;
+  const head = html`<header class="mod-h"><h2>Match DNA fingerprint</h2><span class="mod-k">${tour} singles percentiles · compared only with ${tour} players</span></header>`;
+  if (dims.length < FINGERPRINT_MIN) {
+    return html`<section class="mod dna-fp" data-dna-fingerprint="${tour}" data-fp-state="building">${head}<p class="note">Fingerprint building: ${dims.length} of ${FINGERPRINT_DIMS.length} dimensions have a published ${tour} comparison for this player (${FINGERPRINT_MIN} needed). Unpublished dimensions are never drawn as zero; every measured value is in the tables below.</p></section>`;
+  }
+  const pops = dims.map((d) => d.population).filter(Number.isFinite);
+  const left = FINGERPRINT_DIMS.length - dims.length;
+  return html`<section class="mod dna-fp" data-dna-fingerprint="${tour}" data-fp-state="published" data-fp-dims="${dims.map((d) => d.key).join(',')}">${head}
+    <div class="dna-wrap"><div>${dnaRadar(dims)}</div><div>${dnaBars(dims)}</div></div>
+    <p class="note">Each axis is this player's percentile among ${tour} singles players with a medium- or high-confidence sample for that metric${pops.length ? ` (${Math.min(...pops).toLocaleString('en-US')}–${Math.max(...pops).toLocaleString('en-US')} players per metric)` : ''}, as of ${fmtDate(md.as_of)}. ${left ? `${left} dimension${left === 1 ? '' : 's'} without a published comparison ${left === 1 ? 'is' : 'are'} left out, not drawn as zero. ` : ''}ATP and WTA are never compared.</p></section>`;
 }
 
 /** Headline Match DNA card for the overview. */

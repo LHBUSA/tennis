@@ -9,10 +9,13 @@ import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
 import { leaderBoard } from '../lib/v4.js';
 import { liveGroups, nextMatch, orderTournaments, latestSlams, heroPick, playersToWatch } from '../lib/home.js';
-import { section, rail, wireRails, heroMedia, statusBar, matchCard, tournamentCard, playerCard, dnaColumn, pbecastLive, replayCard, coverageCards } from '../ui/home.js';
+import { section, rail, wireRails, heroMedia, statusBar, matchCard, tournamentCard, playerCard, dnaColumnsSkeleton, dnaBoard, pbecastLive, replayCard, coverageCards } from '../ui/home.js';
 
 const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
-const BOARDS = [['pbe_rating', 'PBE Rating', (v) => String(v)], ['hold_rate', 'Serve · hold rate', (v) => `${(v * 100).toFixed(1)}%`], ['return_games_won', 'Return · break rate', (v) => `${(v * 100).toFixed(1)}%`]];
+// Match DNA boards (mature same-tour populations on both tours). Technical DNA metrics (hold / break rate) stay off the
+// homepage while ATP Technical DNA is below its 30-player gate. Keep in sync with tennis-api PUBLIC_DNA_PREVIEW_METRICS.
+export const HOME_DNA_BOARDS = [['pbe_rating', 'PBE Rating', (v) => String(v)], ['match_win_rate', 'Match win %', (v) => `${(v * 100).toFixed(1)}%`], ['game_win_rate', 'Games won %', (v) => `${(v * 100).toFixed(1)}%`]];
+const BOARD_TIMEOUT_MS = 10000;
 const NEXT = {
   live: { title: 'Live now', sub: 'Matches in progress — open PBEcast for the live court.', link: '/live', linkLabel: 'All live scores', label: 'live matches' },
   upcoming: { title: 'Up next', sub: 'Upcoming matches from today’s tournaments.', link: '/schedule', linkLabel: 'All matches', label: 'upcoming matches' },
@@ -46,7 +49,7 @@ export function mount(root) {
     ${section({ id: 'h-tours', hook: 'tours', title: 'Tournament coverage', sub: 'Live coverage, draws, results and intelligence for every tournament we cover.', link: '/tournaments', linkLabel: 'All tournaments', cls: 'hm-alt' })}
     ${section({ id: 'h-players', hook: 'players', title: 'Players to watch', sub: 'Grand Slam champions and finalists, then the ATP and WTA leaders.', link: '/players', linkLabel: 'All players' })}
     ${section({ id: 'h-news', hook: 'news', title: 'Latest intelligence', sub: 'Stories the newsroom publishes only when real data passes every factual check.', link: '/news', linkLabel: 'Newsroom', cls: 'hm-alt' })}
-    ${section({ id: 'h-dna', hook: 'leaders', title: 'Tennis DNA leaders', sub: 'ATP and WTA compared only within their own tour.', link: '/dna', linkLabel: 'All Tennis DNA', dark: true })}
+    ${section({ id: 'h-dna', hook: 'leaders', title: 'Tennis DNA leaders', sub: 'Match DNA from every singles result we hold — ATP and WTA compared only within their own tour.', link: '/dna', linkLabel: 'All Tennis DNA', dark: true, body: dnaColumnsSkeleton(HOME_DNA_BOARDS) })}
     ${section({ id: 'h-cast', hook: 'pbecast', title: 'PBEcast', sub: 'The analytical court for every covered match — live when a match is on, replays afterwards.', link: '/pbecast', linkLabel: 'All casts and replays', dark: true, cls: 'hm-cast' })}
     ${section({ id: 'h-cov', hook: 'cov', title: 'Coverage & sources', sub: 'What we hold, where it comes from, and what we do not show.', link: '/sources', linkLabel: 'Full sources & methodology', cls: 'hm-alt' })}
   </div>`);
@@ -128,12 +131,19 @@ export function mount(root) {
       ? html`<div class="hm-news">${leadStory(lead)}<div class="hm-news-side">${majors.map((a) => majorStory(a))}</div></div>`
       : html`<p class="hm-note">No story is published yet. The newsroom publishes only when a real event in our data passes every factual check — a quiet day publishes nothing.</p>`);
   });
-  // Tennis DNA leaders: every board states its qualification population; a held tour says "comparison building".
-  Promise.all(BOARDS.flatMap(([m]) => ['atp', 'wta'].map((t) => api(`/v1/dna/leaders?metric=${m}&tour=${t}&limit=5&preview=1`, { signal: ctl.signal }).then((x) => x?.data || null).catch(() => null)))).then((res) => {
-    const el = $('[data-leaders]');
-    if (!el) return;
-    render(el, html`<div class="hm-dna">${BOARDS.map((B, i) => dnaColumn(B, [{ tour: 'atp', b: leaderBoard(res[i * 2], { tour: 'atp' }) }, { tour: 'wta', b: leaderBoard(res[i * 2 + 1], { tour: 'wta' }) }]))}</div>
-      <p class="hm-note">Singles only, from our canonical results and match statistics. <a href="/methodology">Definitions and confidence rules →</a></p>`);
-  });
+  // Tennis DNA leaders: the columns are on screen (skeleton) from the first paint; each of the six boards fills its own
+  // slot when its request resolves, so one slow or failed board never blanks the others. A board that does not answer
+  // within BOARD_TIMEOUT_MS says so in its own slot. Every board states its qualification population.
+  HOME_DNA_BOARDS.forEach(([metric, , fmt]) => ['atp', 'wta'].forEach((tour) => {
+    const req = api(`/v1/dna/leaders?metric=${metric}&tour=${tour}&limit=5&preview=1`, { signal: ctl.signal }).then((x) => x?.data || null).catch(() => null);
+    const late = new Promise((ok) => setTimeout(() => ok(undefined), BOARD_TIMEOUT_MS));
+    const fill = (d) => {
+      const slot = root.querySelector(`[data-dna-slot="${metric}:${tour}"]`);
+      if (!slot || ctl.signal.aborted) return;
+      render(slot, dnaBoard(metric, tour, fmt, d === undefined ? { show: false, rows: [], population: null, note: `${tour.toUpperCase()} board is taking longer than usual — it will appear here when it loads.` } : leaderBoard(d, { tour })));
+      slot.removeAttribute('aria-busy');
+    };
+    Promise.race([req, late]).then((d) => { fill(d); if (d === undefined) req.then(fill); });
+  }));
   return () => { ctl.abort(); clearInterval(timer); };
 }

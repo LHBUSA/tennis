@@ -59,8 +59,22 @@ test('tennis-api keeps top-of-funnel PBEcast and capped DNA preview public', asy
   assert.notEqual(pbecast.status, 401, 'PBEcast must remain public');
   const preview = await get(api, '/v1/dna/leaders?metric=pbe_rating&tour=wta&limit=5&preview=1');
   assert.notEqual(preview.status, 401, 'homepage DNA preview must remain public');
-  const tooDeep = await get(api, '/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=5&preview=1');
-  assert.equal(tooDeep.status, 401, 'non-preview DNA metrics stay premium');
+  for (const m of ['match_win_rate', 'game_win_rate']) {
+    const r = await get(api, `/v1/dna/leaders?metric=${m}&tour=atp&limit=5&preview=1`);
+    assert.notEqual(r.status, 401, `homepage Match DNA preview ${m} must remain public`);
+  }
+  for (const m of ['hold_rate', 'return_games_won', 'deciding_set_win_rate', 'set_win_rate', 'wins_above_expectation']) {
+    const r = await get(api, `/v1/dna/leaders?metric=${m}&tour=wta&limit=5&preview=1`);
+    assert.equal(r.status, 401, `non-preview DNA metric ${m} stays premium`);
+  }
+  const six = await get(api, '/v1/dna/leaders?metric=pbe_rating&tour=atp&limit=6&preview=1');
+  assert.equal(six.status, 401, 'preview max is 5 rows');
+  const five = await get(api, '/v1/dna/leaders?metric=game_win_rate&tour=wta&limit=5&preview=1');
+  assert.notEqual(five.status, 401, '5 rows stay public');
+  const deep = await get(api, '/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=50&preview=1');
+  assert.equal(deep.status, 401, 'preview is capped at 5 rows');
+  const full = await get(api, '/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=5');
+  assert.equal(full.status, 401, 'without preview=1 the board stays premium');
 });
 
 test('tennis-api /v1/sources serves the committed registry + canary evidence', async () => {

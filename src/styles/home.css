@@ -228,6 +228,14 @@
 .hm-dna li b { color: var(--gold-bright); font-family: var(--f-data); font-size: 13px; }
 .hm-dna-r { color: var(--on-dark-2); font-family: var(--f-data); font-size: 12px; }
 .hm-dna-pop { margin: 8px 0 0; font-size: 11.5px; line-height: 1.4; color: var(--on-dark-2); }
+/* skeleton rows while a board loads: same row geometry as a real board, so nothing shifts when it fills */
+.hm-dna-skel li { height: 32px; }
+.hm-dna-skel i { display: block; height: 10px; border-radius: 5px; background: linear-gradient(90deg, rgba(243, 246, 241, 0.08), rgba(243, 246, 241, 0.16), rgba(243, 246, 241, 0.08)); background-size: 200% 100%; animation: hm-skel 1.4s ease-in-out infinite; }
+.hm-dna-skel i:nth-child(2) { width: 32px; height: 32px; border-radius: 50%; }
+.hm-dna-skel i:nth-child(3) { width: 70%; }
+.hm-dna-skel i:nth-child(4) { width: 44px; }
+@keyframes hm-skel { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .hm-dna-skel i { animation: none; } }
 
 /* rejection-first null state: served qualified count vs the board's threshold */
 .hm-cal { display: grid; gap: 8px; min-height: 118px; align-content: start; padding: 12px; border-radius: 10px; border: 1px dashed rgba(217, 180, 74, 0.45); background: repeating-linear-gradient(135deg, rgba(243, 246, 241, 0.025) 0 8px, transparent 8px 16px); }

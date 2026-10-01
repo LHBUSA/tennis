@@ -1,0 +1,322 @@
+{
+  "base": "http://localhost:5196",
+  "mock_dna": true,
+  "api": "https://5b98f81d-tennis-api.sales-fd3.workers.dev",
+  "at": "2026-10-01T02:02:44.135Z",
+  "pass": 52,
+  "fail": 0,
+  "results": [
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "hero renders",
+      "ok": true,
+      "detail": "CARLOS ALCARAZ @783ms"
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "Match DNA fingerprint radar visible",
+      "ok": true,
+      "detail": "published 360x278 @800ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "same-tour wording (ATP only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "fingerprint above the long tables",
+      "ok": true,
+      "detail": "633.6875 < 1340.5625"
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "PBE Rating + Match DNA families present",
+      "ok": true,
+      "detail": "MATCH DNA FINGERPRINT | PBE RATING | FORM | RESULT STRENGTH | PRESSURE | OPPONENT QUALITY | TECHNICAL DNA\nserve · return · pressure from match statistics | TECHNICAL DNA — COVERAGE BUILDING"
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "Technical DNA still coverage building at 17/30",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/carlos-alcaraz/dna",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "hero renders",
+      "ok": true,
+      "detail": "IGA SWIATEK @336ms"
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "Match DNA fingerprint radar visible",
+      "ok": true,
+      "detail": "published 360x278 @353ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "same-tour wording (WTA only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "fingerprint above the long tables",
+      "ok": true,
+      "detail": "633.6875 < 1340.5625"
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "PBE Rating + Match DNA families present",
+      "ok": true,
+      "detail": "MATCH DNA FINGERPRINT | PBE RATING | FORM | RESULT STRENGTH | PRESSURE | OPPONENT QUALITY | TECHNICAL DNA\nserve · return · pressure from match statistics | TECHNICAL DNA — PUBLISHED"
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/iga-swiatek/dna",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "hero renders",
+      "ok": true,
+      "detail": "ARYNA SABALENKA @349ms"
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "Match DNA fingerprint radar visible",
+      "ok": true,
+      "detail": "published 360x278 @369ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "same-tour wording (WTA only)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "fingerprint above the long tables",
+      "ok": true,
+      "detail": "633.6875 < 1340.5625"
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "PBE Rating + Match DNA families present",
+      "ok": true,
+      "detail": "MATCH DNA FINGERPRINT | PBE RATING | FORM | RESULT STRENGTH | PRESSURE | OPPONENT QUALITY | TECHNICAL DNA\nserve · return · pressure from match statistics | TECHNICAL DNA — PUBLISHED"
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players/aryna-sabalenka/dna",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / ",
+      "name": "DNA module has visible columns at first paint (never an empty band)",
+      "ok": true,
+      "detail": "176ms cols=3 h=436"
+    },
+    {
+      "scope": "1440 / ",
+      "name": "boards are Match DNA (PBE Rating, Match win %, Games won %)",
+      "ok": true,
+      "detail": "PBE RATING|MATCH WIN %|GAMES WON %"
+    },
+    {
+      "scope": "1440 / ",
+      "name": "all 6 ATP + WTA boards show leaders",
+      "ok": true,
+      "detail": "pbe_rating:atp,pbe_rating:wta,match_win_rate:atp,match_win_rate:wta,game_win_rate:atp,game_win_rate:wta @472ms"
+    },
+    {
+      "scope": "1440 / ",
+      "name": "ATP Match DNA visible today",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / ",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / ",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "DNA module has visible columns at first paint (never an empty band)",
+      "ok": true,
+      "detail": "165ms cols=3 h=436"
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "boards are Match DNA (PBE Rating, Match win %, Games won %)",
+      "ok": true,
+      "detail": "PBE RATING|MATCH WIN %|GAMES WON %"
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "one failed board does not blank the module (5 others render)",
+      "ok": true,
+      "detail": "pbe_rating:atp,pbe_rating:wta,match_win_rate:wta,game_win_rate:atp,game_win_rate:wta"
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "failed board states itself",
+      "ok": true,
+      "detail": "ATP ATP BOARD UNAVAILABLE ATP leaders unavailable right now."
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / (ATP match-win board aborted)",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 / (all boards slow)",
+      "name": "skeleton visible while boards load",
+      "ok": true,
+      "detail": "6 skeleton boards"
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "first player rows before the delayed enhancements (< 5 s)",
+      "ok": true,
+      "detail": "440ms rows=100"
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "search + Men/Women/All filters present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "initial DOM bounded (<= 100 rows)",
+      "ok": true,
+      "detail": "100"
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "instant name filter works",
+      "ok": true,
+      "detail": "Iga Swiatek"
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "show more extends the list",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "featured Grand Slam players load after the directory",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players (slams + men/players +8 s)",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=men (slams + men/players +8 s)",
+      "name": "first player rows before the delayed enhancements (< 5 s)",
+      "ok": true,
+      "detail": "960ms rows=150"
+    },
+    {
+      "scope": "1440 /players?gender=men (slams + men/players +8 s)",
+      "name": "search + Men/Women/All filters present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=men (slams + men/players +8 s)",
+      "name": "Grand Slam performance still loads (after the ATP list)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=men (slams + men/players +8 s)",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=men (slams + men/players +8 s)",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=women (slams + men/players +8 s)",
+      "name": "first player rows before the delayed enhancements (< 5 s)",
+      "ok": true,
+      "detail": "936ms rows=200"
+    },
+    {
+      "scope": "1440 /players?gender=women (slams + men/players +8 s)",
+      "name": "search + Men/Women/All filters present",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=women (slams + men/players +8 s)",
+      "name": "no horizontal overflow",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "scope": "1440 /players?gender=women (slams + men/players +8 s)",
+      "name": "no page errors",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

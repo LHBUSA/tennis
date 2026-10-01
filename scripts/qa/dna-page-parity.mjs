@@ -6,6 +6,12 @@
 //    visible state (never a silently missing module or a blank cell). 2. Click navigation from the Overview: the visible
 //    "Tennis DNA" tab must change the route, move aria-current and render the full page; "Overview" must bring the
 //    summary back. Full-page screenshots + a heading report (docs/evidence/dna-page-parity-latest.md).
+// AUTH (2026-09-30): /players/:slug/dna and /v1/players/:slug/dna are All Access-gated. The gate is NEVER bypassed here:
+// the run uses a real network session — the `pbe_session` cookie of an entitled (All Access or owner) account — from
+// QA_PBE_SESSION or the file QA_PBE_SESSION_FILE (default D:/Workers/secrets/tennis-qa-pbe-session; the value is never
+// printed). Before any check the session must make GET /v1/membership report entitled:true. No credential, or a
+// credential that is not entitled -> exit 2 HOLD (never a PASS). To capture one: sign in at tennis.propbetedge.ai with the
+// QA/owner account, copy the pbe_session cookie value (DevTools > Application > Cookies) into that file.
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
 
@@ -16,13 +22,32 @@ const PLAYERS = [['carlos-alcaraz', 'ATP'], ['jannik-sinner', 'ATP'], ['elena-ry
 const WIDTHS = [390, 1440];
 const SHOTS = 'qa-artifacts/dna-parity';
 // the shared full-DNA architecture (h2 prefixes); a module is required whenever match_dna exists
-const CORE = ['PBE Rating', 'Form windows', 'Opponent archetypes', 'Tournament level & round', 'Form', 'Result strength', 'Pressure', 'Opponent quality', 'By surface', 'Technical DNA'];
+const CORE = ['Match DNA fingerprint', 'PBE Rating', 'Form windows', 'Opponent archetypes', 'Tournament level & round', 'Form', 'Result strength', 'Pressure', 'Opponent quality', 'By surface', 'Technical DNA'];
 fs.mkdirSync(SHOTS, { recursive: true });
 
 const results = [];
 const report = [];
 const check = (scope, name, ok, detail = '') => { results.push({ scope, name, ok: !!ok, detail }); if (!ok) console.log(`FAIL ${scope}: ${name} ${detail}`); };
-const api = async (slug) => (await (await fetch(`${API}/v1/players/${slug}/dna`)).json()).data;
+const SESSION_FILE = process.env.QA_PBE_SESSION_FILE || 'D:/Workers/secrets/tennis-qa-pbe-session';
+const SESSION = (process.env.QA_PBE_SESSION || (fs.existsSync(SESSION_FILE) ? fs.readFileSync(SESSION_FILE, 'utf8') : '')).trim().replace(/^pbe_session=/, '');
+if (!SESSION) { console.log(`DNA PAGE PARITY: HOLD_NO_SESSION — set QA_PBE_SESSION or write ${SESSION_FILE} (gated pages are never tested anonymously)`); process.exit(2); }
+const authHeaders = { Cookie: `pbe_session=${SESSION}`, Origin: 'https://tennis.propbetedge.ai', accept: 'application/json' };
+const member = await (await fetch(`${API}/v1/membership`, { headers: authHeaders, cache: 'no-store' })).json().catch(() => null);
+if (!member?.membership?.entitled) { console.log(`DNA PAGE PARITY: HOLD_NOT_ENTITLED — the session resolves to state=${member?.membership?.state || 'unknown'}; an All Access or owner session is required`); process.exit(2); }
+console.log(`session: entitled (${member.membership.state})`);
+const browser = await chromium.launch({ executablePath: CHROME });
+const api = async (slug) => {
+  const r = await fetch(`${API}/v1/players/${slug}/dna`, { headers: authHeaders });
+  if (r.status !== 200) throw new Error(`/v1/players/${slug}/dna -> ${r.status} with an entitled session`);
+  return (await r.json()).data;
+};
+const newPage = async (viewport) => {
+  const ctx = await browser.newContext({ viewport });
+  await ctx.addCookies([{ name: 'pbe_session', value: SESSION, domain: '.propbetedge.ai', path: '/', httpOnly: true, secure: true, sameSite: 'Lax' }]);
+  const page = await ctx.newPage();
+  page.on('close', () => ctx.close().catch(() => {}));
+  return page;
+};
 
 async function readPage(page) {
   await page.waitForFunction(() => /Technical DNA|Tennis DNA unavailable|MATCH DNA/.test(document.querySelector('#main')?.innerText || ''), null, { timeout: 30000 }).catch(() => {});
@@ -40,7 +65,9 @@ async function readPage(page) {
       methodology: !!main.querySelector('a[href="/methodology"]'),
       surfRatingCells: surfRow ? [...surfRow.querySelectorAll('td')].map(txt) : [],
       charts: [...main.querySelectorAll('.surf-chart h3')].map(txt),
-      broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.src)
+      broken: [...document.images].filter((i) => i.complete && i.naturalWidth === 0).map((i) => i.src),
+      gate: !!document.querySelector('.progate, [data-progate]') || /ALL ACCESS — SIGN IN|Email me a sign-in link/i.test(main.innerText),
+      fp: (() => { const f = main.querySelector('[data-dna-fingerprint]'); const b = f?.querySelector('svg.radar')?.getBoundingClientRect(); const t = main.querySelector('.dna-tbl'); return f ? { tour: f.dataset.dnaFingerprint, state: f.dataset.fpState, dims: f.dataset.fpDims, w: b?.width || 0, top: f.getBoundingClientRect().top, tableTop: t ? t.getBoundingClientRect().top : null, text: f.innerText } : null; })()
     };
   });
 }
@@ -48,6 +75,14 @@ async function readPage(page) {
 function assertFull(scope, r, d, tour) {
   const md = d.match_dna;
   const has = (h) => r.h2.some((x) => x.startsWith(h));
+  check(scope, 'entitled session sees the page (no membership gate)', !r.gate);
+  // Match DNA fingerprint: radar from published Match DNA percentiles, same-tour wording, above the tables — independent
+  // of the Technical DNA gate (asserted below: the technical state is checked separately)
+  if (md) {
+    check(scope, 'Match DNA fingerprint radar drawn', r.fp?.state === 'published' && r.fp.w > 200, JSON.stringify({ state: r.fp?.state, w: r.fp?.w, dims: r.fp?.dims }));
+    check(scope, `fingerprint compares only with ${tour}`, r.fp?.tour === tour && new RegExp(`compared only with ${tour} players`, 'i').test(r.fp?.text || '') && !new RegExp(`${tour === 'ATP' ? 'WTA' : 'ATP'} players`, 'i').test(r.fp?.text || ''));
+    check(scope, 'fingerprint above the long tables', r.fp && r.fp.tableTop != null && r.fp.top < r.fp.tableTop);
+  }
   check(scope, 'MATCH DNA — LIVE status', !md || /MATCH DNA — LIVE/.test(r.text));
   if (md) for (const h of CORE) check(scope, `module: ${h}`, has(h), `h2=${JSON.stringify(r.h2)}`);
   check(scope, 'methodology link', r.methodology);
@@ -80,12 +115,11 @@ function assertFull(scope, r, d, tour) {
   check(scope, 'no broken images', r.broken.length === 0, r.broken.join(' '));
 }
 
-const browser = await chromium.launch({ executablePath: CHROME });
 const data = Object.fromEntries(await Promise.all(PLAYERS.map(async ([s]) => [s, await api(s)])));
 
 // 1. direct routes, same route class for both tours
 for (const w of WIDTHS) {
-  const page = await browser.newPage({ viewport: { width: w, height: 1000 } });
+  const page = await newPage({ width: w, height: 1000 });
   const errs = [];
   page.on('console', (m) => m.type() === 'error' && errs.push(m.text().slice(0, 120)));
   for (const [slug, tour] of PLAYERS) {
@@ -105,7 +139,7 @@ for (const w of WIDTHS) {
 // 2. click navigation (what a visitor actually does)
 for (const [slug, tour] of [['carlos-alcaraz', 'ATP'], ['elena-rybakina', 'WTA']]) {
   for (const w of WIDTHS) {
-    const page = await browser.newPage({ viewport: { width: w, height: 1000 } });
+    const page = await newPage({ width: w, height: 1000 });
     await page.goto(`${BASE}/players/${slug}`, { waitUntil: 'load' });
     await page.waitForFunction(() => /Match DNA/.test(document.querySelector('#main')?.innerText || ''), null, { timeout: 30000 }).catch(() => {});
     const ov = await page.evaluate(() => ({ path: location.pathname, h2: [...document.querySelectorAll('#main h2')].map((h) => h.textContent.trim().replace(/\s+/g, ' ')), h3: [...document.querySelectorAll('#main h3')].map((h) => h.textContent.trim()), cta: !!document.querySelector('#main .dna-more a[href$="/dna"]'), current: [...document.querySelectorAll('#main nav.tabs a[aria-current="page"]')].map((a) => a.textContent.trim()) }));

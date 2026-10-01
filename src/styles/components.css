@@ -209,7 +209,7 @@
 /* ================= Tennis DNA ================= */
 .dna-wrap { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 22px; align-items: start; }
 @media (max-width: 860px) { .dna-wrap { grid-template-columns: 1fr; } }
-.radar { width: 100%; max-width: 360px; height: auto; display: block; margin: 0 auto; }
+.radar { width: 100%; max-width: 440px; height: auto; display: block; margin: 0 auto; }
 .radar .grid { fill: none; stroke: var(--rule-2); }
 .radar .axis { stroke: var(--rule); }
 .radar .area { fill: rgba(15, 77, 56, 0.2); stroke: var(--court-600); stroke-width: 2; }
@@ -714,3 +714,8 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
   .psrc { grid-template-columns: minmax(0, 1fr); padding: 16px; }
   .psrc .psrc-btn { width: 100%; white-space: normal; text-align: center; }
 }
+/* /players directory: instant name filter over the loaded lists (the header search still covers everything) */
+.dir-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0 0 12px; }
+.dir-filter input { flex: 1 1 220px; max-width: 360px; min-height: 42px; padding: 0 12px; border: 1px solid var(--rule-2); border-radius: 10px; background: var(--white); color: var(--ink); font: inherit; font-size: 16px; }
+/* Match DNA fingerprint sits above the long tables on /players/:slug/dna */
+.dna-fp .dna-wrap { margin-top: 6px; }

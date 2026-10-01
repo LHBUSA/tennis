@@ -131,6 +131,23 @@ export async function matchDnaLeaders(store, { metric, tour, limit }) {
       }
     } catch { /* fall through to the full scan */ }
   }
+  // PBE Rating fast path (2026-09-30): the full scan below took 42 s cold for WTA (~20k rows, OFFSET paging) and blanked
+  // the homepage board. The build stores the same-tour established count (population_established) and the publication
+  // flag on every rating, so the DB filters to established ratings, orders and limits — same population, same order.
+  if (metric === 'pbe_rating') {
+    try {
+      const top = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&${col}->>established=eq.true&order=${col}->value.desc,pbe_player_id.asc&limit=${Math.max(1, limit)}`);
+      const m0 = top[0]?.m;
+      if (!top.length || Number.isFinite(m0?.population_established)) {
+        const qualified = m0?.population_established ?? 0;
+        const published = top.some((r) => r.m.published) && qualified >= COMPARATIVE_MIN;
+        return {
+          metric, tour, as_of: latest.as_of, definition_version: 2, definition: 'PBE Rating (chronological Elo, method v1) among players with 20+ rated matches and a match in the last 365 days', published, qualified, threshold: COMPARATIVE_MIN,
+          rows: published ? top.map((r, i) => ({ rank: i + 1, player: shapePlayer(r.tennis_players), value: r.m.value, numerator: null, denominator: null, sample_matches: r.m.rated_matches ?? null, confidence: r.m.confidence ?? null })) : []
+        };
+      }
+    } catch { /* fall through to the full scan */ }
+  }
   const rows = [];
   for (let off = 0; ; off += 1000) {
     const page = await store.select('tennis_dna_snapshots', `select=pbe_player_id,m:${col},tennis_players!inner(pbe_player_id,slug,full_name,last_name,nationality,gender,${MEDIA})&as_of=eq.${latest.as_of}&surface=eq.all&definition_version=eq.2&tennis_players.gender=eq.${g}&order=pbe_player_id.asc&limit=1000&offset=${off}`);
