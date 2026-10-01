@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.9.0';
+export const VERSION = '0.9.1';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -328,8 +328,7 @@ export async function route(path, url, store, env) {
   return undefined;
 }
 
-export default {
-  async fetch(request, env, ctx) {
+async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { ...corsFor(request), 'access-control-allow-methods': 'GET, POST, OPTIONS', 'access-control-allow-headers': 'Content-Type, Authorization' } });
@@ -361,7 +360,7 @@ export default {
     }
     const premium = isPremiumPath(path, url);
     let membership = null;
-    if (premium) {
+    if (premium && !propsportsInternal) {
       membership = await membershipFor(request, env);
       if (!membership?.membership?.entitled) {
         return json({ ok: false, error: 'membership_required', membership: membership?.membership || null }, {
@@ -390,5 +389,21 @@ export default {
     const res = json(body, { headers: { ...corsFor(request), 'cache-control': bypass ? (premium ? 'private, no-store' : 'no-store') : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
     if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(cacheKey, res.clone()));
     return res;
+}
+
+export async function propsportsFetch(request, env, ctx) {
+  const url = new URL(request.url);
+  const path = url.pathname.replace(/\/+$/, '') || '/';
+  // Service-entrypoint contract is intentionally narrow: PropSports may bypass the
+  // consumer membership gate only for the Player DNA route it commercially exposes.
+  if (request.method !== 'GET' || !/^\/v1\/players\/[a-z0-9-]+\/dna$/.test(path)) {
+    return json({ ok: false, error: 'not_found' }, { status: 404 });
+  }
+  return fetchApi(request, env, ctx, { propsportsInternal: true });
+}
+
+export default {
+  fetch(request, env, ctx) {
+    return fetchApi(request, env, ctx);
   }
 };
