@@ -184,3 +184,10 @@ test('PBE Rating leaders fast path: DB-limited query returns the same board as t
   assert.equal(a.published, true);
   assert.deepEqual(a.rows.map((r) => [r.rank, r.player.slug, r.value, r.sample_matches]), b.rows.map((r) => [r.rank, r.player.slug, r.value, r.sample_matches]));
 });
+
+test('/players enhancements never depend on requestAnimationFrame (paused in hidden tabs)', () => {
+  const page = read('src/pages/live-pages.js');
+  assert.match(page, /const afterPaint = \(fn\) => setTimeout\(fn, 0\);/);
+  const fn = page.slice(page.indexOf('export const players = mountWith('), page.indexOf('export const search = mountWith('));
+  assert.doesNotMatch(fn, /requestAnimationFrame/);
+});

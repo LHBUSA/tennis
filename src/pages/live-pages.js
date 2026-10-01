@@ -219,7 +219,9 @@ const menTable = (d, limit = 500) => html`<p class="note">Men’s singles player
 // (/v1/slams) are enhancements requested only after the directory is on screen, and never block it.
 export const DIR_PAGE = 100;
 export const RANK_PATH = { atp: '/v1/rankings?tour=atp&type=singles&limit=200', wta: '/v1/rankings?tour=wta&type=singles&limit=200' };
-const afterPaint = (fn) => requestAnimationFrame(() => setTimeout(fn, 0));
+// a macrotask after the list's synchronous render (never requestAnimationFrame: it does not fire in a hidden tab, so a
+// directory opened in a background tab would never request its enhancements until shown)
+const afterPaint = (fn) => setTimeout(fn, 0);
 const norm = (x) => String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
 
 export const players = mountWith((root, _c, signal) => {

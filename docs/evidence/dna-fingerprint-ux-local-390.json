@@ -1,8 +1,8 @@
 {
   "base": "http://localhost:5196",
   "mock_dna": true,
-  "api": "https://5b98f81d-tennis-api.sales-fd3.workers.dev",
-  "at": "2026-10-01T02:02:07.601Z",
+  "api": "https://c0d3b5e6-tennis-api.sales-fd3.workers.dev",
+  "at": "2026-10-01T02:10:48.201Z",
   "pass": 52,
   "fail": 0,
   "results": [
@@ -10,13 +10,13 @@
       "scope": "390 /players/carlos-alcaraz/dna",
       "name": "hero renders",
       "ok": true,
-      "detail": "CARLOS ALCARAZ @1265ms"
+      "detail": "CARLOS ALCARAZ @3795ms"
     },
     {
       "scope": "390 /players/carlos-alcaraz/dna",
       "name": "Match DNA fingerprint radar visible",
       "ok": true,
-      "detail": "published 320x247 @1276ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+      "detail": "published 320x247 @3811ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
     },
     {
       "scope": "390 /players/carlos-alcaraz/dna",
@@ -58,13 +58,13 @@
       "scope": "390 /players/iga-swiatek/dna",
       "name": "hero renders",
       "ok": true,
-      "detail": "IGA SWIATEK @898ms"
+      "detail": "IGA SWIATEK @938ms"
     },
     {
       "scope": "390 /players/iga-swiatek/dna",
       "name": "Match DNA fingerprint radar visible",
       "ok": true,
-      "detail": "published 320x247 @910ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+      "detail": "published 320x247 @959ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
     },
     {
       "scope": "390 /players/iga-swiatek/dna",
@@ -100,13 +100,13 @@
       "scope": "390 /players/aryna-sabalenka/dna",
       "name": "hero renders",
       "ok": true,
-      "detail": "ARYNA SABALENKA @920ms"
+      "detail": "ARYNA SABALENKA @993ms"
     },
     {
       "scope": "390 /players/aryna-sabalenka/dna",
       "name": "Match DNA fingerprint radar visible",
       "ok": true,
-      "detail": "published 320x247 @932ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
+      "detail": "published 320x247 @1011ms dims=match_win_rate,set_win_rate,game_win_rate,deciding_set_win_rate,tiebreak_win_rate,comeback_win_rate,top10_win_rate,wins_above_expectation"
     },
     {
       "scope": "390 /players/aryna-sabalenka/dna",
@@ -142,7 +142,7 @@
       "scope": "390 / ",
       "name": "DNA module has visible columns at first paint (never an empty band)",
       "ok": true,
-      "detail": "165ms cols=3 h=1291"
+      "detail": "181ms cols=3 h=1291"
     },
     {
       "scope": "390 / ",
@@ -154,7 +154,7 @@
       "scope": "390 / ",
       "name": "all 6 ATP + WTA boards show leaders",
       "ok": true,
-      "detail": "pbe_rating:atp,pbe_rating:wta,match_win_rate:atp,match_win_rate:wta,game_win_rate:atp,game_win_rate:wta @703ms"
+      "detail": "pbe_rating:atp,pbe_rating:wta,match_win_rate:atp,match_win_rate:wta,game_win_rate:atp,game_win_rate:wta @6649ms"
     },
     {
       "scope": "390 / ",
@@ -178,7 +178,7 @@
       "scope": "390 / (ATP match-win board aborted)",
       "name": "DNA module has visible columns at first paint (never an empty band)",
       "ok": true,
-      "detail": "160ms cols=3 h=1277"
+      "detail": "171ms cols=3 h=1277"
     },
     {
       "scope": "390 / (ATP match-win board aborted)",
@@ -220,7 +220,7 @@
       "scope": "390 /players (slams + men/players +8 s)",
       "name": "first player rows before the delayed enhancements (< 5 s)",
       "ok": true,
-      "detail": "939ms rows=100"
+      "detail": "985ms rows=100"
     },
     {
       "scope": "390 /players (slams + men/players +8 s)",
@@ -268,7 +268,7 @@
       "scope": "390 /players?gender=men (slams + men/players +8 s)",
       "name": "first player rows before the delayed enhancements (< 5 s)",
       "ok": true,
-      "detail": "937ms rows=150"
+      "detail": "359ms rows=150"
     },
     {
       "scope": "390 /players?gender=men (slams + men/players +8 s)",
@@ -298,7 +298,7 @@
       "scope": "390 /players?gender=women (slams + men/players +8 s)",
       "name": "first player rows before the delayed enhancements (< 5 s)",
       "ok": true,
-      "detail": "961ms rows=200"
+      "detail": "956ms rows=200"
     },
     {
       "scope": "390 /players?gender=women (slams + men/players +8 s)",
