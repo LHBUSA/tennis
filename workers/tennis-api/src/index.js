@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.9.2';
+export const VERSION = '0.9.3';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -37,6 +37,18 @@ function corsFor(request) {
   return origin === TENNIS_ORIGIN
     ? { 'access-control-allow-origin': TENNIS_ORIGIN, 'access-control-allow-credentials': 'true', vary: 'Origin' }
     : { 'access-control-allow-origin': '*' };
+}
+
+/**
+ * A cached response carries the CORS headers of the request that FILLED the cache (the key does not vary on Origin):
+ * an Origin-less fill (curl, crawler, uptime check) stored `*`, and every later credentialed browser read of that URL
+ * failed CORS for the whole TTL (seen 2026-10-01 on two homepage DNA boards). Re-issue CORS for THIS request.
+ */
+export function withCors(res, request) {
+  const h = new Headers(res.headers);
+  for (const k of ['access-control-allow-origin', 'access-control-allow-credentials']) h.delete(k);
+  for (const [k, v] of Object.entries(corsFor(request))) h.set(k, v);
+  return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
 async function membershipFor(request, env) {
@@ -378,7 +390,7 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
     const cacheKey = new Request(`${url.origin}${url.pathname}${url.search}${url.search ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
     if (cache && !bypass) {
       const hit = await cache.match(cacheKey);
-      if (hit) return hit;
+      if (hit) return withCors(hit, request);
     }
     let body;
     try {

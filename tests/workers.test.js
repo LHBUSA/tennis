@@ -104,3 +104,18 @@ test('tennis-live polls only live editions, stops an edition once nothing is liv
   assert.ok(mem.get('live:heartbeat'));
   assert.deepEqual(JSON.parse(mem.get('live:owned')), []);
 });
+
+test('tennis-api cache hits re-issue CORS for the current request (an Origin-less fill must not poison browsers)', async () => {
+  const { withCors } = await import('../workers/tennis-api/src/index.js');
+  const cached = new Response('{"ok":true}', { headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*', 'cache-control': 'public, max-age=3600' } });
+  const browser = new Request('https://tennis-api.propbetedge.ai/v1/x', { headers: { Origin: 'https://tennis.propbetedge.ai' } });
+  const r = withCors(cached.clone(), browser);
+  assert.equal(r.headers.get('access-control-allow-origin'), 'https://tennis.propbetedge.ai');
+  assert.equal(r.headers.get('access-control-allow-credentials'), 'true');
+  assert.equal(r.headers.get('cache-control'), 'public, max-age=3600');
+  assert.equal(await r.text(), '{"ok":true}');
+  const credentialed = new Response('{}', { headers: { 'access-control-allow-origin': 'https://tennis.propbetedge.ai', 'access-control-allow-credentials': 'true' } });
+  const other = withCors(credentialed, new Request('https://tennis-api.propbetedge.ai/v1/x'));
+  assert.equal(other.headers.get('access-control-allow-origin'), '*');
+  assert.equal(other.headers.get('access-control-allow-credentials'), null, 'never credentials with a wildcard');
+});
