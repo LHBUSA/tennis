@@ -405,12 +405,41 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
     return res;
 }
 
+const PROPSPORTS_ROUTES = Object.freeze([
+  /^\/v1\/today$/,
+  /^\/v1\/live$/,
+  /^\/v1\/tournaments$/,
+  /^\/v1\/tournaments\/[a-z0-9-]+\/\d{4}$/,
+  /^\/v1\/matches\/[0-9a-f-]{36}$/,
+  /^\/v1\/players$/,
+  /^\/v1\/players\/[a-z0-9-]+$/,
+  /^\/v1\/players\/[a-z0-9-]+\/dna$/,
+  /^\/v1\/rankings$/,
+  /^\/v1\/h2h\/[a-z0-9-]+\/[a-z0-9-]+$/,
+  /^\/v1\/schedule$/,
+  /^\/v1\/sources$/,
+  /^\/v1\/men$/,
+  /^\/v1\/men\/players$/,
+  /^\/v1\/slams$/,
+  /^\/v1\/pbecast\/[0-9a-f-]{36}$/,
+  /^\/v1\/matchups$/,
+  /^\/v1\/matchups\/[0-9a-f-]{36}$/,
+  /^\/v1\/players-to-watch$/,
+  /^\/v1\/dna\/leaders$/,
+  /^\/v1\/players\/[a-z0-9-]+\/profile$/,
+  /^\/v1\/search$/,
+  /^\/v1\/venues\/[a-z0-9-]+$/,
+  /^\/v1\/matches\/[0-9a-f-]{36}\/broadcast$/,
+  /^\/v1\/coverage$/,
+]);
+
 export async function propsportsFetch(request, env, ctx) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
-  // Service-entrypoint contract is intentionally narrow: PropSports may bypass the
-  // consumer membership gate only for the Player DNA route it commercially exposes.
-  if (request.method !== 'GET' || !/^\/v1\/players\/[a-z0-9-]+\/dna$/.test(path)) {
+  // Named service-entrypoint contract: PropSports authenticates its own API key
+  // before calling this bridge. Only the explicitly commercialized Tennis routes
+  // may bypass the consumer All Access membership gate.
+  if (request.method !== 'GET' || !PROPSPORTS_ROUTES.some((re) => re.test(path))) {
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   }
   return fetchApi(request, env, ctx, { propsportsInternal: true });
