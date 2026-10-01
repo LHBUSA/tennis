@@ -43,6 +43,17 @@ forward-only fixes.
 - QA: scripts/qa/dna-fingerprint-ux.mjs (WIDTHS=390|768|1440; MOCK_DNA=1 = owner membership + /dna from the public PBEcast
   Match DNA). scripts/qa/dna-page-parity.mjs needs an entitled `pbe_session` (QA_PBE_SESSION or
   D:/Workers/secrets/tennis-qa-pbe-session); without one it exits 2 HOLD, never PASS.
+- Closeout 2026-10-01 (no behavior change after Vercel 9caaa8e / tennis-api 0.9.3 c0d3b5e6):
+  - 768 QA on the exact build (`WIDTHS=768 MOCK_DNA=1`, production API 0.9.3): 52/52 PASS
+    (docs/evidence/dna-fingerprint-ux-final-768.json). 390 and 1440: 52/52 each (local-390 / local-1440).
+  - Production smoke (real browser, no fixtures): homepage 6/6 DNA slots populated; /players ranking rows first,
+    enhancements after (rankings 204-207 ms, men/players + slams from 236 ms); ?gender=men 150 ATP + 164 Grand Slam rows;
+    ?gender=women 200 rows. Preview limit=5 200, limit=6 401, non-preview DNA leaders 401, /v1/players/:slug/dna 401.
+  - Owner signed-in DNA proof (Carlos Alcaraz, Iga Swiatek, Aryna Sabalenka): **HOLD — no entitled browser session**
+    (the only connected Chrome reports membership `free`). Not run, not claimed.
+  - Authenticated parity gate `scripts/qa/dna-page-parity.mjs`: **HOLD_NO_SESSION** (no credential file). Not a PASS.
+  - To close: sign in as owner in Chrome (or save the entitled pbe_session to D:/Workers/secrets/tennis-qa-pbe-session),
+    then run the owner proof + `node scripts/qa/dna-page-parity.mjs`.
 
 ## Current production (verified live 2026-09-29 ~13:45 UTC after the ATP/WTA parity release; wrangler versions deploy per Worker, Vercel production list)
 
