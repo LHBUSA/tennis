@@ -1,0 +1,1590 @@
+{
+  "base": "https://tennis.propbetedge.ai",
+  "label": "after-slow",
+  "slow": [
+    {
+      "p": "/v1/slams",
+      "ms": 6000
+    },
+    {
+      "p": "metric=game_win_rate&tour=atp",
+      "ms": 6000
+    },
+    {
+      "p": "/v1/men/players",
+      "ms": 6000
+    }
+  ],
+  "at": "2026-10-01T02:05:04.236Z",
+  "runs": [
+    {
+      "width": 1440,
+      "route": "/players",
+      "run": 0,
+      "first_useful_ms": 485,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 100,
+        "imgs": 107,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 261,
+          "end": 790
+        },
+        {
+          "url": "/v1/membership",
+          "start": 263,
+          "end": 367
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=200",
+          "start": 325,
+          "end": 385
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=200",
+          "start": 326,
+          "end": 387
+        },
+        {
+          "url": "/media/players/cece0b88-5daa-595c-a1d2-9e30ad50f394/thumb.webp?v=4b63deabaa",
+          "start": 461,
+          "end": 659
+        },
+        {
+          "url": "/media/players/78968f60-15be-52cd-8937-3398f7e26fc1/thumb.webp?v=493301b153",
+          "start": 463,
+          "end": 655
+        },
+        {
+          "url": "/media/players/6eb55645-66d0-54d4-881d-28cf0ddebea1/thumb.webp?v=fc046d5e0a",
+          "start": 465,
+          "end": 630
+        },
+        {
+          "url": "/media/players/158f6a3d-f164-5515-a805-e5b581699e0e/thumb.webp?v=f7743219e9",
+          "start": 465,
+          "end": 655
+        },
+        {
+          "url": "/media/players/24363360-2f1c-5c4a-b2fb-e834aaec0b2e/thumb.webp?v=d069d60b9c",
+          "start": 466,
+          "end": 634
+        },
+        {
+          "url": "/media/players/d0ad4b56-5809-5d09-9f9b-eab6a5e6ebf7/thumb.webp?v=bfcbc723ad",
+          "start": 466,
+          "end": 652
+        },
+        {
+          "url": "/media/players/4383158c-54b1-553f-b2be-a7273e2a59cc/thumb.webp?v=c97b49d3fc",
+          "start": 466,
+          "end": 631
+        },
+        {
+          "url": "/media/players/3ebb86d8-4568-50e7-b00f-3d2fd0b9f828/thumb.webp?v=897b7837ab",
+          "start": 468,
+          "end": 630
+        },
+        {
+          "url": "/media/players/7094b419-8a8d-5c05-96c4-486d66a94a48/thumb.webp?v=346a888969",
+          "start": 468,
+          "end": 629
+        },
+        {
+          "url": "/media/players/40b363aa-b25f-5f16-b7a5-33717c644691/thumb.webp?v=ca4bc5b97a",
+          "start": 469,
+          "end": 631
+        },
+        {
+          "url": "/media/players/66d524e3-9747-5dcb-855b-35b616777f78/thumb.webp?v=0a0b28e41d",
+          "start": 469,
+          "end": 630
+        },
+        {
+          "url": "/media/players/789ff8a9-e7c6-546a-82ef-b896daa7020a/thumb.webp?v=e9320c2113",
+          "start": 469,
+          "end": 631
+        },
+        {
+          "url": "/media/players/0875e8a3-7680-5001-a4bc-7657fc9a3a45/thumb.webp?v=c6d618794d",
+          "start": 472,
+          "end": 630
+        },
+        {
+          "url": "/media/players/b60531ee-2609-50cf-87ba-e22ca67565f0/thumb.webp?v=7be8f4f6dc",
+          "start": 473,
+          "end": 629
+        },
+        {
+          "url": "/media/players/3fda9103-4caa-5e37-a52e-574ad12745f5/thumb.webp?v=9b9ebc5058",
+          "start": 473,
+          "end": 630
+        },
+        {
+          "url": "/media/players/bd869c3b-b327-53cd-b183-8ade95880e03/thumb.webp?v=96aeab0d6c",
+          "start": 473,
+          "end": 652
+        },
+        {
+          "url": "/media/players/46b7eab2-7098-5e0d-b113-777b5c1913ef/thumb.webp?v=afb778c810",
+          "start": 473,
+          "end": 631
+        },
+        {
+          "url": "/media/players/5413596a-8daf-51eb-964c-95f7ff3692ae/thumb.webp?v=9daff8001d",
+          "start": 473,
+          "end": 631
+        },
+        {
+          "url": "/media/players/c76a1e3b-baef-591f-b2e6-8c11aec677c5/thumb.webp?v=3690f989a2",
+          "start": 474,
+          "end": 631
+        },
+        {
+          "url": "/media/players/abd69eec-c130-5531-b98a-506ea79fdbbd/thumb.webp?v=011297cbe2",
+          "start": 474,
+          "end": 629
+        },
+        {
+          "url": "/media/players/6988a59e-8325-5a1c-9d8b-77327a072ac7/thumb.webp?v=222ca36528",
+          "start": 474,
+          "end": 652
+        },
+        {
+          "url": "/media/players/e811e898-1040-56a6-be1e-57144e5c1acf/thumb.webp?v=7edd1e2ddc",
+          "start": 474,
+          "end": 630
+        },
+        {
+          "url": "/media/players/fe8f1b97-3e0a-5fc3-89df-62e064458f73/thumb.webp?v=673aba5d6f",
+          "start": 474,
+          "end": 631
+        },
+        {
+          "url": "/media/players/83e506ef-4860-5bd3-99b9-a132192853d2/thumb.webp?v=3c0b0f38e4",
+          "start": 474,
+          "end": 652
+        },
+        {
+          "url": "/media/players/3aa0f31c-3b52-5aee-a149-fc824ea953a4/thumb.webp?v=981fd29ee8",
+          "start": 474,
+          "end": 836
+        },
+        {
+          "url": "/media/players/9c8bf567-6e96-5b4f-b36b-319296b48433/thumb.webp?v=327c02a007",
+          "start": 475,
+          "end": 631
+        },
+        {
+          "url": "/media/players/5dbead44-97fa-58cb-a6f2-a592b320d735/thumb.webp?v=120f996ae5",
+          "start": 475,
+          "end": 631
+        },
+        {
+          "url": "/media/players/072f5062-c3f3-5194-9316-ccf9af51cb6c/thumb.webp?v=a3e51c3708",
+          "start": 475,
+          "end": 651
+        },
+        {
+          "url": "/v1/men/players",
+          "start": 475,
+          "end": 6541
+        },
+        {
+          "url": "/v1/slams",
+          "start": 475,
+          "end": 6555
+        },
+        {
+          "url": "/media/players/448a69fc-8448-5324-a072-63e808e8fcbc/thumb.webp?v=35c0ced103",
+          "start": 6554,
+          "end": 6717
+        },
+        {
+          "url": "/media/players/11e971ec-0608-5ea5-af6f-44af4a3977f4/thumb.webp?v=be9c0bc529",
+          "start": 6555,
+          "end": 6746
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/square.webp?v=b16da47327",
+          "start": 6567,
+          "end": 6716
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/square.webp?v=c74d11bb90",
+          "start": 6567,
+          "end": 6756
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/square.webp?v=abd740f3a9",
+          "start": 6568,
+          "end": 6689
+        },
+        {
+          "url": "/media/players/229980f1-a0a3-5386-96ca-b40c30e656ba/square.webp?v=cdc997ba6c",
+          "start": 6568,
+          "end": 6738
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/square.webp?v=6c8cdd6fff",
+          "start": 6568,
+          "end": 6740
+        },
+        {
+          "url": "/media/players/690bbada-d77d-5284-be9b-2971e3ac7254/square.webp?v=e3de1d771b",
+          "start": 6569,
+          "end": 6697
+        },
+        {
+          "url": "/media/players/c54f2e28-cde0-5885-be51-34860c3080c0/square.webp?v=2c2c1b80c4",
+          "start": 6569,
+          "end": 6695
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/players?gender=men",
+      "run": 0,
+      "first_useful_ms": 638,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 314,
+        "imgs": 312,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 361,
+          "end": 551
+        },
+        {
+          "url": "/v1/membership",
+          "start": 362,
+          "end": 630
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=200",
+          "start": 455,
+          "end": 561
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/thumb.webp?v=6c8cdd6fff",
+          "start": 619,
+          "end": 775
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/thumb.webp?v=b16da47327",
+          "start": 620,
+          "end": 754
+        },
+        {
+          "url": "/media/players/c76a1e3b-baef-591f-b2e6-8c11aec677c5/thumb.webp?v=3690f989a2",
+          "start": 621,
+          "end": 826
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/thumb.webp?v=abd740f3a9",
+          "start": 621,
+          "end": 875
+        },
+        {
+          "url": "/media/players/fe8f1b97-3e0a-5fc3-89df-62e064458f73/thumb.webp?v=673aba5d6f",
+          "start": 621,
+          "end": 826
+        },
+        {
+          "url": "/media/players/534c9f12-71e9-5623-b8f0-46b4c149187b/thumb.webp?v=13ca7c3f82",
+          "start": 622,
+          "end": 852
+        },
+        {
+          "url": "/media/players/67661ef2-3c4b-584d-9412-671ea90d8563/thumb.webp?v=e1cf4af9da",
+          "start": 622,
+          "end": 822
+        },
+        {
+          "url": "/media/players/c93edbe0-4235-5d62-89d1-60930f620a91/thumb.webp?v=50ffd0b5de",
+          "start": 624,
+          "end": 822
+        },
+        {
+          "url": "/media/players/62c480c9-10db-5fe2-8051-93a91f28b13d/thumb.webp?v=38bafb286e",
+          "start": 624,
+          "end": 832
+        },
+        {
+          "url": "/media/players/6c348680-39c7-50ab-a15c-7b721ed0af25/thumb.webp?v=c3fc0c8a1d",
+          "start": 625,
+          "end": 848
+        },
+        {
+          "url": "/media/players/288c4f3a-8572-5e86-86e8-baf43154eab6/thumb.webp?v=07f8757cb8",
+          "start": 625,
+          "end": 810
+        },
+        {
+          "url": "/media/players/7ae0e54a-2143-5570-82a5-896f0df8c350/thumb.webp?v=187b0e57e9",
+          "start": 625,
+          "end": 832
+        },
+        {
+          "url": "/media/players/7625f275-8a2c-5fb3-ae9a-2b05816d42e5/thumb.webp?v=3def7f220d",
+          "start": 625,
+          "end": 771
+        },
+        {
+          "url": "/media/players/fca5d3e9-d02e-5144-b87c-987b6d453a03/thumb.webp?v=84f2bf6e56",
+          "start": 625,
+          "end": 832
+        },
+        {
+          "url": "/media/players/b9b881f2-e266-5dc8-983c-4daefaf6f5bc/thumb.webp?v=772e952844",
+          "start": 625,
+          "end": 845
+        },
+        {
+          "url": "/media/players/07681d30-9e80-5788-ab26-d9b047b79db5/thumb.webp?v=f7c62893b5",
+          "start": 626,
+          "end": 829
+        },
+        {
+          "url": "/media/players/80fcea66-3ee0-5d0c-a309-d361560ddfc1/thumb.webp?v=bdc3cd46f0",
+          "start": 626,
+          "end": 974
+        },
+        {
+          "url": "/media/players/ff1852ff-e9df-5bd5-be86-ed7258ff1315/thumb.webp?v=9c0919e601",
+          "start": 626,
+          "end": 819
+        },
+        {
+          "url": "/media/players/b10b7c9a-e40b-5ce6-9045-0ff205827acb/thumb.webp?v=71ecc3749d",
+          "start": 626,
+          "end": 814
+        },
+        {
+          "url": "/media/players/a4b667de-b685-5272-aa05-dbede90265b9/thumb.webp?v=c566940bc7",
+          "start": 626,
+          "end": 806
+        },
+        {
+          "url": "/media/players/30e99857-08d9-5215-a249-3c102e22613b/thumb.webp?v=c3263ce0c2",
+          "start": 627,
+          "end": 821
+        },
+        {
+          "url": "/media/players/fa56a21c-1ee4-550a-a850-7620d385947c/thumb.webp?v=298ac4ab2f",
+          "start": 627,
+          "end": 872
+        },
+        {
+          "url": "/media/players/02d8e239-f042-58ae-914e-314f5c091d42/thumb.webp?v=866f066ea4",
+          "start": 627,
+          "end": 972
+        },
+        {
+          "url": "/media/players/5446ad2b-dd71-5faa-ba16-8e2289994802/thumb.webp?v=5e3b5c1276",
+          "start": 627,
+          "end": 823
+        },
+        {
+          "url": "/media/players/5eae6eec-e018-5242-91b5-8e3207674e1c/thumb.webp?v=fa64243f9a",
+          "start": 627,
+          "end": 816
+        },
+        {
+          "url": "/media/players/fb3d3bb4-a9ca-50f9-8e85-1fc225a5016e/thumb.webp?v=d15c9e7384",
+          "start": 627,
+          "end": 829
+        },
+        {
+          "url": "/media/players/45b8b7c2-9c9c-5429-9167-57b059a8599e/thumb.webp?v=bf20466459",
+          "start": 627,
+          "end": 756
+        },
+        {
+          "url": "/media/players/48515584-7440-5db7-a87e-478d52868396/thumb.webp?v=9471b0574d",
+          "start": 628,
+          "end": 756
+        },
+        {
+          "url": "/media/players/9c091273-522c-57db-b9f0-1104afe5cc9c/thumb.webp?v=824a5f55d9",
+          "start": 628,
+          "end": 828
+        },
+        {
+          "url": "/v1/men/players",
+          "start": 628,
+          "end": 6712
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/players?gender=women",
+      "run": 0,
+      "first_useful_ms": 446,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 200,
+        "imgs": 200,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 208,
+          "end": 355
+        },
+        {
+          "url": "/v1/membership",
+          "start": 209,
+          "end": 353
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=200",
+          "start": 290,
+          "end": 361
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/thumb.webp?v=c74d11bb90",
+          "start": 421,
+          "end": 546
+        },
+        {
+          "url": "/media/players/229980f1-a0a3-5386-96ca-b40c30e656ba/thumb.webp?v=cdc997ba6c",
+          "start": 421,
+          "end": 546
+        },
+        {
+          "url": "/media/players/7243da00-451b-5545-8f3b-7517ff55d751/thumb.webp?v=b4279f8b9c",
+          "start": 422,
+          "end": 547
+        },
+        {
+          "url": "/media/players/eac6bc4d-c49d-5b4f-8ec4-a18a596e36d5/thumb.webp?v=1bb476e141",
+          "start": 422,
+          "end": 587
+        },
+        {
+          "url": "/media/players/6eb55645-66d0-54d4-881d-28cf0ddebea1/thumb.webp?v=fc046d5e0a",
+          "start": 423,
+          "end": 548
+        },
+        {
+          "url": "/media/players/690bbada-d77d-5284-be9b-2971e3ac7254/thumb.webp?v=e3de1d771b",
+          "start": 423,
+          "end": 548
+        },
+        {
+          "url": "/media/players/52ecae1f-97ea-5833-a1b3-499b0f452025/thumb.webp?v=16dd1f5d83",
+          "start": 426,
+          "end": 548
+        },
+        {
+          "url": "/media/players/c54f2e28-cde0-5885-be51-34860c3080c0/thumb.webp?v=2c2c1b80c4",
+          "start": 426,
+          "end": 547
+        },
+        {
+          "url": "/media/players/af6af621-d353-5cde-9b16-ee700a260c85/thumb.webp?v=8e112f2f6e",
+          "start": 426,
+          "end": 588
+        },
+        {
+          "url": "/media/players/34cfd577-f689-571d-bf91-f402ee55210f/thumb.webp?v=900bd0fc33",
+          "start": 426,
+          "end": 547
+        },
+        {
+          "url": "/media/players/158f6a3d-f164-5515-a805-e5b581699e0e/thumb.webp?v=f7743219e9",
+          "start": 427,
+          "end": 587
+        },
+        {
+          "url": "/media/players/3fda9103-4caa-5e37-a52e-574ad12745f5/thumb.webp?v=9b9ebc5058",
+          "start": 427,
+          "end": 587
+        },
+        {
+          "url": "/media/players/ca907aa4-375b-566b-9b54-69965fcd7cc1/thumb.webp?v=bf80b42fb5",
+          "start": 427,
+          "end": 546
+        },
+        {
+          "url": "/media/players/750102e1-dcd6-5d43-83ea-54e940c84fd4/thumb.webp?v=3bde89cd0b",
+          "start": 427,
+          "end": 586
+        },
+        {
+          "url": "/media/players/77ef5193-3fc4-547c-84cf-a263d0ce11bf/thumb.webp?v=a6a22442eb",
+          "start": 427,
+          "end": 612
+        },
+        {
+          "url": "/media/players/4dbcc731-163c-5a80-bb2f-c1140291aa49/thumb.webp?v=4234aaee6a",
+          "start": 427,
+          "end": 552
+        },
+        {
+          "url": "/media/players/f311baa0-3763-5795-9ae3-ebbff5cdd93b/thumb.webp?v=8305737d84",
+          "start": 427,
+          "end": 658
+        },
+        {
+          "url": "/media/players/21496bf7-a850-569b-8929-70d073e28e88/thumb.webp?v=990e895ed8",
+          "start": 428,
+          "end": 587
+        },
+        {
+          "url": "/media/players/c8dfc797-8d4a-5ef7-9910-3ff5f5814fdf/thumb.webp?v=78e6c16f5d",
+          "start": 428,
+          "end": 588
+        },
+        {
+          "url": "/media/players/99f75957-bcda-5237-8899-e85c1bb03686/thumb.webp?v=8c8d253faf",
+          "start": 428,
+          "end": 588
+        },
+        {
+          "url": "/media/players/cbc1b7a4-699e-5626-bb88-d55d9f083b71/thumb.webp?v=082af8d257",
+          "start": 428,
+          "end": 552
+        },
+        {
+          "url": "/media/players/205c6843-d5e7-576a-986c-6dc18d5e86b7/thumb.webp?v=5b88240899",
+          "start": 428,
+          "end": 607
+        },
+        {
+          "url": "/media/players/ad76754a-0559-5852-be4e-0665d3ced4d7/thumb.webp?v=d882f263d9",
+          "start": 429,
+          "end": 552
+        },
+        {
+          "url": "/media/players/f2a28a32-9a7f-56bf-87cf-a4d64c18038f/thumb.webp?v=fbbfd281d9",
+          "start": 429,
+          "end": 587
+        },
+        {
+          "url": "/media/players/5b7d9b62-3126-58aa-a217-5058ac6522d1/thumb.webp?v=4b0afe55f2",
+          "start": 431,
+          "end": 588
+        },
+        {
+          "url": "/media/players/cece0b88-5daa-595c-a1d2-9e30ad50f394/thumb.webp?v=4b63deabaa",
+          "start": 431,
+          "end": 657
+        },
+        {
+          "url": "/media/players/b60531ee-2609-50cf-87ba-e22ca67565f0/thumb.webp?v=7be8f4f6dc",
+          "start": 431,
+          "end": 587
+        },
+        {
+          "url": "/media/players/67cc14f7-ddea-56cc-a90c-8b0b5f262d83/thumb.webp?v=2d4cd8e908",
+          "start": 432,
+          "end": 588
+        },
+        {
+          "url": "/media/players/69d61bf6-660b-5a96-804a-aa3afc8ffeab/thumb.webp?v=97da26f719",
+          "start": 433,
+          "end": 588
+        },
+        {
+          "url": "/media/players/a0f53eb7-c8c3-5ad1-928e-77c4c8c5f2b0/thumb.webp?v=0ea75c1bf4",
+          "start": 433,
+          "end": 588
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "route": "/",
+      "run": 0,
+      "first_useful_ms": 349,
+      "leader_rows_ms": 543,
+      "dom": {
+        "trs": 16,
+        "imgs": 55,
+        "eagerImgs": 3,
+        "leaders": 12
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 241,
+          "end": 863
+        },
+        {
+          "url": "/v1/membership",
+          "start": 242,
+          "end": 403
+        },
+        {
+          "url": "/v1/today",
+          "start": 316,
+          "end": 832
+        },
+        {
+          "url": "/v1/slams",
+          "start": 317,
+          "end": 6383
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=10",
+          "start": 318,
+          "end": 406
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=10",
+          "start": 318,
+          "end": 436
+        },
+        {
+          "url": "/v1/news?limit=20",
+          "start": 318,
+          "end": 407
+        },
+        {
+          "url": "/v1/dna/leaders?metric=pbe_rating&tour=atp&limit=5&preview=1",
+          "start": 318,
+          "end": 436
+        },
+        {
+          "url": "/v1/dna/leaders?metric=pbe_rating&tour=wta&limit=5&preview=1",
+          "start": 318,
+          "end": 436
+        },
+        {
+          "url": "/v1/dna/leaders?metric=match_win_rate&tour=atp&limit=5&preview=1",
+          "start": 319,
+          "end": 434,
+          "failed": true
+        },
+        {
+          "url": "/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=5&preview=1",
+          "start": 319,
+          "end": 435
+        },
+        {
+          "url": "/v1/dna/leaders?metric=game_win_rate&tour=atp&limit=5&preview=1",
+          "start": 319,
+          "end": 6368
+        },
+        {
+          "url": "/v1/dna/leaders?metric=game_win_rate&tour=wta&limit=5&preview=1",
+          "start": 319,
+          "end": 433,
+          "failed": true
+        },
+        {
+          "url": "/media/players/5eae6eec-e018-5242-91b5-8e3207674e1c/wide.webp?v=fa64243f9a",
+          "start": 417,
+          "end": 533
+        },
+        {
+          "url": "/media/players/c1252dce-752c-59f3-9e2d-ad53c5c311b0/wide.webp?v=5daa2b340c",
+          "start": 432,
+          "end": 588
+        },
+        {
+          "url": "/media/players/f2a28a32-9a7f-56bf-87cf-a4d64c18038f/wide.webp?v=fbbfd281d9",
+          "start": 433,
+          "end": 588
+        },
+        {
+          "url": "/media/players/4379c531-739d-5d0b-b1cb-6133375f471f/portrait.webp?v=aa73fe8163",
+          "start": 433,
+          "end": 551
+        },
+        {
+          "url": "/media/players/e988ea29-e7b8-5fc6-b7e5-cce185d930d4/square.webp?v=20323ad8fb",
+          "start": 433,
+          "end": 539
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/thumb.webp?v=6c8cdd6fff",
+          "start": 445,
+          "end": 588
+        },
+        {
+          "url": "/media/players/c76a1e3b-baef-591f-b2e6-8c11aec677c5/thumb.webp?v=3690f989a2",
+          "start": 446,
+          "end": 589
+        },
+        {
+          "url": "/media/players/b45b78d9-4fa1-5f3a-896c-19dabbb59b38/thumb.webp?v=2dd9ce7512",
+          "start": 860,
+          "end": 970
+        },
+        {
+          "url": "/media/players/f5115cf0-dfd9-5696-90a1-bbc1667f9642/thumb.webp?v=4b4b9d3698",
+          "start": 861,
+          "end": 971
+        },
+        {
+          "url": "/media/players/4d7ef8e3-5eb2-5bff-b9fd-738b2ff345cf/thumb.webp?v=74ace208e8",
+          "start": 862,
+          "end": 969
+        },
+        {
+          "url": "/media/players/7b59f700-0059-5ab1-92b4-3b902f6cf8b7/thumb.webp?v=f8161e7577",
+          "start": 862,
+          "end": 973
+        },
+        {
+          "url": "/media/players/c7dc1be7-1212-515f-9774-0df3af8914b7/thumb.webp?v=e766836524",
+          "start": 862,
+          "end": 991
+        },
+        {
+          "url": "/media/players/8e60512b-164a-5ff6-8ac8-4df5d1db4064/thumb.webp?v=374cf3a8de",
+          "start": 862,
+          "end": 970
+        },
+        {
+          "url": "/media/players/282421b5-5fc1-5e5f-b301-8b535ec389e8/thumb.webp?v=fb31389913",
+          "start": 863,
+          "end": 979
+        },
+        {
+          "url": "/media/players/a4b667de-b685-5272-aa05-dbede90265b9/thumb.webp?v=c566940bc7",
+          "start": 863,
+          "end": 968
+        },
+        {
+          "url": "/media/players/30e99857-08d9-5215-a249-3c102e22613b/thumb.webp?v=c3263ce0c2",
+          "start": 863,
+          "end": 976
+        },
+        {
+          "url": "/media/players/9c091273-522c-57db-b9f0-1104afe5cc9c/thumb.webp?v=824a5f55d9",
+          "start": 863,
+          "end": 980
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+          "start": 6411,
+          "end": 6677
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/square.webp?v=b16da47327",
+          "start": 6416,
+          "end": 6676
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/square.webp?v=c74d11bb90",
+          "start": 6417,
+          "end": 6661
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/square.webp?v=abd740f3a9",
+          "start": 6417,
+          "end": 6676
+        },
+        {
+          "url": "/media/players/229980f1-a0a3-5386-96ca-b40c30e656ba/square.webp?v=cdc997ba6c",
+          "start": 6417,
+          "end": 6661
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/square.webp?v=6c8cdd6fff",
+          "start": 6417,
+          "end": 6658
+        },
+        {
+          "url": "/media/players/690bbada-d77d-5284-be9b-2971e3ac7254/square.webp?v=e3de1d771b",
+          "start": 6417,
+          "end": 6663
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/players",
+      "run": 0,
+      "first_useful_ms": 497,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 100,
+        "imgs": 107,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 251,
+          "end": 396
+        },
+        {
+          "url": "/v1/membership",
+          "start": 252,
+          "end": 394
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=200",
+          "start": 326,
+          "end": 418
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=200",
+          "start": 327,
+          "end": 403
+        },
+        {
+          "url": "/media/players/c76a1e3b-baef-591f-b2e6-8c11aec677c5/thumb.webp?v=3690f989a2",
+          "start": 441,
+          "end": 569
+        },
+        {
+          "url": "/media/players/abd69eec-c130-5531-b98a-506ea79fdbbd/thumb.webp?v=011297cbe2",
+          "start": 441,
+          "end": 592
+        },
+        {
+          "url": "/media/players/6988a59e-8325-5a1c-9d8b-77327a072ac7/thumb.webp?v=222ca36528",
+          "start": 443,
+          "end": 569
+        },
+        {
+          "url": "/media/players/e811e898-1040-56a6-be1e-57144e5c1acf/thumb.webp?v=7edd1e2ddc",
+          "start": 443,
+          "end": 566
+        },
+        {
+          "url": "/media/players/fe8f1b97-3e0a-5fc3-89df-62e064458f73/thumb.webp?v=673aba5d6f",
+          "start": 443,
+          "end": 574
+        },
+        {
+          "url": "/media/players/83e506ef-4860-5bd3-99b9-a132192853d2/thumb.webp?v=3c0b0f38e4",
+          "start": 443,
+          "end": 584
+        },
+        {
+          "url": "/media/players/3aa0f31c-3b52-5aee-a149-fc824ea953a4/thumb.webp?v=981fd29ee8",
+          "start": 443,
+          "end": 582
+        },
+        {
+          "url": "/media/players/9c8bf567-6e96-5b4f-b36b-319296b48433/thumb.webp?v=327c02a007",
+          "start": 443,
+          "end": 581
+        },
+        {
+          "url": "/media/players/5dbead44-97fa-58cb-a6f2-a592b320d735/thumb.webp?v=120f996ae5",
+          "start": 444,
+          "end": 581
+        },
+        {
+          "url": "/media/players/072f5062-c3f3-5194-9316-ccf9af51cb6c/thumb.webp?v=a3e51c3708",
+          "start": 446,
+          "end": 593
+        },
+        {
+          "url": "/media/players/447fdfcd-e316-55cb-9b85-94de0d72ba6d/thumb.webp?v=39f6dcd368",
+          "start": 446,
+          "end": 592
+        },
+        {
+          "url": "/media/players/66da34b3-1fe8-5a02-993b-41d06634a5ea/thumb.webp?v=46891d1841",
+          "start": 446,
+          "end": 646
+        },
+        {
+          "url": "/media/players/2a1f6bb4-d99f-5cbd-8251-7abb7fc61527/thumb.webp?v=ecad716c82",
+          "start": 446,
+          "end": 668
+        },
+        {
+          "url": "/media/players/f3b5b11c-24f2-59bf-a6ca-0ad6cbb00dbc/thumb.webp?v=fbb9f3a9de",
+          "start": 447,
+          "end": 588
+        },
+        {
+          "url": "/media/players/a4b667de-b685-5272-aa05-dbede90265b9/thumb.webp?v=c566940bc7",
+          "start": 447,
+          "end": 581
+        },
+        {
+          "url": "/media/players/9eb19557-0281-5772-b65e-d335e9329d38/thumb.webp?v=f95a7de11e",
+          "start": 447,
+          "end": 590
+        },
+        {
+          "url": "/media/players/5e670281-1ffc-508d-ad2d-39a337976b91/thumb.webp?v=b969ad21d3",
+          "start": 447,
+          "end": 589
+        },
+        {
+          "url": "/media/players/30e99857-08d9-5215-a249-3c102e22613b/thumb.webp?v=c3263ce0c2",
+          "start": 447,
+          "end": 581
+        },
+        {
+          "url": "/media/players/a7d428d9-55e4-5f70-a4be-2065a158e13f/thumb.webp?v=edd8f8ddd3",
+          "start": 447,
+          "end": 569
+        },
+        {
+          "url": "/media/players/678489b0-0b4e-55de-a65c-3a7dda64f35e/thumb.webp?v=941ed5ecf0",
+          "start": 447,
+          "end": 645
+        },
+        {
+          "url": "/media/players/67661ef2-3c4b-584d-9412-671ea90d8563/thumb.webp?v=e1cf4af9da",
+          "start": 447,
+          "end": 643
+        },
+        {
+          "url": "/media/players/8f0f4ba2-7986-5bd3-880d-f1ea97489f1a/thumb.webp?v=857ce9c9d8",
+          "start": 448,
+          "end": 581
+        },
+        {
+          "url": "/media/players/bfab2dd0-c213-58cd-b89a-986de5e9578b/thumb.webp?v=d344454cab",
+          "start": 448,
+          "end": 649
+        },
+        {
+          "url": "/media/players/020e6df0-5cc1-51ba-a77d-2b350d90c029/thumb.webp?v=3fc7e2af02",
+          "start": 448,
+          "end": 646
+        },
+        {
+          "url": "/media/players/b10b7c9a-e40b-5ce6-9045-0ff205827acb/thumb.webp?v=71ecc3749d",
+          "start": 448,
+          "end": 575
+        },
+        {
+          "url": "/media/players/45b8b7c2-9c9c-5429-9167-57b059a8599e/thumb.webp?v=bf20466459",
+          "start": 448,
+          "end": 646
+        },
+        {
+          "url": "/v1/men/players",
+          "start": 449,
+          "end": 6527
+        },
+        {
+          "url": "/v1/slams",
+          "start": 450,
+          "end": 6517
+        },
+        {
+          "url": "/media/players/cece0b88-5daa-595c-a1d2-9e30ad50f394/thumb.webp?v=4b63deabaa",
+          "start": 459,
+          "end": 646
+        },
+        {
+          "url": "/media/players/78968f60-15be-52cd-8937-3398f7e26fc1/thumb.webp?v=493301b153",
+          "start": 460,
+          "end": 646
+        },
+        {
+          "url": "/media/players/6eb55645-66d0-54d4-881d-28cf0ddebea1/thumb.webp?v=fc046d5e0a",
+          "start": 461,
+          "end": 646
+        },
+        {
+          "url": "/media/players/158f6a3d-f164-5515-a805-e5b581699e0e/thumb.webp?v=f7743219e9",
+          "start": 461,
+          "end": 644
+        },
+        {
+          "url": "/media/players/24363360-2f1c-5c4a-b2fb-e834aaec0b2e/thumb.webp?v=d069d60b9c",
+          "start": 461,
+          "end": 668
+        },
+        {
+          "url": "/media/players/d0ad4b56-5809-5d09-9f9b-eab6a5e6ebf7/thumb.webp?v=bfcbc723ad",
+          "start": 461,
+          "end": 646
+        },
+        {
+          "url": "/media/players/4383158c-54b1-553f-b2be-a7273e2a59cc/thumb.webp?v=c97b49d3fc",
+          "start": 462,
+          "end": 644
+        },
+        {
+          "url": "/media/players/3ebb86d8-4568-50e7-b00f-3d2fd0b9f828/thumb.webp?v=897b7837ab",
+          "start": 462,
+          "end": 645
+        },
+        {
+          "url": "/media/players/7094b419-8a8d-5c05-96c4-486d66a94a48/thumb.webp?v=346a888969",
+          "start": 462,
+          "end": 643
+        },
+        {
+          "url": "/media/players/40b363aa-b25f-5f16-b7a5-33717c644691/thumb.webp?v=ca4bc5b97a",
+          "start": 462,
+          "end": 668
+        },
+        {
+          "url": "/media/players/66d524e3-9747-5dcb-855b-35b616777f78/thumb.webp?v=0a0b28e41d",
+          "start": 462,
+          "end": 646
+        },
+        {
+          "url": "/media/players/789ff8a9-e7c6-546a-82ef-b896daa7020a/thumb.webp?v=e9320c2113",
+          "start": 462,
+          "end": 643
+        },
+        {
+          "url": "/media/players/0875e8a3-7680-5001-a4bc-7657fc9a3a45/thumb.webp?v=c6d618794d",
+          "start": 462,
+          "end": 643
+        },
+        {
+          "url": "/media/players/b60531ee-2609-50cf-87ba-e22ca67565f0/thumb.webp?v=7be8f4f6dc",
+          "start": 463,
+          "end": 779
+        },
+        {
+          "url": "/media/players/3fda9103-4caa-5e37-a52e-574ad12745f5/thumb.webp?v=9b9ebc5058",
+          "start": 463,
+          "end": 644
+        },
+        {
+          "url": "/media/players/bd869c3b-b327-53cd-b183-8ade95880e03/thumb.webp?v=96aeab0d6c",
+          "start": 463,
+          "end": 646
+        },
+        {
+          "url": "/media/players/46b7eab2-7098-5e0d-b113-777b5c1913ef/thumb.webp?v=afb778c810",
+          "start": 463,
+          "end": 736
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/square.webp?v=b16da47327",
+          "start": 6524,
+          "end": 6676
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/square.webp?v=c74d11bb90",
+          "start": 6524,
+          "end": 6678
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/square.webp?v=abd740f3a9",
+          "start": 6525,
+          "end": 6647
+        },
+        {
+          "url": "/media/players/229980f1-a0a3-5386-96ca-b40c30e656ba/square.webp?v=cdc997ba6c",
+          "start": 6525,
+          "end": 6671
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/square.webp?v=6c8cdd6fff",
+          "start": 6525,
+          "end": 6676
+        },
+        {
+          "url": "/media/players/690bbada-d77d-5284-be9b-2971e3ac7254/square.webp?v=e3de1d771b",
+          "start": 6526,
+          "end": 6652
+        },
+        {
+          "url": "/media/players/c54f2e28-cde0-5885-be51-34860c3080c0/square.webp?v=2c2c1b80c4",
+          "start": 6526,
+          "end": 6667
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/players?gender=men",
+      "run": 0,
+      "first_useful_ms": 459,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 314,
+        "imgs": 312,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 227,
+          "end": 362
+        },
+        {
+          "url": "/v1/membership",
+          "start": 228,
+          "end": 361
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=200",
+          "start": 309,
+          "end": 369
+        },
+        {
+          "url": "/media/players/1c6c8911-cf93-5050-adf1-7a6e31af3b1b/thumb.webp?v=6c8cdd6fff",
+          "start": 425,
+          "end": 669
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/thumb.webp?v=b16da47327",
+          "start": 425,
+          "end": 682
+        },
+        {
+          "url": "/media/players/c76a1e3b-baef-591f-b2e6-8c11aec677c5/thumb.webp?v=3690f989a2",
+          "start": 427,
+          "end": 697
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/thumb.webp?v=abd740f3a9",
+          "start": 427,
+          "end": 729
+        },
+        {
+          "url": "/media/players/fe8f1b97-3e0a-5fc3-89df-62e064458f73/thumb.webp?v=673aba5d6f",
+          "start": 428,
+          "end": 697
+        },
+        {
+          "url": "/media/players/534c9f12-71e9-5623-b8f0-46b4c149187b/thumb.webp?v=13ca7c3f82",
+          "start": 429,
+          "end": 738
+        },
+        {
+          "url": "/media/players/67661ef2-3c4b-584d-9412-671ea90d8563/thumb.webp?v=e1cf4af9da",
+          "start": 429,
+          "end": 732
+        },
+        {
+          "url": "/media/players/c93edbe0-4235-5d62-89d1-60930f620a91/thumb.webp?v=50ffd0b5de",
+          "start": 429,
+          "end": 704
+        },
+        {
+          "url": "/media/players/62c480c9-10db-5fe2-8051-93a91f28b13d/thumb.webp?v=38bafb286e",
+          "start": 429,
+          "end": 679
+        },
+        {
+          "url": "/media/players/6c348680-39c7-50ab-a15c-7b721ed0af25/thumb.webp?v=c3fc0c8a1d",
+          "start": 429,
+          "end": 686
+        },
+        {
+          "url": "/media/players/288c4f3a-8572-5e86-86e8-baf43154eab6/thumb.webp?v=07f8757cb8",
+          "start": 429,
+          "end": 690
+        },
+        {
+          "url": "/media/players/7ae0e54a-2143-5570-82a5-896f0df8c350/thumb.webp?v=187b0e57e9",
+          "start": 429,
+          "end": 608
+        },
+        {
+          "url": "/media/players/7625f275-8a2c-5fb3-ae9a-2b05816d42e5/thumb.webp?v=3def7f220d",
+          "start": 429,
+          "end": 680
+        },
+        {
+          "url": "/media/players/fca5d3e9-d02e-5144-b87c-987b6d453a03/thumb.webp?v=84f2bf6e56",
+          "start": 430,
+          "end": 672
+        },
+        {
+          "url": "/media/players/b9b881f2-e266-5dc8-983c-4daefaf6f5bc/thumb.webp?v=772e952844",
+          "start": 431,
+          "end": 604
+        },
+        {
+          "url": "/media/players/07681d30-9e80-5788-ab26-d9b047b79db5/thumb.webp?v=f7c62893b5",
+          "start": 431,
+          "end": 622
+        },
+        {
+          "url": "/media/players/80fcea66-3ee0-5d0c-a309-d361560ddfc1/thumb.webp?v=bdc3cd46f0",
+          "start": 431,
+          "end": 608
+        },
+        {
+          "url": "/media/players/ff1852ff-e9df-5bd5-be86-ed7258ff1315/thumb.webp?v=9c0919e601",
+          "start": 431,
+          "end": 604
+        },
+        {
+          "url": "/media/players/b10b7c9a-e40b-5ce6-9045-0ff205827acb/thumb.webp?v=71ecc3749d",
+          "start": 432,
+          "end": 590
+        },
+        {
+          "url": "/media/players/a4b667de-b685-5272-aa05-dbede90265b9/thumb.webp?v=c566940bc7",
+          "start": 432,
+          "end": 604
+        },
+        {
+          "url": "/media/players/30e99857-08d9-5215-a249-3c102e22613b/thumb.webp?v=c3263ce0c2",
+          "start": 432,
+          "end": 589
+        },
+        {
+          "url": "/media/players/fa56a21c-1ee4-550a-a850-7620d385947c/thumb.webp?v=298ac4ab2f",
+          "start": 432,
+          "end": 608
+        },
+        {
+          "url": "/media/players/02d8e239-f042-58ae-914e-314f5c091d42/thumb.webp?v=866f066ea4",
+          "start": 432,
+          "end": 590
+        },
+        {
+          "url": "/media/players/5446ad2b-dd71-5faa-ba16-8e2289994802/thumb.webp?v=5e3b5c1276",
+          "start": 432,
+          "end": 604
+        },
+        {
+          "url": "/media/players/5eae6eec-e018-5242-91b5-8e3207674e1c/thumb.webp?v=fa64243f9a",
+          "start": 432,
+          "end": 607
+        },
+        {
+          "url": "/media/players/fb3d3bb4-a9ca-50f9-8e85-1fc225a5016e/thumb.webp?v=d15c9e7384",
+          "start": 432,
+          "end": 590
+        },
+        {
+          "url": "/media/players/45b8b7c2-9c9c-5429-9167-57b059a8599e/thumb.webp?v=bf20466459",
+          "start": 433,
+          "end": 590
+        },
+        {
+          "url": "/v1/men/players",
+          "start": 433,
+          "end": 6493
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/players?gender=women",
+      "run": 0,
+      "first_useful_ms": 553,
+      "leader_rows_ms": null,
+      "dom": {
+        "trs": 200,
+        "imgs": 200,
+        "eagerImgs": 0,
+        "leaders": 0
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 316,
+          "end": 879
+        },
+        {
+          "url": "/v1/membership",
+          "start": 317,
+          "end": 446
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=200",
+          "start": 385,
+          "end": 467
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/thumb.webp?v=c74d11bb90",
+          "start": 526,
+          "end": 637
+        },
+        {
+          "url": "/media/players/229980f1-a0a3-5386-96ca-b40c30e656ba/thumb.webp?v=cdc997ba6c",
+          "start": 527,
+          "end": 636
+        },
+        {
+          "url": "/media/players/7243da00-451b-5545-8f3b-7517ff55d751/thumb.webp?v=b4279f8b9c",
+          "start": 527,
+          "end": 679
+        },
+        {
+          "url": "/media/players/eac6bc4d-c49d-5b4f-8ec4-a18a596e36d5/thumb.webp?v=1bb476e141",
+          "start": 527,
+          "end": 679
+        },
+        {
+          "url": "/media/players/6eb55645-66d0-54d4-881d-28cf0ddebea1/thumb.webp?v=fc046d5e0a",
+          "start": 527,
+          "end": 679
+        },
+        {
+          "url": "/media/players/690bbada-d77d-5284-be9b-2971e3ac7254/thumb.webp?v=e3de1d771b",
+          "start": 529,
+          "end": 679
+        },
+        {
+          "url": "/media/players/52ecae1f-97ea-5833-a1b3-499b0f452025/thumb.webp?v=16dd1f5d83",
+          "start": 529,
+          "end": 760
+        },
+        {
+          "url": "/media/players/c54f2e28-cde0-5885-be51-34860c3080c0/thumb.webp?v=2c2c1b80c4",
+          "start": 529,
+          "end": 681
+        },
+        {
+          "url": "/media/players/af6af621-d353-5cde-9b16-ee700a260c85/thumb.webp?v=8e112f2f6e",
+          "start": 529,
+          "end": 680
+        },
+        {
+          "url": "/media/players/34cfd577-f689-571d-bf91-f402ee55210f/thumb.webp?v=900bd0fc33",
+          "start": 529,
+          "end": 681
+        },
+        {
+          "url": "/media/players/158f6a3d-f164-5515-a805-e5b581699e0e/thumb.webp?v=f7743219e9",
+          "start": 530,
+          "end": 698
+        },
+        {
+          "url": "/media/players/3fda9103-4caa-5e37-a52e-574ad12745f5/thumb.webp?v=9b9ebc5058",
+          "start": 530,
+          "end": 680
+        },
+        {
+          "url": "/media/players/ca907aa4-375b-566b-9b54-69965fcd7cc1/thumb.webp?v=bf80b42fb5",
+          "start": 530,
+          "end": 680
+        },
+        {
+          "url": "/media/players/750102e1-dcd6-5d43-83ea-54e940c84fd4/thumb.webp?v=3bde89cd0b",
+          "start": 532,
+          "end": 680
+        },
+        {
+          "url": "/media/players/77ef5193-3fc4-547c-84cf-a263d0ce11bf/thumb.webp?v=a6a22442eb",
+          "start": 533,
+          "end": 679
+        },
+        {
+          "url": "/media/players/4dbcc731-163c-5a80-bb2f-c1140291aa49/thumb.webp?v=4234aaee6a",
+          "start": 533,
+          "end": 680
+        },
+        {
+          "url": "/media/players/f311baa0-3763-5795-9ae3-ebbff5cdd93b/thumb.webp?v=8305737d84",
+          "start": 533,
+          "end": 698
+        },
+        {
+          "url": "/media/players/21496bf7-a850-569b-8929-70d073e28e88/thumb.webp?v=990e895ed8",
+          "start": 533,
+          "end": 680
+        },
+        {
+          "url": "/media/players/c8dfc797-8d4a-5ef7-9910-3ff5f5814fdf/thumb.webp?v=78e6c16f5d",
+          "start": 533,
+          "end": 748
+        },
+        {
+          "url": "/media/players/99f75957-bcda-5237-8899-e85c1bb03686/thumb.webp?v=8c8d253faf",
+          "start": 533,
+          "end": 680
+        },
+        {
+          "url": "/media/players/cbc1b7a4-699e-5626-bb88-d55d9f083b71/thumb.webp?v=082af8d257",
+          "start": 534,
+          "end": 681
+        },
+        {
+          "url": "/media/players/205c6843-d5e7-576a-986c-6dc18d5e86b7/thumb.webp?v=5b88240899",
+          "start": 534,
+          "end": 681
+        },
+        {
+          "url": "/media/players/ad76754a-0559-5852-be4e-0665d3ced4d7/thumb.webp?v=d882f263d9",
+          "start": 534,
+          "end": 698
+        },
+        {
+          "url": "/media/players/f2a28a32-9a7f-56bf-87cf-a4d64c18038f/thumb.webp?v=fbbfd281d9",
+          "start": 534,
+          "end": 698
+        },
+        {
+          "url": "/media/players/5b7d9b62-3126-58aa-a217-5058ac6522d1/thumb.webp?v=4b0afe55f2",
+          "start": 534,
+          "end": 681
+        },
+        {
+          "url": "/media/players/cece0b88-5daa-595c-a1d2-9e30ad50f394/thumb.webp?v=4b63deabaa",
+          "start": 534,
+          "end": 698
+        },
+        {
+          "url": "/media/players/b60531ee-2609-50cf-87ba-e22ca67565f0/thumb.webp?v=7be8f4f6dc",
+          "start": 534,
+          "end": 698
+        },
+        {
+          "url": "/media/players/67cc14f7-ddea-56cc-a90c-8b0b5f262d83/thumb.webp?v=2d4cd8e908",
+          "start": 534,
+          "end": 698
+        },
+        {
+          "url": "/media/players/69d61bf6-660b-5a96-804a-aa3afc8ffeab/thumb.webp?v=97da26f719",
+          "start": 535,
+          "end": 698
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "route": "/",
+      "run": 0,
+      "first_useful_ms": 357,
+      "leader_rows_ms": 521,
+      "dom": {
+        "trs": 16,
+        "imgs": 55,
+        "eagerImgs": 3,
+        "leaders": 12
+      },
+      "requests": [
+        {
+          "url": "/v1/live",
+          "start": 259,
+          "end": 437
+        },
+        {
+          "url": "/v1/membership",
+          "start": 260,
+          "end": 438
+        },
+        {
+          "url": "/v1/today",
+          "start": 317,
+          "end": 472
+        },
+        {
+          "url": "/v1/slams",
+          "start": 318,
+          "end": 6367
+        },
+        {
+          "url": "/v1/rankings?tour=wta&type=singles&limit=10",
+          "start": 318,
+          "end": 437
+        },
+        {
+          "url": "/v1/rankings?tour=atp&type=singles&limit=10",
+          "start": 319,
+          "end": 441
+        },
+        {
+          "url": "/v1/news?limit=20",
+          "start": 319,
+          "end": 706
+        },
+        {
+          "url": "/v1/dna/leaders?metric=pbe_rating&tour=atp&limit=5&preview=1",
+          "start": 319,
+          "end": 472
+        },
+        {
+          "url": "/v1/dna/leaders?metric=pbe_rating&tour=wta&limit=5&preview=1",
+          "start": 319,
+          "end": 470
+        },
+        {
+          "url": "/v1/dna/leaders?metric=match_win_rate&tour=atp&limit=5&preview=1",
+          "start": 320,
+          "end": 466,
+          "failed": true
+        },
+        {
+          "url": "/v1/dna/leaders?metric=match_win_rate&tour=wta&limit=5&preview=1",
+          "start": 320,
+          "end": 441
+        },
+        {
+          "url": "/v1/dna/leaders?metric=game_win_rate&tour=atp&limit=5&preview=1",
+          "start": 321,
+          "end": 6393
+        },
+        {
+          "url": "/v1/dna/leaders?metric=game_win_rate&tour=wta&limit=5&preview=1",
+          "start": 321,
+          "end": 469,
+          "failed": true
+        },
+        {
+          "url": "/media/players/b45b78d9-4fa1-5f3a-896c-19dabbb59b38/thumb.webp?v=2dd9ce7512",
+          "start": 519,
+          "end": 633
+        },
+        {
+          "url": "/media/players/f5115cf0-dfd9-5696-90a1-bbc1667f9642/thumb.webp?v=4b4b9d3698",
+          "start": 520,
+          "end": 704
+        },
+        {
+          "url": "/media/players/4d7ef8e3-5eb2-5bff-b9fd-738b2ff345cf/thumb.webp?v=74ace208e8",
+          "start": 520,
+          "end": 632
+        },
+        {
+          "url": "/media/players/7b59f700-0059-5ab1-92b4-3b902f6cf8b7/thumb.webp?v=f8161e7577",
+          "start": 520,
+          "end": 634
+        },
+        {
+          "url": "/media/players/c7dc1be7-1212-515f-9774-0df3af8914b7/thumb.webp?v=e766836524",
+          "start": 520,
+          "end": 626
+        },
+        {
+          "url": "/media/players/8e60512b-164a-5ff6-8ac8-4df5d1db4064/thumb.webp?v=374cf3a8de",
+          "start": 520,
+          "end": 636
+        },
+        {
+          "url": "/media/players/5eae6eec-e018-5242-91b5-8e3207674e1c/wide.webp?v=fa64243f9a",
+          "start": 717,
+          "end": 932
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/portrait.webp?v=c74d11bb90",
+          "start": 6390,
+          "end": 6487
+        },
+        {
+          "url": "/media/players/3afc116a-ae9f-500a-ba24-c2009355afb5/square.webp?v=b16da47327",
+          "start": 6394,
+          "end": 6495
+        },
+        {
+          "url": "/media/players/c5247e2e-5a09-52bb-88d0-3a4b9b090388/square.webp?v=c74d11bb90",
+          "start": 6394,
+          "end": 6492
+        },
+        {
+          "url": "/media/players/f3ccafc9-bae3-515e-9e2c-c361c9386079/square.webp?v=abd740f3a9",
+          "start": 6394,
+          "end": 6493
+        }
+      ]
+    }
+  ]
+}

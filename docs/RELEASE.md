@@ -24,6 +24,26 @@ zero-live-matches state correct · a source outage does not crash the site · fa
 Workers: `wrangler versions deploy <previous>`. Vercel: promote the previous deployment. Migrations:
 forward-only fixes.
 
+## 2026-10-01 DNA + Players UX release (verified live ~02:30 UTC)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| Vercel `tennis` | main 9caaa8e (UX release 624db55 = `dpl_H3w9Zrpq2oGUiUNCX2V31yvy1MRn`; 2fe144a Worker-only; 9caaa8e /players rAF fix) | `dpl_FjaEb1atoQd6y2LEPmPnza1S2Msb` (1395825) |
+| tennis-api | `c0d3b5e6-c440-4b6f-8b77-9ffddeacc0f6` 0.9.3 @ main 2fe144a (cached-CORS fix) | `021d5cc2-f3d1-41c2-b2ce-0d56a0be1f04` 0.9.2 @ 624db55, then `35b7c968-d048-446f-a6cb-0c609d6da077` 0.9.1 (PropSports bridge 6f72289, deployed from its branch before the merge) |
+
+- main now contains the PropSports service bridge (fix/propsports-service-bridge-20261001 @ 6f72289, fast-forwarded):
+  tennis-api `main = src/worker.js` (PropSportsTennis entrypoint). Deploy tennis-api only from main.
+- Public DNA preview (no membership): `/v1/dna/leaders?preview=1` for pbe_rating, match_win_rate, game_win_rate, max 5 rows
+  (raw limit; the old capped comparison let limit=50 through). Everything else under /v1/dna and /v1/players/:slug/dna = 401.
+- Edge cache: hits re-issue CORS for the current request (an Origin-less fill used to poison credentialed browser reads
+  for the TTL). PBE Rating leaders use a DB fast path (WTA cold 42.2 s -> 1.4 s, identical board).
+- Timings (scripts/qa/perf-players-dna.mjs, 6 s injected delay on /v1/slams, /v1/men/players and one DNA board):
+  /players first rows 7,222 -> 485 ms; /players?gender=men 6,851 -> 638 ms; homepage DNA content 6,781 ms blank -> 349 ms
+  (first leader rows 543 ms). Evidence docs/evidence/perf-players-dna-{before,after}-*.json.
+- QA: scripts/qa/dna-fingerprint-ux.mjs (WIDTHS=390|768|1440; MOCK_DNA=1 = owner membership + /dna from the public PBEcast
+  Match DNA). scripts/qa/dna-page-parity.mjs needs an entitled `pbe_session` (QA_PBE_SESSION or
+  D:/Workers/secrets/tennis-qa-pbe-session); without one it exits 2 HOLD, never PASS.
+
 ## Current production (verified live 2026-09-29 ~13:45 UTC after the ATP/WTA parity release; wrangler versions deploy per Worker, Vercel production list)
 
 | Component | Current | Rollback target |
