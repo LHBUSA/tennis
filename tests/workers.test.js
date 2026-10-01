@@ -1,7 +1,7 @@
 // Worker handlers: /health everywhere, truthful NOT_CONFIGURED data routes, real /v1/sources, admin-gated runs.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import api from '../workers/tennis-api/src/index.js';
+import api, { propsportsFetch } from '../workers/tennis-api/src/index.js';
 import ingest, { canaryPlan } from '../workers/tennis-ingest/src/index.js';
 import live from '../workers/tennis-live/src/index.js';
 import model from '../workers/tennis-model/src/index.js';
@@ -45,6 +45,14 @@ test('tennis-api premium intelligence fails closed without verified membership',
   }
 });
 
+
+test('PropSports service bridge bypasses consumer membership only for Player DNA', async () => {
+  const env = {};
+  const dna = await propsportsFetch(new Request('https://internal.test/v1/players/x/dna'), env);
+  assert.notEqual(dna.status, 401, 'trusted service path must not require browser membership');
+  const other = await propsportsFetch(new Request('https://internal.test/v1/dna/leaders'), env);
+  assert.equal(other.status, 404, 'service bridge must not become a general premium bypass');
+});
 
 test('tennis-api keeps top-of-funnel PBEcast and capped DNA preview public', async () => {
   const pbecast = await get(api, '/v1/pbecast');
