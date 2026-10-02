@@ -34,7 +34,7 @@ for (const w of WIDTHS) {
   }
   await ctx.route(/^https:\/\/tennis-api\.propbetedge\.ai\//, async (route) => {
     const url = route.request().url();
-    if (MODE === 'entitled' && /\/v1\/membership(\?|$)/.test(url)) {
+    if (MODE === 'entitled' && !SESSION && /\/v1\/membership(\?|$)/.test(url)) {
       return route.fulfill({ status: 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': BASE, 'access-control-allow-credentials': 'true' }, body: JSON.stringify({ ok: true, membership: { sport: 'tennis', state: 'all_access', entitled: true, access_source: 'all_access' } }) });
     }
     if (process.env.PREVIEW_SHELL !== '1') return route.continue();
@@ -49,7 +49,13 @@ for (const w of WIDTHS) {
     const onC = (m) => { if (m.type() === 'error' && !/google|gtag|favicon/i.test(m.text())) errs.push(m.text().slice(0, 160)); };
     const onE = (e) => errs.push(String(e).slice(0, 160));
     const onQ = (r) => { if (/tennis-api/.test(r.url())) reqs.push(r.url().replace(/^https:\/\/[^/]+/, '')); };
-    const onR = (r) => { if (r.status() >= 400 && !/google|favicon/i.test(r.url())) bad.push(`${r.status()} ${r.url().replace(/\?.*$/, '')}`); };
+    const gatedRes = [];
+    let member = null;
+    const onR = async (r) => {
+      if (r.status() >= 400 && !/google|favicon/i.test(r.url())) bad.push(`${r.status()} ${r.url().replace(/\?.*$/, '')}`);
+      if (/tennis-api.*\/v1\/membership(\?|$)/.test(r.url())) { try { member = (await r.json())?.membership?.entitled === true; } catch {} }
+      if (GATED.test(r.url())) { let n = 0; try { const d = (await r.json())?.data; n = Array.isArray(d?.matchups) ? d.matchups.length : d?.tours ? Object.keys(d.tours).length : 0; } catch {} gatedRes.push({ path: r.url().replace(/^https:\/\/[^/]+/, ''), status: r.status(), items: n }); }
+    };
     page.on('console', onC); page.on('pageerror', onE); page.on('request', onQ); page.on('response', onR);
     const nav = await page.goto(`${BASE}${path}`, { waitUntil: 'load' });
     await page.waitForFunction(() => !document.querySelector('.nf-body .loading, [data-body] > .loading'), null, { timeout: 30000 }).catch(() => {});
@@ -58,6 +64,7 @@ for (const w of WIDTHS) {
       loading: !!document.querySelector('.loading'),
       sections: [...document.querySelectorAll('.nf-body h2')].map((h) => h.textContent.trim()),
       stories: document.querySelectorAll('.nf-body a[href^="/news/"]').length,
+      gate: !!document.querySelector('.progate'),
       risers: document.querySelectorAll('.nf-mv-k').length ? [...document.querySelectorAll('.nf-mv-k')].filter((x) => /PBE Rating/.test(x.textContent)).length : 0,
       previews: document.querySelectorAll('.nf-pv-v').length,
       overflow: document.documentElement.scrollWidth - innerWidth,
@@ -67,7 +74,7 @@ for (const w of WIDTHS) {
     }));
     for (const [ev, fn] of [['console', onC], ['pageerror', onE], ['request', onQ], ['response', onR]]) page.off(ev, fn);
     const gatedReqs = reqs.filter((u) => GATED.test(u));
-    const row = { w, path, status: nav?.status(), gatedReqs, bad, errs, ...r };
+    const row = { w, path, status: nav?.status(), gatedReqs, gatedRes, member, bad, errs, ...r };
     rows.push(row);
     const f = (m) => fails.push(`${w}px ${path}: ${m}`);
     if (!nav || nav.status() >= 400) f(`document ${nav?.status()}`);
@@ -84,7 +91,32 @@ for (const w of WIDTHS) {
       for (const p of want) if (!gatedReqs.some((u) => u.startsWith(p))) f(`entitled visitor did not request ${p}`);
       const nonGatedBad = bad.filter((b) => !GATED.test(b));
       if (nonGatedBad.length) f(`failed responses ${nonGatedBad.join(' | ')}`);
+      if (SESSION) { // REAL signed-in proof: every gated call authorized, premium modules rendered, no errors, no gate
+        if (member !== true) f(`/v1/membership not entitled (${member})`);
+        if (bad.length) f(`failed responses ${bad.join(' | ')}`);
+        if (errs.length) f(`console ${errs.join(' | ')}`);
+        for (const g of gatedRes) if (g.status !== 200) f(`gated ${g.path} -> ${g.status}`);
+        const pv = gatedRes.find((g) => g.path.startsWith('/v1/matchups'));
+        if (r.gate) f('premium gate shown to an entitled visitor');
+        if (pv?.items && ['/news', '/news/atp', '/news/wta'].includes(path) && !r.previews) f(`matchups returned ${pv.items} but no What's next rendered`);
+      }
     }
+  }
+  await ctx.close();
+}
+// REAL session only: a direct premium route must refresh signed in (no gate, no 401), twice
+if (SESSION) {
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  await ctx.addCookies([{ name: 'pbe_session', value: SESSION, domain: '.propbetedge.ai', path: '/', secure: true, httpOnly: true, sameSite: 'Lax' }]);
+  const page = await ctx.newPage();
+  const bad = [];
+  page.on('response', (r) => { if (r.status() >= 400 && !/google|favicon/i.test(r.url())) bad.push(`${r.status()} ${r.url().replace(/\?.*$/, '')}`); });
+  for (const [i, nav] of [['load', () => page.goto(`${BASE}/players-to-watch`, { waitUntil: 'load' })], ['refresh', () => page.reload({ waitUntil: 'load' })]]) {
+    await nav();
+    await page.waitForTimeout(4000);
+    const r = await page.evaluate(() => ({ gate: !!document.querySelector('.progate'), loading: !!document.querySelector('.loading'), h1: document.querySelector('h1')?.textContent?.trim() || null }));
+    rows.push({ w: 1440, path: `/players-to-watch (${i})`, direct: true, bad: [...bad], ...r });
+    if (r.gate || r.loading || bad.length) fails.push(`/players-to-watch ${i}: gate ${r.gate} loading ${r.loading} bad ${bad.join(' | ')}`);
   }
   await ctx.close();
 }
