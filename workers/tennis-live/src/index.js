@@ -16,11 +16,26 @@ import { SourceClient } from '../../shared/http.js';
 import { storeFromEnv } from '../../shared/store/postgrest.js';
 import { providerFor, livePolicies, LIVE_PROVIDERS } from './router.js';
 
-export const VERSION = '0.3.0';
-const ROUNDS = 3;          // polls per minute per live edition
+export const VERSION = '0.3.1';
+const ROUNDS = 3;          // CONFIGURED polls per run per live edition (intention; see CADENCE for what is measured)
 const GAP_MS = 18000;      // spacing between rounds
 const MAX_EDITIONS = 8;
 const BUDGET_MS = 50000;  // no round starts that could not finish inside the minute (the next cron owns it)
+
+// Two DIFFERENT concepts, never collapsed into one number: the configured intra-run polling intention above, and the
+// cadence users actually get. MEASURED is evidence from production (docs/TENNISCAST.md), updated only from a new audit.
+export const CADENCE = Object.freeze({
+  scheduler_interval_s: 60, // Cloudflare cron '* * * * *'
+  configured_rounds_per_run: ROUNDS,
+  configured_round_gap_ms: GAP_MS,
+  run_budget_ms: BUDGET_MS,
+  measured_effective_observation_cadence: Object.freeze({
+    summary: '~60 s, occasionally ~30 s',
+    median_gap_s: 60.2, min_gap_s: 27.5, observations: 128,
+    why: 'round 0 finishes ~8-12 s after a ~:18 cron start; round 1 fits the 50 s budget only sometimes; round 2 never',
+    source: 'WTA 125 Adana WS Ruzic–Kostovic, 2026-10-02 18:06–20:34Z (scripts/qa/live-cadence.mjs)'
+  })
+});
 
 export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs = BUDGET_MS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
   const t0 = Date.now();
@@ -66,7 +81,7 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
 export default {
   async fetch(request, env) {
     const path = new URL(request.url).pathname.replace(/\/+$/, '') || '/';
-    if (path === '/health' || path === '/') return json(await health({ worker: 'tennis-live', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY'], extra: { cron: '* * * * *', cadence_s: GAP_MS / 1000, providers: Object.values(LIVE_PROVIDERS).map((p) => ({ source: p.key, tour: p.tour, events: p.events, granularity: p.granularity, official: p.official })) } }), { headers: { 'cache-control': 'no-store' } });
+    if (path === '/health' || path === '/') return json(await health({ worker: 'tennis-live', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY'], extra: { cron: '* * * * *', cadence: CADENCE, providers: Object.values(LIVE_PROVIDERS).map((p) => ({ source: p.key, tour: p.tour, events: p.events, granularity: p.granularity, official: p.official })) } }), { headers: { 'cache-control': 'no-store' } });
     if (path === '/v1/live/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
