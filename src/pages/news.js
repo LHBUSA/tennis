@@ -8,6 +8,7 @@ import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { depthInserts } from '../ui/news-modules.js';
+import { getMembership } from '../lib/membership.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
 import { preferredSourceHtml } from '../ui/preferred-source.js';
@@ -221,6 +222,12 @@ function moversModule(ptw, wire, deskTour) {
     <p class="nf-note">Rating movement from the PBE Rating (chronological Elo, published per tour after out-of-sample validation). Ranking moves come from the lists we archive; the ATP list is secondary-source.</p>` : ''}</section>`;
 }
 
+/** All Access requests the newsroom hub may make: none unless the backend verdict is entitled. */
+export function hubProPaths(desk, entitled) {
+  if (!entitled) return [];
+  return ['/v1/players-to-watch', ...(['all', 'atp', 'wta'].includes(desk) ? ['/v1/matchups?limit=40'] : [])];
+}
+
 export function hub(root, ctx) {
   const ctl = new AbortController();
   const desk = ctx?.params?.desk || 'all';
@@ -235,7 +242,12 @@ export function hub(root, ctx) {
     <div class="page nf-body" data-body><p class="loading">Loading the newsroom…</p></div></div>`);
   const Q = (p) => api(withPreview(p), { signal: ctl.signal }).catch(() => null);
   const wantPreviews = ['all', 'atp', 'wta'].includes(desk);
-  Promise.all([Q('/v1/news?limit=60'), Q('/v1/news/live?limit=80'), Q('/v1/today'), Q('/v1/players-to-watch'), wantPreviews ? Q('/v1/matchups?limit=40') : null]).then(([nr, lr, tr, pr, mr]) => {
+  // /v1/players-to-watch and /v1/matchups are All Access endpoints (tennis-api PREMIUM_PATHS): request them only when the
+  // backend says this visitor is entitled. Anonymous / free visitors get the public modules only — Players moving keeps
+  // its public ranking moves from the wire, What's next is omitted — and never a 401 from the newsroom.
+  const pro = getMembership({ signal: ctl.signal }).then((m) => Boolean(m?.entitled)).catch(() => false);
+  const P = (p) => pro.then((ok) => (hubProPaths(desk, ok).includes(p) ? Q(p) : null));
+  Promise.all([Q('/v1/news?limit=60'), Q('/v1/news/live?limit=80'), Q('/v1/today'), P('/v1/players-to-watch'), wantPreviews ? P('/v1/matchups?limit=40') : null]).then(([nr, lr, tr, pr, mr]) => {
     const body = root.querySelector('[data-body]');
     if (!body) return;
     const all = nr?.data?.articles || [];

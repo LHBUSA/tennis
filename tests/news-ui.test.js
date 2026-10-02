@@ -117,3 +117,11 @@ test('reading time from served prose only', () => {
   assert.equal(readingMinutes([{ paragraphs: [Array.from({ length: 660 }, () => 'w').join(' ')] }]), 3);
   assert.equal(readingMinutes([]), 0);
 });
+
+test('newsroom hub: anonymous / free visitors never request All Access endpoints; entitled visitors keep them', async () => {
+  const { hubProPaths } = await import('../src/pages/news.js');
+  for (const desk of ['all', 'atp', 'wta', 'doubles', 'rankings', 'grand-slams']) assert.deepEqual(hubProPaths(desk, false), [], desk);
+  assert.deepEqual(hubProPaths('all', true), ['/v1/players-to-watch', '/v1/matchups?limit=40']);
+  assert.deepEqual(hubProPaths('wta', true), ['/v1/players-to-watch', '/v1/matchups?limit=40']);
+  assert.deepEqual(hubProPaths('doubles', true), ['/v1/players-to-watch']);
+});
