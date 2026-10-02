@@ -12,7 +12,7 @@ const pc1 = (v) => (v == null ? '—' : `${(v * 100).toFixed(1)}%`);
 const sgn = (v, d = 0) => (v == null ? '—' : `${v > 0 ? '+' : ''}${Number(v).toFixed(d)}`);
 const P = (m, s) => m.sides?.[s]?.players?.[0] || null;
 const who = (p) => (p ? html`<a href="/players/${p.slug}/dna">${p.name}</a>` : 'TBD');
-const STATUS_TEXT = { fixture_not_upcoming: 'No probability: this match is no longer upcoming', fixture_stale: 'No probability: the start time passed and no result is stored (stale fixture)', fixture_undated: 'No probability: no start time published yet', not_validated: 'No probability: this tour’s rating has not passed its backtest', insufficient_history: 'No probability: a player has too few rated matches', no_rating: 'No probability: a player has no PBE Rating yet' };
+const STATUS_TEXT = { pre_match_snapshot_unavailable: 'Pre-match snapshot unavailable', fixture_not_upcoming: 'No probability: this match is no longer upcoming', fixture_stale: 'No probability: the start time passed and no result is stored (stale fixture)', fixture_undated: 'No probability: no start time published yet', not_validated: 'No probability: this tour’s rating has not passed its backtest', insufficient_history: 'No probability: a player has too few rated matches', no_rating: 'No probability: a player has no PBE Rating yet' };
 
 function page(root, { eyebrow, heading, lede, chips = null }) {
   render(root, html`<div class="page"><header class="page-h"><p class="eyebrow">${eyebrow}</p><h1>${heading}</h1>${lede ? html`<p class="lede">${lede}</p>` : ''}
@@ -93,6 +93,7 @@ function heroCenter(d, a, b) {
     <div class="mx-bar" aria-hidden="true"><span style="width:${pa}%"></span></div>
     <p class="mx-edge">${nm(fav === 'A' ? a : b).toUpperCase()} EDGE · ${sgn(fav === 'A' ? mod.rating_edge.points : -mod.rating_edge.points)} RATING</p>
     <p class="mx-where">${where}${t.surface ? '' : ' · surface not sourced'}</p>
+    ${d.pre_match?.frozen && d.current ? html`<p class="mx-frozen">Pre-match view · frozen before play ${fmtDate(d.pre_match.frozen_at.slice(0, 10))} ${localTime(d.pre_match.frozen_at)}${d.current.status === 'completed' && d.current.score ? html` · <b>FINAL</b> ${d.current.score}` : d.current.status === 'in_progress' ? ' · match in progress' : ''}</p>` : ''}
     <p class="mx-basis"><span class="mx-chip">PBE Rating · validated</span><span>Basis: ${mod.basis === 'surface_blend' ? `overall + ${mod.surface_ratings.surface} rating blend` : 'overall rating'}</span><span>Confidence: ${mod.confidence.level.replace('_', ' ')}</span></p></div>`;
 }
 

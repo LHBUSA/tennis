@@ -10,6 +10,7 @@ import { inList } from '../../shared/store/postgrest.js';
 import { calBand, RATING_METHOD_VERSION, PROFILE_MIN } from '../../shared/dna/match-dna.js';
 import { MATCH, MEDIA, UUID, shapeMatch, shapePlayer, maxTime, families } from './shape.js';
 import { DNA_METRICS, TECH_METRICS, compareMetrics, edgeMap, collision, whyStack, h2hBySurface, EDGE_MAP_VERSION } from './matchup-intel.js';
+import { applyPreMatch, freezeOne, listSnapshots } from './matchup-freeze.js';
 
 export const MATCHUP_VERSION = '1.1.0';
 export const MIN_PRIOR = 10; // the backtest's minPrior: probabilities outside it were never evaluated
@@ -213,7 +214,7 @@ async function upcoming(store, env, url) {
   return ok({ as_of: asOf, window: { from, to }, matchup_version: MATCHUP_VERSION, matchups: list }, { rows, policy: { currentS: 600, staleS: 3600 }, semantics: 'scheduled singles matches in the next 7 days with the PBE Rating matchup; probability published only for validated tours and players inside the backtested range' });
 }
 
-async function detail(store, env, id) {
+async function detail(store, env, id, { raw = false } = {}) {
   const rows = await store.select('tennis_matches', `select=${MATCH}&match_id=eq.${id}`);
   if (!rows.length) return null;
   const m = shapeMatch(rows[0]);
@@ -266,7 +267,39 @@ async function detail(store, env, id) {
     context: { ...ctx, serve_return: serveReturn(tech.get(pa.id), tech.get(pb.id)), rest: { A: restBlock(ra, day), B: restBlock(rb, day), basis: 'completed singles matches in the stored ledger before the match day' }, travel: { A: ta, B: tb } },
     h2h
   };
-  return ok(data, { rows, source: ['pbe_derived', ...families(rows)], policy: { currentS: 600, staleS: 3600 }, semantics: 'Matchup DNA: the PBE Rating model (probability + backtest calibration) and separate, labelled context; H2H is not a model feature' });
+  if (raw) return data;
+  // live / finished matches serve the FROZEN pre-play dossier (never a recomputation with today's ratings)
+  const served = await applyPreMatch(env?.TENNIS_SOURCE || null, data);
+  return ok(served, { rows, source: ['pbe_derived', ...families(rows)], policy: { currentS: 600, staleS: 3600 }, semantics: 'Matchup DNA: the PBE Rating model (probability + backtest calibration) and separate, labelled context; H2H is not a model feature' });
+}
+
+/**
+ * FREEZER (cron): every scheduled singles match in the next 36 h gets an immutable pre-match snapshot of its dossier
+ * for the current DNA build day (matchup-freeze.js). Skips matches already frozen for this as_of + version; at most
+ * `limit` dossiers are computed per run. Summary in KV matchup:freeze:last.
+ */
+export async function freezeUpcoming(store, env, { limit = 20, horizonH = 36, now = Date.now() } = {}) {
+  const bucket = env?.TENNIS_SOURCE;
+  if (!bucket || !store) return { error: 'not_configured' };
+  const from = new Date(now - 6 * 3600e3).toISOString();
+  const to = new Date(now + horizonH * 3600e3).toISOString();
+  const rows = await store.select('tennis_matches', `select=match_id,event_type,status,scheduled_at&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=gte.${from}&scheduled_at=lte.${to}&order=scheduled_at.asc&limit=300`);
+  const asOf = await latestV2AsOf(store);
+  const out = { at: new Date(now).toISOString(), candidates: rows.length, as_of: asOf, written: 0, already: 0, skipped: 0, errors: 0, items: [] };
+  for (const r of rows) {
+    if (out.written + out.errors >= limit) break;
+    const have = await listSnapshots(bucket, r.match_id);
+    if (have.some((x) => x.as_of === String(asOf || 'none') && x.matchup_version === MATCHUP_VERSION)) { out.already += 1; continue; }
+    try {
+      const data = await detail(store, env, r.match_id, { raw: true });
+      if (!data?.match) { out.skipped += 1; continue; }
+      const res = await freezeOne(bucket, data, { now: new Date(now).toISOString() });
+      if (res.written) out.written += 1; else out.skipped += 1;
+      out.items.push({ id: r.match_id, ...res });
+    } catch (e) { out.errors += 1; out.items.push({ id: r.match_id, error: String(e?.message || e).slice(0, 160) }); }
+  }
+  if (env.TENNIS_STATE) await env.TENNIS_STATE.put('matchup:freeze:last', JSON.stringify({ ...out, items: out.items.slice(0, 25) }));
+  return out;
 }
 
 async function watch(store, env, url) {

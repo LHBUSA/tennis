@@ -19,6 +19,14 @@ id = "a117d7b3846c4a39a27ee74c49574c99"
 binding = "TENNIS_MEDIA"
 bucket_name = "tennis-media"
 
+# frozen pre-match matchup snapshots (intel/matchup-prematch/, write-once) — matchup-freeze.js
+[[r2_buckets]]
+binding = "TENNIS_SOURCE"
+bucket_name = "tennis-source"
+
+[triggers]
+crons = ["*/10 * * * *"]
+
 
 # Network membership authority. Tennis has no sport-only plan; premium grants
 # come from active PropBetEdge All Access or verified owner identity.

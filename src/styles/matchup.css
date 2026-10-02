@@ -157,3 +157,5 @@
   .mx-form-g { grid-template-columns: minmax(60px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .mx * { transition: none !important; } }
+.mx-frozen { margin: 2px 0 0; padding: 4px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); font: 700 12.5px/1.3 var(--f-data); color: var(--mx-ink); }
+.mi-next-l { margin: 0 0 10px; font-size: 15px; }

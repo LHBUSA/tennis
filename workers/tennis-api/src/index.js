@@ -72,7 +72,7 @@ import { v2Route } from './v2.js';
 import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
 import { coveredEditions, editionTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
-import { matchupRoute } from './matchup.js';
+import { matchupRoute, freezeUpcoming } from './matchup.js';
 import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 export { shapeMatch };
@@ -451,5 +451,9 @@ export async function propsportsFetch(request, env, ctx) {
 export default {
   fetch(request, env, ctx) {
     return fetchApi(request, env, ctx);
+  },
+  // frozen pre-match matchup snapshots (matchup-freeze.js): write-once while matches are scheduled
+  scheduled(_e, env, ctx) {
+    ctx.waitUntil(freezeUpcoming(storeFromEnv(env), env).catch(async (e) => { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('matchup:freeze:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }));
   }
 };

@@ -8,6 +8,7 @@ import { matchDnaSummary, matchDnaFingerprint, familyTable, formBlock, historyTa
 import { avatar, nat } from '../ui/avatar.js';
 import { ratingChart, profileBlock } from '../ui/player-profile.js';
 import { shareBar } from '../ui/share.js';
+import { hasMatchup, matchupLink, localTime } from '../ui/render.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
 import { track } from '../analytics.js';
 import { liveEntry } from '../lib/pbecast-live.js';
@@ -169,7 +170,7 @@ export const venue = mountWith((root, { params }, signal) => {
 // visitors see the PUBLISHED probability (or the real withheld reason) from /v1/matchups/:id; free visitors see a
 // teaser with no premium values. The research simulator (tennis-model) is a different thing and is not shown.
 const miCache = new Map(); // match id -> rendered module (survives the page's 30 s re-renders)
-const miEligible = (m) => m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && ['MS', 'WS'].includes(m.event_type) && ['scheduled', 'in_progress'].includes(m.status);
+const miEligible = (m) => m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && ['MS', 'WS'].includes(m.event_type) && ['scheduled', 'in_progress', 'completed', 'retired'].includes(m.status);
 function miHtml(m, x) {
   const href = `/matchups/${m.id}`;
   if (x.state === 'free') return html`<section class="mi-mod" aria-labelledby="mi-h"><h2 id="mi-h">Matchup DNA<span class="mi-tag">ALL ACCESS</span></h2><p class="mi-sub">Compare PBE Rating win probability, form, serve/return, surface and pressure profiles for this match.</p><a class="mi-cta" href="${href}">Open Matchup Intelligence →</a></section>`;
@@ -178,10 +179,11 @@ function miHtml(m, x) {
   const n = d?.intel?.faceoff?.rows?.length || 0;
   const p = d?.model?.probability;
   const pa = p ? Math.round(p.A * 1000) / 10 : null;
-  return html`<section class="mi-mod" aria-labelledby="mi-h"><h2 id="mi-h">PBE Matchup Intelligence</h2>
+  const frozen = d?.pre_match?.frozen && d?.current;
+  return html`<section class="mi-mod" aria-labelledby="mi-h"><h2 id="mi-h">${frozen ? 'Pre-match PBE view' : 'PBE Matchup Intelligence'}${frozen ? html`<span class="mi-tag">FROZEN BEFORE PLAY</span>` : ''}</h2>
     ${p ? html`<p class="mi-prob tabnum">${nm('A')} ${pa}% <span>·</span> ${nm('B')} ${Math.round((100 - pa) * 10) / 10}%</p><p class="mi-sub">PBE Rating · validated · ${d.model.basis === 'surface_blend' ? 'overall + surface blend' : 'overall rating'}${n ? ` · ${n} qualified DNA comparisons` : ''}</p>`
       : html`<p class="mi-prob">No probability</p><p class="mi-sub">${d?.model?.reason || 'The matchup could not be priced.'}${n ? ` · ${n} qualified DNA comparisons` : ''}</p>`}
-    <a class="mi-cta" href="${href}">Open full DNA matchup →</a></section>`;
+    <a class="mi-cta" href="${href}">${frozen ? 'Open pre-match dossier →' : 'Open full DNA matchup →'}</a></section>`;
 }
 function miSlot(m) {
   if (!miEligible(m)) return '';
@@ -417,6 +419,14 @@ function surfaceHistorySection(md) {
     ${S.filter((x) => !charted(x)).map((x) => html`<p class="note"><b>${cap(x)}:</b> ${why(x)}.</p>`)}</section>`;
 }
 
+/** The player's NEXT canonical singles match only (soonest scheduled, not stale) with its Matchup Intelligence link. */
+function nextMatchBlock(p) {
+  const next = (p.recent_matches || []).filter((m) => hasMatchup(m)).sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at))[0];
+  if (!next) return '';
+  const opp = ['A', 'B'].map((s) => next.sides[s].players[0]).find((x) => x.id !== p.id);
+  return html`<section class="mod mi-next"><header class="mod-h"><h2>Upcoming match</h2><span class="mod-k">${roundLabel(next.round)}${next.tournament?.tournament ? ` · ${next.tournament.tournament}` : ''}</span></header><div class="mod-b"><p class="mi-next-l"><b>${p.last_name || p.name}</b> vs <a href="/players/${opp.slug}/dna">${opp.name}</a> · <time datetime="${next.scheduled_at}">${localTime(next.scheduled_at)}</time></p><p>${matchupLink(next, 'btn green')} <a class="btn line" href="/matches/${next.id}">Match page</a></p></div></section>`;
+}
+
 export const player = mountWith(async (root, { params }, signal) => {
   render(root, html`<div class="page"><p class="loading">Loading player…</p></div>`);
   const tab = params.tab === 'dna' || params.tab === 'surfaces' ? 'dna' : null;
@@ -467,6 +477,7 @@ export const player = mountWith(async (root, { params }, signal) => {
   const md = dres?.data?.match_dna || null;
   heroRating(root, md);
   render(body, html`
+    ${nextMatchBlock(p)}
     ${md ? matchDnaSummary(md, p.slug) : ''}
     ${dnaGate?.comparative && !dnaGate.comparative.published ? html`<p class="note dna-gate"><a href="/players/${p.slug}/dna">Technical DNA →</a> · ${dnaGate.tour} serve/return comparison is still building (${dnaGate.comparative.qualified} of ${dnaGate.comparative.threshold} players with enough match statistics).</p>` : ''}
     ${md ? html`<section class="mod"><header class="mod-h"><h2>Form</h2></header><div class="mod-b">${formBlock(md.form)}${f?.current_tournament ? html`<p class="note" style="margin-top:10px">Current tournament: <a href="/tournaments/${f.current_tournament.slug}/${f.current_tournament.year}">${f.current_tournament.name} ${f.current_tournament.year}</a></p>` : ''}</div></section>` : ''}
