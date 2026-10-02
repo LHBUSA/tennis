@@ -90,3 +90,48 @@ export function predictFrom(model, f) {
   model.names.forEach((k, j) => { z += model.coef[j] * f[k]; });
   return 1 / (1 + Math.exp(-z));
 }
+
+// ---- prospective shadow: compact daily player state (research-only) ---------------------------------------------
+export const STATE_VERSION = 'mm2-state/1';
+const DAYS_KEPT = 40; // activity days kept before the cutoff (act30 for any match day on/after the cutoff)
+
+/**
+ * One player's state at `cutoffDnum` from chronological records (only records dated before the cutoff are used).
+ * For any match day D >= cutoff, stateProfile(state, D) equals profileFrom(records, D) exactly (all records predate D).
+ */
+export function playerState(recs, cutoffDnum) {
+  const before = recs.filter((r) => r[0] < cutoffDnum);
+  if (!before.length) return null;
+  const p = profileFrom(before, cutoffDnum);
+  const r6 = (x) => (x == null ? null : Math.round(x * 1e6) / 1e6);
+  return { form: r6(p.form), opp: r6(p.opp), dec: r6(p.dec), tb: r6(p.tb), ss: r6(p.ss), fsc: r6(p.fsc), cb: r6(p.cb), last: p.last_dnum, days: before.filter((r) => r[0] >= cutoffDnum - DAYS_KEPT).map((r) => r[0]) };
+}
+
+/** Profile for match day number `dnum` (>= the state's cutoff) from a stored player state. */
+export function stateProfile(s, dnum) {
+  return { last_dnum: s.last, act30: s.days.filter((d) => d < dnum && dnum - d <= 30).length, rest: Math.min(365, dnum - s.last), form: s.form, opp: s.opp, dec: s.dec, tb: s.tb, ss: s.ss, fsc: s.fsc, cb: s.cb };
+}
+
+/**
+ * Daily states of one tour from a DNA v2 build: entriesByPlayer (chronological ledger entries per player), the build's
+ * rating run (pre-match p / ratings per entry), cutoff day (the build's as_of). Players with a match in the last 400
+ * days only.
+ */
+export function tourStates(entriesByPlayer, run, cutoffDay) {
+  const cut = dayNum(cutoffDay);
+  const out = {};
+  for (const [pid, entries] of entriesByPlayer) {
+    const lastE = entries.at(-1);
+    if (!lastE || cut - dayNum(lastE.day) > 400) continue;
+    const recs = [];
+    for (const e of entries) {
+      if (dayNum(e.day) >= cut) break;
+      const pr = run.pre.get(e);
+      if (!pr) continue;
+      recs.push(recordsOf(e, pr.p, pr.ra, pr.rb)[e.A === pid ? 0 : 1]);
+    }
+    const s = playerState(recs, cut);
+    if (s) out[pid] = s;
+  }
+  return { state_version: STATE_VERSION, feature_version: FEATURE_VERSION, cutoff: cutoffDay, players: out };
+}

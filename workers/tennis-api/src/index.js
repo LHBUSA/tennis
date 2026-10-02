@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.10.0';
+export const VERSION = '0.10.1';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -72,7 +72,8 @@ import { v2Route } from './v2.js';
 import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
 import { coveredEditions, editionTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
-import { matchupRoute, freezeUpcoming } from './matchup.js';
+import { matchupRoute } from './matchup.js';
+import { scheduledRun } from './scheduled.js';
 import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 export { shapeMatch };
@@ -452,8 +453,8 @@ export default {
   fetch(request, env, ctx) {
     return fetchApi(request, env, ctx);
   },
-  // frozen pre-match matchup snapshots (matchup-freeze.js): write-once while matches are scheduled
+  // frozen pre-match matchup snapshots (matchup-freeze.js): write-once while matches are scheduled (scheduled.js)
   scheduled(_e, env, ctx) {
-    ctx.waitUntil(freezeUpcoming(storeFromEnv(env), env).catch(async (e) => { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('matchup:freeze:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }));
+    ctx.waitUntil(scheduledRun(storeFromEnv(env), env));
   }
 };

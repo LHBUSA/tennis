@@ -6,6 +6,7 @@
 import { atpTierIndex, TIER_KEY } from '../../shared/atp-tiers.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { loadTourLedger, cachedRankRows } from './dna-cache.js';
+import { writeMm2State } from './mm2-state.js';
 import { ledgerEntry, byOrder, rankIndex, ratingRun, backtest, buildMatchDna, populationIndex, applyPopulationOne, slimForPopulation, recentMatches, buildProfile, PROFILE_VERSION, MATCH_DNA_VERSION, RATING_METHOD_VERSION } from '../../shared/dna/match-dna.js';
 
 const BUILDER = 'tennis-ingest dna-v2-job 1.0';
@@ -129,6 +130,8 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
     summary.tours[tour] = { mismatched_rows: L.mismatched, matches: L.length, first_day: L[0]?.day ?? null, last_day: L.at(-1)?.day ?? null, ranking_lists: lists[tour].length, variant, published, surface_published: surfacePublished, backtest: bt };
     const byPlayer = new Map();
     for (const e of L) for (const pid of [e.A, e.B]) { if (!byPlayer.has(pid)) byPlayer.set(pid, []); byPlayer.get(pid).push(e); }
+    // research-only Matchup Model V2 shadow state (mm2-state.js): one R2 object, never part of this build's outputs
+    if (write) await writeMm2State(ctx, tour, byPlayer, run, asOfs[0]);
     // one player's full snapshot at asOf (deterministic; computed twice in the two-pass build below)
     const snapshotOf = (pid, entries, asOf) => {
       // rating as of D = the pre-match rating of the player's first match on/after D, else the final rating

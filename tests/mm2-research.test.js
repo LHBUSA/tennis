@@ -135,3 +135,69 @@ test('research output cannot reach the production matchup API or the frontend', 
     assert.doesNotMatch(fs.readFileSync(f, 'utf8'), /mm2|research[/]|model_v2_challenger/i, `${f} references the research challenger`);
   }
 });
+
+// ---- prospective shadow lane (research-only) ----------------------------------------------------------------------
+import { playerState, stateProfile, tourStates, recordsOf } from '../workers/shared/research/mm2-profile.js';
+import { shadowRecord, shadowFrozen } from '../workers/tennis-api/src/mm2-shadow.js';
+import { SHADOW_MODEL } from '../workers/shared/research/mm2-b-shadow.js';
+
+test('daily player state reproduces the offline profile exactly for any match day on/after its cutoff', () => {
+  const recs = [[100, 0, 1, 0.6, 1600, 1, 1, 0, 0, 1], [118, 1, 0, 0.5, 1650, 0, 0, 0, 0, -1], [125, 0, 0, 0.4, 1700, 0, 0, 1, 0, 0], [129, 0, 1, 0.55, 1580, 1, 2, 1, 0, 0]];
+  const cut = 130;
+  const s = playerState(recs, cut);
+  for (const D of [130, 131, 140, 160, 200]) {
+    const a = profileFrom(recs, D); const b = stateProfile(s, D);
+    for (const k of Object.keys(a)) assert.ok(a[k] === b[k] || Math.abs(a[k] - b[k]) < 1e-6, `${k} @${D}`);
+  }
+  assert.equal(playerState(recs, 100), null); // nothing before the cutoff: no state
+});
+
+test('tour states give the same Challenger B features as the frozen offline rows (matches on the cutoff day)', () => {
+  const L = ledger();
+  const run = ratingRun(L, { variant: 'margin' });
+  const rows = buildRows('WTA', L, { run }).rows;
+  const target = rows.at(-1);
+  const byPlayer = new Map();
+  for (const e of L) for (const pid of [e.A, e.B]) { if (!byPlayer.has(pid)) byPlayer.set(pid, []); byPlayer.get(pid).push(e); }
+  const st = tourStates(byPlayer, run, target.day);
+  const e = L.find((x) => x.id === target.match_id);
+  const f = featuresB(target.champion, null, stateProfile(st.players[e.A], dayNum(target.day)), stateProfile(st.players[e.B], dayNum(target.day)));
+  for (const k of ['form', 'opp', 'act30', 'rest', 'dec', 'tb', 'ss', 'fsc', 'cb', 'L']) assert.ok(Math.abs(f[k] - target.f[k]) < 1e-5, k);
+});
+
+function fakeBucket(init = {}) {
+  const m = new Map(Object.entries(init));
+  return { m, async get(k) { return m.has(k) ? { text: async () => m.get(k) } : null; }, async head(k) { return m.has(k) ? {} : null; }, async put(k, v) { m.set(k, v); } };
+}
+const snapFor = (status = 'published') => ({ snapshot_kind: 'pre_match', match_id: 'mx', frozen_at: '2026-10-03T10:00:00.000Z', scheduled_at: '2026-10-04T12:00:00+00:00', content_hash: 'h',
+  payload: { tour: 'WTA', match: { sides: { A: { players: [{ id: 'pa' }] }, B: { players: [{ id: 'pb' }] } } }, model: { status, probability: status === 'published' ? { A: 0.64, B: 0.36 } : null, basis: 'overall', surface_ratings: null } } });
+const STATE = { state_version: 'mm2-state/1', cutoff: '2026-10-03', players: { pa: { form: 0.05, opp: 1700, dec: 0.55, tb: 0.5, ss: 0.6, fsc: 0.8, cb: 0.25, last: dayNum('2026-10-01'), days: [dayNum('2026-09-28'), dayNum('2026-10-01')] }, pb: { form: -0.02, opp: 1650, dec: 0.45, tb: 0.52, ss: 0.55, fsc: 0.78, cb: 0.2, last: dayNum('2026-09-20'), days: [dayNum('2026-09-20')] } } };
+
+test('shadow record: champion exactly as frozen, challenger from the frozen coefficients; unscorable rows say why', async () => {
+  const r = await shadowRecord(snapFor(), STATE);
+  assert.deepEqual(r.champion.probability, { A: 0.64, B: 0.36 });
+  assert.equal(r.model_version, SHADOW_MODEL.model_version);
+  assert.ok(r.challenger.probability.A > 0 && r.challenger.probability.A < 1);
+  assert.equal(r.research_only, true);
+  assert.match(r.feature_hash, /^[0-9a-f]{64}$/);
+  assert.equal((await shadowRecord(snapFor('insufficient_history'), STATE)).reason, 'champion_not_published:insufficient_history');
+  assert.equal((await shadowRecord(snapFor(), null)).reason, 'no_player_state');
+  assert.equal((await shadowRecord({ ...snapFor(), scheduled_at: '2026-10-01T10:00:00Z' }, STATE)).reason, 'state_newer_than_match');
+});
+
+test('shadow writer: append-only, research prefix only, never overwrites; index appended', async () => {
+  const snapKey = 'intel/matchup-prematch/mx/2026-10-03T10:00:00.000Z_x.json';
+  const b = fakeBucket({ [snapKey]: JSON.stringify(snapFor()), 'research/mm2/state/WTA.json': JSON.stringify(STATE) });
+  const before = new Map(b.m);
+  const s1 = await shadowFrozen(b, [{ id: 'mx', written: true, key: snapKey }, { id: 'my', written: false }]);
+  assert.equal(s1.written, 1);
+  const added = [...b.m.keys()].filter((k) => !before.has(k));
+  assert.ok(added.length === 2 && added.every((k) => k.startsWith('research/mm2/')));
+  const shadowKey = added.find((k) => k.startsWith('research/mm2/shadow/'));
+  const first = b.m.get(shadowKey);
+  const s2 = await shadowFrozen(b, [{ id: 'mx', written: true, key: snapKey }]);
+  assert.equal(s2.exists, 1);
+  assert.equal(b.m.get(shadowKey), first);
+  assert.equal(JSON.parse(b.m.get('research/mm2/shadow-index/2026-10-03.json')).length, 1);
+  assert.equal(b.m.get(snapKey), before.get(snapKey)); // the frozen snapshot is never touched
+});
