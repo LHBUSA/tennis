@@ -115,7 +115,9 @@ for (const w of WIDTHS) {
         courtW: Math.round(document.querySelector('.v3-court .court')?.getBoundingClientRect().width || 0),
         stageW: Math.round(document.querySelector('[data-stage]')?.getBoundingClientRect().width || 0),
         games: [...document.querySelectorAll('.v3-gm li')].map((li) => li.textContent.replace(/\s+/g, ' ').trim()),
-        groups: [...document.querySelectorAll('.v3-rc li')].map((li) => { const m = li.textContent.match(/observed ×(\d+)/); return m ? Number(m[1]) : 1; }),
+        // point feed: one row per stored event (no "observed ×N" collapsing); seek ids must be real event indexes
+        feedRows: [...document.querySelectorAll('.pf-i button')].map((x) => Number(x.dataset.seek)),
+        collapsed: /observed ×\d/.test(document.querySelector('.pf')?.textContent || ''),
         sets: document.querySelector('.v3-fact dd')?.textContent || null
       };
     });
@@ -135,7 +137,7 @@ for (const w of WIDTHS) {
     }
     if (w >= 1024 && !(t.land && t.stageLand)) fail.push('pbecast: desktop court not in landscape');
     if (w < 1024 && t.land) fail.push('pbecast: phone/tablet court should stay portrait');
-    if (JSON.stringify(t.rail) !== JSON.stringify(['Current moment', 'Match pulse', 'Recent moments', 'Recent games'])) fail.push(`pbecast: rail modules ${t.rail.join(',')}`);
+    if (JSON.stringify(t.rail) !== JSON.stringify(['Current moment', 'Match pulse', 'Point feed', 'Recent games'])) fail.push(`pbecast: rail modules ${t.rail.join(',')}`);
     // intelligence = the API's own events: recent games are exactly the provable games (newest first, max 6)
     // compare against the API as of now (a live match moves during the run) — retry once across a poll boundary
     const fresh = (await fetch(`${API}/v1/pbecast/${target.id}`).then((x) => x.json())).data || cast;
@@ -145,8 +147,9 @@ for (const w of WIDTHS) {
     const want = provable.map((g) => `S${g.set} · G${g.game} ${g.result === 'break' ? 'BREAK' : g.result === 'hold' ? 'HOLD' : 'GAME'} ${surname(g.winner)}`);
     const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ');
     if (fresh.mode.includes('live') && !evs.some((e) => e.quality === 'point_event') && JSON.stringify(t.games.map(norm)) !== JSON.stringify(want.map(norm)) && JSON.stringify(t.games.slice(1).map(norm)) !== JSON.stringify(want.slice(0, -1).map(norm)) && JSON.stringify(t.games.map(norm).slice(0, -1)) !== JSON.stringify(want.slice(1).map(norm))) fail.push(`pbecast: recent games differ from the API events: ${t.games[0]} vs ${want[0]}`);
-    // the grouped moment rows represent consecutive real events only (never more than exist)
-    if (t.groups.reduce((a, b) => a + b, 0) > evs.length) fail.push('pbecast: grouped moments claim more observations than exist');
+    // point feed rows are real stored events only: each row seeks a distinct existing event; nothing collapsed
+    if (t.collapsed) fail.push('pbecast: point feed collapsed observations ("observed ×N")');
+    if (new Set(t.feedRows).size !== t.feedRows.length || t.feedRows.some((i) => !(i >= 0 && i < evs.length + 5))) fail.push('pbecast: point feed rows are not distinct stored events');
     if (w >= 1024 && t.courtW < t.stageW * 0.45) fail.push(`pbecast: court ${t.courtW}px of a ${t.stageW}px stage — not the visual anchor`);
     if (errors.length) fail.push(`pbecast console: ${errors.slice(0, 2).join(' | ')}`);
     // arrows (desktop): next moves, prev returns

@@ -19,7 +19,8 @@ import { fmtMetric } from '../ui/match-dna.js';
 import { inTiebreakScore } from '../../workers/shared/canonical/events.js';
 import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
-import { groupMoments, groupTransition, gamesFrom, setsWon, liveContext, pulse } from '../lib/pbecast-view.js';
+import { gamesFrom, setsWon, liveContext, pulse } from '../lib/pbecast-view.js';
+import { pointFeed, feedByGame, situationOf, situationLabel } from '../lib/pbecast-feed.js';
 import { railNav, wireRails, revealCurrent } from '../ui/rail.js';
 import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
@@ -343,25 +344,63 @@ function momentPanel(e, m, state, marker = null) {
 }
 
 /**
- * C. RECENT MOMENTS. Presentation only: consecutive observed score updates inside one game score are shown as one row
- * (first -> last point, "observed ×N"); the stored events and the timeline are untouched (pbecast-view.js).
+ * A'. LIVE STATE CARD (observed matches): the big situation callout (MATCH / SET / BREAK / GAME POINT, DEUCE, ADVANTAGE,
+ * TIEBREAK — else the latest HOLD / BREAK / SET, else who is serving), then server, point score, set games, sets won,
+ * the latest observed change and its time. Point-event matches keep the reason/speed card (momentPanel).
  */
-function recentList(evs, pos, m) {
-  const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
-  return html`<ol class="v3-rc">${groupMoments(evs, pos, { limit: 6 }).map((g) => {
-    const e = g.event;
-    const t = eventText(e, m);
-    const games = e.state ? (e.state.sets || []).map((x) => `${x.A}-${x.B}`).join(' ') : '';
-    const move = g.grouped ? groupTransition(evs, g) : '';
-    const t0 = evs[g.first].event_at || evs[g.first].observed_at;
-    const t1 = e.event_at || e.observed_at;
-    const when = g.count > 1 && t0 && timeOf(t0) !== timeOf(t1) ? `${timeOf(t0)}–${timeOf(t1)}` : timeOf(t1);
-    return html`<li class="${g.current ? 'on' : ''}${g.count > 1 ? ' is-grp' : ''}">
-    <span class="v3-rc-av">${e.winner_side && photoOf(e.winner_side) ? avatar(photoOf(e.winner_side), { px: 26 }) : ''}</span>
-    <b class="v3-rc-tag t-${String(t.tag).replace(/\s+/g, '-').toLowerCase()}">${t.tag}</b>
-    <span class="v3-rc-sc tabnum">${games}${move ? html`<small>${move}</small>` : ''}</span>
-    <span class="v3-rc-q">${g.count > 1 ? html`<em title="${g.count} consecutive observations in this game">observed ×${g.count}</em>` : t.quality === 'point' ? 'POINT' : 'OBS'}${when ? html`<span class="tabnum"> · ${when}</span>` : ''}</span></li>`;
-  })}</ol>`;
+const FEED_TAG = { hold: 'HOLD', break: 'BREAK', game: 'GAME', set: 'SET', match: 'FINAL', tiebreak: 'TIEBREAK', start: 'START', suspended: 'SUSPENDED', resumed: 'RESUMED' };
+function stateCard(e, m, state, item, live) {
+  if (!e) return html`<p class="v3-mo-empty">Waiting for the first observed event.</p>`;
+  const nm = (s) => sideName(m, s);
+  const final = ['completed', 'retired', 'walkover'].includes(state?.status);
+  const sit = final ? null : situationOf(state, m.format);
+  const call = final ? 'FINAL' : situationLabel(sit, nm)
+    || (item && ['hold', 'break', 'set'].includes(item.kind) && item.who ? `${FEED_TAG[item.kind]} · ${item.who}` : null)
+    || (state?.server ? `${nm(state.server).toUpperCase()} SERVING` : 'IN PLAY');
+  const cur = state?.sets?.at(-1);
+  const when = e.event_at || e.observed_at;
+  const age = live && when ? Math.max(0, Math.round((Date.now() - Date.parse(when)) / 1000)) : null;
+  const pt = state?.point && !final ? html`<b>${nm('A')} ${state.point.A}</b><i aria-hidden="true">·</i><b>${nm('B')} ${state.point.B}</b>` : '—';
+  const kind = sit?.kind || (final ? 'final' : item?.kind || 'play');
+  return html`<div class="v3-mo lsc k-${kind}" data-key="${e.event_id}">
+    <div class="v3-mo-top"><span class="v3-mo-tag lsc-call">${call}</span><span class="v3-mo-q q-snapshot" title="Score / server observations, not source point events">OBSERVED</span></div>
+    <dl class="lsc-grid tabnum">
+      <div><dt>Server</dt><dd>${state?.server && !final ? nm(state.server) : '—'}</dd></div>
+      <div><dt>Point</dt><dd>${pt}</dd></div>
+      <div><dt>${cur ? `Set ${state.sets.length}` : 'Games'}</dt><dd>${cur ? `${cur.A}–${cur.B}` : '—'}</dd></div>
+      <div><dt>Sets</dt><dd>${state?.sets?.length ? `${setsWon(state, 'A')}–${setsWon(state, 'B')}` : '—'}</dd></div>
+    </dl>
+    ${item?.line ? html`<p class="v3-mo-line lsc-last">${item.line}</p>` : ''}
+    <p class="v3-mo-meta tabnum">${when ? html`<time datetime="${when}">Observed ${timeOf(when)}</time>${age != null ? html`<i aria-hidden="true">·</i><span>${age < 90 ? `${age}s ago` : `${Math.round(age / 60)} min ago`}</span>` : ''}` : ''}<i aria-hidden="true">·</i><span>${item?.provenance === 'derived' ? 'derived from consecutive observations' : 'observed score state'}</span></p>
+  </div>`;
+}
+
+/**
+ * C. POINT FEED. Every stored event is its own row, grouped by game (newest game first): the current game and the
+ * previous three, the full match on demand. A player is credited only for a proven single point; wider changes read
+ * "score advanced … between observations". Rows are seek buttons: replay jumps to exactly that stored event.
+ */
+function feedPanel(evs, pos, m, all) {
+  const nm = (s) => sideName(m, s);
+  const items = pointFeed(evs, m, { upto: pos, name: nm });
+  const groups = feedByGame(items);
+  const shown = all ? groups : groups.slice(0, 4);
+  const more = groups.length - shown.length;
+  const row = (it) => {
+    const e = evs[it.idx];
+    const src = it.kind === 'point_event' ? eventText(e, m) : null;
+    const chip = src ? src.tag : ['point', 'jump', 'start', 'other'].includes(it.kind) ? situationLabel(it.sit, nm) : FEED_TAG[it.kind] || null;
+    const line = src ? src.line : it.line;
+    const sc = ['hold', 'break', 'set', 'match'].includes(it.kind) ? '' : it.to || '';
+    return html`<li class="pf-i k-${it.kind}${it.major ? ' is-major' : ''}${it.sit ? ` s-${it.sit.kind}` : ''}${it.idx === pos ? ' on' : ''}"><button type="button" data-seek="${it.idx}" aria-current="${it.idx === pos ? 'true' : 'false'}">
+      <time class="tabnum" datetime="${it.time || ''}">${it.time ? timeOf(it.time) : ''}</time><span class="pf-chip${chip ? '' : ' is-empty'}">${chip || ''}</span><span class="pf-line">${line}</span><span class="pf-sc tabnum">${sc}</span></button></li>`;
+  };
+  return html`<div class="pf">${shown.map((g) => html`<section class="pf-g${g.result ? ` r-${g.result}` : ''}">
+      <header class="pf-gh"><b>${g.set ? `Set ${g.set}` : ''}${g.game ? ` · Game ${g.game}` : ''}</b>${g.server ? html`<span>${nm(g.server)} serving</span>` : ''}${g.result && g.winner ? html`<em class="pf-res">${FEED_TAG[g.result]} · ${nm(g.winner)}</em>` : ''}</header>
+      <ol>${g.items.map(row)}</ol></section>`)}
+    ${more ? html`<button type="button" class="pf-more" data-act="feed-all">Show full match timeline · ${more} earlier game${more === 1 ? '' : 's'}</button>` : all && groups.length > 4 ? html`<button type="button" class="pf-more" data-act="feed-recent">Show recent games only</button>` : ''}
+    <p class="pf-note">${evs.some((x) => x.quality === 'point_event') ? 'Point-by-point from the source feed: reasons, speeds and rally lengths appear only where the source publishes them.' : 'Observed score feed. A player is credited with a point only when two consecutive observations differ by exactly one point; wider changes are shown as the score advancing between observations, never reconstructed.'}</p>
+  </div>`;
 }
 
 function timelineBar(evs, m) {
@@ -405,6 +444,7 @@ export function mount(root, { params, live = null }) {
   let queue = [];
   let lastPainted = -1;
   let ctlSig = '';
+  let feedAll = false; // point feed: full match timeline revealed (survives live repaints)
   render(root, html`<div class="page ts-wrap" data-tourstate>${castTourState(TOURS_PENDING, { compact: true, state: 'pending' })}</div><div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   const sw = root.querySelector('[data-switch]');
   wireRails(sw, ctl.signal);
@@ -457,7 +497,7 @@ export function mount(root, { params, live = null }) {
           <h2 class="v3-rail-h" id="v3-rail-h">${data.mode.includes('live') ? 'Live intelligence' : 'Match intelligence'}</h2>
           <section class="v3-mod v3-moment" aria-label="Current moment" aria-live="polite"><h3 class="v3-mod-h">Current moment</h3><div data-moment></div></section>
           <section class="v3-mod v3-pulse" aria-labelledby="v3-pulse-h"><h3 class="v3-mod-h" id="v3-pulse-h">Match pulse</h3><div data-intel></div></section>
-          <section class="v3-mod v3-recent" aria-labelledby="v3-recent-h"><h3 class="v3-mod-h" id="v3-recent-h">Recent moments</h3><div data-recent></div></section>
+          <section class="v3-mod v3-recent" aria-labelledby="v3-recent-h"><h3 class="v3-mod-h" id="v3-recent-h">Point feed</h3><div data-recent></div></section>
           <section class="v3-mod v3-games" aria-labelledby="v3-games-h"><h3 class="v3-mod-h" id="v3-games-h">Recent games</h3><div data-games></div></section>
         </aside>
         <div class="v3-timeline" data-timeline></div>
@@ -532,8 +572,9 @@ export function mount(root, { params, live = null }) {
       const sw = setsWon(state, s);
       card.querySelector('[data-ctx]').textContent = final ? (m.winner_side === s ? 'WINNER' : '') : `${sw} set${sw === 1 ? '' : 's'} · ${lastSet?.[s] ?? 0} games${state.point ? ` · ${state.point[s]}` : ''}`;
     }
-    render($('[data-moment]'), momentPanel(cur, m, state, isPoint && cur ? pointMarker(prev || (ps.pos > 0 ? viewState(ps.pos - 1) : null), state, cur) : null));
-    render($('[data-recent]'), evs.length ? recentList(evs, ps.pos, m) : html`<p class="note">No stored events for this match.</p>`);
+    const feedItem = cur && !isPoint ? pointFeed(evs.slice(0, ps.pos + 1), m, { name: (x) => sideName(m, x) }).at(-1) : null;
+    render($('[data-moment]'), isPoint || !cur ? momentPanel(cur, m, state, isPoint && cur ? pointMarker(prev || (ps.pos > 0 ? viewState(ps.pos - 1) : null), state, cur) : null) : stateCard(cur, m, state, feedItem, ps.mode === 'live'));
+    render($('[data-recent]'), evs.length ? feedPanel(evs, ps.pos, m, feedAll) : html`<p class="note">No stored events for this match.</p>`);
     render($('[data-intel]'), pulsePanel(data, m, state, ps.pos, data.mode.includes('live')));
     render($('[data-games]'), gamesPanel(evs, ps.pos, m));
     // controls: re-render only when their own state changes (keeps focus)
@@ -599,6 +640,7 @@ export function mount(root, { params, live = null }) {
     if (!b || !data) return;
     const n = data.events.length;
     const act = b.dataset.act;
+    if (act === 'feed-all' || act === 'feed-recent') { feedAll = act === 'feed-all'; paint(false); track('pbecast_feed_expand', { match_id: data.match.id, all: feedAll }); return; }
     if (act === 'fs') {
       const el = $('[data-pbc]');
       if (document.fullscreenElement) document.exitFullscreen(); else el.requestFullscreen?.().catch(() => el.classList.toggle('is-fs'));
