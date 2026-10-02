@@ -1,5 +1,17 @@
 # Status — 2026-09-28 13:00 UTC (production snapshot)
 
+**PBE Rating publication (authoritative: `docs/evidence/dna-v2-backtest-latest.json`, build 2026-09-29T03:44:57Z,
+rating method_version 1; reconciled 2026-10-02, nothing recomputed).** Both tours PUBLISHED, surface ratings published
+for both. Champion figures are the PUBLISHED variant of each tour:
+
+| Tour | Variant served | Eval matches | Log loss | Brier | vs fitted ranking (same matches) | Surface blend vs overall |
+|---|---|---|---|---|---|---|
+| ATP | standard | 34,429 | 0.6183 | 0.2147 | 0.6326 vs 0.6391 (15,649) | 0.5898 vs 0.5921 (10,388) |
+| WTA | margin | 104,632 | 0.5353 | 0.1810 | 0.6059 vs 0.6468 (7,318) | 0.5371 vs 0.5377 (100,120) |
+
+(WTA standard variant, not served: 0.5419 / 0.1832, 0.6080 vs 0.6468.) Sections below are dated snapshots; where they
+say WTA PBE Rating is "held", that was superseded by this build.
+
 **2026-09-28 — Phase 5 contextual expansion (evidence: `docs/evidence/context-coverage-latest.json`,
 `source-canary-latest.json`, `production-canary-latest.json`, `dna-v2-qa-latest.json`, `dna-v2-wta-qa-latest.json`,
 `dna-v2-surface-qa-latest.json`; registries `data/context/*.json`).**
@@ -18,7 +30,7 @@
   /records vs derived (singles + doubles, tour level): 216/602 exact, 402 within 2 matches; 386 logged disagreements.
 - Tennis DNA v2: memory-safe build (was failing: 1102 exceededMemory), surface Match DNA (hard/clay/grass),
   incremental inputs live (`dna2:mode=auto`, shadow verification to 2026-10-05; production hashes equal).
-  WTA PBE Rating (margin variant) 0.6061 vs ranking 0.6470 log loss (7,313 matches); surface ratings published
+  WTA PBE Rating (margin variant) 0.6061 vs ranking 0.6470 log loss (7,313 matches; 2026-09-29 build: 0.6059 vs 0.6468 on 7,318); surface ratings published
   for both tours.
 - Incident 2026-09-28 00:24 UTC: ~2-3 min of PostgREST 5xx on tkmln (all tennis reads) caused by our own
   backfill load; see RELEASE.md "Incidents".
@@ -105,7 +117,7 @@ Product: ONE Tennis product — men’s and women’s singles, doubles and mixed
 - **Photos:** 329 men approved; AO 2026 men's main draw 123/128; 2026 men's field (all ingested events)
   272/324.
 - **Tennis DNA:** v2 **Match DNA — live** (definition_version 2; results-based families, per-metric same-tour
-  gates; PBE Rating published for ATP after beating a ranking model out of sample, held for WTA). v1 **technical
+  gates; PBE Rating published for ATP and WTA after each beat a fitted ranking model out of sample — see the table at the top). v1 **technical
   DNA** unchanged: ATP 17/30 → held; only 238 men's singles matches carry statistics (all Australian Open).
 
 ## Open ingest holds (844)
