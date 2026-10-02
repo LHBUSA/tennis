@@ -21,6 +21,8 @@ import { track } from '../analytics.js';
 import { switcherItems } from '../lib/pbecast-live.js';
 import { gamesFrom, setsWon, liveContext, pulse } from '../lib/pbecast-view.js';
 import { pointFeed, feedByGame, situationOf, situationLabel } from '../lib/pbecast-feed.js';
+import { dataMode, breakPressure, recentGames, setStarts, prevGame, nextGame, currentMoment } from '../lib/pbecast-broadcast.js';
+import { getMembership } from '../lib/membership.js';
 import { railNav, wireRails, revealCurrent } from '../ui/rail.js';
 import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
@@ -408,6 +410,69 @@ function feedPanel(evs, pos, m, all) {
   </div>`;
 }
 
+// ================= PBEcast Broadcast V4: current-moment hero, pressure, pre-match panel, navigation =================
+// Same truth contract: only sourced fields; snapshot mode (game-level ESPN) never shows a point score, a server or a
+// point feed; observed mode never reconstructs points; point mode shows source reasons only when the event carries them.
+/** The hero: where the match is, who serves (only when sourced), the situation, and what just changed. */
+function heroMoment(m, state, mode, last, sitText) {
+  const mo = currentMoment(state, mode, { last });
+  const nm = (s) => sideName(m, s);
+  const where = mo.final ? (state?.status === 'retired' ? 'RETIRED' : 'FINAL') : mo.set ? `SET ${mo.set}${mo.tiebreak ? ' · TIEBREAK' : mo.game ? ` · GAME ${mo.game}` : ''}` : statusLabel(state?.status || m.status).toUpperCase();
+  const lead = mo.games && (mo.games.A !== mo.games.B) ? (mo.games.A > mo.games.B ? 'A' : 'B') : null;
+  const games = mo.games ? html`<span class="v4h-games tabnum">${playerLinks(m, 'A')} <b>${mo.games.A}</b><i>·</i><b>${mo.games.B}</b> ${playerLinks(m, 'B')}</span>` : '';
+  return html`<div class="v4h k-${mode}${mo.final ? ' is-final' : ''}" data-k="${sitText || ''}">
+    <div class="v4h-l"><span class="v4h-where">${where}</span>${games}${lead && !mo.final ? html`<small class="v4h-lead">${nm(lead)} leads the set</small>` : ''}</div>
+    <div class="v4h-c">${mo.point ? html`<b class="v4h-pt tabnum">${mo.point.A}<i>–</i>${mo.point.B}</b>` : mode === 'snapshot' && !mo.final ? html`<b class="v4h-pt v4h-nopt">GAMES</b>` : ''}${sitText ? html`<span class="v4h-sit">${sitText}</span>` : ''}${mo.server ? html`<span class="v4h-srv"><i class="v4-ball" aria-hidden="true"></i>${nm(mo.server).toUpperCase()} SERVING</span>` : ''}</div>
+    <div class="v4h-r"><span class="v4h-k">${mode === 'snapshot' ? 'Latest observation' : mode === 'point' ? 'Last point' : 'Latest change'}</span><span class="v4h-last">${last?.line || (mode === 'snapshot' ? 'Set and game score as observed; this source publishes no point-by-point.' : 'Waiting for the first event.')}</span>${last?.tag ? html`<small class="v4h-tag">${last.tag}</small>` : ''}</div>
+  </div>`;
+}
+
+/** Break-point pressure (current match): point mode = every break point played; observed mode = break-point games. */
+function pressurePanel(bpMatch, bpSet, m) {
+  if (!bpMatch) return html`<p class="note">Not available: this source publishes no point score, so break points cannot be observed.</p>`;
+  const pt = bpMatch.basis === 'points';
+  const row = (s) => html`<tr><th scope="row">${playerLinks(m, s)}</th><td class="tabnum">${bpMatch.converted[s]}/${bpMatch.chances[s]}</td><td class="tabnum">${pt ? `${bpMatch.saved[s]}/${bpMatch.faced[s]}` : `${bpMatch.saved[s]}`}</td>${bpSet ? html`<td class="tabnum">${bpSet.converted[s]}/${bpSet.chances[s]}</td>` : ''}</tr>`;
+  return html`<table class="v4-bp"><thead><tr><th></th><th scope="col">${pt ? 'BP converted' : 'Break games won'}</th><th scope="col">${pt ? 'BP saved' : 'Held through'}</th>${bpSet ? html`<th scope="col">This set</th>` : ''}</tr></thead><tbody>${row('A')}${row('B')}</tbody></table>
+    <p class="v3-basis">${pt ? 'Every point played at break point in this match, from the source point stream.' : `Games in which a break-point score was observed${bpMatch.unknown ? ` (${bpMatch.unknown} without a provable ending)` : ''}. Observations are periodic, so break points between two observations are not counted.`} PBE-derived from observed match events.</p>`;
+}
+
+/** Compact pre-match PBE view (entitled): the FROZEN probability when the match has started; never recomputed live. */
+function prematchPanel(x, m) {
+  if (!x) return html`<p class="note">Loading…</p>`;
+  if (x.state === 'free') return html`<p class="v4-pm-t">Matchup DNA</p><p class="note">PBE Rating win probability, form, serve/return, surface and pressure profiles for this match.</p><a class="v3-b v4-pm-cta" href="/matchups/${m.id}">Open Matchup Intelligence →</a>`;
+  const d = x.data;
+  if (!d) return html`<p class="note">Matchup Intelligence covers singles with both players identified.</p>`;
+  const p = d.model?.probability;
+  const frozen = d.pre_match?.frozen;
+  const cats = (d.intel?.edge_map?.categories || []).filter((c) => c.edge === 'A' || c.edge === 'B');
+  return html`<p class="v4-pm-t">${frozen ? 'Pre-match PBE Rating' : 'PBE Rating'}${frozen && d.current ? html` <small>frozen before play</small>` : ''}</p>
+    ${p ? html`<p class="v4-pm-p tabnum"><span>${sideName(m, 'A')} <b>${Math.round(p.A * 1000) / 10}%</b></span><span><b>${Math.round(p.B * 1000) / 10}%</b> ${sideName(m, 'B')}</span></p><div class="v4-pm-bar" aria-hidden="true"><i style="width:${Math.round(p.A * 100)}%"></i></div>` : html`<p class="note">${d.model?.reason || 'No published probability.'}</p>`}
+    ${cats.length ? html`<ul class="v4-pm-c">${cats.map((c) => html`<li><span>${c.label}</span><b>${sideName(m, c.edge)}</b></li>`)}</ul><p class="v3-basis">DNA category comparison (${d.intel.edge_map.version}) — context, not the probability.</p>` : ''}
+    <a class="v3-b v4-pm-cta" href="/matchups/${m.id}">Open full matchup →</a>`;
+}
+
+/** Set chips + previous / next game: real event indexes only. */
+function navBar(evs, pos) {
+  const sets = setStarts(evs);
+  const pg = prevGame(evs, pos);
+  const ng = nextGame(evs, pos);
+  if (!evs.length) return '';
+  return html`<div class="v4-nav" role="group" aria-label="Jump through the match">
+    <button type="button" class="v3-b" data-seek="${pg ?? 0}" ${pg == null ? 'disabled' : ''} aria-label="Previous game">⏮ Game</button>
+    <button type="button" class="v3-b" data-seek="${ng ?? pos}" ${ng == null ? 'disabled' : ''} aria-label="Next game">Game ⏭</button>
+    ${sets.length > 1 ? html`<span class="v4-sets">${sets.map((s) => html`<button type="button" class="v3-chip${evs[pos] && (evs[pos].set_number || evs[pos].state?.sets?.length) === s.set ? ' on' : ''}" data-seek="${s.index}" aria-label="Jump to set ${s.set}">Set ${s.set}</button>`)}</span>` : ''}
+  </div>`;
+}
+
+/** A one-line, polite announcement of what changed (instead of re-announcing the whole scoreboard). */
+function announce(m, state, mode, last) {
+  const mo = currentMoment(state, mode, { last });
+  if (mo.final) return `Match ${state?.status === 'retired' ? 'ended by retirement' : 'complete'}.`;
+  const g = mo.games ? `${sideName(m, 'A')} ${mo.games.A}, ${sideName(m, 'B')} ${mo.games.B}` : '';
+  const pt = mo.point ? `, ${mo.point.A}–${mo.point.B}` : '';
+  return `${last?.line ? `${last.line}. ` : ''}Set ${mo.set || ''}: ${g}${pt}${mo.server ? `, ${sideName(m, mo.server)} serving` : ''}.`;
+}
+
 function timelineBar(evs, m) {
   const groups = [];
   evs.forEach((e, i) => {
@@ -450,6 +515,10 @@ export function mount(root, { params, live = null }) {
   let lastPainted = -1;
   let ctlSig = '';
   let feedAll = false; // point feed: full match timeline revealed (survives live repaints)
+  let lastAnnounced = -1;
+  let pmX = null; // pre-match matchup panel: { state: 'free' } | { state: 'ok', data } (loaded once)
+  // render only when the markup actually changed: an unchanged poll never re-paints (no flashes, no lost focus)
+  const renderIf = (el, tpl) => { if (!el) return; const sig = String(tpl); if (el.__v4sig === sig) return; el.__v4sig = sig; render(el, tpl); };
   render(root, html`<div class="page ts-wrap" data-tourstate>${castTourState(TOURS_PENDING, { compact: true, state: 'pending' })}</div><div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   const sw = root.querySelector('[data-switch]');
   wireRails(sw, ctl.signal);
@@ -490,20 +559,24 @@ export function mount(root, { params, live = null }) {
     render($('[data-pbc]'), html`
       <h1 class="sr">${title} — PBEcast</h1>
       <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${[roundLabel(m.round), eventLabel(m.event_type), t.level, t.surface ? `${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : null, m.court].filter(Boolean).join(' · ')}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
-      <div class="v3-score-wrap page"><div class="v3-score" data-score aria-live="polite"></div></div>
+      <div class="v3-score-wrap page"><div class="v3-score" data-score></div></div>
+      <p class="sr" aria-live="polite" aria-atomic="true" data-announce></p>
+      <div class="v4-hero page" data-hero></div>
       <div class="v3-stage page" data-stage>
         <div class="v3-courtcol">
           ${pidShell(m, 'B')}
           <div class="v3-court" data-court></div>
           ${pidShell(m, 'A')}
           <div class="v3-controls" data-controls></div>
+          <div class="v4-navwrap" data-nav></div>
         </div>
         <aside class="v3-rail" aria-labelledby="v3-rail-h">
           <h2 class="v3-rail-h" id="v3-rail-h">${data.mode.includes('live') ? 'Live intelligence' : 'Match intelligence'}</h2>
-          <section class="v3-mod v3-moment" aria-label="Current moment" aria-live="polite"><h3 class="v3-mod-h">Current moment</h3><div data-moment></div></section>
+          <section class="v3-mod v4-pressure" aria-labelledby="v4-bp-h"><h3 class="v3-mod-h" id="v4-bp-h">Break-point pressure</h3><div data-pressure></div></section>
           <section class="v3-mod v3-pulse" aria-labelledby="v3-pulse-h"><h3 class="v3-mod-h" id="v3-pulse-h">Match pulse</h3><div data-intel></div></section>
           <section class="v3-mod v3-recent" aria-labelledby="v3-recent-h"><h3 class="v3-mod-h" id="v3-recent-h">Point feed</h3><div data-recent></div></section>
           <section class="v3-mod v3-games" aria-labelledby="v3-games-h"><h3 class="v3-mod-h" id="v3-games-h">Recent games</h3><div data-games></div></section>
+          <section class="v3-mod v4-pm" aria-labelledby="v4-pm-h" data-pm-sec hidden><h3 class="v3-mod-h" id="v4-pm-h">Matchup</h3><div data-prematch></div></section>
         </aside>
         <div class="v3-timeline" data-timeline></div>
       </div>
@@ -577,11 +650,20 @@ export function mount(root, { params, live = null }) {
       const sw = setsWon(state, s);
       card.querySelector('[data-ctx]').textContent = final ? (m.winner_side === s ? 'WINNER' : '') : `${sw} set${sw === 1 ? '' : 's'} · ${lastSet?.[s] ?? 0} games${state.point ? ` · ${state.point[s]}` : ''}`;
     }
+    const mode = dataMode(data);
     const feedItem = cur && !isPoint ? pointFeed(evs.slice(0, ps.pos + 1), m, { name: (x) => sideName(m, x) }).at(-1) : null;
-    render($('[data-moment]'), isPoint || !cur ? momentPanel(cur, m, state, isPoint && cur ? pointMarker(prev || (ps.pos > 0 ? viewState(ps.pos - 1) : null), state, cur) : null) : stateCard(cur, m, state, feedItem, ps.mode === 'live'));
-    render($('[data-recent]'), evs.length ? feedPanel(evs, ps.pos, m, feedAll) : html`<p class="note">No stored events for this match.</p>`);
-    render($('[data-intel]'), pulsePanel(data, m, state, ps.pos, data.mode.includes('live')));
-    render($('[data-games]'), gamesPanel(evs, ps.pos, m));
+    const last = cur ? (isPoint ? eventText(cur, m) : feedItem ? { tag: feedItem.sit ? situationLabel(feedItem.sit, (x) => sideName(m, x)) : null, line: feedItem.line } : null) : null;
+    const sitText = !final ? (situationLabel(situationOf(state, m.format), (x) => sideName(m, x)) || sit?.text || null) : null;
+    renderIf($('[data-hero]'), heroMoment(m, state, mode, last, mode === 'snapshot' ? null : sitText));
+    const ann = $('[data-announce]');
+    if (ann && animate && lastAnnounced !== ps.pos) { ann.textContent = announce(m, state, mode, last); lastAnnounced = ps.pos; }
+    renderIf($('[data-pressure]'), pressurePanel(breakPressure(evs, ps.pos, { mode }), mode === 'snapshot' ? null : breakPressure(evs, ps.pos, { mode, scope: 'set' }), m));
+    renderIf($('[data-recent]'), evs.length ? feedPanel(evs, ps.pos, m, feedAll) : html`<p class="pf-note">${mode === 'snapshot' ? 'Game-level coverage: this source publishes set and game scores only, so there is no point feed and no server. The scoreboard shows the latest observed games.' : 'No stored events for this match yet.'}</p>`);
+    const rg = recentGames(evs, ps.pos, { mode });
+    renderIf($('[data-intel]'), html`${rg ? html`<p class="v4-rg"><b>${playerLinks(m, 'A')}</b> won <b class="tabnum">${rg.A}</b> · <b>${playerLinks(m, 'B')}</b> won <b class="tabnum">${rg.B}</b> <small>of the last ${rg.window} ${rg.basis}</small></p>` : ''}${pulsePanel(data, m, state, ps.pos, data.mode.includes('live'))}`);
+    renderIf($('[data-games]'), gamesPanel(evs, ps.pos, m));
+    renderIf($('[data-nav]'), navBar(evs, ps.pos));
+    if (pmX) { const sec = $('[data-pm-sec]'); if (sec) sec.hidden = false; renderIf($('[data-prematch]'), prematchPanel(pmX, m)); }
     // controls: re-render only when their own state changes (keeps focus)
     const sig = `${ps.mode}|${ps.playing}|${ps.paused}|${ps.done}|${ps.speed}|${evs.length}|${ps.mode === 'live' ? ps.pos === evs.length - 1 : ''}`;
     if (sig !== ctlSig) { render($('[data-controls]'), evs.length ? controlsBar(ps, evs.length) : ''); ctlSig = sig; }
@@ -624,6 +706,12 @@ export function mount(root, { params, live = null }) {
       ps = initialState({ live: d.mode.includes('live'), count: d.events.length, deepLinkIndex: i, speed: ps?.speed || DEFAULT_SPEED });
       buildShell();
       paint(false);
+      if (first && ['MS', 'WS'].includes(d.match.event_type) && d.match.sides?.A?.players?.length === 1 && d.match.sides?.B?.players?.length === 1) {
+        getMembership({ signal: ctl.signal }).then(async (mem) => {
+          pmX = mem?.entitled ? { state: 'ok', data: (await api(`/v1/matchups/${d.match.id}`, { signal: ctl.signal }).catch(() => null))?.data || null } : { state: 'free' };
+          if (data && ps) paint(false);
+        }).catch(() => {});
+      }
       if (first) {
         track(d.mode.includes('replay') ? 'tennis_pbecast_replay_open' : 'tennis_pbecast_open', { match_id: d.match.id, pbecast_mode: d.mode, match_status: d.match.status, surface: d.match.tournament?.surface });
         document.title = `${sideName(d.match, 'A')} vs ${sideName(d.match, 'B')} ${d.mode.includes('live') ? 'Live PBEcast' : 'PBEcast Replay'} | PropBetEdge Tennis`;
@@ -666,6 +754,18 @@ export function mount(root, { params, live = null }) {
     paint(act === 'next' || act === 'again');
     schedule();
   };
+  const onDocKey = (e) => {
+    if (!data || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
+    const n = data.events.length;
+    if (e.key === 'f' || e.key === 'F') { const el = $('[data-pbc]'); if (document.fullscreenElement) document.exitFullscreen(); else el?.requestFullscreen?.().catch(() => el.classList.toggle('is-fs')); e.preventDefault(); return; }
+    if (!n) return;
+    if (e.key === ']') { const g = nextGame(data.events, ps.pos); if (g != null) { ps = seek(ps, g, n); queue = []; paint(true); schedule(); } e.preventDefault(); }
+    else if (e.key === '[') { const g = prevGame(data.events, ps.pos); if (g != null) { ps = seek(ps, g, n); queue = []; paint(false); schedule(); } e.preventDefault(); }
+    else if (e.key === ' ' && ps.mode === 'replay' && !(t && /^(BUTTON|A)$/.test(t.tagName))) { ps = togglePlay(ps, n); paint(false); schedule(); e.preventDefault(); }
+  };
+  document.addEventListener('keydown', onDocKey);
   const onKey = (e) => {
     if (!data || !e.target.closest?.('[data-controls],[data-timeline]')) return;
     if (e.key === 'ArrowRight') { ps = step(ps, 1, data.events.length); paint(true); schedule(); e.preventDefault(); }
@@ -674,7 +774,7 @@ export function mount(root, { params, live = null }) {
   root.addEventListener('click', onClick);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };

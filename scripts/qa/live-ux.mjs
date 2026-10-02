@@ -137,7 +137,7 @@ for (const w of WIDTHS) {
     }
     if (w >= 1024 && !(t.land && t.stageLand)) fail.push('pbecast: desktop court not in landscape');
     if (w < 1024 && t.land) fail.push('pbecast: phone/tablet court should stay portrait');
-    if (JSON.stringify(t.rail) !== JSON.stringify(['Current moment', 'Match pulse', 'Point feed', 'Recent games'])) fail.push(`pbecast: rail modules ${t.rail.join(',')}`);
+    if (JSON.stringify(t.rail) !== JSON.stringify(['Break-point pressure', 'Match pulse', 'Point feed', 'Recent games']) && JSON.stringify(t.rail) !== JSON.stringify(['Break-point pressure', 'Match pulse', 'Point feed', 'Recent games', 'Matchup'])) fail.push(`pbecast: rail modules ${t.rail.join(',')}`);
     // intelligence = the API's own events: recent games are exactly the provable games (newest first, max 6)
     // compare against the API as of now (a live match moves during the run) — retry once across a poll boundary
     const fresh = (await fetch(`${API}/v1/pbecast/${target.id}`).then((x) => x.json())).data || cast;
