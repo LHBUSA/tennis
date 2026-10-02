@@ -17,6 +17,7 @@ let wasmReady = null;
 const ready = () => (wasmReady ||= initWasm(wasm));
 
 import { headFor, apiGet, ROUND, fmtD, newsEntities, playerRank } from './heads.js';
+import { noTransform } from './transport.js';
 
 async function shellTemplate(env) {
   // The shell names the deployment's hashed entry script. A long-lived copy outlives the Vercel deployment
@@ -126,7 +127,13 @@ async function sitemap(env) {
 }
 
 export default {
+  // Every response leaves with no-transform: see transport.js for why (Vercel cache vs Accept-Encoding).
   async fetch(request, env, ctx) {
+    return noTransform(await handle(request, env, ctx));
+  }
+};
+
+async function handle(request, env, ctx) {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
     if (path === '/health') return new Response(JSON.stringify({ ok: true, worker: 'tennis-web', version: VERSION, api_binding: !!env.API, media: !!env.TENNIS_MEDIA }), { headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
@@ -141,5 +148,4 @@ export default {
     const html = tpl.replace(/<!--seo:start-->[\s\S]*?<!--seo:end-->/, `<!--seo:start-->\n    ${headHtml(meta)}\n    <!--seo:end-->`).replace('<!--preload-->', '');
     const status = r.id === 'not-found' || /not found/i.test(meta.title) ? 404 : 200;
     return new Response(html, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60, s-maxage=300', 'x-robots-tag': meta.robots.startsWith('noindex') ? 'noindex' : 'all', 'x-content-type-options': 'nosniff' } });
-  }
-};
+}
