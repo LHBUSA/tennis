@@ -505,7 +505,7 @@ async function latency(store, hours = 168) {
  * its frozen_at are kept). A class never goes down. model=1: one routed model edit (trigger admin_reedit) over the new
  * baseline, through the same gates; default is the deterministic baseline. slug=: one story (the canary).
  */
-export async function repairContext(env, store, { write = false, limit = 60, minDims = 4, slug = null, model = false } = {}) {
+export async function repairContext(env, store, { write = false, limit = 60, minDims = 4, slug = null, model = false, attempts = 1 } = {}) {
   const q = `select=article_id,slug,event_id,status,story_class,prose_origin,headline,deck,body,first_published_at,published_at,revised_at,revisions,primary_player_id,player_ids,tennis_article_evidence(packet,frozen_at)&status=eq.published${slug ? `&slug=eq.${encodeURIComponent(slug)}` : ''}&order=published_at.desc&limit=${Math.min(200, limit)}`;
   const rows = await store.select('tennis_articles', q);
   const out = { write, model, min_dims: minDims, scanned: rows.length, match_stories: 0, eligible: 0, repaired: 0, held: 0, items: [] };
@@ -530,9 +530,9 @@ export async function repairContext(env, store, { write = false, limit = 60, min
     // model-written stories are re-edited by the model (one routed admin_reedit call, same gates, baseline fallback):
     // replacing richer model prose with the deterministic baseline would be a downgrade
     const useModel = model || a.prose_origin === 'model';
-    if (useModel && write && ev) ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass: to, packet, baseline, gate, dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: 1 });
+    if (useModel && write && ev) ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass: to, packet, baseline, gate, dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: Math.min(2, Math.max(1, attempts)) });
     else { const g = gate(baseline); ed = { article: { ...baseline, prose_origin: 'baseline' }, origin: g.pass ? 'baseline' : null, gate: g, attempts: [], usage: {} }; }
-    const item = { slug: a.slug, published_at: a.published_at, from_class: from, to_class: to, dims: dims.length, old_thin_context: thin.length > 0, new_gate_pass: !!ed.origin, failures: (ed.gate?.failures || []).slice(0, 6), prose_origin: ed.origin, stored_prose_origin: a.prose_origin || null, would_model_reedit: useModel && !write, old_failures: thin.map((f) => f.gate), after: ed.origin ? { headline: ed.article.headline, sections: ed.article.sections.filter((s) => s.id !== 'method').map((s) => ({ id: s.id, paragraphs: s.paragraphs })) } : null };
+    const item = { slug: a.slug, published_at: a.published_at, from_class: from, to_class: to, dims: dims.length, old_thin_context: thin.length > 0, new_gate_pass: !!ed.origin, failures: (ed.gate?.failures || []).slice(0, 6), prose_origin: ed.origin, model_attempts: (ed.attempts || []).map((x) => ({ pass: x.pass ?? null, failures: (x.failures || []).map((f) => f.gate), error: x.error || null })), stored_prose_origin: a.prose_origin || null, would_model_reedit: useModel && !write, old_failures: thin.map((f) => f.gate), after: ed.origin ? { headline: ed.article.headline, sections: ed.article.sections.filter((s) => s.id !== 'method').map((s) => ({ id: s.id, paragraphs: s.paragraphs })) } : null };
     if (write && ed.origin) {
       await upgradeArticle(store, { ...a, story_class: from }, { article: ed.article, ed, plan, packet, storyClass: to, dimensions: evidenceDimensions(packet), reason: `context repair (tennis-compose ${COMPOSE_VERSION}, ${GATES_VERSION}): stored prose failed thin_context`, keepEvidence: true });
       item.written = true;
@@ -572,7 +572,7 @@ export default {
     // production-path release canary: one routed call, telemetry + premium counter, never writes articles (?dry=1: routing only)
     if (path === '/v1/news/canary-routed' && request.method === 'POST') return json({ ok: true, data: await routedCanary(env, store, { eventId: url.searchParams.get('event_id'), dry: url.searchParams.get('dry') === '1' }) });
     // V4.1 context repair of published match stories (dry unless write=1; model=1 adds one routed admin_reedit edit)
-    if (path === '/v1/news/repair-context' && request.method === 'POST') return json({ ok: true, data: await repairContext(env, store, { write: url.searchParams.get('write') === '1', model: url.searchParams.get('model') === '1', slug: url.searchParams.get('slug'), limit: Number(url.searchParams.get('limit')) || 60, minDims: Number(url.searchParams.get('min_dims')) || 4 }) });
+    if (path === '/v1/news/repair-context' && request.method === 'POST') return json({ ok: true, data: await repairContext(env, store, { write: url.searchParams.get('write') === '1', model: url.searchParams.get('model') === '1', slug: url.searchParams.get('slug'), limit: Number(url.searchParams.get('limit')) || 60, minDims: Number(url.searchParams.get('min_dims')) || 4, attempts: Number(url.searchParams.get('attempts')) || 1 }) });
     if (path === '/v1/news/ai-usage') return json({ ok: true, data: { ...(await poolUsage(env.TENNIS_STATE)), canary_premium_today: Number(await env.TENNIS_STATE?.get(poolKey('canary-premium'))) || 0, config: (({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }) => ({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }))(aiConfig(env)) } });
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates
