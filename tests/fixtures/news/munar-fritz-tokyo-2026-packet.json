@@ -309,7 +309,7 @@
     },
     "first_set_conversion": {
      "pct": 86,
-     "label": "Won set 1 <0x1a> won match",
+     "label": "Won set 1 → won match",
      "value": 0.8599,
      "family": "pressure",
      "record": null,
@@ -544,7 +544,7 @@
     },
     "first_set_conversion": {
      "pct": 80,
-     "label": "Won set 1 <0x1a> won match",
+     "label": "Won set 1 → won match",
      "value": 0.8,
      "family": "pressure",
      "record": null,

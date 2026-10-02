@@ -7,6 +7,10 @@
 #   pwsh scripts/db/run_sql.ps1 -ReloadSchema
 param([string]$Query = "", [string]$File = "", [switch]$ReloadSchema)
 $ErrorActionPreference = "Stop"
+# UTF-8 out: a piped stdout otherwise uses the legacy console codepage and turns non-ASCII (e.g. the Match DNA label
+# arrow U+2192) into 0x1A SUB bytes in every consumer (2026-10-02: misread as corrupt frozen packets).
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+$OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 $sig = @'
 using System; using System.Runtime.InteropServices;
 public class TennisCred {
