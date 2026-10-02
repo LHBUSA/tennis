@@ -3,8 +3,8 @@
 import { html, render, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
-import { avatar } from '../ui/avatar.js';
-import { fmtDate, localTime, roundLabel } from '../ui/render.js';
+import { avatar, nat } from '../ui/avatar.js';
+import { fmtDate, localTime, roundLabel, cap } from '../ui/render.js';
 import { track } from '../analytics.js';
 
 const pct0 = (v) => (v == null ? '—' : `${Math.round(v * 100)}%`);
@@ -58,8 +58,186 @@ export const matchups = mount((root, _c, signal) => {
   }, 'Matchups unavailable.', signal);
 });
 
-// ---- /matchups/:id ---------------------------------------------------------------------------------------
+// ---- /matchups/:id — Matchup Intelligence V2: a pre-match dossier ---------------------------------------------------
+// Order: players + probability -> why PBE -> DNA category comparison -> Match DNA face-off -> serve/return collision ->
+// surface -> form -> opposition -> pressure -> H2H -> load -> model validation. Only the probability is a model output;
+// every other module is labelled context with its sample and confidence. Values come from /v1/matchups/:id only.
 const cmpRow = (label, A, B, fmt, note = '') => html`<tr><th scope="row">${label}${note ? html`<small class="note"> ${note}</small>` : ''}</th><td class="n tabnum">${A == null ? '—' : fmt(A)}</td><td class="n tabnum">${B == null ? '—' : fmt(B)}</td></tr>`;
+const EDGE_TXT = { A: (a) => a, B: (_, b) => b, no_edge: () => 'No edge', insufficient: () => 'Insufficient data' };
+const fmtVal = (r, v) => (r.kind === 'rank' ? `No. ${Math.round(v)}` : r.kind === 'diff' ? sgn(v, 2) : r.kind === 'wae' ? sgn(v, 3) : pc1(v));
+const recTxt = (x) => (x?.record ? (x.record.W != null ? `${x.record.W}–${x.record.L}` : x.record.losses != null ? `${x.record.losses} of ${x.record.matches}` : '') : '');
+const sampleTxt = (x) => `${x.sample ?? '—'} ${x.sample === 1 ? 'match' : 'matches'} · ${x.confidence}`;
+
+function heroSide(p, side, m, cls) {
+  const seed = m.sides?.[side]?.seed;
+  return html`<div class="mx-id ${cls}">
+    ${p?.slug ? html`<a class="mx-portrait" href="/players/${p.slug}/dna" aria-label="${p.name} — Tennis DNA">${avatar(p, { size: 'portrait', px: 132, eager: true })}</a>` : avatar(p, { size: 'portrait', px: 132, eager: true })}
+    <div class="mx-id-t"><b class="mx-name">${p?.slug ? html`<a href="/players/${p.slug}/dna">${p.name}</a>` : p?.name || 'TBD'}</b>
+      <span class="mx-meta">${p?.nationality ? nat(p.nationality) : ''}${p?.rank ? html`<span>No. ${p.rank.rank}</span>` : ''}${seed ? html`<span>Seed ${seed}</span>` : ''}</span>
+      ${p?.slug ? html`<a class="mx-dna-link" href="/players/${p.slug}/dna">View Tennis DNA →</a>` : ''}</div></div>`;
+}
+
+function heroCenter(d, a, b) {
+  const mod = d.model;
+  const nm = (p) => p?.last_name || p?.name;
+  const t = d.match.tournament || {};
+  const where = [roundLabel(d.match.round), t.tournament || t.name, t.surface ? cap(t.surface) : null].filter(Boolean).join(' · ');
+  if (!mod?.probability) {
+    return html`<div class="mx-center"><p class="mx-kicker">PBE Matchup Intelligence</p><p class="mx-withheld">${STATUS_TEXT[mod?.status] || 'No probability'}</p><p class="mx-reason">${mod?.reason || ''}</p>${mod?.rating_edge ? html`<p class="mx-edge">Rating edge ${Math.abs(mod.rating_edge.points)} pts${mod.rating_edge.favours ? ` · ${nm(mod.rating_edge.favours === 'A' ? a : b)}` : ''} · descriptive</p>` : ''}<p class="mx-where">${where}</p></div>`;
+  }
+  const pa = Math.round(mod.probability.A * 1000) / 10;
+  const pb = Math.round((100 - pa) * 10) / 10;
+  const fav = mod.probability.A >= mod.probability.B ? 'A' : 'B';
+  return html`<div class="mx-center"><p class="mx-kicker">PBE Matchup Intelligence</p>
+    <div class="mx-prob tabnum" role="img" aria-label="Win probability: ${a?.name} ${pa}%, ${b?.name} ${pb}%"><b class="${fav === 'A' ? 'fav' : ''}">${pa}<small>%</small></b><b class="${fav === 'B' ? 'fav' : ''}">${pb}<small>%</small></b></div>
+    <div class="mx-bar" aria-hidden="true"><span style="width:${pa}%"></span></div>
+    <p class="mx-edge">${nm(fav === 'A' ? a : b).toUpperCase()} EDGE · ${sgn(fav === 'A' ? mod.rating_edge.points : -mod.rating_edge.points)} RATING</p>
+    <p class="mx-where">${where}${t.surface ? '' : ' · surface not sourced'}</p>
+    <p class="mx-basis"><span class="mx-chip">PBE Rating · validated</span><span>Basis: ${mod.basis === 'surface_blend' ? `overall + ${mod.surface_ratings.surface} rating blend` : 'overall rating'}</span><span>Confidence: ${mod.confidence.level.replace('_', ' ')}</span></p></div>`;
+}
+
+function whyBlock(d, a, b) {
+  const w = d.intel?.why;
+  if (!w) return html`<section class="mod mx-why"><header class="mod-h"><h2>Why PBE has no number here</h2></header><ul>${d.why.map((x) => html`<li>${x}</li>`)}</ul></section>`;
+  const fav = (w.favourite === 'A' ? a : b)?.last_name || w.favourite_name;
+  return html`<section class="mod mx-why" aria-labelledby="mx-why-h"><header class="mod-h"><h2 id="mx-why-h">Why PBE leans ${fav}</h2></header>
+    <div class="mx-why-g">
+      <div class="mx-why-c k-model"><h3>Model</h3><ul>${w.model_inputs.map((x) => html`<li><b class="tabnum">${sgn(x.value)}</b> ${x.label}</li>`)}</ul><p class="note">The only inputs to the probability.</p></div>
+      <div class="mx-why-c k-agree"><h3>Supporting context</h3>${w.supporting.length ? html`<ul>${w.supporting.map((x) => html`<li>${x} — ${fav} leads the DNA comparison</li>`)}</ul>` : html`<p class="note">No DNA category leans ${fav}.</p>`}</div>
+      <div class="mx-why-c k-counter"><h3>Counterpoint</h3>${w.counterpoint.length ? html`<ul>${w.counterpoint.map((x) => html`<li>${x} — leans the other way</li>`)}</ul>` : html`<p class="note">No DNA category leans the other way.</p>`}</div>
+    </div>
+    <ul class="mx-why-t">${d.why.map((x) => html`<li>${x}</li>`)}</ul>
+    <p class="note">${w.note}</p></section>`;
+}
+
+function edgeBlock(d, a, b) {
+  const map = d.intel?.edge_map;
+  if (!map) return '';
+  const nm = (s) => (s === 'A' ? a : b)?.last_name || (s === 'A' ? a : b)?.name;
+  return html`<section class="mod mx-edges" aria-labelledby="mx-edges-h"><header class="mod-h"><h2 id="mx-edges-h">DNA category comparison</h2><span class="mod-k">${map.version} · not a prediction</span></header>
+    <div class="mx-tally tabnum"><div><b>${map.tally.A}</b><span>${nm('A')}</span></div><div><b>${map.tally.B}</b><span>${nm('B')}</span></div><div><b>${map.tally.no_edge}</b><span>No edge</span></div><div><b>${map.tally.insufficient}</b><span>Insufficient</span></div></div>
+    <ul class="mx-edge-l">${map.categories.map((c) => html`<li class="e-${c.edge}"><span class="mx-cat">${c.label}</span><b>${EDGE_TXT[c.edge](nm('A'), nm('B'))}</b><small>${c.edge === 'insufficient' ? (c.note || `${c.qualified ?? 0} qualified comparison${c.qualified === 1 ? '' : 's'}`) : c.windows ? `wins above expectation · 10w ${c.windows[0]} · 52w ${c.windows[1]}` : c.points != null ? `${sgn(c.points)} rating points` : `${c.A}–${c.B} decided · ${c.even} even`}</small></li>`)}</ul>
+    <p class="note">Rule: ${map.rule}</p></section>`;
+}
+
+const CAT_TITLE = { overall: 'Overall strength', pressure: 'Pressure situations', opposition: 'Opponent quality' };
+function faceoffBlock(d, a, b) {
+  const f = d.intel?.faceoff;
+  if (!f?.rows?.length) return html`<section class="mod"><header class="mod-h"><h2>Match DNA</h2></header><p class="note">No Match DNA metric is qualified (medium/high confidence) for both players.</p></section>`;
+  const nm = (p) => p?.last_name || p?.name;
+  const row = (r) => {
+    const span = r.kind === 'rate' ? 1 : Math.max(Math.abs(r.A.value), Math.abs(r.B.value)) || 1;
+    const wA = r.kind === 'rank' ? null : Math.max(0, Math.min(100, (Math.abs(r.A.value) / span) * 100));
+    const wB = r.kind === 'rank' ? null : Math.max(0, Math.min(100, (Math.abs(r.B.value) / span) * 100));
+    return html`<li class="mx-row adv-${r.advantage || 'neutral'}">
+      <span class="mx-row-l">${r.label}${r.better === 'low' ? html`<small>lower is better</small>` : r.better == null ? html`<small>style · no edge</small>` : ''}</span>
+      <span class="mx-v a"><b class="tabnum">${fmtVal(r, r.A.value)}</b>${r.advantage === 'A' ? html`<i aria-label="${nm(a)} leads">◀</i>` : ''}<small>${recTxt(r.A)} ${sampleTxt(r.A)}</small>${wA != null ? html`<span class="mx-b" style="--w:${wA}%"></span>` : ''}</span>
+      <span class="mx-v b">${r.advantage === 'B' ? html`<i aria-label="${nm(b)} leads">▶</i>` : ''}<b class="tabnum">${fmtVal(r, r.B.value)}</b><small>${recTxt(r.B)} ${sampleTxt(r.B)}</small>${wB != null ? html`<span class="mx-b" style="--w:${wB}%"></span>` : ''}</span></li>`;
+  };
+  const cats = ['overall', 'pressure', 'opposition'];
+  return html`<section class="mod mx-faceoff" aria-labelledby="mx-fo-h"><header class="mod-h"><h2 id="mx-fo-h">Match DNA face-off</h2><span class="mod-k">${f.rows.length} qualified comparisons${f.withheld ? ` · ${f.withheld} withheld (low confidence)` : ''}</span></header>
+    <div class="mx-names"><span>${nm(a)}</span><span>${nm(b)}</span></div>
+    ${cats.map((c) => { const rows = f.rows.filter((r) => r.category === c); return rows.length ? html`<h3 class="mx-sub">${CAT_TITLE[c]}</h3><ul class="mx-rows">${rows.map(row)}</ul>` : ''; })}
+    <p class="note">${f.basis}. ATP and WTA are never pooled.</p></section>`;
+}
+
+function collisionBlock(d, a, b) {
+  const c = d.intel?.collision;
+  const t = d.intel?.technical;
+  const nm = (p) => p?.last_name || p?.name;
+  if (!c?.available) return html`<section class="mod mx-col"><header class="mod-h"><h2>Serve / return collision</h2><span class="mod-k">technical DNA</span></header><p class="mx-honest">Not available for this matchup.</p><p class="note">${c?.reason || ''}${t?.withheld ? ` ${t.withheld} technical metric${t.withheld === 1 ? ' is' : 's are'} held below medium confidence.` : ''}</p></section>`;
+  const side = (rows, srv, ret) => html`<div class="mx-col-s"><h3>When ${nm(srv)} serves</h3>${rows.length ? html`<ul>${rows.map((r) => html`<li><span class="mx-cl">${r.label}</span><b class="tabnum">${pc1(r.server.value)}</b><span class="mx-cbar" aria-hidden="true">${((e) => html`<i style="left:${e >= 0 ? 50 : 50 + e}%;width:${Math.abs(e)}%"></i>`)(Math.max(-50, Math.min(50, r.server_edge * 100)))}</span><b class="tabnum">${pc1(r.returner.value)}</b><small>${nm(ret)} return · edge ${sgn(r.server_edge * 100, 1)} pts</small></li>`)}</ul>` : html`<p class="note">No qualified pair.</p>`}</div>`;
+  const read = (x, srv, ret) => (x ? `${nm(srv)}’s ${x.strongest_server.toLowerCase()} profile carries the most weight against ${nm(ret)}’s returns${x.strongest_returner ? `, while ${nm(ret)}’s return profile resists ${nm(srv)}’s ${x.strongest_returner.toLowerCase()} most` : ''}.` : null);
+  const reads = [read(c.read?.A_serving, a, b), read(c.read?.B_serving, b, a)].filter(Boolean);
+  return html`<section class="mod mx-col" aria-labelledby="mx-col-h"><header class="mod-h"><h2 id="mx-col-h">Serve / return collision</h2><span class="mod-k">technical DNA · context</span></header>
+    <div class="mx-col-g">${side(c.A_serving, a, b)}${side(c.B_serving, b, a)}</div>
+    ${reads.length ? html`<p class="mx-read"><b>PBE read</b> ${reads.join(' ')} Historical measurement only — not a causal claim and not a model input.</p>` : ''}
+    ${t?.rows?.length ? html`<details class="mx-tech"><summary>All ${t.rows.length} qualified technical metrics</summary><div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>${t.rows.map((r) => cmpRow(r.label, r.A.value, r.B.value, pc1, r.better === 'low' ? '(lower is better)' : ''))}</tbody></table></div></details>` : ''}
+    <p class="note">${c.note}</p></section>`;
+}
+
+function surfaceBlock(d, a, b) {
+  const s = d.intel?.surface_profile;
+  if (!s) return '';
+  const nm = (p) => p?.last_name || p?.name;
+  const S = ['hard', 'clay', 'grass'];
+  return html`<section class="mod mx-surface"><header class="mod-h"><h2>${s.tournament_surface ? `${cap(s.tournament_surface)} court DNA` : 'Surface DNA'}</h2><span class="mod-k">PBE surface ratings</span></header>
+    <div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>${S.map((k) => html`<tr class="${s.tournament_surface === k ? 'on' : ''}"><th scope="row">${cap(k)}${s.tournament_surface === k ? html` <small>this event</small>` : ''}</th><td class="n tabnum">${s.A?.[k] ? html`${s.A[k].rating} <small>${sgn(s.A[k].vs_overall)} vs overall · ${s.A[k].rated_matches}</small>` : '—'}</td><td class="n tabnum">${s.B?.[k] ? html`${s.B[k].rating} <small>${sgn(s.B[k].vs_overall)} vs overall · ${s.B[k].rated_matches}</small>` : '—'}</td></tr>`)}</tbody></table></div>
+    <p class="note">${s.note || (d.model?.surface_ratings?.used ? `The model used the ${s.tournament_surface} blend.` : `The model did not use a ${s.tournament_surface} blend (it needs both players with 5+ ${s.tournament_surface}-rated matches and a validated surface model).`)}</p></section>`;
+}
+
+function formBlock(d, a, b) {
+  const f = d.context?.form || {};
+  const nm = (p) => p?.last_name || p?.name;
+  const cell = (x) => (x ? html`<b class="tabnum">${x.W}–${x.L}</b><small>vs expectation ${sgn(x.wae, 3)} · ${x.n_rated} rated</small>` : '—');
+  return html`<section class="mod mx-form"><header class="mod-h"><h2>Form</h2><span class="mod-k">opponent-adjusted</span></header>
+    <div class="mx-form-g"><span></span><span class="mx-fh">Last 10 weeks</span><span class="mx-fh">Last 52 weeks</span>
+      ${['A', 'B'].map((s) => html`<span class="mx-fn">${nm(s === 'A' ? a : b)}</span><span class="mx-fc">${cell(f['10w']?.[s])}</span><span class="mx-fc">${cell(f['52w']?.[s])}</span>`)}</div>
+    <p class="note">“vs expectation” = results minus what each player’s rating predicted against those opponents, so a strong record against weak schedules does not look stronger than it is.${f['52w']?.wae_edge != null ? ` 52-week edge ${sgn(f['52w'].wae_edge, 3)} per match.` : ''}</p></section>`;
+}
+
+function oppBlock(d, a, b) {
+  const rows = (d.intel?.faceoff?.rows || []).filter((r) => r.category === 'opposition' && r.A.record && r.B.record);
+  if (!rows.length) return '';
+  const nm = (p) => p?.last_name || p?.name;
+  const maxN = Math.max(...rows.flatMap((r) => [r.A.sample, r.B.sample]));
+  const pill = (x) => html`<span class="mx-opp-v" style="--o:${0.35 + 0.65 * Math.min(1, (x.sample || 0) / maxN)}"><b class="tabnum">${recTxt(x)}</b><small>${pc1(x.value)} · ${x.sample}</small></span>`;
+  return html`<section class="mod mx-opp"><header class="mod-h"><h2>Opponent-strength profile</h2><span class="mod-k">opacity = sample size</span></header>
+    <div class="mx-names"><span>${nm(a)}</span><span>${nm(b)}</span></div>
+    <ul class="mx-opp-l">${rows.map((r) => html`<li><span class="mx-cat">${r.label}</span>${pill(r.A)}${pill(r.B)}</li>`)}</ul>
+    <p class="note">A small sample is drawn fainter: a 1–0 record never competes visually with 14–11.</p></section>`;
+}
+
+function pressureBlock(d, a, b) {
+  const rows = (d.intel?.faceoff?.rows || []).filter((r) => r.category === 'pressure' && r.better);
+  if (!rows.length) return '';
+  const nm = (p) => p?.last_name || p?.name;
+  return html`<section class="mod mx-press"><header class="mod-h"><h2>Pressure profile</h2><span class="mod-k">specific metrics</span></header>
+    <div class="mx-press-g">${rows.map((r) => html`<div class="mx-pc adv-${r.advantage}"><h3>${r.label}</h3><p><span>${nm(a)}</span><b class="tabnum">${pc1(r.A.value)}</b><small>${r.A.sample} matches</small></p><p><span>${nm(b)}</span><b class="tabnum">${pc1(r.B.value)}</b><small>${r.B.sample} matches</small></p></div>`)}</div>
+    <p class="note">Each card is one defined Match DNA metric with its sample.</p></section>`;
+}
+
+function h2hBlock(d, a, b) {
+  const h = d.h2h;
+  const nm = (p) => p?.last_name || p?.name;
+  const bys = d.intel?.h2h_by_surface;
+  return html`<section class="mod mu-h2h mx-h2h"><header class="mod-h"><h2>Head to head</h2><span class="mod-k">not a model input</span></header>
+    <p class="h2h-big tabnum"><span>${nm(a)}</span> <b>${h.record.A}</b> – <b>${h.record.B}</b> <span>${nm(b)}</span></p>
+    ${bys ? html`<p class="mx-h2h-s">${Object.entries(bys).map(([s, x]) => html`<span><b>${cap(s)}</b> ${x.A}–${x.B}</span>`)}</p>` : ''}
+    ${h.meetings.length ? html`<ul class="mx-meet">${h.meetings.map((x) => html`<li><span class="tabnum">${x.year || ''}</span><span>${x.tournament || ''}${x.surface ? html` <small>${x.surface}</small>` : ''}</span><b>${nm(x.won_by === 'A' ? a : b)}</b><span class="tabnum">${x.score || ''}</span></li>`)}</ul>` : html`<p class="note">No stored meeting.</p>`}
+    <p class="note">${h.note}.</p></section>`;
+}
+
+function loadBlock(d, a, b) {
+  const c = d.context;
+  const nm = (p) => p?.last_name || p?.name;
+  return html`<section class="mod mx-load"><header class="mod-h"><h2>Schedule load</h2><span class="mod-k">workload context</span></header>
+    <div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>
+      ${cmpRow('Rest (days since last match)', c.rest?.A?.days_since_last, c.rest?.B?.days_since_last, (v) => `${v}d`)}
+      ${cmpRow('Matches, last 7 days', c.rest?.A?.matches_7d, c.rest?.B?.matches_7d, (v) => `${v}`)}
+      ${cmpRow('Sets, last 7 days', c.rest?.A?.sets_7d, c.rest?.B?.sets_7d, (v) => `${v}`)}
+      ${cmpRow('Matches, last 14 days', c.rest?.A?.matches_14d, c.rest?.B?.matches_14d, (v) => `${v}`)}
+      ${cmpRow('Previous event', c.travel?.A?.previous_event ? `${c.travel.A.previous_event}${c.travel.A.previous_city ? ` · ${c.travel.A.previous_city}` : ''}` : null, c.travel?.B?.previous_event ? `${c.travel.B.previous_event}${c.travel.B.previous_city ? ` · ${c.travel.B.previous_city}` : ''}` : null, (v) => v)}
+    </tbody></table></div>
+    <p class="note">${c.rest?.basis || ''}. Schedule and location exactly as the sources publish them: workload context only, with no distance or travel-time estimate.</p></section>`;
+}
+
+function validationBlock(d) {
+  const mod = d.model;
+  const bt = mod?.confidence?.backtest;
+  const sim = mod?.confidence?.similar_matches;
+  const s = sim?.same_surface || sim?.all_surfaces;
+  if (!mod?.model) return '';
+  return html`<section class="mod mx-valid" aria-labelledby="mx-v-h"><header class="mod-h"><h2 id="mx-v-h">Model validation</h2><span class="mod-k">PBE Rating · method v${mod.model.method_version}${mod.model.variant ? ` (${mod.model.variant})` : ''} · matchup v${mod.model.matchup_version}</span></header>
+    ${bt ? html`<div class="mx-vg tabnum">
+      <div><span>Out-of-sample matches</span><b>${bt.matches.toLocaleString('en-US')}</b></div>
+      <div><span>Accuracy</span><b>${pc1(bt.accuracy)}</b></div>
+      <div><span>Log loss</span><b>${bt.log_loss}</b>${bt.vs_rank ? html`<small>vs ranking model ${bt.vs_rank.rank_log_loss} (rating ${bt.vs_rank.rating_log_loss} on the shared set)</small>` : ''}</div>
+      <div><span>Brier</span><b>${bt.brier}</b></div></div>` : html`<p class="note">No backtest summary for this tour.</p>`}
+    ${s ? html`<p class="mx-cal"><b>Historical calibration</b> In ${s.matches.toLocaleString('en-US')} past ${s.surface === 'all' ? '' : `${s.surface} `}matches where the model gave the favourite ${Math.round(s.band[0] * 100)}–${Math.round(s.band[1] * 100)}%, the favourite won <b>${pc1(s.favourite_won)}</b> (predicted ${pc1(s.predicted)}).</p>` : ''}
+    ${mod.ratings ? html`<p class="note">Ratings: ${mod.ratings.A.value} (${mod.ratings.A.rated_matches} rated) vs ${mod.ratings.B.value} (${mod.ratings.B.rated_matches} rated). A probability is published only for a validated tour and players inside the backtested range; withheld otherwise. <a href="/methodology">Methodology →</a></p>` : ''}</section>`;
+}
+
 export const matchup = mount(async (root, { params }, signal) => {
   render(root, html`<div class="page"><p class="loading">Loading matchup…</p></div>`);
   let res;
@@ -67,60 +245,24 @@ export const matchup = mount(async (root, { params }, signal) => {
   if (resultState(res) === 'error') { render(root, html`<div class="page">${errorModule(res.meta, 'Matchup DNA could not be loaded.')}</div>`); return; }
   if (!res.data) { render(root, html`<div class="page">${emptyModule(res.meta, 'Matchup DNA covers singles matches with both players identified.')}</div>`); return; }
   const d = res.data; const m = d.match; const a = P(m, 'A'); const b = P(m, 'B');
-  const mod = d.model; const c = d.context;
-  track('tennis_matchup_open', { match_id: m.id, tour: d.tour });
-  document.title = `${a?.name} vs ${b?.name} — Matchup DNA | PropBetEdge Tennis`;
+  track('tennis_matchup_open', { match_id: m.id, tour: d.tour, probability: d.model?.status });
+  document.title = `${a?.name} vs ${b?.name} — Matchup Intelligence | PropBetEdge Tennis`;
   setIndexable(false);
-  const nm = (p) => p?.last_name || p?.name;
-  const win = (k, s) => c.form?.[k]?.[s];
-  const sim = mod.confidence?.similar_matches;
-  const simRow = sim?.same_surface || sim?.all_surfaces;
-  render(root, html`<div class="page">
-    <header class="page-h"><p class="eyebrow">Matchup DNA · ${d.tour} · ${m.tournament?.tournament || m.tournament?.name || ''} ${m.tournament?.year || ''}${m.tournament?.surface ? ` · ${m.tournament.surface}` : ''}</p>
-      <h1 class="mu-h1"><span>${avatar(a, { px: 56 })}${who(a)}</span><em>vs</em><span>${who(b)}${avatar(b, { px: 56 })}</span></h1>
-      <p class="lede">${roundLabel(m.round)}${m.scheduled_at ? ` · ${fmtDate(m.scheduled_at.slice(0, 10))} ${localTime(m.scheduled_at)}` : ''}${m.court ? ` · ${m.court}` : ''} · status: ${m.status.replace('_', ' ')}</p>
-      <p class="meta">${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span></p></header>
-    <section class="mod mu-model"><header class="mod-h"><h2>Win probability</h2><span class="mod-k">PBE Rating · method v${mod.model.method_version}${mod.model.variant ? ` (${mod.model.variant})` : ''} · matchup v${mod.model.matchup_version}</span></header>
-      ${probBar(mod, a, b)}
-      <div class="mu-why"><h3 class="sub-h">Why this number</h3><ul>${d.why.map((x) => html`<li>${x}</li>`)}</ul></div>
-      ${mod.ratings ? html`<div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th>Model input</th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>
-        ${cmpRow('PBE Rating', mod.ratings.A.value, mod.ratings.B.value, (v) => v)}
-        ${cmpRow('Rated matches', mod.ratings.A.rated_matches, mod.ratings.B.rated_matches, (v) => `${v}`, mod.ratings.A.provisional || mod.ratings.B.provisional ? '(under 20 = provisional)' : '')}
-        ${mod.surface_ratings ? cmpRow(`${mod.surface_ratings.surface} rating`, mod.surface_ratings.A?.value, mod.surface_ratings.B?.value, (v) => v, mod.surface_ratings.used ? '(used: 50/50 blend)' : '(not used)') : ''}
-      </tbody></table></div>` : ''}
-      ${mod.confidence ? html`<div class="mu-conf"><div><span>Confidence</span><b>${mod.confidence.level.replace('_', ' ')}</b></div>${simRow ? html`<div><span>Similar past matches</span><b class="tabnum">${simRow.matches.toLocaleString('en-US')}</b><small>favourite ${pct0(simRow.band[0])}–${pct0(simRow.band[1])} ${simRow.surface === 'all' ? '' : `on ${simRow.surface}`} · won ${pc1(simRow.favourite_won)} (model said ${pc1(simRow.predicted)})</small></div>` : ''}${mod.confidence.backtest ? html`<div><span>Out-of-sample record</span><b class="tabnum">${pc1(mod.confidence.backtest.accuracy)}</b><small>correct favourite over ${mod.confidence.backtest.matches.toLocaleString('en-US')} matches · log loss ${mod.confidence.backtest.log_loss}${mod.confidence.backtest.vs_rank ? ` vs ranking model ${mod.confidence.backtest.vs_rank.rank_log_loss}` : ''}</small></div>` : ''}</div>` : ''}
+  render(root, html`<div class="mx">
+    <section class="mx-hero" aria-label="Matchup">
+      <div class="mx-hero-in">${heroSide(a, 'A', m, 'a')}${heroCenter(d, a, b)}${heroSide(b, 'B', m, 'b')}</div>
+      <p class="mx-hero-meta">${d.tour} · ${m.scheduled_at ? `${fmtDate(m.scheduled_at.slice(0, 10))} ${localTime(m.scheduled_at)}` : 'start time not published'}${m.court ? ` · ${m.court}` : ''} · ${freshnessBadge(res.meta)}</p>
     </section>
-    <h2 class="sec">Context <small>shown with its sample — none of this changes the probability</small></h2>
-    <div class="grid-2">
-      <section class="mod"><header class="mod-h"><h2>Form</h2><span class="mod-k">opponent-adjusted</span></header>
-        <div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>
-          ${['10w', '52w'].map((k) => html`${cmpRow(`Last ${k.replace('w', '')} weeks`, win(k, 'A'), win(k, 'B'), (x) => `${x.W}–${x.L}`)}${cmpRow('  vs expectation', win(k, 'A')?.wae, win(k, 'B')?.wae, (v) => sgn(v, 3))}`)}
-          ${cmpRow('Career vs expectation', c.opponent_quality?.A?.wins_above_expectation, c.opponent_quality?.B?.wins_above_expectation, (v) => sgn(v, 3))}
-          ${cmpRow('Avg opponent rank', c.opponent_quality?.A?.avg_opponent_rank, c.opponent_quality?.B?.avg_opponent_rank, (v) => `No. ${Math.round(v)}`)}
-        </tbody></table></div>
-        <p class="note">${c.form?.['52w']?.wae_edge != null ? `52-week edge: ${sgn(c.form['52w'].wae_edge, 3)} wins above expectation per match. ` : c.form?.['52w']?.note ? `${c.form['52w'].note}. ` : ''}“vs expectation” = results minus the rating’s pre-match win probability.</p></section>
-      <section class="mod"><header class="mod-h"><h2>Serve &amp; return</h2><span class="mod-k">technical DNA · match statistics</span></header>
-        ${c.serve_return?.available ? html`<div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>${c.serve_return.metrics.map((r) => cmpRow(r.label, r.A?.value, r.B?.value, pc1))}</tbody></table></div>
-          <p class="note">${nm(a)} serve vs ${nm(b)} return: <b>${sgn(c.serve_return.matchups.A_serve_vs_B_return == null ? null : c.serve_return.matchups.A_serve_vs_B_return * 100, 1)} pts</b> · ${nm(b)} serve vs ${nm(a)} return: <b>${sgn(c.serve_return.matchups.B_serve_vs_A_return == null ? null : c.serve_return.matchups.B_serve_vs_A_return * 100, 1)} pts</b>. ${c.serve_return.note}</p>` : html`<p class="note">${c.serve_return?.reason || 'Not available.'}</p>`}</section>
-      <section class="mod"><header class="mod-h"><h2>Surface</h2></header>
-        ${c.surface?.A || c.surface?.B ? html`<div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>${cmpRow(`${c.surface.surface} rating`, c.surface.A?.rating, c.surface.B?.rating, (v) => v)}${cmpRow('vs own overall', c.surface.A?.vs_overall, c.surface.B?.vs_overall, (v) => sgn(v))}${cmpRow(`${c.surface.surface} rated matches`, c.surface.A?.rated_matches, c.surface.B?.rated_matches, (v) => `${v}`)}</tbody></table></div>` : html`<p class="note">${c.surface?.note || 'No surface rating for either player on this surface yet.'}</p>`}</section>
-      <section class="mod"><header class="mod-h"><h2>Rest &amp; schedule</h2></header>
-        <div class="tbl-wrap"><table class="tbl mu-tbl"><thead><tr><th></th><th class="n">${nm(a)}</th><th class="n">${nm(b)}</th></tr></thead><tbody>
-          ${cmpRow('Days since last match', c.rest?.A?.days_since_last, c.rest?.B?.days_since_last, (v) => `${v}`)}
-          ${cmpRow('Matches, last 7 days', c.rest?.A?.matches_7d, c.rest?.B?.matches_7d, (v) => `${v}`)}
-          ${cmpRow('Sets, last 7 days', c.rest?.A?.sets_7d, c.rest?.B?.sets_7d, (v) => `${v}`)}
-          ${cmpRow('Matches, last 14 days', c.rest?.A?.matches_14d, c.rest?.B?.matches_14d, (v) => `${v}`)}
-          ${cmpRow('Previous event', c.travel?.A?.previous_event ? `${c.travel.A.previous_event}${c.travel.A.previous_city ? ` · ${c.travel.A.previous_city}` : ''}` : null, c.travel?.B?.previous_event ? `${c.travel.B.previous_event}${c.travel.B.previous_city ? ` · ${c.travel.B.previous_city}` : ''}` : null, (v) => v)}
-        </tbody></table></div>
-        <p class="note">${c.rest?.basis || ''}. Travel shows only where the sources place each event; no distance or jet-lag estimate is made.</p></section>
-    </div>
-    <section class="mod mu-h2h"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">not a model input</span></header>
-      <p class="h2h-big tabnum"><span>${nm(a)}</span> <b>${d.h2h.record.A}</b> – <b>${d.h2h.record.B}</b> <span>${nm(b)}</span></p>
-      ${d.h2h.meetings.length ? html`<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Event</th><th class="hide-s">Surface</th><th>Winner</th><th>Score</th></tr></thead><tbody>${d.h2h.meetings.map((x) => html`<tr><td class="tabnum">${fmtDate(x.date)}</td><td>${x.slug ? html`<a href="/tournaments/${x.slug}/${x.year}">${x.tournament} ${x.year}</a>` : x.tournament || '—'} · ${roundLabel(x.round)}</td><td class="hide-s">${x.surface || '—'}</td><td>${x.won_by === 'A' ? nm(a) : nm(b)}</td><td class="tabnum"><a href="/matches/${x.id}">${x.score || x.status}</a></td></tr>`)}</tbody></table></div>` : html`<p class="note">No previous meetings in the stored ledger.</p>`}
-      <p class="note">${d.h2h.note}.</p></section>
-    <p class="note"><a href="/matches/${m.id}">Match page →</a> · <a href="/matchups">All matchups →</a> · <a href="/methodology">Methodology →</a></p>
-  </div>`);
+    <div class="page mx-body">
+      ${whyBlock(d, a, b)}
+      ${edgeBlock(d, a, b)}
+      ${faceoffBlock(d, a, b)}
+      <div class="mx-grid">${collisionBlock(d, a, b)}${surfaceBlock(d, a, b)}${formBlock(d, a, b)}${oppBlock(d, a, b)}${pressureBlock(d, a, b)}${h2hBlock(d, a, b)}${loadBlock(d, a, b)}</div>
+      ${validationBlock(d)}
+      <p class="note"><a href="/matches/${m.id}">Match page →</a> · <a href="/matchups">All matchups →</a> · <a href="/methodology">Methodology →</a></p>
+    </div></div>`);
 });
+
 
 // ---- /players-to-watch -----------------------------------------------------------------------------------
 const LISTS = [

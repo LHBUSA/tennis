@@ -49,6 +49,9 @@ export function pbecastCta(m) {
   return '';
 }
 
+/** Upcoming singles with both players identified and a start not yet stale (the matchup API's own rule): link the dossier. */
+export const hasMatchup = (m, now = Date.now()) => m?.status === 'scheduled' && ['MS', 'WS'].includes(m.event_type) && m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && !!m.scheduled_at && Date.parse(m.scheduled_at) >= now - 6 * 3600e3;
+export const matchupLink = (m, cls = 'mi-link') => (hasMatchup(m) ? html`<a class="${cls}" href="/matchups/${m.id}">Matchup Intelligence →</a>` : '');
 export function matchCard(m, { showTournament = true } = {}) {
   const live = m.status === 'in_progress';
   const sc = (side) => html`<div class="mc-sc tabnum">${(m.sets || []).map((s) => {
@@ -68,7 +71,7 @@ export function matchCard(m, { showTournament = true } = {}) {
       ${showTournament && m.tournament ? html`<a href="/tournaments/${m.tournament.slug}/${m.tournament.year}" class="mc-t">${m.tournament.tournament}</a>` : ''}
     </header>
     ${row('A')}${row('B')}
-    <footer class="mc-f"><span>${when}</span><span class="mc-cta">${pbecastCta(m)}<a href="/matches/${m.id}">Match</a></span></footer>
+    <footer class="mc-f"><span>${when}</span><span class="mc-cta">${matchupLink(m)}${pbecastCta(m)}<a href="/matches/${m.id}">Match</a></span></footer>
   </article>`;
 }
 

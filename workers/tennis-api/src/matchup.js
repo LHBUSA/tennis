@@ -9,8 +9,9 @@ import { envelope, notConfigured } from '../../shared/envelope.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { calBand, RATING_METHOD_VERSION, PROFILE_MIN } from '../../shared/dna/match-dna.js';
 import { MATCH, MEDIA, UUID, shapeMatch, shapePlayer, maxTime, families } from './shape.js';
+import { DNA_METRICS, TECH_METRICS, compareMetrics, edgeMap, collision, whyStack, h2hBySurface, EDGE_MAP_VERSION } from './matchup-intel.js';
 
-export const MATCHUP_VERSION = '1.0.0';
+export const MATCHUP_VERSION = '1.1.0';
 export const MIN_PRIOR = 10; // the backtest's minPrior: probabilities outside it were never evaluated
 const SURFACE_MIN = 5;       // the surface blend applies only when both players have >= 5 surface-rated matches
 const LOW_SAMPLE_BAND = 200; // a calibration band with fewer out-of-sample matches is 'thin'
@@ -36,7 +37,7 @@ async function latestV2AsOf(store) {
 async function snapshots(store, pids, asOf, { detail = false } = {}) {
   if (!pids.length || !asOf) return new Map();
   const cols = ['pbe_player_id', 'surface', 'r:metrics->_rating', 'w:metrics->_profile->windows', 'wae:metrics->wins_above_expectation', 'aor:metrics->avg_opponent_rank', 'f:metrics->_form->last10', 'n:provenance->sample->matches'];
-  if (detail) cols.push('recent:metrics->_recent');
+  if (detail) cols.push('recent:metrics->_recent', 'm:metrics');
   const rows = await store.select('tennis_dna_snapshots', `select=${cols.join(',')}&pbe_player_id=${inList(pids)}&as_of=eq.${asOf}&definition_version=eq.2&limit=${pids.length * 4}`);
   const out = new Map();
   for (const r of rows) { if (!out.has(r.pbe_player_id)) out.set(r.pbe_player_id, {}); out.get(r.pbe_player_id)[r.surface] = r; }
@@ -119,7 +120,7 @@ export function restBlock(recent, day) {
   return played.length ? { last_match: played[0].day, days_since_last: Math.round((Date.parse(day) - Date.parse(played[0].day)) / 86400e3), matches_7d: within(7).length, matches_14d: within(14).length, sets_7d: sets(within(7)), sets_14d: sets(within(14)) } : null;
 }
 
-function explain(m, model, ctx) {
+export function explain(m, model, ctx) {
   const A = playerOf(m, 'A')?.name || 'Player A';
   const B = playerOf(m, 'B')?.name || 'Player B';
   const out = [];
@@ -237,8 +238,30 @@ async function detail(store, env, id) {
   const ra = recentOf(a, pa.id);
   const rb = recentOf(b, pb.id);
   const [ta, tb] = await Promise.all([travelBlock(store, [...(a?.all?.recent || [])], m, rows[0].edition_id), travelBlock(store, [...(b?.all?.recent || [])], m, rows[0].edition_id)]);
+  // Matchup Intelligence V2 (display only, never a model input): qualified Match DNA face-off, technical DNA, serve/return
+  // collision, deterministic category edge map, and the why-stack that separates model inputs from context
+  const strip = (x) => { const o = { ...(x || {}) }; for (const k of Object.keys(o)) if (k.startsWith('_')) delete o[k]; return o; };
+  // the V2 intel block is display-only: a failure here must never take down the matchup (probability + context)
+  let intel = null;
+  try {
+    const faceoff = compareMetrics(DNA_METRICS, strip(a?.all?.m), strip(b?.all?.m));
+    const tA = tech.get(pa.id); const tB = tech.get(pb.id);
+    const technical = compareMetrics(TECH_METRICS, tA?.metrics, tB?.metrics);
+    const map = edgeMap({ dna: faceoff.rows, tech: technical.rows, form: ctx.form, surface: ctx.surface });
+    const surfRow = (x) => Object.fromEntries(['hard', 'clay', 'grass'].map((k) => [k, x?.[k]?.r ? { rating: x[k].r.value, rated_matches: x[k].r.rated_matches, vs_overall: x[k].r.value - (x.all?.r?.value ?? x[k].r.value) } : null]));
+    intel = {
+      edge_map_version: EDGE_MAP_VERSION,
+      faceoff: { rows: faceoff.rows, withheld: faceoff.withheld, as_of: asOf, basis: 'Match DNA v2 (results-based), each player within their own tour; rows only where both values are medium/high confidence' },
+      technical: { rows: technical.rows, withheld: technical.withheld, as_of: { A: tA?.as_of || null, B: tB?.as_of || null }, basis: 'Technical DNA v1 from match statistics; rows only where both values are medium/high confidence' },
+      collision: collision(tA?.metrics, tB?.metrics),
+      edge_map: map,
+      why: whyStack(model, map, { A: pa.name, B: pb.name }),
+      surface_profile: { tournament_surface: surface, A: surfRow(a), B: surfRow(b), note: surface ? null : 'the edition’s surface is not sourced: every surface profile is shown, none is singled out, and no surface edge is computed' },
+      h2h_by_surface: h2hBySurface(h2h)
+    };
+  } catch (e) { intel = { error: 'intel_unavailable', detail: String(e?.message || e).slice(0, 160) }; }
   const data = {
-    as_of: asOf, tour: t, matchup_version: MATCHUP_VERSION, match: m, fixture,
+    as_of: asOf, tour: t, matchup_version: MATCHUP_VERSION, match: m, fixture, intel,
     model, why: explain(m, model, ctx),
     context: { ...ctx, serve_return: serveReturn(tech.get(pa.id), tech.get(pb.id)), rest: { A: restBlock(ra, day), B: restBlock(rb, day), basis: 'completed singles matches in the stored ledger before the match day' }, travel: { A: ta, B: tb } },
     h2h

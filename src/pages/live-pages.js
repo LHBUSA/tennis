@@ -2,6 +2,7 @@
 
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
+import { getMembership } from '../lib/membership.js';
 import { emptyModule, errorModule, resultState, freshnessBadge } from '../ui/state.js';
 import { matchDnaSummary, matchDnaFingerprint, familyTable, formBlock, historyTable, ratingLine, careerBlock, surfaceTable } from '../ui/match-dna.js';
 import { avatar, nat } from '../ui/avatar.js';
@@ -163,24 +164,62 @@ export const venue = mountWith((root, { params }, signal) => {
   }, 'Venue not found.', signal);
 });
 
+// ---- PBE Matchup Intelligence on the match page (V2) ---------------------------------------------------------------
+// The match page is the factual shell; for an upcoming/live singles match it leads with the matchup module. Entitled
+// visitors see the PUBLISHED probability (or the real withheld reason) from /v1/matchups/:id; free visitors see a
+// teaser with no premium values. The research simulator (tennis-model) is a different thing and is not shown.
+const miCache = new Map(); // match id -> rendered module (survives the page's 30 s re-renders)
+const miEligible = (m) => m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && ['MS', 'WS'].includes(m.event_type) && ['scheduled', 'in_progress'].includes(m.status);
+function miHtml(m, x) {
+  const href = `/matchups/${m.id}`;
+  if (x.state === 'free') return html`<section class="mi-mod" aria-labelledby="mi-h"><h2 id="mi-h">Matchup DNA<span class="mi-tag">ALL ACCESS</span></h2><p class="mi-sub">Compare PBE Rating win probability, form, serve/return, surface and pressure profiles for this match.</p><a class="mi-cta" href="${href}">Open Matchup Intelligence →</a></section>`;
+  const d = x.data;
+  const nm = (s) => d?.match?.sides?.[s]?.players?.[0]?.last_name || d?.match?.sides?.[s]?.players?.[0]?.name || s;
+  const n = d?.intel?.faceoff?.rows?.length || 0;
+  const p = d?.model?.probability;
+  const pa = p ? Math.round(p.A * 1000) / 10 : null;
+  return html`<section class="mi-mod" aria-labelledby="mi-h"><h2 id="mi-h">PBE Matchup Intelligence</h2>
+    ${p ? html`<p class="mi-prob tabnum">${nm('A')} ${pa}% <span>·</span> ${nm('B')} ${Math.round((100 - pa) * 10) / 10}%</p><p class="mi-sub">PBE Rating · validated · ${d.model.basis === 'surface_blend' ? 'overall + surface blend' : 'overall rating'}${n ? ` · ${n} qualified DNA comparisons` : ''}</p>`
+      : html`<p class="mi-prob">No probability</p><p class="mi-sub">${d?.model?.reason || 'The matchup could not be priced.'}${n ? ` · ${n} qualified DNA comparisons` : ''}</p>`}
+    <a class="mi-cta" href="${href}">Open full DNA matchup →</a></section>`;
+}
+function miSlot(m) {
+  if (!miEligible(m)) return '';
+  const hit = miCache.get(m.id);
+  return html`<div data-mi style="min-height:${hit ? 0 : 148}px">${hit || ''}</div>`;
+}
+async function miLoad(root, m, signal) {
+  if (!miEligible(m) || miCache.has(m.id)) return;
+  let out;
+  const mem = await getMembership({ signal }).catch(() => null);
+  if (!mem?.entitled) out = miHtml(m, { state: 'free' });
+  else {
+    const r = await api(`/v1/matchups/${m.id}`, { signal }).catch(() => null);
+    out = r?.data ? miHtml(m, { state: 'ok', data: r.data }) : html`<section class="mi-mod"><h2>PBE Matchup Intelligence</h2><p class="mi-sub">Matchup Intelligence is unavailable right now.</p></section>`;
+  }
+  miCache.set(m.id, out);
+  const el = root.querySelector('[data-mi]');
+  if (el) { render(el, out); el.style.minHeight = '0'; }
+}
 // ---- match lab ------------------------------------------------------------------------------------------
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
   return fill(root, `/v1/matches/${params.id}`, (m) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
+    miLoad(root, m, signal);
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
     const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${nm('A')} vs ${nm('B')}`;
     markSurface(root, m.surface || m.tournament?.surface);
     const vs = (s) => html`<div class="vs-side">${(m.sides?.[s]?.players || []).map((p) => html`<a href="/players/${p.slug}">${avatar(p, { size: 'square', px: 112, eager: true })}<b>${p.name}</b></a>`)}</div>`;
     const A = m.statistics?.A, B = m.statistics?.B;
-    return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>
+    return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>${miSlot(m)}
       ${matchCard(m)}
       <div class="grid-2" style="margin-top:16px">
-        <section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>
+        ${m.status === 'scheduled' ? '' : html`<section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>`}
         <section class="mod"><header class="mod-h"><h2>PBEcast</h2></header><div class="mod-b"><p>${m.status === 'scheduled' ? 'PBEcast opens when live coverage begins.' : 'Open the analytical court: score, serve, key moments, stats, DNA and head-to-head.'}</p>${m.status !== 'scheduled' ? html`<a class="btn green" href="/pbecast/${m.id}">${m.status === 'in_progress' ? 'Watch PBEcast' : 'Replay PBEcast'}</a>` : ''}</div></section>
         <section class="mod"><header class="mod-h"><h2>Observed changes</h2></header><div class="mod-b">${m.observed_changes?.length ? html`<ul class="opp">${m.observed_changes.slice(-12).map((c) => html`<li><span>${c.kind.replace(/_/g, ' ')}</span><b>${String(c.to_value ?? '')}</b></li>`)}</ul>` : html`<p class="note">No upstream changes recorded since we first observed this match.</p>`}</div></section>
-        <section class="mod"><header class="mod-h"><h2>Model</h2></header><div class="mod-b"><p class="note">No PBE model output: the Tennis model is research-only and unvalidated. Market: unavailable.</p></div></section>
+
       </div>
       ${m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 ? html`<p><a class="btn line" href="/h2h/${m.sides.A.players[0].slug}/${m.sides.B.players[0].slug}">Head-to-head →</a></p>` : ''}
       ${shareBar({ url: `${location.origin}/matches/${m.id}`, text: `${nm('A')} vs ${nm('B')} — PropBetEdge Tennis` })}`;

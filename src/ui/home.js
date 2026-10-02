@@ -3,7 +3,7 @@
 
 import { html } from '../lib/dom.js';
 import { avatar, nat } from './avatar.js';
-import { localTime, fmtRange, fmtDuration, roundLabel, eventLabel, statusLabel } from './render.js';
+import { localTime, fmtRange, fmtDuration, roundLabel, eventLabel, statusLabel, matchupLink } from './render.js';
 import { scoreGrid } from './score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, isDoubles } from '../lib/home.js';
 
@@ -110,7 +110,7 @@ export function matchCard(m) {
       <p class="hm-mh2">${[eventLabel(m.event_type), ...meta].join(' · ')}${when ? html` · <b>${when}</b>` : ''}</p>
     </header>
     ${scoreGrid(m)}
-    <footer>${live ? html`<span class="hm-pill live"><i class="hm-dot" aria-hidden="true"></i>Live</span>` : html`<span class="hm-pill">${cardStatus(m)}</span>`}${dur ? html`<span class="hm-el tabnum" title="${live ? 'Match time reported by the source at its last update' : 'Match duration'}">${dur}</span>` : ''}<span class="hm-go-wrap">${live ? html`<a class="hm-go hm-go-cast" href="/pbecast/${m.id}">PBEcast <span aria-hidden="true">→</span></a>` : ''}<a class="hm-go" href="/matches/${m.id}">Match <span aria-hidden="true">→</span></a></span></footer>
+    <footer>${live ? html`<span class="hm-pill live"><i class="hm-dot" aria-hidden="true"></i>Live</span>` : html`<span class="hm-pill">${cardStatus(m)}</span>`}${dur ? html`<span class="hm-el tabnum" title="${live ? 'Match time reported by the source at its last update' : 'Match duration'}">${dur}</span>` : ''}<span class="hm-go-wrap">${matchupLink(m, 'hm-go hm-go-mu')}${live ? html`<a class="hm-go hm-go-cast" href="/pbecast/${m.id}">PBEcast <span aria-hidden="true">→</span></a>` : ''}<a class="hm-go" href="/matches/${m.id}">Match <span aria-hidden="true">→</span></a></span></footer>
   </article>`;
 }
 
