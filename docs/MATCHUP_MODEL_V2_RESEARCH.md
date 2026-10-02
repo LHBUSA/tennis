@@ -162,8 +162,10 @@ the coin's 0.6931 on 860 WTA matches. It is an early failed baseline and is not 
 - **Contents:** the champion probability exactly as frozen; B's probability; `feature_hash`; `model_version`;
   `coef_hash`.
 
-**Inputs.** Each tour's daily player state (`research/mm2/state/<tour>.json`) is written by the DNA v2 build. It
-reproduces the offline profile exactly for any match day on or after its cutoff.
+**Inputs.** Each tour's daily player state (`research/mm2/state/<tour>.json`) is written by the DNA v2 build. It is exact
+ONLY for matches on its cutoff day (strict-before-day rule). A snapshot whose scheduled day differs from the state's
+cutoff is refused (`challenger: null`, `reason: state_cutoff_mismatch`) and never scored from an older or newer state
+(fix 2026-10-02, before the first natural shadow).
 
 **Where it is visible.** Nothing is served: there is no API route, no frontend and no published-probability change.
 

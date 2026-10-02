@@ -31,7 +31,9 @@ export async function shadowRecord(snap, state, { now = new Date().toISOString()
   const sa = why ? null : state.players[pid('A')];
   const sb = why ? null : state.players[pid('B')];
   const day = String(snap.scheduled_at || '').slice(0, 10);
-  const reason = why || (!sa || !sb ? 'player_not_in_state' : !day ? 'no_scheduled_day' : dayNum(day) < dayNum(state.cutoff) ? 'state_newer_than_match' : null);
+  // the state is exact ONLY for its own cutoff day (records strictly before it): a match on any other day is refused,
+  // never scored from an older or newer state (a player's result on the cutoff day would be missing / leaked)
+  const reason = why || (!day ? 'no_scheduled_day' : day !== state.cutoff ? 'state_cutoff_mismatch' : !sa || !sb ? 'player_not_in_state' : null);
   if (reason) return { ...base, challenger: null, reason };
   const dn = dayNum(day);
   const sr = p.model.surface_ratings;

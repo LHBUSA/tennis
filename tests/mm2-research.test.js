@@ -141,7 +141,7 @@ import { playerState, stateProfile, tourStates, recordsOf } from '../workers/sha
 import { shadowRecord, shadowFrozen } from '../workers/tennis-api/src/mm2-shadow.js';
 import { SHADOW_MODEL } from '../workers/shared/research/mm2-b-shadow.js';
 
-test('daily player state reproduces the offline profile exactly for any match day on/after its cutoff', () => {
+test('daily player state reproduces the offline profile exactly on its cutoff day (no records between cutoff and D)', () => {
   const recs = [[100, 0, 1, 0.6, 1600, 1, 1, 0, 0, 1], [118, 1, 0, 0.5, 1650, 0, 0, 0, 0, -1], [125, 0, 0, 0.4, 1700, 0, 0, 1, 0, 0], [129, 0, 1, 0.55, 1580, 1, 2, 1, 0, 0]];
   const cut = 130;
   const s = playerState(recs, cut);
@@ -169,7 +169,7 @@ function fakeBucket(init = {}) {
   const m = new Map(Object.entries(init));
   return { m, async get(k) { return m.has(k) ? { text: async () => m.get(k) } : null; }, async head(k) { return m.has(k) ? {} : null; }, async put(k, v) { m.set(k, v); } };
 }
-const snapFor = (status = 'published') => ({ snapshot_kind: 'pre_match', match_id: 'mx', frozen_at: '2026-10-03T10:00:00.000Z', scheduled_at: '2026-10-04T12:00:00+00:00', content_hash: 'h',
+const snapFor = (status = 'published') => ({ snapshot_kind: 'pre_match', match_id: 'mx', frozen_at: '2026-10-03T10:00:00.000Z', scheduled_at: '2026-10-03T12:00:00+00:00', content_hash: 'h',
   payload: { tour: 'WTA', match: { sides: { A: { players: [{ id: 'pa' }] }, B: { players: [{ id: 'pb' }] } } }, model: { status, probability: status === 'published' ? { A: 0.64, B: 0.36 } : null, basis: 'overall', surface_ratings: null } } });
 const STATE = { state_version: 'mm2-state/1', cutoff: '2026-10-03', players: { pa: { form: 0.05, opp: 1700, dec: 0.55, tb: 0.5, ss: 0.6, fsc: 0.8, cb: 0.25, last: dayNum('2026-10-01'), days: [dayNum('2026-09-28'), dayNum('2026-10-01')] }, pb: { form: -0.02, opp: 1650, dec: 0.45, tb: 0.52, ss: 0.55, fsc: 0.78, cb: 0.2, last: dayNum('2026-09-20'), days: [dayNum('2026-09-20')] } } };
 
@@ -182,7 +182,9 @@ test('shadow record: champion exactly as frozen, challenger from the frozen coef
   assert.match(r.feature_hash, /^[0-9a-f]{64}$/);
   assert.equal((await shadowRecord(snapFor('insufficient_history'), STATE)).reason, 'champion_not_published:insufficient_history');
   assert.equal((await shadowRecord(snapFor(), null)).reason, 'no_player_state');
-  assert.equal((await shadowRecord({ ...snapFor(), scheduled_at: '2026-10-01T10:00:00Z' }, STATE)).reason, 'state_newer_than_match');
+  assert.equal((await shadowRecord({ ...snapFor(), scheduled_at: '2026-10-02T23:00:00Z' }, STATE)).reason, 'state_cutoff_mismatch'); // cutoff > day
+  assert.equal((await shadowRecord({ ...snapFor(), scheduled_at: '2026-10-04T01:00:00Z' }, STATE)).reason, 'state_cutoff_mismatch'); // cutoff < day
+  assert.equal((await shadowRecord({ ...snapFor(), scheduled_at: '2026-10-03T23:59:00Z' }, STATE)).challenger !== null, true);      // cutoff == day
 });
 
 test('shadow writer: append-only, research prefix only, never overwrites; index appended', async () => {
@@ -232,4 +234,28 @@ test('grading picks the last record frozen before play; retirements/walkovers ex
   assert.equal(pickGradeable(list, { status: 'in_progress', started_at: '2026-10-03T12:00:00Z' }).kind, 'pending');
   assert.equal(pickGradeable([rec('2026-10-03T13:00:00Z')], done).reason, 'no_record_before_start');
   assert.equal(pickGradeable([rec('2026-10-03T09:00:00Z', { challenger: null, reason: 'player_not_in_state' })], done).kind, 'unscored');
+});
+
+test('stale-state regression: a day-D state never scores a D+1 match; the D+1 state includes the result on D', async () => {
+  const L = ledger();
+  const run0 = ratingRun(L, { variant: 'margin' });
+  const D = L.at(-1).day;                                   // the last day with a result for some players
+  const D1 = new Date(Date.parse(D) + 86400e3).toISOString().slice(0, 10);
+  const e = L.at(-1);                                        // a player who played ON day D
+  const byP = (LL) => { const m = new Map(); for (const x of LL) for (const pid of [x.A, x.B]) { if (!m.has(pid)) m.set(pid, []); m.get(pid).push(x); } return m; };
+  const stD = tourStates(byP(L), run0, D);
+  const stD1 = tourStates(byP(L), run0, D1);
+  // the D state lacks the D result; the D+1 state has it
+  assert.ok(stD.players[e.A].last < dayNum(D));
+  assert.equal(stD1.players[e.A].last, dayNum(D));
+  const snap = { ...snapFor(), scheduled_at: `${D1}T10:00:00Z`, frozen_at: `${D1}T01:00:00.000Z`, payload: { ...snapFor().payload, match: { sides: { A: { players: [{ id: e.A }] }, B: { players: [{ id: e.B }] } } } } };
+  const old = await shadowRecord(snap, { ...stD, state_version: 'mm2-state/1' });
+  assert.equal(old.challenger, null);
+  assert.equal(old.reason, 'state_cutoff_mismatch');
+  const fresh = await shadowRecord(snap, { ...stD1, state_version: 'mm2-state/1' });
+  assert.ok(fresh.challenger);
+  // and the D+1 state equals the offline strict-before-day profile for a D+1 match
+  const recs = []; for (const x of byP(L).get(e.A)) { const pr = run0.pre.get(x); recs.push(recordsOf(x, pr.p, pr.ra, pr.rb)[x.A === e.A ? 0 : 1]); }
+  const off = profileFrom(recs, dayNum(D1)); const on = stateProfile(stD1.players[e.A], dayNum(D1));
+  for (const k of Object.keys(off)) assert.ok(off[k] === on[k] || Math.abs(off[k] - on[k]) < 1e-6, k);
 });

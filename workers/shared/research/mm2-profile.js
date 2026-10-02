@@ -97,7 +97,9 @@ const DAYS_KEPT = 40; // activity days kept before the cutoff (act30 for any mat
 
 /**
  * One player's state at `cutoffDnum` from chronological records (only records dated before the cutoff are used).
- * For any match day D >= cutoff, stateProfile(state, D) equals profileFrom(records, D) exactly (all records predate D).
+ * CONTRACT: the state is exact for matches ON the cutoff day only — stateProfile(state, cutoff) equals
+ * profileFrom(records, cutoff) under the strict-before-day rule. For a later day D it is NOT exact (a player's results on
+ * days cutoff..D-1 are absent), so the shadow writer refuses any match whose day differs from the cutoff.
  */
 export function playerState(recs, cutoffDnum) {
   const before = recs.filter((r) => r[0] < cutoffDnum);
