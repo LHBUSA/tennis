@@ -2,22 +2,85 @@
 // Every renderer degrades to nothing (never an empty module / cell / blank hero) when the data is thin.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, longestSameRun } from '../src/lib/newsroom.js';
+import { hierarchy, deskStories, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, longestSameRun } from '../src/lib/newsroom.js';
 import { wireList, storyRow, leadStory, __test as N } from '../src/pages/news.js';
+import { newsPlan } from '../src/lib/v4.js';
 
 const NOW = Date.parse('2026-09-29T16:00:00Z');
 const iso = (h) => new Date(NOW - h * 3600e3).toISOString();
 const art = (slug, h, extra = {}) => ({ slug, headline: `H ${slug}`, desk: 'wta', story_type: 'title', published_at: iso(h), ...extra });
 const str = (x) => String(x);
 
-test('hierarchy: the most significant recent story leads; majors next; nothing dropped or duplicated', () => {
+test('hierarchy: freshness wins — newest eligible story leads whatever its class; majors + rest newest-first; nothing dropped or duplicated', () => {
   const cards = [art('a', 1, { story_class: 'brief' }), art('b', 3, { story_class: 'full' }), art('c', 2), art('d', 30 * 24, { story_class: 'deep' }), art('e', 5, { story_class: 'full' })];
   const h = hierarchy(cards, { now: NOW });
-  assert.equal(h.lead.slug, 'b', 'recent full beats recent brief; an old deep story never leads');
-  assert.deepEqual(h.majors.map((x) => x.slug), ['e', 'a', 'c']);
+  assert.equal(h.lead.slug, 'a', 'a newer brief beats an older full story');
+  assert.deepEqual(h.majors.map((x) => x.slug), ['c', 'b', 'e']);
   assert.deepEqual(h.rest.map((x) => x.slug), ['d']);
   assert.equal(new Set([h.lead, ...h.majors, ...h.rest]).size, cards.length);
   assert.deepEqual(hierarchy([], { now: NOW }), { lead: null, majors: [], rest: [] });
+});
+
+// Hero regression fixtures (2026-10-02: a Sep 28 Fernandez full story held the hero over newer briefs).
+const lead = (cards, desk = 'all', majors = 4) => hierarchy(deskStories(cards, desk), { now: NOW, majors });
+test('hero 1: newest story is a brief -> the brief leads (no full-story preference, no 7-day class bonus)', () => {
+  const h = lead([art('old-full', 4 * 24, { story_class: 'full', media: { hero: { images: [{ id: 'p1' }] } } }), art('new-brief', 1, { story_class: 'brief', desk: 'atp' })]);
+  assert.equal(h.lead.slug, 'new-brief');
+  assert.deepEqual(h.majors.map((x) => x.slug), ['old-full']);
+});
+test('hero 2: newest story is a full story -> it leads', () => {
+  assert.equal(lead([art('brief', 3, { story_class: 'brief' }), art('full', 1, { story_class: 'full' }), art('deep', 9, { story_class: 'deep' })]).lead.slug, 'full');
+});
+test('hero 3: newest ATP story leads on ALL even over a WTA title', () => {
+  assert.equal(lead([art('wta-title', 2, { desk: 'wta', story_class: 'full' }), art('atp-upset', 1, { desk: 'atp', story_type: 'upset', story_class: 'brief' })]).lead.slug, 'atp-upset');
+});
+test('hero 4: WTA desk -> newest WTA story leads regardless of newer ATP stories (desk filter BEFORE the hero pick)', () => {
+  const cards = [art('atp-1', 0.5, { desk: 'atp' }), art('atp-2', 1, { desk: 'atp' }), art('wta-old', 6, { desk: 'wta' }), art('wta-new', 3, { desk: 'wta' }), art('dbl', 0.2, { desk: 'doubles' })];
+  const h = lead(cards, 'wta');
+  assert.equal(h.lead.slug, 'wta-new');
+  assert.deepEqual([h.lead, ...h.majors, ...h.rest].map((x) => x.desk), ['wta', 'wta']);
+  for (const desk of ['atp', 'doubles', 'grand-slams', 'rankings']) {
+    const d = lead(cards, desk);
+    assert.ok(!d.lead || d.lead.desk === desk, `${desk} desk leads with its own story`);
+  }
+  assert.equal(lead(cards, 'doubles').lead.slug, 'dbl');
+  assert.equal(lead(cards, 'rankings').lead, null, 'empty desk: no hero borrowed from another desk');
+});
+test('hero 5: newest story with no image still leads; the lead renders the branded text treatment', () => {
+  const h = lead([art('photo', 5, { story_class: 'full', media: { hero: { images: [{ id: 'p1', src: '/x.webp' }] } } }), art('no-img', 1, { media: { hero: null } })]);
+  assert.equal(h.lead.slug, 'no-img');
+  const out = str(leadStory(h.lead));
+  assert.match(out, /nf-brand-art/);
+  assert.match(out, /H no-img/);
+});
+test('hero 6: the hero never appears again in majors, Latest intelligence, tour rails or more', () => {
+  const cards = Array.from({ length: 16 }, (_, i) => art(`s${i}`, i + 1, { desk: i % 2 ? 'atp' : 'wta' }));
+  const h = lead(cards, 'all');
+  const plan = newsPlan(h.rest, { desk: 'all', latest: 5, rail: 4 });
+  const below = [...h.majors, ...plan.latest, ...plan.atp, ...plan.wta, ...plan.more];
+  assert.equal(h.lead.slug, 's0');
+  assert.ok(!below.includes(h.lead));
+  assert.equal(new Set([h.lead, ...below]).size, cards.length, 'every story exactly once');
+  assert.equal(h.majors[0].slug, 's1', 'the next-newest story follows the hero');
+});
+test('hero 7: future-dated or unpublished cards never lead (kept below the fold, not dropped)', () => {
+  const cards = [art('future', -2), art('held', 0.1, { status: 'held' }), art('draft', 0.2, { status: 'draft' }), art('no-time', 0, { published_at: null }), art('live', 4)];
+  const h = lead(cards);
+  assert.equal(h.lead.slug, 'live');
+  assert.deepEqual(h.majors, []);
+  assert.equal(h.rest.length, 4);
+  assert.equal(lead([art('future', -1), art('held', 1, { status: 'held' })]).lead, null);
+});
+test('hero 8: identical timestamps resolve deterministically (slug, then id) whatever the input order', () => {
+  const same = [art('zeta', 1, { id: '2' }), art('alpha', 1, { id: '9' }), art('alpha', 1, { id: '1' }), art('mid', 1)];
+  const orders = [same, [...same].reverse(), [same[2], same[0], same[3], same[1]]];
+  const seqs = orders.map((o) => { const h = lead(o); return [h.lead, ...h.majors].map((x) => `${x.slug}:${x.id || ''}`).join(','); });
+  assert.equal(new Set(seqs).size, 1);
+  assert.equal(seqs[0], 'alpha:1,alpha:9,mid:,zeta:2');
+});
+test('hero: published_at is the clock — updated_at, ids and event dates never reorder', () => {
+  const cards = [art('a', 5, { updated_at: iso(0), id: 'zzz', occurred_at: iso(0) }), art('b', 2, { updated_at: iso(48), id: 'aaa' })];
+  assert.equal(lead(cards).lead.slug, 'b');
 });
 
 test('desk counts are CURRENT content (articles 14 d, wire 72 h); ITF / Challenger listed only when populated', () => {

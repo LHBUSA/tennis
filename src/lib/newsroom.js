@@ -12,21 +12,31 @@ export const KIND_LABEL = Object.freeze({ upset: 'Upset', seed_upset: 'Seed upse
 const t = (x) => { const v = Date.parse(x || ''); return Number.isFinite(v) ? v : 0; };
 const stamp = (a) => t(a?.published_at || a?.first_published_at || a?.updated_at);
 
+/** Canonical publication time: published_at (first_published_at only when absent). Never updated_at, ids or event dates. */
+export const publishedAt = (a) => t(a?.published_at || a?.first_published_at);
+/** Newest first; equal timestamps break deterministically on slug, then id. */
+export const byPublishedDesc = (a, b) => publishedAt(b) - publishedAt(a) || String(a?.slug || '').localeCompare(String(b?.slug || '')) || String(a?.id || '').localeCompare(String(b?.id || ''));
+/** May lead the page: published (an absent status means the API served it as published) with a real publish time not in the future. */
+const heroEligible = (a, now) => (a.status == null || a.status === 'published') && publishedAt(a) > 0 && publishedAt(a) <= now;
+
+/** A desk's cards: 'all' = everything, otherwise cards whose desk is the selected one. Always applied BEFORE hierarchy(). */
+export const deskStories = (cards, desk = 'all') => (cards || []).filter((x) => x && (desk === 'all' || x.desk === desk));
+
 /**
- * Front-page hierarchy from published cards: the LEAD is the most significant recent story (class first, then
- * recency, within `leadWindowDays`), MAJORS the next 2-3 by the same rule, REST everything else newest-first.
- * Stories without a class rank as brief. Nothing is dropped and nothing duplicated.
+ * Front-page hierarchy from the cards of the SELECTED desk (callers filter by desk first): FRESHNESS WINS. The LEAD is
+ * the newest eligible story by canonical publish time, whatever its class (brief / full / deep), length, tour or imagery;
+ * MAJORS are the next newest eligible; REST is everything else newest-first (ineligible cards — held previews,
+ * future-dated — only ever land here). Nothing is dropped and nothing duplicated. There is no editor pin today; a pin
+ * would be an explicit field (e.g. hero_pinned), never an implicit content-type preference.
  */
-export function hierarchy(cards, { majors = 3, now = Date.now(), leadWindowDays = 7 } = {}) {
+export function hierarchy(cards, { majors = 3, now = Date.now() } = {}) {
   const list = (cards || []).filter(Boolean);
-  if (!list.length) return { lead: null, majors: [], rest: [] };
-  const fresh = (a) => now - stamp(a) <= leadWindowDays * 86400e3;
-  const score = (a) => (fresh(a) ? 10 : 0) + (CLASS_RANK[a.story_class] || 1);
-  const ranked = [...list].sort((a, b) => score(b) - score(a) || stamp(b) - stamp(a));
+  const ranked = list.filter((a) => heroEligible(a, now)).sort(byPublishedDesc);
+  if (!ranked.length) return { lead: null, majors: [], rest: list.slice().sort(byPublishedDesc) };
   const lead = ranked[0];
   const maj = ranked.slice(1, 1 + majors);
   const top = new Set([lead, ...maj]);
-  return { lead, majors: maj, rest: list.filter((a) => !top.has(a)).sort((a, b) => stamp(b) - stamp(a)) };
+  return { lead, majors: maj, rest: list.filter((a) => !top.has(a)).sort(byPublishedDesc) };
 }
 
 /**

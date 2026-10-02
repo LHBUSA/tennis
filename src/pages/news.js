@@ -12,7 +12,7 @@ import { getMembership } from '../lib/membership.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
 import { preferredSourceHtml } from '../ui/preferred-source.js';
-import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh } from '../lib/newsroom.js';
+import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh, deskStories } from '../lib/newsroom.js';
 import { newsPlan, previewPick, setPageSurface } from '../lib/v4.js';
 
 export const DESKS = [['all', 'All'], ['atp', 'ATP'], ['wta', 'WTA'], ['grand-slams', 'Grand Slams'], ['doubles', 'Doubles'], ['rankings', 'Rankings'], ['challenger', 'Challenger'], ['itf', 'ITF']];
@@ -258,7 +258,7 @@ export function hub(root, ctx) {
     const nav = root.querySelector('[data-desks]');
     if (nav) render(nav, html`${navDesks(counts).map((d) => html`<a href="${deskHref(d.key)}" class="${d.empty ? 'is-empty' : ''}" ${d.key === desk ? raw('aria-current="page"') : ''}>${d.label}${d.count ? html`<small>${d.count}</small>` : ''}</a>`)}`);
     const inDesk = (x) => desk === 'all' || x.desk === desk;
-    const stories = all.filter(inDesk);
+    const stories = deskStories(all, desk);
     const wire = wireAll.filter(inDesk);
     const fallbackWire = !wire.length && ['all', 'atp', 'wta'].includes(desk) ? resultRows(today?.latest_results, tourOf).filter((w) => desk === 'all' || w.tour === desk) : [];
     const latestAt = [latestFresh(stories), wire[0]?.detected_at].filter(Boolean).sort().at(-1);
