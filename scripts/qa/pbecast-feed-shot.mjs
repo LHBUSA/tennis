@@ -73,7 +73,13 @@ for (const w of WIDTHS) {
     if (s0.overflow > 0) bad.push(`overflow ${s0.overflow}`);
     if (errs.length) bad.push(`console: ${errs[0].slice(0, 120)}`);
     if (SHOTS.has(w)) await p.locator('.v3-rail').screenshot({ path: `${OUT}/replay-rail-${w}.png` }).catch(() => {});
-    console.log(`${bad.length ? 'FAIL' : 'ok  '} replay ${String(w).padStart(4)} on=${ons.join(',')} back=${back.on} call="${steps.at(-1)?.call}" ${bad.join('; ')}`);
+    // every player of the match links to their Player DNA profile, and the link works
+    const links = await p.evaluate(() => [...new Set([...document.querySelectorAll('a.pl-dna')].map((a) => a.getAttribute('href')))]);
+    const want = await p.evaluate(async (id) => { const r = await fetch(`https://tennis-api.propbetedge.ai/v1/pbecast/${id}`).then((x) => x.json()).catch(() => null); const m = r?.data?.match; return m ? ['A', 'B'].flatMap((s) => (m.players?.[s] || m.sides?.[s]?.players || []).map((x) => x.slug)).filter(Boolean) : []; }, REPLAY);
+    for (const slug of want) if (!links.includes(`/players/${slug}/dna`)) bad.push(`no DNA link for ${slug}`);
+    if (links.some((h) => !/^\/players\/[a-z0-9-]+\/dna$/.test(h) || !want.some((slug) => h === `/players/${slug}/dna`))) bad.push(`unexpected player link ${links.join(',')}`);
+    if (w === WIDTHS.at(-1) && links[0]) { await p.click(`.v3-pid a.pl-dna[href="${links[0]}"]`).catch(() => p.click(`a.pl-dna[href="${links[0]}"]`)); await p.waitForURL(`**${links[0]}`, { timeout: 15000 }).catch(() => bad.push('player link did not navigate')); }
+    console.log(`${bad.length ? 'FAIL' : 'ok  '} replay ${String(w).padStart(4)} on=${ons.join(',')} back=${back.on} dna-links=${links.length}/${want.length} call="${steps.at(-1)?.call}" ${bad.join('; ')}`);
     if (bad.length) fails.push(`replay@${w}: ${bad.join('; ')}`);
     await p.unrouteAll({ behavior: 'ignoreErrors' }).catch(() => {}); await ctx.close();
   }

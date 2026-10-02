@@ -216,3 +216,10 @@
 @media (prefers-reduced-motion: reduce) { .pf { scroll-behavior: auto; } }
 .pf-chip.is-empty { padding: 0; background: none; }
 @media (max-width: 759px) { .pf-chip.is-empty { display: none; } }
+
+/* player names / photos -> Player DNA profile: look unchanged, affordance on hover / keyboard focus */
+a.pl-dna { color: inherit; text-decoration: none; }
+a.pl-dna:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a.pl-dna:focus-visible, a.pl-dna-av:focus-visible { outline: 2px solid var(--gold-bright, #e2b93b); outline-offset: 2px; border-radius: 3px; }
+a.pl-dna-av { display: inline-block; line-height: 0; cursor: pointer; }
+a.pl-dna-av:hover .av { filter: brightness(1.08); }

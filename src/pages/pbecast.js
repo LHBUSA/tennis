@@ -39,6 +39,11 @@ const ANIM = { game_won: 'game', break: 'game', set_won: 'set', tiebreak: 'game'
 // the stored surname when the source gave one (all-caps sources are title-cased), else the last word of the name
 const surname = (p) => (p?.last_name ? p.last_name.split(' ').map((w) => (w === w.toUpperCase() && w.length > 1 ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(' ') : (p?.name || '').split(' ').slice(-1)[0]);
 const sideName = (m, s) => (m.players?.[s] || m.sides?.[s]?.players || []).map(surname).join(' / ') || s;
+// every player shown in PBEcast links to their Player DNA profile (doubles: each partner separately); no slug -> text
+const dnaHref = (p) => (p?.slug ? `/players/${p.slug}/dna` : null);
+const playerLinks = (m, s, fmt = surname) => html`${(m.players?.[s] || m.sides?.[s]?.players || []).map((p, i) => html`${i ? ' / ' : ''}${dnaHref(p) ? html`<a class="pl-dna" href="${dnaHref(p)}" title="${p.name} — Player DNA">${fmt(p)}</a>` : fmt(p)}`)}`;
+// photo links duplicate the name link for pointer users only (tabindex -1: one keyboard stop per player)
+const avatarLink = (p, opts) => (dnaHref(p) ? html`<a class="pl-dna-av" href="${dnaHref(p)}" tabindex="-1" aria-hidden="true">${avatar(p, opts)}</a>` : avatar(p, opts));
 
 /** Human text for one event — only facts the event carries. Exported for truth tests. */
 export function eventText(e, m) {
@@ -83,8 +88,8 @@ function scoreboard(m, state, mode, prev = null) {
   const row = (s) => {
     const ps = m.players?.[s] || m.sides?.[s]?.players || [];
     return html`<div class="sb-row ${m.winner_side === s && final ? 'win' : ''}">
-      <span class="sb-av">${ps.map((p) => avatar(p, { px: 40, eager: true }))}</span>
-      <span class="sb-name">${ps.map((p, i) => html`${i ? ' / ' : ''}<a href="/players/${p.slug}">${p.name}</a>`)}<small>${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
+      <span class="sb-av">${ps.map((p) => avatarLink(p, { px: 40, eager: true }))}</span>
+      <span class="sb-name">${ps.map((p, i) => html`${i ? ' / ' : ''}<a class="pl-dna" href="/players/${p.slug}/dna">${p.name}</a>`)}<small>${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
       <span class="sb-srv">${server === s && !final ? html`<i class="srv" title="Serving"></i><span class="sr">serving</span>` : ''}</span>
       <span class="sb-sets tabnum">${sets.map((x, i) => html`<b class="${(x.A > x.B ? 'A' : 'B') === s && Math.max(x.A, x.B) >= 6 ? 'w' : ''} ${chg(s, i)}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`)}</span>
       <span class="sb-pt tabnum ${chgPt(s)}">${!final && point ? point[s] : ''}</span>
@@ -143,7 +148,7 @@ function technicalCompare(data, m) {
   if (!A && !B) return html`${head}<p class="note dna-tech-status" data-tech-status="unavailable">Technical serve/return DNA is still building for these players: it needs matches with published serve/return statistics.</p>`;
   const dims = (A || B).map((d, i) => ({ label: d.label, a: A?.[i], b: B?.[i] }));
   const v = (x) => (x?.value == null ? '—' : pct(x.value));
-  return html`${head}<table class="cmp2 dna-cmp dna-tech"><thead><tr><th class="n">${sideName(m, 'A')}</th><th></th><th>${sideName(m, 'B')}</th></tr></thead><tbody>${dims.map((d) => html`<tr><td class="n">${v(d.a)}${d.a?.percentile != null ? html` <small>${d.a.percentile}th</small>` : ''}</td><th scope="row">${d.label}</th><td>${v(d.b)}${d.b?.percentile != null ? html` <small>${d.b.percentile}th</small>` : ''}</td></tr>`)}</tbody></table>
+  return html`${head}<table class="cmp2 dna-cmp dna-tech"><thead><tr><th class="n">${playerLinks(m, 'A')}</th><th></th><th>${playerLinks(m, 'B')}</th></tr></thead><tbody>${dims.map((d) => html`<tr><td class="n">${v(d.a)}${d.a?.percentile != null ? html` <small>${d.a.percentile}th</small>` : ''}</td><th scope="row">${d.label}</th><td>${v(d.b)}${d.b?.percentile != null ? html` <small>${d.b.percentile}th</small>` : ''}</td></tr>`)}</tbody></table>
     ${building ? html`<p class="note dna-tech-status" data-tech-status="${building.status}">Technical serve/return DNA is still building${data.dna?.A?.all?.comparative?.qualified != null ? html` (${data.dna.A.all.comparative.qualified} of ${data.dna.A.all.comparative.threshold} ${data.dna.A.all.tour} players meet the full standard)` : ''}. Individual measurements are shown; a percentile appears per metric once 10 same-tour peers qualify.</p>` : ''}
     <p class="note">Stored technical DNA v1 as of ${data.dna?.A?.all?.as_of || data.dna?.B?.all?.as_of || '—'} (exclusive). <a href="/methodology">Definitions</a>.</p>`;
 }
@@ -239,7 +244,7 @@ function pulsePanel(d, m, state, pos, live) {
   if (lastEv && (lastEv.event_at || lastEv.observed_at)) facts.push({ key: 'last', label: lastEv.quality === 'point_event' ? 'Last point' : 'Last observed', value: timeOf(lastEv.event_at || lastEv.observed_at) });
   if (!p.rows.length && !facts.length) return html`<p class="note">No pulse yet: needs games with a provable winner or published statistics.</p>`;
   return html`${facts.length ? html`<dl class="v3-facts">${facts.map((f) => html`<div class="v3-fact"${f.title ? raw(` title="${f.title}"`) : ''}><dt>${f.label}</dt><dd class="tabnum">${f.value}</dd></div>`)}</dl>` : ''}
-    ${p.rows.length ? html`<table class="v3-pulse-t"><thead><tr><th scope="col" class="n">${sideName(m, 'A')}</th><th scope="col"><span class="sr">Measure</span></th><th scope="col">${sideName(m, 'B')}</th></tr></thead><tbody>${p.rows.map((r) => html`<tr><td class="n tabnum">${r.A}</td><th scope="row">${r.label}</th><td class="tabnum">${r.B}</td></tr>`)}</tbody></table>` : ''}
+    ${p.rows.length ? html`<table class="v3-pulse-t"><thead><tr><th scope="col" class="n">${playerLinks(m, 'A')}</th><th scope="col"><span class="sr">Measure</span></th><th scope="col">${playerLinks(m, 'B')}</th></tr></thead><tbody>${p.rows.map((r) => html`<tr><td class="n tabnum">${r.A}</td><th scope="row">${r.label}</th><td class="tabnum">${r.B}</td></tr>`)}</tbody></table>` : ''}
     ${p.basis ? html`<p class="v3-basis">Holds and breaks from ${p.basis} game${p.basis === 1 ? '' : 's'} with a provable server and winner${d.quality === 'point_event' ? '' : ' (several games between two observations have no provable winner and are left out)'}.</p>` : ''}`;
 }
 
@@ -251,7 +256,7 @@ function gamesPanel(evs, pos, m) {
   return html`<ol class="v3-gm">${games.map((g) => html`<li class="${g.result === 'break' ? 'brk' : ''}">
     <span class="v3-gm-at tabnum">S${g.set ?? '—'} · G${g.game ?? '—'}</span>
     <b class="v3-gm-k">${g.result === 'break' ? 'BREAK' : g.result === 'hold' ? 'HOLD' : 'GAME'}</b>
-    <span class="v3-gm-who">${photoOf(g.winner) ? avatar(photoOf(g.winner), { px: 22 }) : ''}<span>${sideName(m, g.winner)}</span></span></li>`)}</ol>`;
+    <span class="v3-gm-who">${photoOf(g.winner) ? avatarLink(photoOf(g.winner), { px: 22 }) : ''}<span>${playerLinks(m, g.winner)}</span></span></li>`)}</ol>`;
 }
 
 const RAIL_TAGS = new Set(['ACE', 'DOUBLE FAULT', 'WINNER', 'BREAK', 'GAME', 'SET', 'TIEBREAK', 'FINAL', 'RETIRED', 'START', 'SUSPENDED', 'RESUMED']);
@@ -295,8 +300,8 @@ function v3Score(m, state, prev, { mode, order }) {
     const meta = ps.map((p) => [p.nationality, p.rank ? `No. ${p.rank.rank}` : null].filter(Boolean).join(' · ')).filter(Boolean).join(' / ');
     return html`<div class="v3s-row${final && m.winner_side === s ? ' win' : ''}${srv ? ' is-srv' : ''}" style="grid-template-columns:${cols}">
       <span class="v3s-srv" aria-hidden="true"></span>
-      <span class="v3s-av">${ps.map((p) => avatar(p, { px: 30, eager: true }))}</span>
-      <span class="v3s-who"><span class="v3s-n">${ps.map((p) => lastName(p)).join(' / ')}${srv ? html`<span class="sr"> serving</span>` : ''}${final && m.winner_side === s ? html`<span class="sr"> winner</span>` : ''}</span>${meta ? html`<small class="v3s-meta">${meta}</small>` : ''}</span>
+      <span class="v3s-av">${ps.map((p) => avatarLink(p, { px: 30, eager: true }))}</span>
+      <span class="v3s-who"><span class="v3s-n">${playerLinks(m, s, lastName)}${srv ? html`<span class="sr"> serving</span>` : ''}${final && m.winner_side === s ? html`<span class="sr"> winner</span>` : ''}</span>${meta ? html`<small class="v3s-meta">${meta}</small>` : ''}</span>
       ${sets.map((x, i) => { const o = s === 'A' ? 'B' : 'A'; const won = !isCur(i) && (x.tb && x.A === x.B ? x.tb[s] > x.tb[o] : x[s] > x[o]); return html`<b class="v3s-c${won ? ' w' : ''}${isCur(i) ? ' cur' : ''}${prev && prev.sets?.[i]?.[s] !== x[s] ? ' chg' : ''}">${x[s]}${x.tb && Math.min(x.tb.A, x.tb.B) === x.tb[s] ? html`<sup>${x.tb[s]}</sup>` : ''}</b>`; })}
       ${point ? html`<b class="v3s-pt tabnum${prev && prev.point?.[s] !== point[s] ? ' chg' : ''}">${point[s]}</b>` : ''}
     </div>`;
@@ -312,8 +317,8 @@ function v3Score(m, state, prev, { mode, order }) {
 function pidShell(m, s) {
   const ps = m.players?.[s] || m.sides?.[s]?.players || [];
   return html`<div class="v3-pid v3-pid-${s}" data-pid="${s}">
-    <span class="v3-av">${ps.map((p) => avatar(p, { size: 'square', px: 72, eager: true }))}</span>
-    <span class="v3-who"><b class="v3-sn">${ps.map(lastName).join(' / ')}</b><small class="v3-full">${ps.map((p) => p.name).join(' / ')}</small><small class="v3-meta">${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
+    <span class="v3-av">${ps.map((p) => avatarLink(p, { size: 'square', px: 72, eager: true }))}</span>
+    <span class="v3-who"><b class="v3-sn">${playerLinks(m, s, lastName)}</b><small class="v3-full">${ps.map((p) => p.name).join(' / ')}</small><small class="v3-meta">${ps.map((p) => [p.rank ? `No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')).join(' / ')}</small></span>
     <span class="v3-now"><span class="v3-tagsrv" data-srv hidden>SERVING</span><span class="v3-ctx tabnum" data-ctx></span></span>
   </div>`;
 }
@@ -365,7 +370,7 @@ function stateCard(e, m, state, item, live) {
   return html`<div class="v3-mo lsc k-${kind}" data-key="${e.event_id}">
     <div class="v3-mo-top"><span class="v3-mo-tag lsc-call">${call}</span><span class="v3-mo-q q-snapshot" title="Score / server observations, not source point events">OBSERVED</span></div>
     <dl class="lsc-grid tabnum">
-      <div><dt>Server</dt><dd>${state?.server && !final ? nm(state.server) : '—'}</dd></div>
+      <div><dt>Server</dt><dd>${state?.server && !final ? playerLinks(m, state.server) : '—'}</dd></div>
       <div><dt>Point</dt><dd>${pt}</dd></div>
       <div><dt>${cur ? `Set ${state.sets.length}` : 'Games'}</dt><dd>${cur ? `${cur.A}–${cur.B}` : '—'}</dd></div>
       <div><dt>Sets</dt><dd>${state?.sets?.length ? `${setsWon(state, 'A')}–${setsWon(state, 'B')}` : '—'}</dd></div>
@@ -396,7 +401,7 @@ function feedPanel(evs, pos, m, all) {
       <time class="tabnum" datetime="${it.time || ''}">${it.time ? timeOf(it.time) : ''}</time><span class="pf-chip${chip ? '' : ' is-empty'}">${chip || ''}</span><span class="pf-line">${line}</span><span class="pf-sc tabnum">${sc}</span></button></li>`;
   };
   return html`<div class="pf">${shown.map((g) => html`<section class="pf-g${g.result ? ` r-${g.result}` : ''}">
-      <header class="pf-gh"><b>${g.set ? `Set ${g.set}` : ''}${g.game ? ` · Game ${g.game}` : ''}</b>${g.server ? html`<span>${nm(g.server)} serving</span>` : ''}${g.result && g.winner ? html`<em class="pf-res">${FEED_TAG[g.result]} · ${nm(g.winner)}</em>` : ''}</header>
+      <header class="pf-gh"><b>${g.set ? `Set ${g.set}` : ''}${g.game ? ` · Game ${g.game}` : ''}</b>${g.server ? html`<span>${playerLinks(m, g.server)} serving</span>` : ''}${g.result && g.winner ? html`<em class="pf-res">${FEED_TAG[g.result]} · ${nm(g.winner)}</em>` : ''}</header>
       <ol>${g.items.map(row)}</ol></section>`)}
     ${more ? html`<button type="button" class="pf-more" data-act="feed-all">Show full match timeline · ${more} earlier game${more === 1 ? '' : 's'}</button>` : all && groups.length > 4 ? html`<button type="button" class="pf-more" data-act="feed-recent">Show recent games only</button>` : ''}
     <p class="pf-note">${evs.some((x) => x.quality === 'point_event') ? 'Point-by-point from the source feed: reasons, speeds and rally lengths appear only where the source publishes them.' : 'Observed score feed. A player is credited with a point only when two consecutive observations differ by exactly one point; wider changes are shown as the score advancing between observations, never reconstructed.'}</p>
@@ -506,10 +511,10 @@ export function mount(root, { params, live = null }) {
       <div class="page pbc-panels" id="pbc-more">
         <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${data.moments.length ? html`<div class="km">${data.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
         <div class="grid-2">
-          <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${sideName(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${sideName(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${playerLinks(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${playerLinks(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
           <section class="mod"><header class="mod-h"><h2>Serve &amp; return</h2></header><div class="mod-b">${statsPanel(data.statistics)}</div></section>
           <section class="mod"><header class="mod-h"><h2>Tennis DNA</h2></header><div class="mod-b">${dnaCompare(data, m)}</div></section>
-          <section class="mod"><header class="mod-h"><h2>Head to head</h2></header><div class="mod-b">${data.h2h ? html`<p class="h2h-big tabnum">${sideName(m, 'A')} <b>${data.h2h.A}</b> – <b>${data.h2h.B}</b> ${sideName(m, 'B')}</p>${data.h2h.meetings.length ? html`<ul class="opp">${data.h2h.meetings.map((x) => html`<li><a href="/matches/${x.id}">${x.year || ''} ${x.tournament || ''}</a><b>${x.score || ''}</b></li>`)}</ul>` : ''}<p class="note">${data.h2h.basis}.</p>` : html`<p class="note">Head-to-head is shown for singles.</p>`}</div></section>
+          <section class="mod"><header class="mod-h"><h2>Head to head</h2></header><div class="mod-b">${data.h2h ? html`<p class="h2h-big tabnum">${playerLinks(m, 'A')} <b>${data.h2h.A}</b> – <b>${data.h2h.B}</b> ${playerLinks(m, 'B')}</p>${data.h2h.meetings.length ? html`<ul class="opp">${data.h2h.meetings.map((x) => html`<li><a href="/matches/${x.id}">${x.year || ''} ${x.tournament || ''}</a><b>${x.score || ''}</b></li>`)}</ul>` : ''}<p class="note">${data.h2h.basis}.</p>` : html`<p class="note">Head-to-head is shown for singles.</p>`}</div></section>
         </div>
         <div class="pbc-actions">${shareBar({ url: `${location.origin}/pbecast/${m.id}`, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}</div>
       </div>`);
