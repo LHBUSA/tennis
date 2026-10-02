@@ -61,3 +61,15 @@ test('a finished edition\'s never-completed "in progress" match is not live', as
   assert.equal(isGenuinelyLive({ status: 'in_progress', tennis_tournament_editions: { end_date: '2026-09-27' }, source_updated_at: '2026-09-26T22:55:00Z' }, now), true);
   assert.equal(isGenuinelyLive({ status: 'in_progress', tennis_tournament_editions: { end_date: '2026-09-27' }, source_updated_at: '2026-09-26T02:00:00Z' }, now), false, 'no source update for 21h');
 });
+
+
+test('today upcoming suppresses stale scheduled rows after the six-hour reconciliation window', async () => {
+  const { isCurrentUpcoming } = await import('../workers/tennis-api/src/index.js');
+  const now = Date.parse('2026-10-02T13:00:00Z');
+  assert.equal(isCurrentUpcoming({ status: 'scheduled', scheduled_at: '2026-09-30T15:00:00Z' }, now), false);
+  assert.equal(isCurrentUpcoming({ status: 'scheduled', scheduled_at: '2026-10-02T08:00:00Z' }, now), true);
+  assert.equal(isCurrentUpcoming({ status: 'scheduled', scheduled_at: '2026-10-02T06:00:00Z' }, now), false);
+  assert.equal(isCurrentUpcoming({ status: 'scheduled', scheduled_at: '2026-10-03T02:00:00Z' }, now), true);
+  assert.equal(isCurrentUpcoming({ status: 'completed', scheduled_at: '2026-10-03T02:00:00Z' }, now), false);
+  assert.equal(isCurrentUpcoming({ status: 'scheduled', scheduled_at: null }, now), false);
+});

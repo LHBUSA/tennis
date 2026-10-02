@@ -113,6 +113,16 @@ async function editionsInWindow(store, from, to, all) {
 const matchDay = (m) => m.source_updated_at || m.updated_at || '';
 const withTour = (e) => ({ ...shapeEdition(e), tour: e.tour || null, status: e.source_status });
 
+// A scheduled row can survive upstream after its start time passed (postponement,
+// missing final, duplicate-source lag). /today must never advertise days-old rows as
+// "upcoming". Keep a six-hour reconciliation grace window, matching Matchup DNA's
+// stale-fixture contract, then suppress the row until the source corrects it.
+export function isCurrentUpcoming(m, now = Date.now()) {
+  if (m?.status !== 'scheduled' || !m?.scheduled_at) return false;
+  const at = Date.parse(m.scheduled_at);
+  return Number.isFinite(at) && at >= now - 6 * 3600e3;
+}
+
 async function todayView(store) {
   const d = today();
   const eds = await editionsInWindow(store, d, d, false);
@@ -124,7 +134,7 @@ async function todayView(store) {
     date: d,
     tournaments: eds.map((e) => ({ ...withTour(e), matches: shaped.filter((m) => m.tournament?.slug === e.tennis_tournaments?.slug && m.tournament?.year === e.year).length })),
     live: shaped.filter((m) => m.status === 'in_progress'),
-    upcoming: shaped.filter((m) => m.status === 'scheduled').sort((a, b) => String(a.scheduled_at || '9').localeCompare(String(b.scheduled_at || '9'))),
+    upcoming: shaped.filter((m) => isCurrentUpcoming(m)).sort((a, b) => String(a.scheduled_at || '9').localeCompare(String(b.scheduled_at || '9'))),
     // newest first by when we last observed the result (ESPN rows carry no source timestamp: our write time)
     latest_results: shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))).slice(0, 40),
     coverage: TOUR_COVERAGE
