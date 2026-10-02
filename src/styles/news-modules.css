@@ -9,6 +9,12 @@
 .nwd-t td b { font: 700 14px var(--f-data); }
 .nwd-t td small { color: var(--faint); font: 500 11.5px var(--f-data); }
 .nwd-t td.lead b { color: var(--win); }
+.nwd-t thead th { border-bottom: 1px solid var(--rule-2); }
+.nwd-t tbody tr:first-child th, .nwd-t tbody tr:first-child td { border-top: 0; }
+.nwd-t tbody th, .nwd-t tbody td { border-top-color: color-mix(in srgb, var(--rule) 70%, transparent); }
+.nwd-t tbody tr:nth-child(even) { background: color-mix(in srgb, var(--paper) 65%, var(--white)); }
+.nwd-t th:first-child, .nwd-t td:first-child { padding-left: 8px; }
+.nwd-t th:last-child, .nwd-t td:last-child { padding-right: 8px; }
 .nwd-src { margin-top: 6px; color: var(--faint); font-size: 12px; }
 .nwd-note { margin: 8px 0 0; color: var(--muted); font-size: 13.5px; }
 .nwd-tiles { list-style: none; padding: 0; margin: 10px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }

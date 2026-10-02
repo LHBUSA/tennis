@@ -4,7 +4,7 @@
 // Pages: /news, /news/atp, /news/wta, /news/doubles, /news/rankings + every published article, at
 // 320/360/390/430/768/1024/1440. Fails on: horizontal overflow, giant blank hero, broken images, stretched low-res
 // images, an identical card wall, lead not visibly larger than majors (1440), unreadable wire at 320, article measure
-// over ~75ch, a rail that crushes the article (<600px at 1440), Source & Method not a <details>, unresolved player /
+// over ~75ch, a rail that crushes the article (<600px at 1440), Source & Method collapsed or hidden (owner 2026-10-02: always open), unresolved player /
 // tournament links, wrong share links, SVG mock media in editorial slots, console errors.
 // Screenshots -> qa-artifacts/news-v3/ ; heading report -> docs/evidence/news-v3-ui-latest.md
 import fs from 'node:fs';
@@ -79,7 +79,7 @@ for (const w of WIDTHS) {
         leadPx: lead ? px(lead, 'fontSize') : 0, majorPx: major ? px(major, 'fontSize') : 0, leadBox, majBox,
         wireVisible: [...document.querySelectorAll('.nf-wire-list > .nf-w')].filter((e) => e.offsetParent !== null).length,
         wire: wireH.length, wireMinPx: wireH.length ? Math.min(...wireH.map((e) => px(e, 'fontSize'))) : 0,
-        measure, artW: art ? art.getBoundingClientRect().width : 0, details: !!document.querySelector('details.nf-method > summary'),
+        measure, artW: art ? art.getBoundingClientRect().width : 0, details: (() => { const m = document.querySelector('.nf-method'); return !!m && !m.closest('details:not([open])') && m.getClientRects().length > 0 && /packet|composer/i.test(m.innerText); })(),
         share, links, url: location.href.split('?')[0], isArticle,
         h1: [...document.querySelectorAll('#main h1')].map((h) => h.textContent.trim()),
         h2: [...document.querySelectorAll('#main h2')].map((h) => h.textContent.trim().replace(/\s+/g, ' ')).slice(0, 30),
@@ -122,7 +122,7 @@ for (const w of WIDTHS) {
     if (r.isArticle) {
       if (r.measure > 80) bad.push(`article measure ~${Math.round(r.measure)}ch`);
       if (w === 1440 && r.artW < 600) bad.push(`rail crushes article (${Math.round(r.artW)}px)`);
-      if (!r.details) bad.push('Source & Method is not a collapsed <details>');
+      if (!r.details) bad.push('Source & Method is not visible without a click (with packet/composer versions)');
       const enc = encodeURIComponent(r.url.replace(BASE, 'https://tennis.propbetedge.ai'));
       if (r.share.length && !r.share.some((h) => h.includes(enc) || h.includes(r.url.replace(BASE, 'https://tennis.propbetedge.ai')))) bad.push('share links do not carry the canonical story URL');
     }

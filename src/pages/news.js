@@ -307,13 +307,18 @@ const heroKey = (a) => { const i = a?.media?.hero?.images?.[0]; return i ? i.pla
 const res0 = (r) => (r?.meta?.semantics ? `${r.meta.semantics}.` : '');
 
 // ---- charts: rendered from plan specs only ---------------------------------------------------------------
+// what a chart measures, by plan id: the pre-match DNA baseline vs what happened in this match (label only, no new numbers)
+const CHART_KIND = { dna_comparison: 'Pre-match baseline', match_dna_comparison: 'Pre-match baseline', serve_comparison: 'Match production', return_comparison: 'Match production', serve_counts: 'Match production' };
 function groupedBar(c) {
   const max = c.max || Math.max(1, ...c.series.flatMap((r) => c.value_keys.map((k) => Number(r[k]) || 0)));
   const fmt = (v) => (v == null ? '—' : c.unit === '%' ? `${v}%` : String(v));
-  return html`<figure class="nw-chart" aria-label="${c.title}">
-    <figcaption><b>${c.title}</b>${c.legend ? html`<span class="nw-leg">${c.legend.map((l, i) => html`<i class="k${i}"></i>${l}`)}</span>` : ''}</figcaption>
-    ${c.series.map((r) => html`<div class="nw-row"><span class="nw-rl">${r[c.label_key]}${r.tb ? html` <small>TB ${r.tb}</small>` : ''}</span>
-      <div class="nw-bars">${c.value_keys.map((k, i) => html`<div class="nw-bar"><span class="k${i}" style="width:${Math.max(0, Math.min(100, ((Number(r[k]) || 0) / max) * 100))}%"></span><em>${fmt(r[k])}${r[`${k}_n`] ? html` <small>${r[`${k}_n`]}</small>` : ''}</em></div>`)}</div></div>`)}
+  // value and n/d sit in fixed columns so numbers line up row to row; the n/d column exists only when the chart carries counts
+  const hasN = c.series.some((r) => c.value_keys.some((k) => r[`${k}_n`]));
+  const kind = CHART_KIND[c.id];
+  return html`<figure class="nw-chart${hasN ? ' has-n' : ''}${kind === 'Pre-match baseline' ? ' is-base' : ''}" data-chart="${c.id || ''}" aria-label="${kind ? `${kind}: ` : ''}${c.title}">
+    <figcaption>${kind ? html`<span class="nw-chart-k">${kind}</span>` : ''}<b>${c.title}</b>${c.legend ? html`<span class="nw-leg">${c.legend.map((l, i) => html`<span><i class="k${i}"></i>${l}</span>`)}</span>` : ''}</figcaption>
+    <div class="nw-rows">${c.series.map((r) => html`<div class="nw-row"><span class="nw-rl">${r[c.label_key]}${r.tb ? html` <small>TB ${r.tb}</small>` : ''}</span>
+      <div class="nw-bars">${c.value_keys.map((k, i) => html`<div class="nw-bar"><span class="k${i}" style="width:${Math.max(0, Math.min(100, ((Number(r[k]) || 0) / max) * 100))}%"></span><em><span class="nw-v">${fmt(r[k])}</span>${hasN ? html`<small>${r[`${k}_n`] || ''}</small>` : ''}</em></div>`)}</div></div>`)}</div>
     ${c.source ? html`<p class="nw-src">Source: ${c.source}${c.note ? ` · ${c.note}` : ''}</p>` : ''}</figure>`;
 }
 function lineChart(c) {
@@ -451,27 +456,28 @@ function intelligenceMod(x) {
     <p class="nf-intel-m">Model values are PropBetEdge estimates frozen before the event; descriptive values are results in our record. <a href="/methodology">Methodology →</a></p></aside>`;
 }
 
-/** SOURCE & METHOD, collapsed (soccer pattern): sources, last verified, unavailable evidence, methodology; advanced inside. */
+/** SOURCE & METHOD, always open (owner 2026-10-02: product differentiation, never behind an accordion): sources, last
+ *  verified, unavailable evidence, methodology, then the packet/composer/gates versions. */
 function sourceMethod(a, meta) {
   const e = a.evidence || {};
   const up = (e.provenance?.upstream || []).map((u) => `${String(u.family || '').toUpperCase()} (${u.what})`);
   const unavailable = [...(e.unavailable || []), ...(a.unavailable || [])].filter(Boolean);
   const gates = a.method?.gates || null;
-  return html`<details class="nf-method"><summary><span class="nf-method-k">Source &amp; Method</span> <span class="nf-method-s">How this story was built</span></summary>
+  return html`<section class="nf-method" aria-labelledby="nf-method-h"><header class="nf-method-hd"><h2 id="nf-method-h" class="nf-method-k">Source &amp; Method</h2> <span class="nf-method-s">How this story was built</span></header>
     <div class="nf-method-b">
       <p><b>Sources.</b> ${e.provenance?.data_brand || 'DATA · PropSports'}${up.length ? ` — upstream: ${up.join('; ')}` : ''}.</p>
       <p><b>Last verified.</b> Evidence frozen ${e.frozen_at ? when(e.frozen_at) : 'at publication'}; every number in this story was checked against it before publication. Values are as of the event, not today.</p>
       ${unavailable.length ? html`<p><b>Not available for this story.</b> ${unavailable.map((u) => (typeof u === 'string' ? u : u.what || u.label || '')).filter(Boolean).join('; ')}.</p>` : ''}
       <p><b>Prose.</b> ${a.method?.prose === 'model' ? 'PropBetEdge editorial model, fact-checked against the evidence' : 'PropBetEdge fact-safe writer'}; charts are built by code from the same evidence. <a href="/methodology">Methodology →</a></p>
-      <details class="nf-method-adv"><summary>Advanced</summary><dl>
+      <div class="nf-method-adv"><p class="nf-method-vk">Versions</p><dl>
         ${e.packet_hash || a.packet_hash ? html`<dt>Packet hash</dt><dd><code>${e.packet_hash || a.packet_hash}</code></dd>` : ''}
         ${e.packet_version ? html`<dt>Packet</dt><dd>${e.packet_version}</dd>` : ''}
         ${a.method?.writer ? html`<dt>Composer</dt><dd>${a.method.writer}</dd>` : ''}
         ${a.method?.editorial ? html`<dt>Editorial</dt><dd>${a.method.editorial}</dd>` : ''}
         ${gates ? html`<dt>Gates</dt><dd>${gates}${a.method?.gates_passed ? ' · passed' : ''}</dd>` : ''}
         ${meta?.api_version || meta?.version ? html`<dt>API</dt><dd>${meta.api_version || meta.version}</dd>` : ''}
-      </dl></details>
-    </div></details>`;
+      </dl></div>
+    </div></section>`;
 }
 
 /** The article hero: event photo > subject composition > tournament atmosphere (all via the resolver) > restrained
@@ -484,9 +490,36 @@ function articleHero(a) {
   return html`<div class="nf-band-hero" role="img" aria-label="${KIND[a.story_type] || 'Story'}${t?.name ? ` · ${tLabel(t)}` : ''}"><img src="/brand/pbe-mark-80.webp" width="110" height="60" alt=""><div><span>${(KIND[a.story_type] || 'Story').toUpperCase()}</span>${t?.name ? html`<b>${tLabel(t)}</b>` : ''}${t?.surface ? html`<small>${t.surface}${t.level ? ` · ${t.level}` : ''}</small>` : ''}</div></div>`;
 }
 
+/** Sticky rail offset = the global header's real height (it changes with the live pill / breakpoints), as --hdr-h on
+ *  the root; CSS falls back to 64px before the first measurement. Returns the disconnect. */
+function trackHeaderHeight() {
+  const hdr = typeof document === 'undefined' ? null : document.querySelector('.hdr');
+  if (!hdr || typeof ResizeObserver === 'undefined') return () => {};
+  const set = () => document.documentElement.style.setProperty('--hdr-h', `${Math.round(hdr.getBoundingClientRect().height)}px`);
+  const ro = new ResizeObserver(set);
+  ro.observe(hdr);
+  set();
+  return () => ro.disconnect();
+}
+
+/** A sticky rail taller than the viewport scrolls inside itself (CSS); data-more marks "content below" for a soft
+ *  bottom fade instead of a hard cut. Visual only — no layout change. Returns the cleanup. */
+function railFade(rail) {
+  if (!rail || typeof ResizeObserver === 'undefined') return () => {};
+  const upd = () => { rail.toggleAttribute('data-more', rail.scrollHeight - rail.clientHeight - rail.scrollTop > 2); };
+  const ro = new ResizeObserver(upd);
+  ro.observe(rail);
+  for (const c of rail.children) ro.observe(c);
+  rail.addEventListener('scroll', upd, { passive: true });
+  upd();
+  return () => { ro.disconnect(); rail.removeEventListener('scroll', upd); };
+}
+
 export function article(root, ctx) {
   const ctl = new AbortController();
   const slug = ctx?.params?.slug;
+  const untrack = trackHeaderHeight();
+  let unfade = () => {};
   render(root, html`<div class="nw"><div data-body><div class="page"><p class="loading">Loading…</p></div></div></div>`);
   api(withPreview(`/v1/news/${slug}`), { signal: ctl.signal }).then((res) => {
     const body = root.querySelector('[data-body]');
@@ -554,12 +587,13 @@ export function article(root, ctx) {
           </article>
           <aside class="nwm-rail" aria-label="Keep exploring">
             ${links.length || dnaLinks.length ? html`<section class="nwm-rbox"><h2>Keep exploring</h2><div class="nwv-links">${[...dnaLinks, ...links].map(([h, l, n]) => html`<a href="${h}"><b>${l}</b><small>${n}</small></a>`)}</div></section>` : ''}
-            ${t?.slug ? html`<section class="nwm-rbox" data-event-live hidden><h2>Live at this event</h2><div data-event-live-list></div><p class="nw-back"><a href="/tournaments/${t.slug}/${t.year}">${tLabel(t)} →</a></p></section>` : ''}
             ${a.related?.length ? html`<section class="nwm-rbox"><h2>Related intelligence</h2><div class="nf-rel">${a.related.slice(0, 3).map(storyRow)}</div><p class="nw-back"><a href="/news">All tennis news →</a></p></section>` : ''}
+            ${t?.slug ? html`<section class="nwm-rbox" data-event-live hidden><h2>Live at this event</h2><div data-event-live-list></div><p class="nw-back"><a href="/tournaments/${t.slug}/${t.year}">${tLabel(t)} →</a></p></section>` : ''}
           </aside>
         </div>
       </div>
     </div>`);
+    unfade = railFade(body.querySelector('.nwm-rail'));
     if (t?.slug && t?.year) {
       api(`/v1/news/live?tournament=${encodeURIComponent(t.slug)}&year=${t.year}&limit=8`, { signal: ctl.signal }).then((r) => {
         const items = (Array.isArray(r?.data?.items) ? r.data.items : []).filter((w) => !w.article_slug || w.article_slug !== a.slug).slice(0, 6);
@@ -570,7 +604,7 @@ export function article(root, ctx) {
       }).catch(() => {});
     }
   }).catch(() => {});
-  return () => ctl.abort();
+  return () => { ctl.abort(); untrack(); unfade(); };
 }
 
 export const __test = { glanceStrip, intelligenceMod, sourceMethod, articleHero, majorStory, featureStory, resultRows, tournamentsModule, moversModule };

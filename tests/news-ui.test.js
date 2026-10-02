@@ -64,17 +64,18 @@ test('at-a-glance: served cells first, never an empty cell, derived only from fr
   assert.ok(glanceCells({ glance: Array.from({ length: 8 }, (_, i) => ({ label: `L${i}`, value: i + 1 })) }).length === 5);
 });
 
-test('article modules: intelligence only from served data; source & method is a collapsed <details>; hero never blank', () => {
+test('article modules: intelligence only from served data; source & method is always open (never an accordion) with versions visible; hero never blank', () => {
   assert.equal(str(N.intelligenceMod(null)), '');
   const intel = str(N.intelligenceMod({ takeaway: 'The return numbers separated most sharply after the first serve.', evidence: [{ label: 'PBE Rating', value: 2277 }, 'Opponent quality: 99th pct'], counterpoint: 'Only 7 matches carry statistics.' }));
   assert.match(intel, /PBE Intelligence/);
   assert.match(intel, /Counterpoint/);
   assert.doesNotMatch(intel, /odds|bet |wager|sportsbook/i, 'not a betting ad');
   const sm = str(N.sourceMethod({ evidence: { frozen_at: '2026-09-28T07:08:00Z', packet_version: 'tennis-packet/3', packet_hash: 'abc123', provenance: { upstream: [{ family: 'wta', what: 'match' }] }, unavailable: ['point-by-point'] }, method: { writer: 'gpt', gates: 'tennis-gates/2', gates_passed: true } }, { version: '0.8.0' }));
-  assert.match(sm, /^<details class="nf-method">/);
-  assert.match(sm, /<summary>.*Source &amp; Method.*How this story was built/s);
+  assert.match(sm, /^<section class="nf-method"/);
+  assert.doesNotMatch(sm, /<details|<summary/, 'owner 2026-10-02: Source & Method is never collapsed');
+  assert.match(sm, /<h2 id="nf-method-h" class="nf-method-k">Source &amp; Method<\/h2>.*How this story was built/s);
   assert.match(sm, /Not available for this story\.<\/b> point-by-point/);
-  assert.match(sm, /<details class="nf-method-adv">.*Packet hash.*abc123.*Composer.*gpt.*Gates.*passed.*API.*0\.8\.0/s);
+  assert.match(sm, /<div class="nf-method-adv">.*Versions.*Packet hash.*abc123.*Composer.*gpt.*Gates.*passed.*API.*0\.8\.0/s);
   const band = str(N.articleHero({ story_type: 'title', tournament: { name: 'Porto 125', year: 2026 }, media: { hero: { type: 'fallback', images: [] } } }));
   assert.match(band, /nf-band-hero/);
   assert.match(band, /Porto 125 2026/);

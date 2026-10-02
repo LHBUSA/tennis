@@ -1,0 +1,1574 @@
+{
+ "base": "https://tennis.propbetedge.ai",
+ "label": "before",
+ "at": "2026-10-02T14:22:49.046Z",
+ "fails": [],
+ "rows": [
+  {
+   "w": 320,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0003,
+   "clsTotal": 0.0003,
+   "railPos": "static",
+   "railH": 1469,
+   "railScrollH": 1469,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4469,
+     "railBottom": 5938,
+     "hdrBottom": 65,
+     "footerTop": 6018,
+     "artBottom": 4445
+    },
+    {
+     "f": 0.7,
+     "railTop": 898,
+     "railBottom": 2367,
+     "hdrBottom": 65,
+     "footerTop": 2447,
+     "artBottom": 874
+    },
+    {
+     "f": 1,
+     "railTop": -2162,
+     "railBottom": -693,
+     "hdrBottom": 65,
+     "footerTop": -613,
+     "artBottom": -2186
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 320,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0001,
+   "clsTotal": 0.0001,
+   "railPos": "static",
+   "railH": 1392,
+   "railScrollH": 1392,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 5264,
+     "railBottom": 6656,
+     "hdrBottom": 65,
+     "footerTop": 6736,
+     "artBottom": 5240
+    },
+    {
+     "f": 0.7,
+     "railTop": 1308,
+     "railBottom": 2700,
+     "hdrBottom": 65,
+     "footerTop": 2780,
+     "artBottom": 1284
+    },
+    {
+     "f": 1,
+     "railTop": -2084,
+     "railBottom": -692,
+     "hdrBottom": 65,
+     "footerTop": -612,
+     "artBottom": -2108
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 320,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0001,
+   "clsTotal": 0.0001,
+   "railPos": "static",
+   "railH": 1446,
+   "railScrollH": 1446,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3916,
+     "railBottom": 5362,
+     "hdrBottom": 65,
+     "footerTop": 5442,
+     "artBottom": 3892
+    },
+    {
+     "f": 0.7,
+     "railTop": 655,
+     "railBottom": 2101,
+     "hdrBottom": 65,
+     "footerTop": 2181,
+     "artBottom": 631
+    },
+    {
+     "f": 1,
+     "railTop": -2139,
+     "railBottom": -693,
+     "hdrBottom": 65,
+     "footerTop": -613,
+     "artBottom": -2163
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 320,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0001,
+   "clsTotal": 0.0001,
+   "railPos": "static",
+   "railH": 3253,
+   "railScrollH": 3253,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4238,
+     "railBottom": 7491,
+     "hdrBottom": 65,
+     "footerTop": 7571,
+     "artBottom": 4214
+    },
+    {
+     "f": 0.7,
+     "railTop": -168,
+     "railBottom": 3085,
+     "hdrBottom": 65,
+     "footerTop": 3165,
+     "artBottom": -192
+    },
+    {
+     "f": 1,
+     "railTop": -3945,
+     "railBottom": -692,
+     "hdrBottom": 65,
+     "footerTop": -612,
+     "artBottom": -3969
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 360,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0002,
+   "clsTotal": 0.0002,
+   "railPos": "static",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4171,
+     "railBottom": 5453,
+     "hdrBottom": 65,
+     "footerTop": 5533,
+     "artBottom": 4147
+    },
+    {
+     "f": 0.7,
+     "railTop": 893,
+     "railBottom": 2175,
+     "hdrBottom": 65,
+     "footerTop": 2255,
+     "artBottom": 869
+    },
+    {
+     "f": 1,
+     "railTop": -1917,
+     "railBottom": -635,
+     "hdrBottom": 65,
+     "footerTop": -555,
+     "artBottom": -1941
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 360,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1204,
+   "railScrollH": 1204,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4829,
+     "railBottom": 6033,
+     "hdrBottom": 65,
+     "footerTop": 6113,
+     "artBottom": 4805
+    },
+    {
+     "f": 0.7,
+     "railTop": 1238,
+     "railBottom": 2442,
+     "hdrBottom": 65,
+     "footerTop": 2522,
+     "artBottom": 1214
+    },
+    {
+     "f": 1,
+     "railTop": -1839,
+     "railBottom": -635,
+     "hdrBottom": 65,
+     "footerTop": -555,
+     "artBottom": -1863
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 360,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3694,
+     "railBottom": 4976,
+     "hdrBottom": 65,
+     "footerTop": 5056,
+     "artBottom": 3670
+    },
+    {
+     "f": 0.7,
+     "railTop": 673,
+     "railBottom": 1955,
+     "hdrBottom": 65,
+     "footerTop": 2035,
+     "artBottom": 649
+    },
+    {
+     "f": 1,
+     "railTop": -1917,
+     "railBottom": -635,
+     "hdrBottom": 65,
+     "footerTop": -555,
+     "artBottom": -1941
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 360,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 3032,
+   "railScrollH": 3032,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4026,
+     "railBottom": 7058,
+     "hdrBottom": 65,
+     "footerTop": 7138,
+     "artBottom": 4002
+    },
+    {
+     "f": 0.7,
+     "railTop": -117,
+     "railBottom": 2915,
+     "hdrBottom": 65,
+     "footerTop": 2995,
+     "artBottom": -141
+    },
+    {
+     "f": 1,
+     "railTop": -3667,
+     "railBottom": -635,
+     "hdrBottom": 65,
+     "footerTop": -555,
+     "artBottom": -3691
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 390,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0117,
+   "clsTotal": 0.0117,
+   "railPos": "static",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4009,
+     "railBottom": 5291,
+     "hdrBottom": 65,
+     "footerTop": 5371,
+     "artBottom": 3985
+    },
+    {
+     "f": 0.7,
+     "railTop": 849,
+     "railBottom": 2131,
+     "hdrBottom": 65,
+     "footerTop": 2211,
+     "artBottom": 825
+    },
+    {
+     "f": 1,
+     "railTop": -1859,
+     "railBottom": -577,
+     "hdrBottom": 65,
+     "footerTop": -497,
+     "artBottom": -1883
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 390,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1204,
+   "railScrollH": 1204,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4707,
+     "railBottom": 5911,
+     "hdrBottom": 65,
+     "footerTop": 5991,
+     "artBottom": 4683
+    },
+    {
+     "f": 0.7,
+     "railTop": 1214,
+     "railBottom": 2418,
+     "hdrBottom": 65,
+     "footerTop": 2498,
+     "artBottom": 1190
+    },
+    {
+     "f": 1,
+     "railTop": -1781,
+     "railBottom": -577,
+     "hdrBottom": 65,
+     "footerTop": -497,
+     "artBottom": -1805
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 390,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3597,
+     "railBottom": 4878,
+     "hdrBottom": 65,
+     "footerTop": 4958,
+     "artBottom": 3573
+    },
+    {
+     "f": 0.7,
+     "railTop": 660,
+     "railBottom": 1941,
+     "hdrBottom": 65,
+     "footerTop": 2021,
+     "artBottom": 636
+    },
+    {
+     "f": 1,
+     "railTop": -1858,
+     "railBottom": -577,
+     "hdrBottom": 65,
+     "footerTop": -497,
+     "artBottom": -1882
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 390,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 2973,
+   "railScrollH": 2973,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3937,
+     "railBottom": 6910,
+     "hdrBottom": 65,
+     "footerTop": 6990,
+     "artBottom": 3913
+    },
+    {
+     "f": 0.7,
+     "railTop": -94,
+     "railBottom": 2879,
+     "hdrBottom": 65,
+     "footerTop": 2959,
+     "artBottom": -118
+    },
+    {
+     "f": 1,
+     "railTop": -3550,
+     "railBottom": -577,
+     "hdrBottom": 65,
+     "footerTop": -497,
+     "artBottom": -3574
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 430,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0005,
+   "clsTotal": 0.0005,
+   "railPos": "static",
+   "railH": 1217,
+   "railScrollH": 1217,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3956,
+     "railBottom": 5173,
+     "hdrBottom": 65,
+     "footerTop": 5253,
+     "artBottom": 3932
+    },
+    {
+     "f": 0.7,
+     "railTop": 880,
+     "railBottom": 2097,
+     "hdrBottom": 65,
+     "footerTop": 2177,
+     "artBottom": 856
+    },
+    {
+     "f": 1,
+     "railTop": -1757,
+     "railBottom": -540,
+     "hdrBottom": 65,
+     "footerTop": -460,
+     "artBottom": -1781
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 430,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1140,
+   "railScrollH": 1140,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 4493,
+     "railBottom": 5632,
+     "hdrBottom": 65,
+     "footerTop": 5712,
+     "artBottom": 4469
+    },
+    {
+     "f": 0.7,
+     "railTop": 1170,
+     "railBottom": 2309,
+     "hdrBottom": 65,
+     "footerTop": 2389,
+     "artBottom": 1146
+    },
+    {
+     "f": 1,
+     "railTop": -1679,
+     "railBottom": -540,
+     "hdrBottom": 65,
+     "footerTop": -460,
+     "artBottom": -1703
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 430,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1217,
+   "railScrollH": 1217,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3496,
+     "railBottom": 4713,
+     "hdrBottom": 65,
+     "footerTop": 4793,
+     "artBottom": 3472
+    },
+    {
+     "f": 0.7,
+     "railTop": 667,
+     "railBottom": 1884,
+     "hdrBottom": 65,
+     "footerTop": 1964,
+     "artBottom": 643
+    },
+    {
+     "f": 1,
+     "railTop": -1757,
+     "railBottom": -540,
+     "hdrBottom": 65,
+     "footerTop": -460,
+     "artBottom": -1781
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 430,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 2739,
+   "railScrollH": 2739,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3838,
+     "railBottom": 6577,
+     "hdrBottom": 65,
+     "footerTop": 6657,
+     "artBottom": 3814
+    },
+    {
+     "f": 0.7,
+     "railTop": 6,
+     "railBottom": 2745,
+     "hdrBottom": 65,
+     "footerTop": 2825,
+     "artBottom": -18
+    },
+    {
+     "f": 1,
+     "railTop": -3278,
+     "railBottom": -539,
+     "hdrBottom": 65,
+     "footerTop": -459,
+     "artBottom": -3302
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 768,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0005,
+   "clsTotal": 0.0005,
+   "railPos": "static",
+   "railH": 1077,
+   "railScrollH": 1077,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3050,
+     "railBottom": 4127,
+     "hdrBottom": 65,
+     "footerTop": 4207,
+     "artBottom": 3026
+    },
+    {
+     "f": 0.7,
+     "railTop": 771,
+     "railBottom": 1848,
+     "hdrBottom": 65,
+     "footerTop": 1928,
+     "artBottom": 747
+    },
+    {
+     "f": 1,
+     "railTop": -1182,
+     "railBottom": -105,
+     "hdrBottom": 65,
+     "footerTop": -25,
+     "artBottom": -1206
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 768,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 999,
+   "railScrollH": 999,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3520,
+     "railBottom": 4520,
+     "hdrBottom": 65,
+     "footerTop": 4600,
+     "artBottom": 3496
+    },
+    {
+     "f": 0.7,
+     "railTop": 1030,
+     "railBottom": 2030,
+     "hdrBottom": 65,
+     "footerTop": 2110,
+     "artBottom": 1006
+    },
+    {
+     "f": 1,
+     "railTop": -1104,
+     "railBottom": -104,
+     "hdrBottom": 65,
+     "footerTop": -24,
+     "artBottom": -1128
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 768,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1077,
+   "railScrollH": 1077,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 2727,
+     "railBottom": 3804,
+     "hdrBottom": 65,
+     "footerTop": 3884,
+     "artBottom": 2703
+    },
+    {
+     "f": 0.7,
+     "railTop": 623,
+     "railBottom": 1700,
+     "hdrBottom": 65,
+     "footerTop": 1780,
+     "artBottom": 599
+    },
+    {
+     "f": 1,
+     "railTop": -1181,
+     "railBottom": -104,
+     "hdrBottom": 65,
+     "footerTop": -24,
+     "artBottom": -1205
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 768,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 2035,
+   "railScrollH": 2035,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3022,
+     "railBottom": 5057,
+     "hdrBottom": 65,
+     "footerTop": 5137,
+     "artBottom": 2998
+    },
+    {
+     "f": 0.7,
+     "railTop": 243,
+     "railBottom": 2278,
+     "hdrBottom": 65,
+     "footerTop": 2358,
+     "artBottom": 219
+    },
+    {
+     "f": 1,
+     "railTop": -2140,
+     "railBottom": -105,
+     "hdrBottom": 65,
+     "footerTop": -25,
+     "artBottom": -2164
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 1024,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0004,
+   "clsTotal": 0.0004,
+   "railPos": "static",
+   "railH": 1077,
+   "railScrollH": 1077,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3139,
+     "railBottom": 4216,
+     "hdrBottom": 65,
+     "footerTop": 4296,
+     "artBottom": 3115
+    },
+    {
+     "f": 0.7,
+     "railTop": 969,
+     "railBottom": 2046,
+     "hdrBottom": 65,
+     "footerTop": 2126,
+     "artBottom": 945
+    },
+    {
+     "f": 1,
+     "railTop": -892,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": -916
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 1024,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 999,
+   "railScrollH": 999,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3547,
+     "railBottom": 4546,
+     "hdrBottom": 65,
+     "footerTop": 4626,
+     "artBottom": 3523
+    },
+    {
+     "f": 0.7,
+     "railTop": 1199,
+     "railBottom": 2198,
+     "hdrBottom": 65,
+     "footerTop": 2278,
+     "artBottom": 1175
+    },
+    {
+     "f": 1,
+     "railTop": -814,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": -838
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 1024,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 1077,
+   "railScrollH": 1077,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 2799,
+     "railBottom": 3876,
+     "hdrBottom": 65,
+     "footerTop": 3956,
+     "artBottom": 2775
+    },
+    {
+     "f": 0.7,
+     "railTop": 812,
+     "railBottom": 1889,
+     "hdrBottom": 65,
+     "footerTop": 1969,
+     "artBottom": 788
+    },
+    {
+     "f": 1,
+     "railTop": -892,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": -916
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 1024,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0,
+   "clsTotal": 0,
+   "railPos": "static",
+   "railH": 2015,
+   "railScrollH": 2015,
+   "railBelowArticle": true,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 3155,
+     "railBottom": 5170,
+     "hdrBottom": 65,
+     "footerTop": 5250,
+     "artBottom": 3131
+    },
+    {
+     "f": 0.7,
+     "railTop": 471,
+     "railBottom": 2486,
+     "hdrBottom": 65,
+     "footerTop": 2566,
+     "artBottom": 447
+    },
+    {
+     "f": 1,
+     "railTop": -1830,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": -1854
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  },
+  {
+   "w": 1440,
+   "slug": "fernandez-wins-the-singapore-title-c6c3a0",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0016,
+   "clsTotal": 0.0016,
+   "railPos": "sticky",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": false,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 84,
+     "railBottom": 1366,
+     "hdrBottom": 65,
+     "footerTop": 3663,
+     "artBottom": 3583
+    },
+    {
+     "f": 0.7,
+     "railTop": 84,
+     "railBottom": 1366,
+     "hdrBottom": 65,
+     "footerTop": 1833,
+     "artBottom": 1753
+    },
+    {
+     "f": 1,
+     "railTop": -1097,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": 185
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f13b4d0f9fefd449",
+   "narrativeHash": "a36bd625fcce0b29",
+   "valuesHash": "311ef0ee912325ff",
+   "dnaLabels": []
+  },
+  {
+   "w": 1440,
+   "slug": "fernandez-beats-no-5-andreeva-in-the-singapore-q",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0012,
+   "clsTotal": 0.0012,
+   "railPos": "sticky",
+   "railH": 1204,
+   "railScrollH": 1204,
+   "railBelowArticle": false,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 84,
+     "railBottom": 1288,
+     "hdrBottom": 65,
+     "footerTop": 4184,
+     "artBottom": 4104
+    },
+    {
+     "f": 0.7,
+     "railTop": 84,
+     "railBottom": 1288,
+     "hdrBottom": 65,
+     "footerTop": 2074,
+     "artBottom": 1994
+    },
+    {
+     "f": 1,
+     "railTop": -1020,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": 185
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "245c35092558abeb",
+   "narrativeHash": "8a870ede741a5604",
+   "valuesHash": "c19d205fd3bd0584",
+   "dnaLabels": []
+  },
+  {
+   "w": 1440,
+   "slug": "birrell-wins-the-seoul-title-48ee62",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0012,
+   "clsTotal": 0.0012,
+   "railPos": "sticky",
+   "railH": 1282,
+   "railScrollH": 1282,
+   "railBelowArticle": false,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 84,
+     "railBottom": 1366,
+     "hdrBottom": 65,
+     "footerTop": 3304,
+     "artBottom": 3224
+    },
+    {
+     "f": 0.7,
+     "railTop": 84,
+     "railBottom": 1366,
+     "hdrBottom": 65,
+     "footerTop": 1668,
+     "artBottom": 1588
+    },
+    {
+     "f": 1,
+     "railTop": -1097,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": 185
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "c489b14464c17cf3",
+   "narrativeHash": "8c0b32b2a302ac6e",
+   "valuesHash": "f76673860e993d27",
+   "dnaLabels": []
+  },
+  {
+   "w": 1440,
+   "slug": "fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-gr",
+   "overflow": 0,
+   "clipped": [],
+   "errors": [],
+   "clsLoad": 0.0674,
+   "clsTotal": 0.0674,
+   "railPos": "sticky",
+   "railH": 3079,
+   "railScrollH": 3079,
+   "railBelowArticle": false,
+   "samples": [
+    {
+     "f": 0.35,
+     "railTop": 84,
+     "railBottom": 3163,
+     "hdrBottom": 65,
+     "footerTop": 4003,
+     "artBottom": 3923
+    },
+    {
+     "f": 0.7,
+     "railTop": -1169,
+     "railBottom": 1910,
+     "hdrBottom": 65,
+     "footerTop": 1990,
+     "artBottom": 1910
+    },
+    {
+     "f": 1,
+     "railTop": -2894,
+     "railBottom": 185,
+     "hdrBottom": 65,
+     "footerTop": 265,
+     "artBottom": 185
+    }
+   ],
+   "method": {
+    "visible": false,
+    "isDetails": true,
+    "hasPacket": false,
+    "hasComposer": false
+   },
+   "ldHash": "f93e3f02030ab51d",
+   "narrativeHash": "45eaa92eb645f4b6",
+   "valuesHash": "47b8f54a7bc09486",
+   "dnaLabels": []
+  }
+ ],
+ "links": [
+  [
+   "/news",
+   200
+  ],
+  [
+   "/players/leylah-fernandez",
+   200
+  ],
+  [
+   "/players/talia-gibson",
+   200
+  ],
+  [
+   "/tournaments/singapore/2026",
+   200
+  ],
+  [
+   "/pbecast/c452b6be-c8bf-501e-ac06-f9858d18bfca",
+   200
+  ],
+  [
+   "/matches/c452b6be-c8bf-501e-ac06-f9858d18bfca",
+   200
+  ],
+  [
+   "/players/maja-chwalinska",
+   200
+  ],
+  [
+   "/methodology",
+   200
+  ],
+  [
+   "/players/leylah-fernandez/dna",
+   200
+  ],
+  [
+   "/players/talia-gibson/dna",
+   200
+  ],
+  [
+   "/rankings/women",
+   200
+  ],
+  [
+   "/news/fils-knocks-out-no-2-seed-tiafoe-at-kinoshita-group-japan-open-tennis-championsh-ffae98",
+   200
+  ],
+  [
+   "/news/jacquet-beats-no-20-darderi-in-the-kinoshita-group-japan-open-tennis-championshi-6c342e",
+   200
+  ],
+  [
+   "/news/vallejo-beats-no-14-jodar-in-the-kinoshita-group-japan-open-tennis-championships-fcd10a",
+   200
+  ],
+  [
+   "/players/mirra-andreeva",
+   200
+  ],
+  [
+   "/matches/626060f2-4799-5b8e-986c-1d6082ec7436",
+   200
+  ],
+  [
+   "/players/kyoka-okamura",
+   200
+  ],
+  [
+   "/players/alycia-parks",
+   200
+  ],
+  [
+   "/players/mirra-andreeva/dna",
+   200
+  ],
+  [
+   "/players/kimberly-birrell",
+   200
+  ],
+  [
+   "/players/maya-joint",
+   200
+  ],
+  [
+   "/tournaments/seoul/2026",
+   200
+  ],
+  [
+   "/pbecast/c12f2acf-8441-5e79-a197-451d9cfeecc9",
+   200
+  ],
+  [
+   "/matches/c12f2acf-8441-5e79-a197-451d9cfeecc9",
+   200
+  ],
+  [
+   "/players/kimberly-birrell/dna",
+   200
+  ],
+  [
+   "/players/maya-joint/dna",
+   200
+  ],
+  [
+   "/players/arthur-fils",
+   200
+  ],
+  [
+   "/players/frances-tiafoe",
+   200
+  ],
+  [
+   "/tournaments/kinoshita-group-japan-open-tennis-championships/2026",
+   200
+  ],
+  [
+   "/matches/934ef4d1-a78e-584e-b638-834b9a26225f",
+   200
+  ],
+  [
+   "/players/arthur-fils/dna",
+   200
+  ],
+  [
+   "/players/frances-tiafoe/dna",
+   200
+  ],
+  [
+   "/players/valentin-vacherot",
+   200
+  ],
+  [
+   "/matches/cd7ec6db-a771-541e-aafe-0e791c333acd",
+   200
+  ],
+  [
+   "/players/martin-damm",
+   200
+  ],
+  [
+   "/players/kamil-majchrzak",
+   200
+  ],
+  [
+   "/players/luca-van-assche",
+   200
+  ],
+  [
+   "/rankings/men",
+   200
+  ],
+  [
+   "/matches/da52d3be-f1d3-5b94-8b03-253b4d216863",
+   200
+  ],
+  [
+   "/matches/9d348c82-38bc-5adf-a894-0fb2bd838286",
+   200
+  ],
+  [
+   "/players/jan-zielinski",
+   200
+  ],
+  [
+   "/matches/0d2f3fc0-5c19-5d6c-a629-8c66073e0266",
+   200
+  ],
+  [
+   "/matches/0bbe5cb7-cb5a-5378-a088-99a2e17f3c3f",
+   200
+  ],
+  [
+   "/matches/1d53bc63-9ccb-518a-9233-d24541de14d5",
+   200
+  ],
+  [
+   "/players/matteo-berrettini",
+   200
+  ],
+  [
+   "/matches/c524ddb5-b476-5abb-b0b8-dae206367e7a",
+   200
+  ],
+  [
+   "/players/kaito-uesugi",
+   200
+  ],
+  [
+   "/news/munar-beats-no-10-fritz-in-the-kinoshita-group-japan-open-tennis-championships-r-ed5a31",
+   200
+  ]
+ ]
+}

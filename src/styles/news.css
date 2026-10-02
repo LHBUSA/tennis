@@ -159,20 +159,19 @@
 .nf-band-hero b { font: 800 clamp(20px, 3vw, 30px)/1.05 var(--f-display); text-transform: uppercase; overflow-wrap: anywhere; }
 .nf-band-hero small { font: 600 11.5px/1.3 var(--f-data); text-transform: uppercase; letter-spacing: 0.08em; color: var(--on-dark-2); }
 
-.nf-method { margin: 34px 0 16px; border-top: 1px solid var(--rule-2); border-bottom: 1px solid var(--rule-2); }
-.nf-method > summary { cursor: pointer; list-style: none; padding: 14px 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; min-height: 44px; }
-.nf-method > summary::-webkit-details-marker { display: none; }
-.nf-method > summary::after { content: '+'; margin-left: auto; font: 700 18px/1 var(--f-data); color: var(--court-700); }
-.nf-method[open] > summary::after { content: '–'; }
-.nf-method-k { font: 800 13px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--court-700); }
+.nf-method { margin: 34px 0 16px; padding: 16px 0 6px; border-top: 3px solid var(--court-700); border-bottom: 1px solid var(--rule-2); }
+.nf-method-hd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin: 0 0 10px; }
+.nwm .nw-body .nf-method h2.nf-method-k { border: 0; padding: 0; margin: 0; font: 800 13px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--court-700); }
 .nf-method-s { font-size: 13px; color: var(--muted); }
-.nf-method-b { padding: 0 0 14px; }
-.nwm .nw-body .nf-method-b p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin: 0 0 10px; }
-.nf-method-adv { margin-top: 6px; }
-.nf-method-adv summary { cursor: pointer; font: 700 12px/1 var(--f-data); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding: 8px 0; min-height: 32px; }
-.nf-method-adv dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 14px; margin: 6px 0 0; font-size: 12.5px; }
+.nf-method-b { padding: 0 0 14px; min-width: 0; }
+.nwm .nw-body .nf-method-b p { font-size: 14px; line-height: 1.55; color: var(--ink-2); margin: 0 0 10px; overflow-wrap: anywhere; }
+.nf-method-adv { margin-top: 12px; padding: 10px 12px; background: var(--paper); border: 1px solid var(--rule); border-radius: var(--r); }
+.nwm .nw-body .nf-method-adv .nf-method-vk { font: 700 11px/1 var(--f-data); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.nf-method-adv dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 14px; margin: 0; font-size: 12.5px; }
 .nf-method-adv dt { color: var(--muted); font-weight: 700; }
-.nf-method-adv dd { margin: 0; overflow-wrap: anywhere; color: var(--ink-2); }
+.nf-method-adv dd { margin: 0; min-width: 0; overflow-wrap: anywhere; color: var(--ink-2); font: 500 12.5px/1.4 var(--f-data); }
+.nf-method-adv code { font: inherit; word-break: break-all; }
+@media (max-width: 360px) { .nf-method-adv dl { grid-template-columns: minmax(0, 1fr); gap: 0; } .nf-method-adv dd { margin-bottom: 6px; } }
 .nf-rel .nf-row { padding: 12px 0; }
 .nf-rel .nf-row:first-child { padding-top: 0; }
 .nf-rel .nf-row h3 { font-size: 17px; }

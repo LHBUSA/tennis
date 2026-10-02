@@ -533,7 +533,18 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 @media (min-width: 1100px) {
   .nwm-grid { display: flex; gap: 40px; align-items: flex-start; }
   .nwm-art { flex: 1 1 760px; margin: 0; min-width: 0; }
-  .nwm-rail { flex: 0 0 320px; margin: 0; position: sticky; top: 84px; }
+  .nwm-rail { flex: 0 0 320px; margin: 0; }
+}
+/* sticky rail: only in the two-column layout and only when the viewport is tall enough to be useful. Offset = the real
+   header height (--hdr-h, measured in article()); the rail never outgrows the viewport — a long rail (live feed) scrolls
+   inside itself, so Keep exploring stays pinned and Related intelligence stays reachable. Sticky is bounded by .nwm-grid,
+   so it can never reach the footer. */
+@media (min-width: 1100px) and (min-height: 620px) {
+  .nwm-rail { position: sticky; top: calc(var(--hdr-h, 64px) + 20px); max-height: calc(100vh - var(--hdr-h, 64px) - 40px); overflow-y: auto; overscroll-behavior-y: auto; scrollbar-width: thin; scrollbar-color: var(--rule-2) transparent; padding: 2px; margin: -2px; }
+  .nwm-rail .nwv-links { gap: 6px; }
+  .nwm-rail .nwv-links a { padding: 9px 12px; gap: 1px; }
+  .nwm-rail .nf-rel .nf-row-dek { display: none; }
+  .nwm-rail[data-more] { -webkit-mask-image: linear-gradient(#000 calc(100% - 56px), transparent); mask-image: linear-gradient(#000 calc(100% - 56px), transparent); }
 }
 .nwm-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; padding: 0 0 12px; border-bottom: 1px solid var(--rule); font: 700 11px/1 var(--f-data); letter-spacing: 0.1em; text-transform: uppercase; }
 .nwm-sport { background: var(--gold-bright); color: var(--night); padding: 5px 9px; border-radius: 3px; }
@@ -719,3 +730,31 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 .dir-filter input { flex: 1 1 220px; max-width: 360px; min-height: 42px; padding: 0 12px; border: 1px solid var(--rule-2); border-radius: 10px; background: var(--white); color: var(--ink); font: inherit; font-size: 16px; }
 /* Match DNA fingerprint sits above the long tables on /players/:slug/dna */
 .dna-fp .dna-wrap { margin-top: 6px; }
+
+/* ---- article stat tables (2026-10-02 polish): editorial table, not a dashboard. White card on paper, faint zebra rows,
+   value and n/d in fixed tabular columns so numbers scan down a column; the bars and data are unchanged. */
+.nwm .nw-body .nw-chart { background: var(--white); border: 1px solid var(--rule); border-radius: var(--r); padding: 16px 18px 14px; box-shadow: 0 1px 2px rgba(6, 32, 25, 0.04); }
+.nw-chart figcaption { align-items: baseline; margin-bottom: 8px; padding-bottom: 10px; border-bottom: 1px solid var(--rule-2); }
+.nw-chart figcaption > b { font: 700 15px/1.25 var(--f-ui); color: var(--ink); margin-right: auto; }
+.nw-chart-k { flex-basis: 100%; font: 800 11px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--court-600); }
+.nw-chart.is-base .nw-chart-k { color: var(--gold); }
+.nw-leg > span { white-space: nowrap; }
+.nw-rows { margin: 0 -18px; }
+.nw-chart .nw-row { padding: 8px 18px; border-top: 1px solid color-mix(in srgb, var(--rule) 70%, transparent); }
+.nw-chart .nw-row:first-child { border-top: 0; }
+.nw-chart .nw-row:nth-child(even) { background: color-mix(in srgb, var(--paper) 65%, var(--white)); }
+.nw-chart .nw-rl { font: 600 13.5px/1.3 var(--f-ui); color: var(--ink-2); }
+.nw-chart .nw-bar em { display: grid; grid-template-columns: 4.1em; justify-items: end; align-items: baseline; }
+.nw-chart.has-n .nw-bar em { grid-template-columns: 4.1em 3.6em; column-gap: 6px; }
+.nw-chart .nw-bar em small { justify-self: start; font: 500 11.5px/1 var(--f-data); color: var(--faint); }
+.nw-chart .nw-v { font-variant-numeric: tabular-nums; }
+.nw-chart .nw-bar > span { height: 10px; }
+.nw-chart .nw-src { padding-top: 10px; border-top: 1px solid color-mix(in srgb, var(--rule) 70%, transparent); margin-top: 0 !important; }
+@media (max-width: 600px) {
+  .nwm .nw-body .nw-chart { padding: 14px 14px 12px; }
+  .nw-rows { margin: 0 -14px; }
+  .nw-chart .nw-row { padding: 8px 14px; }
+}
+@media (max-width: 360px) {
+  .nw-chart.has-n .nw-bar em { grid-template-columns: 3.9em 3.3em; column-gap: 4px; }
+}
