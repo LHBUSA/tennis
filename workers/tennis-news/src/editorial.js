@@ -7,7 +7,9 @@
 // same gates the baseline passes are run on its output. Failure -> deterministic baseline (if it passes)
 // or HOLD. Gates are never relaxed for model prose.
 
-export const EDITORIAL_VERSION = 'tennis-editorial/4.0.0';
+import { evidenceDimensions } from './classify.js';
+
+export const EDITORIAL_VERSION = 'tennis-editorial/4.1.0';
 const API = 'https://api.openai.com/v1/responses';
 const CALL_TIMEOUT_MS = 90_000;
 export const USD_PER_MTOK = { input: 1.25, output: 10 }; // nominal standard rate for gpt-5.6-sol (same constant UFC records)
@@ -114,13 +116,31 @@ export function modelPacket(packet) {
   return JSON.parse(JSON.stringify(packet, (k, v) => (/^(square|wide|square_jpg|source_page|credit|license|author|photo|data_url|built_at|detector|edition_id)$/.test(k) ? undefined : v)));
 }
 
+// Approved section ids per PACKET evidence family (tennis-editorial 4.1.0). The baseline deciding not to render a
+// standalone section for a family (e.g. a brief) must not hide that family from the editor: the packet stays the only
+// fact source and the gates stay authoritative, but the editor may synthesise every family the packet proves.
+const FAMILY_SECTIONS = Object.freeze({
+  set_detail: ['match_development'], match_development: ['match_development'], point_level: ['match_development'],
+  match_statistics: ['match_data'], match_dna: ['player_read'], technical_dna: ['player_read'], recent_form: ['player_read'],
+  surface_context: ['surface'], h2h: ['h2h'], draw_path: ['path'], next_opponent: ['next'], tournament_context: ['why_it_mattered'],
+  ranking_history: ['trajectory']
+});
+/** Allowed section ids = the baseline's sections ∪ ids the packet's evidence dimensions support (never 'method'). */
+export function allowedSectionIds(packet, baseline) {
+  const ids = new Set(['what_happened', 'why_it_mattered', 'analysis', ...baseline.sections.map((s) => s.id)]);
+  for (const d of evidenceDimensions(packet)) for (const id of FAMILY_SECTIONS[d] || []) ids.add(id);
+  if (!packet?.match) for (const id of ['match_development', 'match_data', 'surface', 'h2h', 'path']) ids.delete(id);
+  ids.delete('method');
+  return [...ids];
+}
+
 const WORDS = { brief: ['220-600', '150-400'], full: ['450-900', '250-600'], deep: ['700-1300', '350-800'] };
 export function buildInput(packet, baseline, correction = null) {
-  const allowed = baseline.sections.map((s) => s.id).filter((id) => id !== 'method');
-  const extra = ['analysis'];
+  const allowed = allowedSectionIds(packet, baseline);
+  const extra = [];
   return [
     `Write the PropBetEdge Tennis story for this ${packet.event.kind.replace(/_/g, ' ')} event.`,
-    `STORY CLASS: ${baseline.story_class || 'full'}. ACCEPTANCE: ${WORDS[baseline.story_class || 'full'][packet.match ? 0 : 1]} words across your sections; at least ${packet.match ? (baseline.story_class === 'brief' ? 2 : 3) : 1} sections; every number from the packet. A brief is a tight news story: what happened and why it matters, nothing padded.`,
+    `STORY CLASS: ${baseline.story_class || 'full'}. ACCEPTANCE: ${WORDS[baseline.story_class || 'full'][packet.match ? 0 : 1]} words across your sections; at least ${packet.match ? (baseline.story_class === 'brief' ? 2 : 3) : 1} sections; every number from the packet. A brief is shorter than a full story but is still contextual journalism: answer what happened, why it was notable, and what evidence gives it context, synthesising the richest 1-3 context families the packet holds (draw path, match development, recent form, Match DNA records, H2H, surface, serve/return). Do not pad where the packet has no evidence; never restate a module's table.`,
     `ALLOWED SECTION IDS: ${[...allowed, ...extra].join(', ')}`,
     correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\nFix only these problems.` : '',
     `FACT-SAFE BASELINE (every fact here is verified; you may reorganise and deepen the writing, but you may not add facts beyond the packet):\n${JSON.stringify({ headline: baseline.headline, dek: baseline.dek, sections: baseline.sections.filter((s) => s.id !== 'method') })}`,
@@ -129,9 +149,9 @@ export function buildInput(packet, baseline, correction = null) {
 }
 
 /** Parse + shape model output onto the baseline frame (method section, ids, metadata stay code-owned). */
-export function adopt(modelJson, baseline) {
+export function adopt(modelJson, baseline, packet = null) {
   const o = typeof modelJson === 'string' ? JSON.parse(modelJson) : modelJson;
-  const allowed = new Set([...baseline.sections.map((s) => s.id), 'analysis']);
+  const allowed = new Set(packet ? allowedSectionIds(packet, baseline) : [...baseline.sections.map((s) => s.id), 'analysis']);
   const sections = (o.sections || []).filter((s) => allowed.has(s.id) && s.id !== 'method' && Array.isArray(s.paragraphs) && s.paragraphs.some((p) => String(p).trim())).map((s) => ({ id: s.id, heading: String(s.heading).slice(0, 80), paragraphs: s.paragraphs.map((p) => String(p).trim()).filter(Boolean) }));
   const method = baseline.sections.find((s) => s.id === 'method');
   return { ...baseline, headline: String(o.headline || '').trim(), dek: String(o.dek || '').trim(), sections: method ? [...sections, method] : sections, prose_origin: 'model' };
@@ -154,7 +174,7 @@ export async function editorialize({ packet, baseline, gate, apiKey, routing = n
       try {
         const r = await callModel(apiKey, { routing: r0, input: buildInput(packet, baseline, correction), fetchImpl });
         add(r.usage);
-        const draft = adopt(r.text, baseline);
+        const draft = adopt(r.text, baseline, packet);
         const g = gate(draft);
         log.push({ attempt: i + 1, model: r.model, pass: g.pass, failures: g.failures.slice(0, 12) });
         if (onCall) await onCall({ attempt: i + 1, model: r.model, usage: r.usage, response_id: r.response_id, latency_ms: r.latency_ms, gate_pass: g.pass });

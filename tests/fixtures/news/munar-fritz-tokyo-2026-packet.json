@@ -1,0 +1,938 @@
+{
+ "h2h": {
+  "note": "meetings in our archive only (coverage starts 2024-12-29)",
+  "wins": 0,
+  "losses": 0,
+  "player_id": "e1978034-04f4-577f-a44f-581b28857884",
+  "opponent_id": "6c348680-39c7-50ab-a15c-7b721ed0af25",
+  "coverage_from": "2024-12-29",
+  "prior_meetings": []
+ },
+ "next": {
+  "match_id": "c89ada54-cf7a-5bc2-9978-9481dc503529",
+  "opponent": [
+   {
+    "id": "28353751-abd7-5974-8864-be62a2fbc8d6",
+    "name": "Jaime Faria",
+    "slug": "jaime-faria"
+   }
+  ],
+  "round_label": "round 2"
+ },
+ "tour": "atp",
+ "event": {
+  "kind": "upset",
+  "facts": {
+   "tour": "atp",
+   "level": null,
+   "round": "1",
+   "list_date": "2026-09-21",
+   "rank_list": "atp_singles",
+   "event_type": "MS",
+   "loser_rank": 10,
+   "loser_seed": 3,
+   "winner_rank": 66,
+   "winner_seed": null,
+   "edition_tier": "ATP 500",
+   "source_family": "espn",
+   "tier_registry": "atp-tiers/2026-09-29.2",
+   "competition_key": null,
+   "secondary_kinds": [
+    "comeback",
+    "seed_upset"
+   ],
+   "tournament_slug": "kinoshita-group-japan-open-tennis-championships",
+   "winner_unranked": false,
+   "rank_source_family": "espn",
+   "rank_classification": "secondary"
+  },
+  "detector": "tennis-detect/1.2.0",
+  "event_id": "upset:ed5a31b129ce36d25d33",
+  "materiality": 62,
+  "occurred_at": "2026-09-25T19:00:00-05:00"
+ },
+ "match": {
+  "id": "cebcbec5-02a1-5f8c-82b1-803c722ec1c3",
+  "date": "2026-09-26",
+  "sets": [
+   {
+    "A": 7,
+    "B": 6,
+    "tb": {
+     "A": 9,
+     "B": 7
+    },
+    "match_tiebreak": false
+   },
+   {
+    "A": 4,
+    "B": 6,
+    "tb": null,
+    "match_tiebreak": false
+   },
+   {
+    "A": 3,
+    "B": 6,
+    "tb": null,
+    "match_tiebreak": false
+   }
+  ],
+  "round": "1",
+  "score": "7-6(7) 4-6 3-6",
+  "format": "BO3_TB7",
+  "status": "completed",
+  "best_of": 3,
+  "duration": null,
+  "duration_s": null,
+  "end_reason": "completed",
+  "event_type": "MS",
+  "started_at": null,
+  "round_label": "round 1",
+  "winner_side": "B"
+ },
+ "version": "tennis-packet/4.0.0",
+ "built_at": "2026-10-01T05:32:20.793Z",
+ "draw_path": {
+  "matches": [
+   {
+    "date": "2026-09-26",
+    "year": 2026,
+    "round": "Q-1",
+    "score": "5-7 6-1 6-4",
+    "result": "W",
+    "status": "completed",
+    "surface": null,
+    "match_id": "9f5b4b1e-b59a-5840-9ab0-50bb70aaca4c",
+    "opponent": [
+     {
+      "id": "1ee51c09-d86b-54b9-9095-c5fc1bc14a21",
+      "name": "Marcos Giron",
+      "slug": "marcos-giron"
+     }
+    ],
+    "tournament": "Kinoshita Group Japan Open Tennis Championships",
+    "round_label": "qualifying round 1",
+    "tournament_slug": "kinoshita-group-japan-open-tennis-championships"
+   },
+   {
+    "date": "2026-09-26",
+    "year": 2026,
+    "round": "Q-2",
+    "score": "6-2 6-3",
+    "result": "W",
+    "status": "completed",
+    "surface": null,
+    "match_id": "3ce72095-ba6f-5151-b2b0-2ac72a738f80",
+    "opponent": [
+     {
+      "id": "101d63b4-d5c4-52b2-8291-9d4284d8103c",
+      "name": "Aleksandar Kovacevic",
+      "slug": "aleksandar-kovacevic"
+     }
+    ],
+    "tournament": "Kinoshita Group Japan Open Tennis Championships",
+    "round_label": "qualifying round 2",
+    "tournament_slug": "kinoshita-group-japan-open-tennis-championships"
+   }
+  ],
+  "player_id": "e1978034-04f4-577f-a44f-581b28857884"
+ },
+ "match_dna": {
+  "6c348680-39c7-50ab-a15c-7b721ed0af25": {
+   "form": {
+    "career": null,
+    "last10": {
+     "L": 2,
+     "W": 8,
+     "to": "2026-08-21",
+     "from": "2026-07-27"
+    },
+    "last20": {
+     "L": 4,
+     "W": 16,
+     "to": "2026-08-21",
+     "from": "2026-06-17"
+    },
+    "current_streak": {
+     "length": 1,
+     "result": "L"
+    }
+   },
+   "as_of": "2026-09-01",
+   "rating": {
+    "value": 2012,
+    "published": true,
+    "percentile": null,
+    "established": false,
+    "provisional": false,
+    "rated_matches": 522
+   },
+   "metrics": {
+    "avg_set_diff": {
+     "label": "Set differential / match",
+     "value": 0.4674,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 522
+    },
+    "set_win_rate": {
+     "pct": 58.9,
+     "label": "Set win %",
+     "value": 0.5893,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 528
+    },
+    "avg_game_diff": {
+     "label": "Game differential / match",
+     "value": 1.4751,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 522
+    },
+    "game_win_rate": {
+     "pct": 52.8,
+     "label": "Games won %",
+     "value": 0.5282,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 528
+    },
+    "match_win_rate": {
+     "pct": 62.1,
+     "label": "Match win %",
+     "value": 0.6212,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 528
+    },
+    "top10_win_rate": {
+     "pct": 37.9,
+     "label": "vs top 10",
+     "value": 0.3788,
+     "family": "opponent_quality",
+     "record": {
+      "L": 41,
+      "W": 25
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 66
+    },
+    "top25_win_rate": {
+     "pct": 45.5,
+     "label": "vs top 25",
+     "value": 0.4545,
+     "family": "opponent_quality",
+     "record": {
+      "L": 66,
+      "W": 55
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 121
+    },
+    "top50_win_rate": {
+     "pct": 57.5,
+     "label": "vs top 50",
+     "value": 0.5745,
+     "family": "opponent_quality",
+     "record": {
+      "L": 100,
+      "W": 135
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 235
+    },
+    "top100_win_rate": {
+     "pct": 62.3,
+     "label": "vs top 100",
+     "value": 0.6226,
+     "family": "opponent_quality",
+     "record": {
+      "L": 140,
+      "W": 231
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 371
+    },
+    "avg_opponent_rank": {
+     "label": "Average opponent rank",
+     "value": 49.109,
+     "family": "opponent_quality",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 413
+    },
+    "comeback_win_rate": {
+     "pct": 27.4,
+     "label": "Comeback win % (lost set 1)",
+     "value": 0.2744,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 215
+    },
+    "tiebreak_win_rate": {
+     "pct": 57,
+     "label": "Tiebreak win %",
+     "value": 0.57,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 528
+    },
+    "close_match_win_rate": {
+     "pct": 58.2,
+     "label": "Close-match win %",
+     "value": 0.5821,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 201
+    },
+    "first_set_conversion": {
+     "pct": 86,
+     "label": "Won set 1 <0x1a> won match",
+     "value": 0.8599,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 307
+    },
+    "outside100_loss_rate": {
+     "pct": 21.6,
+     "label": "Losses vs outside top 100",
+     "value": 0.2162,
+     "family": "opponent_quality",
+     "record": {
+      "losses": 16,
+      "matches": 74
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 74
+    },
+    "deciding_set_win_rate": {
+     "pct": 56.7,
+     "label": "Deciding-set win %",
+     "value": 0.5667,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 180
+    },
+    "straight_sets_win_rate": {
+     "pct": 62.5,
+     "label": "Straight-sets wins",
+     "value": 0.6254,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 522
+    },
+    "wins_above_expectation": {
+     "label": "Wins above expectation / match",
+     "value": 0.0285,
+     "family": "opponent_quality",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 489
+    },
+    "deciding_set_dependence": {
+     "pct": 31.6,
+     "label": "Wins needing a deciding set",
+     "value": 0.3158,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 323
+    }
+   },
+   "built_at": "2026-09-27T08:46:35.589731-05:00",
+   "rating_validated_at_the_time": true
+  },
+  "e1978034-04f4-577f-a44f-581b28857884": {
+   "form": {
+    "career": null,
+    "last10": {
+     "L": 6,
+     "W": 4,
+     "to": "2026-08-30",
+     "from": "2026-05-21"
+    },
+    "last20": {
+     "L": 11,
+     "W": 9,
+     "to": "2026-08-30",
+     "from": "2026-02-01"
+    },
+    "current_streak": {
+     "length": 2,
+     "result": "W"
+    }
+   },
+   "as_of": "2026-09-01",
+   "rating": {
+    "value": 1796,
+    "published": true,
+    "percentile": null,
+    "established": false,
+    "provisional": false,
+    "rated_matches": 299
+   },
+   "metrics": {
+    "avg_set_diff": {
+     "label": "Set differential / match",
+     "value": -0.1237,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 299
+    },
+    "set_win_rate": {
+     "pct": 47.5,
+     "label": "Set win %",
+     "value": 0.475,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 309
+    },
+    "avg_game_diff": {
+     "label": "Game differential / match",
+     "value": -0.1304,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 299
+    },
+    "game_win_rate": {
+     "pct": 49.7,
+     "label": "Games won %",
+     "value": 0.4974,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 309
+    },
+    "match_win_rate": {
+     "pct": 45.3,
+     "label": "Match win %",
+     "value": 0.4531,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 309
+    },
+    "top10_win_rate": {
+     "pct": 16.7,
+     "label": "vs top 10",
+     "value": 0.1667,
+     "family": "opponent_quality",
+     "record": {
+      "L": 20,
+      "W": 4
+     },
+     "confidence": "medium",
+     "percentile": null,
+     "sample_matches": 24
+    },
+    "top25_win_rate": {
+     "pct": 28.4,
+     "label": "vs top 25",
+     "value": 0.2836,
+     "family": "opponent_quality",
+     "record": {
+      "L": 48,
+      "W": 19
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 67
+    },
+    "top50_win_rate": {
+     "pct": 31.6,
+     "label": "vs top 50",
+     "value": 0.3158,
+     "family": "opponent_quality",
+     "record": {
+      "L": 78,
+      "W": 36
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 114
+    },
+    "top100_win_rate": {
+     "pct": 41.8,
+     "label": "vs top 100",
+     "value": 0.4178,
+     "family": "opponent_quality",
+     "record": {
+      "L": 124,
+      "W": 89
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 213
+    },
+    "avg_opponent_rank": {
+     "label": "Average opponent rank",
+     "value": 60.7838,
+     "family": "opponent_quality",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 259
+    },
+    "comeback_win_rate": {
+     "pct": 13.8,
+     "label": "Comeback win % (lost set 1)",
+     "value": 0.1384,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 159
+    },
+    "tiebreak_win_rate": {
+     "pct": 47.2,
+     "label": "Tiebreak win %",
+     "value": 0.472,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 309
+    },
+    "close_match_win_rate": {
+     "pct": 38.7,
+     "label": "Close-match win %",
+     "value": 0.3874,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 111
+    },
+    "first_set_conversion": {
+     "pct": 80,
+     "label": "Won set 1 <0x1a> won match",
+     "value": 0.8,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 140
+    },
+    "outside100_loss_rate": {
+     "pct": 43.9,
+     "label": "Losses vs outside top 100",
+     "value": 0.439,
+     "family": "opponent_quality",
+     "record": {
+      "losses": 36,
+      "matches": 82
+     },
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 82
+    },
+    "deciding_set_win_rate": {
+     "pct": 38.3,
+     "label": "Deciding-set win %",
+     "value": 0.3832,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 107
+    },
+    "straight_sets_win_rate": {
+     "pct": 65.7,
+     "label": "Straight-sets wins",
+     "value": 0.6567,
+     "family": "result_strength",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 299
+    },
+    "wins_above_expectation": {
+     "label": "Wins above expectation / match",
+     "value": 0.0304,
+     "family": "opponent_quality",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 268
+    },
+    "deciding_set_dependence": {
+     "pct": 30.6,
+     "label": "Wins needing a deciding set",
+     "value": 0.306,
+     "family": "pressure",
+     "record": null,
+     "confidence": "high",
+     "percentile": null,
+     "sample_matches": 134
+    }
+   },
+   "built_at": "2026-09-27T08:46:35.589731-05:00",
+   "rating_validated_at_the_time": true
+  }
+ },
+ "provenance": {
+  "data_url": "https://propsports.proptechusa.ai",
+  "upstream": [
+   {
+    "what": "match result and set scores",
+    "family": "espn",
+    "classification": "secondary"
+   }
+  ],
+  "data_brand": "DATA � PropSports"
+ },
+ "tournament": {
+  "city": "Tokyo",
+  "name": "Kinoshita Group Japan Open Tennis Championships",
+  "slug": "kinoshita-group-japan-open-tennis-championships",
+  "year": 2026,
+  "level": null,
+  "indoor": false,
+  "country": null,
+  "surface": null,
+  "end_date": "2026-10-06",
+  "edition_id": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+  "start_date": "2026-09-26",
+  "source_family": "espn",
+  "competition_key": null
+ },
+ "expectation": {
+  "note": "model expectation from ratings published before the match; descriptive facts are separate",
+  "as_of": "2026-09-01",
+  "model": "PBE Rating (overall, chronological Elo, method v1)",
+  "loser_id": "6c348680-39c7-50ab-a15c-7b721ed0af25",
+  "winner_id": "e1978034-04f4-577f-a44f-581b28857884",
+  "loser_rating": 2012,
+  "winner_rating": 1796,
+  "winner_pre_match_pct": 22,
+  "result_vs_expectation": 0.78,
+  "winner_was_rating_underdog": true
+ },
+ "recent_form": {
+  "6c348680-39c7-50ab-a15c-7b721ed0af25": [
+   {
+    "date": "2026-08-30",
+    "year": 2026,
+    "round": "3",
+    "score": "6-3 6-4 3-6 4-6 4-6",
+    "result": "L",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "f5a410d5-bc2d-5cc1-bc87-459facb34982",
+    "opponent": [
+     {
+      "id": "30e99857-08d9-5215-a249-3c102e22613b",
+      "name": "Francisco Cerundolo",
+      "slug": "francisco-cerundolo"
+     }
+    ],
+    "tournament": "Us Open",
+    "round_label": "round 3",
+    "tournament_slug": "us-open"
+   },
+   {
+    "date": "2026-08-30",
+    "year": 2026,
+    "round": "2",
+    "score": "6-0 6-1 6-1",
+    "result": "W",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "b7013d58-1f49-5ff4-8434-2e40e648b37a",
+    "opponent": [
+     {
+      "id": "5dbead44-97fa-58cb-a6f2-a592b320d735",
+      "name": "Mattia Bellucci",
+      "slug": "mattia-bellucci"
+     }
+    ],
+    "tournament": "Us Open",
+    "round_label": "round 2",
+    "tournament_slug": "us-open"
+   },
+   {
+    "date": "2026-08-10",
+    "year": 2026,
+    "round": "Q",
+    "score": "6-7(9) 6-4 3-6",
+    "result": "L",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "c7e8e46f-8ef6-56bd-8218-7f7257897cd8",
+    "opponent": [
+     {
+      "id": "07681d30-9e80-5788-ab26-d9b047b79db5",
+      "name": "Brandon Nakashima",
+      "slug": "brandon-nakashima"
+     }
+    ],
+    "tournament": "Cincinnati Open",
+    "round_label": "quarterfinal",
+    "tournament_slug": "cincinnati-open"
+   },
+   {
+    "date": "2026-08-10",
+    "year": 2026,
+    "round": "4",
+    "score": "6-4 6-3",
+    "result": "W",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "5d1e994a-a702-57db-8bc3-dc3399c5f107",
+    "opponent": [
+     {
+      "id": "874e8e7e-459f-55a2-8626-cf7da516ddcf",
+      "name": "Christopher O'Connell",
+      "slug": "christopher-o-connell"
+     }
+    ],
+    "tournament": "Cincinnati Open",
+    "round_label": "round 4",
+    "tournament_slug": "cincinnati-open"
+   },
+   {
+    "date": "2026-08-10",
+    "year": 2026,
+    "round": "3",
+    "score": "6-3 6-4",
+    "result": "W",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "e986ffb0-cf4d-58d7-8940-48bdf3f4d023",
+    "opponent": [
+     {
+      "id": "554e28e8-fe26-5131-8eb5-9cd591eda1a3",
+      "name": "Daniel Merida",
+      "slug": "daniel-merida"
+     }
+    ],
+    "tournament": "Cincinnati Open",
+    "round_label": "round 3",
+    "tournament_slug": "cincinnati-open"
+   }
+  ],
+  "e1978034-04f4-577f-a44f-581b28857884": [
+   {
+    "date": "2026-08-30",
+    "year": 2026,
+    "round": "2",
+    "score": "6-7(4) 2-6 5-7",
+    "result": "L",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "a1abdd42-95f5-57c8-ac80-8b9858681e57",
+    "opponent": [
+     {
+      "id": "9c091273-522c-57db-b9f0-1104afe5cc9c",
+      "name": "Arthur Rinderknech",
+      "slug": "arthur-rinderknech"
+     }
+    ],
+    "tournament": "Us Open",
+    "round_label": "round 2",
+    "tournament_slug": "us-open"
+   },
+   {
+    "date": "2026-08-30",
+    "year": 2026,
+    "round": "1",
+    "score": "6-7(5) 3-6 6-1 7-6(4) 7-5",
+    "result": "W",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "f57a673d-1b3d-5a09-bde6-dae5b4f7e131",
+    "opponent": [
+     {
+      "id": "e811e898-1040-56a6-be1e-57144e5c1acf",
+      "name": "Terence Atmane",
+      "slug": "terence-atmane"
+     }
+    ],
+    "tournament": "Us Open",
+    "round_label": "round 1",
+    "tournament_slug": "us-open"
+   },
+   {
+    "date": "2026-07-31",
+    "year": 2026,
+    "round": "2",
+    "score": "w/o",
+    "result": "L",
+    "status": "walkover",
+    "surface": "hard",
+    "match_id": "b90c4523-affa-5fbe-9f24-47a7a3888d9a",
+    "opponent": [
+     {
+      "id": "71bc9b41-30bd-54e9-a730-d0b9bcfdfa7b",
+      "name": "Alexander Blockx",
+      "slug": "alexander-blockx"
+     }
+    ],
+    "tournament": "National Bank Open presented by Rogers",
+    "round_label": "round 2",
+    "tournament_slug": "national-bank-open-presented-by-rogers"
+   },
+   {
+    "date": "2026-07-31",
+    "year": 2026,
+    "round": "1",
+    "score": "7-6(3) 6-3",
+    "result": "W",
+    "status": "completed",
+    "surface": "hard",
+    "match_id": "aedf23cd-0620-5b62-9c5f-ec591a1b6f24",
+    "opponent": [
+     {
+      "id": "f71c924f-73ff-53ec-a644-b13e52edfab2",
+      "name": "Rinky Hijikata",
+      "slug": "rinky-hijikata"
+     }
+    ],
+    "tournament": "National Bank Open presented by Rogers",
+    "round_label": "round 1",
+    "tournament_slug": "national-bank-open-presented-by-rogers"
+   },
+   {
+    "date": "2026-07-10",
+    "year": 2026,
+    "round": "1",
+    "score": "2-6 4-6",
+    "result": "L",
+    "status": "completed",
+    "surface": null,
+    "match_id": "513ea45a-74b3-502c-93ed-0415646decf2",
+    "opponent": [
+     {
+      "id": "22cd3fff-29f3-5fe7-98b1-496097aee074",
+      "name": "Dominic Stricker",
+      "slug": "dominic-stricker"
+     }
+    ],
+    "tournament": "EFG Swiss Open Gstaad",
+    "round_label": "round 1",
+    "tournament_slug": "efg-swiss-open-gstaad"
+   }
+  ]
+ },
+ "match_source": {
+  "name": "ESPN",
+  "source_family": "espn",
+  "classification": "secondary"
+ },
+ "participants": {
+  "A": {
+   "key": "S:6c348680-39c7-50ab-a15c-7b721ed0af25",
+   "seed": 3,
+   "entry": null,
+   "players": [
+    {
+     "id": "6c348680-39c7-50ab-a15c-7b721ed0af25",
+     "name": "Taylor Fritz",
+     "rank": {
+      "list": "atp_singles",
+      "rank": 10,
+      "points": 3175,
+      "list_date": "2026-09-21",
+      "source_family": "espn"
+     },
+     "slug": "taylor-fritz",
+     "photo": {
+      "wide": "https://tennis-api.propbetedge.ai/media/players/6c348680-39c7-50ab-a15c-7b721ed0af25/wide.webp?v=c3fc0c8a1d",
+      "author": "si.robi",
+      "credit": "si.robi / CC BY-SA 2.0 / Wikimedia Commons",
+      "square": "https://tennis-api.propbetedge.ai/media/players/6c348680-39c7-50ab-a15c-7b721ed0af25/square.webp?v=c3fc0c8a1d",
+      "license": "CC BY-SA 2.0",
+      "player_id": "6c348680-39c7-50ab-a15c-7b721ed0af25",
+      "square_jpg": "https://tennis-api.propbetedge.ai/media/players/6c348680-39c7-50ab-a15c-7b721ed0af25/square.jpg?v=c3fc0c8a1d",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Fritz_MCM23_(62)_(52882575177).jpg"
+     },
+     "last_name": "Fritz",
+     "nationality": "USA"
+    }
+   ]
+  },
+  "B": {
+   "key": "S:e1978034-04f4-577f-a44f-581b28857884",
+   "seed": null,
+   "entry": null,
+   "players": [
+    {
+     "id": "e1978034-04f4-577f-a44f-581b28857884",
+     "name": "Jaume Munar",
+     "rank": {
+      "list": "atp_singles",
+      "rank": 66,
+      "points": 875,
+      "list_date": "2026-09-21",
+      "source_family": "espn"
+     },
+     "slug": "jaume-munar",
+     "photo": {
+      "wide": "https://tennis-api.propbetedge.ai/media/players/e1978034-04f4-577f-a44f-581b28857884/wide.webp?v=245853c429",
+      "author": "si.robi",
+      "credit": "si.robi / CC BY-SA 2.0 / Wikimedia Commons",
+      "square": "https://tennis-api.propbetedge.ai/media/players/e1978034-04f4-577f-a44f-581b28857884/square.webp?v=245853c429",
+      "license": "CC BY-SA 2.0",
+      "player_id": "e1978034-04f4-577f-a44f-581b28857884",
+      "square_jpg": "https://tennis-api.propbetedge.ai/media/players/e1978034-04f4-577f-a44f-581b28857884/square.jpg?v=245853c429",
+      "source_page": "https://commons.wikimedia.org/wiki/File:Munar_WM19_(12)_(48521794586).jpg"
+     },
+     "last_name": "Munar",
+     "nationality": "ESP"
+    }
+   ]
+  }
+ },
+ "rankings_note": "ATP singles list in the PropBetEdge archive in force at the start of the tournament, from a secondary source (ESPN); it holds the top 150 only",
+ "ranking_provenance": {
+  "list": "atp_singles",
+  "note": "ATP singles list in the PropBetEdge archive in force at the start of the tournament, from a secondary source (ESPN); it holds the top 150 only",
+  "depth": 150,
+  "label": "ATP singles",
+  "phrase": "the ATP singles list in the PropBetEdge archive",
+  "list_date": "2026-09-21",
+  "truncated": true,
+  "source_family": "espn",
+  "classification": "secondary"
+ },
+ "canonical_signature": "upset:cebcbec5-02a1-5f8c-82b1-803c722ec1c3"
+}

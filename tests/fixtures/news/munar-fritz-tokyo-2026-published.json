@@ -1,0 +1,41 @@
+{
+ "_doc": "Published production article as of 2026-10-02 (thin brief: the regression case)",
+ "headline": "Munar beats No. 10 Fritz in the Kinoshita Group Japan Open Tennis Championships round 1",
+ "dek": "Munar won 6-7(7), 6-4, 6-3 in the round 1 of Kinoshita Group Japan Open Tennis Championships.",
+ "sections": [
+  {
+   "id": "what_happened",
+   "heading": "What happened",
+   "paragraphs": [
+    "Jaume Munar, ranked No. 66, beat Taylor Fritz (No. 10) 6-7(7), 6-4, 6-3 in the round 1 of Kinoshita Group Japan Open Tennis Championships in Tokyo."
+   ]
+  },
+  {
+   "id": "why_it_mattered",
+   "heading": "Why it mattered",
+   "paragraphs": [
+    "On the ATP singles list in the PropBetEdge archive in force when the tournament began, Munar was ranked No. 66 and Fritz No. 10.",
+    "It was Munar's 3rd win of the tournament."
+   ]
+  },
+  {
+   "id": "next",
+   "heading": "What comes next",
+   "paragraphs": [
+    "Munar plays Jaime Faria in the round 2."
+   ]
+  },
+  {
+   "id": "method",
+   "heading": "Source & method",
+   "paragraphs": [
+    "The result and set scores come from a secondary source (ESPN), archived by PropBetEdge. Rankings are the ATP singles list in the PropBetEdge archive in force at the start of the tournament, not today's, taken from a secondary source (ESPN) rather than an official tour release. Match DNA and Technical DNA values are stored snapshots built only from matches before this one. Nothing in this story is estimated or inferred."
+   ]
+  }
+ ],
+ "primary_player_id": "e1978034-04f4-577f-a44f-581b28857884",
+ "player_ids": [
+  "e1978034-04f4-577f-a44f-581b28857884",
+  "6c348680-39c7-50ab-a15c-7b721ed0af25"
+ ]
+}

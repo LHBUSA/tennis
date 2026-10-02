@@ -140,13 +140,16 @@ test('composition depth follows the class; baseline prose passes every gate incl
     const g = runGates(a, p, { plan });
     assert.ok(g.pass, `${storyClass}: ${JSON.stringify(g.failures)}`);
     const ids = a.sections.map((s) => s.id);
-    if (storyClass === 'brief') { assert.ok(!ids.includes('player_read') && !ids.includes('h2h') && !ids.includes('path')); }
+    // V4.1 (owner 2026-10-02): a brief is still contextual journalism — ONE context paragraph (player_read), never the
+    // standalone H2H / path sections of a full story
+    if (storyClass === 'brief') { assert.ok(!ids.includes('h2h') && !ids.includes('path')); assert.equal(a.sections.filter((s) => s.id === 'player_read').flatMap((s) => s.paragraphs).length <= 1, true); }
     else { assert.ok(ids.includes('player_read'), 'Match DNA section'); assert.ok(ids.includes('path')); }
     assert.equal(a.sections.at(-1).heading, 'Source & method');
   }
-  // no empty or weak section: without Match DNA there is no "what the result says" section
+  // no empty or weak section: without Match DNA there is no "what the result says" section (a sourced form/context
+  // fallback is allowed)
   const nomd = packet({ md: false, exp: false });
-  assert.ok(!compose(nomd, { storyClass: 'full' }).sections.some((s) => s.id === 'player_read'));
+  assert.ok(!compose(nomd, { storyClass: 'full' }).sections.some((s) => /^What the result says/.test(s.heading)));
 });
 
 test('additive-value gates: restating the headline, repeating a point or reading out a chart is held', () => {

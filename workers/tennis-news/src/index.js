@@ -14,12 +14,12 @@ import { json } from '../../shared/envelope.js';
 import { health } from '../../shared/health.js';
 import { storeFromEnv, inList } from '../../shared/store/postgrest.js';
 import { detectMatchEvents, detectRankingEvents, DETECTOR_VERSION, GATED_KINDS } from './detect.js';
-import { classifyEvent, classifyStory, historyEntry, CLASSIFIER_VERSION, CLASS_RANK } from './classify.js';
+import { classifyEvent, classifyStory, historyEntry, evidenceDimensions, CLASSIFIER_VERSION, CLASS_RANK } from './classify.js';
 import { buildPacket, loadMatches, loadMatch, rankAt, PACKET_VERSION } from './packet.js';
 import { compose, slugFor, COMPOSE_VERSION } from './compose.js';
 import { buildPlan } from './plan.js';
 import { correctPreMatchRatings } from './correct.js';
-import { runGates, GATES_VERSION } from './gates.js';
+import { runGates, contextFailures, GATES_VERSION } from './gates.js';
 import { editorialize, costUsd, redactSecrets, EDITORIAL_VERSION } from './editorial.js';
 import { route, aiConfig, poolUsage, addPoolTokens, callTelemetry, poolKey, isNewCanonicalStory } from './ai-router.js';
 import { runCanary } from './canary.js';
@@ -27,7 +27,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '3.0.0';
+export const VERSION = '3.1.0';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -232,11 +232,12 @@ const packetHash = async (packet) => {
  * prose/plan/class from the NEW frozen packet; revised_at set; a revision appended that keeps the prior packet (and its
  * hash), frozen_at and headline — history is never lost.
  */
-export async function upgradeArticle(store, existing, { article, ed, plan, packet, storyClass, dimensions = [], now = iso() }) {
+export async function upgradeArticle(store, existing, { article, ed, plan, packet, storyClass, dimensions = [], now = iso(), reason = null, keepEvidence = false }) {
   const prior = (await store.select('tennis_article_evidence', `select=packet,frozen_at&article_id=eq.${existing.article_id}`))[0] || null;
-  const revision = { at: now, from_class: existing.story_class || null, to_class: storyClass, reason: `new evidence: ${dimensions.filter((d) => d !== 'result').join(', ')}`, prior_packet_hash: prior ? await packetHash(prior.packet) : null, prior_frozen_at: prior?.frozen_at || null, prior_headline: existing.headline, packet_hash: await packetHash(packet), prior_packet: prior?.packet || null };
+  const revision = { at: now, from_class: existing.story_class || null, to_class: storyClass, reason: reason || `new evidence: ${dimensions.filter((d) => d !== 'result').join(', ')}`, prior_packet_hash: prior ? await packetHash(prior.packet) : null, prior_frozen_at: prior?.frozen_at || null, prior_headline: existing.headline, packet_hash: await packetHash(packet), prior_packet: prior?.packet || null };
   await store.req('PATCH', `tennis_articles?article_id=eq.${existing.article_id}`, { body: { headline: article.headline, deck: article.dek, body: { sections: article.sections }, content_plan: plan, key_stat: article.key_stat, story_class: storyClass, prose_origin: ed.origin, gate_results: { gates_version: GATES_VERSION, gate: ed.gate, attempts: ed.attempts, usage: ed.usage, nominal_standard_cost_usd: costUsd(ed.usage), routing: ed.routing || null }, generator_version: COMPOSE_VERSION, editorial_version: EDITORIAL_VERSION, updated_at: now, revised_at: now, revisions: [...(existing.revisions || []), revision] }, prefer: 'return=minimal' });
-  await store.req('PATCH', `tennis_article_evidence?article_id=eq.${existing.article_id}`, { body: { packet, frozen_at: now }, prefer: 'return=minimal' });
+  // a prose repair keeps the SAME frozen packet and its frozen_at (no new evidence was frozen)
+  if (!keepEvidence) await store.req('PATCH', `tennis_article_evidence?article_id=eq.${existing.article_id}`, { body: { packet, frozen_at: now }, prefer: 'return=minimal' });
   return revision;
 }
 
@@ -495,6 +496,51 @@ async function latency(store, hours = 168) {
   return { window_h: hours, published: xs.length, p50_ms: q(0.5), p95_ms: q(0.95), max_ms: xs.at(-1) ?? null };
 }
 
+/**
+ * CONTEXT REPAIR (tennis-news V4.1, owner 2026-10-02): published MATCH stories whose STORED prose fails the context
+ * contract (gate thin_context) although their frozen packet proves >= minDims meaningful evidence dimensions are
+ * recomposed from their OWN frozen packet (no rebuild, no new facts) with the current classifier and composer, and run
+ * through every gate. dry (default): report only, nothing written. write=1: in-place revision via upgradeArticle (same
+ * article_id, slug, published_at, first_published_at; revised_at + a 'context repair' revision; the frozen packet and
+ * its frozen_at are kept). A class never goes down. model=1: one routed model edit (trigger admin_reedit) over the new
+ * baseline, through the same gates; default is the deterministic baseline. slug=: one story (the canary).
+ */
+export async function repairContext(env, store, { write = false, limit = 60, minDims = 4, slug = null, model = false } = {}) {
+  const q = `select=article_id,slug,event_id,status,story_class,headline,deck,body,first_published_at,published_at,revised_at,revisions,primary_player_id,player_ids,tennis_article_evidence(packet,frozen_at)&status=eq.published${slug ? `&slug=eq.${encodeURIComponent(slug)}` : ''}&order=published_at.desc&limit=${Math.min(200, limit)}`;
+  const rows = await store.select('tennis_articles', q);
+  const out = { write, model, min_dims: minDims, scanned: rows.length, match_stories: 0, eligible: 0, repaired: 0, held: 0, items: [] };
+  for (const a of rows) {
+    const evd = Array.isArray(a.tennis_article_evidence) ? a.tennis_article_evidence[0] : a.tennis_article_evidence;
+    const packet = evd?.packet;
+    if (!packet?.match) continue;
+    out.match_stories += 1;
+    const old = { headline: a.headline, dek: a.deck, sections: a.body?.sections || [], primary_player_id: a.primary_player_id, player_ids: a.player_ids || [] };
+    const thin = contextFailures(old, packet);
+    const dims = evidenceDimensions(packet).filter((d) => d !== 'result');
+    if (!slug && (!thin.length || dims.length < minDims)) continue;
+    out.eligible += 1;
+    const ev = (await store.select('tennis_news_events', `select=event_id,kind,evidence,editorial_class&event_id=eq.${encodeURIComponent(a.event_id)}`))[0] || null;
+    const story = ev ? classifyStory({ kind: ev.kind, facts: ev.evidence?.facts || {} }, packet) : null;
+    const from = a.story_class || 'brief';
+    const to = story && CLASS_RANK[story.surface] > CLASS_RANK[from] ? story.surface : from;
+    const baseline = compose(packet, { storyClass: to });
+    const plan = buildPlan(packet, baseline);
+    const gate = (x) => runGates(x, packet, { plan });
+    let ed;
+    if (model && write && ev) ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass: to, packet, baseline, gate, dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: 1 });
+    else { const g = gate(baseline); ed = { article: { ...baseline, prose_origin: 'baseline' }, origin: g.pass ? 'baseline' : null, gate: g, attempts: [], usage: {} }; }
+    const item = { slug: a.slug, published_at: a.published_at, from_class: from, to_class: to, dims: dims.length, old_thin_context: thin.length > 0, new_gate_pass: !!ed.origin, failures: (ed.gate?.failures || []).slice(0, 6), prose_origin: ed.origin, after: ed.origin ? { headline: ed.article.headline, sections: ed.article.sections.filter((s) => s.id !== 'method').map((s) => ({ id: s.id, paragraphs: s.paragraphs })) } : null };
+    if (write && ed.origin) {
+      await upgradeArticle(store, { ...a, story_class: from }, { article: ed.article, ed, plan, packet, storyClass: to, dimensions: evidenceDimensions(packet), reason: `context repair (tennis-compose ${COMPOSE_VERSION}, ${GATES_VERSION}): stored prose failed thin_context`, keepEvidence: true });
+      item.written = true;
+      out.repaired += 1;
+    } else if (!ed.origin) out.held += 1;
+    out.items.push(item);
+  }
+  return out;
+}
+
+
 const authed = (request, env) => env.NEWS_ADMIN_TOKEN && request.headers.get('authorization') === `Bearer ${env.NEWS_ADMIN_TOKEN}`;
 
 export default {
@@ -522,6 +568,8 @@ export default {
     }
     // production-path release canary: one routed call, telemetry + premium counter, never writes articles (?dry=1: routing only)
     if (path === '/v1/news/canary-routed' && request.method === 'POST') return json({ ok: true, data: await routedCanary(env, store, { eventId: url.searchParams.get('event_id'), dry: url.searchParams.get('dry') === '1' }) });
+    // V4.1 context repair of published match stories (dry unless write=1; model=1 adds one routed admin_reedit edit)
+    if (path === '/v1/news/repair-context' && request.method === 'POST') return json({ ok: true, data: await repairContext(env, store, { write: url.searchParams.get('write') === '1', model: url.searchParams.get('model') === '1', slug: url.searchParams.get('slug'), limit: Number(url.searchParams.get('limit')) || 60, minDims: Number(url.searchParams.get('min_dims')) || 4 }) });
     if (path === '/v1/news/ai-usage') return json({ ok: true, data: { ...(await poolUsage(env.TENNIS_STATE)), canary_premium_today: Number(await env.TENNIS_STATE?.get(poolKey('canary-premium'))) || 0, config: (({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }) => ({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }))(aiConfig(env)) } });
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates

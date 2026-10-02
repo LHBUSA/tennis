@@ -4,7 +4,7 @@
 
 import { parseScore } from '../../shared/canonical/scoring.js';
 
-export const GATES_VERSION = 'tennis-gates/4.0.1';
+export const GATES_VERSION = 'tennis-gates/4.1.0';
 
 const SKIP_KEY = /(^|_)(id|ids|url|slug|hash|key|token|image|square|wide|thumb|portrait|jpg|photo|source_page|license|capture|event_id|built_at|detector|version)$/i;
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -170,6 +170,9 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   // 10. V4 tennis-intelligence grounding: every serve/return/development claim needs the family that proves it
   for (const f of intelligenceFailures(text, packet)) fail(f.gate, f.detail);
 
+  // 11. V4.1 context contract: a match story whose packet proves context must use it in prose
+  for (const f of contextFailures(article, packet)) fail(f.gate, f.detail);
+
   return { version: GATES_VERSION, pass: failures.length === 0, failures, checked_at: now, words, numbers_checked: numberTokens(text).length };
 }
 
@@ -261,4 +264,43 @@ export function intelligenceFailures(text, packet) {
   const allSaved = text.match(/\bsaved\s+(every|all)\s+(of\s+)?(the\s+|her\s+|his\s+|their\s+)?(\d+\s+)?break\s+points?\b/i);
   if (allSaved && !S.some((s) => s?.break_points_saved?.d && s.break_points_saved.n === s.break_points_saved.d)) f('clean_hold_claim', allSaved[0]);
   return out;
+}
+
+// ---- V4.1 context contract (tennis-gates/4.1.0) ------------------------------------------------------------------
+const lastWord = (n) => String(n || '').trim().split(/\s+/).slice(-1)[0];
+const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const mentions = (p, names) => names.some((n) => n && new RegExp(`(^|[^\\p{L}])${esc(n)}(?![\\p{L}])`, 'iu').test(p));
+const isComebackOrTb = (packet) => [packet.event?.kind, ...(packet.event?.facts?.secondary_kinds || [])].some((k) => k === 'comeback' || k === 'deciding_tiebreak');
+
+/**
+ * Context families a MATCH packet proves beyond the result and the ranking, each with the test a paragraph must meet to
+ * count as using it. A family counts only when the packet holds the concrete values its test looks for.
+ */
+export function contextFamilies(packet) {
+  const out = [];
+  if (!packet?.match) return out;
+  const dpNames = (packet.draw_path?.matches || []).flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)]));
+  if (dpNames.length) out.push({ family: 'draw_path', test: (p) => mentions(p, dpNames) || /\bqualif\w*\b[^.]*\b(win|wins|won|beat|beating|over)\b|\bmain-draw win\b/i.test(p) });
+  if (isComebackOrTb(packet) || packet.match_development) out.push({ family: 'match_development', test: (p) => /\b(opening|first)[- ]set\b|\bdeciding[- ]set\b|\bset down\b|\btiebreak\b|\bbroke\b|\bbreak of serve\b|\blongest run\b/i.test(p) });
+  const recs = new Set(); const pcts = new Set();
+  for (const md of Object.values(packet.match_dna || {})) for (const x of Object.values(md?.metrics || {})) { if (x?.record && x.record.W + x.record.L) recs.add(`${x.record.W}-${x.record.L}`); if (x?.pct != null && x.sample_matches) pcts.add(`${x.pct}%`); }
+  if (recs.size || pcts.size) out.push({ family: 'match_dna', test: (p) => [...recs].some((r) => p.includes(r)) || [...pcts].some((x) => p.includes(x)) });
+  const formNames = Object.values(packet.recent_form || {}).flat().flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)]));
+  if (formNames.length) out.push({ family: 'recent_form', test: (p) => mentions(p, formNames) });
+  if (packet.h2h?.prior_meetings?.length) out.push({ family: 'h2h', test: (p) => /\b(met|meeting|meetings|head-to-head)\b/i.test(p) });
+  const statPcts = new Set(sidesOf(packet).flatMap((s) => Object.values(s || {}).map((x) => (x?.pct != null ? `${x.pct}%` : null)).filter(Boolean)));
+  if (statPcts.size) out.push({ family: 'match_statistics', test: (p) => [...statPcts].some((x) => p.includes(x)) || /\bheld \d+ of \d+\b|\bconverted \d+ of \d+\b/i.test(p) });
+  return out;
+}
+
+/**
+ * thin_context: a published MATCH story whose packet proves at least one context family must have at least one body
+ * paragraph that uses one (headline/score/ranking restatement and "Nth win" lines never count: they match no test).
+ */
+export function contextFailures(article, packet) {
+  const fams = contextFamilies(packet);
+  if (!fams.length) return [];
+  const paras = article.sections.filter((s) => !['what_happened', 'method', 'next'].includes(s.id)).flatMap((s) => s.paragraphs.map(String));
+  const used = fams.filter((f) => paras.some((p) => f.test(p))).map((f) => f.family);
+  return used.length ? [] : [{ gate: 'thin_context', detail: `packet proves ${fams.map((f) => f.family).join(', ')} but no paragraph uses any of them` }];
 }

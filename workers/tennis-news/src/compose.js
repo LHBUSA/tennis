@@ -6,10 +6,12 @@
 // quote, a price or a "first"/"career-best" claim — the packet cannot prove any of those.
 
 import { deskFor, provenanceOf, LIST_LABEL } from './tour.js';
+import { hasKind } from './classify.js';
 
-export const COMPOSE_VERSION = 'tennis-compose/4.0.0';
+export const COMPOSE_VERSION = 'tennis-compose/4.1.0';
 const RANKC = { brief: 1, full: 2, deep: 3 };
 const atLeastC = (c, min) => (RANKC[c] || 2) >= RANKC[min];
+const brief0 = (c) => !atLeastC(c, 'full');
 
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const surname = (p) => p?.last_name ? p.last_name.split(' ').map((w) => (w === w.toUpperCase() ? w.charAt(0) + w.slice(1).toLowerCase() : w)).join(' ') : String(p?.name || '').split(' ').slice(-1)[0];
@@ -20,7 +22,21 @@ const v = (side, one, many) => (plural(side) ? many : one);
 const setLine = (sets, W) => sets.map((s) => (s.match_tiebreak && s.tb ? `[${s.tb[W]}-${s.tb[other(W)]}]` : `${s[W]}-${s[other(W)]}${s.tb ? `(${Math.min(s.tb.A, s.tb.B)})` : ''}`)).join(', ');
 const durTxt = (d) => (!d ? null : d.hours ? `${d.hours} hour${d.hours === 1 ? '' : 's'}${d.minutes ? ` ${d.minutes} minute${d.minutes === 1 ? '' : 's'}` : ''}` : `${d.minutes} minutes`);
 const cap = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
-const theEvent = (t) => `${t.name}${t.level ? ` (${t.level}${t.surface ? `, ${t.indoor ? 'indoor ' : ''}${t.surface}` : ''})` : ''}`;
+/** Tournament tier as FROZEN: the source level, else the reviewed ATP tier registry recorded on the event facts
+ *  (facts.edition_tier, e.g. "ATP 500"). Never inferred from a tournament name at render time. */
+export const tierLabel = (packet) => packet?.tournament?.level || packet?.event?.facts?.edition_tier || null;
+const theEvent = (t, tier = t.level) => `${t.name}${tier ? ` (${tier}${t.surface ? `, ${t.indoor ? 'indoor ' : ''}${t.surface}` : ''})` : ''}`;
+const isQual = (r) => /^Q-/.test(String(r?.round || '')) || /qualifying/i.test(String(r?.round_label || ''));
+/** Draw path split: qualifying wins vs main-draw wins (never one ambiguous "Nth win of the tournament"). */
+export function drawPathSplit(packet) {
+  const rows = (packet?.draw_path?.matches || []).filter((r) => r.result === 'W');
+  return { qual: rows.filter(isQual), main: rows.filter((r) => !isQual(r)) };
+}
+const namesOf = (rows) => rows.map((r) => r.opponent.map((o) => o.name).join(' / '));
+const andList = (xs) => (xs.length <= 1 ? xs.join('') : `${xs.slice(0, -1).join(', ')} and ${xs.at(-1)}`);
+const NUMW = ['no', 'one', 'two', 'three', 'four', 'five'];
+/** "round 1" reads as a name ("in round 1"); "semifinals" keeps its article ("in the semifinals"). */
+const theRound = (label) => (/^round \d+$/i.test(String(label || '')) ? String(label) : `the ${label}`);
 const ord = (n) => `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
 
 function statSentence(name, st, oName) {
@@ -62,6 +78,8 @@ function composeMatch(packet, storyClass = 'full') {
   const l = packet.participants[L];
   const P = { W, L, w, l, t, m, event: packet.event };
   const kind = packet.event.kind;
+  const tier = tierLabel(packet);
+  const is = (k) => hasKind(packet, k); // primary kind OR a proven secondary kind of the same canonical story
   const wName = team(w);
   const lName = team(l);
   const wS = team(w, true);
@@ -71,8 +89,8 @@ function composeMatch(packet, storyClass = 'full') {
   // WHAT HAPPENED
   const how = m.status === 'retired' ? `after ${lS} retired with the score at ${setLine(m.sets, W)}` : m.status === 'walkover' ? `by walkover` : setLine(m.sets, W);
   const lead = m.status === 'walkover'
-    ? `${wName} advanced past the ${m.round_label} of ${theEvent(t)} by walkover: ${lName} withdrew before the match. The source does not give a reason, and we do not state one.`
-    : `${wName}${!plural(w) && rankTxt(w.players[0]) ? `, ranked ${rankTxt(w.players[0])},` : ''} beat ${lName}${!plural(l) && rankTxt(l.players[0]) ? ` (${rankTxt(l.players[0])})` : ''} ${how} in the ${m.round_label} of ${theEvent(t)}${t.city && !String(t.name).startsWith(t.city) ? ` in ${t.city}` : ''}.`;
+    ? `${wName} advanced past ${theRound(m.round_label)} of ${theEvent(t, tier)} by walkover: ${lName} withdrew before the match. The source does not give a reason, and we do not state one.`
+    : `${wName}${!plural(w) && rankTxt(w.players[0]) ? `, ranked ${rankTxt(w.players[0])},` : ''} beat ${lName}${!plural(l) && rankTxt(l.players[0]) ? ` (${rankTxt(l.players[0])})` : ''} ${how} in ${theRound(m.round_label)} of ${theEvent(t, tier)}${t.city && !String(t.name).startsWith(t.city) ? ` in ${t.city}` : ''}.`;
   const what = [lead];
   if (m.status === 'retired') what.push(`${lS} did not finish the match. The result records a retirement and no cause; we do not speculate about one.`);
   if (m.duration && m.status !== 'walkover') what.push(`The match lasted ${durTxt(m.duration)}.`);
@@ -133,31 +151,73 @@ function composeMatch(packet, storyClass = 'full') {
     else if (ef.winner_outside_list) why.push(`${wS} was outside the top ${ef.winner_outside_list} of ${prov.phrase} in force when the tournament began; ${lS} was No. ${lr}.`);
     else why.push(`${wS} was not ranked on ${prov.phrase} in force when the tournament began; ${lS} was No. ${lr}.`);
   }
-  if (kind === 'seed_upset') why.push(`${lS} was the No. ${l.seed} seed; ${wS} was unseeded.`);
+  // seeding: the loser's seed whenever the story is (also) a seed upset — "unseeded" only when the winner had no seed
+  if (is('seed_upset') && l.seed) why.push(`${lS} was the No. ${l.seed} seed${tier ? ` at this ${tier}` : ''}${w.seed ? `; ${wS} the No. ${w.seed}` : `; ${wS} was unseeded`}.`);
   if (kind === 'qualifier_run') why.push(`${wS} entered the main draw as a ${packet.event.facts.entry === 'LL' ? 'lucky loser' : 'qualifier'}.`);
   if (kind === 'title' || kind === 'doubles_title') why.push(`The final was the last match of ${t.name} ${t.year}.`);
-  if (kind === 'comeback') why.push(`${wS} lost the first set ${m.sets[0][W]}-${m.sets[0][L]} and still won the match.`);
-  if (kind === 'deciding_tiebreak') why.push(`The deciding set went to a tiebreak, and ${wS} won it.`);
-  if (packet.draw_path?.matches.length) why.push(`It was ${wS}'s ${ord(packet.draw_path.matches.length + 1)} win of the tournament.`);
-  if (why.length) sections.push({ id: 'why_it_mattered', heading: 'Why it mattered', paragraphs: why });
+  // the second paragraph tells HOW the win came about, in order: draw path, then match development
+  const story = [];
+  const sets = m.sets || [];
+  const comeback = is('comeback') && sets.length >= 2 && m.status === 'completed' && sets[0][W] < sets[0][L];
+  // DRAW PATH: qualifying wins and main-draw wins are never merged into one "Nth win of the tournament"
+  const dp = drawPathSplit(packet);
+  const qN = `${NUMW[dp.qual.length] || dp.qual.length} qualifying win${dp.qual.length === 1 ? '' : 's'}`;
+  if (dp.qual.length && !dp.main.length) story.push(`${wS} reached the main draw through ${qN}, over ${andList(namesOf(dp.qual))}${comeback ? '' : `, before beating ${lS} in ${theRound(m.round_label)}`}.`);
+  else if (dp.main.length) story.push(`It was ${wS}'s ${ord(dp.main.length + 1)} main-draw win at ${t.name}${dp.qual.length ? `, after ${qN}` : ''}.`);
+  // MATCH DEVELOPMENT from the stored set scores (never reconstructed breaks): primary OR secondary comeback
+  if (comeback) {
+    const rest = sets.slice(1);
+    const restWon = rest.filter((s) => s[W] > s[L] || (s.match_tiebreak && s.tb && s.tb[W] > s.tb[L])).length;
+    // the set scores are in the lead and the match-flow chart: the development is told, not read out again
+    story.push(`${story.length ? `Against ${lS}, ${wS}` : wS} lost the ${sets[0].tb ? 'opening-set tiebreak' : 'opening set'} and then ${restWon === rest.length ? (rest.length === 2 ? 'won the next two sets' : `won all ${NUMW[rest.length] || rest.length} sets that followed`) : 'won the match from there'}.`);
+  }
+  if (is('deciding_tiebreak')) story.push(`The deciding set went to a tiebreak, and ${wS} won it.`);
+  const paras = [why.join(' '), story.join(' ')].filter(Boolean);
+  if (paras.length) sections.push({ id: 'why_it_mattered', heading: 'Why it mattered', paragraphs: paras });
 
-  // WHAT THE RESULT SAYS — results-based Match DNA v2 frozen before the match (full/deep); never a percentile or a
-  // tour comparison in prose (the gates hold those), only the player's own stored record
+  // WHAT THE RESULT SAYS — results-based Match DNA v2 frozen before the match. Every class (a brief gets ONE tight
+  // paragraph): the player's own stored record (W-L where the snapshot stores it, else its stored win % and sample);
+  // never a percentile, a tour comparison or the rating model's probability in prose (code-rendered modules hold those)
   const wid = w.players[0]?.id;
   const lid = l.players[0]?.id;
   const mW = packet.match_dna?.[wid];
   const mL = packet.match_dna?.[lid];
-  if (atLeastC(storyClass, 'full') && mW) {
+  if (mW && !plural(w)) {
     const read = [];
     const mw = mW.metrics?.match_win_rate;
+    const mlw = mL?.metrics?.match_win_rate;
     const t10 = mW.metrics?.top10_win_rate;
     const y = mW.windows?.['52w'];
-    if (mw?.record) read.push(`Going into the match, ${wS}'s Match DNA (a snapshot dated ${mW.as_of}, built only from earlier results) showed ${mw.record.W}-${mw.record.L} in singles in our archive${y && y.W + y.L ? `, ${y.W}-${y.L} over the previous ${y.weeks} weeks` : ''}.`);
-    if (t10?.record && t10.record.W + t10.record.L) read.push(`Against top-10 opponents it was ${t10.record.W}-${t10.record.L}.`);
+    const dnaWhen = `Match DNA snapshot dated ${mW.as_of}, built only from earlier results`;
+    if (mw?.record) read.push(`Going into the match, ${wS}'s ${dnaWhen}, showed ${mw.record.W}-${mw.record.L} in singles in our archive${y && y.W + y.L ? `, ${y.W}-${y.L} over the previous ${y.weeks} weeks` : ''}.`);
+    if (lr && lr <= 10 && t10?.record && t10.record.W + t10.record.L) read.push(`Before this match ${wS} was ${t10.record.W}-${t10.record.L} against top-10 opponents in our archive (${dnaWhen}).`);
+    else if (t10?.record && t10.record.W + t10.record.L) read.push(`Against top-10 opponents ${wS} was ${t10.record.W}-${t10.record.L} in our archive.`);
     const dec = mW.metrics?.deciding_set_win_rate;
-    if ((kind === 'comeback' || kind === 'deciding_tiebreak') && dec?.record) read.push(`${wS} had won ${dec.record.W} of ${dec.record.W + dec.record.L} deciding sets in our archive before this one.`);
-    if (mL?.metrics?.match_win_rate?.record) read.push(`${lS} came in at ${mL.metrics.match_win_rate.record.W}-${mL.metrics.match_win_rate.record.L}.`);
-    if (read.length >= 2) sections.push({ id: 'player_read', heading: `What the result says about ${wS}`, paragraphs: [read.join(' ')] });
+    if ((is('comeback') || is('deciding_tiebreak')) && dec?.record) read.push(`${wS} had won ${dec.record.W} of ${dec.record.W + dec.record.L} deciding sets in our archive before this one.`);
+    if (mlw?.record) read.push(`${lS} came in at ${mlw.record.W}-${mlw.record.L}.`);
+    else if (!plural(l) && mlw?.pct != null && mw?.pct != null && mlw.sample_matches && mw.sample_matches) {
+      const loserStronger = mlw.pct > mw.pct;
+      read.push(`${loserStronger ? lS : wS} came in with the stronger stored match-win profile: ${loserStronger ? `${mlw.pct}% of ${mlw.sample_matches}` : `${mw.pct}% of ${mw.sample_matches}`} archived matches won, against ${loserStronger ? `${mw.pct}% of ${mw.sample_matches} for ${wS}` : `${mlw.pct}% of ${mlw.sample_matches} for ${lS}`}.`);
+    }
+    const brief = !atLeastC(storyClass, 'full');
+    const keep = brief ? read.slice(0, 2) : read;
+    // archived head-to-head is context in every class (one sentence in a brief; the full section below otherwise)
+    if (brief && packet.h2h?.prior_meetings?.length) keep.push(`In our records (from ${packet.h2h.coverage_from}) they had met ${packet.h2h.prior_meetings.length} time${packet.h2h.prior_meetings.length === 1 ? '' : 's'} before, with ${wS} winning ${packet.h2h.wins}.`);
+    if (keep.length >= (brief ? 1 : 2)) sections.push({ id: 'player_read', heading: `What the result says about ${wS}`, paragraphs: [keep.join(' ')] });
+  }
+  // CONTEXT FALLBACK (no Match DNA paragraph): archived H2H and each player's most recent previous result in our archive
+  // (names, rounds and tournaments only — no computed counts), so a packet that proves context is never told thinly
+  if (!sections.some((s) => s.id === 'player_read')) {
+    const ctx = [];
+    if (packet.h2h?.prior_meetings?.length && !atLeastC(storyClass, 'full')) ctx.push(`In our records (from ${packet.h2h.coverage_from}) ${wS} and ${lS} had met ${packet.h2h.prior_meetings.length} time${packet.h2h.prior_meetings.length === 1 ? '' : 's'} before, with ${wS} winning ${packet.h2h.wins}.`);
+    const lastOf = (side) => { const pid = side.players[0]?.id; const rows = (packet.recent_form?.[pid] || []).filter((r) => r.result === 'W' || r.result === 'L'); return rows[0] || null; };
+    const evName = (r) => String(r.tournament || '').replace(/\bUs Open\b/, 'US Open');
+    for (const [side, nm] of [[l, lS], [w, wS]]) {
+      if (plural(side)) continue;
+      const r = lastOf(side);
+      if (r && r.opponent?.length) ctx.push(`${nm}'s previous match in our archive before this tournament was a ${r.result === 'W' ? 'win over' : 'loss to'} ${r.opponent.map((o) => o.name).join(' / ')}${r.tournament ? ` at ${evName(r)}` : ''}${r.round_label ? ` (${r.round_label})` : ''}.`);
+    }
+    if (ctx.length) sections.push({ id: 'player_read', heading: 'Form and context', paragraphs: [ctx.slice(0, brief0(storyClass) ? 2 : 3).join(' ')] });
   }
 
   // SURFACE AND MATCHUP CONTEXT — sourced surface only (never inferred from a tournament name)
@@ -188,18 +248,20 @@ function composeMatch(packet, storyClass = 'full') {
   }
 
   // PATH THROUGH THE DRAW
-  if (atLeastC(storyClass, 'full') && packet.draw_path?.matches.length) {
-    sections.push({ id: 'path', heading: `Path through ${t.name}`, paragraphs: [packet.draw_path.matches.map((r) => `${cap(r.round_label)}: ${r.result === 'W' ? 'beat' : 'lost to'} ${r.opponent.map((o) => o.name).join(' / ')}${r.score ? ` ${r.score}` : ''}`).join('. ') + '.'] });
+  // the draw-path MODULE renders every score; the prose names the main-draw journey only (qualifying is already told
+  // in "Why it mattered") and never reads the scores out again
+  if (atLeastC(storyClass, 'full') && dp.main.length) {
+    sections.push({ id: 'path', heading: `Path through ${t.name}`, paragraphs: [`${dp.qual.length ? `After ${qN}, ` : ''}${wS} ${dp.main.length === 1 ? 'had already beaten' : 'had beaten'} ${andList(dp.main.map((r) => `${r.opponent.map((o) => o.name).join(' / ')} (${r.round_label})`))} before this match.`] });
   }
 
   // WHAT'S NEXT — only when the draw already shows it
-  if (packet.next?.opponent.length) sections.push({ id: 'next', heading: 'What comes next', paragraphs: [`${wS} plays ${packet.next.opponent.map((o) => o.name).join(' / ')} in the ${packet.next.round_label}.`] });
+  if (packet.next?.opponent.length) sections.push({ id: 'next', heading: 'What comes next', paragraphs: [`${wS} plays ${packet.next.opponent.map((o) => o.name).join(' / ')} in ${theRound(packet.next.round_label)}.`] });
 
   sections.push({ id: 'method', heading: 'Source & method', paragraphs: [methodText(packet, prov)] });
 
   const dek = m.status === 'walkover'
-    ? `${lName} withdrew before the ${m.round_label}; ${wName} ${v(w, 'moves', 'move')} on.`
-    : `${wS} won ${setLine(m.sets, W)}${m.duration ? ` in ${durTxt(m.duration)}` : ''} in the ${m.round_label} of ${t.name}.`;
+    ? `${lName} withdrew before ${theRound(m.round_label)}; ${wName} ${v(w, 'moves', 'move')} on.`
+    : `${wS} won ${setLine(m.sets, W)}${m.duration ? ` in ${durTxt(m.duration)}` : ''} in ${theRound(m.round_label)} of ${t.name}.`;
   const keyStat = kind === 'upset' && lr ? { label: 'Ranking gap', value: wr ? `No. ${wr} def. No. ${lr}` : `Unranked def. No. ${lr}` } : kind === 'marathon' ? { label: 'Duration', value: durTxt(m.duration) } : m.score ? { label: 'Score', value: setLine(m.sets, W) } : null;
   return { headline: headlineFor(kind, P), dek, sections, key_stat: keyStat, story_type: kind, desk: deskFor(m.event_type, t), primary_player_id: wid, player_ids: [...w.players, ...l.players].map((p) => p.id), match_id: m.id, tournament: { slug: t.slug, year: t.year, name: t.name } };
 }

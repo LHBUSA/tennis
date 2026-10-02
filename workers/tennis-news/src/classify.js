@@ -10,7 +10,12 @@
 // value and is not an input here. A tier the source does not give (and the reviewed ATP registry does not list)
 // stays unknown — never guessed from a name.
 
-export const CLASSIFIER_VERSION = 'tennis-classify/1.0.0';
+export const CLASSIFIER_VERSION = 'tennis-classify/1.1.0';
+
+/** Every detected kind of one canonical story: the primary kind + facts.secondary_kinds (one article per match). */
+export const kindsOf = (ev) => [ev?.kind, ...((ev?.facts?.secondary_kinds) || [])].filter(Boolean);
+/** True when the story is (also) of kind k — accepts an event or a packet ({ event }). Use this, never kind === k, for context. */
+export const hasKind = (x, k) => kindsOf(x?.event || x).includes(k);
 export const CLASSES = Object.freeze(['wire', 'brief', 'full', 'deep']);
 const RANK = { wire: 0, brief: 1, full: 2, deep: 3 };
 export const atLeast = (c, min) => RANK[c] >= RANK[min];
@@ -83,6 +88,9 @@ function kindClass(kind, c, f) {
       if (lr && lr <= 10) {
         if (c.tier === 'slam' && c.late) return ['deep', `top-10 upset in a Grand Slam ${c.round === 'F' ? 'final' : 'semifinal'}`];
         if (c.T >= 4 && (c.late || c.qf)) return ['full', `top-10 upset in a late round of a ${c.tier} event`];
+        // 1.1.0: a top-10 player beaten by a player outside the top 50 at a 500+ event is significant in ANY main-draw
+        // round (facts only: point-in-time ranks + reviewed tier; never a model probability or odds). Evidence still caps.
+        if (c.singles && c.T >= 3 && c.winnerRank != null && c.winnerRank > 50) return ['full', `No. ${c.winnerRank} beat top-10 No. ${lr} at a ${c.tier} event`];
         return ['brief', `beat a top-10 player (No. ${lr})`];
       }
       if (lr && lr <= 20) {

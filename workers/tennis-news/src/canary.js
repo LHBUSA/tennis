@@ -61,7 +61,7 @@ async function runOne(env, cfg, { model, packet, baseline, plan, input, maxOutpu
   const routing = { lane: model === cfg.flagshipModel ? LANES.FLAGSHIP : LANES.STANDARD, model, pool: poolOf(model, cfg), reason: 'offline canary (identical inputs)', max_output_tokens: maxOutput, reasoning_effort: cfg.standardEffort };
   try {
     const r = await callModel(env.OPENAI_API_KEY, { routing, input, fetchImpl });
-    const draft = adopt(r.text, baseline);
+    const draft = adopt(r.text, baseline, packet);
     const g = runGates(draft, packet, { plan });
     const ps = prose(draft);
     return {
