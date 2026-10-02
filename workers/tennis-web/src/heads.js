@@ -37,7 +37,8 @@ export function newsEntities(a) {
   const winners = sb?.winner_side && parts?.[sb.winner_side] ? parts[sb.winner_side].players : a.evidence?.player ? [a.evidence.player] : [];
   const withSlug = (xs) => xs.filter((p) => p?.slug && p?.name);
   const images = withSlug(winners).map((p) => p.photo?.square).filter(Boolean);
-  return { section: DESK_SECTION[a.desk] ? `Tennis · ${DESK_SECTION[a.desk]}` : 'Tennis', people: withSlug(people), featured: withSlug(winners), match_id: a.match_id || null, tournament: a.tournament || null, images };
+  const photos = withSlug(winners).filter((p) => p.photo?.square).map((p) => ({ ...p.photo, name: p.photo.name || p.name }));
+  return { section: DESK_SECTION[a.desk] ? `Tennis · ${DESK_SECTION[a.desk]}` : 'Tennis', people: withSlug(people), featured: withSlug(winners), match_id: a.match_id || null, tournament: a.tournament || null, images, photos };
 }
 
 export async function headFor(env, r, url = null) {
@@ -56,7 +57,7 @@ export async function headFor(env, r, url = null) {
       type: 'article',
       image,
       article: published ? { published_time: a.first_published_at || a.published_at, modified_time: a.updated_at, section: 'Tennis' } : null,
-      jsonld: [published ? newsArticleLd(a, canonical, image.url, newsEntities(a)) : null, breadcrumb([['PropBetEdge', 'https://propbetedge.ai/'], ['Tennis', '/'], ['News', '/news'], [a.headline, `/news/${a.slug}`]])].filter(Boolean)
+      jsonld: [published ? newsArticleLd(a, canonical, image, newsEntities(a)) : null, breadcrumb([['PropBetEdge', 'https://propbetedge.ai/'], ['Tennis', '/'], ['News', '/news'], [a.headline, `/news/${a.slug}`]])].filter(Boolean)
     };
   }
   if (id === 'player' || id === 'player-sub') {

@@ -5,6 +5,7 @@
 export const SITE = 'https://tennis.propbetedge.ai';
 export const BRAND = 'PropBetEdge Tennis';
 import { PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
+import { ownedImage, licensedImage, compositeImage, imageObject } from './image-metadata.js';
 
 export const X_HANDLE = PROPBETEDGE_X_HANDLE;
 export const X_URL = PROPBETEDGE_X_URL;
@@ -68,8 +69,33 @@ export function headHtml(m) {
   return tags.join('\n    ');
 }
 
+// ---- Image rights ---------------------------------------------------------------------------------------
+// Every ImageObject goes through ./image-metadata.js (network contract: docs/IMAGE_METADATA_CONTRACT.md in
+// propbetedge-news-site). Photos are Commons files with a recorded author/license/file page; a generated card is
+// PropBetEdge art plus the photos workers/tennis-web composites into it (catalog hero, else up to two portraits).
+
+/** The canonical deed URL for a Creative Commons license name ("CC BY-SA 4.0", "CC0"), else null. */
+export function ccLicenseUrl(name) {
+  const t = String(name || '').trim();
+  const m = /^CC (BY(?:-NC)?(?:-SA|-ND)?) (\d\.\d)$/i.exec(t);
+  if (m) return `https://creativecommons.org/licenses/${m[1].toLowerCase()}/${m[2]}/`;
+  return /^CC0\b/i.test(t) ? 'https://creativecommons.org/publicdomain/zero/1.0/' : null;
+}
+// Commons fills a missing author with "No machine-readable author provided. X assumed": a guess, not a recorded author.
+const recordedAuthor = (a) => (/no machine-readable author|\bassumed\b|^unknown\b|^anonymous\b/i.test(String(a || '')) ? '' : a);
+export const photoRecord = (ph, base = {}) => licensedImage({ ...base, author: recordedAuthor(ph?.author), license: ph?.license, license_url: ph?.license_url || ccLicenseUrl(ph?.license), source_page: ph?.source_page });
+
+/** What the /og/news card embeds (workers/tennis-web/src/index.js): the catalog hero photo, else portrait heads. */
+export function newsCardParts(a) {
+  const h = a?.media?.hero;
+  const first = h?.images?.[0];
+  if (first?.kind === 'catalog' && first.id) return [photoRecord(first)];
+  if (h?.type === 'portrait') return (h.images || []).slice(0, 2).map((x) => photoRecord(x));
+  return [];
+}
+
 // ---- JSON-LD ------------------------------------------------------------------------------------------
-export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#org', name: 'PropBetEdge', url: 'https://propbetedge.ai', logo: { '@type': 'ImageObject', url: `${SITE}/brand/icon-512.png`, width: 512, height: 512 }, sameAs: [X_URL] };
+export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#org', name: 'PropBetEdge', url: 'https://propbetedge.ai', logo: imageObject(ownedImage({ url: `${SITE}/brand/icon-512.png`, width: 512, height: 512, caption: 'PropBetEdge' })), sameAs: [X_URL] };
 export const WEBSITE = { '@type': 'WebSite', '@id': `${SITE}/#site`, name: BRAND, url: `${SITE}/`, publisher: { '@id': ORGANIZATION['@id'] } };
 
 export function breadcrumb(items) {
@@ -93,7 +119,7 @@ export function personLd(p, canonical) {
   const n = { '@type': 'Person', '@id': `${canonical}#person`, name: p.name, url: canonical };
   if (p.nationality) n.nationality = p.nationality;
   if (p.dob) n.birthDate = p.dob;
-  if (p.photo?.square) n.image = p.photo.square;
+  if (p.photo?.square) n.image = imageObject(photoRecord(p.photo, { url: p.photo.square, caption: p.name }));
   n.knowsAbout = 'Tennis';
   return n;
 }
@@ -118,7 +144,9 @@ export function itemListLd(name, items) {
 /** NewsArticle — published stories only; headline/dates/image/author are the story's own stored fields. */
 export function newsArticleLd(a, canonical, image, ctx = {}) {
   const n = { '@type': 'NewsArticle', '@id': `${canonical}#article`, mainEntityOfPage: canonical, url: canonical, headline: String(a.headline).slice(0, 110), description: a.dek || undefined, datePublished: a.first_published_at || a.published_at, dateModified: a.updated_at || a.published_at, author: { '@type': 'Organization', name: 'PropBetEdge Tennis Desk', url: `${SITE}/news` }, publisher: { '@id': ORGANIZATION['@id'] }, isPartOf: { '@id': WEBSITE['@id'] }, articleSection: ctx.section || 'Tennis' };
-  const images = [image, ...(ctx.images || [])].filter(Boolean);
+  const card = image ? imageObject(compositeImage({ url: image.url || image, width: image.width, height: image.height, caption: image.alt, year: a.first_published_at || a.published_at, parts: newsCardParts(a) })) : null;
+  const photos = ctx.photos ? ctx.photos.map((ph) => imageObject(photoRecord(ph, { url: ph.square, caption: ph.name }))) : ctx.images || [];
+  const images = [card, ...photos].filter(Boolean);
   if (images.length) n.image = images;
   // entities only from the frozen evidence: people by their canonical player page (the same #person @id the
   // player pages publish), the match by its match page event, the edition by its tournament page
