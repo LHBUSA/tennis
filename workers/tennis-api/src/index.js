@@ -11,7 +11,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.9.3';
+export const VERSION = '0.9.4';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -93,11 +93,17 @@ export function isGenuinelyLive(m, now = Date.now()) {
   return m.status === 'in_progress' && (!end || end >= new Date(now - 2 * 86400e3).toISOString().slice(0, 10)) && (src === null || now - src < maxAge);
 }
 
+/**
+ * THE live contract, shared by /v1/live and /v1/today.live (one rule, never two): genuinely live (above) AND still
+ * linked to a source. A row no source links to any more (its external ids moved to the surviving row of a duplicate
+ * pair) can never be observed again: it is not live (2026-09-29: two 0-0 Adana rows from 09:10 shown next to their
+ * finished duplicates). Callers must select tennis_match_external_ids(provider). Status is never inferred.
+ */
+export const isLiveRow = (m, now = Date.now()) => isGenuinelyLive(m, now) && (m.tennis_match_external_ids || []).length > 0;
+
 async function live(store) {
-  // a row no source links to any more (its external ids moved to the surviving row of a duplicate pair) can never be
-  // observed again: it is not live (2026-09-29: two 0-0 Adana rows from 09:10 shown next to their finished duplicates)
   const rows = (await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&status=eq.in_progress&order=updated_at.desc&limit=200`))
-    .filter((m) => isGenuinelyLive(m) && (m.tennis_match_external_ids || []).length > 0);
+    .filter((m) => isLiveRow(m));
   return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server only where the source publishes them (official WTA feed), game-level state from the secondary ESPN feed for ATP events' });
 }
 
@@ -127,13 +133,16 @@ async function todayView(store) {
   const d = today();
   const eds = await editionsInWindow(store, d, d, false);
   const ids = eds.map((e) => e.edition_id);
-  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast&limit=600`) : [];
+  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&edition_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast&limit=600`) : [];
   const tourOf = new Map(eds.map((e) => [e.edition_id, e.tour]));
   const shaped = matches.map((m) => ({ ...shapeMatch(m), tour: tourOf.get(m.edition_id) || null }));
+  // live = the SAME contract as /v1/live (isLiveRow on the raw row). A stale / unlinked 'in_progress' row is simply not
+  // live; its stored status is not rewritten or reinterpreted here.
+  const liveIds = new Set(matches.filter((m) => isLiveRow(m)).map((m) => m.match_id));
   const data = {
     date: d,
     tournaments: eds.map((e) => ({ ...withTour(e), matches: shaped.filter((m) => m.tournament?.slug === e.tennis_tournaments?.slug && m.tournament?.year === e.year).length })),
-    live: shaped.filter((m) => m.status === 'in_progress'),
+    live: shaped.filter((m) => m.status === 'in_progress' && liveIds.has(m.id)),
     upcoming: shaped.filter((m) => isCurrentUpcoming(m)).sort((a, b) => String(a.scheduled_at || '9').localeCompare(String(b.scheduled_at || '9'))),
     // newest first by when we last observed the result (ESPN rows carry no source timestamp: our write time)
     latest_results: shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))).slice(0, 40),
