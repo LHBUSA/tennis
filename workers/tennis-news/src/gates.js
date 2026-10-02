@@ -305,5 +305,13 @@ export function contextFailures(article, packet) {
   if (!fams.length) return [];
   const paras = article.sections.filter((s) => !['what_happened', 'method', 'next'].includes(s.id)).flatMap((s) => s.paragraphs.map(String));
   const used = fams.filter((f) => paras.some((p) => f.test(p))).map((f) => f.family);
-  return used.length ? [] : [{ gate: 'thin_context', detail: `packet proves ${fams.map((f) => f.family).join(', ')} but no paragraph uses any of them` }];
+  const out = used.length ? [] : [{ gate: 'thin_context', detail: `packet proves ${fams.map((f) => f.family).join(', ')} but no paragraph uses any of them` }];
+  // "Nth win of the tournament" is ambiguous when the draw path holds QUALIFYING wins: say which (owner rule V4.1)
+  const quals = (packet.draw_path?.matches || []).some((r) => r.result === 'W' && (/^Q-/.test(String(r.round || '')) || /qualifying/i.test(String(r.round_label || ''))));
+  if (quals) {
+    const all = article.sections.filter((s) => s.id !== 'method').flatMap((s) => s.paragraphs.map(String)).join(' ').split(/(?<=[.!?])\s+/);
+    const amb = all.find((x) => /\b\d+(st|nd|rd|th)\s+(win|victory)\s+(of|at|in)\s+the\s+(tournament|event|week)\b/i.test(x) && !/qualif/i.test(x));
+    if (amb) out.push({ gate: 'ambiguous_win_count', detail: `counts qualifying without saying so: "${amb.slice(0, 120)}"` });
+  }
+  return out;
 }

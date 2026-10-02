@@ -506,7 +506,7 @@ async function latency(store, hours = 168) {
  * baseline, through the same gates; default is the deterministic baseline. slug=: one story (the canary).
  */
 export async function repairContext(env, store, { write = false, limit = 60, minDims = 4, slug = null, model = false } = {}) {
-  const q = `select=article_id,slug,event_id,status,story_class,headline,deck,body,first_published_at,published_at,revised_at,revisions,primary_player_id,player_ids,tennis_article_evidence(packet,frozen_at)&status=eq.published${slug ? `&slug=eq.${encodeURIComponent(slug)}` : ''}&order=published_at.desc&limit=${Math.min(200, limit)}`;
+  const q = `select=article_id,slug,event_id,status,story_class,prose_origin,headline,deck,body,first_published_at,published_at,revised_at,revisions,primary_player_id,player_ids,tennis_article_evidence(packet,frozen_at)&status=eq.published${slug ? `&slug=eq.${encodeURIComponent(slug)}` : ''}&order=published_at.desc&limit=${Math.min(200, limit)}`;
   const rows = await store.select('tennis_articles', q);
   const out = { write, model, min_dims: minDims, scanned: rows.length, match_stories: 0, eligible: 0, repaired: 0, held: 0, items: [] };
   for (const a of rows) {
@@ -527,9 +527,12 @@ export async function repairContext(env, store, { write = false, limit = 60, min
     const plan = buildPlan(packet, baseline);
     const gate = (x) => runGates(x, packet, { plan });
     let ed;
-    if (model && write && ev) ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass: to, packet, baseline, gate, dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: 1 });
+    // model-written stories are re-edited by the model (one routed admin_reedit call, same gates, baseline fallback):
+    // replacing richer model prose with the deterministic baseline would be a downgrade
+    const useModel = model || a.prose_origin === 'model';
+    if (useModel && write && ev) ed = await routedProse(env, store, { ev, articleId: a.article_id, storyClass: to, packet, baseline, gate, dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: 1 });
     else { const g = gate(baseline); ed = { article: { ...baseline, prose_origin: 'baseline' }, origin: g.pass ? 'baseline' : null, gate: g, attempts: [], usage: {} }; }
-    const item = { slug: a.slug, published_at: a.published_at, from_class: from, to_class: to, dims: dims.length, old_thin_context: thin.length > 0, new_gate_pass: !!ed.origin, failures: (ed.gate?.failures || []).slice(0, 6), prose_origin: ed.origin, after: ed.origin ? { headline: ed.article.headline, sections: ed.article.sections.filter((s) => s.id !== 'method').map((s) => ({ id: s.id, paragraphs: s.paragraphs })) } : null };
+    const item = { slug: a.slug, published_at: a.published_at, from_class: from, to_class: to, dims: dims.length, old_thin_context: thin.length > 0, new_gate_pass: !!ed.origin, failures: (ed.gate?.failures || []).slice(0, 6), prose_origin: ed.origin, stored_prose_origin: a.prose_origin || null, would_model_reedit: useModel && !write, old_failures: thin.map((f) => f.gate), after: ed.origin ? { headline: ed.article.headline, sections: ed.article.sections.filter((s) => s.id !== 'method').map((s) => ({ id: s.id, paragraphs: s.paragraphs })) } : null };
     if (write && ed.origin) {
       await upgradeArticle(store, { ...a, story_class: from }, { article: ed.article, ed, plan, packet, storyClass: to, dimensions: evidenceDimensions(packet), reason: `context repair (tennis-compose ${COMPOSE_VERSION}, ${GATES_VERSION}): stored prose failed thin_context`, keepEvidence: true });
       item.written = true;

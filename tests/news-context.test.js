@@ -31,6 +31,14 @@ test('thin_context: naming this match\'s own players never counts as context (op
   assert.equal(contextFailures(PUBLISHED, withOpp)[0]?.gate, 'thin_context', 'the published prose names Fritz, which is not recent-form context');
 });
 
+test('ambiguous_win_count: "Nth win of the tournament" with qualifying wins in the path must say so', () => {
+  const art = (p) => ({ ...PUBLISHED, sections: [{ id: 'why_it_mattered', heading: 'x', paragraphs: [p, 'Munar reached the main draw through two qualifying wins, over Marcos Giron and Aleksandar Kovacevic.'] }] });
+  assert.equal(contextFailures(art('It was his 3rd win of the tournament.'), PACKET).some((f) => f.gate === 'ambiguous_win_count'), true);
+  assert.equal(contextFailures(art('It was his 3rd win of the tournament, including qualifying.'), PACKET).some((f) => f.gate === 'ambiguous_win_count'), false);
+  const noQual = { ...PACKET, draw_path: { matches: [{ ...PACKET.draw_path.matches[0], round: '1', round_label: 'round 1' }] } };
+  assert.equal(contextFailures(art('It was his 2nd win of the tournament.'), noQual).some((f) => f.gate === 'ambiguous_win_count'), false, 'no qualifying: unambiguous');
+});
+
 test('Munar–Fritz acceptance: qualifying path, comeback, tier, seeding, pre-match comparison, next — no banned claims', () => {
   const a = compose(PACKET, { storyClass: 'brief' });
   const t = text(a);
