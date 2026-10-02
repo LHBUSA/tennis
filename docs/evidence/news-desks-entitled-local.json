@@ -1,0 +1,870 @@
+{
+ "base": "http://localhost:5197",
+ "mode": "entitled",
+ "label": "local",
+ "session": false,
+ "at": "2026-10-02T15:23:42.815Z",
+ "fails": [],
+ "rows": [
+  {
+   "w": 320,
+   "path": "/news",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "ATP desk",
+    "WTA desk",
+    "Notable results"
+   ],
+   "stories": 41,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News — Data-Checked Stories from PropBetEdge | PropBetEdge Tennis",
+   "canonical": "https://tennis.propbetedge.ai/news",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1"
+  },
+  {
+   "w": 320,
+   "path": "/news/atp",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fils sends No. 2 seed Tiafoe out in Tokyo",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 25,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 320,
+   "path": "/news/wta",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 12,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 320,
+   "path": "/news/doubles",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Chan/Wu win the Seoul doubles title",
+    "Current tournaments",
+    "Notable results"
+   ],
+   "stories": 8,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 320,
+   "path": "/news/rankings",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 320,
+   "path": "/news/grand-slams",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 390,
+   "path": "/news",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "ATP desk",
+    "WTA desk",
+    "Notable results"
+   ],
+   "stories": 41,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News — Data-Checked Stories from PropBetEdge | PropBetEdge Tennis",
+   "canonical": "https://tennis.propbetedge.ai/news",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1"
+  },
+  {
+   "w": 390,
+   "path": "/news/atp",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fils sends No. 2 seed Tiafoe out in Tokyo",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 25,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 390,
+   "path": "/news/wta",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 12,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 390,
+   "path": "/news/doubles",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Chan/Wu win the Seoul doubles title",
+    "Current tournaments",
+    "Notable results"
+   ],
+   "stories": 8,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 390,
+   "path": "/news/rankings",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 390,
+   "path": "/news/grand-slams",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 768,
+   "path": "/news",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "ATP desk",
+    "WTA desk",
+    "Notable results"
+   ],
+   "stories": 41,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News — Data-Checked Stories from PropBetEdge | PropBetEdge Tennis",
+   "canonical": "https://tennis.propbetedge.ai/news",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1"
+  },
+  {
+   "w": 768,
+   "path": "/news/atp",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fils sends No. 2 seed Tiafoe out in Tokyo",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 25,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 768,
+   "path": "/news/wta",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 12,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 768,
+   "path": "/news/doubles",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Chan/Wu win the Seoul doubles title",
+    "Current tournaments",
+    "Notable results"
+   ],
+   "stories": 8,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 768,
+   "path": "/news/rankings",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 768,
+   "path": "/news/grand-slams",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1024,
+   "path": "/news",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "ATP desk",
+    "WTA desk",
+    "Notable results"
+   ],
+   "stories": 41,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News — Data-Checked Stories from PropBetEdge | PropBetEdge Tennis",
+   "canonical": "https://tennis.propbetedge.ai/news",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1"
+  },
+  {
+   "w": 1024,
+   "path": "/news/atp",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fils sends No. 2 seed Tiafoe out in Tokyo",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 25,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1024,
+   "path": "/news/wta",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 12,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1024,
+   "path": "/news/doubles",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Chan/Wu win the Seoul doubles title",
+    "Current tournaments",
+    "Notable results"
+   ],
+   "stories": 8,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1024,
+   "path": "/news/rankings",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1024,
+   "path": "/news/grand-slams",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1440,
+   "path": "/news",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/matchups",
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "ATP desk",
+    "WTA desk",
+    "Notable results"
+   ],
+   "stories": 41,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News — Data-Checked Stories from PropBetEdge | PropBetEdge Tennis",
+   "canonical": "https://tennis.propbetedge.ai/news",
+   "robots": "index, follow, max-image-preview:large, max-snippet:-1"
+  },
+  {
+   "w": 1440,
+   "path": "/news/atp",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fils sends No. 2 seed Tiafoe out in Tokyo",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 25,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1440,
+   "path": "/news/wta",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch",
+    "/v1/matchups?limit=40"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch",
+    "401 https://tennis-api.propbetedge.ai/v1/matchups"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Fernandez wins the Singapore title",
+    "Current tournaments",
+    "Latest intelligence",
+    "Notable results"
+   ],
+   "stories": 12,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1440,
+   "path": "/news/doubles",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Chan/Wu win the Seoul doubles title",
+    "Current tournaments",
+    "Notable results"
+   ],
+   "stories": 8,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1440,
+   "path": "/news/rankings",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  },
+  {
+   "w": 1440,
+   "path": "/news/grand-slams",
+   "status": 200,
+   "gatedReqs": [
+    "/v1/players-to-watch"
+   ],
+   "bad": [
+    "401 https://tennis-api.propbetedge.ai/v1/players-to-watch"
+   ],
+   "errs": [
+    "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+   ],
+   "loading": false,
+   "sections": [
+    "Current tournaments"
+   ],
+   "stories": 0,
+   "risers": 0,
+   "previews": 0,
+   "overflow": 0,
+   "title": "Tennis News | PropBetEdge Tennis",
+   "canonical": null,
+   "robots": "noindex, follow"
+  }
+ ]
+}
