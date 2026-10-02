@@ -101,9 +101,18 @@ export function isGenuinelyLive(m, now = Date.now()) {
  */
 export const isLiveRow = (m, now = Date.now()) => isGenuinelyLive(m, now) && (m.tennis_match_external_ids || []).length > 0;
 
+/**
+ * The live rows: ONE query (status-filtered, so small and fast) + isLiveRow. /v1/live serves these; /v1/today.live is
+ * the intersection with them. Never embed external ids into the 600-row /today read: that query hit statement
+ * timeout 57014 in production (2026-10-02, tennis-api 0.9.4 first deploy, rolled back within ~3 min).
+ */
+export async function liveRows(store, now = Date.now()) {
+  return (await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&status=eq.in_progress&order=updated_at.desc&limit=200`))
+    .filter((m) => isLiveRow(m, now));
+}
+
 async function live(store) {
-  const rows = (await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&status=eq.in_progress&order=updated_at.desc&limit=200`))
-    .filter((m) => isLiveRow(m));
+  const rows = await liveRows(store);
   return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server only where the source publishes them (official WTA feed), game-level state from the secondary ESPN feed for ATP events' });
 }
 
@@ -133,12 +142,16 @@ async function todayView(store) {
   const d = today();
   const eds = await editionsInWindow(store, d, d, false);
   const ids = eds.map((e) => e.edition_id);
-  const matches = ids.length ? await store.select('tennis_matches', `select=${MATCH},tennis_match_external_ids(provider)&edition_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast&limit=600`) : [];
+  // the 600-row read stays exactly as before (no embeds: see liveRows); the live set comes from liveRows in parallel
+  const [matches, liveSet] = await Promise.all([
+    ids.length ? store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded&order=source_updated_at.desc.nullslast&limit=600`) : [],
+    ids.length ? liveRows(store) : [],
+  ]);
   const tourOf = new Map(eds.map((e) => [e.edition_id, e.tour]));
   const shaped = matches.map((m) => ({ ...shapeMatch(m), tour: tourOf.get(m.edition_id) || null }));
-  // live = the SAME contract as /v1/live (isLiveRow on the raw row). A stale / unlinked 'in_progress' row is simply not
-  // live; its stored status is not rewritten or reinterpreted here.
-  const liveIds = new Set(matches.filter((m) => isLiveRow(m)).map((m) => m.match_id));
+  // live = the SAME rows /v1/live serves (liveRows). A stale / unlinked 'in_progress' row is simply not live; its
+  // stored status is not rewritten or reinterpreted here.
+  const liveIds = new Set(liveSet.map((m) => m.match_id));
   const data = {
     date: d,
     tournaments: eds.map((e) => ({ ...withTour(e), matches: shaped.filter((m) => m.tournament?.slug === e.tennis_tournaments?.slug && m.tournament?.year === e.year).length })),
