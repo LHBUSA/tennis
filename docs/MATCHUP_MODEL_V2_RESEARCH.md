@@ -154,12 +154,59 @@ the coin's 0.6931 on 860 WTA matches. It is an early failed baseline and is not 
 - Features use matches strictly before the match day; the champion's own rating also includes same-day earlier rounds,
   exactly as production serves it.
 
-## Prospective shadow (next)
+## Prospective shadow (LIVE since 2026-10-02, frozen)
 
-The cleanest promotion evidence comes from predictions written before play. For each `matchup-freeze/1` snapshot, an
-append-only research record will hold: champion probability as frozen, challenger probability, `frozen_at`,
-`feature_hash` and `model_version`. Each record is graded after the result. The published probability is never
-replaced.
+**What is written.** For every pre-match snapshot newly written by `matchup-freeze/1`, tennis-api's cron
+(`scheduled.js` → `mm2-shadow.js`) writes one write-once research record:
+- **Path:** `research/mm2/shadow/<match_id>/<frozen_at>_mm2-B-context-1.json`, plus a daily index.
+- **Contents:** the champion probability exactly as frozen; B's probability; `feature_hash`; `model_version`;
+  `coef_hash`.
+
+**Inputs.** Each tour's daily player state (`research/mm2/state/<tour>.json`) is written by the DNA v2 build. It
+reproduces the offline profile exactly for any match day on or after its cutoff.
+
+**Where it is visible.** Nothing is served: there is no API route, no frontend and no published-probability change.
+
+**Frozen during the shadow window.** `mm2-B-context/1` is fixed:
+- `coef_hash ca5795a4dc2d7578d8798d778c1c6dec9a6fb06d05676a235c8742e3ae3541a5`;
+- the 11 features, their transforms, λ = 1 and no extra calibration layer.
+
+Only the daily player state moves. Any refit, transform or feature change is a new challenger,
+`mm2-B-context/2`, with its own prospective period. The coefficients are never rolled forward under `/1`; a test
+pins the hash.
+
+**Grading.** `scripts/research/mm2/grade-shadow.mjs` runs offline and read-only:
+- Only the last record frozen before play is used.
+- Only completed matches are graded; retirements, walkovers and cancellations are excluded.
+- Nothing is recomputed after the match.
+
+**Internal scoreboard** (not a product page): `docs/evidence/matchup-model-v2-shadow-latest.md` and `.json`. It is
+kept separately per tour and shows:
+- graded, pending, excluded and unscored counts, and edition clusters;
+- log loss, Brier and ECE for champion vs B, with deltas;
+- the paired 95% CI and reliability bands;
+- surface, level and favourite-band tables.
+
+It contains no ROI, units or betting language.
+
+### Promotion gate — `mm2-shadow-gate/1` (frozen 2026-10-02, before any shadow result)
+
+Defined in `scripts/research/mm2/shadow-gate.mjs` and pinned by tests. Changing it means `/2`, recorded here.
+
+**Evidence needed, per tour (ATP and WTA separately):**
+- at least 2,000 graded prospective predictions;
+- at least 40 tournament-edition clusters;
+- at least 2 sourced surfaces with 100 or more graded matches each.
+
+**Results needed, on identical rows:**
+- B's log loss is below the champion's, and the paired cluster-bootstrap 95% CI of the delta is entirely below 0
+  (1,000 resamples, seed 20261002);
+- B's Brier is no worse;
+- B's ECE is no worse;
+- no material segment failure (surface, level or favourite band with n ≥ 200 whose CI is entirely above 0).
+
+Meeting the gate only makes B **eligible for an owner decision**. Nothing is promoted automatically. This may take
+months.
 
 ## Reproduce
 

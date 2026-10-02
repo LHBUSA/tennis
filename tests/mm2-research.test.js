@@ -201,3 +201,35 @@ test('shadow writer: append-only, research prefix only, never overwrites; index 
   assert.equal(JSON.parse(b.m.get('research/mm2/shadow-index/2026-10-03.json')).length, 1);
   assert.equal(b.m.get(snapKey), before.get(snapKey)); // the frozen snapshot is never touched
 });
+
+// ---- frozen shadow model + frozen prospective gate --------------------------------------------------------------
+import crypto from 'node:crypto';
+import { PROMOTION_GATE, pickGradeable, gateStatus } from '../scripts/research/mm2/shadow-gate.mjs';
+
+test('mm2-B-context/1 is frozen: coefficients hash to the pinned coef_hash (a refit must be /2, never /1)', () => {
+  assert.equal(SHADOW_MODEL.model_version, 'mm2-B-context/1');
+  assert.equal(SHADOW_MODEL.coef_hash, 'ca5795a4dc2d7578d8798d778c1c6dec9a6fb06d05676a235c8742e3ae3541a5');
+  assert.equal(crypto.createHash('sha256').update(JSON.stringify(SHADOW_MODEL.tours)).digest('hex'), SHADOW_MODEL.coef_hash);
+  assert.deepEqual(SHADOW_MODEL.names, ['L', 'surf_edge', 'form', 'opp', 'act30', 'rest', 'dec', 'tb', 'ss', 'fsc', 'cb']);
+  assert.deepEqual([SHADOW_MODEL.tours.ATP.lambda, SHADOW_MODEL.tours.WTA.lambda], [1, 1]);
+});
+
+test('the prospective promotion gate is frozen (mm2-shadow-gate/1)', () => {
+  assert.equal(PROMOTION_GATE.gate_version, 'mm2-shadow-gate/1');
+  assert.equal(PROMOTION_GATE.coef_hash, SHADOW_MODEL.coef_hash);
+  assert.deepEqual({ ...PROMOTION_GATE.per_tour }, { min_graded: 2000, min_edition_clusters: 40, min_surfaces_with_100_graded: 2 });
+  assert.equal(gateStatus({ n: 0 }).met, false);
+});
+
+test('grading picks the last record frozen before play; retirements/walkovers excluded; unfinished pending', () => {
+  const rec = (t, extra = {}) => ({ frozen_at: t, challenger: { probability: { A: 0.6 } }, champion: { probability: { A: 0.55 } }, ...extra });
+  const list = [rec('2026-10-03T01:00:00Z'), rec('2026-10-03T09:00:00Z'), rec('2026-10-03T13:00:00Z')];
+  const done = { status: 'completed', winner_side: 'B', started_at: '2026-10-03T12:00:00Z' };
+  const g = pickGradeable(list, done);
+  assert.equal(g.kind, 'graded'); assert.equal(g.record.frozen_at, '2026-10-03T09:00:00Z'); assert.equal(g.y, 0);
+  assert.equal(pickGradeable(list, { ...done, status: 'retired' }).kind, 'excluded');
+  assert.equal(pickGradeable(list, { ...done, status: 'walkover' }).reason, 'walkover');
+  assert.equal(pickGradeable(list, { status: 'in_progress', started_at: '2026-10-03T12:00:00Z' }).kind, 'pending');
+  assert.equal(pickGradeable([rec('2026-10-03T13:00:00Z')], done).reason, 'no_record_before_start');
+  assert.equal(pickGradeable([rec('2026-10-03T09:00:00Z', { challenger: null, reason: 'player_not_in_state' })], done).kind, 'unscored');
+});

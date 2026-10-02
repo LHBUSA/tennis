@@ -1,0 +1,51 @@
+{
+ "generated_at": "2026-10-02T23:28:41.091Z",
+ "internal_only": true,
+ "lane": "mm2-shadow/1 (research-only; published probability never replaced)",
+ "model_version": "mm2-B-context/1",
+ "coef_hash": "ca5795a4dc2d7578d8798d778c1c6dec9a6fb06d05676a235c8742e3ae3541a5",
+ "promotion_gate": {
+  "gate_version": "mm2-shadow-gate/1",
+  "model_version": "mm2-B-context/1",
+  "coef_hash": "ca5795a4dc2d7578d8798d778c1c6dec9a6fb06d05676a235c8742e3ae3541a5",
+  "per_tour": {
+   "min_graded": 2000,
+   "min_edition_clusters": 40,
+   "min_surfaces_with_100_graded": 2
+  },
+  "identical_rows": true,
+  "log_loss": "challenger < champion AND paired cluster-bootstrap 95% CI of (challenger - champion) entirely below 0",
+  "brier": "challenger <= champion",
+  "calibration": "challenger ECE <= champion ECE",
+  "segments": "no material segment failure: no surface / level / favourite band with n >= 200 whose paired 95% CI is entirely above 0",
+  "bootstrap": {
+   "reps": 1000,
+   "seed": 20261002,
+   "cluster": "tournament edition"
+  }
+ },
+ "from": "2026-10-02",
+ "shadow_records": 0,
+ "matches_with_shadow": 0,
+ "graded": 0,
+ "pending": {
+  "ATP": {
+   "pending_unfinished": 0,
+   "excluded": {},
+   "unscored": {}
+  },
+  "WTA": {
+   "pending_unfinished": 0,
+   "excluded": {},
+   "unscored": {}
+  }
+ },
+ "ATP": {
+  "n": 0
+ },
+ "WTA": {
+  "n": 0
+ },
+ "rows": [],
+ "note": "prospective: every challenger probability was written before play from the frozen coefficients; promotion remains an owner decision"
+}
