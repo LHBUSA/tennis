@@ -8,8 +8,8 @@ import { leadStory, majorStory } from './news.js';
 import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
 import { leaderBoard } from '../lib/v4.js';
-import { liveGroups, nextMatch, orderTournaments, latestSlams, heroPick, playersToWatch } from '../lib/home.js';
-import { section, rail, wireRails, heroMedia, statusBar, matchCard, tournamentCard, playerCard, dnaColumnsSkeleton, dnaBoard, pbecastLive, replayCard, coverageCards } from '../ui/home.js';
+import { liveGroups, nextMatch, orderTournaments, latestSlams, heroPick, playersToWatch, tourStatus } from '../lib/home.js';
+import { section, rail, wireRails, heroMedia, statusBar, tourLines, TOURS_PENDING, matchCard, tournamentCard, playerCard, dnaColumnsSkeleton, dnaBoard, pbecastLive, replayCard, coverageCards } from '../ui/home.js';
 
 const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
 // Match DNA boards (mature same-tour populations on both tours). Technical DNA metrics (hold / break rate) stay off the
@@ -44,7 +44,7 @@ export function mount(root) {
         <ul class="hm-hero-index" aria-label="In PropBetEdge Tennis"><li><a href="/players">Players</a></li><li><a href="/tournaments">Tournaments</a></li><li><a href="/dna">Match DNA</a></li><li><a href="/pbecast">PBEcast</a></li></ul>
       </div>
     </section>
-    <div class="hm-status" data-status aria-live="polite"><div class="hm-in"><p class="hm-st-msg">Checking live matches…</p></div></div>
+    <div class="hm-status" data-status aria-live="polite"><div class="hm-in"><p class="hm-st-msg">Checking live matches…</p>${tourLines(TOURS_PENDING, { state: 'pending' })}</div></div>
     <div data-next>${section({ id: 'h-next', ...NEXT.upcoming })}</div>
     ${section({ id: 'h-tours', hook: 'tours', title: 'Tournament coverage', sub: 'Live coverage, draws, results and intelligence for every tournament we cover.', link: '/tournaments', linkLabel: 'All tournaments', cls: 'hm-alt' })}
     ${section({ id: 'h-players', hook: 'players', title: 'Players to watch', sub: 'Grand Slam champions and finalists, then the ATP and WTA leaders.', link: '/players', linkLabel: 'All players' })}
@@ -98,7 +98,7 @@ export function mount(root) {
     try { t = await api('/v1/today', { signal: ctl.signal }); } catch (e) { if (ctl.signal.aborted) return; }
     const d = t?.data || null;
     const st = $('[data-status]');
-    if (st) render(st, html`<div class="hm-in">${statusBar(d, liveGroups(d?.live), nextMatch(d?.upcoming))}</div>`);
+    if (st) render(st, html`<div class="hm-in">${statusBar(d, liveGroups(d?.live), nextMatch(d?.upcoming), d ? tourStatus(d.live, d.upcoming) : null)}</div>`);
     if (!d) return;
     today = d;
     drawNext();

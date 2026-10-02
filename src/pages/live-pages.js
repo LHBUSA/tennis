@@ -10,6 +10,8 @@ import { shareBar } from '../ui/share.js';
 import { slamRow, matchList, matchCard, tournamentRow, rankingTable, rankSpark, dnaRadar, dnaBars, eventLabel, roundLabel, fmtRange, fmtDate, cap, pct } from '../ui/render.js';
 import { track } from '../analytics.js';
 import { liveEntry } from '../lib/pbecast-live.js';
+import { tourStatus } from '../lib/home.js';
+import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
@@ -523,12 +525,23 @@ export const pbecastHub = mountWith(async (root, _c, signal) => {
     return mount(root, { params: { id: entry.id }, live: live.data });
   }
   const menBox = () => {
-    // outside the polled body so the 60 s refresh never blanks it
-    root.querySelector('[data-body]')?.insertAdjacentHTML('afterend', '<section class="mod" data-pbp-replays style="margin-top:18px"><header class="mod-h"><h2>Point-by-point replays</h2></header><p class="loading">Loading…</p></section>');
-    api('/v1/slams', { signal }).then((r) => { const el = root.querySelector('[data-pbp-replays]'); if (el && r.data?.replays?.length) render(el, html`<header class="mod-h"><h2>Point-by-point replays</h2><span class="mod-k">${r.data.replay_edition.tournament} ${r.data.replay_edition.year}</span></header>${replayList(r.data.replays)}<p class="note">Every point from the official match feed — reason and score only. <a href="/tournaments/${r.data.replay_edition.slug}/${r.data.replay_edition.year}">All ${r.data.replay_edition.tournament} matches →</a></p>`); else if (el) el.remove(); }).catch(() => {});
+    // outside the polled body so the 60 s refresh never blanks it. Added only once the body has rendered AND the replays
+    // are known: appended below content already on screen, it never pushes anything (the old "Loading…" placeholder
+    // moved when the body filled above it: CLS ~0.17 on the hub)
+    const bodyReady = new Promise((ok) => { const chk = () => (signal.aborted || !root.querySelector('[data-body] .loading') ? ok() : setTimeout(chk, 100)); chk(); });
+    Promise.all([api('/v1/slams', { signal }), bodyReady]).then(([r]) => { if (signal.aborted || !r.data?.replays?.length) return; root.querySelector('[data-body]')?.insertAdjacentHTML('afterend', '<section class="mod" data-pbp-replays style="margin-top:18px"></section>'); const el = root.querySelector('[data-pbp-replays]'); if (el) render(el, html`<header class="mod-h"><h2>Point-by-point replays</h2><span class="mod-k">${r.data.replay_edition.tournament} ${r.data.replay_edition.year}</span></header>${replayList(r.data.replays)}<p class="note">Every point from the official match feed — reason and score only. <a href="/tournaments/${r.data.replay_edition.slug}/${r.data.replay_edition.year}">All ${r.data.replay_edition.tournament} matches →</a></p>`); }).catch(() => {});
   };
   shell(root, { eyebrow: 'PBEcast', heading: 'PBEcast', lede: 'The live analytical court: score, server, key moments, serve and return, Tennis DNA and head-to-head — and replays of completed matches. Observed-live coverage updates about every 18 seconds; point-by-point appears only where a source publishes it.' });
   menBox();
+  // LIVE NOW / UP NEXT for ATP and WTA, above the body: painted as a same-height placeholder first (no layout shift)
+  const tsBox = document.createElement('div');
+  tsBox.setAttribute('data-tourstate', '');
+  root.querySelector('[data-body]')?.before(tsBox);
+  render(tsBox, castTourState(TOURS_PENDING, { state: 'pending' }));
+  const loadTours = () => api('/v1/today', { signal }).then((r) => { if (r?.data) render(tsBox, castTourState(tourStatus(r.data.live, r.data.upcoming))); }).catch(() => {});
+  loadTours();
+  const tsPoll = setInterval(loadTours, 60000);
+  signal.addEventListener('abort', () => clearInterval(tsPoll));
   return fill(root, '/v1/today', (d) => html`<div class="mod"><p class="empty-h">No PBEcast live right now.</p><p class="note">When a covered match goes live, PBEcast opens straight onto its court. <a href="/schedule">See today’s schedule →</a></p></div>
     ${d.latest_results.length ? html`<h2 class="sec">Replays <small>matches finished at tournaments in progress</small></h2>${matchList(d.latest_results.filter((m) => ['completed', 'retired'].includes(m.status)).slice(0, 12))}` : ''}`, 'PBEcast unavailable.', signal, { poll: 60 });
 });

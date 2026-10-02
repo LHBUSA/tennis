@@ -54,3 +54,62 @@ test('players to watch: featured first, then ATP and WTA interleaved; ATP rank c
   assert.match(out[1].note, /secondary-source/);
   assert.equal(out[2].note, 'WTA No. 1');
 });
+
+// Tour-aware live state (2026-10-02): "only WTA live" must never read as "ATP not covered".
+import { tourStatus, matchTour } from '../src/lib/home.js';
+import { tourLines, castTourState, TOURS_PENDING } from '../src/ui/home.js';
+
+const TNOW = Date.parse('2026-10-02T19:40:00Z');
+const at = (h) => new Date(TNOW + h * 3600e3).toISOString();
+const P = (n) => ({ players: [{ slug: n.toLowerCase(), name: n, last_name: n }] });
+const M = (id, tour, event_type, status, h, extra = {}) => ({ id, tour, event_type, status, scheduled_at: h == null ? null : at(h), sides: { A: P(`${id}a`), B: P(`${id}b`) }, tournament: { name: tour === 'atp' ? 'China Open' : 'Adana Open - Adana, TUR', slug: 't', year: 2026, level: tour === 'atp' ? null : 'WTA 125' }, ...extra });
+const ts = (live, up) => Object.fromEntries(tourStatus(live, up, { now: TNOW }).map((r) => [r.tour, r]));
+const text = (x) => String(x).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+test('tour state: only WTA live -> ATP still listed with its next real start', () => {
+  const s = ts([M('w1', 'wta-125', 'WS', 'in_progress', -1)], [M('a1', 'atp', 'MS', 'scheduled', 6), M('a0', 'atp', 'MD', 'scheduled', 5)]);
+  assert.deepEqual([s.atp.live, s.wta.live], [0, 1]);
+  assert.equal(s.atp.next[0].id, 'a0', 'soonest first');
+  const out = text(tourLines(Object.values(s)));
+  assert.match(out, /ATP No ATP matches live · next at /);
+  assert.match(out, /WTA 1 match live 1 singles/);
+});
+test('tour state: only ATP live (ESPN rows) -> WTA listed; ATP counted from event/tour', () => {
+  const s = ts([M('a1', 'atp', 'MS', 'in_progress', -1), M('a2', 'atp', 'MS', 'in_progress', -1), M('a3', 'atp', 'MD', 'in_progress', -1)], [M('w1', 'wta', 'WS', 'scheduled', 3)]);
+  assert.deepEqual([s.atp.live, s.atp.singles, s.atp.doubles, s.wta.live], [3, 2, 1, 0]);
+  assert.match(text(tourLines(Object.values(s))), /ATP 3 matches live 2 singles · 1 doubles.*WTA No WTA matches live · next at/);
+});
+test('tour state: ATP + WTA live together; doubles-only live', () => {
+  const s = ts([M('a1', 'atp', 'MS', 'in_progress', -1), M('w1', 'wta', 'WD', 'in_progress', -1), M('w2', 'wta-125', 'WD', 'in_progress', -1)], []);
+  assert.deepEqual([s.atp.live, s.wta.live, s.wta.singles, s.wta.doubles], [1, 2, 0, 2]);
+  assert.match(text(tourLines(Object.values(s))), /WTA 2 matches live 2 doubles/);
+});
+test('tour state: neither live, both upcoming; one tour with nothing in the window says so (no guessed date)', () => {
+  const both = ts([], [M('a1', 'atp', 'MS', 'scheduled', 2), M('w1', 'wta', 'WS', 'scheduled', 4)]);
+  assert.ok(both.atp.next.length && both.wta.next.length);
+  const one = ts([], [M('w1', 'wta', 'WS', 'scheduled', 4)]);
+  const out = text(tourLines(Object.values(one)));
+  assert.match(out, /ATP No ATP matches live · no scheduled match in current window/);
+  assert.doesNotMatch(out, /ATP[^W]*next at/);
+});
+test('tour state: stale past rows, date-only rows, non-scheduled rows and mixed doubles never become "next" / never guessed', () => {
+  const s = ts([M('x', null, 'XD', 'in_progress', -1, { tour: 'grand-slam', tournament: { level: 'Grand Slam' } })],
+    [M('old', 'atp', 'MS', 'scheduled', -30), M('dateonly', 'wta', 'WS', 'scheduled', null), M('susp', 'atp', 'MS', 'suspended', 2)]);
+  assert.deepEqual([s.atp.live, s.wta.live, s.atp.next.length, s.wta.next.length], [0, 0, 0, 0]);
+});
+test('tour state: /v1/live rows (no tour field) resolve by WTA level or event code', () => {
+  assert.equal(matchTour({ event_type: 'WS', tournament: { level: 'WTA 125' } }), 'wta');
+  assert.equal(matchTour({ event_type: 'MS', tournament: { level: null } }), 'atp');
+  assert.equal(matchTour({ tour: 'grand-slam', event_type: 'WD' }), 'wta');
+  assert.equal(matchTour({ tour: 'grand-slam', event_type: 'XD' }), null);
+});
+test('PBEcast top state: LIVE NOW ATP xN / WTA xN and UP NEXT per tour with Singles/Doubles; neither tour hidden', () => {
+  const rows = tourStatus([M('w1', 'wta-125', 'WS', 'in_progress', -1)], [M('a1', 'atp', 'MD', 'scheduled', 2), M('a2', 'atp', 'MS', 'scheduled', 3)], { now: TNOW });
+  const full = text(castTourState(rows));
+  assert.match(full, /Live now ATP ×0 No ATP matches live WTA ×1 1 singles/);
+  assert.match(full, /Up next ATP .*Doubles a1a vs a1b China Open.*Singles a2a vs a2b China Open WTA No scheduled match in current window/);
+  const compact = text(castTourState(rows, { compact: true }));
+  assert.doesNotMatch(compact, /a2a/, 'compact strip: one next match per tour');
+  assert.match(text(castTourState(TOURS_PENDING, { compact: true, state: 'pending' })), /ATP … WTA …/);
+  assert.match(text(tourLines(TOURS_PENDING, { state: 'pending' })), /ATP Checking… WTA Checking…/);
+});

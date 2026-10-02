@@ -5,7 +5,7 @@ import { html } from '../lib/dom.js';
 import { avatar, nat } from './avatar.js';
 import { localTime, fmtRange, fmtDuration, roundLabel, eventLabel, statusLabel } from './render.js';
 import { scoreGrid } from './score-grid.js';
-import { tourTag, tourFamily, tournamentName, roundShort } from '../lib/home.js';
+import { tourTag, tourFamily, tournamentName, roundShort, isDoubles } from '../lib/home.js';
 
 /** Section row: intro column (title, one line, link) + body. `dark` = emerald band. */
 export function section({ id, title, sub, link, linkLabel, body, hook = 'body', dark = false, cls = '' }) {
@@ -33,18 +33,57 @@ export function heroMedia(pick) {
 
 // ---------------------------------------------------------------- live status bar
 
-export function statusBar(d, groups, next) {
-  if (!d) return html`<p class="hm-st-msg">Live data unavailable right now.</p><a class="hm-st-cta" href="/live">View live scores <span aria-hidden="true">→</span></a>`;
+export function statusBar(d, groups, next, tours = null) {
+  if (!d) return html`<p class="hm-st-msg">Live data unavailable right now.</p><a class="hm-st-cta" href="/live">View live scores <span aria-hidden="true">→</span></a>${tourLines(TOURS_PENDING, { state: 'unavailable' })}`;
   if (groups.length) {
     return html`<p class="hm-st-live"><i class="hm-dot" aria-hidden="true"></i>Live now</p>
       <ul class="hm-st-list">${groups.map((g) => html`<li><a href="${g.href}"><b>${g.name}</b><span>${g.rounds.join(' · ')}</span><em>${g.count} match${g.count === 1 ? '' : 'es'} live</em></a></li>`)}</ul>
-      <a class="hm-st-cta" href="/live">View live scores <span aria-hidden="true">→</span></a>`;
+      <a class="hm-st-cta" href="/live">View live scores <span aria-hidden="true">→</span></a>${tours ? tourLines(tours) : ''}`;
   }
   const t = next ? localTime(next.scheduled_at) : null;
   return html`<p class="hm-st-msg"><b>No match live right now</b></p>
     <ul class="hm-st-list"><li><span>${d.tournaments.length} tournament${d.tournaments.length === 1 ? '' : 's'} in progress</span></li>
     ${next && t ? html`<li><a href="/matches/${next.id}"><span>Next match</span><b>${t}</b><em>${tournamentName(next.tournament)}</em></a></li>` : ''}</ul>
-    <a class="hm-st-cta" href="/schedule">View today <span aria-hidden="true">→</span></a>`;
+    <a class="hm-st-cta" href="/schedule">View today <span aria-hidden="true">→</span></a>${tours ? tourLines(tours) : ''}`;
+}
+
+/** Placeholder rows: the tour row is on screen from the first paint (same height), so filling it never shifts the page. */
+export const TOURS_PENDING = [{ tour: 'atp', label: 'ATP' }, { tour: 'wta', label: 'WTA' }];
+const split = (r) => [r.singles ? `${r.singles} singles` : '', r.doubles ? `${r.doubles} doubles` : ''].filter(Boolean).join(' · ');
+/**
+ * Tour status (tourStatus rows): ATP and WTA are ALWAYS both listed — "3 matches live" when that tour is on court, else
+ * "No ATP matches live · next at <viewer-local time>" from a real scheduled time, else "no scheduled match in current
+ * window". Never a guessed time. state: 'pending' (first paint) | 'unavailable' (API down).
+ */
+export function tourLines(rows, { state = null } = {}) {
+  return html`<ul class="hm-tours" aria-label="ATP and WTA status">${rows.map((r) => {
+    let body;
+    if (state) body = html`<span class="hm-tour-t">${state === 'pending' ? 'Checking…' : 'Status unavailable'}</span>`;
+    else if (r.live) body = html`<a class="hm-tour-t" href="/live"><b>${r.live} match${r.live === 1 ? '' : 'es'} live</b>${split(r) ? html`<small>${split(r)}</small>` : ''}</a>`;
+    else {
+      const n = r.next?.[0];
+      const t = n ? localTime(n.scheduled_at) : null;
+      body = html`<span class="hm-tour-t">No ${r.label} matches live · ${n && t ? html`next at <a href="/matches/${n.id}"><time datetime="${n.scheduled_at}">${t}</time></a>` : 'no scheduled match in current window'}</span>`;
+    }
+    return html`<li class="hm-tour hm-tour-${r.tour}${r.live && !state ? ' is-live' : ''}" data-tour="${r.tour}"><span class="hm-tag hm-tag-${r.tour}">${r.label}</span>${body}</li>`;
+  })}</ul>`;
+}
+
+const kind = (m) => (isDoubles(m.event_type) ? 'Doubles' : 'Singles');
+const sideNames = (s) => (s?.players || []).map((p) => p.last_name || p.name).join(' / ');
+/**
+ * PBEcast top state: LIVE NOW (ATP ×N, WTA ×N with the singles / doubles split) and UP NEXT (each tour's next real
+ * scheduled matches, viewer-local time, Singles / Doubles visible). Neither tour is ever hidden because the other is on
+ * court. compact = the strip above a live court (one next match per tour). state 'pending' = first paint placeholder.
+ */
+export function castTourState(rows, { compact = false, state = null } = {}) {
+  const nextOf = (r) => (compact ? (r.next || []).slice(0, 1) : r.next || []);
+  return html`<section class="ts${compact ? ' ts-compact' : ''}" aria-label="ATP and WTA: live now and up next">
+    <div class="ts-col"><h2 class="ts-h"><i class="hm-dot" aria-hidden="true"></i>Live now</h2>
+      <ul class="ts-live">${rows.map((r) => html`<li class="ts-row${r.live ? ' is-live' : ''}" data-tour="${r.tour}"><span class="hm-tag hm-tag-${r.tour}">${r.label}</span>${state ? html`<span class="ts-n">…</span>` : html`<b class="ts-n">×${r.live}</b><small>${r.live ? split(r) : `No ${r.label} matches live`}</small>`}</li>`)}</ul></div>
+    <div class="ts-col"><h2 class="ts-h">Up next</h2>
+      <ul class="ts-next">${rows.map((r) => html`<li class="ts-tour" data-tour="${r.tour}"><span class="hm-tag hm-tag-${r.tour}">${r.label}</span>${state ? html`<span class="ts-none">Checking…</span>` : nextOf(r).length ? html`<ol>${nextOf(r).map((m) => html`<li><a href="/matches/${m.id}"><time datetime="${m.scheduled_at}">${localTime(m.scheduled_at)}</time><span class="ts-k">${kind(m)}</span><b>${sideNames(m.sides?.A)} vs ${sideNames(m.sides?.B)}</b><em>${tournamentName(m.tournament)}</em></a></li>`)}</ol>` : html`<span class="ts-none">No scheduled match in current window</span>`}</li>`)}</ul></div>
+  </section>`;
 }
 
 // ---------------------------------------------------------------- match cards

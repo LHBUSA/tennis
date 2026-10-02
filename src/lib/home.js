@@ -45,6 +45,31 @@ export function liveGroups(live) {
   return [...by.values()].sort((a, b) => b.count - a.count || a.name.localeCompare(b.name)).map((g) => ({ ...g, rounds: [...g.rounds] }));
 }
 
+// Tour of a match: the stored tour code; else a WTA-tier level ("WTA 125", "WTA 1000"); else the event code (MS/MD men's
+// side, WS/WD women's side — Slam rows carry tour 'grand-slam'). Mixed doubles and anything unknown -> null (never guessed).
+const EVENT_TOUR = { MS: 'atp', MD: 'atp', WS: 'wta', WD: 'wta' };
+export const matchTour = (m) => tourFamily(m?.tour) || (/^WTA\b/i.test(m?.tournament?.level || '') ? 'wta' : null) || EVENT_TOUR[m?.event_type] || null;
+export const isDoubles = (eventType) => /D$/.test(String(eventType || ''));
+const TOURS = [['atp', 'ATP'], ['wta', 'WTA']];
+
+/**
+ * Tour-aware live state (homepage status + PBEcast). One row per tour, ATP and WTA ALWAYS both present — a tour with
+ * nothing on court still says so, so "only WTA live" never reads as "ATP not covered". live = in-progress matches of that
+ * tour (singles / doubles split); next = that tour's soonest scheduled matches with a real clock time in the served
+ * schedule window (stale past rows and date-only rows never count). next = [] -> "no scheduled match in current window".
+ */
+export function tourStatus(live, upcoming, { now = Date.now(), next = 3 } = {}) {
+  return TOURS.map(([tour, label]) => {
+    const on = (live || []).filter((m) => m?.status === 'in_progress' && matchTour(m) === tour);
+    const nx = (upcoming || [])
+      .filter((m) => matchTour(m) === tour && m?.status === 'scheduled' && /T\d{2}:\d{2}/.test(m.scheduled_at || '') && Date.parse(m.scheduled_at) >= now - 15 * 60e3)
+      .sort((a, b) => Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at) || String(a.id).localeCompare(String(b.id)))
+      .slice(0, next);
+    const doubles = on.filter((m) => isDoubles(m.event_type)).length;
+    return { tour, label, live: on.length, singles: on.length - doubles, doubles, next: nx };
+  });
+}
+
 /** The next scheduled match with a real clock time (date-only source times are never shown as a time). */
 export function nextMatch(upcoming, { now = Date.now() } = {}) {
   return (upcoming || [])

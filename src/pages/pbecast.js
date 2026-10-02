@@ -22,7 +22,8 @@ import { switcherItems } from '../lib/pbecast-live.js';
 import { groupMoments, groupTransition, gamesFrom, setsWon, liveContext, pulse } from '../lib/pbecast-view.js';
 import { railNav, wireRails, revealCurrent } from '../ui/rail.js';
 import { scoreGrid } from '../ui/score-grid.js';
-import { tourTag, tourFamily, tournamentName, roundShort } from '../lib/home.js';
+import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
+import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 
@@ -404,7 +405,7 @@ export function mount(root, { params, live = null }) {
   let queue = [];
   let lastPainted = -1;
   let ctlSig = '';
-  render(root, html`<div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
+  render(root, html`<div class="page ts-wrap" data-tourstate>${castTourState(TOURS_PENDING, { compact: true, state: 'pending' })}</div><div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   const sw = root.querySelector('[data-switch]');
   wireRails(sw, ctl.signal);
   // the ticker keeps the viewer's scroll position across polls, and never re-renders under their focus
@@ -425,6 +426,10 @@ export function mount(root, { params, live = null }) {
   if (live) drawSwitch(live);
   loadLive();
   const livePoll = setInterval(loadLive, 30000);
+  // ATP + WTA live now / up next above the court: the other tour stays visible while this match is on (tour-aware state)
+  const loadTours = async () => { try { const r = await api('/v1/today', { signal: ctl.signal }); const ts = root.querySelector('[data-tourstate]'); if (ts && r?.data) render(ts, castTourState(tourStatus(r.data.live, r.data.upcoming), { compact: true })); } catch { /* aborted */ } };
+  loadTours();
+  const tourPoll = setInterval(loadTours, 60000);
   const $ = (sel) => root.querySelector(sel);
 
   const viewState = (i) => {
@@ -622,7 +627,7 @@ export function mount(root, { params, live = null }) {
   root.addEventListener('click', onClick);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };
