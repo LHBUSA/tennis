@@ -10,7 +10,7 @@
 | `wta` | official WTA live-scoring feed (api.wtatennis.com) | WTA, WTA 125, Slam women: WS, WD | point score + server | ingest `matches` step (WTA calendar editions) |
 | `espn` | ESPN core API, ATP league — SECONDARY, not an official ATP feed | ATP events: MS, MD, XD | set/game score only (competition status + per-competitor linescores); ESPN publishes no point score or server — null, never invented | ingest `espn_live` step (current ATP events recorded by the espn_atp lane) |
 
-`tennis-live` polls every edition in `live:editions` about every 18-20 s through its router provider; every
+`tennis-live` polls every edition in `live:editions` inside a once-a-minute cron (designed for 3 rounds 18 s apart; measured 2026-10-02: 1–2 rounds fit the 50 s budget, observations ~60 s apart, never < 27 s) through its router provider; every
 observation goes parse -> normalizeMatch -> the ONE canonical writer (tennis_matches, tennis_sets,
 `score_snapshot` rows in tennis_match_events, tennis_source_changes). Ownership: `live:heartbeat` + `live:owned`;
 while the heartbeat is fresh, neither the ingest `matches`/`espn_live` steps nor the espn_atp/espn_wta lanes write an

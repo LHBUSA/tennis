@@ -183,7 +183,7 @@ export async function pbecast(store, id) {
   const data = {
     contract: 'pbecast/1.0.0', match: { ...m, players }, mode,
     quality: hasPoints ? 'point_event' : snaps.length ? 'score_snapshot' : null,
-    cadence_note: hasPoints ? 'every point as published by the source' : m.source === 'espn' ? 'game-level observation of a secondary source (ESPN; not an official ATP feed) about every 20 seconds while live — it publishes set and game scores only, so no point score or server is shown; changes between two observations are shown as one update' : 'periodic observation of the source (about every 18 seconds while live); changes between two observations are shown as one update',
+    cadence_note: hasPoints ? 'every point as published by the source' : m.source === 'espn' ? 'game-level observation of a secondary source (ESPN; not an official ATP feed) about once a minute while live (measured; occasionally twice) — it publishes set and game scores only, so no point score or server is shown; changes between two observations are shown as one update' : 'periodic observation of the source, measured about once a minute while live (occasionally twice); a change between two observations is shown as one update and never reconstructed',
     events, moments: keyMoments(events), control: matchControl(hasPoints ? gamesFromPoints(points).map((g) => ({ event_detail: { game_won: { winner: g.winner, result: g.result } } })) : events),
     games: hasPoints ? gamesFromPoints(points) : null,
     statistics: stats.length ? Object.fromEntries(stats.map((s) => [s.side, s.stats])) : null,
