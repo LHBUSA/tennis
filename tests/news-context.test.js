@@ -25,6 +25,12 @@ test('thin_context gate: the published Munar–Fritz brief is caught; the recomp
   }
 });
 
+test('thin_context: naming this match\'s own players never counts as context (opponent inside a recent-form list)', () => {
+  const pid = PACKET.participants.B.players[0].id;
+  const withOpp = { ...PACKET, recent_form: { ...PACKET.recent_form, [pid]: [{ ...Object.values(PACKET.recent_form)[0][0], opponent: [{ id: 'f', name: 'Taylor Fritz' }] }] } };
+  assert.equal(contextFailures(PUBLISHED, withOpp)[0]?.gate, 'thin_context', 'the published prose names Fritz, which is not recent-form context');
+});
+
 test('Munar–Fritz acceptance: qualifying path, comeback, tier, seeding, pre-match comparison, next — no banned claims', () => {
   const a = compose(PACKET, { storyClass: 'brief' });
   const t = text(a);

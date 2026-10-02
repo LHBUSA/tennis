@@ -279,13 +279,16 @@ const isComebackOrTb = (packet) => [packet.event?.kind, ...(packet.event?.facts?
 export function contextFamilies(packet) {
   const out = [];
   if (!packet?.match) return out;
-  const dpNames = (packet.draw_path?.matches || []).flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)]));
+  // naming THIS match's players is never context (e.g. today's opponent also sits in a recent-form list)
+  const own = new Set(['A', 'B'].flatMap((s) => packet.participants?.[s]?.players || []).flatMap((p) => [p.name, p.last_name, lastWord(p.name)]).filter(Boolean).map((x) => String(x).toLowerCase()));
+  const notOwn = (names) => names.filter((n) => n && !own.has(String(n).toLowerCase()));
+  const dpNames = notOwn((packet.draw_path?.matches || []).flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)])));
   if (dpNames.length) out.push({ family: 'draw_path', test: (p) => mentions(p, dpNames) || /\bqualif\w*\b[^.]*\b(win|wins|won|beat|beating|over)\b|\bmain-draw win\b/i.test(p) });
   if (isComebackOrTb(packet) || packet.match_development) out.push({ family: 'match_development', test: (p) => /\b(opening|first)[- ]set\b|\bdeciding[- ]set\b|\bset down\b|\btiebreak\b|\bbroke\b|\bbreak of serve\b|\blongest run\b/i.test(p) });
   const recs = new Set(); const pcts = new Set();
   for (const md of Object.values(packet.match_dna || {})) for (const x of Object.values(md?.metrics || {})) { if (x?.record && x.record.W + x.record.L) recs.add(`${x.record.W}-${x.record.L}`); if (x?.pct != null && x.sample_matches) pcts.add(`${x.pct}%`); }
   if (recs.size || pcts.size) out.push({ family: 'match_dna', test: (p) => [...recs].some((r) => p.includes(r)) || [...pcts].some((x) => p.includes(x)) });
-  const formNames = Object.values(packet.recent_form || {}).flat().flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)]));
+  const formNames = notOwn(Object.values(packet.recent_form || {}).flat().flatMap((r) => (r.opponent || []).flatMap((o) => [o.name, lastWord(o.name)])));
   if (formNames.length) out.push({ family: 'recent_form', test: (p) => mentions(p, formNames) });
   if (packet.h2h?.prior_meetings?.length) out.push({ family: 'h2h', test: (p) => /\b(met|meeting|meetings|head-to-head)\b/i.test(p) });
   const statPcts = new Set(sidesOf(packet).flatMap((s) => Object.values(s || {}).map((x) => (x?.pct != null ? `${x.pct}%` : null)).filter(Boolean)));
