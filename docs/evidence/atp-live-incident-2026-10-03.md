@@ -101,3 +101,20 @@ No payloads are stored, and nothing is exposed publicly.
   loop).
 - **Not deployment-related:** tennis-api is not on the write path.
 - **Configuration and platform related:** waitUntil lifetime, ownership handoff.
+
+## Addendum 2026-10-03 18:05Z — schedule/draw stall (results + next-round fixtures)
+
+- **Scope.** Only Beijing ATP (ESPN 959-2026, edition 81fb3ab5) was stale: 21 MS/MD rows still `scheduled` 6+ h after
+  their start (oldest 09-30 04:30Z), last write 2026-09-30 04:59:28Z. Every other edition with matches in the last 30 days
+  had 0 such rows (SQL 17:30Z). Upstream had everything: ESPN listed Borges v Djokovic as final since 09-30 and the QF
+  Zverev v Djokovic (comp 183465, 10-04 11:00Z) by 17:25Z.
+- **Second cause (besides the ownership loop fixed in a758154).** The espn_atp current queue was rebuilt only on the 3 h
+  season re-list, and an `OWNED_BY_LIVE` skip was consumed like a read. The 14:53Z re-list (before the 15:25Z release
+  deploy) skipped 959-2026 as owned, so even after the release the edition would have stayed stale until ~17:53Z; in
+  normal operation results and next-round fixtures could lag up to 3 h.
+- **Fix 0fb386b** (ingest 2b1ad8bb, api 773cc5f2): current-window events re-read every 15 min, owned skips retried after
+  4 min; first tick after deploy (17:39Z) wrote 54 Beijing ATP rows (all R1/R2 finals + 4 QF fixtures). Freshness guard
+  per tournament on /v1/schedule and in tennis-ingest (KV `freshness:schedule`; STALE 17:39Z -> CURRENT 17:52Z).
+- **Market layer.** HURKHA/DERUB attached on the next lane read; ZVEDJO (ticker date 10-04, first seen 12:20Z while our
+  schedule lacked it) kept its carried `unmatched` decision until the propsports-markets far-date refresh (every 30 min)
+  and attached at 18:00:56Z to canonical 8b76f7f0. Unmatched queue tennis-atp: 8 eligible / 8 matched.

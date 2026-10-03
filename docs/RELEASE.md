@@ -8,6 +8,13 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-03 Schedule freshness (Beijing ATP stall; docs/evidence/atp-live-incident-2026-10-03.md, addendum)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-ingest | `2b1ad8bb-6a30-41ca-b981-2d48c22f8511` 0.4.1 @ 0fb386b (ESPN current window re-read every 15 min; `freshness` step -> KV `freshness:schedule`, /health, /v1/runs, `tennis_schedule_stale` error log) | `c32e2997-cbb4-4b57-8d79-16f9b989806b` @ 77fde35 |
+| tennis-api | `773cc5f2-7caf-4ef5-8296-3f9c90742a3b` 0.10.4 @ 0fb386b (/v1/schedule `tournaments[].freshness`, `data.freshness`, per-tournament `meta.degraded`) | `225b60f3-8ef8-4d34-bdba-ac3e055c6609` @ 0a36080 |
+
 ## 2026-10-03 Newsroom V5 editorial overhaul (docs/NEWSROOM_EDITORIAL_V5.md)
 
 | Component | Current | Rollback target |
