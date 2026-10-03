@@ -36,7 +36,7 @@ before a visual), `too_many_visuals` (> 4), `thin_lead`, `database_writing` (> 7
 paragraph — a scoreline or W-L record counts once — or a chain of short numeric sentences), `restates_numbers`,
 `template_intro` (winner-beat-loser-score first sentence, metric lead), `no_story_angle`, `recap_no_development`,
 `preview_no_argument`, `preview_prediction`, `conclusion_repeats_opening`, `duplicate_heading`, `template_headings`,
-`unsupported_tactical`, `repeated_phrasing` (>= 3 six-word frames, names/numbers normalised, shared with >= 2 other
+`unsupported_tactical`, `meta_language` ("the supplied record"), `repeated_phrasing` (>= 3 six-word frames, names/numbers normalised, shared with >= 2 other
 published stories; required provenance wording exempt).
 
 Factual-gate precision changes made with V5 (each from a real false positive in the first production rewrites):

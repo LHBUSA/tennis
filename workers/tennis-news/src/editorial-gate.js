@@ -192,6 +192,9 @@ export function editorialGate(article, packet, { plan = null, storyClass = artic
   if (tac) fail('unsupported_tactical', tac[0]);
   const net = articleText(article).match(NET_OK);
   if (net && !['A', 'B'].some((s) => packet?.stats?.[s]?.net_points_won)) fail('unsupported_tactical', net[0]);
+  // 11b. system meta-language ("the supplied record", "the packet"): journalism never narrates its own inputs
+  const meta = articleText(article).match(/\b(the packet|evidence packet|supplied (path )?records?|source record|the data provided|provided data|not included in the (supplied|available|path))\b/i);
+  if (meta) fail('meta_language', meta[0]);
   // 12. repeated phrasing across the newsroom
   const stock = stockPhrases(article, corpus);
   if (stock.length >= 3) fail('repeated_phrasing', stock.slice(0, 4).map((x) => `"${x.phrase}" (${x.articles})`).join('; '));
