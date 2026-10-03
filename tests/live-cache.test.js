@@ -1,0 +1,25 @@
+// 2026-10-03: PBEcast did not update in an open browser. A cached /v1/live or /v1/pbecast copy came back from the edge
+// with the zone's browser TTL (Cache-Control: public, max-age=14400), and the browser client fetched with the default
+// cache mode, so its 15 s polls could be answered from the browser's own HTTP cache for hours.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import worker from '../workers/tennis-api/src/index.js';
+import { LIVE_PATH } from '../src/data/api.js';
+
+test('an edge cache hit is re-stamped with the route TTL, never the zone browser TTL', async () => {
+  const stored = new Response(JSON.stringify({ ok: true, data: [], meta: { freshness: 'CURRENT' } }), { headers: { 'content-type': 'application/json', 'cache-control': 'public, max-age=14400' } });
+  const prev = globalThis.caches;
+  globalThis.caches = { default: { match: async () => stored.clone(), put: async () => {} } };
+  try {
+    for (const [path, ttl] of [['/v1/live', 15], ['/v1/pbecast/a1ec927d-1673-5c9a-9187-c1f0854d8776', 15], ['/v1/today', 30], ['/v1/matches/a1ec927d-1673-5c9a-9187-c1f0854d8776', 20]]) {
+      const res = await worker.fetch(new Request(`https://tennis-api.propbetedge.ai${path}`, { headers: { origin: 'https://tennis.propbetedge.ai' } }), {}, { waitUntil() {} });
+      assert.equal(res.headers.get('cache-control'), `public, max-age=${ttl}`, path);
+      assert.equal(res.headers.get('access-control-allow-origin'), 'https://tennis.propbetedge.ai');
+    }
+  } finally { globalThis.caches = prev; }
+});
+
+test('live-sensitive reads bypass the browser HTTP cache; static reads keep it', () => {
+  for (const p of ['/v1/live', '/v1/today', '/v1/pbecast/x', '/v1/matches/x', '/v1/live?x=1']) assert.ok(LIVE_PATH.test(p), p);
+  for (const p of ['/v1/players', '/v1/rankings', '/v1/tournaments/x/2026', '/v1/news', '/v1/matchups/x']) assert.ok(!LIVE_PATH.test(p), p);
+});

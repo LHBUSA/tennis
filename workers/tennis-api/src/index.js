@@ -423,7 +423,13 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
     const cacheKey = new Request(`${url.origin}${url.pathname}${url.search}${url.search ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
     if (cache && !bypass) {
       const hit = await cache.match(cacheKey);
-      if (hit) return withCors(hit, request);
+      if (hit) {
+        // a cached copy comes back with the ZONE's browser TTL (observed: max-age=14400 on /v1/live and /v1/pbecast,
+        // 2026-10-03), which let browsers hold live state for hours; restamp this route's own TTL on every hit
+        const r = withCors(new Response(hit.body, hit), request);
+        r.headers.set('cache-control', `public, max-age=${ttl}`);
+        return r;
+      }
     }
     let body;
     try {

@@ -5,6 +5,7 @@
 const BASE = (import.meta.env?.VITE_TENNIS_API_BASE || '').replace(/\/+$/, '') || null;
 
 export const apiConfigured = () => !!BASE;
+export const LIVE_PATH = /^\/v1\/(live|today|pbecast\/|matches\/)/;
 
 function local(freshness, semantics, degraded = []) {
   return { ok: false, data: null, meta: { source: [], fetched_at: new Date().toISOString(), source_updated_at: null, age_s: null, freshness, semantics, degraded } };
@@ -13,7 +14,9 @@ function local(freshness, semantics, degraded = []) {
 export async function api(path, { signal } = {}) {
   if (!BASE) return local('NOT_CONFIGURED', 'tennis-api is not connected to this build');
   try {
-    const res = await fetch(`${BASE}${path}`, { signal, credentials: 'include', headers: { accept: 'application/json' } });
+    // live-sensitive reads never come from the browser HTTP cache (a stale header must never freeze a live page);
+    // the API's edge cache still absorbs the load
+    const res = await fetch(`${BASE}${path}`, { signal, credentials: 'include', headers: { accept: 'application/json' }, ...(LIVE_PATH.test(path) ? { cache: 'no-store' } : {}) });
     const body = await res.json();
     if (!body || typeof body !== 'object' || !body.meta) return local('ERROR', 'unexpected response shape');
     return body;
