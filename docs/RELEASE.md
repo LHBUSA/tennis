@@ -1,5 +1,13 @@
 # Release
 
+
+## Worker deploys: always through scripts/ops/deploy-worker.mjs (2026-10-03)
+
+`node scripts/ops/deploy-worker.mjs <worker> --yes`. It refuses to deploy unless the tree is committed, local main equals
+origin/main, and the commit currently in production is an ancestor of HEAD; it then uploads, checks the preview
+`/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
+another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
+
 ## Gate (all required)
 
 `npm run check` PASS · canaries PASS or explicitly degraded · `npm run qa` PASS at 1440/1024/430/390/360/320

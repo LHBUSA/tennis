@@ -31,9 +31,11 @@ const blocks = list.split(/\n(?=Created:)/);
 const last = blocks.at(-1) || '';
 const msg = /Message:\s+(.+)/.exec(last)?.[1] || '';
 const prevVersion = /\(100%\)\s+([0-9a-f-]{36})/.exec(last)?.[1] || null;
-const base = /@\s*([0-9a-f]{7,40})\b/.exec(msg)?.[1] || null;
+// the commit is any token in the deployment / version messages that git resolves to a commit (version-id prefixes don't)
+const isCommit = (t) => { try { return git('cat-file', '-t', t) === 'commit'; } catch { return false; } };
+const base = [...last.matchAll(/\b([0-9a-f]{7,40})\b/g)].map((m) => m[1]).find(isCommit) || null;
 console.log(`deployed: ${prevVersion} "${msg}"`);
-if (!base) fail('the deployed version does not name its commit ("@ <sha>"): cannot prove this deploy contains it — reconcile manually');
+if (!base) fail('the deployed version names no commit git knows: cannot prove this deploy contains it — reconcile manually');
 let isAncestor = true;
 try { git('merge-base', '--is-ancestor', base, head); } catch { isAncestor = false; }
 if (!isAncestor) fail(`deployed commit ${base} is not in HEAD's history: another line of work is in production — merge it first`);
