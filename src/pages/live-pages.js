@@ -19,7 +19,7 @@ import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
 import { kalshi, bounded, marketPollMs, paintKalshiLines } from '../data/kalshi.js';
 import { marketModule, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
-import { liveMarketPanel, finalLine } from '../ui/live-market.js';
+import { liveMarketPanel } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -237,11 +237,10 @@ async function miLoad(root, m, signal) {
 // while mounted — live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none — and stops
 // on unmount.
 const kxName = (m) => (s) => (m?.sides?.[s]?.players || []).map((p) => p.name).join(' / ') || s;
-// open market -> LIVE MARKET / MARKET OPEN · PRE-MATCH (owner 2026-10-03); closed / settled -> the shared history card
-// (marketModule) + our final result as a separate fact
-const kxCardHtml = (entry, m = null) => raw(m && entry?.kalshi?.state === 'open' && !['CLOSED', 'SETTLED'].includes(entry?.market?.lifecycle)
-  ? liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })
-  : `${marketModule(entry, { placement: 'match' })}${['CLOSED', 'SETTLED'].includes(entry?.market?.lifecycle) && m ? finalLine(m, kxName(m)) : ''}`);
+// Market Pulse with its lifecycle label (MLB standard, owner 2026-10-03): the full shared kalshiCard while the market
+// trades, "How the market closed" + our final result (a separate fact) once it is CLOSED / SETTLED. Without our match yet
+// (or with no lifecycle label to give) the shared marketModule decides.
+const kxCardHtml = (entry, m = null) => raw((m && liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })) || marketModule(entry, { placement: 'match' }));
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
   wireWatch(root, signal);

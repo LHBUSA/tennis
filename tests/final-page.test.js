@@ -20,13 +20,13 @@ test('WATCH: the label is the real video type; highlights are never called a rep
   assert.match(src, /youtube-nocookie\.com\/embed\//); assert.doesNotMatch(src, /youtube\.com\/embed\//);
 });
 
-test('PBEcast FINAL state keeps the court and adds summary -> replay -> market close -> watch -> story; live polling stops', () => {
+test('PBEcast FINAL state keeps the court and adds summary -> market close (under the scoreboard) -> replay -> watch -> story; live polling stops', () => {
   const cast = read('../src/pages/pbecast.js');
-  const order = ['data-final', 'data-score', 'id="pbc-stage"', 'id="pbc-market"', '<div class="pbc-kxh" data-kx-history-slot>', 'id="pbc-watch"', 'id="pbc-story"'].map((k) => cast.indexOf(k));
+  const order = ['data-final', 'data-score', 'id="pbc-market"', 'id="pbc-stage"', 'id="pbc-watch"', 'id="pbc-story"'].map((k) => cast.indexOf(k));
   assert.ok(order.every((i) => i > 0) && order.every((i, k) => k === 0 || i > order[k - 1]), `page order ${order}`);
   assert.match(cast, /else if \(!d\.mode\.includes\('live'\) && poll\) \{ clearInterval\(poll\); poll = null; \}/);
   assert.match(cast, /api\(`\/v1\/matches\/\$\{id\}\/videos`/); assert.match(cast, /api\(`\/v1\/news\?match=\$\{id\}&limit=3`/);
-  assert.match(cast, /marketHistoryCard\(kx, \{ placement: 'pbecast-replay' \}\)/, 'market close = the shared history contract');
+  assert.match(cast, /liveMarketPanel\(kx, data\.match, /, 'market close = the shared history contract, in the Market Pulse slot');
 });
 
 test('homepage LIVE & RECENT: live first, then finals; replay only when events are stored; market only from the shared board', () => {

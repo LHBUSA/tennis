@@ -159,11 +159,14 @@ describe('placements', () => {
     assert.match(live, /wireKalshi/);
     assert.equal(data.KALSHI_FIRST_PAINT_MS <= 800, true);
   });
-  test('PBEcast: strip in its own slot, never awaited, cleared on unmount', () => {
-    assert.match(cast, /liveMarketPanel\(kx, data\.match, \{ name: \(s\) => sideName\(data\.match, s\), placement: 'pbecast' \}\)/, 'open market = LIVE MARKET (owner 2026-10-03)');
+  test('PBEcast: Market Pulse in its own slot under the scoreboard, never awaited, cleared on unmount', () => {
+    assert.match(cast, /liveMarketPanel\(kx, data\.match, \{ name: \(s\) => sideName\(data\.match, s\), placement: 'pbecast', compact: true \}\)/, 'full card + lifecycle label (MLB standard)');
+    assert.match(cast, /<div class="v3-score-wrap page">.*<\/div>\s*<div class="page pbc-kx" id="pbc-market" data-kx-strip><\/div>/, 'directly under the scoreboard');
+    assert.match(cast, /tickerMarketText\(kalshi\.forEvent\(m\.id\), m\)/, 'rail line from the one board read');
     assert.match(cast, /data-kx-strip/);
     assert.doesNotMatch(cast, /await\s+loadKx/);
-    assert.match(cast, /^\s*loadKx\(false\);$/m, 'background read, not awaited by the cast');
+    assert.match(cast, /^\s*const kxFirst = loadKx\(false\);$/m, 'background read');
+    assert.match(cast, /first \? bounded\(kxFirst\) : null/, 'first paint waits for the market at most KALSHI_FIRST_PAINT_MS');
     assert.match(cast, /return \(\) => \{ ctl\.abort\(\); clearTimeout\(kxTimer\);/);
   });
   test('/sources has the Kalshi row: prediction market, not sportsbook odds, not a PBE model; links; Mid-market; observed-only movement', () => {
@@ -193,10 +196,11 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     assert.deepEqual(files.filter((f) => KALSHI_API.test(fs.readFileSync(f, 'utf8'))), []);
   });
 
+  // pinned: propbetedge-workers 8b73545 (workers/propsports-markets/client)
   const VENDORED = {
-    'kalshi-market-ui.js': 'c343805e546cde66d01676c9c6c9f6f4ca746a8ba138b4b1ad0159a341f3db2a',
-    'kalshi-market-ui.css': 'db0f4b1efd5209966fb627f72e217b9539876d5123edc10d80524d172da41a06',
-    'kalshi-market-client.js': '653cb0fc2673f909552453052560bfd6194e0e4d045c51b1eb73483957d4c049'
+    'kalshi-market-ui.js': '93a8f485e90633a1cd70e93ab4123c1dc2161d08b3a76e41ec3cc4a0279d74f4',
+    'kalshi-market-ui.css': 'fb046ada2b2e5450207e4301c0e41a193aa599e4661843fdcdb50d45ac7191ae',
+    'kalshi-market-client.js': '211be23bb9a5b2be0a1b4ed1a1c2c1b3b2dfc4ef45a040ae13c07d28a8ae8744'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
   test('vendored files are byte-identical to the pinned shared release', () => {
@@ -282,14 +286,13 @@ describe('market history: "How the market closed" (real settled tennis market)',
     const settled = await data.kalshi.loadEvent(SETTLED_ID, { force: true });
     assert.equal(settled?.market?.lifecycle, 'SETTLED', 'the event endpoint carries the settled market for a completed match');
   });
-  test('completed-match mount: the match page slot renders for every status; PBEcast replay has the history slot', () => {
+  test('completed-match mount: the match page slot renders for every status; PBEcast history lives in the Market Pulse slot', () => {
     const live = read('src/pages/live-pages.js');
     const cast = read('src/pages/pbecast.js');
     assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch\)\}<\/div>/);
     assert.doesNotMatch(live, /status [!=]==? 'completed'[^\n]*data-kx-card/);
     assert.match(live, /marketPollMs\(kx, kxStatus\)/);
-    assert.match(cast, /marketHistoryCard\(kx, \{ placement: 'pbecast-replay' \}\)/);
-    assert.match(cast, /<div class="pbc-kxh" data-kx-history-slot><\/div>/);
-    assert.match(cast, /kx\?\.kalshi\?\.state === 'open' \? liveMarketPanel\(/, 'the live slot shows only an open market; history has its own slot');
+    assert.doesNotMatch(cast, /data-kx-history-slot/, 'one slot for the whole lifecycle');
+    assert.match(read('src/ui/live-market.js'), /marketHistoryCard\(entry, \{ placement: `\$\{placement\}-history` \}\)/);
   });
 });

@@ -1,21 +1,20 @@
-// Tennis LIVE MARKET module (Kalshi prediction market) — one lifecycle, never switched off once a market existed.
-//   ACTIVE / UPCOMING  -> "LIVE MARKET" (green dot, match in play) or "MARKET OPEN · PRE-MATCH": price per player,
-//                          the venue's own observation time, a sparkline of OUR stored observations, View market.
-//   CLOSED / SETTLED    -> the shared "How the market closed" history (first observed / before start / final trade /
-//                          settlement YES-NO / awaiting settlement, chart from observations only) + our match result as a
-//                          SEPARATE fact. A finished match never implies a settlement.
-// PropBetEdge = research; Kalshi = the market. Never sportsbook odds, never a PBE probability. No market -> ''.
+// Tennis Market Pulse module (Kalshi prediction market) — MLB market-presentation standard (owner 2026-10-03).
+// One module directly under the scoreboard for the whole match lifecycle, with a lifecycle label:
+//   UPCOMING / ACTIVE  -> "MARKET OPEN · PRE-MATCH" / "LIVE MARKET" / "MATCH FINAL · MARKET STILL TRADING" + the FULL
+//                         shared kalshiCard (Market Pulse, Mid-market, Updated Ns ago, stored movement + sparkline,
+//                         bid / ask, "View market on Kalshi ↗").
+//   CLOSED / SETTLED   -> "MARKET CLOSED · AWAITING SETTLEMENT" / "MARKET SETTLED" + the shared "How the market closed"
+//                         history (marketHistoryCard) + our match result as a SEPARATE fact. A finished match never
+//                         implies a settlement.
+// Kalshi = the market, never sportsbook odds, never a PBE probability. No market -> ''.
 // Pure HTML builder (tests/live-market.test.js); data comes from src/data/kalshi.js (our markets Worker, never Kalshi).
 
-import { sparkline, ageLabel, marketHistoryCard } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshiCard, kalshiLine, marketHistoryCard } from '../vendor/kalshi/kalshi-market-ui.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const cents = (bp) => (bp == null ? '—' : `${(bp / 100).toFixed(bp % 100 ? 1 : 0)}¢`); // 58.5¢ stays 58.5¢ (no rounding drift)
 // a score is written from the WINNER's side (ours is stored side A first)
 const winnerScore = (score, w) => (w === 'B' ? String(score).split(/\s+/).map((t) => t.replace(/^(\d+)-(\d+)/, (_, a, b) => `${b}-${a}`).replace(/^\[(\d+)-(\d+)\]/, (_, a, b) => `[${b}-${a}]`)).join(' ') : String(score));
-const ROLE = { a: 'A', b: 'B' };
 const FINAL = new Set(['completed', 'retired', 'walkover']);
-const safeUrl = (u) => (/^https:\/\/kalshi\.com\//.test(String(u || '')) ? u : null);
 
 /** The module's state for an entry + our match: null when no market exists for this match. */
 export function marketState(entry, match) {
@@ -24,11 +23,9 @@ export function marketState(entry, match) {
   if (lc === 'SETTLED') return { key: 'settled', label: 'MARKET SETTLED', live: false };
   if (lc === 'CLOSED') return { key: 'closed', label: FINAL.has(match?.status) ? 'MARKET CLOSED · AWAITING SETTLEMENT' : 'MARKET CLOSED', live: false };
   if (entry.kalshi?.state !== 'open') return null;
+  if (FINAL.has(match?.status)) return { key: 'final-open', label: 'MATCH FINAL · MARKET STILL TRADING', live: false };
   return match?.status === 'in_progress' ? { key: 'live', label: 'LIVE MARKET', live: true } : { key: 'open', label: 'MARKET OPEN · PRE-MATCH', live: false };
 }
-
-/** Points for one side's sparkline: OUR stored observations only (mid when two-sided, else nothing drawn). */
-const sparkFor = (entry, role) => (entry?.movement?.kalshi?.[role]?.points || []).filter((p) => p.mid_bp != null && Number.isFinite(Date.parse(p.t)));
 
 /** Our final match result, a SEPARATE fact from any market settlement (winner-side score). '' unless final. */
 export function finalLine(match, name) {
@@ -39,32 +36,54 @@ export function finalLine(match, name) {
 
 /**
  * entry: event-endpoint entry (kalshi, market, market_history, movement); match: our canonical match;
- * name(side) -> display name; nowMs for the age label.
+ * name(side) -> display name (for our separate result line); compact: PBEcast layout.
  */
-export function liveMarketPanel(entry, match, { name = (s) => s, nowMs = Date.now(), placement = 'pbecast' } = {}) {
+export function liveMarketPanel(entry, match, { name = (s) => s, placement = 'pbecast', compact = false } = {}) {
   const st = marketState(entry, match);
   if (!st) return '';
-  const url = safeUrl(entry.kalshi?.market_url || entry.market?.market_url || entry.market_history?.market_url);
-  if (st.key === 'closed' || st.key === 'settled') {
-    const hist = marketHistoryCard(entry, { placement: `${placement}-history` });
-    if (!hist) return '';
-    return `<section class="lm lm-${st.key}" data-lm="${st.key}" aria-label="${esc(st.label)}">
-      <header class="lm-hd"><span class="lm-chip lm-chip-${st.key}">${esc(st.label)}</span></header>
-      ${hist}
-      ${finalLine(match, name)}
-    </section>`;
-  }
-  const k = entry.kalshi;
-  const rows = (k.outcomes || []).filter((o) => ROLE[o.role]).map((o) => {
-    const side = ROLE[o.role];
-    const pts = sparkFor(entry, o.role);
-    return `<li class="lm-row s-${side}"><span class="lm-who">${esc(name(side))}</span><b class="lm-px tabnum">${cents(o.mid_bp ?? o.last_price_bp)}</b>${pts.length >= 2 ? `<span class="lm-spark" title="Our recorded observations of this market">${sparkline(pts, { width: 96, height: 24 })}</span>` : ''}</li>`;
-  }).join('');
-  const obsMs = Date.parse(k.observed_at || '');
-  const age = Number.isFinite(obsMs) ? Math.max(0, Math.round((nowMs - obsMs) / 1000)) : null;
+  const done = st.key === 'closed' || st.key === 'settled';
+  const body = done ? marketHistoryCard(entry, { placement: `${placement}-history` }) : kalshiCard(entry, { placement, compact });
+  if (!body) return '';
   return `<section class="lm lm-${st.key}" data-lm="${st.key}" aria-label="${esc(st.label)}">
-    <header class="lm-hd"><span class="lm-chip lm-chip-${st.key}">${st.live ? '<i class="lm-dot" aria-hidden="true"></i>' : ''}${esc(st.label)}</span>${age != null ? `<time class="lm-age" datetime="${esc(k.observed_at)}">Updated ${esc(ageLabel(age))}</time>` : ''}</header>
-    <ol class="lm-rows">${rows}</ol>
-    <footer class="lm-ft"><small>Kalshi prediction market · price per $1 contract · not a PropBetEdge model</small>${url ? `<a class="lm-cta" href="${esc(url)}" target="_blank" rel="noopener noreferrer sponsored" data-kx-click data-kx-ticker="${esc(k.event_ticker || '')}" data-kx-placement="${esc(placement)}">View market →</a>` : ''}</footer>
+    <p class="lm-phase lm-chip-${st.key}">${st.live ? '<i class="lm-dot" aria-hidden="true"></i>' : '<i class="lm-dot lm-dot-still" aria-hidden="true"></i>'}${esc(st.label)}</p>
+    ${body}
+    ${done ? finalLine(match, name) : ''}
   </section>`;
+}
+
+// ---- live-rail market line ("MKT  Alcaraz 88.5¢ · Shapovalov 13.5¢") -------------------------------------------------
+const centsShort = (bp) => { const c = bp / 100; return `${Number.isInteger(c) ? c : c.toFixed(1)}¢`; };
+const lastName = (p) => p?.last_name || String(p?.name || '').split(' ').slice(-1)[0] || '';
+
+/**
+ * Compact market text for a live-rail card, or '' (no line). Only an exact match for THIS match (canonical id + both
+ * singles players by id, side A then side B like the score rows) and only what the shared client would show on a
+ * compact card (kalshiLine: open, every Mid-market present, not stale). Decided matches carry no line.
+ */
+export function tickerMarketText(entry, match) {
+  if (!entry || !match || !['in_progress', 'scheduled', 'suspended'].includes(match.status)) return '';
+  if (String(entry.event?.canonical_event_id ?? '') !== String(match.id)) return '';
+  if (!kalshiLine(entry)) return '';
+  const outs = entry.kalshi?.outcomes || [];
+  if (outs.length !== 2) return '';
+  const a = outs.find((o) => o.role === 'a');
+  const b = outs.find((o) => o.role === 'b');
+  const pa = match.sides?.A?.players || [];
+  const pb = match.sides?.B?.players || [];
+  if (!a || !b || pa.length !== 1 || pb.length !== 1) return '';
+  if (String(a.team_id) !== String(pa[0].id) || String(b.team_id) !== String(pb[0].id)) return '';
+  if (!Number.isFinite(a.mid_bp) || !Number.isFinite(b.mid_bp)) return '';
+  return `${lastName(pa[0])} ${centsShort(a.mid_bp)} · ${lastName(pb[0])} ${centsShort(b.mid_bp)}`;
+}
+
+/** The line's markup (inside the rail card; never a link — the card click stays the PBEcast court). */
+export const tickerMarketHtml = (text) => (text ? `<span class="tk-mkt" title="Kalshi prediction market · Mid-market (not sportsbook odds)"><b>MKT</b><span class="tk-mkt-px">${esc(text)}</span></span>` : '');
+
+/** Write (or remove) one card's market line in place; nothing else in the card changes. */
+export function patchTickerMarket(card, text) {
+  const el = card.querySelector('.tk-mkt');
+  if (!text) { if (el) el.remove(); return; }
+  if (!el) { card.querySelector('.tk-go')?.insertAdjacentHTML('beforebegin', tickerMarketHtml(text)); return; }
+  const px = el.querySelector('.tk-mkt-px');
+  if (px && px.textContent !== text) px.textContent = text;
 }

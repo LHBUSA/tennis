@@ -28,9 +28,9 @@ import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
-import { kalshi, marketPollMs } from '../data/kalshi.js';
-import { marketHistoryCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
-import { liveMarketPanel, finalLine } from '../ui/live-market.js';
+import { kalshi, marketPollMs, bounded } from '../data/kalshi.js';
+import { wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { liveMarketPanel, tickerMarketText, tickerMarketHtml, patchTickerMarket } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 import { liveGranularity, gameLedger, actionRail, currentGame, courtReaction, gameRun, pointRun, provenPoints, hasSpatial, staleness } from '../lib/pbecast-court.js';
@@ -193,18 +193,18 @@ function dnaCompare(data, m) {
  * revealed on first render. A rail (src/ui/rail.js): no native scrollbar, swipe / trackpad / arrows, one-card
  * auto-advance that pauses on hover, focus, touch and reduced motion. Every value is the /v1/live summary's own.
  */
-function liveTicker(items) {
+function liveTicker(items, mkt = () => '') {
   if (!items.length) return '';
   const badge = (m) => {
     const t = tourTag(m.tour) || m.tournament?.level || null;
     const fam = tourFamily(m.tour) || (/^WTA/i.test(t || '') ? 'wta' : /^ATP/i.test(t || '') ? 'atp' : null);
     return t ? html`<span class="hm-tag${fam ? ` hm-tag-${fam}` : ''}">${t}</span>` : '';
   };
-  const card = ({ href, current, match: m }) => html`<a href="${href}" class="tk${current ? ' on' : ''}" ${current ? raw('aria-current="page"') : ''}>
+  const card = ({ href, current, match: m }) => html`<a href="${href}" class="tk${current ? ' on' : ''}" data-tk-id="${m.id}" ${current ? raw('aria-current="page"') : ''}>
     <span class="tk-top">${current ? html`<span class="tk-now">Now showing</span>` : html`<span class="tk-live"><i aria-hidden="true"></i>Live</span>`}${badge(m)}<span class="tk-r" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}</span></span>
     <span class="tk-t">${tournamentName(m.tournament)}${m.court ? html`<small> · ${m.court}</small>` : ''}</span>
     ${scoreGrid(m, { px: 24, links: false })}
-    <span class="tk-go">${current ? 'On this court' : html`Open PBEcast <span aria-hidden="true">→</span>`}</span></a>`;
+    ${raw(tickerMarketHtml(mkt(m)))}<span class="tk-go">${current ? 'On this court' : html`Open PBEcast <span aria-hidden="true">→</span>`}</span></a>`;
   return html`<nav class="pbc-tk" aria-label="Live matches"><div class="pbc-tk-in" data-rail data-auto="4500">
     <div class="pbc-tk-h"><p class="pbc-tk-t"><span class="live-dot" aria-hidden="true"></span>Live matches <small class="tabnum">${items.length}</small></p>${railNav('live match')}</div>
     <ul class="hm-track pbc-tk-track" aria-label="Live matches, ${items.length}">${items.map((it) => html`<li>${card(it)}</li>`)}</ul>
@@ -545,11 +545,27 @@ export function mount(root, { params, live = null }) {
   render(root, html`<div class="page ts-wrap" data-tourstate>${castTourState(TOURS_PENDING, { compact: true, state: 'pending' })}</div><div data-switch></div><div class="pbc v3" data-pbc><div class="page"><p class="loading">Loading PBEcast…</p></div></div>`);
   const sw = root.querySelector('[data-switch]');
   wireRails(sw, ctl.signal);
-  // the ticker keeps the viewer's scroll position across polls, and never re-renders under their focus
+  // the ticker keeps the viewer's scroll position across polls, and never re-renders under their focus. Market line
+  // (MLB standard): one board read per poll (shared client: 15 s TTL, one in-flight request), written into the cards
+  // IN PLACE; the rail is rebuilt only when its matches / scores change. No market -> the card is exactly as before.
+  let tkList = [];
+  let tkSig = '';
+  const tkText = (m) => tickerMarketText(kalshi.forEvent(m.id), m);
+  const patchSwitch = () => {
+    const byId = new Map(tkList.map((m) => [String(m.id), m]));
+    for (const card of sw.querySelectorAll('.tk[data-tk-id]')) {
+      const m = byId.get(card.dataset.tkId);
+      if (m) patchTickerMarket(card, tkText(m));
+    }
+  };
   const drawSwitch = (list) => {
-    if (sw.contains(document.activeElement) && document.activeElement !== document.body) return;
+    tkList = list;
+    const items = switcherItems(list, params.id);
+    const sig = String(liveTicker(items));
+    if (sig === tkSig || (sw.contains(document.activeElement) && document.activeElement !== document.body)) { patchSwitch(); return; }
+    tkSig = sig;
     const was = sw.querySelector('.hm-track')?.scrollLeft;
-    render(sw, liveTicker(switcherItems(list, params.id)));
+    render(sw, liveTicker(items, tkText));
     const r = sw.querySelector('[data-rail]');
     if (!r) return;
     if (was != null) r.querySelector('.hm-track').scrollLeft = was;
@@ -559,7 +575,16 @@ export function mount(root, { params, live = null }) {
   const wide = matchMedia('(min-width: 1024px)');
   const onWide = () => { if (data && ps) { ctlSig = ''; paint(false); } };
   wide.addEventListener('change', onWide);
-  const loadLive = async () => { try { const r = await api('/v1/live', { signal: ctl.signal }); if (Array.isArray(r.data)) drawSwitch(r.data); } catch { /* aborted */ } };
+  const loadLive = async () => {
+    try {
+      // the rail is never delayed by the market: the board read runs alongside and its lines land in place
+      const board = kalshi.loadBoard();
+      const r = await api('/v1/live', { signal: ctl.signal });
+      if (ctl.signal.aborted) return;
+      if (Array.isArray(r.data)) drawSwitch(r.data);
+      board.then(() => { if (!ctl.signal.aborted) patchSwitch(); }).catch(() => {});
+    } catch { /* aborted */ }
+  };
   if (live) drawSwitch(live);
   loadLive();
   const livePoll = setInterval(loadLive, 30000);
@@ -569,32 +594,18 @@ export function mount(root, { params, live = null }) {
   const tourPoll = setInterval(loadTours, 60000);
   const $ = (sel) => root.querySelector(sel);
 
-  // Kalshi prediction-market strip under the scoreboard. Never blocking: the event read runs in the background from our
-  // markets API (never Kalshi) and the strip is written into its own slot when it lands; it survives shell rebuilds and
-  // keeps an expanded strip open across updates. Once the market has CLOSED/SETTLED the replay also carries the
-  // "How the market closed" history card (its own slot in the panels below the court; the strip is unchanged).
+  // Market Pulse (Kalshi prediction market) directly under the scoreboard for the whole match lifecycle (MLB standard,
+  // owner 2026-10-03): lifecycle label + the full shared kalshiCard while the market trades ("MARKET OPEN · PRE-MATCH" /
+  // "LIVE MARKET" / "MATCH FINAL · MARKET STILL TRADING"), then "How the market closed" in the SAME slot once it is
+  // CLOSED / SETTLED. Never blocking: the event read runs in the background from our markets API (never Kalshi) and is
+  // written into its own slot in place when it lands (survives shell rebuilds). No market -> empty slot (hidden).
   // Polls while mounted: live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none.
   let kx = null;
   let kxTimer = null;
   const paintKx = () => {
-    paintKxHistory();
     const el = $('[data-kx-strip]');
     if (!el) return;
-    // owner (2026-10-03): an open market is the LIVE MARKET (Kalshi = the market, PBE = the intelligence); closed and
-    // settled markets live in the history slot below
-    const next = data?.match && kx?.kalshi?.state === 'open' ? liveMarketPanel(kx, data.match, { name: (s) => sideName(data.match, s), placement: 'pbecast' }) : '';
-    if (el.__kx === next) return;
-    const open = !!el.querySelector('details[open]');
-    el.__kx = next;
-    el.innerHTML = next;
-    if (open) el.querySelector('details')?.setAttribute('open', '');
-    if (next) wireKalshi(el);
-  };
-  const paintKxHistory = () => {
-    const el = $('[data-kx-history-slot]');
-    if (!el) return;
-    const card = marketHistoryCard(kx, { placement: 'pbecast-replay' });
-    const next = card && data?.match ? `${card}${finalLine(data.match, (s) => sideName(data.match, s))}` : card;
+    const next = data?.match ? liveMarketPanel(kx, data.match, { name: (s) => sideName(data.match, s), placement: 'pbecast', compact: true }) : '';
     if (el.__kx === next) return;
     el.__kx = next;
     el.innerHTML = next;
@@ -615,7 +626,9 @@ export function mount(root, { params, live = null }) {
     paintFinal();
     scheduleKx();
   }
-  loadKx(false);
+  // the court's first paint waits for the market at most KALSHI_FIRST_PAINT_MS (bounded), so the module is in the
+  // first paint instead of pushing the court down when it lands; a later answer is still written in place
+  const kxFirst = loadKx(false);
 
   const viewState = (i) => {
     const m = data.match;
@@ -669,7 +682,7 @@ export function mount(root, { params, live = null }) {
       <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${[roundLabel(m.round), eventLabel(m.event_type), t.level, t.surface ? `${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : null, m.court].filter(Boolean).join(' · ')}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
       <div class="page" data-final></div>
       <div class="v3-score-wrap page"><div class="v3-score" data-score></div></div>
-      <div class="page pbc-kx" data-kx-strip></div>
+      <div class="page pbc-kx" id="pbc-market" data-kx-strip></div>
       <p class="sr" aria-live="polite" aria-atomic="true" data-announce></p>
       <div class="v4-hero page" data-hero></div>
       <div class="v3-stage page" id="pbc-stage" data-stage>
@@ -692,8 +705,6 @@ export function mount(root, { params, live = null }) {
       </div>
       <p class="pbc-note page">${freshnessBadge(data.meta)} ${data.cadence_note}${data.quality === 'point_event' ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'} <a href="#pbc-more">More intelligence ↓</a></p>
       <div class="page pbc-panels" id="pbc-more">
-        <span id="pbc-market" class="pbc-anchor"></span>
-        <div class="pbc-kxh" data-kx-history-slot></div>
         <section class="mod" id="pbc-watch" data-watch-sec hidden><header class="mod-h"><h2>Watch</h2><span class="mod-k">Official video</span></header><div class="mod-b" data-watch></div></section>
         <section class="mod" id="pbc-story" data-story-sec hidden><header class="mod-h"><h2>Match story</h2></header><div class="mod-b" data-story></div></section>
         <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${data.moments.length ? html`<div class="km">${data.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
@@ -821,7 +832,7 @@ export function mount(root, { params, live = null }) {
 
   const load = async (first) => {
     let res;
-    try { res = await api(`/v1/pbecast/${params.id}`, { signal: ctl.signal }); } catch { return; }
+    try { [res] = await Promise.all([api(`/v1/pbecast/${params.id}`, { signal: ctl.signal }), first ? bounded(kxFirst) : null]); } catch { return; }
     if (!res.data) { if (first) render($('[data-pbc]'), html`<div class="page">${emptyModule(res.meta, 'This match is not in the canonical store.')}</div>`); return; }
     const d = { ...res.data, meta: res.meta };
     const prevCount = data?.events.length || 0;
