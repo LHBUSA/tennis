@@ -149,7 +149,8 @@ export function editorialGate(article, packet, { plan = null, storyClass = artic
     const ss = sentences(x.p);
     const numbered = ss.filter((s) => nums(s).length).length;
     if (ss.length >= 3 && numbered / ss.length >= 0.75 && wc(x.p) / ss.length < 22) fail('database_writing', `${x.id}: a chain of short numeric sentences`);
-    if (n >= 3 && !CONNECTIVE.test(x.p)) fail('restates_numbers', `${x.id}: "${x.p.slice(0, 90)}"`);
+    // "merely restates numbers": every sentence carries a figure and nothing connects them into an argument
+    if (n >= 3 && ss.every((s) => nums(s).length) && !CONNECTIVE.test(x.p)) fail('restates_numbers', `${x.id}: "${x.p.slice(0, 90)}"`);
   }
   // 5. template intro / metric lead
   const lead = paras[0]?.p || '';

@@ -587,7 +587,7 @@ export async function rewriteArticle(env, store, { slug, write = false, dry = fa
   const angle = storyAngle(packet, plan, storyClass);
   const corpus = await loadCorpus(store, { exclude: a.article_id });
   const gate = publicationGate(packet, { plan, storyClass, corpus, angle });
-  const ctx = { plan, angle, avoid: overusedFrames(corpus) };
+  const ctx = { plan, angle, avoid: overusedFrames(corpus), keepDraft: true };
   plan.angle = { version: ANGLE_VERSION, id: angle.angle?.id || null, thesis: angle.angle?.thesis || null, tier: angle.tier, target: angle.target, type: angle.type };
   const old = { headline: a.headline, dek: a.deck, sections: a.body?.sections || [], primary_player_id: a.primary_player_id, player_ids: a.player_ids || [] };
   const oldGate = gate(old);

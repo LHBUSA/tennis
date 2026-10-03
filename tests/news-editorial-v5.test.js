@@ -97,7 +97,7 @@ test('adopt: narrative sections keep visual + note; unknown visuals and scoreboa
   const input = buildInput(PACKET, base, null, { plan: PLAN });
   assert.match(input, /STORY ANGLE/);
   assert.match(input, /WORD TARGET: 650-1150/);
-  assert.match(input, /TURNING POINTS/);
+  assert.match(input, /WHERE THE MATCH SWUNG/);
   assert.ok(!/FACT-SAFE BASELINE/.test(input), 'the templated baseline is no longer shown to the writer');
 });
 

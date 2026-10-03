@@ -123,8 +123,8 @@ function kindClass(kind, c, f) {
       // top-10 player in a quarterfinal+ at a 500+ event. Evidence still caps (full needs MIN_DIMS.full).
       const topIn = Math.min(f.a_rank ?? 999, f.b_rank ?? 999) <= 10;
       if (!c.singles || !c.main || c.tier === 'itf' || c.tier == null) return ['wire', 'preview: not a tour-level main-draw singles match'];
-      if (c.late && c.T >= 1) return ['full', `preview: ${c.round === 'F' ? 'final' : 'semifinal'} at a ${c.tier} event`];
-      if (c.qf && (c.T >= 3 || (topIn && c.T >= 2))) return ['full', `preview: quarterfinal at a ${c.tier} event`];
+      if (c.late && c.T >= 1) return ['full', `${c.round === 'F' ? 'final' : 'semifinal'} at a ${c.tier} event`];
+      if (c.qf && (c.T >= 3 || (topIn && c.T >= 2))) return ['full', `quarterfinal at a ${c.tier} event`];
       return ['wire', 'preview: round below the preview bar'];
     }
     case 'new_no1': return ['deep', 'new No. 1'];

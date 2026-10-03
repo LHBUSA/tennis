@@ -43,7 +43,7 @@ const BANNED = [
   [/\b(injur\w*|ill(ness)?|medical|physio|trainer|pain|cramp\w*|blister\w*|fatigue\w*|sick|strain\w*|surgery|hurt)\b/i, 'unsupported_medical'],
   [/\b(mental(ly)?|motivat\w*|confiden\w*|nerves|nervous|emotion\w*|frustrat\w*|angry|hungry|desperate|determined|composure|belief)\b/i, 'unsupported_mentality'],
   [/\b(odds|favou?rite|underdog|bet|bets|betting|bettors?|wager\w*|sportsbook|moneyline|spread|line moved)\b|(?<![\d\w-])[+-]\d{3}\b/i, 'unsupported_market'],
-  [/\b(first|maiden|debut)\s+(title|final|trophy|semifinal|quarterfinal|win over)|career[- ](high|best)|personal best|record\b|all-time|historic/i, 'unsupported_first_or_record'],
+  [/\b(first|maiden|debut)\s+(title|final|trophy|semifinal|quarterfinal|win over)|career[- ](high|best)|personal best|\b(a|new|the|all-time|tournament|world|tour|event|career|season|open-era)\s+record\b(?!\s+(of|against|in|on|at|before|for|from|over|across|shows?|showed|with|entering|going|into))|\brecord[- ](breaking|setting|tying|equall?ing|high|low|books?|number|holder)\b|\b(set|sets|setting|broke|breaks|breaking|equall?ed|matched|tied|extends?|extended)\s+(a|the|his|her|their)\s+(\w+\s+)?record\b|all-time|historic(?!al)/i, 'unsupported_first_or_record'], // V5: "historical" (the archive) is not a "historic" claim
   [/[“”"]/, 'unsupported_quote'],
   [/\b(our model|win probability|projected|fair price|edge of)\b/i, 'unsupported_model'],
   // tour-relative claims: the packet carries individual measurements only (no peer percentiles), so any

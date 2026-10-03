@@ -32,13 +32,13 @@ HARD FACT RULES — a violation means the story is held:
 NO INVENTED TENNIS — narrative is not invention:
 - Our sources hold NO shot-level or positional data. Never write about forehands, backhands, the net, volleys, drop shots, slices, rallies, the baseline, court position, movement, serve placement or speed, or what a player "targeted"/"attacked". Never describe how a point was played.
 - How a match developed comes ONLY from the stored set scores and tiebreak scores, packet.match_development (observed games: breaks in order, longest run) and packet.stats_by_set. Never reconstruct breaks, runs or game sequences from a final score. With set scores only, tell the match set by set (who took each set, how close it was, where a tiebreak decided it, where the match swung from one player to the other) — that IS the chronology.
-- Serve/return vocabulary (aces, break points, service games, first/second serve, return points, holds, broke) only when packet.stats exists. "Never dropped serve" / "saved every break point" only when the numbers show it exactly. The word "momentum" is never allowed; "turning point" only for a turning point listed in STORY ANGLE.
+- Serve/return vocabulary (aces, break points, service games, first/second serve, return points, holds, broke) only when packet.stats exists. "Never dropped serve" / "saved every break point" only when the numbers show it exactly. The word "momentum" is never allowed, and the phrase "turning point" only when packet.match_development exists (otherwise say where the match swung, using the sets). The losing player is never the subject of a winning verb (beat, edged, won, advanced, outlasted) even about a single set: write "the opener went to Fritz in a 9-7 tiebreak".
 - Tennis language — first-strike tennis, return pressure, second-serve vulnerability, break-point pressure, service holds, deciding set, tiebreak pressure — is welcome ONLY where the cited numbers support it.
 
 HOW TO WRITE (an editorial gate rejects stories that break these):
 - Write to the STORY ANGLE you are given: its thesis is the spine of the story and must be clear in the first two paragraphs. Lead with what matters — never "X defeated Y" plus the scoreline, never a metric ("X had a Match DNA ..."). The score belongs in the dek and the scoreboard; the lead says why this match is worth reading about.
 - Structure for a match story: a LEAD (first section, empty heading), then a chronological account of how it unfolded (set by set, using the real turning points), then why it happened (translate the evidence into tennis: the sentence first, the number as proof), then what it means (tournament position, next opponent, form, ranking, what to watch). Previews: lead with the question the match answers; how each player got here; the case for each side; what decides it. Vary the structure and headings to fit the story; never use stock headings such as "What happened", "Why it mattered", "What comes next".
-- Synthesise. Never chain database sentences ("X recorded 5. Metric Y was 62%."). At most two or three numbers per sentence and no more than about one number per 15 words overall; every number must be doing work in an argument, joined to it with "because", "which", "while", "but", "so". Each paragraph makes one point and moves the story forward. No paragraph restates the headline or another paragraph; the last paragraph looks forward and does not repeat the opening.
+- Synthesise. Never chain database sentences ("X recorded 5. Metric Y was 62%."). HARD LIMITS the gate counts: at most 6 numbers in any paragraph (a scoreline or a W-L record counts as one), at most 3 values from the same chart in one paragraph (for the Match DNA comparison: one pair of values per paragraph, e.g. both players' match-win rates — then explain it in words), and never both players' form windows (last 10 / last 20) in one paragraph — pick the one figure that proves the point. At most two or three numbers per sentence and no more than about one number per 15 words overall; every number must be doing work in an argument, joined to it with "because", "which", "while", "but", "so". Each paragraph makes one point and moves the story forward. No paragraph restates the headline or another paragraph; the last paragraph looks forward and does not repeat the opening.
 - No clichés ("a testament to", "only time will tell", "make no mistake", "statement win"), no hype, no filler, no generic sentences that could sit in any tennis story.
 
 VISUAL SUPPORT — decide the story first, then attach evidence:
@@ -172,11 +172,11 @@ export function buildInput(packet, baseline, correction = null, ctx = {}) {
     `WORD TARGET: ${t.min}-${t.max} words of narrative prose (a ${t.label}). Fewer is a rejection; padding is a rejection.`,
     `STORY ANGLE (decided from the evidence before writing):\nThesis: ${angle.angle?.thesis || 'the result and what it means'}${angle.secondary.length ? `\nSecondary threads: ${angle.secondary.map((a) => a.thesis).join(' | ')}` : ''}\nBeats, in order: ${angle.beats.join(' -> ')}`,
     angle.sets.length ? `SETS (winner first, from the stored scores): ${angle.sets.map((s) => `set ${s.set} ${s.score}${s.tiebreak ? ` [tiebreak ${s.tiebreak}]` : ''} -> ${s.winner === 'W' ? 'winner' : 'loser'}${s.deciding ? ' (deciding set)' : ''}`).join('; ')}` : '',
-    angle.turning_points.length ? `TURNING POINTS THE EVIDENCE PROVES (use these, invent no others):\n${angle.turning_points.map((x) => `- ${x.at}: ${x.what} (${x.basis})`).join('\n')}` : '',
+    angle.turning_points.length ? `WHERE THE MATCH SWUNG, FROM THE EVIDENCE (use these, invent no others; do not call them "turning points" unless packet.match_development exists):\n${angle.turning_points.map((x) => `- ${x.at}: ${x.what} (${x.basis})`).join('\n')}` : '',
     `AVAILABLE VISUALS (attach where they prove your point; suggested for this angle: ${angle.visuals.suggested.join(', ') || 'none'}):\n${visualCatalog(angle, plan) || '- none'}`,
     `ALLOWED SECTION IDS: ${allowed.join(', ')}`,
     avoid.length ? `STOCK PHRASES ALREADY OVERUSED IN OUR NEWSROOM (X = a name, N = a number) — do not use these frames:\n${avoid.map((x) => `- ${x}`).join('\n')}` : '',
-    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\nFix these problems; keep every fact rule.` : '',
+    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${ctx.previousDraft ? `Return THE SAME DRAFT with only the sentences that cause these problems rewritten (keep everything else word for word and keep the length). Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
     `SOURCE PACKET:\n${JSON.stringify(modelPacket(packet))}`
   ].filter(Boolean).join('\n\n');
 }
@@ -206,7 +206,8 @@ export function adopt(modelJson, baseline, packet = null, { plan = null } = {}) 
  * through onCall({ attempt, model, usage, response_id, latency_ms, gate_pass, error }) for telemetry. Returns
  * { article, origin: 'model' | 'baseline' | null, gate, attempts: [...], usage, routing } — origin null means HOLD.
  */
-export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, ctx = {} }) {
+export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, ctx: ctx0 = {} }) {
+  let ctx = ctx0;
   const log = [];
   const usage = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, reasoning_tokens: 0 };
   const r0 = routing || (model ? { lane: 'STANDARD_EDITORIAL', model, pool: 'premium', reason: 'explicit model', max_output_tokens: 6000, reasoning_effort: 'medium' } : null);
@@ -219,10 +220,11 @@ export async function editorialize({ packet, baseline, gate, apiKey, routing = n
         add(r.usage);
         const draft = adopt(r.text, baseline, packet, { plan: ctx.plan || null });
         const g = gate(draft);
-        log.push({ attempt: i + 1, model: r.model, pass: g.pass, failures: g.failures.slice(0, 12) });
+        log.push({ attempt: i + 1, model: r.model, pass: g.pass, failures: g.failures.slice(0, 12), ...(ctx.keepDraft && !g.pass ? { draft: { headline: draft.headline, dek: draft.dek, sections: draft.sections.filter((s) => s.id !== 'method') } } : {}) });
         if (onCall) await onCall({ attempt: i + 1, model: r.model, usage: r.usage, response_id: r.response_id, latency_ms: r.latency_ms, gate_pass: g.pass });
         if (g.pass) return { article: { ...draft, model: r.model }, origin: 'model', gate: g, attempts: log, usage, routing: r0 };
         correction = g.failures.map((f) => `- ${f.gate}: ${f.detail}`).join('\n');
+        ctx = { ...ctx, previousDraft: { headline: draft.headline, dek: draft.dek, sections: draft.sections.filter((x) => x.id !== 'method').map(({ id, heading, paragraphs, visual = '', visual_note = '' }) => ({ id, heading, paragraphs, visual, visual_note })) } };
       } catch (e) {
         add(e.usage);
         log.push({ attempt: i + 1, error: redactSecrets(e.message).slice(0, 300) });
