@@ -55,3 +55,7 @@ a scoreline is not chart narration and chart narration needs >= 5 figures; "not 
   interpretations, overflow, screenshots 1440/390).
 - Cost: automatic new stories keep 1 attempt; the Tennis premium soft cap (300k tokens/UTC day) still applies — rewrite
   batches stop at the cap and continue the next UTC day.
+- Overhaul queue (Cloudflare cron, no new resource): `POST /v1/news/rewrite-queue?items=rewrite:<slug>,enrich:<event_id>&attempts=2`
+  (`replace=1` resets), `GET /v1/news/rewrite-queue` = queue + log. One item per cron run, only while Tennis premium
+  usage today < `TENNIS_REWRITE_MAX_PREMIUM` (default 240000, under the 250k warn / 300k soft cap); otherwise it waits
+  for the next UTC day.

@@ -30,7 +30,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '4.0.5';
+export const VERSION = '4.1.0';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -500,6 +500,7 @@ export async function run(env, { dry = false } = {}) {
       await telemetry(store, [{ event_id: ev.event_id, stage: 'error', status: 'fail', detail: { error: msg } }]);
     }
   }
+  try { out.overhaul = await processOverhaulQueue(env, store); } catch (e) { out.overhaul = { error: redactSecrets(e.message) }; }
   out.finished_at = iso();
   if (env.TENNIS_STATE) await env.TENNIS_STATE.put('news:last_run', JSON.stringify(out), { expirationTtl: 7 * 86400 });
   return out;
@@ -618,6 +619,53 @@ export async function editorialAudit(store, { limit = 40 } = {}) {
   return { stories: out.length, passing: out.filter((x) => x.pass).length, items: out };
 }
 
+/** Admin re-run of ONE held/unpublished event through the full pipeline (attempts <= 2; the second edits the first draft).
+ *  The held draft + evidence are rebuilt from a fresh packet. Never touches a published story. */
+export async function adminEnrich(env, store, id, attempts = 1) {
+  const ev = id ? (await store.select('tennis_news_events', `select=*&event_id=eq.${encodeURIComponent(id)}`))[0] : null;
+  if (!ev) return { error: 'no such event', status: 404 };
+  if (!['held', 'detected', 'wire'].includes(ev.state)) return { error: `event is ${ev.state}`, status: 409 };
+  if (ev.article_id) {
+    const a = (await store.select('tennis_articles', `select=status&article_id=eq.${ev.article_id}`))[0];
+    if (a?.status === 'published') return { error: 'published story: use /v1/news/rewrite', status: 409 };
+    await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { article_id: null }, prefer: 'return=minimal' });
+    await store.del('tennis_article_evidence', `article_id=eq.${ev.article_id}`);
+    await store.del('tennis_articles', `article_id=eq.${ev.article_id}`);
+  }
+  const token = crypto.randomUUID();
+  await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { state: 'enriching', lease_token: token, lease_expires_at: new Date(Date.now() + LEASE_S * 1000).toISOString(), state_changed_at: iso() }, prefer: 'return=minimal' });
+  const out = await enrichOne(env, store, { ...ev, article_id: null, state: 'enriching', lease_token: token }, { attempts });
+  const a = out.article_id ? (await store.select('tennis_articles', `select=slug,status,hold_reason,gate_results&article_id=eq.${out.article_id}`))[0] : null;
+  return { ...out, attempts: a?.gate_results?.attempts || null, usage: a?.gate_results?.usage || null };
+}
+
+// ---- editorial overhaul queue (owner brief 2026-10-03: batch rewrites across UTC days inside the existing cap) ------
+// One item per cron run, only while Tennis's premium usage today is below TENNIS_REWRITE_MAX_PREMIUM (default 240000,
+// under the 250000 warn / 300000 soft cap) so natural new stories keep their headroom. Items: rewrite:<slug> (published
+// story, in place, writes only on a full gate pass) | enrich:<event_id> (held/unpublished event, e.g. a preview).
+const QUEUE_KEY = 'news:overhaul:queue';
+const QUEUE_LOG = 'news:overhaul:log';
+const queueBudget = (env) => Number(env.TENNIS_REWRITE_MAX_PREMIUM) || 240000;
+export async function processOverhaulQueue(env, store) {
+  const kv = env.TENNIS_STATE;
+  if (!kv) return null;
+  const q = JSON.parse((await kv.get(QUEUE_KEY)) || '[]');
+  if (!q.length) return null;
+  const usage = await poolUsage(kv);
+  if (usage.premium_today >= queueBudget(env)) return { waiting: 'premium budget for today used', premium_today: usage.premium_today, queued: q.length };
+  const item = q.shift();
+  await kv.put(QUEUE_KEY, JSON.stringify(q));
+  let res;
+  try {
+    if (item.type === 'rewrite') { const r = await rewriteArticle(env, store, { slug: item.id, write: true, attempts: item.attempts || 2 }); res = { written: !!r.written, error: r.error || null, before: r.before?.prose_words ?? null, after: r.after?.prose_words ?? null, failures: (r.attempts || []).map((a) => (a.failures || []).map((f) => f.gate)), cost: r.nominal_standard_cost_usd ?? null }; }
+    else { const r = await adminEnrich(env, store, item.id, item.attempts || 2); res = { state: r.state || null, slug: r.slug || null, error: r.error || null, failures: (r.attempts || []).map((a) => (a.failures || []).map((f) => f.gate)) }; }
+  } catch (e) { res = { error: redactSecrets(e.message).slice(0, 200) }; }
+  const log = JSON.parse((await kv.get(QUEUE_LOG)) || '[]');
+  log.push({ at: iso(), ...item, ...res });
+  await kv.put(QUEUE_LOG, JSON.stringify(log.slice(-80)), { expirationTtl: 14 * 86400 });
+  return { item, ...res, remaining: q.length };
+}
+
 const authed = (request, env) => env.NEWS_ADMIN_TOKEN && request.headers.get('authorization') === `Bearer ${env.NEWS_ADMIN_TOKEN}`;
 
 export default {
@@ -656,22 +704,20 @@ export default {
     // admin re-run of ONE held/unpublished event through the full pipeline with up to 2 attempts (the second edits the
     // first draft); the held draft + evidence are rebuilt from a fresh packet. Never touches a published story.
     if (path === '/v1/news/enrich' && request.method === 'POST') {
-      const id = url.searchParams.get('event_id');
-      const ev = id ? (await store.select('tennis_news_events', `select=*&event_id=eq.${encodeURIComponent(id)}`))[0] : null;
-      if (!ev) return json({ ok: false, error: 'no such event' }, { status: 404 });
-      if (!['held', 'detected', 'wire'].includes(ev.state)) return json({ ok: false, error: `event is ${ev.state}` }, { status: 409 });
-      if (ev.article_id) {
-        const a = (await store.select('tennis_articles', `select=status&article_id=eq.${ev.article_id}`))[0];
-        if (a?.status === 'published') return json({ ok: false, error: 'published story: use /v1/news/rewrite' }, { status: 409 });
-        await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { article_id: null }, prefer: 'return=minimal' });
-        await store.del('tennis_article_evidence', `article_id=eq.${ev.article_id}`);
-        await store.del('tennis_articles', `article_id=eq.${ev.article_id}`);
+      const r = await adminEnrich(env, store, url.searchParams.get('event_id'), Number(url.searchParams.get('attempts')) || 1);
+      return json(r.error ? { ok: false, error: r.error } : { ok: true, data: r }, { status: r.status || 200 });
+    }
+    // overhaul queue (cap-aware, one item per cron run): POST ?items=rewrite:<slug>,enrich:<event_id> appends; GET shows
+    if (path === '/v1/news/rewrite-queue') {
+      if (request.method === 'POST') {
+        const items = String(url.searchParams.get('items') || '').split(',').map((x) => x.trim()).filter(Boolean).map((x) => { const i = x.indexOf(':'); return { type: x.slice(0, i), id: x.slice(i + 1), attempts: Number(url.searchParams.get('attempts')) || 2 }; }).filter((x) => ['rewrite', 'enrich'].includes(x.type) && x.id);
+        const q = JSON.parse((await env.TENNIS_STATE.get(QUEUE_KEY)) || '[]');
+        if (url.searchParams.get('replace') === '1') q.length = 0;
+        q.push(...items);
+        await env.TENNIS_STATE.put(QUEUE_KEY, JSON.stringify(q));
+        return json({ ok: true, data: { queued: q.length, added: items.length } });
       }
-      const token = crypto.randomUUID();
-      await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { state: 'enriching', lease_token: token, lease_expires_at: new Date(Date.now() + LEASE_S * 1000).toISOString(), state_changed_at: iso() }, prefer: 'return=minimal' });
-      const out = await enrichOne(env, store, { ...ev, article_id: null, state: 'enriching', lease_token: token }, { attempts: Number(url.searchParams.get('attempts')) || 1 });
-      const a = out.article_id ? (await store.select('tennis_articles', `select=slug,status,hold_reason,gate_results&article_id=eq.${out.article_id}`))[0] : null;
-      return json({ ok: true, data: { ...out, attempts: a?.gate_results?.attempts || null, usage: a?.gate_results?.usage || null } });
+      return json({ ok: true, data: { queue: JSON.parse((await env.TENNIS_STATE.get(QUEUE_KEY)) || '[]'), log: JSON.parse((await env.TENNIS_STATE.get(QUEUE_LOG)) || '[]'), max_premium: queueBudget(env) } });
     }
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates

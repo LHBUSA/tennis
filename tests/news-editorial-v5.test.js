@@ -133,3 +133,14 @@ test('preview gates: a prediction is held; the preview frame is never publishabl
   const art = { ...frame, sections: [{ id: 'lead', heading: '', paragraphs: ['Fritz will win this match comfortably, and the question is only by how much the ranking gap shows.'] }, ...frame.sections.slice(1)] };
   assert.ok(runGates(art, pv, { plan }).failures.some((f) => f.gate === 'unsupported_prediction'));
 });
+
+test('overhaul queue: waits (pops nothing) once the premium budget for the UTC day is used', async () => {
+  const { processOverhaulQueue } = await import('../workers/tennis-news/src/index.js');
+  const { poolKey } = await import('../workers/tennis-news/src/ai-router.js');
+  const m = new Map([['news:overhaul:queue', JSON.stringify([{ type: 'rewrite', id: 'x', attempts: 2 }])], [poolKey('premium'), '250000']]);
+  const kv = { get: async (k) => m.get(k) ?? null, put: async (k, v) => { m.set(k, v); } };
+  const r = await processOverhaulQueue({ TENNIS_STATE: kv }, null);
+  assert.match(r.waiting, /budget/);
+  assert.equal(JSON.parse(m.get('news:overhaul:queue')).length, 1, 'item kept for the next day');
+  assert.equal(await processOverhaulQueue({ TENNIS_STATE: { get: async () => null, put: async () => {} } }, null), null, 'empty queue: nothing to do');
+});
