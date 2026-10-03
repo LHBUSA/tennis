@@ -50,8 +50,18 @@ test('PropSports service bridge bypasses consumer membership only for Player DNA
   const env = {};
   const dna = await propsportsFetch(new Request('https://internal.test/v1/players/x/dna'), env);
   assert.notEqual(dna.status, 401, 'trusted service path must not require browser membership');
-  const other = await propsportsFetch(new Request('https://internal.test/v1/dna/leaders'), env);
-  assert.equal(other.status, 404, 'service bridge must not become a general premium bypass');
+  // Every other route behaves exactly like the public API: no premium bypass, and no blanket 404
+  // (PropSports routes all 25 catalog Tennis routes through this binding).
+  for (const p of ['/v1/dna/leaders', '/v1/rankings', '/v1/today']) {
+    const viaBridge = await propsportsFetch(new Request(`https://internal.test${p}`), env);
+    const viaPublic = await api.fetch(new Request(`https://internal.test${p}`), env);
+    assert.equal(viaBridge.status, viaPublic.status, `${p}: bridge must equal the public API`);
+  }
+  const premium = await propsportsFetch(new Request('https://internal.test/v1/dna/leaders'), env);
+  const premiumPublic = await api.fetch(new Request('https://internal.test/v1/dna/leaders'), env);
+  assert.equal(premium.status, premiumPublic.status, 'service bridge must not become a general premium bypass');
+  const post = await propsportsFetch(new Request('https://internal.test/v1/today', { method: 'POST' }), env);
+  assert.equal(post.status, 404);
 });
 
 test('tennis-api keeps top-of-funnel PBEcast and capped DNA preview public', async () => {

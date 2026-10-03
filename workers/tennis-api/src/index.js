@@ -441,12 +441,14 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
 export async function propsportsFetch(request, env, ctx) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
-  // Service-entrypoint contract is intentionally narrow: PropSports may bypass the
-  // consumer membership gate only for the Player DNA route it commercially exposes.
-  if (request.method !== 'GET' || !/^\/v1\/players\/[a-z0-9-]+\/dna$/.test(path)) {
-    return json({ ok: false, error: 'not_found' }, { status: 404 });
+  // Service-entrypoint contract: PropSports may bypass the consumer membership gate only for
+  // the Player DNA route it commercially exposes. Every other PropSports Tennis route is the
+  // ordinary public API (same behaviour as tennis-api.propbetedge.ai): no bypass.
+  if (request.method === 'GET' && /^\/v1\/players\/[a-z0-9-]+\/dna$/.test(path)) {
+    return fetchApi(request, env, ctx, { propsportsInternal: true });
   }
-  return fetchApi(request, env, ctx, { propsportsInternal: true });
+  if (request.method !== 'GET') return json({ ok: false, error: 'not_found' }, { status: 404 });
+  return fetchApi(request, env, ctx);
 }
 
 export default {
