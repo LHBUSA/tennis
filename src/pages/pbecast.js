@@ -31,6 +31,7 @@ import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state
 import { kalshi, kalshiPollState } from '../data/kalshi.js';
 import { kalshiStrip, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
+import { liveGranularity, gameLedger, actionRail, currentGame, courtReaction, gameRun, pointRun, provenPoints, hasSpatial, staleness } from '../lib/pbecast-court.js';
 
 const MODE_LABEL = {
   point_by_point_live: 'Point-by-point live', point_by_point_replay: 'Replay · point-by-point',
@@ -211,19 +212,21 @@ function liveTicker(items) {
 
 // ---- PBEcast V2 building blocks ------------------------------------------------------------------------
 const MODE_BADGE = {
-  tracked_live: ['TRACKED LIVE', 'Ball and point positions from the source'],
-  point_by_point_live: ['POINT-BY-POINT LIVE', 'Every point from the official feed · no ball tracking'],
-  observed_live: ['OBSERVED LIVE', 'Score/server observations · no spatial tracking'],
-  point_by_point_replay: ['POINT-BY-POINT REPLAY', 'Every point from the official feed · no ball tracking'],
-  observed_replay: ['OBSERVED REPLAY', 'Score/server observations · no spatial tracking'],
+  tracked_live: ['TRACKED LIVE', 'Ball and point positions as published'],
+  point_by_point_live: ['POINT-BY-POINT LIVE', 'Every point as published · no ball tracking'],
+  observed_live: ['OBSERVED LIVE', 'Score and event observations · no spatial tracking'],
+  point_by_point_replay: ['POINT-BY-POINT REPLAY', 'Every point as published · no ball tracking'],
+  observed_replay: ['OBSERVED REPLAY', 'Score and event observations · no spatial tracking'],
   scheduled: ['SCHEDULED', 'PBEcast starts when live coverage begins'],
   result_only: ['RESULT ONLY', 'No stored events for this match']
 };
-function modeBadge(mode, evs) {
-  const tracked = evs.some((e) => e.coordinates);
+const GRAN = { point: 'Point-level', game: 'Game-level' };
+function modeBadge(mode, evs, gran) {
+  const tracked = hasSpatial(evs); // a tracking view exists only for source point events that carry coordinates
   const key = tracked && mode.includes('live') ? 'tracked_live' : mode;
   const [label, sub] = MODE_BADGE[key] || [MODE_LABEL[mode] || mode, ''];
-  return html`<div class="pbc-mode k-${key}" role="status"><span class="pbc-mode-l">${mode.includes('live') ? html`<i class="dot"></i>` : ''}${label}</span><small>${sub}</small></div>`;
+  const g = GRAN[gran] && !['scheduled', 'result_only'].includes(mode) ? `${GRAN[gran]} ${mode.includes('live') ? 'live' : 'replay'}` : null;
+  return html`<div class="pbc-mode k-${key}" role="status" data-gran="${gran}"><span class="pbc-mode-l">${mode.includes('live') ? html`<i class="dot"></i>` : ''}${label}</span>${g ? html`<span class="pbc-gran">${g}</span>` : ''}<small>${sub}</small></div>`;
 }
 
 const lastName = (p) => surname(p);
@@ -252,15 +255,31 @@ function pulsePanel(d, m, state, pos, live) {
     ${p.basis ? html`<p class="v3-basis">Holds and breaks from ${p.basis} game${p.basis === 1 ? '' : 's'} with a provable server and winner${d.quality === 'point_event' ? '' : ' (several games between two observations have no provable winner and are left out)'}.</p>` : ''}`;
 }
 
-/** D. RECENT GAMES: HOLD / BREAK per game with a provable winner, newest first. */
-function gamesPanel(evs, pos, m) {
-  const games = gamesFrom(evs, pos).slice(-6).reverse();
-  if (!games.length) return html`<p class="note">No game with a provable winner yet.</p>`;
-  const photoOf = (s) => (m.players?.[s] || m.sides?.[s]?.players || [])[0];
-  return html`<ol class="v3-gm">${games.map((g) => html`<li class="${g.result === 'break' ? 'brk' : ''}">
-    <span class="v3-gm-at tabnum">S${g.set ?? '—'} · G${g.game ?? '—'}</span>
-    <b class="v3-gm-k">${g.result === 'break' ? 'BREAK' : g.result === 'hold' ? 'HOLD' : 'GAME'}</b>
-    <span class="v3-gm-who">${photoOf(g.winner) ? avatarLink(photoOf(g.winner), { px: 22 }) : ''}<span>${playerLinks(m, g.winner)}</span></span></li>`)}</ol>`;
+/**
+ * D. GAME BY GAME (action rail): the last completed games — complete at our cadence — newest first, set boundaries
+ * marked, the game in play on top. A game won between two observations by both sides is one honest "span" row.
+ * Proven points (exactly one point between two observations) appear inside the game in play; nothing else does.
+ */
+function gamesPanel(evs, pos, m, gran, state) {
+  const ledger = gameLedger(evs, pos);
+  const rail = actionRail(ledger, 10).reverse();
+  const g = currentGame(state);
+  const pts = gran === 'point' && g ? provenPoints(evs, pos, m) : [];
+  const nm = (s) => sideName(m, s);
+  if (!rail.length && !g) return html`<p class="note">${evs.length ? 'No completed game observed yet.' : 'No observed games yet.'}</p>`;
+  const kindOf = (x) => (x.kind === 'span' ? 'span' : x.tiebreak ? 'tb' : x.result || 'game');
+  const TAG = { hold: 'HOLD', break: 'BREAK', game: 'GAME', tb: 'TIEBREAK', span: 'GAMES' };
+  const row = (x) => html`<li class="gr-i k-${kindOf(x)}${x.winner ? ` s-${x.winner}` : ''}${x.set_end ? ' set-end' : ''}">
+      <span class="gr-at tabnum">S${x.set} · G${x.kind === 'span' ? `${x.from}–${x.to}` : x.game}</span>
+      <b class="gr-k">${TAG[kindOf(x)]}</b>
+      <span class="gr-who">${x.kind === 'span' ? html`${nm('A')} ${x.A} · ${nm('B')} ${x.B} <small>between observations</small>` : html`${playerLinks(m, x.winner)}${x.between ? html` <small>between observations</small>` : ''}`}</span>
+      <span class="gr-sc tabnum">${x.kind === 'span' ? '' : `${x.after.A}–${x.after.B}`}</span>${x.set_end ? html`<em class="gr-set">SET ${x.set}</em>` : ''}</li>`;
+  const live = g ? html`<li class="gr-i gr-now"><span class="gr-at tabnum">S${g.set} · G${g.game}</span><b class="gr-k">IN PLAY</b>
+      <span class="gr-who">${state?.server && gran === 'point' ? html`${playerLinks(m, state.server)} serving` : gran === 'game' ? html`<small>game-level live: no point score</small>` : ''}</span>
+      ${pts.length ? html`<span class="gr-pts" aria-label="Proven points this game: ${pts.map((p) => nm(p.winner)).join(', ')}">${pts.map((p) => html`<i class="gr-pt s-${p.winner}${p.saved ? ' saved' : ''}" title="${nm(p.winner)} · ${p.to}"></i>`)}</span>` : ''}</li>` : '';
+  return html`<ol class="gr">${live}${rail.map((x, i) => html`${i > 0 && rail[i - 1].set !== x.set ? html`<li class="gr-sep" aria-hidden="true">Set ${x.set}</li>` : ''}${row(x)}`)}</ol>
+    ${ledger.corrections?.length ? html`<p class="v3-basis">${ledger.corrections.length} score correction${ledger.corrections.length === 1 ? '' : 's'} applied as published.</p>` : ''}
+    ${gran === 'point' ? html`<p class="v3-basis">Dots in the game in play are points proven by two consecutive observations; other points are not shown.</p>` : ''}`;
 }
 
 const RAIL_TAGS = new Set(['ACE', 'DOUBLE FAULT', 'WINNER', 'BREAK', 'GAME', 'SET', 'TIEBREAK', 'FINAL', 'RETIRED', 'START', 'SUSPENDED', 'RESUMED']);
@@ -408,7 +427,7 @@ function feedPanel(evs, pos, m, all) {
       <header class="pf-gh"><b>${g.set ? `Set ${g.set}` : ''}${g.game ? ` · Game ${g.game}` : ''}</b>${g.server ? html`<span>${playerLinks(m, g.server)} serving</span>` : ''}${g.result && g.winner ? html`<em class="pf-res">${FEED_TAG[g.result]} · ${nm(g.winner)}</em>` : ''}</header>
       <ol>${g.items.map(row)}</ol></section>`)}
     ${more ? html`<button type="button" class="pf-more" data-act="feed-all">Show full match timeline · ${more} earlier game${more === 1 ? '' : 's'}</button>` : all && groups.length > 4 ? html`<button type="button" class="pf-more" data-act="feed-recent">Show recent games only</button>` : ''}
-    <p class="pf-note">${evs.some((x) => x.quality === 'point_event') ? 'Point-by-point from the source feed: reasons, speeds and rally lengths appear only where the source publishes them.' : 'Observed score feed. A player is credited with a point only when two consecutive observations differ by exactly one point; wider changes are shown as the score advancing between observations, never reconstructed.'}</p>
+    <p class="pf-note">${evs.some((x) => x.quality === 'point_event') ? 'Point-by-point as published: reasons, speeds and rally lengths appear only where they are published.' : 'Observed score feed. A player is credited with a point only when two consecutive observations differ by exactly one point; wider changes are shown as the score advancing between observations, never reconstructed.'}</p>
   </div>`;
 }
 
@@ -425,17 +444,17 @@ function heroMoment(m, state, mode, last, sitText) {
   return html`<div class="v4h k-${mode}${mo.final ? ' is-final' : ''}" data-k="${sitText || ''}">
     <div class="v4h-l"><span class="v4h-where">${where}</span>${games}${lead && !mo.final ? html`<small class="v4h-lead">${nm(lead)} leads the set</small>` : ''}</div>
     <div class="v4h-c">${mo.point ? html`<b class="v4h-pt tabnum">${mo.point.A}<i>–</i>${mo.point.B}</b>` : mode === 'snapshot' && !mo.final ? html`<b class="v4h-pt v4h-nopt">GAMES</b>` : ''}${sitText ? html`<span class="v4h-sit">${sitText}</span>` : ''}${mo.server ? html`<span class="v4h-srv"><i class="v4-ball" aria-hidden="true"></i>${nm(mo.server).toUpperCase()} SERVING</span>` : ''}</div>
-    <div class="v4h-r"><span class="v4h-k">${mode === 'snapshot' ? 'Latest observation' : mode === 'point' ? 'Last point' : 'Latest change'}</span><span class="v4h-last">${last?.line || (mode === 'snapshot' ? 'Set and game score as observed; this source publishes no point-by-point.' : 'Waiting for the first event.')}</span>${last?.tag ? html`<small class="v4h-tag">${last.tag}</small>` : ''}</div>
+    <div class="v4h-r"><span class="v4h-k">${mode === 'snapshot' ? 'Latest observation' : mode === 'point' ? 'Last point' : 'Latest change'}</span><span class="v4h-last">${last?.line || (mode === 'snapshot' ? 'Set and game score as observed; game-level live has no point-by-point.' : 'Waiting for the first event.')}</span>${last?.tag ? html`<small class="v4h-tag">${last.tag}</small>` : ''}</div>
   </div>`;
 }
 
 /** Break-point pressure (current match): point mode = every break point played; observed mode = break-point games. */
 function pressurePanel(bpMatch, bpSet, m) {
-  if (!bpMatch) return html`<p class="note">Not available: this source publishes no point score, so break points cannot be observed.</p>`;
+  if (!bpMatch) return html`<p class="note">Not available at game-level live: without a point score, break points cannot be observed.</p>`;
   const pt = bpMatch.basis === 'points';
   const row = (s) => html`<tr><th scope="row">${playerLinks(m, s)}</th><td class="tabnum">${bpMatch.converted[s]}/${bpMatch.chances[s]}</td><td class="tabnum">${pt ? `${bpMatch.saved[s]}/${bpMatch.faced[s]}` : `${bpMatch.saved[s]}`}</td>${bpSet ? html`<td class="tabnum">${bpSet.converted[s]}/${bpSet.chances[s]}</td>` : ''}</tr>`;
   return html`<table class="v4-bp"><thead><tr><th></th><th scope="col">${pt ? 'BP converted' : 'Break games won'}</th><th scope="col">${pt ? 'BP saved' : 'Held through'}</th>${bpSet ? html`<th scope="col">This set</th>` : ''}</tr></thead><tbody>${row('A')}${row('B')}</tbody></table>
-    <p class="v3-basis">${pt ? 'Every point played at break point in this match, from the source point stream.' : `Games in which a break-point score was observed${bpMatch.unknown ? ` (${bpMatch.unknown} without a provable ending)` : ''}. Observations are periodic, so break points between two observations are not counted.`} PBE-derived from observed match events.</p>`;
+    <p class="v3-basis">${pt ? 'Every point played at break point in this match.' : `Games in which a break-point score was observed${bpMatch.unknown ? ` (${bpMatch.unknown} without a provable ending)` : ''}. Observations are periodic, so break points between two observations are not counted.`} PBE-derived from observed match events.</p>`;
 }
 
 /** Compact pre-match PBE view (entitled): the FROZEN probability when the match has started; never recomputed live. */
@@ -610,8 +629,8 @@ export function mount(root, { params, live = null }) {
           <h2 class="v3-rail-h" id="v3-rail-h">${data.mode.includes('live') ? 'Live intelligence' : 'Match intelligence'}</h2>
           <section class="v3-mod v4-pressure" aria-labelledby="v4-bp-h"><h3 class="v3-mod-h" id="v4-bp-h">Break-point pressure</h3><div data-pressure></div></section>
           <section class="v3-mod v3-pulse" aria-labelledby="v3-pulse-h"><h3 class="v3-mod-h" id="v3-pulse-h">Match pulse</h3><div data-intel></div></section>
+          <section class="v3-mod v3-games" aria-labelledby="v3-games-h"><h3 class="v3-mod-h" id="v3-games-h">Game by game</h3><div data-games></div></section>
           <section class="v3-mod v3-recent" aria-labelledby="v3-recent-h"><h3 class="v3-mod-h" id="v3-recent-h">Point feed</h3><div data-recent></div></section>
-          <section class="v3-mod v3-games" aria-labelledby="v3-games-h"><h3 class="v3-mod-h" id="v3-games-h">Recent games</h3><div data-games></div></section>
           <section class="v3-mod v4-pm" aria-labelledby="v4-pm-h" data-pm-sec hidden><h3 class="v3-mod-h" id="v4-pm-h">Matchup</h3><div data-prematch></div></section>
         </aside>
         <div class="v3-timeline" data-timeline></div>
@@ -657,18 +676,25 @@ export function mount(root, { params, live = null }) {
     const hl = anim && cur?.winner_side && ['point', 'game', 'set', 'end'].includes(anim) ? cur.winner_side : isPoint && cur ? cur.winner_side : null;
     const tagNow = cur ? eventText(cur, m).tag : null;
     const mkNow = isPoint && cur ? pointMarker(ps.pos > 0 ? viewState(ps.pos - 1) : null, state, cur) : null;
-    const banner = mkNow ? (mkNow === 'FINAL' ? 'MATCH' : mkNow) : tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
+    const gran = liveGranularity(data);
+    // the court reacts to the observed transition at this position only (pbecast-court.js); never a position or path
+    const react = cur ? courtReaction(evs, ps.pos, { match: m, granularity: gran, name: (x) => sideName(m, x) }) : null;
+    const lastGame = gran === 'game' && !final ? gameLedger(evs, ps.pos).filter((g) => g.kind === 'game').at(-1) || null : null;
+    const banner = react && react.kind !== 'start' ? react.label : mkNow ? (mkNow === 'FINAL' ? 'MATCH' : mkNow) : tagNow && !['SCORE UPDATE', 'OBSERVED', 'UPDATE', 'POINT'].includes(tagNow) ? tagNow : null;
 
-    render($('[data-mode]'), modeBadge(data.mode, evs));
+    render($('[data-mode]'), modeBadge(data.mode, evs, gran));
     const land = wide.matches;
     render($('[data-score]'), v3Score(m, state, prev, { mode: data.mode, order: land ? ['A', 'B'] : ['B', 'A'] }));
     $('[data-stage]')?.classList.toggle('is-land', land);
     render($('[data-court]'), html`<div class="court-wrap${data.mode.includes('live') && !final ? ' is-live' : ''}${tracked ? ' is-tracked' : ''}${sit ? ` sit-${sit.kind}` : ''}" ${anim ? raw(`data-anim="${anim}"`) : ''}>
-      ${tracked ? html`<span class="v3-tracked">TRACKED · ball position from the source</span>` : ''}
-      ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final ? null : state.server, point: state.point, tiebreak: inTiebreakScore(state.point), highlight: hl, ball: cur?.coordinates || null, trail: cur?.trail || null, serveIndicator: !final, surface: m.tournament?.surface || null, landscape: land })}
+      ${tracked ? html`<span class="v3-tracked">TRACKED · ball position as published</span>` : ''}
+      ${courtSvg({ doubles: ['MD', 'WD', 'XD'].includes(m.event_type), server: final || gran !== 'point' ? null : state.server, point: gran === 'point' ? state.point : null, tiebreak: inTiebreakScore(state.point), highlight: react ? null : hl, ball: tracked ? cur.coordinates : null, trail: tracked ? cur?.trail || null : null, serveIndicator: !final, surface: m.tournament?.surface || null, landscape: land,
+        pressure: !final && sit?.kind === 'break_point' ? sit.side : null, react: animate && react?.side ? { kind: react.kind, side: react.side } : null, lastGame: lastGame?.winner || null })}
       ${sit ? html`<span class="court-sit k-${sit.kind}" role="status">${sit.text}${state.point && state.server ? html`<small class="tabnum">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}</small>` : ''}</span>` : !final && state.point && state.server ? html`<span class="court-pt tabnum" aria-label="Point score, server first">${state.point[state.server]}–${state.point[state.server === 'A' ? 'B' : 'A']}<small>server first</small></span>` : ''}
-      ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(banner).replace(/\s+/g, '-').toLowerCase()}" data-k="${cur.event_id}">${banner}</span>` : ''}
-      ${!final && state.server ? html`<span class="court-key"><i class="k-serve"></i> Serve indicator — not tracked position</span>` : ''}
+      ${banner ? html`<span class="court-banner ${isPoint ? 'pt' : 'obs'} t-${String(react?.kind || banner).replace(/[^a-z0-9]+/gi, '-').toLowerCase()} tone-${react?.tone || 'game'}" data-k="${cur.event_id}">${banner}</span>` : ''}
+      ${!final && gran === 'point' && state.server ? html`<span class="court-key"><i class="k-serve"></i> ${/D$/.test(m.event_type || '') ? 'Serving team' : 'Serve indicator'} — not tracked position</span>` : ''}
+      ${lastGame ? html`<span class="court-key court-last">Last confirmed game · ${sideName(m, lastGame.winner)} <small>(not a serve marker)</small></span>` : ''}
+      <span class="court-stale" data-stale hidden></span>
       ${ps.mode === 'replay' && ps.done ? html`<div class="v3-done" role="status"><b>REPLAY COMPLETE</b><span><button type="button" class="v3-b v3-play" data-act="again">↻ Replay again</button><button type="button" class="v3-b" data-act="start">Jump to start</button></span></div>` : ''}
     </div>`);
     // player cards: headshots stay mounted; only live state changes
@@ -695,10 +721,13 @@ export function mount(root, { params, live = null }) {
     const ann = $('[data-announce]');
     if (ann && animate && lastAnnounced !== ps.pos) { ann.textContent = announce(m, state, mode, last); lastAnnounced = ps.pos; }
     renderIf($('[data-pressure]'), pressurePanel(breakPressure(evs, ps.pos, { mode }), mode === 'snapshot' ? null : breakPressure(evs, ps.pos, { mode, scope: 'set' }), m));
-    renderIf($('[data-recent]'), evs.length ? feedPanel(evs, ps.pos, m, feedAll) : html`<p class="pf-note">${mode === 'snapshot' ? 'Game-level coverage: this source publishes set and game scores only, so there is no point feed and no server. The scoreboard shows the latest observed games.' : 'No stored events for this match yet.'}</p>`);
+    renderIf($('[data-recent]'), evs.length ? feedPanel(evs, ps.pos, m, feedAll) : html`<p class="pf-note">${mode === 'snapshot' ? 'Game-level live: set and game scores only, so there is no point feed and no server. The game-by-game rail shows every observed game.' : 'No stored events for this match yet.'}</p>`);
     const rg = recentGames(evs, ps.pos, { mode });
-    renderIf($('[data-intel]'), html`${rg ? html`<p class="v4-rg"><b>${playerLinks(m, 'A')}</b> won <b class="tabnum">${rg.A}</b> · <b>${playerLinks(m, 'B')}</b> won <b class="tabnum">${rg.B}</b> <small>of the last ${rg.window} ${rg.basis}</small></p>` : ''}${pulsePanel(data, m, state, ps.pos, data.mode.includes('live'))}`);
-    renderIf($('[data-games]'), gamesPanel(evs, ps.pos, m));
+    const run = gameRun(gameLedger(evs, ps.pos));
+    const prun = gran === 'point' && !isPoint ? pointRun(evs, ps.pos, m) : null;
+    const runs = [run && run.games >= 2 ? `${run.games} straight games · ${sideName(m, run.side)}` : null, run?.break_hold ? `Break + hold · ${sideName(m, run.side)}` : null, prun ? `${prun.points} straight proven points · ${sideName(m, prun.side)}` : null].filter(Boolean);
+    renderIf($('[data-intel]'), html`${runs.length ? html`<ul class="v5-runs">${runs.map((r) => html`<li>${r}</li>`)}</ul>` : ''}${rg ? html`<p class="v4-rg"><b>${playerLinks(m, 'A')}</b> won <b class="tabnum">${rg.A}</b> · <b>${playerLinks(m, 'B')}</b> won <b class="tabnum">${rg.B}</b> <small>of the last ${rg.window} ${rg.basis}</small></p>` : ''}${pulsePanel(data, m, state, ps.pos, data.mode.includes('live'))}`);
+    renderIf($('[data-games]'), gamesPanel(evs, ps.pos, m, gran, state));
     renderIf($('[data-nav]'), navBar(evs, ps.pos));
     if (pmX) { const sec = $('[data-pm-sec]'); if (sec) sec.hidden = false; renderIf($('[data-prematch]'), prematchPanel(pmX, m)); }
     // controls: re-render only when their own state changes (keeps focus)
@@ -715,6 +744,7 @@ export function mount(root, { params, live = null }) {
       if (mk === 'FINAL') stageFlash(`MATCH · ${surnameUp(m, cur.winner_side)}`, 'match');
       else if (mk === 'SET') stageFlash(`SET · ${surnameUp(m, cur.winner_side)}`, 'set');
     }
+    staleUpdate();
     lastPainted = ps.pos;
   }
 
@@ -765,6 +795,17 @@ export function mount(root, { params, live = null }) {
     if (d.mode.includes('live') && !poll) poll = setInterval(() => load(false), 15000);
   };
 
+  // live but quiet: say so (never fill the gap) — refreshed every 15 s from the last stored observation time
+  function staleUpdate() {
+    const el = root.querySelector('[data-stale]');
+    if (!el || !data) return;
+    const last = data.events.at(-1);
+    const st = staleness(last?.observed_at || last?.event_at || null, { live: data.mode.includes('live') && !['completed', 'retired', 'walkover'].includes(data.match.status) });
+    el.hidden = !st.stale;
+    el.textContent = st.stale ? `No new observation for ${st.minutes} min — showing the last observed state` : '';
+  }
+  const staleTick = setInterval(staleUpdate, 15000);
+
   const onClick = (e) => {
     const b = e.target.closest('[data-act],[data-seek],[data-speed],[data-jump]');
     if (!b || !data) return;
@@ -811,7 +852,7 @@ export function mount(root, { params, live = null }) {
   root.addEventListener('click', onClick);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); clearTimeout(kxTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); clearTimeout(kxTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); clearInterval(staleTick); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };

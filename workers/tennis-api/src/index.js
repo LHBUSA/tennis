@@ -114,7 +114,7 @@ export async function liveRows(store, now = Date.now()) {
 
 async function live(store) {
   const rows = await liveRows(store);
-  return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server only where the source publishes them (official WTA feed), game-level state from the secondary source for ATP events' });
+  return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server where the live source publishes them (point-level live), set and game scores only otherwise (game-level live)' });
 }
 
 async function editionsInWindow(store, from, to, all) {

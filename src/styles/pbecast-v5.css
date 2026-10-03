@@ -1,0 +1,72 @@
+/* PBEcast V5 — event-driven live court (src/lib/pbecast-court.js). State visualization only: whole halves of the
+   court light up for OBSERVED transitions; nothing here draws a ball path, bounce, placement or player position. */
+
+/* granularity chip beside the mode badge */
+.pbc-gran { display: inline-flex; align-items: center; font: 800 10.5px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; padding: 6px 9px; border-radius: 999px; background: var(--court-50); color: var(--court-700); border: 1px solid rgba(15, 74, 55, 0.18); }
+.pbc-mode[data-gran="game"] .pbc-gran { background: #eef1ec; color: #3d4a43; }
+
+/* receiver-side break-point pressure band (observed break point only) */
+.court .c-pressure { fill: rgba(255, 106, 99, 0.12); animation: v5pressure 1.8s ease-in-out infinite; }
+@keyframes v5pressure { 0%, 100% { fill: rgba(255, 106, 99, 0.08); } 50% { fill: rgba(255, 106, 99, 0.2); } }
+
+/* one-shot pulse on the half of the side that won the observed point / game / set */
+.court .c-react { fill: rgba(255, 236, 150, 0); animation: v5react 1.1s ease-out; }
+.court .c-react.k-break, .court .c-react.k-set, .court .c-react.k-match, .court .c-react.k-bp_saved { animation: v5major 1.6s ease-out; }
+@keyframes v5react { 0% { fill: rgba(255, 236, 150, 0.34); } 100% { fill: rgba(255, 236, 150, 0); } }
+@keyframes v5major { 0% { fill: rgba(226, 187, 92, 0.55); } 35% { fill: rgba(226, 187, 92, 0.4); } 100% { fill: rgba(226, 187, 92, 0.06); } }
+
+/* game-level live: the last confirmed game's half, a quiet tint (never a serve marker) */
+.court .c-last { fill: rgba(243, 246, 241, 0.07); }
+.court-key.court-last { left: auto; right: 10px; }
+.court-key.court-last small { opacity: 0.75; }
+
+/* reaction caption tones */
+.court-banner.tone-point { font-size: clamp(13px, 1.7vw, 16px); background: rgba(6, 32, 25, 0.88); color: var(--on-dark); box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16); }
+.court-banner.tone-quiet { font-size: 12px; background: rgba(6, 32, 25, 0.7); color: var(--on-dark-2); }
+.court-banner.tone-game { background: #f3f6f1; color: var(--night); }
+.court-banner.tone-major { background: var(--gold-bright); color: var(--night); box-shadow: 0 0 0 4px rgba(226, 187, 92, 0.35); }
+
+/* live, but no new observation for a while: say so, never fill the gap */
+.court-stale { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); max-width: calc(100% - 24px); font: 700 11.5px/1.25 var(--f-ui); color: #ffe7a3; background: rgba(6, 32, 25, 0.86); border: 1px dashed rgba(255, 231, 163, 0.5); border-radius: 8px; padding: 6px 10px; text-align: center; }
+.court-stale[hidden] { display: none; }
+
+/* game-by-game action rail */
+.gr { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.gr-i { display: grid; grid-template-columns: 72px 66px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 34px; padding: 3px 6px; border-radius: 8px; position: relative; }
+.gr-i.k-break { background: var(--gold-soft); }
+.gr-i.k-span { background: repeating-linear-gradient(135deg, #f4f6f2 0 6px, #eceff0 6px 12px); }
+.gr-i.set-end { box-shadow: inset 0 -2px 0 var(--gold); padding-bottom: 8px; }
+.gr-at { font: 700 11.5px/1 var(--f-data); color: var(--muted); white-space: nowrap; }
+.gr-k { font: 800 10.5px/1 var(--f-display); letter-spacing: 0.13em; text-align: center; padding: 5px 0; border-radius: 4px; background: var(--court-50); color: var(--court-700); }
+.gr-i.k-break .gr-k { background: var(--gold-bright); color: var(--night); }
+.gr-i.k-tb .gr-k { background: #e9e4f7; color: #3f2f7a; }
+.gr-i.k-span .gr-k { background: #fff; color: #4b5560; }
+.gr-who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 13px/1.25 var(--f-ui); }
+.gr-who small { color: var(--muted); font-weight: 600; }
+.gr-sc { font: 800 13px/1 var(--f-data); color: var(--ink); }
+.gr-set { position: absolute; right: 6px; bottom: -6px; font: 800 9px/1 var(--f-display); letter-spacing: 0.14em; font-style: normal; color: var(--gold); background: var(--white); padding: 1px 4px; }
+.gr-sep { font: 800 10px/1 var(--f-display); letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); padding: 8px 6px 2px; }
+.gr-now { background: var(--court-800); color: var(--on-dark); grid-template-columns: 72px 66px minmax(0, 1fr); grid-auto-rows: auto; }
+.gr-now .gr-at, .gr-now .gr-who small { color: var(--on-dark-2); }
+.gr-now .gr-k { background: var(--live); color: #fff; }
+.gr-now .gr-who a { color: var(--on-dark); }
+.gr-pts { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 5px; padding: 2px 0 4px; }
+.gr-pt { width: 11px; height: 11px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35); }
+.gr-pt.s-A { background: #d9ec3a; }
+.gr-pt.s-B { background: #8fd3ff; }
+.gr-pt.saved { box-shadow: 0 0 0 2px var(--gold-bright); }
+.gr-pt:last-child { animation: v5dot 0.6s ease-out; }
+@keyframes v5dot { 0% { transform: scale(0.2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+/* runs (only where the observed history proves them) */
+.v5-runs { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.v5-runs li { font: 800 11px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; padding: 6px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--night); }
+
+@media (max-width: 480px) {
+  .gr-i { grid-template-columns: 58px 56px minmax(0, 1fr) auto; gap: 6px; }
+  .court-stale { top: 46px; font-size: 10.5px; }
+  .court-key.court-last { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .court .c-pressure, .court .c-react, .gr-pt:last-child { animation: none !important; }
+}

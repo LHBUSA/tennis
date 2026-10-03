@@ -21,7 +21,7 @@ export function mount(root) {
         <li><b>Same tour only.</b> ATP and WTA players are separate populations; a percentile never pools the two.</li>
         <li><b>Percentiles</b> need at least ${PERCENTILE_MIN_PEERS} same-tour peers with medium or high confidence on that metric; a comparison is published once ${COMPARATIVE_MIN} same-tour players qualify.</li>
         <li><b>PBE Rating</b> is published for a tour only where it beats a ranking-based baseline out of sample; otherwise it is held.</li>
-        <li><b>Sources.</b> Men’s results come from official Grand Slam feeds and, for the ATP Tour, a secondary source (ESPN); women’s from the official WTA feed, its player histories and the same secondary source. Every snapshot lists its source families.</li>
+        <li><b>Sources.</b> Men’s results come from official Grand Slam feeds and, for the ATP Tour, a secondary source; women’s from official WTA data, its player histories and the same secondary source. Every snapshot lists its source families.</li>
       </ul>
     </div></section>
     ${Object.keys(MFAMILY).map((f) => html`<section class="mod"><header class="mod-h"><h2>Match DNA · ${MFAMILY[f]}</h2></header><div class="mod-b">

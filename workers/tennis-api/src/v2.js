@@ -183,7 +183,10 @@ export async function pbecast(store, id) {
   const data = {
     contract: 'pbecast/1.0.0', match: { ...m, players }, mode,
     quality: hasPoints ? 'point_event' : snaps.length ? 'score_snapshot' : null,
-    cadence_note: hasPoints ? 'every point as published by the source' : m.source === 'espn' ? 'game-level observation of a secondary source (not an official ATP feed) about once a minute while live (measured; occasionally twice) — it publishes set and game scores only, so no point score or server is shown; changes between two observations are shown as one update' : 'periodic observation of the source, measured about once a minute while live (occasionally twice); a change between two observations is shown as one update and never reconstructed',
+    // public copy is source-neutral (provenance stays in meta.source / the match's own source field)
+    cadence_note: hasPoints ? 'every point as published' : m.source === 'espn' ? 'game-level live: set and game scores observed about once a minute while live (measured; occasionally twice), so no point score or server is shown; changes between two observations are shown as one update' : 'point-level live: score and server observed about once a minute while live (measured; occasionally twice); a change between two observations is shown as one update and never reconstructed',
+    // 'point' = score + server per observation (or source point events); 'game' = set/game scores only; null = no live state
+    live_granularity: hasPoints || snaps.some((e) => e.state?.point) || m.live?.point ? 'point' : m.source === 'espn' || snaps.length || (m.sets || []).length ? 'game' : null,
     events, moments: keyMoments(events), control: matchControl(hasPoints ? gamesFromPoints(points).map((g) => ({ event_detail: { game_won: { winner: g.winner, result: g.result } } })) : events),
     games: hasPoints ? gamesFromPoints(points) : null,
     statistics: stats.length ? Object.fromEntries(stats.map((s) => [s.side, s.stats])) : null,

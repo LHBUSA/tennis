@@ -64,7 +64,7 @@ for (const w of WIDTHS) {
       if (s.srv) bad.push('server shown on a game-level source');
       if (s.pt && /\d/.test(s.pt)) bad.push(`point score shown: ${s.pt}`);
       if (s.feed) bad.push(`point feed rows on snapshot: ${s.feed}`);
-      if (!/Game-level coverage/.test(s.note)) bad.push('snapshot feed note missing');
+      if (!/Game-level live/.test(s.note)) bad.push('snapshot feed note missing');
       if (s.bp) bad.push('break-point table on snapshot');
       if (!s.pm || /\d+(\.\d)?%/.test(s.pm)) bad.push('free teaser missing or leaks numbers');
     } else {

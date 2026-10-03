@@ -37,7 +37,11 @@ export function serveCourt(point, inTiebreak) {
  * model = { doubles, server: 'A'|'B'|null, point: {A,B}|null, tiebreak: bool, highlight: 'A'|'B'|null,
  *           ball: {x,y}|null (source coordinates only), trail: [{x,y}] (source coordinates only),
  *           serveIndicator: bool, surface: 'hard'|'clay'|'grass'|null, simulation: bool,
- *           landscape: bool }
+ *           landscape: bool, pressure: 'A'|'B'|null, react: { kind, side }|null, lastGame: 'A'|'B'|null }
+ * State overlays (whole halves of the court, never a position):
+ *   pressure — the returner's half while they hold an observed break point;
+ *   react    — a one-shot pulse on the half of the side that won the observed point / game / set;
+ *   lastGame — game-level live only: the half of the side that won the last confirmed game (NOT a server marker).
  * landscape: the SAME drawing turned a quarter (a proper rotation, never a mirror): side A's baseline on the left, B's on
  * the right. Geometry, serve side and service box are unchanged; only the view is rotated (wide screens).
  * Two different balls, never confused:
@@ -76,6 +80,11 @@ export function courtSvg(model = {}) {
     const by = model.server === 'A' ? -L - 0.9 : L + 0.9;
     s += serveMarker(0, by, model.serveIndicator);
   }
+  const half = (side, cls) => { const y0 = side === 'A' ? -L : 0, y1 = side === 'A' ? 0 : L; return `<rect class="${cls}" x="${X(-D)}" y="${Y(y1)}" width="${(2 * D).toFixed(3)}" height="${(y1 - y0).toFixed(3)}"/>`; };
+  const sideOk = (x) => x === 'A' || x === 'B';
+  if (sideOk(model.lastGame)) s += half(model.lastGame, 'c-last');
+  if (sideOk(model.pressure)) s += half(model.pressure, 'c-pressure');
+  if (model.react && sideOk(model.react.side)) s += half(model.react.side, `c-react k-${String(model.react.kind).replace(/[^a-z_]/g, '')}`);
   if (model.highlight) {
     const y0 = model.highlight === 'A' ? -L : 0, y1 = model.highlight === 'A' ? 0 : L;
     s += `<rect class="c-hl" x="${X(-D)}" y="${Y(y1)}" width="${(2 * D).toFixed(3)}" height="${(y1 - y0).toFixed(3)}"/>`;

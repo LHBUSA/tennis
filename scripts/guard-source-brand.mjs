@@ -29,6 +29,12 @@ const FORBIDDEN = [
   new RegExp(String.raw`\(${PROVIDERS}[^)]{0,40}\)`, 'g'),
   // operational setup must never reach customers
   /wrangler secret put|npx wrangler|C:\\\\Workers/gi,
+  // Tennis (2026-10-03, PBEcast Phase 2): official-feed wording and upstream hosts never reach customers
+  /official WTA (?:live[- ])?(?:feed|API|scoring)/gi,
+  /WTA (?:live )?feed/gi,
+  /wtatennis\.com/gi,
+  /ausopen\.com/gi,
+  /Australian Open (?:feed|match[- ]cent(?:re|er)|scores? API)/gi,
 ];
 // Publisher / sportsbook / broadcaster names that merely contain a provider word.
 const BENIGN = /\bESPN ?BET\b|\bESPN\+|\bESPN2\b|\bESPNU\b|\bESPN Deportes\b|\bWatchESPN\b/gi;
