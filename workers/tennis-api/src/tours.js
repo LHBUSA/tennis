@@ -44,7 +44,7 @@ export async function coveredEditions(store, from, to, { extra = 'tennis_tournam
     store.select('tennis_tournament_editions', `${sel}&${win}&level=${inList(TOUR_LEVELS)}`),
     // ONE query: each ESPN candidate edition embeds at most one of its men's singles matches (index on edition_id;
     // an edition without one embeds []) — no per-edition probes, so a multi-year window stays one request
-    store.select('tennis_tournament_editions', `${sel},tennis_matches(match_id)&tennis_matches.event_type=eq.MS&tennis_matches.limit=1&${win}&level=is.null&source_family=eq.espn`).catch(() => [])
+    store.select('tennis_tournament_editions', `${sel},tennis_matches(match_id)&tennis_matches.event_type=eq.MS&tennis_matches.limit=1&${win}&level=is.null&source_family=eq.espn`).catch(() => []) // source-brand:allow (PostgREST filter, not customer copy)
   ]); // an ATP-query failure degrades to the official tours, never fails the page
   const atpIds = new Set(espn.filter((e) => Array.isArray(e.tennis_matches) && e.tennis_matches.length).map((e) => e.edition_id));
   return [...tour, ...espn.map(({ tennis_matches: _ms, ...e }) => e)]
