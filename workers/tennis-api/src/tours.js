@@ -9,9 +9,10 @@
 
 import { inList } from '../../shared/store/postgrest.js';
 import { TOUR_LEVELS } from './shape.js';
-import { TOUR_COVERAGE } from '../../shared/tour-coverage.js';
+import { TOUR_COVERAGE as REGISTRY_COVERAGE, publicCoverage } from '../../shared/tour-coverage.js';
 
-export { TOUR_COVERAGE };
+// API contract: customer-safe coverage (registry_source stays on the Sources page only).
+export const TOUR_COVERAGE = Object.freeze(publicCoverage(REGISTRY_COVERAGE));
 
 export const TOUR_FILTERS = ['atp', 'wta', 'wta-125', 'grand-slam'];
 const ATP_COMPETITIONS = new Set([null, 'atp_finals']);

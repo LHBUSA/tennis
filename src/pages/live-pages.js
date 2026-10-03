@@ -160,7 +160,7 @@ export const tournament = mountWith((root, { params }, signal) => {
         <div><p class="eyebrow">Dates</p><b>${fmtRange(e.start_date, e.end_date)}</b></div>
         <div><p class="eyebrow">Surface</p><b>${cap(e.surface || '—')}${e.indoor === true ? ' · indoor' : e.indoor === false ? ' · outdoor' : ''}</b></div>
         <div><p class="eyebrow">Location</p><b>${where || '—'}</b>${e.venue?.slug ? html` <a href="/venues/${e.venue.slug}">venue page</a>` : ''}<br><small class="note">${e.venue?.precision === 'city' ? 'City from the source; the venue itself is not named by our source.' : ''}</small></div>
-        <div><p class="eyebrow">Category</p><b>${e.level || (e.tour === 'atp' ? 'ATP Tour' : '—')}</b>${!e.level && e.tour === 'atp' ? html`<br><small class="note">Secondary source (ESPN); it publishes no tournament level or surface.</small>` : ''}</div>
+        <div><p class="eyebrow">Category</p><b>${e.level || (e.tour === 'atp' ? 'ATP Tour' : '—')}</b>${!e.level && e.tour === 'atp' ? html`<br><small class="note">PropSports secondary source; it publishes no tournament level or surface.</small>` : ''}</div>
       </div></div>
       <nav class="tabs ev-tabs" aria-label="Events"><a href="/tournaments/${params.slug}/${params.year}" ${!want && !qual ? raw('aria-current="page"') : ''}>All events <small>${d.matches.length}</small></a>${events.map((ev) => html`<a href="/tournaments/${params.slug}/${params.year}/${EVENT_SLUG[ev]}" ${want === ev ? raw('aria-current="page"') : ''}>${eventLabel(ev)} <small>${count(ev)}</small></a>`)}${hasQ ? html`<a href="/tournaments/${params.slug}/${params.year}/qualifying" ${qual ? raw('aria-current="page"') : ''}>Qualifying <small>${d.matches.filter(isQ).length}</small></a>` : ''}</nav>
       ${live.length ? html`<h2 class="sec">Live now</h2>${matchList(live, { showTournament: false })}` : ''}
@@ -296,7 +296,7 @@ export const rankingsHub = mountWith((root) => {
 });
 
 // ---- players + search --------------------------------------------------------------------------------
-const ATP_DISCLOSURE = 'ATP singles list carried by a secondary source (ESPN), not an official ATP feed';
+const ATP_DISCLOSURE = 'ATP singles list carried by a secondary source, not an official ATP feed';
 const atpTable = (k) => html`<h2 class="sec">ATP singles <small>list dated ${fmtDate(k.ranking_date)} · ${k.rows.length}</small></h2>
   ${rankingTable(k)}
   <p class="note">${k.disclosure || ATP_DISCLOSURE} · dated when that source last updated it${k.previous_date ? ` · movement vs our archived list of ${fmtDate(k.previous_date)}` : ''}.</p>`;
@@ -536,7 +536,7 @@ export const player = mountWith(async (root, { params }, signal) => {
     <section class="mod" data-stories hidden><header class="mod-h"><h2>Tennis intelligence</h2><a class="mod-k" href="/news">Newsroom →</a></header><div data-stories-list></div></section>
     ${md?.recent?.length ? html`<section class="mod"><header class="mod-h"><h2>Match history</h2><span class="mod-k">singles · last ${md.recent.length}</span></header>${historyTable(md)}</section>` : html`<section class="mod"><header class="mod-h"><h2>Recent matches</h2></header><div class="mod-b">${p.recent_matches.length ? matchList(p.recent_matches.slice(0, 12)) : html`<p class="note">No matches stored yet.</p>`}</div></section>`}
     ${f?.top_opponents?.length ? html`<section class="mod"><header class="mod-h"><h2>Head-to-head</h2><span class="mod-k">most-played opponents in the store</span></header><ul class="opp">${f.top_opponents.map((o) => html`<li><a href="/h2h/${p.slug}/${o.slug}">${o.name}</a><b>${o.W}–${o.L}</b></li>`)}</ul></section>` : ''}
-    <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">Canonical id <code>${p.id}</code>. Linked source ids: ${p.external_ids.map((e) => `${e.provider}:${e.id}`).join(' · ')}</p></div></section>
+    <section class="mod"><header class="mod-h"><h2>Identity</h2></header><div class="mod-b"><p class="note">PropSports id <code>${p.id}</code>. DATA · PropSports</p></div></section>
   `);
   fillStories(root, `player=${p.id}`, signal);
 });

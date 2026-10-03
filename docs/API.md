@@ -3,9 +3,14 @@
 Every response:
 
 ```json
-{ "ok": true, "data": {}, "meta": { "source": [], "fetched_at": "", "source_updated_at": "", "age_s": 0,
-  "freshness": "CURRENT", "semantics": "", "degraded": [] } }
+{ "ok": true, "data": {}, "meta": { "data_source": "PropSports", "source": [], "fetched_at": "", "source_updated_at": "", "age_s": 0,
+  "freshness": "CURRENT", "semantics": "", "degraded": [], "deprecated": {} } }
 ```
+
+Data brand (2026-10-03): `meta.data_source` is always `"PropSports"`. **Deprecated, compatibility only** (kept working;
+removed in a future versioned contract): `meta.source` (upstream source families) and `data.external_ids` on player
+documents (upstream crosswalk ids; use the PropSports canonical `data.id` / `data.slug`). `meta.deprecated` lists them.
+`coverage` / `tour_coverage` carry customer-safe source labels; the upstream detail stays on the Sources page.
 
 Freshness: `CURRENT | CACHED | STALE | UNAVAILABLE | ERROR | NOT_CONFIGURED`
 (`workers/shared/envelope.js`).

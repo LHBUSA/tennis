@@ -6,7 +6,8 @@ export const TOUR_COVERAGE = Object.freeze({
   atp: {
     label: 'ATP Tour',
     provenance: 'secondary',
-    source: 'ESPN (secondary source; not an official ATP feed)',
+    source: 'PropSports secondary source (not an official ATP feed)',
+    registry_source: 'ESPN (secondary source; not an official ATP feed)', // source-brand:allow (Sources registry only; stripped from the API by publicCoverage)
     tournaments_results: 'ATP Tour events and results 2007–present (singles, doubles, mixed); tournament level and surface are not published by this source',
     schedule: 'fixtures only once the secondary source lists them (usually the draw and the next day’s order of play)',
     live: 'set and game score from the secondary source while a match is observed live; no point-by-point',
@@ -21,9 +22,13 @@ export const TOUR_COVERAGE = Object.freeze({
     tournaments_results: 'WTA 125 editions', schedule: 'official order of play', live: 'official live score with point score and server', rankings: 'official WTA singles and doubles lists'
   },
   'grand-slam': {
-    label: 'Grand Slams', provenance: 'official + secondary', source: 'official Grand Slam feeds where accessible, else the WTA feed (women) and ESPN (men, secondary)',
+    label: 'Grand Slams', provenance: 'official + secondary', source: 'official Grand Slam feeds where accessible, else the WTA feed (women) and a PropSports secondary source (men)',
+    registry_source: 'official Grand Slam feeds where accessible, else the WTA feed (women) and ESPN (men, secondary)', // source-brand:allow (Sources registry only; stripped from the API by publicCoverage)
     tournaments_results: 'every event of each edition we hold: men’s and women’s singles and doubles, mixed doubles, qualifying',
     schedule: 'as each source publishes it', live: 'as each source publishes it', rankings: 'n/a'
   }
 });
 
+// Customer contract (network standard DATA · PropSports): the registry-only upstream detail never leaves the API.
+export const publicCoverage = (c) => (c && typeof c === 'object' ? Object.fromEntries(Object.entries(c).map(([k, v]) => [k, v && typeof v === 'object' && 'label' in v ? (({ registry_source, ...rest }) => rest)(v) : v])) : c);
+export const publicTourCoverage = (v) => (v ? (({ registry_source, ...rest }) => rest)(v) : v);
