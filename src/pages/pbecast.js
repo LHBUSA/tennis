@@ -31,6 +31,7 @@ import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state
 import { kalshi, marketPollMs } from '../data/kalshi.js';
 import { marketHistoryCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel, finalLine } from '../ui/live-market.js';
+import { watchPanel, wireWatch } from '../ui/watch.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 import { liveGranularity, gameLedger, actionRail, currentGame, courtReaction, gameRun, pointRun, provenPoints, hasSpatial, staleness } from '../lib/pbecast-court.js';
 
@@ -611,6 +612,7 @@ export function mount(root, { params, live = null }) {
     if (ctl.signal.aborted) return;
     kx = e;
     paintKx();
+    paintFinal();
     scheduleKx();
   }
   loadKx(false);
@@ -621,6 +623,43 @@ export function mount(root, { params, live = null }) {
     return e?.state || { status: m.status, sets: (m.sets || []).map((x) => ({ A: x.A, B: x.B, tb: x.tb })), point: m.live?.point || null, server: m.live?.server || null };
   };
 
+  // ---- FINAL state of this URL: summary (what happened) -> PBEcast replay -> how the market closed -> watch -> story.
+  // Nothing is switched off when a match ends; the page gains the post-match modules as they become available.
+  let finVideos = null;
+  let finStories = null;
+  const isFinal = () => ['completed', 'retired', 'walkover'].includes(data?.match?.status);
+  function paintFinal() {
+    const el = $('[data-final]');
+    if (!el || !data) return;
+    if (!isFinal() || !data.match.winner_side) { el.innerHTML = ''; return; }
+    const m = data.match;
+    const w = m.winner_side;
+    const l = w === 'A' ? 'B' : 'A';
+    const score = String(m.score || '').split(/\s+/).map((t) => (w === 'B' ? t.replace(/^(\d+)-(\d+)/, (_, a, b) => `${b}-${a}`) : t)).join(' ');
+    const t = m.tournament || {};
+    const ctx = [t.tournament, roundLabel(m.round), eventLabel(m.event_type), m.duration_s ? fmtDuration(m.duration_s) : null].filter(Boolean).join(' · ');
+    const nav = [['#pbc-stage', 'PBEcast replay'], kx && ['CLOSED', 'SETTLED'].includes(kx.market?.lifecycle) ? ['#pbc-market', 'How the market closed'] : null, finVideos?.length ? ['#pbc-watch', 'Watch'] : null, finStories?.length ? ['#pbc-story', 'Match story'] : null].filter(Boolean);
+    const next = String(html`<section class="fin" aria-label="Final result"><div class="fin-top"><span class="fin-chip">${m.status === 'retired' ? 'FINAL · RET.' : m.status === 'walkover' ? 'WALKOVER' : 'FINAL'}</span><span class="fin-ctx">${ctx}</span></div>
+      <p class="fin-res">${playerLinks(m, w)} <small>def.</small> ${playerLinks(m, l)} <span class="fin-score tabnum">${m.status === 'walkover' ? '' : score}</span></p>
+      ${nav.length ? html`<nav class="fin-nav" aria-label="On this page">${nav.map(([h, label]) => html`<a href="${h}">${label}</a>`)}</nav>` : ''}</section>`);
+    if (el.__fin !== next) { el.__fin = next; el.innerHTML = next; }
+  }
+  async function finalExtras() {
+    if (!isFinal()) return;
+    const id = data.match.id;
+    const [v, n] = await Promise.all([api(`/v1/matches/${id}/videos`, { signal: ctl.signal }).catch(() => null), api(`/v1/news?match=${id}&limit=3`, { signal: ctl.signal }).catch(() => null)]);
+    if (ctl.signal.aborted || !data || data.match.id !== id) return;
+    finVideos = Array.isArray(v?.data) ? v.data : [];
+    finStories = (n?.data?.articles || []).filter((a) => a.slug && a.headline);
+    const m = data.match;
+    const wsec = $('[data-watch-sec]');
+    const wv = watchPanel(finVideos, { context: [sideName(m, 'A'), 'vs', sideName(m, 'B'), '·', m.tournament?.tournament, roundLabel(m.round)].filter(Boolean).join(' ') });
+    if (wsec) { wsec.hidden = !wv; render($('[data-watch]'), raw(wv)); }
+    const ssec = $('[data-story-sec]');
+    if (ssec) { ssec.hidden = !finStories.length; render($('[data-story]'), finStories.length ? html`<ul class="mst">${finStories.map((a) => html`<li><a href="/news/${a.slug}"><b>${a.headline}</b>${a.dek ? html`<small>${a.dek}</small>` : ''}</a></li>`)}</ul>` : ''); }
+    paintFinal();
+  }
+
   function buildShell() {
     const m = data.match;
     const t = m.tournament || {};
@@ -628,11 +667,12 @@ export function mount(root, { params, live = null }) {
     render($('[data-pbc]'), html`
       <h1 class="sr">${title} — PBEcast</h1>
       <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${[roundLabel(m.round), eventLabel(m.event_type), t.level, t.surface ? `${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : null, m.court].filter(Boolean).join(' · ')}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
+      <div class="page" data-final></div>
       <div class="v3-score-wrap page"><div class="v3-score" data-score></div></div>
       <div class="page pbc-kx" data-kx-strip></div>
       <p class="sr" aria-live="polite" aria-atomic="true" data-announce></p>
       <div class="v4-hero page" data-hero></div>
-      <div class="v3-stage page" data-stage>
+      <div class="v3-stage page" id="pbc-stage" data-stage>
         <div class="v3-courtcol">
           ${pidShell(m, 'B')}
           <div class="v3-court" data-court></div>
@@ -652,7 +692,10 @@ export function mount(root, { params, live = null }) {
       </div>
       <p class="pbc-note page">${freshnessBadge(data.meta)} ${data.cadence_note}${data.quality === 'point_event' ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'} <a href="#pbc-more">More intelligence ↓</a></p>
       <div class="page pbc-panels" id="pbc-more">
+        <span id="pbc-market" class="pbc-anchor"></span>
         <div class="pbc-kxh" data-kx-history-slot></div>
+        <section class="mod" id="pbc-watch" data-watch-sec hidden><header class="mod-h"><h2>Watch</h2><span class="mod-k">Official video</span></header><div class="mod-b" data-watch></div></section>
+        <section class="mod" id="pbc-story" data-story-sec hidden><header class="mod-h"><h2>Match story</h2></header><div class="mod-b" data-story></div></section>
         <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${data.moments.length ? html`<div class="km">${data.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
         <div class="grid-2">
           <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${playerLinks(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${playerLinks(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>
@@ -761,6 +804,7 @@ export function mount(root, { params, live = null }) {
       else if (mk === 'SET') stageFlash(`SET · ${surnameUp(m, cur.winner_side)}`, 'set');
     }
     staleUpdate();
+    paintFinal();
     lastPainted = ps.pos;
   }
 
@@ -789,6 +833,7 @@ export function mount(root, { params, live = null }) {
       ps = initialState({ live: d.mode.includes('live'), count: d.events.length, deepLinkIndex: i, speed: ps?.speed || DEFAULT_SPEED });
       buildShell();
       paint(false);
+      finalExtras();
       if (first && ['MS', 'WS'].includes(d.match.event_type) && d.match.sides?.A?.players?.length === 1 && d.match.sides?.B?.players?.length === 1) {
         getMembership({ signal: ctl.signal }).then(async (mem) => {
           pmX = mem?.entitled ? { state: 'ok', data: (await api(`/v1/matchups/${d.match.id}`, { signal: ctl.signal }).catch(() => null))?.data || null } : { state: 'free' };
@@ -809,6 +854,8 @@ export function mount(root, { params, live = null }) {
       schedule();
     }
     if (d.mode.includes('live') && !poll) poll = setInterval(() => load(false), 15000);
+    // FINAL: the live loop stops; the page is now the replay / history of the match
+    else if (!d.mode.includes('live') && poll) { clearInterval(poll); poll = null; }
   };
 
   // live but quiet: say so (never fill the gap) — refreshed every 15 s from the last stored observation time
@@ -866,6 +913,7 @@ export function mount(root, { params, live = null }) {
     if (e.key === 'ArrowLeft') { ps = step(ps, -1, data.events.length); paint(false); schedule(); e.preventDefault(); }
   };
   root.addEventListener('click', onClick);
+  wireWatch(root, ctl.signal);
   root.addEventListener('keydown', onKey);
   load(true);
   return () => { ctl.abort(); clearTimeout(kxTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); clearInterval(staleTick); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };

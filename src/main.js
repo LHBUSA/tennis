@@ -17,6 +17,7 @@ import './styles/pbecast-v3.css';
 import './styles/pbecast-v4.css';
 import './styles/pbecast-v5.css';
 import './styles/live-market.css';
+import './styles/watch.css';
 import './styles/matchup.css';
 import './vendor/kalshi/kalshi-market-ui.css';
 import './styles/kalshi.css';

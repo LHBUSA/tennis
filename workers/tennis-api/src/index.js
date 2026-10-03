@@ -163,6 +163,14 @@ async function todayView(store) {
     latest_results: shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))).slice(0, 40),
     coverage: TOUR_COVERAGE
   };
+  // a finished match has a PBEcast REPLAY only when we stored its events (observed live or source points): one row per
+  // match (its first event) — the homepage never claims a replay for a result-only match
+  const fin = data.latest_results.map((m) => m.id);
+  if (fin.length) {
+    const first = await store.select('tennis_match_events', `select=match_id,quality&event_sequence=eq.0&match_id=${inList(fin)}`).catch(() => []);
+    const q = new Map(first.map((e) => [e.match_id, e.quality === 'point_event' ? 'point' : 'observed']));
+    for (const m of data.latest_results) m.replay = q.get(m.id) || null;
+  }
   return ok(data, { rows: matches, policy: { currentS: 300, staleS: 1800 }, semantics: 'editions in progress today across the ATP Tour (secondary source), WTA Tour, WTA 125 and the Grand Slams, and their observed matches', degraded: ['ATP Challenger and ITF match data are not yet acquirable; ATP Tour data comes from a secondary source (see /v1/sources)'] });
 }
 

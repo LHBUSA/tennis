@@ -10,6 +10,7 @@ import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
 import { leaderBoard } from '../lib/v4.js';
 import { liveGroups, nextMatch, orderTournaments, latestSlams, heroPick, playersToWatch, tourStatus } from '../lib/home.js';
+import { liveRecentItems } from '../ui/live-recent.js';
 import { section, rail, wireRails, heroMedia, statusBar, tourLines, TOURS_PENDING, matchCard, tournamentCard, playerCard, dnaColumnsSkeleton, dnaBoard, pbecastLive, replayCard, coverageCards } from '../ui/home.js';
 
 const menWomen = (m) => { const g = eventGender(m); return g === 'mixed' ? null : g; };
@@ -46,6 +47,7 @@ export function mount(root) {
       </div>
     </section>
     <div class="hm-status" data-status aria-live="polite"><div class="hm-in"><p class="hm-st-msg">Checking live matches…</p>${tourLines(TOURS_PENDING, { state: 'pending' })}</div></div>
+    <div data-lr>${section({ id: 'h-lr', hook: 'lrbody', title: 'Live & recent', sub: 'Live courts and the latest finals: PBEcast, how the market priced it and the official highlights.', link: '/pbecast', linkLabel: 'All PBEcasts' })}</div>
     <div data-next>${section({ id: 'h-next', ...NEXT.upcoming })}</div>
     ${section({ id: 'h-tours', hook: 'tours', title: 'Tournament coverage', sub: 'Live coverage, draws, results and intelligence for every tournament we cover.', link: '/tournaments', linkLabel: 'All tournaments', cls: 'hm-alt' })}
     ${section({ id: 'h-players', hook: 'players', title: 'Players to watch', sub: 'Grand Slam champions and finalists, then the ATP and WTA leaders.', link: '/players', linkLabel: 'All players' })}
@@ -71,6 +73,16 @@ export function mount(root) {
     const list = ensureEach(src, 10, menWomen).slice(0, 10);
     render(el, section({ id: 'h-next', ...NEXT[mode], body: rail(list.map(matchCard), { label: NEXT[mode].label, cls: 'hm-rail-match' }) }));
   };
+  // LIVE & RECENT: live courts + the latest finals (replay, market close and official video indicators)
+  let videos = {};
+  const drawLR = () => {
+    const el = $('[data-lrbody]');
+    if (!el || !today) return;
+    const items = liveRecentItems(today, videos);
+    render(el, items.length ? rail(items, { label: 'live and recent matches', cls: 'hm-rail-match lr-rail' }) : html`<p class="hm-note">No live match and no recent final right now.</p>`);
+    paintKalshiLines(el);
+  };
+  api('/v1/videos/recent', { signal: ctl.signal }).then((r) => { videos = r?.data || {}; drawLR(); }).catch(() => {});
   const drawTours = () => {
     const el = $('[data-tours]');
     if (!el || (!today && !slams)) return;
@@ -98,13 +110,14 @@ export function mount(root) {
     let t = null;
     // Kalshi board for the match rail, read alongside /v1/today (bounded; a late board fills the rail's slots in place)
     const kb = kalshi.loadBoard();
-    kb.then(() => { if (!ctl.signal.aborted) paintKalshiLines($('[data-next]')); }).catch(() => {});
+    kb.then(() => { if (!ctl.signal.aborted) { paintKalshiLines($('[data-next]')); paintKalshiLines($('[data-lrbody]')); } }).catch(() => {});
     try { [t] = await Promise.all([api('/v1/today', { signal: ctl.signal }), bounded(kb)]); } catch (e) { if (ctl.signal.aborted) return; }
     const d = t?.data || null;
     const st = $('[data-status]');
     if (st) render(st, html`<div class="hm-in">${statusBar(d, liveGroups(d?.live), nextMatch(d?.upcoming), d ? tourStatus(d.live, d.upcoming) : null)}</div>`);
     if (!d) return;
     today = d;
+    drawLR();
     drawNext();
     paintKalshiLines($('[data-next]'));
     drawTours();

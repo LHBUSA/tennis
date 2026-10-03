@@ -16,7 +16,9 @@ const pub = (v) => ({
   video_type: v.video_type, label: LABEL[v.video_type] || 'Video', thumbnail: `https://i.ytimg.com/vi/${v.video_id}/hqdefault.jpg`,
   embeddable: v.embeddable === true, availability: v.embeddable === true ? 'embeddable' : 'unverified', confidence: v.link?.confidence || null
 });
-const rank = (vs) => vs.slice().sort((a, b) => (RANK[a.video_type] ?? 9) - (RANK[b.video_type] ?? 9) || String(b.published_at).localeCompare(String(a.published_at)));
+// within a type: the tour's / tournament's own channel before the rights holder, then newest
+const CLASS = { tournament_official: 0, tour_official: 0, rights_holder: 1 };
+const rank = (vs) => vs.slice().sort((a, b) => (RANK[a.video_type] ?? 9) - (RANK[b.video_type] ?? 9) || (CLASS[a.channel_class] ?? 2) - (CLASS[b.channel_class] ?? 2) || String(b.published_at).localeCompare(String(a.published_at)));
 
 export async function videoRoute(path, env) {
   const m = /^\/v1\/matches\/([0-9a-f-]{36})\/videos$/.exec(path);
@@ -41,8 +43,8 @@ export async function videoRoute(path, env) {
   const cat = (await kv.get(KV_CATALOG, 'json')) || { videos: [] };
   const byId = new Map(cat.videos.map((v) => [v.video_id, v]));
   const vs = rank(ids.map((id) => byId.get(id)).filter((v) => v && v.status === 'linked' && v.embeddable !== false && RANK[v.video_type] && RANK[v.video_type] <= 4));
-  // one video per type and per id (a channel never duplicates; two channels may post the same match: keep both, ranked)
+  // no duplicates: ONE video per type (two official channels often post the same match's highlights)
   const seen = new Set();
-  const data = vs.filter((v) => (seen.has(v.video_id) ? false : seen.add(v.video_id))).slice(0, 4).map(pub);
+  const data = vs.filter((v) => (seen.has(v.video_type) ? false : seen.add(v.video_type))).slice(0, 4).map(pub);
   return envelope(data, { ...meta, semantics: 'official videos linked to this match, best first: full match replay > extended highlights > match highlights > interview' });
 }

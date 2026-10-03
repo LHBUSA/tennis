@@ -1,0 +1,55 @@
+// Completed-match page (PBEcast FINAL state), WATCH, homepage LIVE & RECENT, and the permanent live-cache regressions.
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { watchPanel } from '../src/ui/watch.js';
+import { liveRecentItems } from '../src/ui/live-recent.js';
+
+const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
+const V = (video_type, extra = {}) => ({ video_id: 'Qd4MQBnmF5A', title: 'Elena Rybakina vs. Alina Charaeva | 2026 Beijing Round 2 | WTA Match Highlights', channel: 'WTA', channel_class: 'tour_official', published_at: '2026-10-03T15:22:00Z', video_type, ...extra });
+
+test('WATCH: the label is the real video type; highlights are never called a replay; poster first, no autoplay on load', () => {
+  const h = watchPanel([V('match_highlights')]);
+  assert.match(h, /MATCH HIGHLIGHTS/); assert.doesNotMatch(h, /FULL MATCH REPLAY|full replay/i);
+  assert.match(h, /i\.ytimg\.com\/vi\/Qd4MQBnmF5A\/hqdefault\.jpg/); assert.doesNotMatch(h, /<iframe/, 'the player loads only on click');
+  assert.match(h, /Watch on YouTube/); assert.match(h, /Official · WTA/); assert.match(h, /not hosted by PropBetEdge/);
+  assert.match(watchPanel([V('full_match', { title: 'Tatjana Maria vs. Jelena Ostapenko Full Match | 2026 US Open Round 1', channel: 'US Open' })]), /FULL MATCH REPLAY/);
+  assert.equal(watchPanel([]), ''); assert.equal(watchPanel([V('short')]), '', 'shorts / unknown types never render');
+  assert.equal(watchPanel([{ ...V('match_highlights'), video_id: 'not-an-id' }]), '', 'only real video ids');
+  const src = read('../src/ui/watch.js');
+  assert.match(src, /youtube-nocookie\.com\/embed\//); assert.doesNotMatch(src, /youtube\.com\/embed\//);
+});
+
+test('PBEcast FINAL state keeps the court and adds summary -> replay -> market close -> watch -> story; live polling stops', () => {
+  const cast = read('../src/pages/pbecast.js');
+  const order = ['data-final', 'data-score', 'id="pbc-stage"', 'id="pbc-market"', '<div class="pbc-kxh" data-kx-history-slot>', 'id="pbc-watch"', 'id="pbc-story"'].map((k) => cast.indexOf(k));
+  assert.ok(order.every((i) => i > 0) && order.every((i, k) => k === 0 || i > order[k - 1]), `page order ${order}`);
+  assert.match(cast, /else if \(!d\.mode\.includes\('live'\) && poll\) \{ clearInterval\(poll\); poll = null; \}/);
+  assert.match(cast, /api\(`\/v1\/matches\/\$\{id\}\/videos`/); assert.match(cast, /api\(`\/v1\/news\?match=\$\{id\}&limit=3`/);
+  assert.match(cast, /marketHistoryCard\(kx, \{ placement: 'pbecast-replay' \}\)/, 'market close = the shared history contract');
+});
+
+test('homepage LIVE & RECENT: live first, then finals; replay only when events are stored; market only from the shared board', () => {
+  const live = { id: 'l1', status: 'in_progress', event_type: 'WS', round: 'M-2', tour: 'wta', tournament: { name: 'Adana', level: 'WTA 125' }, sides: { A: { players: [{ last_name: 'Ruzic' }] }, B: { players: [{ last_name: 'Jeanjean' }] } }, sets: [{ A: 3, B: 4 }] };
+  const fin = (id, replay) => ({ id, status: 'completed', winner_side: 'B', score: '6-3 4-6 3-6', event_type: 'WS', round: 'M-2', tour: 'wta', replay, tournament: { name: 'Beijing' }, sides: { A: { players: [{ last_name: 'Rybakina' }] }, B: { players: [{ last_name: 'Charaeva' }] } } });
+  const items = liveRecentItems({ live: [live], latest_results: [fin('f1', 'observed'), fin('f2', null), { ...fin('wo', null), status: 'walkover' }] }, { f1: { best: 'match_highlights' } }).map(String);
+  assert.equal(items.length, 3, 'walkovers are not recent finals');
+  assert.match(items[0], /LIVE/); assert.match(items[0], /Live PBEcast/); assert.match(items[0], /data-kx-line="l1"/);
+  assert.match(items[1], /<b>Charaeva<\/b> def\. Rybakina <span class="tabnum">3-6 6-4 6-3<\/span>/, 'winner-side score');
+  assert.match(items[1], /PBEcast replay/); assert.match(items[1], /▶ Highlights/);
+  assert.match(read('../src/ui/live-recent.js'), /kalshiSlot\(m, 'hm-kx'\)/, 'finals use the shared slot: it renders only when the shared board recorded a close');
+  assert.doesNotMatch(items[2], /PBEcast replay|▶/, 'no replay claimed without stored events; no video badge without a linked video');
+  assert.doesNotMatch(read('../src/ui/live-recent.js'), /kalshi\.com|\bbp\b|mid_bp/, 'no market data hard-coded in the component');
+});
+
+test('live-cache regressions (2026-10-03): no multi-hour browser TTL on live data; live reads bypass the browser cache; Last updated = observation', () => {
+  const api = read('../workers/tennis-api/src/index.js');
+  const ttl = (re) => Number(new RegExp(`\\[/\\^\\\\/v1\\\\/${re}[^,]*, (\\d+)\\]`).exec(api)?.[1]);
+  assert.ok(ttl('live') <= 30 && ttl('pbecast') <= 30 && ttl('today') <= 60, `live ${ttl('live')} pbecast ${ttl('pbecast')} today ${ttl('today')}`);
+  assert.match(api, /r\.headers\.set\('cache-control', `public, max-age=\$\{ttl\}`\)/, 'edge hits re-stamped with the route TTL');
+  assert.match(read('../src/data/api.js'), /LIVE_PATH\.test\(path\) \? \{ cache: 'no-store' \}/);
+  // the state card / stale chip use the stored observation time (observed_at), never the poll time
+  const cast = read('../src/pages/pbecast.js');
+  assert.match(cast, /const when = e\.event_at \|\| e\.observed_at;/);
+  assert.match(cast, /staleness\(last\?\.observed_at \|\| last\?\.event_at \|\| null/);
+});

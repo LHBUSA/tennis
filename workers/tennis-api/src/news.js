@@ -95,7 +95,8 @@ export async function newsRoute(path, url, store, env) {
     const player = url.searchParams.get('player');
     const tslug = url.searchParams.get('tournament');
     const tyear = url.searchParams.get('year');
-    const filt = `${player && /^[0-9a-f-]{36}$/.test(player) ? `&player_ids=cs.{${player}}` : ''}${tslug && /^[a-z0-9-]{1,80}$/.test(tslug) ? `&tournament->>slug=eq.${tslug}` : ''}${tyear && /^\d{4}$/.test(tyear) ? `&tournament->>year=eq.${tyear}` : ''}`;
+    const matchId = url.searchParams.get('match'); // stories about one canonical match (the completed-match page)
+    const filt = `${matchId && /^[0-9a-f-]{36}$/.test(matchId) ? `&match_id=eq.${matchId}` : ''}${player && /^[0-9a-f-]{36}$/.test(player) ? `&player_ids=cs.{${player}}` : ''}${tslug && /^[a-z0-9-]{1,80}$/.test(tslug) ? `&tournament->>slug=eq.${tslug}` : ''}${tyear && /^\d{4}$/.test(tyear) ? `&tournament->>year=eq.${tyear}` : ''}`;
     const rows = await store.select('tennis_articles', `select=${LIST}&${statusQ}${desk !== 'all' ? `&desk=eq.${desk}` : ''}${filt}&order=published_at.desc.nullslast,updated_at.desc,article_id.desc&limit=${limit}`);
     const photos = await currentPhotos(store, rows.flatMap((r) => storyContext(r).featured_ids));
     return envelope({ desk, desks: DESKS, articles: rows.map((r) => shapeCard(r, photos)), preview }, { source: ['propbetedge'], source_updated_at: rows[0]?.updated_at || null, policy: { currentS: 300, staleS: 3600 }, semantics: rows.length ? 'published PropBetEdge Tennis stories, newest first' : 'no published stories yet: every story must pass the evidence gates (a quiet day publishes nothing)' });
