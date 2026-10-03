@@ -87,7 +87,7 @@ try {
           prose_words: proseWords, structured_words: structuredWords, header_words: headerWords, page_words: allWords,
           structured_share: proseWords + structuredWords ? Math.round((structuredWords / (proseWords + structuredWords)) * 100) : null,
           headings: [...body.querySelectorAll('section > h2')].map((h) => h.innerText),
-          blocks, min_prose_between_visuals: (() => { const xs = blocks.filter((b) => !/nf-method/.test(b.kind)).slice(1).map((b) => b.prose_before); return xs.length ? Math.min(...xs) : null; })(),
+          blocks, min_prose_between_visuals: (() => { const xs = blocks.filter((b) => !/nf-method|nf-intel/.test(b.kind)).slice(1).map((b) => b.prose_before); return xs.length ? Math.min(...xs) : null; })(),
           appendix_modules: appendix ? appendix.querySelectorAll(':scope > .mod, :scope > figure, :scope > section').length : 0,
           overflow: document.documentElement.scrollWidth > window.innerWidth + 1, scroll_width: document.documentElement.scrollWidth,
           canonical: document.querySelector('link[rel=canonical]')?.href || null, robots: document.querySelector('meta[name=robots]')?.content || null,

@@ -30,7 +30,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '4.0.0';
+export const VERSION = '4.0.1';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
