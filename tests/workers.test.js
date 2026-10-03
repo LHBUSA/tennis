@@ -46,12 +46,47 @@ test('tennis-api premium intelligence fails closed without verified membership',
 });
 
 
-test('PropSports service bridge bypasses consumer membership only for Player DNA', async () => {
+test('PropSports service bridge exposes exactly the 25 approved Tennis routes', async () => {
   const env = {};
-  const dna = await propsportsFetch(new Request('https://internal.test/v1/players/x/dna'), env);
-  assert.notEqual(dna.status, 401, 'trusted service path must not require browser membership');
-  const other = await propsportsFetch(new Request('https://internal.test/v1/dna/leaders'), env);
-  assert.equal(other.status, 404, 'service bridge must not become a general premium bypass');
+  const id = '11111111-1111-1111-1111-111111111111';
+  const approved = [
+    '/v1/today',
+    '/v1/live',
+    '/v1/tournaments',
+    '/v1/tournaments/wimbledon/2026',
+    `/v1/matches/${id}`,
+    '/v1/players',
+    '/v1/players/carlos-alcaraz',
+    '/v1/players/carlos-alcaraz/dna',
+    '/v1/rankings',
+    '/v1/h2h/carlos-alcaraz/jannik-sinner',
+    '/v1/schedule',
+    '/v1/sources',
+    '/v1/men',
+    '/v1/men/players',
+    '/v1/slams',
+    `/v1/pbecast/${id}`,
+    '/v1/matchups',
+    `/v1/matchups/${id}`,
+    '/v1/players-to-watch',
+    '/v1/dna/leaders',
+    '/v1/players/carlos-alcaraz/profile',
+    '/v1/search?q=alcaraz',
+    '/v1/venues/arthur-ashe-stadium',
+    `/v1/matches/${id}/broadcast`,
+    '/v1/coverage',
+  ];
+  assert.equal(approved.length, 25);
+  for (const path of approved) {
+    const res = await propsportsFetch(new Request(`https://internal.test${path}`), env);
+    assert.notEqual(res.status, 404, `approved PropSports route must be bridged: ${path}`);
+    assert.notEqual(res.status, 401, `approved PropSports route must bypass browser membership: ${path}`);
+  }
+
+  for (const path of ['/v1/news', '/v1/odds', '/v1/pbe-picks', '/v1/track-record', '/v1/breakout-watch', '/v1/doubles/pairs/example']) {
+    const res = await propsportsFetch(new Request(`https://internal.test${path}`), env);
+    assert.equal(res.status, 404, `unapproved route must stay outside the PropSports bridge: ${path}`);
+  }
 });
 
 test('tennis-api keeps top-of-funnel PBEcast and capped DNA preview public', async () => {

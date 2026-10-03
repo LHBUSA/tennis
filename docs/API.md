@@ -35,3 +35,10 @@ Base: `https://tennis-api.propbetedge.ai`. Edge-cached per route (live 15 s … 
 
 Run ledgers: `tennis-ingest GET/POST /v1/runs` (POST needs `Bearer INGEST_ADMIN_TOKEN`),
 `tennis-live /v1/live/runs` (last live cycle), `tennis-model /v1/model/runs`, `tennis-news /v1/news/runs`.
+
+
+## PropSports service bridge
+
+The named Cloudflare service entrypoint `PropSportsTennis` is for the PropSports API gateway after PropSports has validated its own API key and Tennis entitlement. It bypasses the consumer All Access membership check only for the 25 explicitly commercialized Tennis routes: the 10 core routes above plus schedule, sources, men, men/players, slams, PBEcast match, matchup board/detail, players-to-watch, DNA leaders, player profile, search, venue, match broadcast, and coverage.
+
+It does **not** expose `/v1/news`, `/v1/odds`, `/v1/pbe-picks`, `/v1/track-record`, `/v1/breakout-watch`, or doubles pair profiles through PropSports. Those remain outside the service bridge until their product/data contracts are separately approved.
