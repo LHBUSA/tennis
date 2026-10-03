@@ -168,13 +168,19 @@ export async function writeMatches(store, sourceMatches, edition, opts = {}) {
  * Several editions in one batched pass (identical rules per edition): groups = [{ edition, sourceMatches }].
  * Cross-source matching, writes and hold resolution run once for all groups instead of once per edition.
  */
-export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false } = {}) {
+export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false, trace = false } = {}) {
   const result = { written: 0, held: 0, changes: 0, skipped: 0, attached: 0, taken_over: 0, duplicate_candidates: 0 };
+  // trace (live lanes): one internal reason code per incoming source row — never a silent drop
+  const outcome = new Map();
   const normalized = [];
   const holds = [];
   for (const { edition, sourceMatches } of groups) for (const sm of sourceMatches) {
     // matches without both sides decided yet (TBD slots) are not matches yet
-    if (!(sm.sides?.A?.length && sm.sides?.B?.length) || [...sm.sides.A, ...sm.sides.B].some((m) => !m.provider_id || !realProviderId(m.provider, m.provider_id))) { result.skipped += 1; continue; }
+    if (!(sm.sides?.A?.length && sm.sides?.B?.length) || [...sm.sides.A, ...sm.sides.B].some((m) => !m.provider_id || !realProviderId(m.provider, m.provider_id))) {
+      result.skipped += 1;
+      outcome.set(sm.provider_match_id, !(sm.sides?.A?.length && sm.sides?.B?.length) ? 'SKIPPED_SIDE_UNDECIDED' : `SKIPPED_UNRESOLVED_PLAYER:${[...sm.sides.A, ...sm.sides.B].filter((m) => !m.provider_id || !realProviderId(m.provider, m.provider_id)).map((m) => m.provider_id || 'none').join('+').slice(0, 60)}`);
+      continue;
+    }
     if (!sm.status) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: sm.warnings || ['no_status'], payload: slim(sm), capture_id: captureId }); continue; }
     const n = await normalizeMatch(sm);
     if (!n.canonical) { holds.push({ provider: sm.provider, entity_type: 'match', external_id: sm.provider_match_id, problems: n.problems, payload: slim(sm), capture_id: captureId }); continue; }
@@ -306,6 +312,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     await writeSnapshotEvents(store, keep, captureId);
     if (changes.length) await store.insert('tennis_source_changes', changes.map((c) => ({ entity_type: c.entity_type, entity_id: c.entity_id, field: c.field, kind: c.kind, from_value: c.from_value, to_value: c.to_value, source_family: c.source_family, capture_id: c.capture_id })));
     result.written = keep.length;
+    for (const x of keep) outcome.set(x.sm.provider_match_id, 'WRITTEN');
     result.changes = changes.length;
     // a later clean observation resolves an earlier hold for the same source row
     const resolvedIds = [...keep, ...attach].map((x) => x.sm.provider_match_id);
@@ -328,6 +335,13 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
   }
   await hold(store, dedupe(holds, (h) => `${h.provider}:${h.external_id}`));
   result.held = holds.length;
+  if (trace) {
+    for (const h of holds) outcome.set(h.external_id, `HELD:${String(h.problems?.[0] || 'unknown').slice(0, 80)}`);
+    for (const x of attach) if (!outcome.has(x.sm.provider_match_id)) outcome.set(x.sm.provider_match_id, 'ATTACHED');
+    for (const x of normalized) if (!outcome.has(x.sm.provider_match_id)) outcome.set(x.sm.provider_match_id, 'NOT_WRITTEN');
+    for (const { sourceMatches } of groups) for (const sm of sourceMatches) if (!outcome.has(sm.provider_match_id)) outcome.set(sm.provider_match_id, 'DROPPED_UNCLASSIFIED');
+    result.outcomes = Object.fromEntries(outcome);
+  }
   return result;
 }
 

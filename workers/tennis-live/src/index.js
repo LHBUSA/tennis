@@ -15,8 +15,11 @@ import { health } from '../../shared/health.js';
 import { SourceClient } from '../../shared/http.js';
 import { storeFromEnv } from '../../shared/store/postgrest.js';
 import { providerFor, livePolicies, LIVE_PROVIDERS } from './router.js';
+import { dryReplay } from './diag.js';
 
-export const VERSION = '0.3.1';
+export const VERSION = '0.3.2';
+export const DIAG_KEY = 'live:diag:espn';
+const DIAG_MAX = 400;
 const ROUNDS = 3;          // CONFIGURED polls per run per live edition (intention; see CADENCE for what is measured)
 const GAP_MS = 18000;      // spacing between rounds
 const MAX_EDITIONS = 8;
@@ -53,6 +56,7 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   }
   const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0 };
   const out = [];
+  const diag = []; // ESPN (game-level) live pipeline stage trace, kept in a bounded internal KV ring (no payloads)
   let stillLive = editions;
   let lastRoundMs = 0;
   for (let i = 0; i < rounds && stillLive.length; i += 1) {
@@ -67,7 +71,9 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
       let provider;
       let r;
       try { provider = providerFor(ed); r = await provider.observe(ctx, ed); } catch (e) { r = { state: 'ERROR', error: String(e?.message || e).slice(0, 200) }; }
-      out.push({ round: i, source: provider?.key || null, event: ed.source === 'espn' ? ed.event_id : `${ed.event_id}-${ed.year}`, state: r.state, written: r.written, changes: r.changes, live: r.live, error: r.error });
+      out.push({ round: i, source: provider?.key || null, event: ed.source === 'espn' ? ed.event_id : `${ed.event_id}-${ed.year}`, state: r.state, written: r.written, changes: r.changes, live: r.live, error: r.error,
+        ...(provider?.key === 'espn' ? { held: r.held ?? null, skipped: r.skipped ?? null, attached: r.attached ?? null, trace: r.trace || null } : {}) });
+      if (provider?.key === 'espn' && r.trace && Object.keys(r.trace).length) diag.push({ at: new Date().toISOString(), round: i, event: ed.event_id, state: r.state, live: r.live ?? 0, written: r.written ?? 0, held: r.held ?? 0, skipped: r.skipped ?? 0, error: r.error || null, trace: r.trace });
       if (r.state === 'PASS' && r.live) next.push(ed);
     }
     stillLive = next;
@@ -75,6 +81,11 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   }
   const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out };
   await kv.put('tennis-live:last_run', JSON.stringify(s));
+  if (diag.length) {
+    const ring = ((await kv.get(DIAG_KEY, 'json')) || []).concat(diag).slice(-DIAG_MAX);
+    await kv.put(DIAG_KEY, JSON.stringify(ring), { expirationTtl: 4 * 86400 });
+    for (const d of diag) console.log(JSON.stringify({ espn_live_diag: d }));
+  }
   return s;
 }
 
@@ -87,15 +98,26 @@ export default {
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
       try { return json({ ok: true, data: await liveCycle(env, { rounds: 1 }) }, { headers: { 'cache-control': 'no-store' } }); } catch (e) { return json({ ok: false, error: String(e?.stack || e).slice(0, 800) }, { status: 500 }); }
     }
+    // internal forensic surfaces (admin token): the ESPN stage-trace ring and the dry replay of archived payloads
+    if (path === '/v1/live/diag' || path === '/v1/live/diag/replay') {
+      const auth = request.headers.get('authorization') || '';
+      if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      if (path === '/v1/live/diag') return json({ ok: true, data: (await env.TENNIS_STATE.get(DIAG_KEY, 'json')) || [] }, { headers: { 'cache-control': 'no-store' } });
+      if (request.method !== 'POST') return json({ ok: false, error: 'POST a replay spec' }, { status: 405 });
+      try { return json({ ok: true, data: await dryReplay(env, storeFromEnv(env), await request.json()) }, { headers: { 'cache-control': 'no-store' } }); } catch (e) { return json({ ok: false, error: String(e?.stack || e).slice(0, 800) }, { status: 500 }); }
+    }
     if (path === '/v1/live/runs') {
       const last = env.TENNIS_STATE ? await env.TENNIS_STATE.get('tennis-live:last_run', 'json') : null;
       return json({ ok: !!last, data: last, meta: { semantics: 'most recent live cycle' } }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
-  async scheduled(_e, env, ctx) {
-    ctx.waitUntil(liveCycle(env).catch(async (e) => {
+  // The cycle is AWAITED: work handed to ctx.waitUntil after the handler returns is cut off ~30 s later, and a live cycle
+  // runs up to its 50 s budget (23 s measured with nothing ATP-live). The ESPN edition runs last, so a cut there loses
+  // its writes silently after its reads were archived (2026-10-03 Beijing forensics).
+  async scheduled(_e, env) {
+    await liveCycle(env).catch(async (e) => {
       if (env.TENNIS_STATE) await env.TENNIS_STATE.put('tennis-live:last_error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 800) }));
-    }));
+    });
   }
 };

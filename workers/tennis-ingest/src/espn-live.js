@@ -95,18 +95,24 @@ export async function espnLiveObserve(ctx, eventId, { league = 'atp', maxStatus 
   const cands = liveCandidates(json, { now, previously, league });
   const liveMap = {};
   const statuses = {};
+  // per-competition stage trace (internal): every candidate ends with a reason code, never a silent drop
+  const trace = {};
+  const mark = (id, code) => { (trace[id] ||= []).push(code); };
+  for (const c of cands.slice(maxStatus)) mark(c.id, 'STATUS_BUDGET_EXCEEDED');
   for (const c of cands.slice(0, maxStatus)) {
+    mark(c.id, c.prev ? 'CANDIDATE_PREVIOUSLY_LIVE' : 'CANDIDATE_IN_WINDOW');
     const st = await fetchRun(ctx, espn.espnCompetitionStatus, { eventId, compId: c.id });
-    if (st.state !== 'PASS') { statuses[c.id] = `error:${st.error || st.state}`; continue; }
+    if (st.state !== 'PASS') { statuses[c.id] = `error:${st.error || st.state}`; mark(c.id, `STATUS_FETCH_FAILED:${st.state}`); continue; }
     statuses[c.id] = st.records[0].name;
-    if (st.records[0].name !== 'STATUS_IN_PROGRESS') continue;
+    if (st.records[0].name !== 'STATUS_IN_PROGRESS') { mark(c.id, `NOT_LIVE:${st.records[0].name}`); continue; }
     const ls = [];
     for (const cid of c.competitors) {
       const r = await fetchRun(ctx, espn.espnLinescores, { eventId, compId: c.id, competitorId: cid });
       ls.push(r.state === 'PASS' ? r.records[0].rows : null);
     }
-    if (ls.some((x) => !x)) { statuses[c.id] = 'STATUS_IN_PROGRESS:linescores_unavailable'; continue; }
+    if (ls.some((x) => !x)) { statuses[c.id] = 'STATUS_IN_PROGRESS:linescores_unavailable'; mark(c.id, 'LINESCORES_UNAVAILABLE'); continue; }
     liveMap[c.id] = { A: ls[0], B: ls[1], period: st.records[0].period, observed_at: new Date(now).toISOString() };
+    mark(c.id, 'LIVE');
   }
   const touched = new Set([...Object.keys(liveMap), ...previously]);
   const comps = (json.competitions || []).filter((c) => touched.has(String(c.id)));
@@ -116,13 +122,29 @@ export async function espnLiveObserve(ctx, eventId, { league = 'atp', maxStatus 
   const compOf = (m) => m.provider_match_id.split(':').pop();
   // live now, or live last time and now carrying a proven result (status set by the result line)
   const keep = parsed.matches.filter((m) => liveMap[compOf(m)] || (previously.includes(compOf(m)) && m.status && m.status !== 'scheduled' && m.status !== 'in_progress'));
+  for (const id of touched) {
+    const m = parsed.matches.find((x) => compOf(x) === id);
+    if (!m) mark(id, `NOT_PARSED:${(parsed.skipped.find((x) => String(x.id || '').endsWith(`:${id}`))?.reason || 'absent').slice(0, 60)}`);
+    else if (!keep.includes(m)) mark(id, `NOT_KEPT:${m.status || 'no_status'}`);
+    else mark(id, `NORMALIZED:${m.status}`);
+  }
   let w = { written: 0, held: 0, changes: 0 };
   if (keep.length && dry) return { state: 'PASS', dry: true, source: 'espn', event: eventId, edition_id, name: first.edition.name, live: Object.keys(liveMap).length, statuses, would_write: keep.map((m) => ({ id: m.provider_match_id, event_type: m.event_type, status: m.status, sets: m.sets.map((x) => `${x.games.A}-${x.games.B}`).join(' ') })) };
   if (keep.length) {
     const [row] = await ctx.store.select('tennis_tournament_editions', `select=edition_id,surface,indoor&edition_id=eq.${edition_id}`);
     // the espn_atp lane creates the edition (it reads current events from two days before their start)
-    if (!row) return { state: 'EDITION_PENDING', edition_id, live: Object.keys(liveMap).length, statuses };
-    w = await writeMatches(ctx.store, keep, { edition_id, surface: row.surface ?? null, indoor: row.indoor ?? first.edition.indoor ?? null }, { captureId: res.capture?.capture_id || null, dedupe: true });
+    if (!row) { for (const m of keep) mark(compOf(m), 'EDITION_PENDING'); return { state: 'EDITION_PENDING', edition_id, live: Object.keys(liveMap).length, statuses, trace }; }
+    for (const m of keep) mark(compOf(m), 'WRITE_ATTEMPTED');
+    try {
+      w = await writeMatches(ctx.store, keep, { edition_id, surface: row.surface ?? null, indoor: row.indoor ?? first.edition.indoor ?? null }, { captureId: res.capture?.capture_id || null, dedupe: true, trace: true });
+    } catch (e) {
+      const msg = String(e?.message || e).slice(0, 200);
+      for (const m of keep) mark(compOf(m), `WRITE_FAILED:${msg}`);
+      return { state: 'WRITE_FAILED', error: msg, edition_id, live: Object.keys(liveMap).length, statuses, trace };
+    }
+    for (const m of keep) mark(compOf(m), w.outcomes?.[m.provider_match_id] || 'WRITE_RESULT_UNKNOWN');
+    const { outcomes: _o, ...wNoOutcomes } = w;
+    w = wNoOutcomes;
   }
   // still-open competitions stay tracked until a result line (or a non-live status) is observed
   // (a match whose status already says final keeps being tracked until its result line appears; a day-old one is dropped)
@@ -132,7 +154,7 @@ export async function espnLiveObserve(ctx, eventId, { league = 'atp', maxStatus 
     return c && !(c.notes || []).some((n) => RESULT.test(String(n.text))) && !(Number.isFinite(at) && now - at > 24 * 3600e3);
   })])];
   if (!dry) await ctx.kv.put(KV_PREV(eventId), JSON.stringify(next), { expirationTtl: 12 * 3600 });
-  return { state: 'PASS', source: 'espn', event: eventId, edition_id, name: first.edition.name, live: Object.keys(liveMap).length, statuses, ...w };
+  return { state: 'PASS', source: 'espn', event: eventId, edition_id, name: first.edition.name, live: Object.keys(liveMap).length, statuses, trace, ...w };
 }
 
 /** Record a current-season ATP event for live discovery (espn_atp lane, after each current-event read). */
@@ -161,8 +183,12 @@ export async function espnLiveScan(ctx, { today, owned = new Set(), prevLive = n
   const live = [];
   for (const e of events.slice(0, maxEvents)) {
     if (owned.has(e.edition_id)) {
-      out.push({ event: e.id, state: 'OWNED_BY_LIVE' });
-      if (prevLive.has(e.edition_id)) live.push(prevLive.get(e.edition_id));
+      // ownership lasts only while tennis-live still tracks a competition of this event (its KV_PREV list: live now, or
+      // live last time and awaiting its result). Re-adding the old entry unconditionally made ownership self-perpetuating:
+      // Beijing 959-2026 stayed 'owned' from 2026-09-30 with nothing live, so no lane wrote its results or fixtures.
+      const tracked = (await ctx.kv.get(KV_PREV(e.id), 'json')) || [];
+      out.push({ event: e.id, state: tracked.length ? 'OWNED_BY_LIVE' : 'OWNERSHIP_RELEASED', tracked: tracked.length });
+      if (prevLive.has(e.edition_id) && tracked.length) live.push({ ...prevLive.get(e.edition_id), live: tracked.length });
       continue;
     }
     let r;

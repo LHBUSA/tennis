@@ -130,11 +130,13 @@ test('ownership: the ingest discovery scan never observes or writes an edition t
   const state = { event: ESPN_EVENT, status: { 183447: 'STATUS_IN_PROGRESS' }, ls: { 2367: ls([2]), 3209: ls([1]) } };
   const prev = { source: 'espn', league: 'atp', event_id: '959-2026', edition_id: espnEd, live: 1 };
   const owned = { env: {}, store, kv, client: clientFor(state), log: [], upstream: 0, now: NOW };
+  await kv.put('espn:live:959-2026', JSON.stringify(['183447'])); // tennis-live is tracking a competition of this event
   const r = await espnLiveScan(owned, { today, owned: new Set([espnEd]), prevLive: new Map([[espnEd, prev]]) });
   assert.equal(r.out[0].state, 'OWNED_BY_LIVE');
   assert.equal(owned.client.calls.length, 0, 'no upstream read for an owned edition');
   assert.equal(store.rows('tennis_matches').length, 0, 'no write for an owned edition');
-  assert.deepEqual(r.live, [prev], 'the owned edition stays in live:editions');
+  assert.deepEqual(r.live, [prev], 'the owned edition stays in live:editions while a competition is tracked');
+  await kv.put('espn:live:959-2026', JSON.stringify([]));
   // not owned: the scan observes it and hands it to tennis-live as an ESPN entry
   const free = { env: {}, store, kv, client: clientFor(state), log: [], upstream: 0, now: NOW };
   const r2 = await espnLiveScan(free, { today, owned: new Set(), prevLive: new Map() });
@@ -165,4 +167,41 @@ test('ESPN live parsing proves what it writes: contiguous sets, known formats, m
   assert.deepEqual(cands.map((c) => c.id), ['183447', '183472']);
   assert.deepEqual(liveCandidates(ev, { now: Date.parse('2026-09-30T04:00:00Z') }).map((c) => c.id), ['183447']);
   assert.deepEqual(splitEventId('959-2026'), { tid: 959, year: 2026 });
+});
+
+// ---- 2026-10-03 ATP live forensics: every candidate ends with a reason code; ownership is not self-perpetuating ----
+import { espnLiveObserve as observeTraced } from '../workers/tennis-ingest/src/espn-live.js';
+test('ESPN live observe: per-competition stage trace ends in a reason code for every candidate (no silent drop)', async () => {
+  const { store, espnEd } = await seed();
+  const state = { event: ESPN_EVENT, status: { 183447: 'STATUS_IN_PROGRESS', 183472: 'STATUS_IN_PROGRESS' }, ls: { 2367: ls([6], [3]), 3209: ls([4], [2]), '2865-10073': ls([7, 7], [2]), '3700-3511': ls([6, 5], [3]) } };
+  const ctx = { env: {}, store, kv: new MemKV(), client: clientFor(state), log: [], upstream: 0, now: NOW };
+  const r = await observeTraced(ctx, '959-2026', { maxStatus: 4 });
+  assert.equal(r.state, 'PASS');
+  for (const id of ['183447', '183472']) assert.deepEqual(r.trace[id].slice(-4), ['LIVE', 'NORMALIZED:in_progress', 'WRITE_ATTEMPTED', 'WRITTEN'], `${id}: ${r.trace[id]}`);
+  for (const [id, codes] of Object.entries(r.trace)) assert.ok(codes.length && /^(WRITTEN|NOT_LIVE:|STATUS_|LINESCORES_|NOT_PARSED:|NOT_KEPT:|HELD:|ATTACHED|SKIPPED_|EDITION_PENDING|WRITE_FAILED:|STATUS_BUDGET_EXCEEDED)/.test(codes.at(-1)), `${id} ends without a reason: ${codes}`);
+  assert.ok(!('outcomes' in r), 'per-row outcomes stay internal to the trace');
+});
+test('ESPN live observe: a failing write is WRITE_FAILED with its reason, never an opaque PASS', async () => {
+  const { store } = await seed();
+  const state = { event: ESPN_EVENT, status: { 183447: 'STATUS_IN_PROGRESS' }, ls: { 2367: ls([6], [3]), 3209: ls([4], [2]) } };
+  const broken = new Proxy(store, { get: (t, k) => (k === 'upsert' ? async (table, ...a) => { if (table === 'tennis_matches') { const e = new Error('simulated 500'); e.status = 500; throw e; } return t.upsert(table, ...a); } : typeof t[k] === 'function' ? t[k].bind(t) : t[k]) });
+  const r = await observeTraced({ env: {}, store: broken, kv: new MemKV(), client: clientFor(state), log: [], upstream: 0, now: NOW }, '959-2026', { maxStatus: 4 });
+  assert.equal(r.state, 'WRITE_FAILED');
+  assert.match(r.trace['183447'].at(-1), /^WRITE_FAILED:simulated 500/);
+});
+test('ESPN live ownership is released when tennis-live tracks no competition of the event (Beijing 2026-09-30 regression)', async () => {
+  const { espnLiveScan: scan } = await import('../workers/tennis-ingest/src/espn-live.js');
+  const kv = new MemKV();
+  const ed = { edition_id: 'ed-959', event_id: '959-2026', source: 'espn', live: 1 };
+  await kv.put(KV_EVENTS, JSON.stringify({ '959-2026': { edition_id: 'ed-959', name: 'China Open', start_date: '2026-09-26', end_date: '2026-10-11', final: false } }));
+  const ctx = { env: {}, store: new MemStore(), kv, client: clientFor({ event: ESPN_EVENT, status: {}, ls: {} }), log: [], upstream: 0, now: NOW };
+  const owned = new Set(['ed-959']);
+  const prevLive = new Map([['ed-959', ed]]);
+  let r = await scan(ctx, { today: '2026-09-30', owned, prevLive });
+  assert.equal(r.out[0].state, 'OWNERSHIP_RELEASED');
+  assert.equal(r.live.length, 0, 'nothing tracked -> not handed back -> ingest writes the edition again');
+  await kv.put('espn:live:959-2026', JSON.stringify(['183451']));
+  r = await scan(ctx, { today: '2026-09-30', owned, prevLive });
+  assert.equal(r.out[0].state, 'OWNED_BY_LIVE');
+  assert.equal(r.live.length, 1, 'a tracked competition keeps tennis-live as owner');
 });
