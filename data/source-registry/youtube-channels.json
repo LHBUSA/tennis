@@ -1,0 +1,14 @@
+{
+ "version": "tennis-youtube-channels/1",
+ "reviewed_at": "2026-10-03",
+ "policy": "Keyless (owner decision, network-wide): public Atom feed + oEmbed only, never the Data API or a key. A channel is enabled only with two proofs: its feed <title> matches the organisation, AND (YouTube's verified badge, or the organisation's own website links the channel, or Wikidata P2397 on the organisation). The feed title and channel id are re-proved on every run; a mismatch disables the channel for that run. Shorts are never linked. Fan / reupload / compilation channels are never enabled. Videos are embedded poster-first via youtube-nocookie; never downloaded, rehosted or clipped.",
+ "channels": [
+  { "id": "UCaBIVVpHjq6j3tSyxwTE-8Q", "handle": "@WTA", "name": "WTA", "class": "tour_official", "enabled": true, "verification": { "feed_title": "WTA", "checks": ["feed_title_match", "linked_from_official_site:https://www.wtatennis.com (youtube.com/user/WTA -> same channel id)"] } },
+  { "id": "UCY_5h5zaSwN7Or4kIJDYNXA", "handle": "@ATPTour", "name": "ATP Tour", "class": "tour_official", "enabled": true, "verification": { "feed_title": "ATP Tour", "checks": ["feed_title_match", "wikidata:P2397 on Q300008 (ATP Tour)"] } },
+  { "id": "UCbcxFkd6B9xUU54InHv4Tig", "handle": "@TennisTV", "name": "Tennis TV", "class": "rights_holder", "enabled": true, "verification": { "feed_title": "Tennis TV", "checks": ["feed_title_match", "linked_from_official_site:https://www.tennistv.com (youtube.com/tennistv -> same channel id)"] }, "note": "The ATP Tour's official streaming service (rights holder)." },
+  { "id": "UCeTKJSW1NTAkf27nNmjWt5A", "handle": "@australianopen", "name": "Australian Open", "class": "tournament_official", "enabled": true, "verification": { "feed_title": "Australian Open", "checks": ["feed_title_match", "linked_from_official_site:https://ausopen.com (youtube.com/user/australianopentv -> same channel id)"] } },
+  { "id": "UCF3K1Jf8hjFW8qliei8fQ3A", "handle": "@rolandgarros", "name": "Roland-Garros", "class": "tournament_official", "enabled": true, "verification": { "feed_title": "Roland-Garros", "checks": ["feed_title_match", "verified_badge"] } },
+  { "id": "UCNa8NxMgSm7m4Ii9d4QGk1Q", "handle": "@Wimbledon", "name": "Wimbledon", "class": "tournament_official", "enabled": true, "verification": { "feed_title": "Wimbledon", "checks": ["feed_title_match", "verified_badge"] } },
+  { "id": "UCXbboag48Qlr78zzz6SkzkQ", "handle": "@usopen", "name": "US Open", "class": "tournament_official", "enabled": true, "verification": { "feed_title": "US Open Tennis Championships", "checks": ["feed_title_match", "verified_badge"] } }
+ ]
+}

@@ -19,7 +19,7 @@
 export const CAPABILITIES = Object.freeze([
   'calendar', 'draws', 'schedule', 'live_state', 'point_by_point', 'set_game_scoring', 'serve_stats', 'return_stats',
   'match_stats', 'player_identity', 'player_bio', 'rankings_singles', 'rankings_doubles', 'race', 'match_history', 'h2h',
-  'withdrawals_ret_wo', 'qualifying', 'doubles', 'mixed', 'odds', 'news', 'history', 'player_media'
+  'withdrawals_ret_wo', 'qualifying', 'doubles', 'mixed', 'odds', 'news', 'history', 'player_media', 'official_video'
 ]);
 
 export const VERDICTS = Object.freeze(['PASS', 'DEGRADED', 'NOT_AVAILABLE', 'BLOCKED_BY_ACCESS_CONTROL', 'UNVERIFIED', 'COMMERCIAL_REFERENCE_ONLY']);

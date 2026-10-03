@@ -11,6 +11,8 @@
 // A failure in one job never stops the others.
 
 import { json } from '../../shared/envelope.js';
+import { runVideo } from './video.js';
+import { YOUTUBE_HOST, YOUTUBE_POLICY } from '../../providers/youtube.js';
 import { health } from '../../shared/health.js';
 import { SourceClient } from '../../shared/http.js';
 import { storeFromEnv, inList } from '../../shared/store/postgrest.js';
@@ -183,7 +185,7 @@ async function tickLocked(env, store, kv, force, { only = null, budget = null, p
 }
 
 async function tickInner(env, store, kv, force, { only = null, budget = null, params = {} } = {}) {
-  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 }, 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), log: [], steps: [], upstream: 0 };
+  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, [YOUTUBE_HOST]: YOUTUBE_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 }, 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), log: [], steps: [], upstream: 0 };
   // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
   if (only) return laneOnly(ctx, only, budget, params);
   const started = new Date();
@@ -242,6 +244,9 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
 
   // 3. stats
   await step(ctx, 'stats', () => pendingStats(ctx, 20));
+
+  // 2c. official video (keyless YouTube feeds of the verified tennis channels): self-gated to ~every 30 min
+  await step(ctx, 'video', () => runVideo(ctx));
 
   // 4. current rankings
   await step(ctx, 'rankings', async () => {

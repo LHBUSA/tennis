@@ -73,6 +73,7 @@ import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
 import { coveredEditions, editionTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
 import { matchupRoute } from './matchup.js';
+import { videoRoute } from './videos.js';
 import { scheduledRun } from './scheduled.js';
 import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
@@ -340,10 +341,12 @@ const NOT_YET = {
   '/v1/track-record': 'Track Record: no picks have been locked, nothing graded',
 };
 
-const TTL = [[/^\/v1\/matchups/, 600], [/^\/v1\/players-to-watch/, 3600], [/^\/v1\/news/, 60], [/^\/v1\/pbecast/, 15], [/^\/v1\/schedule/, 60], [/^\/v1\/(dna|credits)/, 3600], [/^\/v1\/players\/[^/]+\/(dna|profile)/, 1800], [/^\/v1\/coverage/, 600], [/^\/v1\/search/, 300], [/^\/v1\/venues/, 3600], [/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300], [/^\/v1\/(men|slams)/, 600]];
+const TTL = [[/^\/v1\/matches\/[0-9a-f-]{36}\/videos$/, 300], [/^\/v1\/videos/, 300], [/^\/v1\/matchups/, 600], [/^\/v1\/players-to-watch/, 3600], [/^\/v1\/news/, 60], [/^\/v1\/pbecast/, 15], [/^\/v1\/schedule/, 60], [/^\/v1\/(dna|credits)/, 3600], [/^\/v1\/players\/[^/]+\/(dna|profile)/, 1800], [/^\/v1\/coverage/, 600], [/^\/v1\/search/, 300], [/^\/v1\/venues/, 3600], [/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300], [/^\/v1\/(men|slams)/, 600]];
 
 export async function route(path, url, store, env) {
   if (path === '/v1/sources') return sources();
+  const vid = await videoRoute(path, env);
+  if (vid !== undefined) return vid;
   const news = await newsRoute(path, url, store, env);
   if (news !== undefined) return news;
   const mr = await menRoute(path, url, store);

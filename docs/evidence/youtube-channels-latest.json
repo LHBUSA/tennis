@@ -1,0 +1,105 @@
+{
+ "generated_at": "2026-10-03T16:21:00.577Z",
+ "source": "youtube.feed (keyless official channels)",
+ "channels": [
+  {
+   "handle": "@WTA",
+   "id": "UCaBIVVpHjq6j3tSyxwTE-8Q",
+   "class": "tour_official",
+   "feed_http": 200,
+   "feed_title": "WTA",
+   "entries": 15,
+   "shorts": 7,
+   "proofs": {
+    "feed_title_match": true,
+    "linked_from_official_site": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@ATPTour",
+   "id": "UCY_5h5zaSwN7Or4kIJDYNXA",
+   "class": "tour_official",
+   "feed_http": 200,
+   "feed_title": "ATP Tour",
+   "entries": 15,
+   "shorts": 5,
+   "proofs": {
+    "feed_title_match": true,
+    "wikidata_p2397": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@TennisTV",
+   "id": "UCbcxFkd6B9xUU54InHv4Tig",
+   "class": "rights_holder",
+   "feed_http": 200,
+   "feed_title": "Tennis TV",
+   "entries": 15,
+   "shorts": 4,
+   "proofs": {
+    "feed_title_match": true,
+    "linked_from_official_site": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@australianopen",
+   "id": "UCeTKJSW1NTAkf27nNmjWt5A",
+   "class": "tournament_official",
+   "feed_http": 200,
+   "feed_title": "Australian Open",
+   "entries": 15,
+   "shorts": 6,
+   "proofs": {
+    "feed_title_match": true,
+    "linked_from_official_site": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@rolandgarros",
+   "id": "UCF3K1Jf8hjFW8qliei8fQ3A",
+   "class": "tournament_official",
+   "feed_http": 200,
+   "feed_title": "Roland-Garros",
+   "entries": 15,
+   "shorts": 13,
+   "proofs": {
+    "feed_title_match": true,
+    "verified_badge": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@Wimbledon",
+   "id": "UCNa8NxMgSm7m4Ii9d4QGk1Q",
+   "class": "tournament_official",
+   "feed_http": 200,
+   "feed_title": "Wimbledon",
+   "entries": 15,
+   "shorts": 2,
+   "proofs": {
+    "feed_title_match": true,
+    "verified_badge": true
+   },
+   "passed": true
+  },
+  {
+   "handle": "@usopen",
+   "id": "UCXbboag48Qlr78zzz6SkzkQ",
+   "class": "tournament_official",
+   "feed_http": 200,
+   "feed_title": "US Open Tennis Championships",
+   "entries": 15,
+   "shorts": 5,
+   "proofs": {
+    "feed_title_match": true,
+    "verified_badge": true
+   },
+   "passed": true
+  }
+ ],
+ "all_passed": true
+}

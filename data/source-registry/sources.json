@@ -1177,6 +1177,34 @@
       "notes": "Fetched only through tennis-ingest /v1/drawsheet (polite client, byte-exact R2 archive + capture row). A sheet never mints or merges a player: a slot points at a player already stored in that edition, or stays unresolved.",
       "storage_policy": "raw PDF content-addressed in R2; parsed slots in Supabase with capture id",
       "attribution": null
+    },
+    {
+      "key": "youtube.feed",
+      "family": "youtube",
+      "name": "YouTube — official tennis channels (WTA, ATP Tour, Tennis TV, Australian Open, Roland-Garros, Wimbledon, US Open): public Atom feeds + oEmbed, keyless",
+      "tier": "official_media",
+      "url": "https://www.youtube.com/feeds/videos.xml",
+      "capabilities": [
+        "official_video"
+      ],
+      "verdict": "PASS",
+      "evidence": {
+        "file": "docs/evidence/youtube-channels-latest.json"
+      },
+      "native_ids": {
+        "video": "YouTube video id",
+        "channel": "UC… channel id"
+      },
+      "robots": "robots.txt disallows /feeds/videos.xml; owner decision (network-wide, reaffirmed 2026-10-03): keyless feed + oEmbed ingest, metadata only",
+      "terms": {
+        "url": "https://www.youtube.com/t/terms",
+        "status": "EMBED_ONLY",
+        "quote": "Embedded via the YouTube player; never downloaded, rehosted or clipped."
+      },
+      "production_status": "INGEST — tennis-ingest video step every ~30 min; links one long-form official upload to one canonical match",
+      "notes": "Channels and two proofs each in data/source-registry/youtube-channels.json; re-proved every run (feed title + channel id).",
+      "storage_policy": "feed captures content-addressed in R2; catalog + match links in KV (video:v1:*)",
+      "attribution": "Official video · embedded from YouTube"
     }
   ],
   "rights_decision": {
