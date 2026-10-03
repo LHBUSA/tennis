@@ -160,7 +160,9 @@ async function todayView(store) {
     live: shaped.filter((m) => m.status === 'in_progress' && liveIds.has(m.id)),
     upcoming: shaped.filter((m) => isCurrentUpcoming(m)).sort((a, b) => String(a.scheduled_at || '9').localeCompare(String(b.scheduled_at || '9'))),
     // newest first by when we last observed the result (ESPN rows carry no source timestamp: our write time)
-    latest_results: shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))).slice(0, 40),
+    // up to 20 newest per side of the sport (women's / men's + mixed), merged newest first: a burst of one tour's
+    // results (e.g. a backfill) never pushes the other tour's finals off the list
+    latest_results: (() => { const fin = shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))); return [...fin.filter((m) => /^W/.test(m.event_type || '')).slice(0, 20), ...fin.filter((m) => !/^W/.test(m.event_type || '')).slice(0, 20)].sort((a, b) => matchDay(b).localeCompare(matchDay(a))); })(),
     coverage: TOUR_COVERAGE
   };
   // a finished match has a PBEcast REPLAY only when we stored its events (observed live or source points): one row per

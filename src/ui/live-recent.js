@@ -37,6 +37,12 @@ export function liveRecentCard(m, video = null) {
 /** Live first (deterministic court order), then the latest finals with a winner; walkovers are not "recent finals". */
 export function liveRecentItems(today, videos = {}, { finals = 10 } = {}) {
   const live = orderLive(today?.live || []);
-  const recent = (today?.latest_results || []).filter((m) => FINAL.has(m.status) && m.winner_side).slice(0, finals);
+  // newest finals, men's and women's events interleaved (the newest rows are often one tour's batch of results)
+  const done = (today?.latest_results || []).filter((m) => FINAL.has(m.status) && m.winner_side);
+  const men = done.filter((m) => /^M/.test(m.event_type || ''));
+  const women = done.filter((m) => /^W/.test(m.event_type || ''));
+  const other = done.filter((m) => !/^[MW]/.test(m.event_type || ''));
+  const recent = [];
+  for (let i = 0; recent.length < finals && (i < men.length || i < women.length || i < other.length); i += 1) for (const g of [women, men, other]) if (g[i] && recent.length < finals) recent.push(g[i]);
   return [...live, ...recent].map((m) => liveRecentCard(m, videos[m.id] || null));
 }
