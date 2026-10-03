@@ -62,10 +62,14 @@ describe('vendored component with a real tennis entry', () => {
     for (const o of [a, b]) assert.ok(t.includes(o.abbr) && t.includes(o.contract), o.abbr);
     assert.equal((card.match(/class="kx__panel"/g) || []).length, 2, 'one panel per player');
     assert.match(t, /not sportsbook odds and not a PropBetEdge model/);
+    assert.match(t, /Market Pulse Live prediction market · Kalshi/);
+    assert.match(t, /Live prediction-market pricing — no sportsbook line required/);
     assert.match(t, /Mid-market/);
     assert.doesNotMatch(t, /win probability|chance to win|PBE prediction/i);
     const strip = text(ui.kalshiStrip(e, { placement: 'pbecast' }));
     for (const o of [a, b]) assert.ok(strip.includes(o.abbr), `strip ${o.abbr}`);
+    assert.match(strip, /Market Pulse/);
+    assert.match(strip, /Live prediction-market expectations — no sportsbook line required · Kalshi/);
     for (const ev of BOARD.events) {
       const line = text(ui.kalshiLine(ev));
       for (const o of ev.kalshi.outcomes) assert.ok(line.includes(`${o.abbr} ${(o.mid_bp / 100).toFixed(1)}`), `${ev.event.competition} ${o.abbr}`);
@@ -174,8 +178,8 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
   });
 
   const VENDORED = {
-    'kalshi-market-ui.js': '6f1c1244403f078da96182c7658e0f3da3e3777ccffa80b834257245a2aa2d81',
-    'kalshi-market-ui.css': '43cbdcc9313a82618c38bd3998e020943e0db2031b95ed34ef566e91883901fd',
+    'kalshi-market-ui.js': '0f03224b086e11967329e2a4666ef5327e335fbb32ae251a31a2a543b30e1952',
+    'kalshi-market-ui.css': '572d18127bf6ce357e50b4320e0d98d83b07aa3d6bfb1e1c04c43bee4f009f98',
     'kalshi-market-client.js': '653cb0fc2673f909552453052560bfd6194e0e4d045c51b1eb73483957d4c049'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
