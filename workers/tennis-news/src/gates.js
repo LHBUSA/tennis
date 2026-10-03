@@ -124,7 +124,7 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
     for (const [pid, d] of Object.entries(packet.match_dna || {})) if (d.as_of >= m.date || (d.surface && d.surface.as_of >= m.date)) fail('match_dna_after_event', `${pid} ${d.as_of} >= ${m.date}`);
     for (const rows of Object.values(packet.recent_form || {})) for (const r of rows) if (r.date && r.date > m.date) fail('form_after_event', r.match_id);
     for (const side of Object.values(packet.paths || {})) for (const r of side?.matches || []) if (r.match_id === m.id) fail('path_includes_match', r.match_id);
-    const pr = text.match(/\b(will|should|is expected to|are expected to|is likely to|are likely to|bound to|poised to|set to)\s+(win|beat|prevail|advance|reach|take|lose|edge|dominate|cruise)\b|\b(prediction|predicts?|our pick|tip(ped)? to)\b/i);
+    const pr = text.match(/\b(will|should|is expected to|are expected to|is likely to|are likely to|bound to|poised to|set to)\s+(win|beat|prevail|advance|reach|take|lose|edge|dominate|cruise)\b|\b(our pick|tipped to|we predict|predicted to)\b/i); // "not a prediction" is a disclaimer, not a pick
     if (pr) fail('unsupported_prediction', pr[0]);
   } else if (packet.match) {
     const m = packet.match;
@@ -226,7 +226,7 @@ export function additiveValueFailures(article, plan = null) {
     // scorelines ("5-7 6-1 6-4" of an earlier round) are results, not a chart read out: small set scores coincide with
     // any games-by-set chart, so they are left out of the narration count (V5)
     const nums = numberTokens(x.p.replace(/(?<![\w.])\d{1,2}-\d{1,2}(?:\(\d{1,2}\))?(?:,?\s+\d{1,2}-\d{1,2}(?:\(\d{1,2}\))?)*/g, ' ')).filter((t) => !(Number.isInteger(Number(t)) && Number(t) >= 0 && Number(t) <= 5));
-    if (nums.length < 4) continue;
+    if (nums.length < 5) continue; // V5: comparing two players on two measures (4 figures) is an argument, not a read-out
     for (const c of charts) {
       const hit = nums.filter((t) => c.set.has(t)).length;
       if (hit / nums.length >= 0.8) { out.push({ gate: 'chart_narration', detail: `${x.id} reads out ${c.id} (${hit}/${nums.length} figures)` }); break; }

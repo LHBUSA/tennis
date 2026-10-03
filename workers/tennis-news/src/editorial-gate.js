@@ -16,7 +16,8 @@ const NUM = /(?<![\w.])\d+(?:\.\d+)?%?/g;
 // a scoreline ("6-7(7), 6-4, 6-3") or a W-L record ("4-20") is ONE fact for density purposes, not five numbers
 const SCORELINE = /(?<![\w.])\d{1,4}-\d{1,4}(?:\(\d{1,2}\))?(?:,?\s+\d{1,2}-\d{1,2}(?:\(\d{1,2}\))?)*/g;
 const nums = (t) => { const s = String(t).replace(/\b(19|20)\d{2}\b/g, ' '); const lines = s.match(SCORELINE) || []; return [...lines, ...(s.replace(SCORELINE, ' ').match(NUM) || [])]; };
-const sentences = (p) => String(p).split(/(?<=[.!?])\s+(?=[A-Z0-9“"(])/).filter((s) => s.trim());
+// "No. 66" is a ranking, not a sentence end (the abbreviation is restored after splitting)
+const sentences = (p) => String(p).replace(/\bNo\.\s(?=\d)/g, 'No§ ').split(/(?<=[.!?])\s+(?=[A-Z0-9“"(])/).map((s) => s.replace(/No§ /g, 'No. ')).filter((s) => s.trim());
 const STOP = new Set('the a an and or of in on at to for with by from as was were is are be been his her their its it that this than then over into after before against while which who'.split(' '));
 const bag = (t) => new Set(String(t).toLowerCase().replace(/[^a-z0-9\s-]/g, ' ').split(/\s+/).filter((w) => w && !STOP.has(w)));
 const jaccard = (a, b) => { const A = bag(a); const B = bag(b); if (!A.size || !B.size) return 0; let n = 0; for (const x of A) if (B.has(x)) n += 1; return n / (A.size + B.size - n); };
@@ -31,7 +32,7 @@ const TEMPLATE_HEADINGS = new Set(['what happened', 'why it mattered', 'what com
 // a claim about a forehand, the net or court position is invented however plausible it sounds.
 const TACTICAL = /\b(forehands?|backhands?|volley(s|ed|ing)?|drop[- ]shots?|slices?|sliced|lobs?|lobbed|crosscourt|cross-court|down the line|inside[- ]out|baseline|serve[- ]and[- ]volley|net rush\w*|rushed the net|came (to|into) the net|approach shots?|footwork|movement|court position|kick serve|serve speed|mph|km\/h|rall(y|ies) length|long rallies|short rallies|groundstrokes?|wide serve|body serve|t[- ]serve|second-serve returns? (deep|short)|attack(ed|ing)? the (backhand|forehand|second serve)|targeted the|went after the)\b/i;
 const NET_OK = /\bnet points?\b/i; // allowed only when the packet counts net points
-const PREDICT = /\b(will|should|is expected to|are expected to|is likely to|are likely to|bound to|poised to|set to)\s+(win|beat|prevail|advance|reach|take|lose|edge|dominate|cruise)\b|\b(prediction|predicts?|our pick|tip(ped)? to)\b/i;
+const PREDICT = /\b(will|should|is expected to|are expected to|is likely to|are likely to|bound to|poised to|set to)\s+(win|beat|prevail|advance|reach|take|lose|edge|dominate|cruise)\b|\b(our pick|tipped to|we predict|predicted to)\b/i;
 const CONNECTIVE = /\b(because|which|so|while|after|when|meaning|but|yet|despite|though|although|enough|instead|until|before|even|only|still|whereas|leaving|turning|giving|making|keeping|without|unlike|rather|since|once|then|and that)\b/i;
 const SET_REF = /\b(opening set|first set|second set|third set|fourth set|fifth set|deciding set|final set|set (one|two|three|four|five|1|2|3|4|5)|the opener|opening-set|first-set|second-set|third-set|tiebreak|match tiebreak)\b/gi;
 // Wording the factual rules REQUIRE (provenance, archive scope): never a "stock phrase" failure.
