@@ -15,6 +15,22 @@ const MARKETS = 'https://propsports-markets.sales-fd3.workers.dev';
 const BOARD = JSON.parse(fs.readFileSync(new URL('./fixtures/kalshi/tennis-board.json', import.meta.url), 'utf8'));
 const EVENT = JSON.parse(fs.readFileSync(new URL('./fixtures/kalshi/tennis-event.json', import.meta.url), 'utf8'));
 const ATP_ID = EVENT.event.event.canonical_event_id; // Alcaraz vs Shapovalov (captured live)
+// REAL settled market (captured from production 2026-10-03): Rybakina vs Charaeva, Charaeva first observed 5.5¢ -> settled YES.
+const SETTLED = JSON.parse(fs.readFileSync(new URL('./fixtures/kalshi/tennis-event-settled.json', import.meta.url), 'utf8'));
+const SETTLED_ID = SETTLED.event.event.canonical_event_id;
+// CLOSED variant of the same real market (QA reshape only: lifecycle CLOSED, no settlement yet).
+const closedOf = (src) => {
+  const e = structuredClone(src.event);
+  e.market.lifecycle = 'CLOSED';
+  e.market.close.lifecycle = 'CLOSED';
+  for (const o of e.market.close.outcomes) o.result = null;
+  e.market_history.lifecycle = 'CLOSED';
+  e.market_history.status_label = 'Market closed';
+  for (const o of e.market_history.outcomes) o.settlement = null;
+  delete e.market_history.markers?.settlement;
+  return e;
+};
+const CLOSED = closedOf(SETTLED);
 const read = (p) => fs.readFileSync(path.join(ROOT, p), 'utf8');
 const text = (h) => String(h).replace(/<[^>]*>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ').replace(/\s+/g, ' ').trim();
 
@@ -24,9 +40,9 @@ globalThis.fetch = async (url) => {
   url = String(url);
   fetched.push(url);
   if (!marketsUp) throw new Error('markets down');
-  if (url === `${MARKETS}/v1/market-intelligence/sport/tennis`) return { ok: true, json: async () => BOARD };
+  if (url === `${MARKETS}/v1/market-intelligence/sport/tennis`) return { ok: true, json: async () => ({ ...BOARD, events: [...BOARD.events, SETTLED.event] }) };
   const ev = url.match(/\/v1\/market-intelligence\/event\/tennis\/([0-9a-f-]+)$/);
-  if (ev) return { ok: true, json: async () => ({ ...EVENT, event: ev[1] === ATP_ID ? EVENT.event : null }) };
+  if (ev) return { ok: true, json: async () => ({ ...EVENT, event: ev[1] === ATP_ID ? EVENT.event : ev[1] === SETTLED_ID ? SETTLED.event : null }) };
   throw new Error(`unexpected fetch ${url}`);
 };
 
@@ -136,7 +152,7 @@ describe('placements', () => {
   const live = read('src/pages/live-pages.js');
   const cast = read('src/pages/pbecast.js');
   test('match page: full card in its own block, loaded with the match (bounded), polled while mounted, cleared on unmount', () => {
-    assert.match(live, /kalshiCard\(entry, \{ placement: 'match' \}\)/);
+    assert.match(live, /marketModule\(entry, \{ placement: 'match' \}\)/);
     assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx\)\}<\/div>/);
     assert.match(live, /ready: \(\) => bounded\(kxFirst\)/);
     assert.match(live, /clearTimeout\(kxTimer\)/);
@@ -178,8 +194,8 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
   });
 
   const VENDORED = {
-    'kalshi-market-ui.js': '0f03224b086e11967329e2a4666ef5327e335fbb32ae251a31a2a543b30e1952',
-    'kalshi-market-ui.css': '572d18127bf6ce357e50b4320e0d98d83b07aa3d6bfb1e1c04c43bee4f009f98',
+    'kalshi-market-ui.js': 'c343805e546cde66d01676c9c6c9f6f4ca746a8ba138b4b1ad0159a341f3db2a',
+    'kalshi-market-ui.css': 'db0f4b1efd5209966fb627f72e217b9539876d5123edc10d80524d172da41a06',
     'kalshi-market-client.js': '653cb0fc2673f909552453052560bfd6194e0e4d045c51b1eb73483957d4c049'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
@@ -198,5 +214,82 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     const connect = csp.split(';').map((s) => s.trim()).find((s) => s.startsWith('connect-src'));
     assert.ok(connect.split(/\s+/).includes(MARKETS), connect);
     assert.doesNotMatch(csp, /kalshi/i);
+  });
+});
+
+describe('market history: "How the market closed" (real settled tennis market)', () => {
+  test('SETTLED: marketModule renders the history card with first observed, final trade and venue settlement', () => {
+    assert.equal(SETTLED.event.market.lifecycle, 'SETTLED');
+    const h = ui.marketModule(SETTLED.event, { placement: 'match' });
+    assert.match(h, /data-kx-history/);
+    const t = text(h);
+    assert.match(t, /How the market closed/);
+    assert.match(t, /Market settled/);
+    assert.match(t, /Alina Charaeva/);
+    assert.match(t, /First observed 5\.5¢/, 'Charaeva first observed 5.5¢ (never called an open)');
+    assert.doesNotMatch(t, /\bOpen(ed|ing)?\s+(at\s+)?\d/i, 'never labels a price as the open');
+    assert.match(t, /Final trade 99¢/);
+    assert.match(t, /Settled YES/);
+    assert.match(t, /Kalshi settlement: Alina Charaeva — YES/);
+    assert.match(t, /not the opening price/, 'partial history is said plainly');
+    assert.match(t, /Settlement is the market venue's, not our result/);
+    assert.match(h, /<svg [^>]*role="img"/, 'observed-price chart');
+    assert.doesNotMatch(h, /style="/, 'no inline styles (CSP)');
+    assert.doesNotMatch(t, /Market Pulse/, 'the live card is replaced once settled');
+  });
+  test('CLOSED (event final, market not settled): "Market closed · awaiting settlement", never a settlement', () => {
+    const h = ui.marketModule(CLOSED, { placement: 'match' });
+    const t = text(h);
+    assert.match(t, /Market closed · awaiting settlement/);
+    assert.match(t, /Awaiting settlement/);
+    assert.doesNotMatch(t, /Settled YES|Settled NO|settlement: /);
+  });
+  test('no entry -> nothing on every placement', () => {
+    assert.equal(ui.marketModule(null), '');
+    assert.equal(ui.marketHistoryCard(null), '');
+    assert.equal(ui.marketHistoryCard({ market: { lifecycle: 'ACTIVE' } }), '');
+    assert.equal(ui.marketCloseLine(null), '');
+    assert.equal(ui.marketCloseLine({ market: { lifecycle: 'SETTLED', close: null } }), '');
+  });
+  test('every history link goes to kalshi.com, new tab, rel="noopener noreferrer sponsored"', () => {
+    for (const h of [ui.marketModule(SETTLED.event, { placement: 'match' }), ui.marketHistoryCard(CLOSED, { placement: 'pbecast-replay' })]) {
+      const links = h.match(/<a [^>]*>/g) || [];
+      assert.ok(links.length >= 1);
+      for (const a of links) {
+        assert.match(a, /href="https:\/\/kalshi\.com\/markets\//);
+        assert.match(a, /target="_blank"/);
+        assert.match(a, /rel="noopener noreferrer sponsored"/);
+      }
+    }
+  });
+  test('result card: subtle closed-market line from the board for a decided match; none without a recorded close', async () => {
+    await data.kalshi.loadBoard({ force: true });
+    const done = String(render.matchCard({ ...match(SETTLED_ID, 'completed') }));
+    assert.match(done, new RegExp(`<div class="mc-kx" data-kx-line="${SETTLED_ID}" data-kx-close>`));
+    assert.match(done, /kx-line kx-line--closed/);
+    assert.match(text(done), /MARKET ?Alina Charaeva first 5\.5¢ · settled YES/);
+    assert.doesNotMatch(String(render.matchCard(match(ATP_ID, 'completed'))), /data-kx-line/, 'no recorded close -> no slot');
+    assert.doesNotMatch(String(render.matchCard(match('33333333-3333-3333-3333-333333333333', 'completed'))), /data-kx-line/);
+  });
+  test('poll plan: live 20 s, pregame 45 s, CLOSED 5 min until settled, SETTLED none', async () => {
+    const live = await data.kalshi.loadEvent(ATP_ID, { force: true });
+    assert.equal(data.marketPollMs(live, 'in_progress'), 20_000);
+    assert.equal(data.marketPollMs(live, 'scheduled'), 45_000);
+    assert.equal(data.marketPollMs(null, 'scheduled'), 120_000);
+    assert.equal(data.marketPollMs(CLOSED, 'completed'), 300_000);
+    assert.equal(data.marketPollMs(SETTLED.event, 'completed'), null);
+    assert.equal(data.marketPollMs(null, 'completed'), null);
+    const settled = await data.kalshi.loadEvent(SETTLED_ID, { force: true });
+    assert.equal(settled?.market?.lifecycle, 'SETTLED', 'the event endpoint carries the settled market for a completed match');
+  });
+  test('completed-match mount: the match page slot renders for every status; PBEcast replay has the history slot', () => {
+    const live = read('src/pages/live-pages.js');
+    const cast = read('src/pages/pbecast.js');
+    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx\)\}<\/div>/);
+    assert.doesNotMatch(live, /status [!=]==? 'completed'[^\n]*data-kx-card/);
+    assert.match(live, /marketPollMs\(kx, kxStatus\)/);
+    assert.match(cast, /marketHistoryCard\(kx, \{ placement: 'pbecast-replay' \}\)/);
+    assert.match(cast, /<div class="pbc-kxh" data-kx-history-slot><\/div>/);
+    assert.match(cast, /kalshiStrip\(kx, \{ placement: 'pbecast' \}\)/, 'live strip unchanged');
   });
 });

@@ -29,3 +29,9 @@
 .hm-kx { margin: 6px 0 0; }
 .mc-kx .kx-line, .hm-kx .kx-line { --pbe-paper: var(--ink-2); max-width: 100%; flex-wrap: wrap; font-size: 11.5px; }
 .mc-kx .kx-line__b, .hm-kx .kx-line__b { color: var(--model); }
+
+/* market history ("How the market closed"): match page uses .kx-slot; PBEcast replay has its own slot in the panels */
+.pbc-kxh:empty { display: none; }
+.pbc-kxh { margin: 0 0 16px; }
+/* result cards: the closed-market line stays quiet (muted badge, not the model accent) */
+.mc-kx .kx-line--closed .kx-line__b, .hm-kx .kx-line--closed .kx-line__b { color: var(--muted); }

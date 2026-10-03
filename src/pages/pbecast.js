@@ -28,8 +28,8 @@ import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
-import { kalshi, kalshiPollState } from '../data/kalshi.js';
-import { kalshiStrip, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshi, marketPollMs } from '../data/kalshi.js';
+import { kalshiStrip, marketHistoryCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 import { liveGranularity, gameLedger, actionRail, currentGame, courtReaction, gameRun, pointRun, provenPoints, hasSpatial, staleness } from '../lib/pbecast-court.js';
 
@@ -569,11 +569,13 @@ export function mount(root, { params, live = null }) {
 
   // Kalshi prediction-market strip under the scoreboard. Never blocking: the event read runs in the background from our
   // markets API (never Kalshi) and the strip is written into its own slot when it lands; it survives shell rebuilds and
-  // keeps an expanded strip open across updates. Polls while mounted: live 20 s, pregame 45 s, no market yet 120 s,
-  // settled match: no polling.
+  // keeps an expanded strip open across updates. Once the market has CLOSED/SETTLED the replay also carries the
+  // "How the market closed" history card (its own slot in the panels below the court; the strip is unchanged).
+  // Polls while mounted: live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none.
   let kx = null;
   let kxTimer = null;
   const paintKx = () => {
+    paintKxHistory();
     const el = $('[data-kx-strip]');
     if (!el) return;
     const next = kalshiStrip(kx, { placement: 'pbecast' });
@@ -584,12 +586,21 @@ export function mount(root, { params, live = null }) {
     if (open) el.querySelector('details')?.setAttribute('open', '');
     if (next) wireKalshi(el);
   };
+  const paintKxHistory = () => {
+    const el = $('[data-kx-history-slot]');
+    if (!el) return;
+    const next = marketHistoryCard(kx, { placement: 'pbecast-replay' });
+    if (el.__kx === next) return;
+    el.__kx = next;
+    el.innerHTML = next;
+    if (next) wireKalshi(el);
+  };
   const scheduleKx = () => {
     clearTimeout(kxTimer);
     kxTimer = null;
-    const lane = kalshiPollState(data?.match?.status ?? 'scheduled');
-    if (!lane || ctl.signal.aborted) return;
-    kxTimer = setTimeout(loadKx, kalshi.pollMsFor(kx ? lane : 'idle'));
+    const ms = marketPollMs(kx, data?.match?.status ?? 'scheduled');
+    if (!ms || ctl.signal.aborted) return;
+    kxTimer = setTimeout(loadKx, ms);
   };
   async function loadKx(force = true) {
     const e = await kalshi.loadEvent(params.id, { force }).catch(() => null);
@@ -637,6 +648,7 @@ export function mount(root, { params, live = null }) {
       </div>
       <p class="pbc-note page">${freshnessBadge(data.meta)} ${data.cadence_note}${data.quality === 'point_event' ? '' : '. Point reasons, serve speeds and ball positions are not in this feed and are never shown.'} <a href="#pbc-more">More intelligence ↓</a></p>
       <div class="page pbc-panels" id="pbc-more">
+        <div class="pbc-kxh" data-kx-history-slot></div>
         <section class="mod"><header class="mod-h"><h2>Key moments</h2></header><div class="mod-b">${data.moments.length ? html`<div class="km">${data.moments.map((k) => html`<button type="button" class="km-b" data-jump="${k.event_id}"><b>${k.kind}</b>${k.side ? ` ${sideName(m, k.side)}` : ''}<small>${k.text}</small></button>`)}</div>` : html`<p class="note">No provable key moments yet.</p>`}</div></section>
         <div class="grid-2">
           <section class="mod"><header class="mod-h"><h2>Match control</h2><span class="mod-k">Descriptive</span></header><div class="mod-b">${data.control ? html`<div class="ctl"><span style="flex:${data.control.A}">${playerLinks(m, 'A')} ${data.control.A}</span><span style="flex:${data.control.B}">${data.control.B} ${playerLinks(m, 'B')}</span></div><p class="note">${data.control.definition}.</p>` : html`<p class="note">Needs at least four games with a known winner. Not a win probability.</p>`}</div></section>

@@ -17,8 +17,8 @@ import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
-import { kalshi, bounded, kalshiPollState, paintKalshiLines } from '../data/kalshi.js';
-import { kalshiCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshi, bounded, marketPollMs, paintKalshiLines } from '../data/kalshi.js';
+import { marketModule, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -218,10 +218,13 @@ async function miLoad(root, m, signal) {
   if (el) { render(el, out); el.style.minHeight = '0'; }
 }
 // ---- match lab ------------------------------------------------------------------------------------------
-// Kalshi prediction-market card (its own block under the score). The event read starts WITH the match read and the
-// first paint waits for it at most KALSHI_FIRST_PAINT_MS; then it polls our markets API (never Kalshi) while the page is
-// mounted — live 20 s, pregame 45 s, no market yet 120 s, settled match: no polling — and stops on unmount.
-const kxCardHtml = (entry) => raw(kalshiCard(entry, { placement: 'match' }));
+// Kalshi prediction-market module (its own block under the score) for every match that has or had a market, completed
+// ones included: the live Market Pulse card while the market trades, "How the market closed" once it is CLOSED/SETTLED
+// (marketModule decides from the API's lifecycle, so the page evolves with no release). The event read starts WITH the
+// match read and the first paint waits for it at most KALSHI_FIRST_PAINT_MS; then it polls our markets API (never Kalshi)
+// while mounted — live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none — and stops
+// on unmount.
+const kxCardHtml = (entry) => raw(marketModule(entry, { placement: 'match' }));
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
   let kx = null;
@@ -237,18 +240,18 @@ export const match = mountWith((root, { params }, signal) => {
   const scheduleKx = () => {
     clearTimeout(kxTimer);
     kxTimer = null;
-    const lane = kalshiPollState(kxStatus);
-    if (!lane || signal.aborted) return;
+    const ms = kxStatus ? marketPollMs(kx, kxStatus) : null;
+    if (!ms || signal.aborted) return;
     kxTimer = setTimeout(async () => {
       const e = await kalshi.loadEvent(params.id, { force: true }).catch(() => null);
       if (signal.aborted) return;
-      kx = e;
+      kx = e ?? kx;
       paintKx();
       scheduleKx();
-    }, kalshi.pollMsFor(kx ? lane : 'idle'));
+    }, ms);
   };
-  // a market that answers after the bounded wait still lands in place
-  kxFirst.then(() => { if (!signal.aborted) paintKx(); });
+  // a market that answers after the bounded wait still lands in place (and re-plans polling from its lifecycle)
+  kxFirst.then(() => { if (!signal.aborted) { paintKx(); scheduleKx(); } });
   const stop = fill(root, `/v1/matches/${params.id}`, (m) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     miLoad(root, m, signal);

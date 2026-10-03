@@ -2,7 +2,7 @@
 
 import { html, raw } from '../lib/dom.js';
 import { avatar, nat } from './avatar.js';
-import { kalshiLineEligible, kalshiLineFor } from '../data/kalshi.js';
+import { kalshiLineEligible, kalshiCloseEligible, kalshiLineFor } from '../data/kalshi.js';
 
 const EVENT = { MS: "Men's singles", WS: "Women's singles", MD: "Men's doubles", WD: "Women's doubles", XD: 'Mixed doubles' };
 export const eventLabel = (e) => EVENT[e] || e;
@@ -54,7 +54,13 @@ export function pbecastCta(m) {
 export const hasMatchup = (m, now = Date.now()) => m?.status === 'scheduled' && ['MS', 'WS'].includes(m.event_type) && m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && !!m.scheduled_at && Date.parse(m.scheduled_at) >= now - 6 * 3600e3;
 export const matchupLink = (m, cls = 'mi-link') => (hasMatchup(m) ? html`<a class="${cls}" href="/matchups/${m.id}">Matchup Intelligence →</a>` : '');
 /** Kalshi prediction-market line for a match still to be decided: a slot filled from the board (empty = hidden). */
-export const kalshiSlot = (m, cls = 'mc-kx') => (kalshiLineEligible(m) ? html`<div class="${cls}" data-kx-line="${m.id}">${raw(kalshiLineFor(m))}</div>` : '');
+// A decided match gets the subtle "how the market closed" line only when the loaded board already has a recorded close
+// for it (no slot otherwise: long result lists stay lean and nothing appears late on a result card).
+export const kalshiSlot = (m, cls = 'mc-kx') => {
+  if (kalshiLineEligible(m)) return html`<div class="${cls}" data-kx-line="${m.id}">${raw(kalshiLineFor(m))}</div>`;
+  const close = kalshiCloseEligible(m) ? kalshiLineFor(m) : '';
+  return close ? html`<div class="${cls}" data-kx-line="${m.id}" data-kx-close>${raw(close)}</div>` : '';
+};
 export function matchCard(m, { showTournament = true, kalshi = true } = {}) {
   const live = m.status === 'in_progress';
   const sc = (side) => html`<div class="mc-sc tabnum">${(m.sets || []).map((s) => {
