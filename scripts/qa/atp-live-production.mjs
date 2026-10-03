@@ -1,7 +1,12 @@
 #!/usr/bin/env node
 // One-shot ATP live acceptance against PRODUCTION (no loop, no background watcher).
 //   node scripts/qa/atp-live-production.mjs [--wait 240] [--shots]
-// Outcome (last line): PASS | HOLD_NO_LIVE_ATP | FAIL. Exit 0 for PASS and HOLD, 1 for FAIL.
+// Outcome (last line): PASS | NO_LIVE_MATCH_AVAILABLE | LIVE_MATCH_AVAILABLE_BUT_NOT_INGESTED | FAIL.
+// Exit 0 for PASS and NO_LIVE_MATCH_AVAILABLE, 1 otherwise. (Before 2026-10-03 the no-row outcome was HOLD_NO_LIVE_ATP,
+// which could not tell "nothing was live" from "a live match was polled but never stored" — the Beijing incident
+// 2026-10-03 was the second; see docs/evidence/atp-live-incident-2026-10-03.md.) The distinction uses the live lane's
+// own internal stage trace (tennis-live /v1/live/diag, admin token from D:\Workers\secrets): a competition traced
+// LIVE in the last 5 minutes with no ATP row in /v1/live = LIVE_MATCH_AVAILABLE_BUT_NOT_INGESTED.
 //
 // ATP live state comes from the SECONDARY ESPN feed at game level (tennis-live router provider 'espn'): set/game score
 // only. It must never carry a point score, a server, point events, serve speeds or coordinates.
@@ -47,7 +52,20 @@ if (!atp.length) {
   fs.writeFileSync(STATE, JSON.stringify(prev, null, 1));
   const failed = checks.filter((c) => !c.ok).length;
   console.log(`live rows: ${rows.length} (${[...new Set(rows.map((m) => `${m.source}:${m.event_type}`))].join(', ') || 'none'}); ESPN ATP men's singles live: 0`);
-  console.log(failed ? 'FAIL' : 'HOLD_NO_LIVE_ATP');
+  // was anything live upstream? the live lane's own trace (no extra source request)
+  let liveSeen = [];
+  try {
+    const tok = fs.readFileSync('D:/Workers/secrets/tennis-ingest-admin-token', 'utf8').trim();
+    const ring = (await (await fetch('https://tennis-live.sales-fd3.workers.dev/v1/live/diag', { headers: { authorization: `Bearer ${tok}` } })).json()).data || [];
+    const since = Date.now() - 5 * 60e3;
+    liveSeen = ring.filter((d) => Date.parse(d.at) >= since).flatMap((d) => Object.entries(d.trace || {}).filter(([, codes]) => codes.includes('LIVE')).map(([id, codes]) => ({ event: d.event, comp: id, last: codes.at(-1), at: d.at })));
+  } catch (e) { console.log(`live-lane trace unavailable: ${String(e?.message || e).slice(0, 120)}`); }
+  if (liveSeen.length) {
+    console.log(`live lane saw ATP live in the last 5 min: ${JSON.stringify(liveSeen.slice(-6))}`);
+    console.log('LIVE_MATCH_AVAILABLE_BUT_NOT_INGESTED');
+    return 1;
+  }
+  console.log(failed ? 'FAIL' : 'NO_LIVE_MATCH_AVAILABLE');
   return (failed ? 1 : 0);
 }
 
