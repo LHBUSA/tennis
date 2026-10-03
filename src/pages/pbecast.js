@@ -29,7 +29,8 @@ import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
 import { kalshi, marketPollMs } from '../data/kalshi.js';
-import { kalshiStrip, marketHistoryCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { marketHistoryCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { liveMarketPanel, finalLine } from '../ui/live-market.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 import { liveGranularity, gameLedger, actionRail, currentGame, courtReaction, gameRun, pointRun, provenPoints, hasSpatial, staleness } from '../lib/pbecast-court.js';
 
@@ -578,7 +579,9 @@ export function mount(root, { params, live = null }) {
     paintKxHistory();
     const el = $('[data-kx-strip]');
     if (!el) return;
-    const next = kalshiStrip(kx, { placement: 'pbecast' });
+    // owner (2026-10-03): an open market is the LIVE MARKET (Kalshi = the market, PBE = the intelligence); closed and
+    // settled markets live in the history slot below
+    const next = data?.match && kx?.kalshi?.state === 'open' ? liveMarketPanel(kx, data.match, { name: (s) => sideName(data.match, s), placement: 'pbecast' }) : '';
     if (el.__kx === next) return;
     const open = !!el.querySelector('details[open]');
     el.__kx = next;
@@ -589,7 +592,8 @@ export function mount(root, { params, live = null }) {
   const paintKxHistory = () => {
     const el = $('[data-kx-history-slot]');
     if (!el) return;
-    const next = marketHistoryCard(kx, { placement: 'pbecast-replay' });
+    const card = marketHistoryCard(kx, { placement: 'pbecast-replay' });
+    const next = card && data?.match ? `${card}${finalLine(data.match, (s) => sideName(data.match, s))}` : card;
     if (el.__kx === next) return;
     el.__kx = next;
     el.innerHTML = next;

@@ -153,14 +153,14 @@ describe('placements', () => {
   const cast = read('src/pages/pbecast.js');
   test('match page: full card in its own block, loaded with the match (bounded), polled while mounted, cleared on unmount', () => {
     assert.match(live, /marketModule\(entry, \{ placement: 'match' \}\)/);
-    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx\)\}<\/div>/);
+    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch\)\}<\/div>/);
     assert.match(live, /ready: \(\) => bounded\(kxFirst\)/);
     assert.match(live, /clearTimeout\(kxTimer\)/);
     assert.match(live, /wireKalshi/);
     assert.equal(data.KALSHI_FIRST_PAINT_MS <= 800, true);
   });
   test('PBEcast: strip in its own slot, never awaited, cleared on unmount', () => {
-    assert.match(cast, /kalshiStrip\(kx, \{ placement: 'pbecast' \}\)/);
+    assert.match(cast, /liveMarketPanel\(kx, data\.match, \{ name: \(s\) => sideName\(data\.match, s\), placement: 'pbecast' \}\)/, 'open market = LIVE MARKET (owner 2026-10-03)');
     assert.match(cast, /data-kx-strip/);
     assert.doesNotMatch(cast, /await\s+loadKx/);
     assert.match(cast, /^\s*loadKx\(false\);$/m, 'background read, not awaited by the cast');
@@ -285,11 +285,11 @@ describe('market history: "How the market closed" (real settled tennis market)',
   test('completed-match mount: the match page slot renders for every status; PBEcast replay has the history slot', () => {
     const live = read('src/pages/live-pages.js');
     const cast = read('src/pages/pbecast.js');
-    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx\)\}<\/div>/);
+    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch\)\}<\/div>/);
     assert.doesNotMatch(live, /status [!=]==? 'completed'[^\n]*data-kx-card/);
     assert.match(live, /marketPollMs\(kx, kxStatus\)/);
     assert.match(cast, /marketHistoryCard\(kx, \{ placement: 'pbecast-replay' \}\)/);
     assert.match(cast, /<div class="pbc-kxh" data-kx-history-slot><\/div>/);
-    assert.match(cast, /kalshiStrip\(kx, \{ placement: 'pbecast' \}\)/, 'live strip unchanged');
+    assert.match(cast, /kx\?\.kalshi\?\.state === 'open' \? liveMarketPanel\(/, 'the live slot shows only an open market; history has its own slot');
   });
 });

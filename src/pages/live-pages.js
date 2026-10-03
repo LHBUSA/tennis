@@ -19,6 +19,7 @@ import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
 import { kalshi, bounded, marketPollMs, paintKalshiLines } from '../data/kalshi.js';
 import { marketModule, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { liveMarketPanel, finalLine } from '../ui/live-market.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -224,17 +225,23 @@ async function miLoad(root, m, signal) {
 // match read and the first paint waits for it at most KALSHI_FIRST_PAINT_MS; then it polls our markets API (never Kalshi)
 // while mounted — live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none — and stops
 // on unmount.
-const kxCardHtml = (entry) => raw(marketModule(entry, { placement: 'match' }));
+const kxName = (m) => (s) => (m?.sides?.[s]?.players || []).map((p) => p.name).join(' / ') || s;
+// open market -> LIVE MARKET / MARKET OPEN · PRE-MATCH (owner 2026-10-03); closed / settled -> the shared history card
+// (marketModule) + our final result as a separate fact
+const kxCardHtml = (entry, m = null) => raw(m && entry?.kalshi?.state === 'open' && !['CLOSED', 'SETTLED'].includes(entry?.market?.lifecycle)
+  ? liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })
+  : `${marketModule(entry, { placement: 'match' })}${['CLOSED', 'SETTLED'].includes(entry?.market?.lifecycle) && m ? finalLine(m, kxName(m)) : ''}`);
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
   let kx = null;
   let kxStatus = null;
+  let kxMatch = null;
   let kxTimer = null;
   const kxFirst = kalshi.loadEvent(params.id).then((e) => { kx = e; }).catch(() => {});
   const paintKx = () => {
     const el = root.querySelector('[data-kx-card]');
     if (!el) return;
-    const next = String(kxCardHtml(kx));
+    const next = String(kxCardHtml(kx, kxMatch));
     if (el.innerHTML !== next) { el.innerHTML = next; wireKalshi(el); }
   };
   const scheduleKx = () => {
@@ -255,6 +262,7 @@ export const match = mountWith((root, { params }, signal) => {
   const stop = fill(root, `/v1/matches/${params.id}`, (m) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     miLoad(root, m, signal);
+    kxMatch = { status: m.status, winner_side: m.winner_side, score: m.score, sides: m.sides };
     if (kxStatus !== m.status) { kxStatus = m.status; scheduleKx(); }
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
     const h = root.querySelector('.page-h h1');
@@ -264,7 +272,7 @@ export const match = mountWith((root, { params }, signal) => {
     const A = m.statistics?.A, B = m.statistics?.B;
     return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>${miSlot(m)}
       ${matchCard(m, { kalshi: false })}
-      <div class="kx-slot" data-kx-card>${kxCardHtml(kx)}</div>
+      <div class="kx-slot" data-kx-card>${kxCardHtml(kx, kxMatch)}</div>
       <div class="grid-2" style="margin-top:16px">
         ${m.status === 'scheduled' ? '' : html`<section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>`}
         <section class="mod"><header class="mod-h"><h2>PBEcast</h2></header><div class="mod-b"><p>${m.status === 'scheduled' ? 'PBEcast opens when live coverage begins.' : 'Open the analytical court: score, serve, key moments, stats, DNA and head-to-head.'}</p>${m.status !== 'scheduled' ? html`<a class="btn green" href="/pbecast/${m.id}">${m.status === 'in_progress' ? 'Watch PBEcast' : 'Replay PBEcast'}</a>` : ''}</div></section>
