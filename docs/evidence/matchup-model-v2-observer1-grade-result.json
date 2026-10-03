@@ -1,0 +1,19 @@
+{
+ "mode": "grade",
+ "status": "FAIL",
+ "at": "2026-10-03T06:37:34.991Z",
+ "match_id": "d54c6504-7fc1-5048-980a-6613cd15c383",
+ "failed_first_write": [],
+ "failed_immutability": [],
+ "grade": {
+  "kind": "graded",
+  "result": "A",
+  "graded_record_frozen_at": "2026-10-03T00:10:13.202Z",
+  "started_at": null,
+  "champion_A": 0.512,
+  "challenger_A": 0.474017,
+  "champion_log_loss": 0.6694306539426292,
+  "challenger_log_loss": 0.7465120929512905,
+  "recomputed_after_match": false
+ }
+}

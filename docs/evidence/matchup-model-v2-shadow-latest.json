@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-02T23:28:41.091Z",
+ "generated_at": "2026-10-03T13:57:25.716Z",
  "internal_only": true,
  "lane": "mm2-shadow/1 (research-only; published probability never replaced)",
  "model_version": "mm2-B-context/1",
@@ -25,27 +25,336 @@
   }
  },
  "from": "2026-10-02",
- "shadow_records": 0,
- "matches_with_shadow": 0,
- "graded": 0,
+ "shadow_records": 20,
+ "matches_with_shadow": 20,
+ "graded": 4,
  "pending": {
   "ATP": {
    "pending_unfinished": 0,
    "excluded": {},
-   "unscored": {}
+   "unscored": {
+    "state_cutoff_mismatch": 4
+   }
   },
   "WTA": {
    "pending_unfinished": 0,
    "excluded": {},
-   "unscored": {}
+   "unscored": {
+    "champion_not_published:no_rating": 12
+   }
   }
  },
  "ATP": {
-  "n": 0
+  "n": 4,
+  "clusters": 1,
+  "surfaces_with_100": 0,
+  "champion": {
+   "n": 4,
+   "log_loss": 0.5368,
+   "brier": 0.1915,
+   "accuracy": 0.75,
+   "ece": 0.3765
+  },
+  "challenger": {
+   "n": 4,
+   "log_loss": 0.522,
+   "brier": 0.1837,
+   "accuracy": 0.5,
+   "ece": 0.3771
+  },
+  "delta": {
+   "log_loss": -0.0148,
+   "brier": -0.0078,
+   "ece": 0.0006
+  },
+  "paired": "needs >= 30 graded matches",
+  "reliability": {
+   "champion": [
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 1,
+     "predicted": 0.512,
+     "observed": 1
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 1,
+     "predicted": 0.641,
+     "observed": 0
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 1,
+     "predicted": 0.66,
+     "observed": 1
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 1,
+     "predicted": 0.963,
+     "observed": 1
+    }
+   ],
+   "challenger": [
+    {
+     "from": 0.5,
+     "to": 0.55,
+     "n": 1,
+     "predicted": 0.526,
+     "observed": 0
+    },
+    {
+     "from": 0.55,
+     "to": 0.6,
+     "n": 1,
+     "predicted": 0.5623,
+     "observed": 0
+    },
+    {
+     "from": 0.6,
+     "to": 0.65,
+     "n": 1,
+     "predicted": 0.6262,
+     "observed": 1
+    },
+    {
+     "from": 0.65,
+     "to": 0.7,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.7,
+     "to": 0.75,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.75,
+     "to": 0.8,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.8,
+     "to": 0.85,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.85,
+     "to": 0.9,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.9,
+     "to": 0.95,
+     "n": 0,
+     "predicted": null,
+     "observed": null
+    },
+    {
+     "from": 0.95,
+     "to": 1,
+     "n": 1,
+     "predicted": 0.9539,
+     "observed": 1
+    }
+   ]
+  },
+  "segments": {
+   "surface": [
+    {
+     "group": "unknown",
+     "n": 4,
+     "champion_log_loss": 0.5368,
+     "challenger_log_loss": 0.522,
+     "delta": -0.0148,
+     "champion_brier": 0.1915,
+     "challenger_brier": 0.1837,
+     "ci95": null
+    }
+   ],
+   "level": [
+    {
+     "group": "unknown",
+     "n": 4,
+     "champion_log_loss": 0.5368,
+     "challenger_log_loss": 0.522,
+     "delta": -0.0148,
+     "champion_brier": 0.1915,
+     "challenger_brier": 0.1837,
+     "ci95": null
+    }
+   ],
+   "favourite_band": [
+    {
+     "group": "50-55",
+     "n": 1,
+     "champion_log_loss": 0.6694,
+     "challenger_log_loss": 0.7465,
+     "delta": 0.0771,
+     "champion_brier": 0.2381,
+     "challenger_brier": 0.2767,
+     "ci95": null
+    },
+    {
+     "group": "60-70",
+     "n": 2,
+     "champion_log_loss": 0.72,
+     "challenger_log_loss": 0.6471,
+     "delta": -0.0729,
+     "champion_brier": 0.2632,
+     "challenger_brier": 0.2279,
+     "ci95": null
+    },
+    {
+     "group": "90+",
+     "n": 1,
+     "champion_log_loss": 0.0377,
+     "challenger_log_loss": 0.0472,
+     "delta": 0.0095,
+     "champion_brier": 0.0014,
+     "challenger_brier": 0.0021,
+     "ci95": null
+    }
+   ]
+  },
+  "segment_failures": [],
+  "gate": {
+   "met": false,
+   "checks": {
+    "graded": false,
+    "edition_clusters": false,
+    "surfaces": false,
+    "log_loss_lower": true,
+    "log_loss_ci_below_zero": false,
+    "brier_no_worse": true,
+    "calibration_no_worse": false,
+    "no_material_segment_failure": true
+   }
+  }
  },
  "WTA": {
   "n": 0
  },
- "rows": [],
+ "rows": [
+  {
+   "match_id": "d54c6504-7fc1-5048-980a-6613cd15c383",
+   "tour": "ATP",
+   "edition": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "surface": "unknown",
+   "level": "unknown",
+   "shadow_key": "research/mm2/shadow/d54c6504-7fc1-5048-980a-6613cd15c383/2026-10-03T00:10:13.202Z_mm2-B-context-1.json",
+   "records_for_match": 1,
+   "y": 1,
+   "champion": 0.512,
+   "challenger": 0.474017,
+   "frozen_at": "2026-10-03T00:10:13.202Z",
+   "started_at": null,
+   "feature_hash": "cd0dda98c449129f95ebf3aa01d51cf6382bc3c579ad77082428081de4e358db",
+   "model_version": "mm2-B-context/1"
+  },
+  {
+   "match_id": "e4bd1b3d-a516-525d-b343-6633934f551c",
+   "tour": "ATP",
+   "edition": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "surface": "unknown",
+   "level": "unknown",
+   "shadow_key": "research/mm2/shadow/e4bd1b3d-a516-525d-b343-6633934f551c/2026-10-03T00:10:13.202Z_mm2-B-context-1.json",
+   "records_for_match": 1,
+   "y": 1,
+   "champion": 0.963,
+   "challenger": 0.953878,
+   "frozen_at": "2026-10-03T00:10:13.202Z",
+   "started_at": null,
+   "feature_hash": "293e8b3ee96810d70ed903f65e58f64c5fddad3705f91c3ac7349b0778cc358c",
+   "model_version": "mm2-B-context/1"
+  },
+  {
+   "match_id": "0b4ca346-e234-5192-a1a5-d3e7f6fcfb7a",
+   "tour": "ATP",
+   "edition": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "surface": "unknown",
+   "level": "unknown",
+   "shadow_key": "research/mm2/shadow/0b4ca346-e234-5192-a1a5-d3e7f6fcfb7a/2026-10-03T00:10:13.202Z_mm2-B-context-1.json",
+   "records_for_match": 1,
+   "y": 0,
+   "champion": 0.641,
+   "challenger": 0.562265,
+   "frozen_at": "2026-10-03T00:10:13.202Z",
+   "started_at": null,
+   "feature_hash": "4fe3146882f83d69ae65f8f347eb0260a2e8d4913b983633f2d558519ce742c4",
+   "model_version": "mm2-B-context/1"
+  },
+  {
+   "match_id": "be50424a-4059-5341-83ac-cbd1cdfe02a9",
+   "tour": "ATP",
+   "edition": "d1fd1ff0-8b77-5f9f-a6bb-6d408a60189c",
+   "surface": "unknown",
+   "level": "unknown",
+   "shadow_key": "research/mm2/shadow/be50424a-4059-5341-83ac-cbd1cdfe02a9/2026-10-03T00:10:13.202Z_mm2-B-context-1.json",
+   "records_for_match": 1,
+   "y": 0,
+   "champion": 0.34,
+   "challenger": 0.373768,
+   "frozen_at": "2026-10-03T00:10:13.202Z",
+   "started_at": null,
+   "feature_hash": "31188f25f041e79e93559689fcc2e6e1374735a2156671315b56ce5eaa368d5a",
+   "model_version": "mm2-B-context/1"
+  }
+ ],
  "note": "prospective: every challenger probability was written before play from the frozen coefficients; promotion remains an owner decision"
 }

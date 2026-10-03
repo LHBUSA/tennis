@@ -259,3 +259,33 @@ test('stale-state regression: a day-D state never scores a D+1 match; the D+1 st
   const off = profileFrom(recs, dayNum(D1)); const on = stateProfile(stD1.players[e.A], dayNum(D1));
   for (const k of Object.keys(off)) assert.ok(off[k] === on[k] || Math.abs(off[k] - on[k]) < 1e-6, k);
 });
+
+import { freezeDeadline, gradeInvariants } from '../scripts/research/mm2/lib/observer.mjs';
+
+test('observer freeze deadline is the grader deadline: started_at ?? scheduled_at (pickGradeable parity)', () => {
+  const rec = (frozen_at) => ({ frozen_at, challenger: { probability: { A: 0.5, B: 0.5 } }, champion: { probability: { A: 0.5, B: 0.5 } } });
+  for (const m of [
+    { status: 'completed', winner_side: 'A', started_at: '2026-10-03T02:20:00Z', scheduled_at: '2026-10-03T02:10:00Z' },
+    { status: 'completed', winner_side: 'A', started_at: null, scheduled_at: '2026-10-03T02:10:00Z' }
+  ]) {
+    const dl = freezeDeadline(m).at;
+    const before = new Date(Date.parse(dl) - 1000).toISOString();
+    assert.equal(pickGradeable([rec(before)], m).kind, 'graded');
+    assert.equal(pickGradeable([rec(dl)], m).kind, 'excluded'); // frozen AT the deadline is not before it: both agree
+  }
+  assert.deepEqual(freezeDeadline({ started_at: null, scheduled_at: null }), { at: null, basis: null });
+});
+
+test('observer regression (d54c6504, 2026-10-03): started_at null + scheduled_at -> frozen_before_match_started passes; nothing else relaxed', () => {
+  const proof = { started_at: null, scheduled_at: '2026-10-03T02:10:00+00:00', first_natural_write: { passed: true }, immutability: { passed: true },
+    grade: { kind: 'graded', started_at: null, graded_record_frozen_at: '2026-10-03T00:10:13.202Z', recomputed_after_match: false } };
+  const ok = gradeInvariants(proof);
+  assert.equal(ok.passed, true);
+  assert.equal(ok.deadline_basis, 'scheduled_at');
+  // every other invariant still fails closed
+  assert.deepEqual(gradeInvariants({ ...proof, grade: { ...proof.grade, graded_record_frozen_at: '2026-10-03T02:10:00Z' } }).failed, ['frozen_before_match_started']);
+  assert.deepEqual(gradeInvariants({ ...proof, scheduled_at: null }).failed, ['frozen_before_match_started']);
+  assert.deepEqual(gradeInvariants({ ...proof, immutability: { passed: false } }).failed, ['immutability']);
+  assert.deepEqual(gradeInvariants({ ...proof, grade: { ...proof.grade, recomputed_after_match: true } }).failed, ['recomputed_after_match_false']);
+  assert.deepEqual(gradeInvariants({ ...proof, grade: { ...proof.grade, kind: 'pending' } }).failed, ['graded']);
+});

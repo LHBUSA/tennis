@@ -5,7 +5,7 @@
 // 2. immutability: the PRODUCTION shadowFrozen code is re-run for the same snapshot against production R2 through an
 //    adapter whose put() throws: it must take the 'exists' path; object bytes/hash and the record count are unchanged.
 // 3. grade (when the match has finished): pickGradeable on the stored result.
-// Writes docs/evidence/matchup-model-v2-shadow-proof.json. Never writes to R2 or the database.
+// Writes docs/evidence/matchup-model-v2-shadow-proof.json (or $PROOF_OUT). Never writes to R2 or the database.
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -108,6 +108,6 @@ const proof = { generated_at: new Date().toISOString(), match_id: id, tour: stor
   first_natural_write: { passed: Object.values(checks1).every(Boolean), checks: checks1, public_api: exposure },
   immutability: { passed: Object.values(checks2).every(Boolean), checks: checks2, rerun },
   grade };
-fs.writeFileSync('docs/evidence/matchup-model-v2-shadow-proof.json', JSON.stringify(proof, null, 1));
+fs.writeFileSync(process.env.PROOF_OUT || 'docs/evidence/matchup-model-v2-shadow-proof.json', JSON.stringify(proof, null, 1));
 console.log(JSON.stringify({ match: id, tour: stored.tour, shadow: shadowKey, sha256: proof.shadow.sha256, first_write: proof.first_natural_write.passed, failed1: Object.entries(checks1).filter(([, v]) => !v).map(([k]) => k), immutability: proof.immutability.passed, failed2: Object.entries(checks2).filter(([, v]) => !v).map(([k]) => k), grade }));
 }
