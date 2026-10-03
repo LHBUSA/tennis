@@ -62,6 +62,7 @@ export function shingles(text, n = 6) {
     const g = t.slice(i, i + n);
     if (g.includes('|')) continue;
     if (g.filter((x) => x === 'X' || x === 'N').length >= 3) continue;
+    if (/\bno N\b/.test(g.join(' '))) continue; // a ranking statement ("X was No. 8 and Y No. 11") is a fact frame, not stock prose
     const s = g.join(' ');
     if (COMPLIANCE.test(s)) continue;
     out.add(s);

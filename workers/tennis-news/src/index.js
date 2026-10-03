@@ -30,7 +30,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '4.0.1';
+export const VERSION = '4.0.2';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -293,7 +293,7 @@ export async function routedCanary(env, store, { eventId, dry = false } = {}) {
   return { ...head, model_calls: ed.attempts.filter((x) => !x.skipped).length, origin: ed.origin, attempts: ed.attempts, usage: ed.usage, pool_before: before, pool_after: after, draft: { headline: ed.article?.headline || null, published: false } };
 }
 
-export async function enrichOne(env, store, ev) {
+export async function enrichOne(env, store, ev, { attempts = 1 } = {}) {
   const t0 = Date.now();
   const sinceDetect = () => Date.now() - Date.parse(ev.detected_at);
   const facts = ev.evidence?.facts || {};
@@ -378,7 +378,7 @@ export async function enrichOne(env, store, ev) {
   await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}`, { body: { article_id: articleId }, prefer: 'return=minimal' });
   await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'packet', status: 'ok', latency_ms: Date.now() - t0, since_detect_ms: sinceDetect(), detail: { version: PACKET_VERSION, families: Object.keys(packet), class: storyClass, dimensions: story.evidence_dimensions } }]);
 
-  const ed = await routedProse(env, store, { ev, articleId, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: 'new', ctx });
+  const ed = await routedProse(env, store, { ev, articleId, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: 'new', attempts: Math.min(2, Math.max(1, attempts)), ctx: { ...ctx, keepDraft: attempts > 1 } });
   plan.routing = ed.routing;
   if (ed.article?.layout) plan.layout = ed.article.layout;
   // nominal standard-rate cost (never an actual bill: the org may receive complimentary tokens)
