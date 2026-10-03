@@ -31,6 +31,21 @@ export function currentQueue(ids, done, future, today) {
   return ids.filter((id) => !done.has(id) && !(future[id] && future[id] > readFrom));
 }
 
+// Events in the current window (started, or starting within FIXTURE_LEAD_DAYS, not final) are re-read every
+// ACTIVE_REFRESH_MS between the 3 h season re-lists: results and next-round fixtures (draw advancement) land within
+// ~15 min instead of up to 3 h. An edition tennis-live owns is retried after OWNED_RETRY_MS (a skipped read is not a
+// refresh). Incident 2026-10-03: Beijing ATP (959-2026) was skipped as OWNED_BY_LIVE on every 3 h re-list from 09-30,
+// so R1 results and the QF fixture never landed; after the ownership release it would still have waited up to 3 h.
+export const ACTIVE_REFRESH_MS = 15 * 60 * 1000;
+export const OWNED_RETRY_MS = 4 * 60 * 1000;
+/** Active-window events whose re-read is due now (not queued, not final, not far-future, last read >= refresh ago). */
+export function dueActive(cur, today, nowMs, refreshMs = ACTIVE_REFRESH_MS) {
+  const queued = new Set(cur.queue || []);
+  const readAt = cur.read_at || {};
+  return currentQueue(cur.active || [], new Set(cur.done || []), cur.future || {}, today)
+    .filter((id) => !queued.has(id) && !(readAt[id] && nowMs - Date.parse(readAt[id]) < refreshMs));
+}
+
 async function all(store, table, query, page = 1000) {
   const out = [];
   for (let off = 0; ; off += page) {
@@ -255,14 +270,20 @@ export async function espnLaneStep(ctx, { budget = 20, today = iso(new Date()), 
   const out = { runs: [] };
   const save = () => ctx.kv.put(lk.state, JSON.stringify(st));
   // 1. current season
-  if (!st.cur.listed_at || Date.now() - Date.parse(st.cur.listed_at) > CURRENT_REFRESH_MS) {
+  // (a state from before the active window existed has no `active` list: re-list once to build it)
+  if (!st.cur.listed_at || !Array.isArray(st.cur.active) || Date.now() - Date.parse(st.cur.listed_at) > CURRENT_REFRESH_MS) {
     const ids = await seasonEvents(ctx, season, league);
     const done = new Set(st.cur.done);
     const future = st.cur.future || {};
     // events that have not started are re-read from FIXTURE_LEAD_DAYS before their start date (draws and the first
     // day's order of play publish before day one: Matchup DNA needs those fixtures); later events wait
-    st.cur = { listed_at: now(), queue: currentQueue(ids, done, future, today), done: [...done], future };
+    const queue = currentQueue(ids, done, future, today);
+    const readAt = Object.fromEntries(Object.entries(st.cur.read_at || {}).filter(([id]) => queue.includes(id)));
+    st.cur = { listed_at: now(), queue, active: [...queue], read_at: readAt, done: [...done], future };
     await save();
+  } else {
+    const due = dueActive(st.cur, today, Date.now());
+    if (due.length) { st.cur.queue.push(...due); await save(); }
   }
   while (st.cur.queue.length && spent() < budget) {
     const id = st.cur.queue[0];
@@ -272,6 +293,8 @@ export async function espnLaneStep(ctx, { budget = 20, today = iso(new Date()), 
     // ATP live discovery reads current events from here (espn-live.js currentLiveEvents)
     if (league === 'atp') await noteCurrentEvent(ctx.kv, today, r);
     st.cur.queue.shift();
+    // an OWNED_BY_LIVE skip wrote nothing: retry soon instead of counting it as a refresh
+    st.cur.read_at = { ...(st.cur.read_at || {}), [id]: new Date(Date.now() - (r.state === 'OWNED_BY_LIVE' ? ACTIVE_REFRESH_MS - OWNED_RETRY_MS : 0)).toISOString() };
     if (r.final || r.state === 'ABSENT') st.cur.done = [...new Set([...st.cur.done, id])];
     else if (r.start_date && r.start_date > today) st.cur.future = { ...(st.cur.future || {}), [id]: r.start_date };
     await save();

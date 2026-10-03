@@ -33,9 +33,10 @@ import { runRetention } from './dna-retention.js';
 import { candidateMatchIds } from './writer.js';
 import { STORE_5XX, BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
+import { readOverdue, GUARD_VERSION, OVERDUE_H } from '../../shared/freshness.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
-export const VERSION = '0.4.0';
+export const VERSION = '0.4.1';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
 const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
 const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
@@ -43,6 +44,7 @@ const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the c
 // current-edition feed is used for identity (2025 join) and, later, 2025 stats/point-by-point enrichment.
 const WIMBLEDON_YEARS = [];
 const UPSTREAM_BUDGET = 40;
+const FRESHNESS_KEY = 'freshness:schedule';
 
 /** Kept for the canary endpoint + tests: one bounded request per adapter. */
 export function canaryPlan() {
@@ -247,6 +249,22 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
 
   // 2c. official video (keyless YouTube feeds of the verified tennis channels): self-gated to ~every 30 min
   await step(ctx, 'video', () => runVideo(ctx));
+
+  // 2d. schedule freshness guard (shared/freshness.js), every ~10 min: tournaments whose matches stay unfinalized long
+  // after their start mean a stalled results/draw lane (2026-10-03: Beijing ATP frozen at R1 for 3 days, unnoticed).
+  // KV `freshness:schedule` feeds /health + /v1/runs; a STALE result logs one error line (Workers observability).
+  await step(ctx, 'freshness', async () => {
+    const prev = await kv.get(FRESHNESS_KEY, 'json');
+    if (prev?.checked_at && Date.now() - Date.parse(prev.checked_at) < 10 * 60 * 1000) return 'fresh';
+    const by = await readOverdue(store, Date.now());
+    const ids = [...by.keys()];
+    const names = ids.length ? new Map((await store.select('tennis_tournament_editions', `select=edition_id,name,source_family&edition_id=${inList(ids)}`)).map((e) => [e.edition_id, e])) : new Map();
+    const stale = ids.map((id) => ({ edition_id: id, name: names.get(id)?.name || null, source_family: names.get(id)?.source_family || null, ...by.get(id) })).sort((a, b) => b.overdue - a.overdue);
+    const rec = { contract: GUARD_VERSION, checked_at: new Date().toISOString(), state: stale.length ? 'STALE' : 'CURRENT', rule: `unfinalized ${OVERDUE_H}+ h after start`, stale, stale_since: stale.length ? (prev?.state === 'STALE' && prev.stale_since ? prev.stale_since : new Date().toISOString()) : null };
+    await kv.put(FRESHNESS_KEY, JSON.stringify(rec));
+    if (stale.length) console.error(JSON.stringify({ alert: 'tennis_schedule_stale', stale_since: rec.stale_since, stale: stale.map((x) => ({ name: x.name, source_family: x.source_family, overdue: x.overdue, oldest_start: x.oldest_start, last_update: x.last_update })) }));
+    return { state: rec.state, stale: stale.length };
+  });
 
   // 4. current rankings
   await step(ctx, 'rankings', async () => {
@@ -474,13 +492,13 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/+$/, '') || '/';
     if (path === '/health' || path === '/') {
-      return json(await health({ worker: 'tennis-ingest', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY', 'INGEST_ADMIN_TOKEN'], extra: { mode: 'ingest', cron: '*/2 * * * *' } }), { headers: { 'cache-control': 'no-store' } });
+      return json(await health({ worker: 'tennis-ingest', version: VERSION, env, deps: ['TENNIS_STATE', 'TENNIS_SOURCE', 'TENNIS_MODEL_SUPABASE_URL', 'TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY', 'INGEST_ADMIN_TOKEN'], extra: { mode: 'ingest', cron: '*/2 * * * *', schedule_freshness: env.TENNIS_STATE ? await env.TENNIS_STATE.get(FRESHNESS_KEY, 'json') : null } }), { headers: { 'cache-control': 'no-store' } });
     }
     if (path === '/v1/runs' && request.method === 'GET') {
       if (!env.TENNIS_STATE) return json({ ok: false, error: 'not_configured' }, { status: 503 });
       const [last, bfCal, bfEvents, bfRank, active, bfEspn, bfEspnRank, laneEspn, bfEspnW, bfEspnRankW] = await Promise.all(['tennis-ingest:last_run', 'bf:cal', 'bf:events', 'bf:rank', 'cal:active', 'bf:espn', 'bf:espnrank', 'lane:espn_atp', 'bf:espn:wta', 'bf:espnrank:wta'].map((k) => env.TENNIS_STATE.get(k, 'json')));
       const espnState = bfEspn ? { history_year: bfEspn.year, history_queue: bfEspn.queue ? bfEspn.queue.length : null, current_listed_at: bfEspn.cur?.listed_at, current_queue: bfEspn.cur?.queue?.length ?? 0, current_done: bfEspn.cur?.done?.length ?? 0, lane: laneEspn } : null;
-      return json({ ok: true, data: { last_run: last, backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank, espn_atp: espnState, espn_wta: bfEspnW ? { history_year: bfEspnW.year, history_queue: bfEspnW.queue ? bfEspnW.queue.length : null, current_queue: bfEspnW.cur?.queue?.length ?? 0, current_done: bfEspnW.cur?.done?.length ?? 0 } : null, espn_wta_rankings: bfEspnRankW ? { current: `${bfEspnRankW.season} w${bfEspnRankW.week}`, history: bfEspnRankW.hist, source_errors: bfEspnRankW.source_errors || [] } : null, espn_rankings: bfEspnRank ? { current: `${bfEspnRank.season} w${bfEspnRank.week}`, history: bfEspnRank.hist, relinked: bfEspnRank.relinked } : null }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: { last_run: last, schedule_freshness: await env.TENNIS_STATE.get(FRESHNESS_KEY, 'json'), backfill: { calendar: bfCal, events_remaining: bfEvents?.length ?? null, ranking_history: bfRank, espn_atp: espnState, espn_wta: bfEspnW ? { history_year: bfEspnW.year, history_queue: bfEspnW.queue ? bfEspnW.queue.length : null, current_queue: bfEspnW.cur?.queue?.length ?? 0, current_done: bfEspnW.cur?.done?.length ?? 0 } : null, espn_wta_rankings: bfEspnRankW ? { current: `${bfEspnRankW.season} w${bfEspnRankW.week}`, history: bfEspnRankW.hist, source_errors: bfEspnRankW.source_errors || [] } : null, espn_rankings: bfEspnRank ? { current: `${bfEspnRank.season} w${bfEspnRank.week}`, history: bfEspnRank.hist, relinked: bfEspnRank.relinked } : null }, active_editions: active }, meta: { semantics: 'most recent ingest tick + backfill cursors' } }, { headers: { 'cache-control': 'no-store' } });
     }
     // admin: store an approved, pipeline-generated player-media derivative (scripts/media/photos.mjs)
     if (path === '/v1/media' && request.method === 'PUT') {

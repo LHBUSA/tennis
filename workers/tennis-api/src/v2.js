@@ -17,6 +17,7 @@ export const DNA_DIMENSIONS = [
 const LOWER_IS_BETTER = new Set(['double_fault_rate']);
 
 import { coveredEditions, keepTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
+import { readOverdue, tournamentFreshness, GUARD_VERSION, OVERDUE_H } from '../../shared/freshness.js';
 import { matchDna, matchDnaLeaders, pbecastMatchDna, V2_METRICS } from './dna2.js';
 
 // offset paging is only exact over a stable order: every caller's query names one (a page boundary over an unordered
@@ -213,17 +214,27 @@ export async function schedule(store, url) {
   const types = G && E ? G.filter((t) => E.includes(t)) : G || E;
   const eventQ = types ? `&event_type=in.(${(types.length ? types : ['none']).join(',')})` : '';
   const includeMatches = view === 'today' || view === 'tomorrow' || statusF;
-  const matches = includeMatches && ids.length ? await store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=500`) : [];
+  const nowMs = Date.now();
+  const [matches, overdue] = await Promise.all([
+    includeMatches && ids.length ? store.select('tennis_matches', `select=${MATCH}&edition_id=${inList(ids)}&status=neq.superseded${statusQ}${eventQ}&order=source_updated_at.desc.nullslast&limit=500`) : [],
+    // freshness guard (shared/freshness.js): per tournament, so a fresh tour can never hide a stalled one
+    readOverdue(store, nowMs, ids).catch(() => null)
+  ]);
+  const asOf = new Map();
+  for (const m of matches) { const t = m.updated_at || m.source_updated_at; if (t && (!asOf.has(m.edition_id) || t > asOf.get(m.edition_id))) asOf.set(m.edition_id, t); }
   const surf = url.searchParams.get('surface');
   const tour = url.searchParams.get('tour');
   const keepEd = (e) => (!surf || e.surface === surf) && keepTour(tour, e.tour);
   const shaped = matches.map((m) => ({ ...shapeMatch(m), tour: tourOf.get(m.edition_id) || null })).filter((mm) => keepEd({ surface: mm.tournament?.surface, tour: mm.tour }));
-  const tournaments = eds.filter(keepEd).map((e) => ({ ...shapeEdition({ ...e }), tour: e.tour, status: e.source_status, venue: e.tennis_venues || null }));
+  const tournaments = eds.filter(keepEd).map((e) => ({ ...shapeEdition({ ...e }), tour: e.tour, status: e.source_status, venue: e.tennis_venues || null, freshness: overdue ? tournamentFreshness(asOf.get(e.edition_id), overdue.get(e.edition_id)) : null }));
+  const stale = tournaments.filter((t) => t.freshness?.state === 'STALE');
+  const freshness = { contract: GUARD_VERSION, state: overdue == null ? 'UNAVAILABLE' : stale.length ? 'STALE' : 'CURRENT', stale_tournaments: stale.map((t) => t.slug) };
+  const staleNotes = stale.map((t) => `${t.name} (${t.tour}): ${t.freshness.overdue_unfinalized} matches are ${OVERDUE_H}+ h past their start with no result stored; this tournament's schedule is behind (last stored update ${t.freshness.as_of || 'unknown'})`);
   const at = (x) => x.scheduled_at || '9';
   const seen = (x) => x.source_updated_at || x.updated_at || '';
   const done = shaped.filter((x) => FINAL.includes(x.status)).sort((a, b) => seen(b).localeCompare(seen(a)));
-  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled').sort((a, b) => at(a).localeCompare(at(b))), completed: done.slice(0, 60), completed_total: done.length, filters: { tours: TOUR_FILTERS, surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'], genders: ['men', 'women', 'mixed'] }, coverage: TOUR_COVERAGE },
-    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): ATP Tour (secondary source: fixtures once that source lists them), WTA Tour and WTA 125 (official), Grand Slams (every event). Start times are shown only when the source publishes a full timestamp. See coverage for what each tour's schedule, live and ranking layers are.`, degraded: ['ATP Challenger and ITF schedules are not yet acquirable; ATP Tour tournament level and surface are not published by its secondary source'] });
+  return ok({ view, window: win, tournaments, live: shaped.filter((x) => x.status === 'in_progress'), scheduled: shaped.filter((x) => x.status === 'scheduled').sort((a, b) => at(a).localeCompare(at(b))), completed: done.slice(0, 60), completed_total: done.length, freshness, filters: { tours: TOUR_FILTERS, surfaces: ['hard', 'clay', 'grass'], events: ['singles', 'doubles'], genders: ['men', 'women', 'mixed'] }, coverage: TOUR_COVERAGE },
+    { rows: [...eds, ...matches], policy: { currentS: 300, staleS: 1800 }, semantics: `schedule ${view} (${win[0]}..${win[1]}): ATP Tour (secondary source: fixtures once that source lists them), WTA Tour and WTA 125 (official), Grand Slams (every event). Start times are shown only when the source publishes a full timestamp. See coverage for what each tour's schedule, live and ranking layers are.`, degraded: ['ATP Challenger and ITF schedules are not yet acquirable; ATP Tour tournament level and surface are not published by its secondary source', ...staleNotes] });
 }
 
 // ---- DNA ----------------------------------------------------------------------------------------------

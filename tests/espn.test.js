@@ -593,3 +593,17 @@ test('current season queue: final events never re-read; events starting within 2
   const q = currentQueue(['a', 'b', 'c', 'd', 'e'], new Set(['a']), { b: '2026-09-29', c: '2026-09-30', d: '2026-10-06' }, '2026-09-28');
   assert.deepEqual(q, ['b', 'c', 'e'], 'a is final, d starts in 8 days, e has no known start (in progress)');
 });
+
+test('current window: in-progress events are re-read every 15 min between 3 h re-lists (draw advancement, 2026-10-03 Beijing)', async () => {
+  const { dueActive, ACTIVE_REFRESH_MS, OWNED_RETRY_MS } = await import('../workers/tennis-ingest/src/espn-jobs.js');
+  const now = Date.parse('2026-10-03T18:00:00Z');
+  const ago = (ms) => new Date(now - ms).toISOString();
+  const cur = { active: ['beijing', 'tokyo', 'fresh', 'queued', 'final', 'later'], queue: ['queued'], done: ['final'], future: { later: '2026-10-12' }, read_at: { beijing: ago(3 * 3600e3), tokyo: ago(ACTIVE_REFRESH_MS + 1), fresh: ago(60e3) } };
+  assert.deepEqual(dueActive(cur, '2026-10-03', now), ['beijing', 'tokyo'], 'stale reads are due; fresh/queued/final/far-future are not');
+  assert.deepEqual(dueActive({ ...cur, read_at: {} }, '2026-10-03', now), ['beijing', 'tokyo', 'fresh'], 'never read = due');
+  assert.deepEqual(dueActive({ queue: [], done: [] }, '2026-10-03', now), [], 'a pre-window state has no active list');
+  // an OWNED_BY_LIVE skip is stamped so it comes due again after OWNED_RETRY_MS, not after a full refresh
+  const owned = { active: ['beijing'], queue: [], done: [], read_at: { beijing: new Date(now - (ACTIVE_REFRESH_MS - OWNED_RETRY_MS)).toISOString() } };
+  assert.deepEqual(dueActive(owned, '2026-10-03', now), []);
+  assert.deepEqual(dueActive(owned, '2026-10-03', now + OWNED_RETRY_MS), ['beijing']);
+});
