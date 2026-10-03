@@ -30,7 +30,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '4.0.2';
+export const VERSION = '4.0.3';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -653,6 +653,26 @@ export default {
     // preview detection on demand (?dry=1 lists candidates; no model call either way)
     if (path === '/v1/news/previews' && request.method === 'POST') return json({ ok: true, data: await detectPreviews(env, store, { dry: url.searchParams.get('dry') === '1' }) });
     if (path === '/v1/news/ai-usage') return json({ ok: true, data: { ...(await poolUsage(env.TENNIS_STATE)), canary_premium_today: Number(await env.TENNIS_STATE?.get(poolKey('canary-premium'))) || 0, config: (({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }) => ({ standardModel, flagshipModel, flagshipEnabled, volumeModel, standardMaxOutput, flagshipMaxOutput, premiumSoftCap, premiumWarn }))(aiConfig(env)) } });
+    // admin re-run of ONE held/unpublished event through the full pipeline with up to 2 attempts (the second edits the
+    // first draft); the held draft + evidence are rebuilt from a fresh packet. Never touches a published story.
+    if (path === '/v1/news/enrich' && request.method === 'POST') {
+      const id = url.searchParams.get('event_id');
+      const ev = id ? (await store.select('tennis_news_events', `select=*&event_id=eq.${encodeURIComponent(id)}`))[0] : null;
+      if (!ev) return json({ ok: false, error: 'no such event' }, { status: 404 });
+      if (!['held', 'detected', 'wire'].includes(ev.state)) return json({ ok: false, error: `event is ${ev.state}` }, { status: 409 });
+      if (ev.article_id) {
+        const a = (await store.select('tennis_articles', `select=status&article_id=eq.${ev.article_id}`))[0];
+        if (a?.status === 'published') return json({ ok: false, error: 'published story: use /v1/news/rewrite' }, { status: 409 });
+        await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { article_id: null }, prefer: 'return=minimal' });
+        await store.del('tennis_article_evidence', `article_id=eq.${ev.article_id}`);
+        await store.del('tennis_articles', `article_id=eq.${ev.article_id}`);
+      }
+      const token = crypto.randomUUID();
+      await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { state: 'enriching', lease_token: token, lease_expires_at: new Date(Date.now() + LEASE_S * 1000).toISOString(), state_changed_at: iso() }, prefer: 'return=minimal' });
+      const out = await enrichOne(env, store, { ...ev, article_id: null, state: 'enriching', lease_token: token }, { attempts: Number(url.searchParams.get('attempts')) || 1 });
+      const a = out.article_id ? (await store.select('tennis_articles', `select=slug,status,hold_reason,gate_results&article_id=eq.${out.article_id}`))[0] : null;
+      return json({ ok: true, data: { ...out, attempts: a?.gate_results?.attempts || null, usage: a?.gate_results?.usage || null } });
+    }
     if (path === '/v1/news/requeue' && request.method === 'POST') {
       // holds are terminal; after a gate/source fix, re-run matching holds through the SAME gates
       const reason = url.searchParams.get('reason');
