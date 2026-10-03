@@ -8,6 +8,17 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-03 Newsroom V5 editorial overhaul (docs/NEWSROOM_EDITORIAL_V5.md)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-news | `dd7f74f3-4742-4f70-b596-fec91b276f4a` 4.1.0 @ 77fde35 (editorial gate, angle, narrative writer, previews, overhaul queue) | `ee4d36a2` 4.0.5 -> `99c01dcc` 4.0.4 -> `b9ef3139` 4.0.3 -> `3308bdc9` 4.0.2 -> `ed260a82` 4.0.1 -> `6eb908c3` 4.0.0 -> `1769fe2c` 3.1.0 (pre-overhaul) |
+| Vercel `tennis` | main (narrative article layout from d711275; backward compatible with legacy stories) | previous production deployment |
+
+Deployed manually (upload -> preview /health -> versions deploy) because the production 3.1.0 deployment message named no
+commit (deploy-worker.mjs refuses); base reconciled by hand: 3.1.0 = b18cb97, an ancestor of every 4.x commit, and no other
+commit touched workers/tennis-news in between. Rewritten stories keep their prior headline/dek/body in `revisions`.
+
 ## Gate (all required)
 
 `npm run check` PASS · canaries PASS or explicitly degraded · `npm run qa` PASS at 1440/1024/430/390/360/320
