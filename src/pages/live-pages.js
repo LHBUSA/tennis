@@ -261,9 +261,10 @@ export const match = mountWith((root, { params }, signal) => {
     const ms = kxStatus ? marketPollMs(kx, kxStatus) : null;
     if (!ms || signal.aborted) return;
     kxTimer = setTimeout(async () => {
-      const e = await kalshi.loadEvent(params.id, { force: true }).catch(() => null);
+      // shared client ad6187a: a failed read resolves to the last good entry (uncached, retried next poll)
+      const e = await kalshi.loadEvent(params.id, { force: true });
       if (signal.aborted) return;
-      kx = e ?? kx;
+      kx = e;
       paintKx();
       scheduleKx();
     }, ms);

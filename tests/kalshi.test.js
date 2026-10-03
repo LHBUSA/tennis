@@ -131,6 +131,32 @@ describe('tennis data client', () => {
   });
 });
 
+describe('shared client ad6187a behaviour', () => {
+  test('a failed event read is never cached as no market: last good value kept, next poll retries', async () => {
+    const { createKalshiClient } = await import('../src/vendor/kalshi/kalshi-market-client.js');
+    let up = true; let calls = 0;
+    const c = createKalshiClient({ sport: 'tennis', base: MARKETS, fetchImpl: async () => { calls++; return up ? new Response(JSON.stringify(EVENT), { status: 200 }) : new Response('x', { status: 503 }); } });
+    const good = await c.loadEvent(ATP_ID, { force: true });
+    assert.ok(good?.kalshi, 'first read gives the entry');
+    up = false;
+    assert.equal(await c.loadEvent(ATP_ID, { force: true }), good, 'failure resolves to the last good entry');
+    const n = calls;
+    up = true;
+    assert.ok(await c.loadEvent(ATP_ID), 'not cached: the next (non-forced) read refetches');
+    assert.equal(calls, n + 1, 'the failure was not cached for the TTL');
+    const fresh = createKalshiClient({ sport: 'tennis', base: MARKETS, fetchImpl: async () => new Response('x', { status: 500 }) });
+    assert.equal(await fresh.loadEvent(ATP_ID), null, 'no good value yet -> nothing');
+  });
+  test('card subtitle says Live prediction market only for a live-fresh quote; stale -> quote not current', async () => {
+    const { kalshiCard } = await import('../src/vendor/kalshi/kalshi-market-ui.js');
+    const at = (freshness) => { const e = structuredClone(EVENT.event); e.kalshi.freshness = freshness; return text(kalshiCard(e, { placement: 'test' })); };
+    assert.match(at('live'), /Live prediction market/);
+    assert.match(at('stale'), /quote not current/);
+    assert.doesNotMatch(at('stale'), /Live prediction market/);
+    assert.doesNotMatch(at('delayed'), /Live prediction market/);
+  });
+});
+
 describe('compact card line (schedule / live / home)', () => {
   test('not-completed match with a market -> one restrained line; completed / no market -> none', async () => {
     await data.kalshi.loadBoard({ force: true });
@@ -196,11 +222,11 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     assert.deepEqual(files.filter((f) => KALSHI_API.test(fs.readFileSync(f, 'utf8'))), []);
   });
 
-  // pinned: propbetedge-workers 8b73545 (workers/propsports-markets/client)
+  // pinned: propbetedge-workers ad6187a (workers/propsports-markets/client)
   const VENDORED = {
-    'kalshi-market-ui.js': '93a8f485e90633a1cd70e93ab4123c1dc2161d08b3a76e41ec3cc4a0279d74f4',
+    'kalshi-market-ui.js': '03712a0eb48e5265523ec45b145fd2fa880c9435e1adf2c6ca988c78c3fa37a8',
     'kalshi-market-ui.css': 'fb046ada2b2e5450207e4301c0e41a193aa599e4661843fdcdb50d45ac7191ae',
-    'kalshi-market-client.js': '211be23bb9a5b2be0a1b4ed1a1c2c1b3b2dfc4ef45a040ae13c07d28a8ae8744'
+    'kalshi-market-client.js': '68f9ed06de627654634e385acc79b1efdee858de4a59801e20b401b5c0bc43dc'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
   test('vendored files are byte-identical to the pinned shared release', () => {
