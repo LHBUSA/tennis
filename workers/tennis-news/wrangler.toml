@@ -36,6 +36,8 @@ TENNIS_PREMIUM_DAILY_SOFT_CAP = "300000"
 TENNIS_PREMIUM_DAILY_WARN = "250000"
 # network-wide rule: only NEW canonical stories, explicit admin re-edits and offline canaries may reach a model transport
 TENNIS_AI_ELIGIBLE_TRIGGERS = "new,admin_reedit,canary"
+# previews of late-round singles matches (editorial overhaul 2026-10-03): bounded to 3 per run, 8 per UTC day
+NEWS_PREVIEWS_ENABLED = "true"
 
 [[kv_namespaces]]
 binding = "TENNIS_STATE"

@@ -7,7 +7,7 @@ export const CLASS_RANK = Object.freeze({ deep: 3, full: 2, brief: 1 });
 export const DESK_LABEL = Object.freeze({ all: 'All', atp: 'ATP', wta: 'WTA', 'grand-slams': 'Grand Slams', doubles: 'Doubles', rankings: 'Rankings', challenger: 'Challenger', itf: 'ITF' });
 /** Desk nav order (owner brief §14); ITF is listed only when populated. */
 export const DESK_ORDER = ['all', 'atp', 'wta', 'grand-slams', 'doubles', 'rankings', 'challenger', 'itf'];
-export const KIND_LABEL = Object.freeze({ upset: 'Upset', seed_upset: 'Seed upset', title: 'Title', doubles_title: 'Doubles title', retirement: 'Retirement', walkover: 'Walkover', marathon: 'Marathon', comeback: 'Comeback', deciding_tiebreak: 'Deciding tiebreak', dominant: 'Dominant win', qualifier_run: 'Qualifier run', new_no1: 'New No. 1', enters_top10: 'Top 10', enters_top20: 'Top 20', enters_top50: 'Top 50', enters_top100: 'Top 100', result: 'Result', final_score: 'Result' });
+export const KIND_LABEL = Object.freeze({ upset: 'Upset', seed_upset: 'Seed upset', title: 'Title', doubles_title: 'Doubles title', retirement: 'Retirement', walkover: 'Walkover', marathon: 'Marathon', comeback: 'Comeback', deciding_tiebreak: 'Deciding tiebreak', dominant: 'Dominant win', qualifier_run: 'Qualifier run', new_no1: 'New No. 1', enters_top10: 'Top 10', enters_top20: 'Top 20', enters_top50: 'Top 50', enters_top100: 'Top 100', result: 'Result', final_score: 'Result', preview: 'Preview' });
 
 const t = (x) => { const v = Date.parse(x || ''); return Number.isFinite(v) ? v : 0; };
 const stamp = (a) => t(a?.published_at || a?.first_published_at || a?.updated_at);

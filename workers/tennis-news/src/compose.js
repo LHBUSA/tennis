@@ -8,7 +8,7 @@
 import { deskFor, provenanceOf, LIST_LABEL } from './tour.js';
 import { hasKind } from './classify.js';
 
-export const COMPOSE_VERSION = 'tennis-compose/4.1.0';
+export const COMPOSE_VERSION = 'tennis-compose/5.0.0';
 const RANKC = { brief: 1, full: 2, deep: 3 };
 const atLeastC = (c, min) => (RANKC[c] || 2) >= RANKC[min];
 const brief0 = (c) => !atLeastC(c, 'full');
@@ -311,10 +311,31 @@ function composeRanking(packet, storyClass = 'full') {
   return { headline, dek: `${s} is No. ${f.rank} on the ${list} list dated ${f.list_date}.`, sections, key_stat: { label: 'New ranking', value: `No. ${f.rank}` }, story_type: packet.event.kind, desk: 'rankings', primary_player_id: p.id, player_ids: [p.id], match_id: null, tournament: null };
 }
 
+/** PREVIEW frame (editorial overhaul 2026-10-03): identity, desk, headline/dek and Source & Method. The deterministic
+ *  prose is a fact-safe lead only — a preview needs an argument, so it publishes only with editor prose that passes the
+ *  editorial gate (the frame alone is held, never shipped). */
+function composePreview(packet, storyClass = 'full') {
+  const m = packet.match;
+  const t = packet.tournament;
+  const A = packet.participants.A;
+  const B = packet.participants.B;
+  const aS = team(A, true);
+  const bS = team(B, true);
+  const tier = tierLabel(packet);
+  const prov = provenanceOf(packet);
+  const rk = (side) => (rankTxt(side.players[0]) ? ` (${rankTxt(side.players[0])})` : '');
+  const lead = `${team(A)}${rk(A)} and ${team(B)}${rk(B)} meet in ${theRound(m.round_label)} of ${theEvent(t, tier)}${t.city && !String(t.name).startsWith(t.city) ? ` in ${t.city}` : ''}.`;
+  const up = packet.provenance?.upstream || [];
+  const src = up[0] ? (up[0].classification === 'secondary' ? `a secondary source (${String(up[0].family).toUpperCase()})` : `the official ${String(up[0].family).toUpperCase()} feed`) : 'our archive';
+  const method = [`The draw, schedule and earlier results come from ${src}, archived by PropBetEdge.`, prov ? `Rankings are ${prov.phrase} in force at the start of the tournament${prov.classification === 'secondary' ? `, taken from a secondary source (${String(prov.source_family || 'unknown').toUpperCase()}) rather than an official tour release` : ''}.` : null, 'Match DNA values are stored snapshots built only from matches before this one. This preview makes no prediction and states no probability.'].filter(Boolean).join(' ');
+  const sections = [{ id: 'lead', heading: '', paragraphs: [lead] }, { id: 'method', heading: 'Source & method', paragraphs: [method] }];
+  return { headline: `${aS} vs ${bS}: ${t.name} ${m.round_label} preview`, dek: `${cap(m.round_label)} · ${t.name}${tier ? ` (${tier})` : ''}.`, sections, key_stat: { label: 'Round', value: cap(m.round_label) }, story_type: 'preview', desk: deskFor(m.event_type, t), primary_player_id: A.players[0].id, player_ids: [...A.players, ...B.players].map((p) => p.id), match_id: m.id, tournament: { slug: t.slug, year: t.year, name: t.name } };
+}
+
 /** storyClass (brief | full | deep) sets the depth: sections appear only when the class calls for them AND the frozen
  *  packet supports them; nothing is padded to reach a length. */
 export function compose(packet, { storyClass = 'full' } = {}) {
-  return { ...(packet.match ? composeMatch(packet, storyClass) : composeRanking(packet, storyClass)), story_class: storyClass, compose_version: COMPOSE_VERSION };
+  return { ...(packet.preview ? composePreview(packet, storyClass) : packet.match ? composeMatch(packet, storyClass) : composeRanking(packet, storyClass)), story_class: storyClass, compose_version: COMPOSE_VERSION };
 }
 
 export function slugFor(article, packet) {

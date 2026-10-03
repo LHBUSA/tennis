@@ -118,6 +118,15 @@ function kindClass(kind, c, f) {
       const sig = (c.late && c.T >= 3) || (lr && lr <= 10 && c.T >= 3) || (c.tier === 'slam' && (c.qf || c.late));
       return sig ? ['brief', `${kind.replace('_', ' ')} with significance (${c.late ? 'late round' : 'top-10 opponent'} at a ${c.tier} event)`] : ['wire', `routine ${kind.replace('_', ' ')}`];
     }
+    case 'preview': {
+      // a scheduled singles match worth a story (editorial overhaul 2026-10-03): late rounds of tour-level events, or a
+      // top-10 player in a quarterfinal+ at a 500+ event. Evidence still caps (full needs MIN_DIMS.full).
+      const topIn = Math.min(f.a_rank ?? 999, f.b_rank ?? 999) <= 10;
+      if (!c.singles || !c.main || c.tier === 'itf' || c.tier == null) return ['wire', 'preview: not a tour-level main-draw singles match'];
+      if (c.late && c.T >= 1) return ['full', `preview: ${c.round === 'F' ? 'final' : 'semifinal'} at a ${c.tier} event`];
+      if (c.qf && (c.T >= 3 || (topIn && c.T >= 2))) return ['full', `preview: quarterfinal at a ${c.tier} event`];
+      return ['wire', 'preview: round below the preview bar'];
+    }
     case 'new_no1': return ['deep', 'new No. 1'];
     case 'enters_top10': return ['full', 'enters the top 10'];
     case 'enters_top20': return ['brief', 'enters the top 20'];
@@ -162,7 +171,7 @@ export function evidenceDimensions(packet) {
   if (packet.expectation) d.push('pre_match_expectation');
   if (packet.recent_form && Object.values(packet.recent_form).some((x) => x.length)) d.push('recent_form');
   if (packet.h2h?.prior_meetings?.length) d.push('h2h');
-  if (packet.draw_path?.matches?.length) d.push('draw_path');
+  if (packet.draw_path?.matches?.length || (packet.paths && Object.values(packet.paths).some((x) => x?.matches?.length))) d.push('draw_path');
   if (packet.tournament && (packet.tournament.level || packet.tournament.competition_key || packet.event?.facts?.edition_tier)) d.push('tournament_context');
   if (packet.next?.opponent?.length) d.push('next_opponent');
   if (packet.tournament?.surface && packet.match_dna && Object.values(packet.match_dna).some((x) => x.surface)) d.push('surface_context');

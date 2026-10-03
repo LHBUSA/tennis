@@ -3,7 +3,7 @@
 // whose facts are missing is omitted with a reason instead of rendered empty. One axis per chart.
 
 import { provenanceOf } from './tour.js';
-export const PLAN_VERSION = 'tennis-plan/4.0.0';
+export const PLAN_VERSION = 'tennis-plan/5.0.0';
 const other = (s) => (s === 'A' ? 'B' : 'A');
 const short = (side) => (side?.players || []).map((p) => p.last_name || String(p.name).split(' ').slice(-1)[0]).join('/');
 
@@ -252,7 +252,35 @@ function rankingChart(packet) {
   return { id: 'ranking_trajectory', type: 'line', title: official ? 'Official ranking by week' : 'Ranking by week (PropBetEdge archive)', unit: 'rank', invert: true, label_key: 'date', value_keys: ['rank'], series: h.map((r) => ({ date: r.date, rank: r.rank })), source: official ? 'archived official lists' : `archived weekly lists from a secondary source (${String(packet.ranking_provenance?.source_family || 'unknown').toUpperCase()})` };
 }
 
+/** PREVIEW plan (editorial overhaul 2026-10-03): the matchup card, both players' context, this week's paths, earlier
+ *  meetings, form and the Match DNA comparison — every value copied from the frozen preview packet. */
+function previewPlan(packet, article) {
+  const modules = [];
+  const omitted = [];
+  const add = (id, title, data, reason) => (data ? modules.push({ id, title, data }) : omitted.push({ id, reason }));
+  const m = packet.match;
+  add('preview_card', 'The matchup', { match_id: m.id, scheduled_at: m.scheduled_at, round_label: m.round_label, best_of: m.best_of, tournament: packet.tournament, sides: packet.participants }, 'no match');
+  add('player_context', 'Player context', playerContext(packet, 'A', 'B'), 'fewer than two context facts in the packet');
+  const paths = packet.paths && Object.values(packet.paths).some((x) => x?.matches?.length) ? packet.paths : null;
+  add('paths', 'Paths this week', paths, 'no completed rounds stored for either player at this tournament');
+  add('h2h', 'Head-to-head', packet.h2h?.prior_meetings?.length ? packet.h2h : null, 'no earlier meeting in our archive');
+  add('form', 'Recent form', packet.recent_form && Object.values(packet.recent_form).some((x) => x.length) ? packet.recent_form : null, 'no earlier results stored');
+  const charts = [];
+  const mdna = matchDnaChart(packet, 'A', 'B');
+  if (mdna) charts.push(mdna); else omitted.push({ id: 'match_dna_comparison', reason: 'no pre-match Match DNA for both players with three shared metrics' });
+  if (charts.length) modules.push({ id: 'charts', title: 'The data', data: { charts } });
+  modules.push({ id: 'method', title: 'Source & method', data: { provenance: packet.provenance, packet_version: packet.version, built_at: packet.built_at } });
+  const cells = [];
+  const addC = (label, value, note = null) => { if (value != null && value !== '') cells.push({ label, value: String(value), note, kind: 'fact' }); };
+  addC('Round', m.round_label ? m.round_label.charAt(0).toUpperCase() + m.round_label.slice(1) : null, packet.tournament?.name || null);
+  for (const s of ['A', 'B']) { const p = packet.participants[s]?.players?.[0]; if (Number.isFinite(p?.rank?.rank)) addC(short(packet.participants[s]), `No. ${p.rank.rank}`, 'list in force at the start of the tournament'); }
+  if (packet.h2h?.prior_meetings?.length) addC('Head-to-head', `${packet.h2h.wins}-${packet.h2h.losses}`, `${short(packet.participants.A)} first · our archive`);
+  addC('Surface', packet.tournament?.surface ? packet.tournament.surface.charAt(0).toUpperCase() + packet.tournament.surface.slice(1) : null);
+  return { version: PLAN_VERSION, layout: 'narrative/1', modules, omitted, chart_count: charts.length, module_ids: modules.map((x) => x.id), story_type: 'preview', story_class: article?.story_class || null, glance: cells.length >= 3 ? cells.slice(0, 5) : null, intelligence: null };
+}
+
 export function buildPlan(packet, article) {
+  if (packet?.preview) return previewPlan(packet, article);
   const modules = [];
   const omitted = [];
   const add = (id, title, data, reason) => (data ? modules.push({ id, title, data }) : omitted.push({ id, reason }));

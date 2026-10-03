@@ -37,3 +37,27 @@
   .nwd-tiles { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); }
   .nwd-pcs { grid-template-columns: 1fr 1fr; }
 }
+
+/* Narrative layout (editorial overhaul 2026-10-03): prose leads, each visual sits inside the section it proves and is
+   followed by its reading; the lead has no heading; unattached visuals live in a collapsed appendix. */
+.nw-body .nw-lead > p:first-child { font-size: 20px; line-height: 1.6; }
+.nw-body .nw-vis { margin: 20px 0 24px; padding: 0; }
+.nw-body .nw-vis > .mod, .nw-body .nw-vis > figure, .nw-body .nw-vis > section { margin: 0; }
+.nw-body .nw-read { margin: 10px 0 0; padding: 10px 14px; border-left: 3px solid var(--gold); background: color-mix(in srgb, var(--paper) 70%, var(--white)); font-size: 15.5px; line-height: 1.55; color: var(--ink); max-width: none; }
+.nw-body .nw-read span { display: block; margin-bottom: 4px; font: 800 11px/1 var(--f-display); letter-spacing: 0.18em; text-transform: uppercase; color: var(--gold); }
+.nw-body .nw-opener { margin-top: 6px; }
+.nw-appendix { margin-top: 28px; }
+.nw-appendix .nf-more-data[open] > summary { margin-bottom: 12px; }
+.nwp-card .nwp-vs { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 10px; margin: 10px 0 6px; }
+.nwp-card .nwp-vs > i { font: 800 13px var(--f-display); letter-spacing: 0.14em; color: var(--muted); font-style: normal; text-transform: uppercase; }
+.nwp-card .nwp-p { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; min-width: 0; }
+.nwp-card .nwp-side:last-child .nwp-p { flex-direction: row-reverse; text-align: right; }
+.nwp-card .nwp-p span { display: grid; min-width: 0; }
+.nwp-card .nwp-p b { font: 700 15px/1.25 var(--f-ui); overflow-wrap: anywhere; }
+.nwp-card .nwp-p small { color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+@media (max-width: 520px) {
+  .nw-body .nw-lead > p:first-child { font-size: 18.5px; }
+  .nwp-card .nwp-vs { grid-template-columns: 1fr; }
+  .nwp-card .nwp-vs > i { text-align: center; }
+  .nwp-card .nwp-side:last-child .nwp-p { flex-direction: row; text-align: left; }
+}

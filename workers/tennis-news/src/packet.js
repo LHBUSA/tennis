@@ -370,3 +370,44 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
   packet.canonical_signature = `${event.kind}:${m.id}`;
   return packet;
 }
+
+// ---- PREVIEW packets (editorial overhaul 2026-10-03) ----------------------------------------------------------------
+// A scheduled singles match. Same point-in-time discipline as a result packet: rankings in force at the tournament
+// start, Match DNA snapshots strictly before the match day, form strictly before this tournament, this week's path from
+// completed rounds only, head-to-head before this tournament. NO model expectation (a probability in a free preview
+// would also publish the All Access matchup product), no odds, nothing about the match itself beyond its schedule.
+export async function buildPreviewPacket(store, event, { now = new Date().toISOString() } = {}) {
+  const m = await loadMatch(store, event.match_id);
+  if (!m || m.status !== 'scheduled' || !['WS', 'MS'].includes(m.event_type)) return null;
+  const A = m.sides.A?.players?.[0];
+  const B = m.sides.B?.players?.[0];
+  if (!A || !B || m.sides.A.players.length !== 1 || m.sides.B.players.length !== 1) return null;
+  const date = (m.scheduled_at || m.started_at || `${m.tournament.start_date}T00:00:00Z`).slice(0, 10);
+  const startIso = m.scheduled_at || `${date}T00:00:00Z`;
+  const listKey = RANKING_LISTS[m.event_type] || null;
+  const ranks = listKey ? await rankAt(store, [A.id, B.id], m.tournament.start_date, listKey) : new Map();
+  for (const s of ['A', 'B']) for (const p of m.sides[s].players) p.rank = ranks.get(p.id) || null;
+  const packet = { version: PACKET_VERSION, built_at: now, preview: true, event: { kind: 'preview', event_id: event.event_id, materiality: event.materiality, facts: event.facts, occurred_at: event.occurred_at, detector: event.detector || null }, provenance: { data_brand: 'DATA · PropSports', data_url: 'https://propsports.proptechusa.ai', upstream: [] } };
+  packet.match = { id: m.id, event_type: m.event_type, round: m.round, round_label: m.round_label, format: m.format, best_of: m.best_of, status: 'scheduled', winner_side: null, scheduled_at: m.scheduled_at, date, sets: [] };
+  packet.participants = m.sides;
+  packet.tournament = m.tournament;
+  packet.tour = tourOf(m.event_type);
+  packet.match_source = matchSource(m.source_family);
+  packet.ranking_provenance = ranks.provenance || null;
+  packet.provenance.upstream.push({ family: m.source_family || 'unknown', classification: packet.match_source.classification, what: 'draw, schedule and earlier results' });
+  const [ha, hb] = await Promise.all([playerHistory(store, A.id), playerHistory(store, B.id)]);
+  const before = (x) => x.tournament.start_date < m.tournament.start_date;
+  const thisWeek = (h, pid) => h.filter((x) => x.tournament.edition_id === m.tournament.edition_id && x.round_order < ROUND_ORDER(m.round) && x.status !== 'scheduled').sort((p, q) => p.round_order - q.round_order).map((x) => resultRow(x, pid));
+  packet.paths = { A: { player_id: A.id, matches: thisWeek(ha, A.id) }, B: { player_id: B.id, matches: thisWeek(hb, B.id) } };
+  const fa = ha.filter(before).slice(0, 5).map((x) => resultRow(x, A.id));
+  const fb = hb.filter(before).slice(0, 5).map((x) => resultRow(x, B.id));
+  if (fa.length || fb.length) packet.recent_form = { [A.id]: fa, [B.id]: fb };
+  const meetings = ha.filter((x) => before(x) && sideOfPlayer(x, B.id)).map((x) => resultRow(x, A.id));
+  packet.h2h = { player_id: A.id, opponent_id: B.id, prior_meetings: meetings, wins: meetings.filter((r) => r.result === 'W').length, losses: meetings.filter((r) => r.result === 'L').length, coverage_from: '2024-12-29', note: 'meetings in our archive only (coverage starts 2024-12-29)' };
+  const surf = m.tournament.surface || null;
+  const md = {};
+  for (const pid of [A.id, B.id]) { const x = await matchDnaBefore(store, pid, date, surf, startIso); if (x) md[pid] = x; }
+  if (Object.keys(md).length) packet.match_dna = md;
+  packet.canonical_signature = `preview:${m.id}`;
+  return packet;
+}

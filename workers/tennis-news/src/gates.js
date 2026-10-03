@@ -4,7 +4,7 @@
 
 import { parseScore } from '../../shared/canonical/scoring.js';
 
-export const GATES_VERSION = 'tennis-gates/4.1.0';
+export const GATES_VERSION = 'tennis-gates/5.0.0';
 
 const SKIP_KEY = /(^|_)(id|ids|url|slug|hash|key|token|image|square|wide|thumb|portrait|jpg|photo|source_page|license|capture|event_id|built_at|detector|version)$/i;
 const UUID = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
@@ -54,7 +54,7 @@ const BANNED = [
 
 // Win-loss records are packet data, not record-breaking claims (canary 2026-09-29: "a 67-107 record against top-50
 // opponents", "pre-match record in our archive" were held as unsupported records). Only these phrasings are exempt.
-const WL_RECORD = /\b\d{1,4}-\d{1,4}\s+record\b|\brecord\s+(of|at)\s+\d{1,4}-\d{1,4}\b|\b(pre-match|win-loss|W-L|head-to-head|H2H|surface|season|career)\s+record\b|\brecord\s+(in|from)\s+(our|the)\s+(archive|PropBetEdge)\b/gi;
+const WL_RECORD = /\b(results|stored|archived|archive|long|overall|singles|doubles|match|winning|losing|recent|their|his|her|its|player's|players')\s+record\b|\b\d{1,4}-\d{1,4}\s+record\b|\brecord\s+(of|at)\s+\d{1,4}-\d{1,4}\b|\b(pre-match|win-loss|W-L|head-to-head|H2H|surface|season|career)\s+record\b|\brecord\s+(in|from)\s+(our|the)\s+(archive|PropBetEdge)\b/gi;
 // Form windows (last 10 matches, last 20 matches, 52 weeks) are the definition of the stored window, not a statistic.
 const WINDOW = (t) => new RegExp(`\\blast\\s+${t}\\s+(matches|results|weeks)\\b|\\b${t}[- ]week\\b|\\b(over|in)\\s+(the\\s+)?(previous|past|last)\\s+${t}\\s+(matches|weeks)\\b`, 'i');
 const WINDOW_SIZES = new Set(['10', '20', '52']);
@@ -62,7 +62,7 @@ const WINDOW_SIZES = new Set(['10', '20', '52']);
 const ROUND_REACHED = { F: 'final|title match|championship match|title decider', S: 'semi-?finals?|last four', Q: 'quarter-?finals?|last eight' };
 
 function prose(article) {
-  return [article.headline, article.dek, ...article.sections.flatMap((s) => [s.heading, ...s.paragraphs])].join('\n');
+  return [article.headline, article.dek, ...article.sections.flatMap((s) => [s.heading, ...s.paragraphs, s.visual_note || ''])].join('\n');
 }
 
 export function runGates(article, packet, { existingSignatures = new Set(), now = new Date().toISOString(), plan = null } = {}) {
@@ -75,7 +75,7 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   const dates = allowedDates(packet);
   for (const d of text.match(ISO_DATE) || []) if (!dates.has(d.slice(0, 10))) fail('date_grounding', d);
   for (const sec of [{ paragraphs: [article.headline, article.dek] }, ...article.sections]) {
-    for (const para of sec.paragraphs) {
+    for (const para of [...sec.paragraphs, ...(sec.visual_note ? [sec.visual_note] : [])]) {
       for (const sentence of String(para).split(/(?<=[.!?])\s+/)) {
         for (const t of numberTokens(sentence)) {
           const n = Number(t);
@@ -116,7 +116,17 @@ export function runGates(article, packet, { existingSignatures = new Set(), now 
   else if (!article.headline.includes(primary.last_name ? primary.last_name.split(' ')[0].charAt(0) + primary.last_name.split(' ')[0].slice(1).toLowerCase() : primary.name.split(' ').slice(-1)[0]) && !article.headline.includes(primary.name)) fail('entity_headline', 'primary surname missing from headline');
   for (const id of article.player_ids) if (!names.some((p) => p.id === id)) fail('entity_unknown_player', id);
 
-  if (packet.match) {
+  if (packet.preview) {
+    // PREVIEW (editorial overhaul 2026-10-03): the match has not been played. Point-in-time inputs only; no prediction.
+    const m = packet.match;
+    if (m.status !== 'scheduled') fail('preview_not_scheduled', m.status);
+    for (const p of names) if (p.rank && p.rank.list_date > packet.tournament.start_date) fail('ranking_after_event', `${p.name} list ${p.rank.list_date}`);
+    for (const [pid, d] of Object.entries(packet.match_dna || {})) if (d.as_of >= m.date || (d.surface && d.surface.as_of >= m.date)) fail('match_dna_after_event', `${pid} ${d.as_of} >= ${m.date}`);
+    for (const rows of Object.values(packet.recent_form || {})) for (const r of rows) if (r.date && r.date > m.date) fail('form_after_event', r.match_id);
+    for (const side of Object.values(packet.paths || {})) for (const r of side?.matches || []) if (r.match_id === m.id) fail('path_includes_match', r.match_id);
+    const pr = text.match(/\b(will|should|is expected to|are expected to|is likely to|are likely to|bound to|poised to|set to)\s+(win|beat|prevail|advance|reach|take|lose|edge|dominate|cruise)\b|\b(prediction|predicts?|our pick|tip(ped)? to)\b/i);
+    if (pr) fail('unsupported_prediction', pr[0]);
+  } else if (packet.match) {
     const m = packet.match;
     // 4b. result direction: the loser is never written as the subject of a winning verb
     const L = m.winner_side === 'A' ? 'B' : 'A';
@@ -213,7 +223,9 @@ export function additiveValueFailures(article, plan = null) {
   }
   const charts = chartNumbers(plan);
   if (charts.length) for (const x of paras) {
-    const nums = numberTokens(x.p).filter((t) => !(Number.isInteger(Number(t)) && Number(t) >= 0 && Number(t) <= 5));
+    // scorelines ("5-7 6-1 6-4" of an earlier round) are results, not a chart read out: small set scores coincide with
+    // any games-by-set chart, so they are left out of the narration count (V5)
+    const nums = numberTokens(x.p.replace(/(?<![\w.])\d{1,2}-\d{1,2}(?:\(\d{1,2}\))?(?:,?\s+\d{1,2}-\d{1,2}(?:\(\d{1,2}\))?)*/g, ' ')).filter((t) => !(Number.isInteger(Number(t)) && Number(t) >= 0 && Number(t) <= 5));
     if (nums.length < 4) continue;
     for (const c of charts) {
       const hit = nums.filter((t) => c.set.has(t)).length;

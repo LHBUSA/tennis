@@ -1,0 +1,73 @@
+{
+  "headline": "Munar recovers from a lost tiebreak to knock No. 3 seed Fritz out of Tokyo",
+  "dek": "Jaume Munar won 6-7(7), 6-4, 6-3 in round 1 of the ATP 500 in Tokyo, three days after starting in qualifying.",
+  "story_type": "upset",
+  "story_class": "full",
+  "layout": "narrative/1",
+  "primary_player_id": "e1978034-04f4-577f-a44f-581b28857884",
+  "player_ids": [
+    "6c348680-39c7-50ab-a15c-7b721ed0af25",
+    "e1978034-04f4-577f-a44f-581b28857884"
+  ],
+  "sections": [
+    {
+      "id": "lead",
+      "heading": "",
+      "paragraphs": [
+        "For most of an hour in Tokyo, the opening round looked like it would follow the script that Taylor Fritz has written for years: hold the tight moments, take the first set, and close. Jaume Munar, who had to come through qualifying just to reach the main draw, refused to let that script finish, and turned a lost tiebreak into the biggest result of his week.",
+        "It was not supposed to be close on paper. Fritz arrived as the No. 3 seed, while Munar was unseeded, and the gap between them on the ATP singles list in the PropBetEdge archive in force when the tournament began was wide: No. 10 against No. 66."
+      ],
+      "visual": "",
+      "visual_note": ""
+    },
+    {
+      "id": "unfolded",
+      "heading": "A tiebreak lost, then a different match",
+      "paragraphs": [
+        "The first set went the distance and then some. Neither man could separate before the tiebreak, and even that ran past its usual length before Fritz closed it 9-7. For a player who had already spent two matches in qualifying, dropping a set that long could have been the end of the story.",
+        "Instead the match changed shape. Munar took the second set 6-4, the first time all afternoon that the scoreboard tilted his way, and the third was cleaner still at 6-3. Losing the opener and then winning the next two sets is exactly the pattern Fritz rarely allows, which is why the order of the sets matters more here than the final line.",
+        "Our archive holds no game-by-game log of this match, so the story of the swing is told by the sets themselves. What they show is a match that grew less tight as it went on: a first set that needed an extended tiebreak, a second set that went the distance on games, and a third that Munar closed with room to spare."
+      ],
+      "visual": "set_by_set",
+      "visual_note": "Read the sets from top to bottom: the only set Fritz won needed an extended tiebreak, while Munar's two sets were each settled on games alone. The match did not drift away from Fritz in one swing; it closed on him set by set."
+    },
+    {
+      "id": "records",
+      "heading": "What the records said going in",
+      "paragraphs": [
+        "Munar's archive did not suggest this kind of afternoon. Before Tokyo he was 4-20 against top-10 opponents in our records, and he had won 45.3% of his archived singles matches, while Fritz had won 62.1% of his across a far larger sample of 528 matches.",
+        "The detail that makes the comeback unusual sits in Fritz's own profile. When he won the opening set in our archive, he went on to win the match 86% of the time, which is what made a lost first set feel decisive. Munar, by contrast, had won only 13.8% of the archived matches in which he lost the first set, so this was not a comeback built on habit; it ran against both players' history at once."
+      ],
+      "visual": "match_dna_comparison",
+      "visual_note": "These bars are each player's results record before the match, not this match's numbers. Fritz leads almost every line, which is the point: the result came against the grain of the stored records, especially on matches won from a set down."
+    },
+    {
+      "id": "the_run",
+      "heading": "Three wins before the main draw had properly begun",
+      "paragraphs": [
+        "The win also capped a demanding start to the week. Munar opened qualifying by recovering from a set down against Marcos Giron, winning 5-7 6-1 6-4, and then beat Aleksandar Kovacevic 6-2 6-3 to reach the main draw. Fritz, meanwhile, was playing his first match of the tournament.",
+        "That path matters for how this result reads. Munar was not a fresh name ambushing a seed; he was a player who had already come back once that week and knew what a lost opening set felt like. His recent form had been uneven, with a five-set win over Terence Atmane at the US Open followed by a straight-sets loss to Arthur Rinderknech, so the Tokyo run is a sharper stretch than anything just before it."
+      ],
+      "visual": "path",
+      "visual_note": "The path shows two qualifying wins before the Fritz match, the first of them also won after losing the opening set. Every result here is from this week, so the column tells the story of this run rather than of the season."
+    },
+    {
+      "id": "means",
+      "heading": "What it opens up",
+      "paragraphs": [
+        "Removing the No. 3 seed in the first round changes the shape of that section of the draw. Munar's next opponent is Jaime Faria in round 2, a match in which he will be the more established name in the pairing rather than the outsider he was against Fritz.",
+        "It also adds to a stretch in which Munar has kept finding his way through long matches. The five-set win over Atmane in New York came from two sets down on the scoreline, and in Tokyo he has now won twice in a week after losing the opening set, which is a different profile from the one his archived comeback rate describes.",
+        "For Fritz, the loss is a single result against a long record, and his archive says he wins most matches like this. For Munar, the question for the rest of the week is whether a qualifier who has now won three matches in Tokyo can keep turning close sets his way without a long tiebreak taking the first one from him again."
+      ],
+      "visual": "",
+      "visual_note": ""
+    },
+    {
+      "id": "method",
+      "heading": "Source & method",
+      "paragraphs": [
+        "The result and set scores come from a secondary source (ESPN), archived by PropBetEdge."
+      ]
+    }
+  ]
+}

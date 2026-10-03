@@ -8,6 +8,7 @@ import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { avatar } from '../ui/avatar.js';
 import { depthInserts } from '../ui/news-modules.js';
+import * as NM from '../ui/news-modules.js';
 import { getMembership } from '../lib/membership.js';
 import { shareBar } from '../ui/share.js';
 import { track } from '../analytics.js';
@@ -502,6 +503,77 @@ function articleHero(a) {
   return html`<div class="nf-band-hero" role="img" aria-label="${KIND[a.story_type] || 'Story'}${t?.name ? ` · ${tLabel(t)}` : ''}"><img src="/brand/pbe-mark-80.webp" width="110" height="60" alt=""><div><span>${(KIND[a.story_type] || 'Story').toUpperCase()}</span>${t?.name ? html`<b>${tLabel(t)}</b>` : ''}${t?.surface ? html`<small>${t.surface}${t.level ? ` · ${t.level}` : ''}</small>` : ''}</div></div>`;
 }
 
+// ---- NARRATIVE LAYOUT (editorial overhaul 2026-10-03, "Prose leads. Data supports.") -------------------------------
+// The story's own sections carry the visuals: each section may attach ONE visual (section.visual) that proves its point,
+// followed by the editor's interpretation (section.visual_note). The lead has no heading; the scoreboard (or a
+// preview's matchup card) follows it. Visuals the story did not attach go to a collapsed data appendix — preserved,
+// one tap away, never a wall of charts inside the narrative.
+const SUPERSEDED = { serve_profile: ['serve_comparison', 'serve_counts'], return_pressure: ['return_comparison'], set_by_set: ['match_flow'] };
+export const isNarrative = (a) => a?.plan?.layout === 'narrative/1' || (a?.sections || []).some((s) => s && typeof s.visual === 'string');
+
+function previewCard(d, a) {
+  const at = d.scheduled_at ? new Date(d.scheduled_at).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : null;
+  const side = (s) => {
+    const x = d.sides?.[s] || {};
+    return html`<div class="nwp-side">${(x.players || []).map((p) => html`<a class="nwp-p" href="/players/${p.slug}">${avatar({ name: p.name, photo: photoOf(a, p) }, { px: 56 })}<span><b>${p.name}</b><small>${[x.seed ? `Seed ${x.seed}` : null, p.rank && RANK_LIST[p.rank.list] ? `${RANK_LIST[p.rank.list]} No. ${p.rank.rank}` : null, p.nationality].filter(Boolean).join(' · ')}</small></span></a>`)}</div>`;
+  };
+  return html`<div class="mod nwp-card" data-module="preview_card"><p class="mod-k">${d.tournament?.name || ''} · ${ROUND_TITLE(d.round_label)}${d.best_of ? ` · best of ${d.best_of}` : ''}${at ? html` · <time datetime="${d.scheduled_at}">${at}</time>` : ''}</p>
+    <div class="nwp-vs">${side('A')}<i aria-hidden="true">vs</i>${side('B')}</div>
+    <p class="nw-links"><a href="/matches/${d.match_id}">Match page →</a> <a href="/matchups/${d.match_id}">Matchup DNA →</a></p></div>`;
+}
+function pathsMod(d, parts) {
+  const col = (s) => {
+    const x = d?.[s];
+    const p = parts?.[s]?.players?.[0];
+    if (!x?.matches?.length || !p) return '';
+    return html`<div><b>${p.name}</b><ul class="nw-list">${x.matches.map((r) => html`<li><span class="${r.result === 'W' ? 'win' : 'loss'}">${r.result}</span> ${ROUND_TITLE(r.round_label)} · ${joinH(r.opponent.map((o) => html`<a href="/players/${o.slug}">${o.name}</a>`))} · ${r.score || ''}</li>`)}</ul></div>`;
+  };
+  return html`<div class="mod" data-module="paths"><p class="mod-k">Paths this week</p><div class="nw-form">${col('A')}${col('B')}</div></div>`;
+}
+
+/** One visual by id from the story's frozen content plan ('' when the plan does not carry it). */
+function visualById(id, { a, mods, charts, sb, parts, W, names }) {
+  const mod = mods.find((m) => m.id === id && m.data);
+  const c = charts.find((x) => x.id === id);
+  if (c) return chart(c);
+  if (!mod) return '';
+  const L = W === 'A' ? 'B' : W === 'B' ? 'A' : null;
+  const sideNames = W ? { W: (parts?.[W]?.players || []).map((p) => String(p.name).split(' ').slice(-1)[0]).join(' / '), L: (parts?.[L]?.players || []).map((p) => String(p.name).split(' ').slice(-1)[0]).join(' / ') } : { W: (parts?.A?.players || []).map((p) => String(p.name).split(' ').slice(-1)[0]).join(' / '), L: (parts?.B?.players || []).map((p) => String(p.name).split(' ').slice(-1)[0]).join(' / ') };
+  switch (id) {
+    case 'scoreboard': return sb ? scoreboard(sb) : '';
+    case 'preview_card': return previewCard(mod.data, a);
+    case 'key_numbers': return NM.keyNumbers(mod, sideNames);
+    case 'set_by_set': return NM.setBySet(mod, sideNames);
+    case 'match_development': return NM.development(mod, sideNames);
+    case 'serve_profile': case 'return_pressure': return NM.pairTable(mod, sideNames);
+    case 'player_context': return NM.playerContext(mod);
+    case 'next': return NM.nextMatch(mod.data);
+    case 'path': return pathMod(mod.data);
+    case 'paths': return pathsMod(mod.data, parts);
+    case 'h2h': return h2hMod(mod.data);
+    case 'form': return formMod(mod.data, names);
+    default: return '';
+  }
+}
+
+function narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel }) {
+  const ctx = { a, mods, charts, sb, parts, W, names };
+  const secs = (a.sections || []).filter((s) => s.id !== 'method');
+  const used = new Set(secs.map((s) => s.visual).filter(Boolean));
+  const opener = mods.some((m) => m.id === 'preview_card') ? 'preview_card' : 'scoreboard';
+  used.add(opener);
+  for (const v of [...used]) for (const x of SUPERSEDED[v] || []) used.add(x);
+  // the appendix: every module/chart the story did not attach (twins of an attached table are not repeated)
+  const tables = new Set(mods.map((m) => m.id));
+  const appendixIds = [...mods.filter((m) => !['charts', 'method', 'scoreboard', 'preview_card'].includes(m.id)).map((m) => m.id), ...charts.map((c) => c.id)]
+    .filter((id) => !used.has(id) && !Object.entries(SUPERSEDED).some(([t, twins]) => tables.has(t) && twins.includes(id)));
+  const appendix = appendixIds.map((id) => visualById(id, ctx)).filter(Boolean);
+  const read = (s) => (s.visual_note ? html`<p class="nw-read"><span>Reading the data</span> ${s.visual_note}</p>` : '');
+  return html`${secs.map((s, i) => html`<section id="${s.id}" class="${i === 0 ? 'nw-lead' : ''}">${s.heading ? html`<h2>${s.heading}</h2>` : ''}${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${s.visual ? html`<figure class="nw-vis" data-visual="${s.visual}">${visualById(s.visual, ctx)}${read(s)}</figure>` : ''}</section>${i === 0 ? html`<div class="nw-vis nw-opener">${visualById(opener, ctx)}</div>` : ''}`)}
+    ${intel}
+    ${appendix.length ? html`<section id="data-appendix" class="nw-appendix"><details class="nf-more-data"><summary>All the data behind this story (${appendix.length})</summary>${appendix}</details></section>` : ''}`;
+}
+
 /** Sticky rail offset = the global header's real height (it changes with the live pill / breakpoints), as --hdr-h on
  *  the root; CSS falls back to 64px before the first measurement. Returns the disconnect. */
 function trackHeaderHeight() {
@@ -588,10 +660,11 @@ export function article(root, ctx) {
             ${articleHero(a)}
             ${glanceCells(a).length ? html`${glanceStrip(a)}${replayCta(a)}` : facts(a, sb, t, a.replay)}
             <div class="nw-body">
+              ${isNarrative(a) ? narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel }) : html`
               ${sections.map((s, i) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>${i === 0 ? matchup(a, parts, W) : ''}${i === Math.min(1, sections.length - 1) ? intel : ''}`)}
               ${!sections.length ? intel : ''}
               ${leftovers.length ? html`<section id="more-data"><h2>The match in numbers</h2>${leftovers}</section>` : ''}
-              ${get('form') ? formMod(get('form'), names) : ''}
+              ${get('form') ? formMod(get('form'), names) : ''}`}
               ${sourceMethod(a, res.meta)}
               ${photoCredits(a, people)}
             </div>

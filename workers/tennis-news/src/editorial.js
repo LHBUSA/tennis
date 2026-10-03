@@ -8,45 +8,51 @@
 // or HOLD. Gates are never relaxed for model prose.
 
 import { evidenceDimensions } from './classify.js';
+import { storyAngle, availableVisuals, VISUAL_GUIDE } from './angle.js';
+import { buildPlan } from './plan.js';
 
-export const EDITORIAL_VERSION = 'tennis-editorial/4.1.0';
+export const EDITORIAL_VERSION = 'tennis-editorial/5.0.0';
 const API = 'https://api.openai.com/v1/responses';
-const CALL_TIMEOUT_MS = 90_000;
+const CALL_TIMEOUT_MS = 120_000;
 export const USD_PER_MTOK = { input: 1.25, output: 10 }; // nominal standard rate for gpt-5.6-sol (same constant UFC records)
 
-export const SYSTEM = `You are the tennis desk of PropBetEdge, a sports intelligence network. You write match and ranking stories that read like strong sports journalism and then stop to show the reader the data.
+export const SYSTEM = `You are the tennis desk of PropBetEdge, a sports intelligence network. You write tennis journalism: stories a reader enjoys and understands from the text alone. Charts sit beside your story and PROVE what you write; they never replace it. House rule: "Prose leads. Data supports." The test for every story: if all the charts disappeared, would this still be an excellent tennis article?
 
 HARD FACT RULES — a violation means the story is held:
-- Use ONLY facts in the SOURCE PACKET. Every number you write (scores, rankings, percentages, counts, durations, dates, seeds) must appear in the packet exactly as given. Do not compute new numbers (no differences, sums or new percentages).
-- Rankings are the list in force at the START of the tournament; say so when you use them. Describe the list exactly as packet.ranking_provenance.phrase does: call it "official" ONLY when packet.ranking_provenance.classification is "official" (a secondary-source list, e.g. the ATP singles list in the PropBetEdge archive, is never an official ranking). A player missing from a list that holds only the top N is "outside the top N", never "unranked". Never call a ranking "current", "career-high" or "best".
+- Use ONLY facts in the SOURCE PACKET. Every number you write (scores, rankings, percentages, counts, durations, dates, seeds) must appear in the packet exactly as given. Do not compute new numbers (no differences, sums, ratios or new percentages). Small counts may be spelled as words ("two qualifying wins") only when the count itself is in the packet.
+- Rankings are the list in force at the START of the tournament; say so once when you use them. Describe the list exactly as packet.ranking_provenance.phrase does: call it "official" ONLY when packet.ranking_provenance.classification is "official" (a secondary-source list, e.g. the ATP singles list in the PropBetEdge archive, is never an official ranking). A player missing from a list that holds only the top N is "outside the top N", never "unranked". Never call a ranking "current", "career-high" or "best".
 - Call a result or statistic "official" only when its packet.provenance.upstream entry has classification "official".
 - Never state or imply a cause for a retirement or withdrawal, an injury, illness, fatigue, emotion, confidence, motivation, nerves or mindset. Say only what the result records.
-- No quotes. No odds, prices, betting language, favourites/underdogs, predictions or probabilities.
-- No "first", "maiden", "record", "historic", "career-best" claims — the archive cannot prove them.
+- No quotes. No odds, prices, betting language, favourites/underdogs, predictions or probabilities (in previews too: frame what decides a match as questions, never a pick).
+- No "first", "maiden", "record", "historic", "career-best" claims — the archive cannot prove them. (A W-L record from our archive is fine: "a 4-20 record against top-10 opponents in our archive".)
 - Head-to-head counts are from our archive only; say "in our records" when you use them.
-- "What's next" only when packet.next exists.
+- Match DNA (packet.match_dna) is each player's own results record in our archive before the match: use W-L records and win rates to explain; never write percentiles, tour comparisons or the rating model's probabilities.
 - The winner is participants[match.winner_side]. Never reverse it.
 
-STYLE: clear, specific, confident, no clichés ("a testament to", "only time will tell", "make no mistake"...), no hype, no filler. Lead with what happened, then why it mattered, then the serve/return story the statistics actually show, then context (form, draw path, H2H, Tennis DNA) only where the packet has it. Charts and scoreboards are rendered separately by code next to your sections — refer to them naturally ("the serve numbers show...") but never restate long tables.
+NO INVENTED TENNIS — narrative is not invention:
+- Our sources hold NO shot-level or positional data. Never write about forehands, backhands, the net, volleys, drop shots, slices, rallies, the baseline, court position, movement, serve placement or speed, or what a player "targeted"/"attacked". Never describe how a point was played.
+- How a match developed comes ONLY from the stored set scores and tiebreak scores, packet.match_development (observed games: breaks in order, longest run) and packet.stats_by_set. Never reconstruct breaks, runs or game sequences from a final score. With set scores only, tell the match set by set (who took each set, how close it was, where a tiebreak decided it, where the match swung from one player to the other) — that IS the chronology.
+- Serve/return vocabulary (aces, break points, service games, first/second serve, return points, holds, broke) only when packet.stats exists. "Never dropped serve" / "saved every break point" only when the numbers show it exactly. The word "momentum" is never allowed; "turning point" only for a turning point listed in STORY ANGLE.
+- Tennis language — first-strike tennis, return pressure, second-serve vulnerability, break-point pressure, service holds, deciding set, tiebreak pressure — is welcome ONLY where the cited numbers support it.
 
-TENNIS INTELLIGENCE (V4) — synthesis, not recitation, and only from the families the packet holds:
-- MATCH DEVELOPMENT (packet.match_development, packet.stats_by_set): describe how the score developed — where the first break came, how many breaks each side made, the longest run of games — ONLY from these observed families. Never reconstruct breaks or runs from the final score, and never write "N straight games" unless it equals match_development.longest_run.games. The word "momentum" is never allowed; "turning point" only when match_development shows the breaks.
-- SERVE STORY (packet.stats: service_games_held, first/second serve, aces, double faults, break points saved): explain what decided the service games (e.g. second-serve vulnerability, holding under break-point pressure), not a list of percentages. "Never dropped serve" / "saved every break point" only when the numbers show it exactly.
-- RETURN STORY (packet.stats: return points, break points earned/converted, return games won): explain where the pressure came from and whether it was converted.
-- No serve/return vocabulary at all (aces, break points, service games…) when packet.stats is absent. No winners/unforced-error counts unless the packet holds them.
-- PLAYER CONTEXT and CONSEQUENCE (ranking at the start of the tournament, surface record, recent form, archived H2H, draw path, packet.next): use them to say what the result means for the player and what comes next — no speculation about the future beyond packet.next.
-- Tennis-specific analysis: surface, format (best-of-3/5, deciding tiebreak), round and seeding matter; mind-reading, fatigue or injury explanations never do.
+HOW TO WRITE (an editorial gate rejects stories that break these):
+- Write to the STORY ANGLE you are given: its thesis is the spine of the story and must be clear in the first two paragraphs. Lead with what matters — never "X defeated Y" plus the scoreline, never a metric ("X had a Match DNA ..."). The score belongs in the dek and the scoreboard; the lead says why this match is worth reading about.
+- Structure for a match story: a LEAD (first section, empty heading), then a chronological account of how it unfolded (set by set, using the real turning points), then why it happened (translate the evidence into tennis: the sentence first, the number as proof), then what it means (tournament position, next opponent, form, ranking, what to watch). Previews: lead with the question the match answers; how each player got here; the case for each side; what decides it. Vary the structure and headings to fit the story; never use stock headings such as "What happened", "Why it mattered", "What comes next".
+- Synthesise. Never chain database sentences ("X recorded 5. Metric Y was 62%."). At most two or three numbers per sentence and no more than about one number per 15 words overall; every number must be doing work in an argument, joined to it with "because", "which", "while", "but", "so". Each paragraph makes one point and moves the story forward. No paragraph restates the headline or another paragraph; the last paragraph looks forward and does not repeat the opening.
+- No clichés ("a testament to", "only time will tell", "make no mistake", "statement win"), no hype, no filler, no generic sentences that could sit in any tennis story.
 
-ADD VALUE (held if broken): a chart already shows its numbers — explain the relationship the evidence supports instead of reading figures out (never 4+ figures from one chart in a paragraph). No section may restate the headline and dek. No two sections may make the same analytical point. Match DNA (packet.match_dna) is each player's own record in our archive before the match: use the records (W-L) to explain what the result says about the player; never write percentiles, tour comparisons or the rating model's probabilities (those are shown in code-rendered modules).
+VISUAL SUPPORT — decide the story first, then attach evidence:
+- A section may attach ONE visual from AVAILABLE VISUALS (field "visual"; "" for none) — the one that proves that section's point — plus "visual_note": 2-3 sentences (25-70 words) telling the reader what they are looking at, what is unusual in it, and how it shaped this match. The note may cite at most two values from the visual; it follows every fact rule.
+- Two to four visuals, never the same one twice, and at least 90 words of your prose before each attached visual (the lead never carries one; the scoreboard is placed automatically after the lead). Visuals you do not attach go to a data appendix automatically.
 
-OUTPUT: JSON only, matching the schema. sections[].id must be one of the ALLOWED SECTION IDS, in a sensible order; omit sections the packet cannot support. Do not write the "method" section — it is supplied by code.`;
+OUTPUT: JSON only, matching the schema. The first section is the lead: id "lead", heading "", visual "". Section ids: short snake_case from ALLOWED SECTION IDS. Do not write the "method" section — it is supplied by code. Length: the WORD TARGET counts narrative paragraphs only (not headings or visual notes); meet it with substance from the packet, never with filler. The headline tells the story (the angle), not just the result; the dek carries the score, round, tournament and context.`;
 
 export const SCHEMA = {
   type: 'object', additionalProperties: false, required: ['headline', 'dek', 'sections'],
   properties: {
     headline: { type: 'string' },
     dek: { type: 'string' },
-    sections: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'heading', 'paragraphs'], properties: { id: { type: 'string' }, heading: { type: 'string' }, paragraphs: { type: 'array', items: { type: 'string' } } } } }
+    sections: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'heading', 'paragraphs', 'visual', 'visual_note'], properties: { id: { type: 'string' }, heading: { type: 'string' }, paragraphs: { type: 'array', items: { type: 'string' } }, visual: { type: 'string' }, visual_note: { type: 'string' } } } }
   }
 };
 
@@ -125,36 +131,73 @@ const FAMILY_SECTIONS = Object.freeze({
   surface_context: ['surface'], h2h: ['h2h'], draw_path: ['path'], next_opponent: ['next'], tournament_context: ['why_it_mattered'],
   ranking_history: ['trajectory']
 });
-/** Allowed section ids = the baseline's sections ∪ ids the packet's evidence dimensions support (never 'method'). */
+// Narrative section ids (editorial 5.0.0): the story's own movements. Their headings are written per story.
+export const NARRATIVE_IDS = Object.freeze(['lead', 'unfolded', 'turning_point', 'deciding_set', 'why', 'serve_return', 'pressure', 'records', 'form', 'the_run', 'means', 'watch', 'case_a', 'case_b', 'question', 'context']);
+const MATCH_ONLY = ['match_development', 'match_data', 'surface', 'h2h', 'path', 'unfolded', 'turning_point', 'deciding_set', 'serve_return', 'pressure'];
+/** Allowed section ids = the baseline's sections ∪ ids the packet's evidence dimensions support ∪ narrative ids (never 'method'). */
 export function allowedSectionIds(packet, baseline) {
-  const ids = new Set(['what_happened', 'why_it_mattered', 'analysis', ...baseline.sections.map((s) => s.id)]);
+  const ids = new Set(['what_happened', 'why_it_mattered', 'analysis', ...NARRATIVE_IDS, ...(baseline?.sections || []).map((s) => s.id)]);
   for (const d of evidenceDimensions(packet)) for (const id of FAMILY_SECTIONS[d] || []) ids.add(id);
-  if (!packet?.match) for (const id of ['match_development', 'match_data', 'surface', 'h2h', 'path']) ids.delete(id);
+  if (!packet?.match) for (const id of MATCH_ONLY) ids.delete(id);
   ids.delete('method');
   return [...ids];
 }
 
-const WORDS = { brief: ['220-600', '150-400'], full: ['450-900', '250-600'], deep: ['700-1300', '350-800'] };
-export function buildInput(packet, baseline, correction = null) {
+/** Compact, number-exact facts for interpreting each available visual (copied from the plan, never computed). */
+function visualCatalog(angle, plan) {
+  const get = (id) => (plan?.modules || []).find((m) => m.id === id)?.data;
+  const charts = get('charts')?.charts || [];
+  return angle.visuals.available.map((id) => {
+    const chart = charts.find((c) => c.id === id);
+    let shows = VISUAL_GUIDE[id] || id;
+    if (chart) shows += ` | rows: ${chart.series.map((r) => `${r[chart.label_key]} ${chart.value_keys.map((k) => r[k]).join(' vs ')}`).join('; ')}`;
+    return `- ${id}: ${shows}`;
+  }).join('\n');
+}
+
+/**
+ * The editor's brief. ctx = { plan, angle, storyClass, avoid } — the STORY ANGLE is decided from the evidence before
+ * any prose (angle.js); the editor writes to it and attaches visuals to the points they prove. The deterministic
+ * baseline is no longer shown to the model (its fixed frame produced templated stories).
+ */
+export function buildInput(packet, baseline, correction = null, ctx = {}) {
+  const plan = ctx.plan || buildPlan(packet, baseline);
+  const storyClass = baseline?.story_class || ctx.storyClass || 'full';
+  const angle = ctx.angle || storyAngle(packet, plan, storyClass);
   const allowed = allowedSectionIds(packet, baseline);
-  const extra = [];
+  const t = angle.target;
+  const avoid = (ctx.avoid || []).slice(0, 20);
   return [
-    `Write the PropBetEdge Tennis story for this ${packet.event.kind.replace(/_/g, ' ')} event.`,
-    `STORY CLASS: ${baseline.story_class || 'full'}. ACCEPTANCE: ${WORDS[baseline.story_class || 'full'][packet.match ? 0 : 1]} words across your sections; at least ${packet.match ? (baseline.story_class === 'brief' ? 2 : 3) : 1} sections; every number from the packet. A brief is shorter than a full story but is still contextual journalism: answer what happened, why it was notable, and what evidence gives it context, synthesising the richest 1-3 context families the packet holds (draw path, match development, recent form, Match DNA records, H2H, surface, serve/return). Do not pad where the packet has no evidence; never restate a module's table.`,
-    `ALLOWED SECTION IDS: ${[...allowed, ...extra].join(', ')}`,
-    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\nFix only these problems.` : '',
-    `FACT-SAFE BASELINE (every fact here is verified; you may reorganise and deepen the writing, but you may not add facts beyond the packet):\n${JSON.stringify({ headline: baseline.headline, dek: baseline.dek, sections: baseline.sections.filter((s) => s.id !== 'method') })}`,
+    `Write the PropBetEdge Tennis ${angle.type === 'preview' ? 'PREVIEW' : angle.type === 'recap' ? 'match story' : 'ranking story'} for this ${String(packet.event?.kind || angle.type).replace(/_/g, ' ')} event.`,
+    `WORD TARGET: ${t.min}-${t.max} words of narrative prose (a ${t.label}). Fewer is a rejection; padding is a rejection.`,
+    `STORY ANGLE (decided from the evidence before writing):\nThesis: ${angle.angle?.thesis || 'the result and what it means'}${angle.secondary.length ? `\nSecondary threads: ${angle.secondary.map((a) => a.thesis).join(' | ')}` : ''}\nBeats, in order: ${angle.beats.join(' -> ')}`,
+    angle.sets.length ? `SETS (winner first, from the stored scores): ${angle.sets.map((s) => `set ${s.set} ${s.score}${s.tiebreak ? ` [tiebreak ${s.tiebreak}]` : ''} -> ${s.winner === 'W' ? 'winner' : 'loser'}${s.deciding ? ' (deciding set)' : ''}`).join('; ')}` : '',
+    angle.turning_points.length ? `TURNING POINTS THE EVIDENCE PROVES (use these, invent no others):\n${angle.turning_points.map((x) => `- ${x.at}: ${x.what} (${x.basis})`).join('\n')}` : '',
+    `AVAILABLE VISUALS (attach where they prove your point; suggested for this angle: ${angle.visuals.suggested.join(', ') || 'none'}):\n${visualCatalog(angle, plan) || '- none'}`,
+    `ALLOWED SECTION IDS: ${allowed.join(', ')}`,
+    avoid.length ? `STOCK PHRASES ALREADY OVERUSED IN OUR NEWSROOM (X = a name, N = a number) — do not use these frames:\n${avoid.map((x) => `- ${x}`).join('\n')}` : '',
+    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\nFix these problems; keep every fact rule.` : '',
     `SOURCE PACKET:\n${JSON.stringify(modelPacket(packet))}`
   ].filter(Boolean).join('\n\n');
 }
 
+const SID = /^[a-z][a-z_]{1,29}$/;
 /** Parse + shape model output onto the baseline frame (method section, ids, metadata stay code-owned). */
-export function adopt(modelJson, baseline, packet = null) {
+export function adopt(modelJson, baseline, packet = null, { plan = null } = {}) {
   const o = typeof modelJson === 'string' ? JSON.parse(modelJson) : modelJson;
   const allowed = new Set(packet ? allowedSectionIds(packet, baseline) : [...baseline.sections.map((s) => s.id), 'analysis']);
-  const sections = (o.sections || []).filter((s) => allowed.has(s.id) && s.id !== 'method' && Array.isArray(s.paragraphs) && s.paragraphs.some((p) => String(p).trim())).map((s) => ({ id: s.id, heading: String(s.heading).slice(0, 80), paragraphs: s.paragraphs.map((p) => String(p).trim()).filter(Boolean) }));
+  const vis = plan ? availableVisuals(plan) : null;
+  const sections = (o.sections || [])
+    .filter((s) => s && SID.test(String(s.id)) && allowed.has(s.id) && s.id !== 'method' && Array.isArray(s.paragraphs) && s.paragraphs.some((p) => String(p).trim()))
+    .map((s) => {
+      const out = { id: s.id, heading: String(s.heading || '').trim().slice(0, 80), paragraphs: s.paragraphs.map((p) => String(p).trim()).filter(Boolean) };
+      const v = String(s.visual || '').trim();
+      if (v && v !== 'scoreboard' && v !== 'preview_card' && (!vis || vis.has(v))) { out.visual = v; out.visual_note = String(s.visual_note || '').trim(); }
+      return out;
+    });
   const method = baseline.sections.find((s) => s.id === 'method');
-  return { ...baseline, headline: String(o.headline || '').trim(), dek: String(o.dek || '').trim(), sections: method ? [...sections, method] : sections, prose_origin: 'model' };
+  const narrative = sections.some((s) => 'visual' in s) || sections[0]?.id === 'lead';
+  return { ...baseline, headline: String(o.headline || '').trim(), dek: String(o.dek || '').trim(), sections: method ? [...sections, method] : sections, prose_origin: 'model', ...(narrative ? { layout: 'narrative/1' } : {}) };
 }
 
 /**
@@ -163,7 +206,7 @@ export function adopt(modelJson, baseline, packet = null) {
  * through onCall({ attempt, model, usage, response_id, latency_ms, gate_pass, error }) for telemetry. Returns
  * { article, origin: 'model' | 'baseline' | null, gate, attempts: [...], usage, routing } — origin null means HOLD.
  */
-export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null }) {
+export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, ctx = {} }) {
   const log = [];
   const usage = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, reasoning_tokens: 0 };
   const r0 = routing || (model ? { lane: 'STANDARD_EDITORIAL', model, pool: 'premium', reason: 'explicit model', max_output_tokens: 6000, reasoning_effort: 'medium' } : null);
@@ -172,9 +215,9 @@ export async function editorialize({ packet, baseline, gate, apiKey, routing = n
     let correction = null;
     for (let i = 0; i < attempts; i += 1) {
       try {
-        const r = await callModel(apiKey, { routing: r0, input: buildInput(packet, baseline, correction), fetchImpl });
+        const r = await callModel(apiKey, { routing: r0, input: buildInput(packet, baseline, correction, ctx), fetchImpl });
         add(r.usage);
-        const draft = adopt(r.text, baseline, packet);
+        const draft = adopt(r.text, baseline, packet, { plan: ctx.plan || null });
         const g = gate(draft);
         log.push({ attempt: i + 1, model: r.model, pass: g.pass, failures: g.failures.slice(0, 12) });
         if (onCall) await onCall({ attempt: i + 1, model: r.model, usage: r.usage, response_id: r.response_id, latency_ms: r.latency_ms, gate_pass: g.pass });
