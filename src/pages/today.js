@@ -4,6 +4,7 @@
 
 import { html, render } from '../lib/dom.js';
 import { api } from '../data/api.js';
+import { kalshi, bounded, paintKalshiLines } from '../data/kalshi.js';
 import { leadStory, majorStory } from './news.js';
 import { hierarchy } from '../lib/newsroom.js';
 import { ensureEach, eventGender, storyTour } from '../lib/balance.js';
@@ -95,13 +96,17 @@ export function mount(root) {
   };
   const refresh = async () => {
     let t = null;
-    try { t = await api('/v1/today', { signal: ctl.signal }); } catch (e) { if (ctl.signal.aborted) return; }
+    // Kalshi board for the match rail, read alongside /v1/today (bounded; a late board fills the rail's slots in place)
+    const kb = kalshi.loadBoard();
+    kb.then(() => { if (!ctl.signal.aborted) paintKalshiLines($('[data-next]')); }).catch(() => {});
+    try { [t] = await Promise.all([api('/v1/today', { signal: ctl.signal }), bounded(kb)]); } catch (e) { if (ctl.signal.aborted) return; }
     const d = t?.data || null;
     const st = $('[data-status]');
     if (st) render(st, html`<div class="hm-in">${statusBar(d, liveGroups(d?.live), nextMatch(d?.upcoming), d ? tourStatus(d.live, d.upcoming) : null)}</div>`);
     if (!d) return;
     today = d;
     drawNext();
+    paintKalshiLines($('[data-next]'));
     drawTours();
     drawCast();
     const cov = $('[data-cov]');

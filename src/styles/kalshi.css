@@ -1,0 +1,31 @@
+/* Kalshi Market Intelligence — Tennis placement styles. The component itself is src/vendor/kalshi/kalshi-market-ui.css
+   (vendored unchanged); this file only maps Tennis tokens onto it and sizes the slots. The full card and the PBEcast strip
+   are a night-court panel (prediction-market data sits apart from our own analytics); the compact card line sits on the
+   light match cards, so its text uses Tennis ink. Empty slots take no space. */
+.kx, .kx-strip {
+  --pbe-ink-2: var(--court-900);
+  --pbe-paper: var(--on-dark);
+  --pbe-dim: var(--on-dark-2);
+  --pbe-line: rgba(243, 246, 241, .14);
+  --f-mono: var(--f-data);
+  color: var(--on-dark);
+}
+.kx.ic { display: block; min-width: 0; border: 1px solid rgba(127, 184, 255, .24); border-radius: var(--r); padding: 14px 16px; box-shadow: var(--shadow); }
+.kx-strip > .kx.ic { border: 0; border-top: 1px solid var(--pbe-line); box-shadow: none; }
+.kx a:focus-visible, .kx-strip summary:focus-visible { outline: 2px solid #7fb8ff; outline-offset: 2px; }
+
+/* match page: its own block under the score */
+.kx-slot:empty { display: none; }
+.kx-slot { margin: 16px 0 0; }
+
+/* PBEcast: one line under the sticky scoreboard */
+.pbc-kx:empty { display: none; }
+.pbc-kx { margin-top: 8px; margin-bottom: 4px; }
+.pbc.v3:fullscreen .pbc-kx, .pbc.v3.is-fs .pbc-kx { display: none; }
+
+/* schedule / live / home cards: restrained line, light surface */
+.mc-kx:empty, .hm-kx:empty { display: none; }
+.mc-kx { margin: 2px 0 8px; }
+.hm-kx { margin: 6px 0 0; }
+.mc-kx .kx-line, .hm-kx .kx-line { --pbe-paper: var(--ink-2); max-width: 100%; flex-wrap: wrap; font-size: 11.5px; }
+.mc-kx .kx-line__b, .hm-kx .kx-line__b { color: var(--model); }

@@ -13,7 +13,9 @@ Read before changing anything: `docs/STATUS.md` (what is real today), `docs/ARCH
   **Supabase** = canonical system of record (sports project, tkmln). **Cloudflare** = APIs, ingestion,
   normalization, live runtime, queues, cron, intelligence. KV = live state; R2 = raw evidence.
 - **Never add GitHub Actions** (owner policy). Schedules are Cloudflare Cron.
-- The browser talks only to `tennis-api`, only through `src/data/api.js`. No provider or Supabase calls
+- The browser talks only to `tennis-api`, only through `src/data/api.js` — plus the shared PropBetEdge
+  `propsports-markets` Worker for Kalshi prediction-market data, only through `src/data/kalshi.js` and the vendored
+  client in `src/vendor/kalshi/` (vendored unchanged; never a Kalshi API host). No provider or Supabase calls
   from the browser, no secrets in the bundle.
 - **$0 data licensing.** We build the data layer; we do not rent it. Commercial feeds are
   `COMMERCIAL_REFERENCE_ONLY` and are never listed as a blocker. When a field is missing, find where the

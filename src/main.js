@@ -16,6 +16,8 @@ import './styles/pbecast-v2.css';
 import './styles/pbecast-v3.css';
 import './styles/pbecast-v4.css';
 import './styles/matchup.css';
+import './vendor/kalshi/kalshi-market-ui.css';
+import './styles/kalshi.css';
 import { render } from './lib/dom.js';
 import { resolveRoute } from './lib/routes.js';
 import { routeMeta } from './seo/meta.js';

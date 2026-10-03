@@ -35,10 +35,18 @@ const code = [...src, ...workers];
 // 1. No Math.random in production paths (jitter uses crypto.getRandomValues).
 for (const f of code) if (/Math\.random\s*\(/.test(read(f))) fail('no-math-random', rel(f));
 
-// 2. The browser talks only to tennis-api, only through src/data/api.js.
+// 2. The browser talks only to our own Workers: tennis-api through src/data/api.js, and the shared PropBetEdge
+//    propsports-markets Worker through the vendored Kalshi client (src/vendor/kalshi/, unchanged). That client may
+//    name no host but propsports-markets, and nothing in src/ may name a Kalshi API host (the browser never calls Kalshi).
+const MARKETS_CLIENT = 'src/vendor/kalshi/kalshi-market-client.js';
+const KALSHI_API_HOST = /(?:api\.elections\.kalshi\.com|trading-api\.kalshi\.com|external-api\.kalshi\.com|demo-api\.kalshi\.co|api\.kalshi\.com)/i;
 for (const f of src) {
   const t = stripComments(read(f));
-  if (/\bfetch\s*\(/.test(t) && !rel(f).endsWith('src/data/api.js')) fail('browser-fetch-outside-api-client', rel(f));
+  if (rel(f) === MARKETS_CLIENT) {
+    const hosts = [...t.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((m) => m[1].toLowerCase());
+    if (hosts.some((h) => h !== 'propsports-markets.sales-fd3.workers.dev')) fail('markets-client-host', `${rel(f)} -> ${hosts.join(', ')}`);
+  } else if (/\bfetch\s*\(/.test(t) && !rel(f).endsWith('src/data/api.js')) fail('browser-fetch-outside-api-client', rel(f));
+  if (KALSHI_API_HOST.test(read(f))) fail('browser-kalshi-api-host', rel(f));
   if (/supabase\.co|service_role|SUPABASE_SERVICE/i.test(t)) fail('browser-database-access', rel(f));
   if (/new\s+WebSocket|EventSource\s*\(/.test(t)) fail('browser-direct-stream', rel(f));
 }

@@ -28,6 +28,8 @@ import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
+import { kalshi, kalshiPollState } from '../data/kalshi.js';
+import { kalshiStrip, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
 
 const MODE_LABEL = {
@@ -546,6 +548,39 @@ export function mount(root, { params, live = null }) {
   const tourPoll = setInterval(loadTours, 60000);
   const $ = (sel) => root.querySelector(sel);
 
+  // Kalshi prediction-market strip under the scoreboard. Never blocking: the event read runs in the background from our
+  // markets API (never Kalshi) and the strip is written into its own slot when it lands; it survives shell rebuilds and
+  // keeps an expanded strip open across updates. Polls while mounted: live 20 s, pregame 45 s, no market yet 120 s,
+  // settled match: no polling.
+  let kx = null;
+  let kxTimer = null;
+  const paintKx = () => {
+    const el = $('[data-kx-strip]');
+    if (!el) return;
+    const next = kalshiStrip(kx, { placement: 'pbecast' });
+    if (el.__kx === next) return;
+    const open = !!el.querySelector('details[open]');
+    el.__kx = next;
+    el.innerHTML = next;
+    if (open) el.querySelector('details')?.setAttribute('open', '');
+    if (next) wireKalshi(el);
+  };
+  const scheduleKx = () => {
+    clearTimeout(kxTimer);
+    kxTimer = null;
+    const lane = kalshiPollState(data?.match?.status ?? 'scheduled');
+    if (!lane || ctl.signal.aborted) return;
+    kxTimer = setTimeout(loadKx, kalshi.pollMsFor(kx ? lane : 'idle'));
+  };
+  async function loadKx(force = true) {
+    const e = await kalshi.loadEvent(params.id, { force }).catch(() => null);
+    if (ctl.signal.aborted) return;
+    kx = e;
+    paintKx();
+    scheduleKx();
+  }
+  loadKx(false);
+
   const viewState = (i) => {
     const m = data.match;
     const e = data.events[i];
@@ -560,6 +595,7 @@ export function mount(root, { params, live = null }) {
       <h1 class="sr">${title} — PBEcast</h1>
       <header class="v3-bar page"><span class="v3-bar-t">${t.tournament || ''}</span><span>${[roundLabel(m.round), eventLabel(m.event_type), t.level, t.surface ? `${cap(t.surface)}${t.indoor ? ' (indoor)' : ''}` : null, m.court].filter(Boolean).join(' · ')}</span><span class="v3-bar-mode" data-mode></span><span class="v3-bar-time">${m.duration_s ? fmtDuration(m.duration_s) : ''}</span></header>
       <div class="v3-score-wrap page"><div class="v3-score" data-score></div></div>
+      <div class="page pbc-kx" data-kx-strip></div>
       <p class="sr" aria-live="polite" aria-atomic="true" data-announce></p>
       <div class="v4-hero page" data-hero></div>
       <div class="v3-stage page" data-stage>
@@ -592,6 +628,7 @@ export function mount(root, { params, live = null }) {
         <div class="pbc-actions">${shareBar({ url: `${location.origin}/pbecast/${m.id}`, text: `${title} — PropBetEdge Tennis PBEcast`, label: 'Share' })}</div>
       </div>`);
     if (data.events.length) render($('[data-timeline]'), timelineBar(data.events, m));
+    paintKx();
     lastPainted = -1;
     ctlSig = '';
   }
@@ -774,7 +811,7 @@ export function mount(root, { params, live = null }) {
   root.addEventListener('click', onClick);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); clearTimeout(kxTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };

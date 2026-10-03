@@ -2,6 +2,7 @@
 
 import { html, raw } from '../lib/dom.js';
 import { avatar, nat } from './avatar.js';
+import { kalshiLineEligible, kalshiLineFor } from '../data/kalshi.js';
 
 const EVENT = { MS: "Men's singles", WS: "Women's singles", MD: "Men's doubles", WD: "Women's doubles", XD: 'Mixed doubles' };
 export const eventLabel = (e) => EVENT[e] || e;
@@ -52,7 +53,9 @@ export function pbecastCta(m) {
 /** Upcoming singles with both players identified and a start not yet stale (the matchup API's own rule): link the dossier. */
 export const hasMatchup = (m, now = Date.now()) => m?.status === 'scheduled' && ['MS', 'WS'].includes(m.event_type) && m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 && !!m.scheduled_at && Date.parse(m.scheduled_at) >= now - 6 * 3600e3;
 export const matchupLink = (m, cls = 'mi-link') => (hasMatchup(m) ? html`<a class="${cls}" href="/matchups/${m.id}">Matchup Intelligence →</a>` : '');
-export function matchCard(m, { showTournament = true } = {}) {
+/** Kalshi prediction-market line for a match still to be decided: a slot filled from the board (empty = hidden). */
+export const kalshiSlot = (m, cls = 'mc-kx') => (kalshiLineEligible(m) ? html`<div class="${cls}" data-kx-line="${m.id}">${raw(kalshiLineFor(m))}</div>` : '');
+export function matchCard(m, { showTournament = true, kalshi = true } = {}) {
   const live = m.status === 'in_progress';
   const sc = (side) => html`<div class="mc-sc tabnum">${(m.sets || []).map((s) => {
     if (s.match_tiebreak && s.tb) return html`<span class="${s.winner === side ? 'w' : ''}">${s.tb[side]}</span>`;
@@ -71,6 +74,7 @@ export function matchCard(m, { showTournament = true } = {}) {
       ${showTournament && m.tournament ? html`<a href="/tournaments/${m.tournament.slug}/${m.tournament.year}" class="mc-t">${m.tournament.tournament}</a>` : ''}
     </header>
     ${row('A')}${row('B')}
+    ${kalshi ? kalshiSlot(m) : ''}
     <footer class="mc-f"><span>${when}</span><span class="mc-cta">${matchupLink(m)}${pbecastCta(m)}<a href="/matches/${m.id}">Match</a></span></footer>
   </article>`;
 }

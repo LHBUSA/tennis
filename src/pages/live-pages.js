@@ -17,6 +17,8 @@ import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
+import { kalshi, bounded, kalshiPollState, paintKalshiLines } from '../data/kalshi.js';
+import { kalshiCard, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 
 const title = (s) => String(s || '').replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
@@ -38,10 +40,12 @@ function markSurface(root, surface) {
   if (a.label) { render(slot, html`<span class="surf-chip">${a.label}</span>`); slot.hidden = false; } else slot.hidden = true;
 }
 
-async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'This data could not be loaded right now. Please try again shortly.' } = {}) {
+// `ready` (optional): a side read run IN PARALLEL with the API call and awaited with it, so its result is part of the
+// paint (callers bound it — see bounded() in data/kalshi.js). `after` (optional): runs on the body after each paint.
+async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'This data could not be loaded right now. Please try again shortly.', ready = null, after = null } = {}) {
   const run = async () => {
     let res;
-    try { res = await api(path, { signal }); } catch { return; }
+    try { [res] = await Promise.all([api(path, { signal }), ready ? ready() : null]); } catch { return; }
     const body = root.querySelector('[data-body]');
     const meta = root.querySelector('[data-meta]');
     if (!body) return;
@@ -53,6 +57,7 @@ async function fill(root, path, draw, note, signal, { poll = 0, errorNote = 'Thi
     if (resultState(res) === 'error') { render(body, html`${sem}${errorModule(res.meta, errorNote)}`); return; }
     const out = res.data != null ? draw(res.data, res.meta) : null;
     render(body, html`${sem}${out || emptyModule(res.meta, note)}`);
+    if (after && out) after(body);
   };
   await run();
   if (!poll) return () => {};
@@ -69,11 +74,20 @@ function mountWith(fn) {
   };
 }
 
+// Kalshi board for compact match cards: read alongside the page's own data (bounded, never blocking); when it lands
+// after the first paint it fills the cards' empty slots in place.
+const kxBoard = (root, signal) => () => {
+  const p = kalshi.loadBoard();
+  p.then(() => { if (!signal.aborted) paintKalshiLines(root); }).catch(() => {});
+  return bounded(p);
+};
+const kxAfter = (body) => paintKalshiLines(body);
+
 // ---- live ---------------------------------------------------------------------------------------------
 export const live = mountWith((root, _c, signal) => {
   track('tennis_live_open', { route: '/live' });
   shell(root, { eyebrow: 'Live', heading: 'Live Now', lede: 'Matches in progress, with set, game and point scores and the server exactly as the source last published them. Open PBEcast for the live analytical court.' });
-  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="sec"><span>${d.length} match${d.length === 1 ? '' : 'es'} live</span></p>${matchList(d)}` : html`<div class="mod"><p class="empty-h">No matches in progress right now.</p><p class="note">Covered live: ATP Tour (set and game score from a secondary source, no point-by-point), WTA Tour and WTA 125 (official, with point score) and the Grand Slams. Challenger and ITF live data are not yet acquirable. <a href="/schedule">See the schedule →</a> · <a href="/pbecast">PBEcast replays →</a></p></div>`), 'Live data unavailable.', signal, { poll: 30 });
+  return fill(root, '/v1/live', (d) => (d.length ? html`<p class="sec"><span>${d.length} match${d.length === 1 ? '' : 'es'} live</span></p>${matchList(d)}` : html`<div class="mod"><p class="empty-h">No matches in progress right now.</p><p class="note">Covered live: ATP Tour (set and game score from a secondary source, no point-by-point), WTA Tour and WTA 125 (official, with point score) and the Grand Slams. Challenger and ITF live data are not yet acquirable. <a href="/schedule">See the schedule →</a> · <a href="/pbecast">PBEcast replays →</a></p></div>`), 'Live data unavailable.', signal, { poll: 30, ready: kxBoard(root, signal), after: kxAfter });
 });
 
 // ---- schedule -----------------------------------------------------------------------------------------
@@ -101,7 +115,7 @@ export const schedule = mountWith((root, _c, signal) => {
     ${d.completed.length ? html`<h2 class="sec">Completed</h2>${matchList(d.completed.slice(0, 60))}` : ''}
     ${f.gender === 'men' && !d.live.length && !d.scheduled.length && !d.completed.length ? html`<div class="mod"><p class="empty-h">No men’s match in this window.</p><p class="note">ATP Tour fixtures appear once our secondary source lists them; Grand Slam men’s events come from the tournaments’ own feeds where accessible. ATP Challenger is not yet covered. <a href="/schedule?view=week">This week →</a> · <a href="/tournaments">Tournaments →</a></p></div>` : ''}
     ${view === 'week' || view === 'upcoming' ? html`<p class="note">Match-level order of play is published a day ahead; future days show tournaments only.</p>` : ''}
-    <div class="mod"><header class="mod-h"><h2>Where to watch</h2></header><p class="note">Broadcast rights are territorial. PropBetEdge shows official broadcasters only when a verified official source is ingested — none is yet, so no watch links are shown.</p></div>`, 'Schedule unavailable.', signal, { poll: view === 'today' ? 60 : 0 });
+    <div class="mod"><header class="mod-h"><h2>Where to watch</h2></header><p class="note">Broadcast rights are territorial. PropBetEdge shows official broadcasters only when a verified official source is ingested — none is yet, so no watch links are shown.</p></div>`, 'Schedule unavailable.', signal, { poll: view === 'today' ? 60 : 0, ready: kxBoard(root, signal), after: kxAfter });
 });
 
 export const matches = schedule;
@@ -204,11 +218,41 @@ async function miLoad(root, m, signal) {
   if (el) { render(el, out); el.style.minHeight = '0'; }
 }
 // ---- match lab ------------------------------------------------------------------------------------------
+// Kalshi prediction-market card (its own block under the score). The event read starts WITH the match read and the
+// first paint waits for it at most KALSHI_FIRST_PAINT_MS; then it polls our markets API (never Kalshi) while the page is
+// mounted — live 20 s, pregame 45 s, no market yet 120 s, settled match: no polling — and stops on unmount.
+const kxCardHtml = (entry) => raw(kalshiCard(entry, { placement: 'match' }));
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
-  return fill(root, `/v1/matches/${params.id}`, (m) => {
+  let kx = null;
+  let kxStatus = null;
+  let kxTimer = null;
+  const kxFirst = kalshi.loadEvent(params.id).then((e) => { kx = e; }).catch(() => {});
+  const paintKx = () => {
+    const el = root.querySelector('[data-kx-card]');
+    if (!el) return;
+    const next = String(kxCardHtml(kx));
+    if (el.innerHTML !== next) { el.innerHTML = next; wireKalshi(el); }
+  };
+  const scheduleKx = () => {
+    clearTimeout(kxTimer);
+    kxTimer = null;
+    const lane = kalshiPollState(kxStatus);
+    if (!lane || signal.aborted) return;
+    kxTimer = setTimeout(async () => {
+      const e = await kalshi.loadEvent(params.id, { force: true }).catch(() => null);
+      if (signal.aborted) return;
+      kx = e;
+      paintKx();
+      scheduleKx();
+    }, kalshi.pollMsFor(kx ? lane : 'idle'));
+  };
+  // a market that answers after the bounded wait still lands in place
+  kxFirst.then(() => { if (!signal.aborted) paintKx(); });
+  const stop = fill(root, `/v1/matches/${params.id}`, (m) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     miLoad(root, m, signal);
+    if (kxStatus !== m.status) { kxStatus = m.status; scheduleKx(); }
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
     const h = root.querySelector('.page-h h1');
     if (h) h.textContent = `${nm('A')} vs ${nm('B')}`;
@@ -216,7 +260,8 @@ export const match = mountWith((root, { params }, signal) => {
     const vs = (s) => html`<div class="vs-side">${(m.sides?.[s]?.players || []).map((p) => html`<a href="/players/${p.slug}">${avatar(p, { size: 'square', px: 112, eager: true })}<b>${p.name}</b></a>`)}</div>`;
     const A = m.statistics?.A, B = m.statistics?.B;
     return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>${miSlot(m)}
-      ${matchCard(m)}
+      ${matchCard(m, { kalshi: false })}
+      <div class="kx-slot" data-kx-card>${kxCardHtml(kx)}</div>
       <div class="grid-2" style="margin-top:16px">
         ${m.status === 'scheduled' ? '' : html`<section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>`}
         <section class="mod"><header class="mod-h"><h2>PBEcast</h2></header><div class="mod-b"><p>${m.status === 'scheduled' ? 'PBEcast opens when live coverage begins.' : 'Open the analytical court: score, serve, key moments, stats, DNA and head-to-head.'}</p>${m.status !== 'scheduled' ? html`<a class="btn green" href="/pbecast/${m.id}">${m.status === 'in_progress' ? 'Watch PBEcast' : 'Replay PBEcast'}</a>` : ''}</div></section>
@@ -225,7 +270,8 @@ export const match = mountWith((root, { params }, signal) => {
       </div>
       ${m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 ? html`<p><a class="btn line" href="/h2h/${m.sides.A.players[0].slug}/${m.sides.B.players[0].slug}">Head-to-head →</a></p>` : ''}
       ${shareBar({ url: `${location.origin}/matches/${m.id}`, text: `${nm('A')} vs ${nm('B')} — PropBetEdge Tennis` })}`;
-  }, 'This match is not in the canonical store.', signal, { poll: 30 });
+  }, 'This match is not in the canonical store.', signal, { poll: 30, ready: () => bounded(kxFirst), after: (body) => wireKalshi(body) });
+  return stop.then((s) => () => { s(); clearTimeout(kxTimer); kxTimer = null; });
 });
 
 // ---- rankings -----------------------------------------------------------------------------------------

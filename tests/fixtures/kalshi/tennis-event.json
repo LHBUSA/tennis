@@ -1,0 +1,167 @@
+{
+ "contract": "market-intel/1",
+ "sport": "tennis",
+ "enabled": true,
+ "generated_at": "2026-10-03T13:54:15.317Z",
+ "event": {
+  "event": {
+   "sport": "tennis",
+   "competition": "atp",
+   "canonical_event_id": "f1b02139-1c07-5b44-bd15-9fc3bc900651",
+   "start_at": "2026-10-04T04:00:00+00:00",
+   "state": "pre"
+  },
+  "kalshi": {
+   "source": "kalshi",
+   "source_type": "prediction_market",
+   "label": "Kalshi",
+   "attribution": "Prediction market data",
+   "link_text": "View on Kalshi",
+   "market_url": "https://kalshi.com/markets/kxatpmatch/atp-tennis-match/kxatpmatch-26oct03alcsha",
+   "event_ticker": "KXATPMATCH-26OCT03ALCSHA",
+   "proposition": "player_wins_match",
+   "state": "open",
+   "freshness": "live",
+   "read_cadence_min": 2,
+   "observed_at": "2026-10-03T13:52:56.894+00:00",
+   "age_seconds": 78,
+   "mid_rule": "Mid-market = midpoint of best YES bid and best YES ask; shown only when both exist and the spread is at most 10¢.",
+   "price_unit": "basis points of $1 (100 bp = 1¢); a YES contract pays $1 if the outcome happens",
+   "outcomes": [
+    {
+     "role": "a",
+     "team_id": "c76a1e3b-baef-591f-b2e6-8c11aec677c5",
+     "abbr": "Carlos Alcaraz",
+     "kalshi_name": "Carlos Alcaraz",
+     "contract": "Carlos Alcaraz wins",
+     "market_ticker": "KXATPMATCH-26OCT03ALCSHA-ALC",
+     "state": "open",
+     "result": null,
+     "yes_bid_bp": 8800,
+     "yes_ask_bp": 8900,
+     "no_bid_bp": 1100,
+     "no_ask_bp": 1200,
+     "best_yes_bid_bp": 8800,
+     "best_yes_ask_bp": 8900,
+     "last_price_bp": 8900,
+     "mid_bp": 8850,
+     "volume": 9008.81,
+     "volume_24h": 8948.81,
+     "open_interest": 8655.81,
+     "spread_bp": 100,
+     "source_updated_at": "2026-10-03T07:05:39.21069Z",
+     "displayable": true
+    },
+    {
+     "role": "b",
+     "team_id": "1258e21b-dd1b-5885-bd8f-3b53fd68dc99",
+     "abbr": "Denis Shapovalov",
+     "kalshi_name": "Denis Shapovalov",
+     "contract": "Denis Shapovalov wins",
+     "market_ticker": "KXATPMATCH-26OCT03ALCSHA-SHA",
+     "state": "open",
+     "result": null,
+     "yes_bid_bp": 1100,
+     "yes_ask_bp": 1200,
+     "no_bid_bp": 8800,
+     "no_ask_bp": 8900,
+     "best_yes_bid_bp": 1100,
+     "best_yes_ask_bp": 1200,
+     "last_price_bp": 1200,
+     "mid_bp": 1150,
+     "volume": 1171.22,
+     "volume_24h": 1171.22,
+     "open_interest": 1171.22,
+     "spread_bp": 100,
+     "source_updated_at": "2026-10-03T07:05:39.21069Z",
+     "displayable": true
+    }
+   ]
+  },
+  "sportsbooks": null,
+  "pbe": null,
+  "comparisons": [],
+  "movement": {
+   "kalshi": {
+    "a": {
+     "points": [
+      {
+       "t": "2026-10-03T13:48:56.893+00:00",
+       "milestone": "first_observed",
+       "state": "open",
+       "bid_bp": 8800,
+       "ask_bp": 8900,
+       "last_bp": 8900,
+       "mid_bp": 8850,
+       "result": null
+      },
+      {
+       "t": "2026-10-03T13:52:56.894Z",
+       "milestone": "current",
+       "state": "open",
+       "bid_bp": 8800,
+       "ask_bp": 8900,
+       "last_bp": 8900,
+       "mid_bp": 8850,
+       "result": null
+      }
+     ],
+     "first_mid": {
+      "t": "2026-10-03T13:48:56.893+00:00",
+      "mid_bp": 8850
+     },
+     "current_mid": {
+      "t": "2026-10-03T13:52:56.894Z",
+      "mid_bp": 8850
+     },
+     "delta_mid_bp": 0
+    },
+    "b": {
+     "points": [
+      {
+       "t": "2026-10-03T13:48:56.893+00:00",
+       "milestone": "first_observed",
+       "state": "open",
+       "bid_bp": 1100,
+       "ask_bp": 1200,
+       "last_bp": 1100,
+       "mid_bp": 1150,
+       "result": null
+      },
+      {
+       "t": "2026-10-03T13:50:56.909+00:00",
+       "milestone": "change",
+       "state": "open",
+       "bid_bp": 1100,
+       "ask_bp": 1200,
+       "last_bp": 1200,
+       "mid_bp": 1150,
+       "result": null
+      },
+      {
+       "t": "2026-10-03T13:52:56.894Z",
+       "milestone": "current",
+       "state": "open",
+       "bid_bp": 1100,
+       "ask_bp": 1200,
+       "last_bp": 1200,
+       "mid_bp": 1150,
+       "result": null
+      }
+     ],
+     "first_mid": {
+      "t": "2026-10-03T13:48:56.893+00:00",
+      "mid_bp": 1150
+     },
+     "current_mid": {
+      "t": "2026-10-03T13:52:56.894Z",
+      "mid_bp": 1150
+     },
+     "delta_mid_bp": 0
+    }
+   },
+   "basis": "Mid-market of each observed snapshot",
+   "note": "Observed snapshots only. Moves we did not capture are absent, never reconstructed."
+  }
+ }
+}

@@ -835,7 +835,7 @@
         "quote": null
       },
       "production_status": "NOT_USED",
-      "notes": "Cloudflare 403. No free, keyless tennis odds source found: MARKET UNAVAILABLE is the default state.",
+      "notes": "Cloudflare 403. No free, keyless tennis sportsbook-odds source found: sportsbook odds stay unavailable (the Kalshi prediction market is a separate source, listed above).",
       "storage_policy": "raw payload content-addressed in R2; normalized rows in Supabase",
       "attribution": null,
       "native_ids": {}
