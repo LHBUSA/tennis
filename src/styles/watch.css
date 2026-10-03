@@ -38,14 +38,3 @@
 .mst a:hover { border-color: var(--court-700); }
 .mst b { font: 700 14.5px/1.3 var(--f-ui); }
 .mst small { color: var(--muted); font: 600 12px/1.3 var(--f-ui); }
-
-/* homepage LIVE & RECENT cards (src/ui/live-recent.js) */
-.lr-card .hm-mh { display: grid; gap: 6px; }
-.lr-chip { justify-self: start; display: inline-flex; align-items: center; gap: 6px; font: 800 10.5px/1 var(--f-display); letter-spacing: 0.16em; padding: 5px 9px; border-radius: 999px; background: var(--night, #062019); color: #fff; }
-.lr-chip.lr-live { background: #fdecea; color: #b3261e; }
-.lr-res { margin: 4px 0 2px; font: 600 15px/1.35 var(--f-ui); }
-.lr-res b { font-weight: 800; }
-.lr-res .tabnum { display: block; font: 800 15px/1.3 var(--f-data); margin-top: 2px; }
-.lr-ft { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: auto; }
-.lr-badge { font: 800 11.5px/1 var(--f-ui); padding: 7px 10px; border-radius: 999px; text-decoration: none; background: #fdecea; color: #8d1f19; }
-.lr-badge:hover { background: #c4302b; color: #fff; }

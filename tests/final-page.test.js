@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { watchPanel } from '../src/ui/watch.js';
-import { liveRecentItems } from '../src/ui/live-recent.js';
+import { liveRecentItems, liveRecentSection, liveRecentTrack } from '../src/ui/live-recent.js';
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), 'utf8');
 const V = (video_type, extra = {}) => ({ video_id: 'Qd4MQBnmF5A', title: 'Elena Rybakina vs. Alina Charaeva | 2026 Beijing Round 2 | WTA Match Highlights', channel: 'WTA', channel_class: 'tour_official', published_at: '2026-10-03T15:22:00Z', video_type, ...extra });
@@ -35,11 +35,27 @@ test('homepage LIVE & RECENT: live first, then finals; replay only when events a
   const items = liveRecentItems({ live: [live], latest_results: [fin('f1', 'observed'), fin('f2', null), { ...fin('wo', null), status: 'walkover' }] }, { f1: { best: 'match_highlights' } }).map(String);
   assert.equal(items.length, 3, 'walkovers are not recent finals');
   assert.match(items[0], /LIVE/); assert.match(items[0], /Live PBEcast/); assert.match(items[0], /data-kx-line="l1"/);
-  assert.match(items[1], /<b>Charaeva<\/b> def\. Rybakina <span class="tabnum">3-6 6-4 6-3<\/span>/, 'winner-side score');
+  assert.match(items[1], /<b>Charaeva<\/b> <span class="lr-def">def\.<\/span> Rybakina<\/p>/, 'winner first, strongest');
+  assert.match(items[1], /<p class="lr-score"><span class="tabnum">3–6 6–4 6–3<\/span><\/p>/, 'winner-side score on its own line');
+  assert.match(items[1], /data-tour="wta"/); assert.doesNotMatch(items[1], /lr-chip|>FINAL</, 'no FINAL pill on every final card');
   assert.match(items[1], /PBEcast replay/); assert.match(items[1], /▶ Highlights/);
   assert.match(read('../src/ui/live-recent.js'), /kalshiSlot\(m, 'hm-kx'\)/, 'finals use the shared slot: it renders only when the shared board recorded a close');
   assert.doesNotMatch(items[2], /PBEcast replay|▶/, 'no replay claimed without stored events; no video badge without a linked video');
   assert.doesNotMatch(read('../src/ui/live-recent.js'), /kalshi\.com|\bbp\b|mid_bp/, 'no market data hard-coded in the component');
+});
+
+test('homepage LIVE & RECENT layout: own full-width header row (no intro column), arrows in the header, section omitted when empty', () => {
+  const shell = String(liveRecentSection());
+  assert.doesNotMatch(shell, /hm-intro/, 'not the generic intro-column section');
+  assert.match(shell, /<header class="lr-head"><h2 id="h-lr">Live &amp; recent<\/h2><p>Live courts, recent finals, PBEcast and official highlights\.<\/p><span class="lr-tools"><a class="hm-more" href="\/pbecast">All PBEcasts/);
+  assert.ok(shell.indexOf('class="hm-nav"') < shell.indexOf('data-lrbody'), 'arrows sit in the header row');
+  assert.match(shell, /class="hm-in lr-in" data-rail/);
+  assert.equal(liveRecentTrack([]), '');
+  const today = read('../src/pages/today.js');
+  assert.match(today, /wrap\.hidden = !items\.length/); assert.doesNotMatch(today, /No live match and no recent final/);
+  const css = read('../src/styles/live-recent.css');
+  assert.match(css, /grid-auto-columns: calc\(\(100% - 3 \* var\(--lr-gap\)\) \/ 4\)/, '4 across on desktop');
+  assert.match(css, /-webkit-line-clamp: 2/, 'long doubles names clamp (title keeps the full names)');
 });
 
 test('live-cache regressions (2026-10-03): no multi-hour browser TTL on live data; live reads bypass the browser cache; Last updated = observation', () => {

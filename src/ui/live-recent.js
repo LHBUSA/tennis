@@ -1,34 +1,56 @@
-// Homepage LIVE & RECENT: live matches (live PBEcast + the shared market line) followed by recent finals (winner-side
-// result, PBEcast replay only when events are stored, the shared "how the market closed" line, official highlights).
-// Market state comes ONLY from the shared Kalshi board (kalshiSlot -> paintKalshiLines); nothing is hard-coded here.
+// Homepage LIVE & RECENT: a full-width tennis scoreboard strip — live matches (live PBEcast + the shared market line)
+// followed by recent finals (winner-side result, PBEcast replay only when events are stored, the shared "how the market
+// closed" line, official highlights). Market state comes ONLY from the shared Kalshi board (kalshiSlot ->
+// paintKalshiLines); nothing is hard-coded here. Styles: src/styles/live-recent.css (.lr-*); the strip scrolls with the
+// shared rail behaviour (src/ui/rail.js — arrows only when it overflows, here in the header row).
 import { html } from '../lib/dom.js';
 import { scoreGrid } from './score-grid.js';
+import { railNav } from './rail.js';
 import { kalshiSlot, roundLabel, eventLabel } from './render.js';
-import { tourTag, tournamentName, roundShort } from '../lib/home.js';
+import { tourTag, tourFamily, tournamentName, roundShort } from '../lib/home.js';
 import { orderLive } from '../lib/pbecast-live.js';
 
 const FINAL = new Set(['completed', 'retired']);
+const LABEL = 'live and recent matches';
 const nm = (m, s) => (m.sides?.[s]?.players || []).map((p) => p.last_name || String(p.name || '').split(' ').slice(-1)[0]).join(' / ');
+const full = (m, s) => (m.sides?.[s]?.players || []).map((p) => p.name || p.last_name || '').join(' / ');
 const winnerScore = (m) => String(m.score || '').split(/\s+/).map((t) => (m.winner_side === 'B' ? t.replace(/^(\d+)-(\d+)/, (_, a, b) => `${b}-${a}`) : t)).join(' ');
 const VIDEO = { full_match: 'Full match replay', extended_highlights: 'Extended highlights', match_highlights: 'Highlights', interview: 'Interview' };
 
-export function liveRecentCard(m, video = null) {
-  const live = m.status === 'in_progress';
+/** Section shell: one header row (title, line, All PBEcasts, arrows) above a full-width strip. Rendered before data. */
+export function liveRecentSection() {
+  return html`<section class="hm-sec lr-sec" aria-labelledby="h-lr"><div class="hm-in lr-in" data-rail>
+    <header class="lr-head"><h2 id="h-lr">Live &amp; recent</h2><p>Live courts, recent finals, PBEcast and official highlights.</p><span class="lr-tools"><a class="hm-more" href="/pbecast">All PBEcasts <span aria-hidden="true">→</span></a>${railNav(LABEL)}</span></header>
+    <div class="lr-body" data-lrbody><p class="hm-wait lr-wait" aria-hidden="true"></p></div>
+  </div></section>`;
+}
+
+/** The strip itself (the .hm-track the shared rail wiring scrolls). '' when there is nothing to show. */
+export const liveRecentTrack = (items) => (items?.length ? html`<div class="hm-track lr-track" tabindex="0" role="region" aria-label="${LABEL}">${items}</div>` : '');
+
+// tour · tournament on the left, round on the right; all secondary to the result
+const meta = (m) => {
   const t = m.tournament;
-  const head = html`<p class="hm-mh1">${tourTag(m.tour) ? html`<span class="hm-tag">${tourTag(m.tour)}</span>` : ''}${t ? html`<span class="hm-mt" title="${tournamentName(t)}">${tournamentName(t)}</span>` : ''}<span class="hm-mr" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}</span></p>`;
-  if (live) {
-    return html`<article class="hm-card lr-card is-live" data-lr="live">
-      <header class="hm-mh"><span class="lr-chip lr-live"><i class="hm-dot" aria-hidden="true"></i>LIVE</span>${head}</header>
-      ${scoreGrid(m, { links: false })}
+  const tag = tourTag(m.tour);
+  return html`<span class="lr-ev">${tag ? html`<span class="lr-tour lr-tour-${tourFamily(m.tour) || 'x'}">${tag}</span>` : ''}${tag && t ? ' · ' : ''}${t ? tournamentName(t) : ''}</span><span class="lr-rd" title="${eventLabel(m.event_type)} · ${roundLabel(m.round)}">${roundShort(m.round)}</span>`;
+};
+
+export function liveRecentCard(m, video = null) {
+  const fam = tourFamily(m.tour) || '';
+  if (m.status === 'in_progress') {
+    return html`<article class="hm-card lr-card is-live" data-lr="live" data-tour="${fam}">
+      <p class="lr-meta"><span class="lr-live"><i class="hm-dot" aria-hidden="true"></i>LIVE</span>${meta(m)}</p>
+      ${scoreGrid(m, { links: false, px: 24 })}
       ${kalshiSlot(m, 'hm-kx')}
       <footer class="lr-ft"><a class="hm-go hm-go-cast" href="/pbecast/${m.id}">Live PBEcast <span aria-hidden="true">→</span></a></footer>
     </article>`;
   }
   const w = m.winner_side;
   const l = w === 'A' ? 'B' : 'A';
-  return html`<article class="hm-card lr-card" data-lr="final">
-    <header class="hm-mh"><span class="lr-chip">${m.status === 'retired' ? 'FINAL · RET.' : 'FINAL'}</span>${head}</header>
-    <p class="lr-res"><b>${nm(m, w)}</b> def. ${nm(m, l)} <span class="tabnum">${winnerScore(m)}</span></p>
+  return html`<article class="hm-card lr-card" data-lr="final" data-tour="${fam}">
+    <p class="lr-meta">${meta(m)}</p>
+    <p class="lr-res" title="${full(m, w)} def. ${full(m, l)}"><b>${nm(m, w)}</b> <span class="lr-def">def.</span> ${nm(m, l)}</p>
+    <p class="lr-score"><span class="tabnum">${winnerScore(m).replace(/(\d)-(\d)/g, '$1–$2')}</span>${m.status === 'retired' ? html` <small class="lr-ret">ret.</small>` : ''}</p>
     ${kalshiSlot(m, 'hm-kx')}
     <footer class="lr-ft">${m.replay ? html`<a class="hm-go hm-go-cast" href="/pbecast/${m.id}">PBEcast replay <span aria-hidden="true">→</span></a>` : html`<a class="hm-go" href="/matches/${m.id}">Match <span aria-hidden="true">→</span></a>`}${video ? html`<a class="lr-badge lr-video" href="/pbecast/${m.id}#pbc-watch">▶ ${VIDEO[video.best] || 'Video'}</a>` : ''}</footer>
   </article>`;
