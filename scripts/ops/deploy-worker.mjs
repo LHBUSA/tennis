@@ -17,7 +17,9 @@ const dir = path.resolve('workers', worker);
 const env = { ...process.env, NODE_OPTIONS: '--require D:/Workers/exfat-readlink.cjs' };
 const sh = (cmd, args, opts = {}) => execFileSync(cmd, args, { encoding: 'utf8', env, maxBuffer: 1 << 26, ...opts }).trim();
 const git = (...a) => sh('git', a);
-const wr = (...a) => sh('npx', ['wrangler', ...a], { cwd: dir, shell: process.platform === 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
+// on Windows npx needs a shell, which re-splits arguments: quote anything with spaces
+const q = (x) => (process.platform === 'win32' && /[\s()]/.test(x) ? `"${x.replace(/"/g, '\\"')}"` : x);
+const wr = (...a) => sh('npx', ['wrangler', ...a.map(q)], { cwd: dir, shell: process.platform === 'win32', stdio: ['ignore', 'pipe', 'pipe'] });
 const fail = (why) => { console.log(`ABORT ${why}`); process.exit(1); };
 
 if (git('status', '--porcelain', '--', 'workers/')) fail('uncommitted changes under workers/: commit (and push) first');
