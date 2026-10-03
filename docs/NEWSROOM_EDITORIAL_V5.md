@@ -39,6 +39,12 @@ paragraph — a scoreline or W-L record counts once — or a chain of short nume
 `unsupported_tactical`, `meta_language` ("the supplied record"), `repeated_phrasing` (>= 3 six-word frames, names/numbers normalised, shared with >= 2 other
 published stories; required provenance wording exempt).
 
+Voice rules (coordinator review 2026-10-03, gate 1.1.0): `archive_tic` (> 2 archive/record-provenance phrases per
+story; provenance lives in Source & Method), `meta_language` (never narrate inputs or missing data: "available source",
+"supplied", "documented", "path record", "the scores alone cannot"), `self_explaining` ("That result matters for the
+preview because..."), `stat_overload` (> 3 percentages / W-L records in a paragraph), `clunky_score_prose` ("finishing
+threshold", "recorded as 7-9 from X's side").
+
 Factual-gate precision changes made with V5 (each from a real false positive in the first production rewrites):
 "historical" is not "historic"; "record" is banned only as a record claim (W-L / "the match record shows" allowed);
 a scoreline is not chart narration and chart narration needs >= 5 figures; "not a prediction" is a disclaimer.

@@ -76,7 +76,7 @@ export function turningPoints(packet) {
   const who = (x) => (x === 'W' ? wS : lS);
   for (const s of sets) {
     const prev = sets[s.set - 2];
-    if (s.margin === 'tiebreak') out.push({ at: `set ${s.set}`, what: `${who(s.winner)} won the set ${s.score} in a tiebreak (${s.tiebreak} from ${wS}'s side)${s.extended_tiebreak ? ', a tiebreak that went beyond 7 points' : ''}`, basis: 'set scores' });
+    if (s.margin === 'tiebreak') out.push({ at: `set ${s.set}`, what: `${who(s.winner)} won the set ${s.winner === 'W' ? s.score : s.score.replace(/^(\d+)-(\d+)/, '$2-$1')} in a ${s.extended_tiebreak ? 'long ' : ''}tiebreak (${s.winner === 'W' ? s.tiebreak : s.tiebreak.split('-').reverse().join('-')} to ${who(s.winner)})`, basis: 'set scores' });
     if (s.margin === 'match_tiebreak') out.push({ at: 'match tiebreak', what: `the match was decided in a match tiebreak, ${s.score} to ${who(s.winner)}`, basis: 'set scores' });
     if (prev && prev.winner !== s.winner && s.winner) out.push({ at: `set ${s.set}`, what: `the set went the other way: ${who(s.winner)} took set ${s.set} ${s.score} after ${who(prev.winner)} won set ${prev.set}`, basis: 'set scores' });
     if (prev && prev.winner === s.winner && ['tiebreak', 'tight'].includes(prev.margin) && ['clear', 'lopsided'].includes(s.margin)) out.push({ at: `set ${s.set}`, what: `after a tight set ${prev.set}, set ${s.set} was one-sided (${s.score})`, basis: 'set scores' });
@@ -128,12 +128,12 @@ function recapAngles(packet) {
   }
   const lr = Number.isFinite(f.loser_rank) ? f.loser_rank : null;
   const wr = Number.isFinite(f.winner_rank) ? f.winner_rank : null;
-  if ((has(packet, 'upset') || has(packet, 'seed_upset')) && (lr || f.loser_seed)) add(lr && lr <= 10 ? 84 : 76, { id: 'upset', thesis: `${wS} beat ${lS}${lr ? `, ranked No. ${lr}` : ''}${f.loser_seed ? ` and seeded No. ${f.loser_seed}` : ''}${wr ? ` from No. ${wr}` : ''}: the story is how the lower-ranked player got there and what the records said going in.`, keywords: 'seed|No\\.\\s*\\d+|rank|upset', visuals: ['player_context', 'match_dna_comparison', 'set_by_set', 'path'] });
+  if ((has(packet, 'upset') || has(packet, 'seed_upset')) && (lr || f.loser_seed)) add(lr && lr <= 10 ? 84 : 76, { id: 'upset', thesis: `${wS} beat ${lS}${lr ? `, ranked No. ${lr}` : ''}${f.loser_seed ? ` and seeded No. ${f.loser_seed}` : ''}${wr ? ` from No. ${wr}` : ''}: the story is how the lower-ranked player got there and what their results said going in.`, keywords: 'seed|No\\.\\s*\\d+|rank|upset', visuals: ['player_context', 'match_dna_comparison', 'set_by_set', 'path'] });
   const dom = sets.length && sets.every((s) => s.winner === 'W') && sets.every((s) => ['clear', 'lopsided'].includes(s.margin));
   if (dom) add(60, { id: 'control', thesis: `${wS} controlled the match from start to finish in straight sets.`, keywords: 'straight sets|control|never|from the start', visuals: ['set_by_set', 'serve_profile', 'return_pressure', 'player_context'] });
   const wid = packet.participants[W]?.players?.[0]?.id;
   const form = (packet.recent_form?.[wid] || []).filter((r) => r.result === 'W' || r.result === 'L');
-  if (form.length >= 4 && form.filter((r) => r.result === 'L').length >= 3) add(58, { id: 'form_turn', thesis: `${wS} arrived out of form in our archive (more losses than wins in the previous results) and turned it here.`, keywords: 'form|previous|before this|coming in|arrived', visuals: ['form', 'player_context', 'match_dna_comparison', 'set_by_set'] });
+  if (form.length >= 4 && form.filter((r) => r.result === 'L').length >= 3) add(58, { id: 'form_turn', thesis: `${wS} arrived out of form (more losses than wins in his previous results) and turned it here.`, keywords: 'form|previous|before this|coming in|arrived', visuals: ['form', 'player_context', 'match_dna_comparison', 'set_by_set'] });
   add(10, { id: 'result', thesis: `${wS} beat ${lS}; the story is how the sets went and what the result means for ${wS}.`, keywords: '.', visuals: ['set_by_set', 'player_context', 'path'] });
   return out.sort((a, b) => b.score - a.score);
 }
@@ -153,7 +153,7 @@ function previewAngles(packet) {
   if (h?.prior_meetings?.length) out.push({ score: 80, id: 'rematch', thesis: `${aS} and ${bS} have met before in our records; the preview is about what has changed since.`, keywords: 'met|meeting|head-to-head|last time', visuals: ['h2h', 'player_context', 'match_dna_comparison', 'form'] });
   if (qual(pa) || qual(pb)) out.push({ score: 78, id: 'qualifier_vs', thesis: `${qual(pa) ? aS : bS} came through qualifying; the question is whether that run of matches meets a fresher opponent.`, keywords: 'qualif', visuals: ['paths', 'player_context', 'form', 'match_dna_comparison'] });
   if (Number.isFinite(ra) && Number.isFinite(rb) && Math.abs(ra - rb) >= 25) out.push({ score: 70, id: 'ranking_gap', thesis: `A wide ranking gap (No. ${Math.min(ra, rb)} against No. ${Math.max(ra, rb)}); the preview tests whether this week's results and records narrow it.`, keywords: 'No\\.\\s*\\d+|rank', visuals: ['player_context', 'match_dna_comparison', 'paths', 'form'] });
-  out.push({ score: 50, id: 'matchup', thesis: `Two players arriving by different routes: the preview weighs their path this week, recent form and archived records.`, keywords: 'path|form|record|this week', visuals: ['player_context', 'match_dna_comparison', 'paths', 'form'] });
+  out.push({ score: 50, id: 'matchup', thesis: `Two players arriving by different routes: the preview weighs their path this week, recent form and their results going in.`, keywords: 'path|form|record|this week', visuals: ['player_context', 'match_dna_comparison', 'paths', 'form'] });
   return out.sort((a, b) => b.score - a.score);
 }
 
@@ -183,11 +183,11 @@ export const VISUAL_GUIDE = Object.freeze({
   player_context: 'each player: ranking at the start of the tournament, surface record, last 52 weeks, recent results',
   path: 'the draw path: every earlier match this week with scores',
   paths: "both players' matches earlier this week, with scores",
-  h2h: 'earlier meetings in our archive',
+  h2h: 'their earlier meetings (since 2024-12-29)',
   form: 'each player\'s five previous results before this tournament',
   next: 'the next scheduled opponent',
-  match_dna_comparison: 'Match DNA going in: each player\'s archived win rates (matches, sets, deciding sets, tiebreaks, vs top 10/50) before this match',
-  dna_comparison: 'Technical DNA going in: archived serve/return averages before this match',
+  match_dna_comparison: 'Match DNA going in: each player\'s win rates (matches, sets, deciding sets, tiebreaks, vs top 10/50) before this match',
+  dna_comparison: 'Technical DNA going in: serve/return averages before this match',
   serve_comparison: 'serve percentages side by side', return_comparison: 'return percentages side by side', serve_counts: 'aces and double faults', match_flow: 'games by set',
   ranking_trajectory: 'the weekly ranking line up to this list'
 });
@@ -211,7 +211,7 @@ export function storyAngle(packet, plan = null, storyClass = 'brief') {
     beats = ['lead: the question this match answers (a thesis, not a prediction)', 'how each player got here this week (paths, scores)', 'the case for each side from form, records, surface and ranking', 'what decides it / what to watch — framed as questions the evidence raises, never a pick'];
   } else {
     cands = [{ id: 'ranking_move', thesis: 'A ranking move: the story is the results behind it and what the new position means.', keywords: 'rank|No\\.\\s*\\d+|list', visuals: ['ranking_trajectory'] }];
-    beats = ['lead: the move and why it matters', 'the results behind it (archive records)', 'what the new position means'];
+    beats = ['lead: the move and why it matters', 'the results behind it', 'what the new position means'];
   }
   const [angle, ...rest] = cands;
   const pick = (ids) => ids.filter((id) => available.has(id));

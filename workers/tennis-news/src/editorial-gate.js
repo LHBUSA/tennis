@@ -8,7 +8,7 @@
 
 import { storyAngle, PROSE_TARGETS, availableVisuals } from './angle.js';
 
-export const EDITORIAL_GATE_VERSION = 'tennis-editorial-gate/1.0.0';
+export const EDITORIAL_GATE_VERSION = 'tennis-editorial-gate/1.1.0';
 
 const WORDS = (t) => String(t || '').trim().split(/\s+/).filter(Boolean);
 const wc = (t) => WORDS(t).length;
@@ -37,6 +37,19 @@ const CONNECTIVE = /\b(because|which|so|while|after|when|meaning|but|yet|despite
 const SET_REF = /\b(opening set|first set|second set|third set|fourth set|fifth set|deciding set|final set|set (one|two|three|four|five|1|2|3|4|5)|the opener|opening-set|first-set|second-set|third-set|tiebreak|match tiebreak)\b/gi;
 // Wording the factual rules REQUIRE (provenance, archive scope): never a "stock phrase" failure.
 const COMPLIANCE = /(x archive|archive in force|in force at|at the start of|our archive|our records|in force when|propbetedge archive|list in force|singles list|doubles list|match dna snapshot|built only from|secondary source|before the match|before this match|start of the tournament|the tournament began)/i;
+
+// ---- voice rules (coordinator review 2026-10-03) ----------------------------------------------------------------
+// The story never narrates its inputs or what is missing from them: just don't make the claim.
+export const META_LANGUAGE = /\b(the packet|evidence packet|supplied|source records?|path records?|the data provided|provided data|not included in the|(statistics|data|scores?) in the source|the source (does|did|contains|holds|shows|has)\b|available source|the available (data|evidence|record|records|scores)|documented|stored path|no point-by-point|point-level (data|record|statistics)|serve statistics (are|were) (not|un)|(the )?(set )?scores? alone (cannot|can't|do not|does not|don't)|the scores? (do|does) not (support|establish|show)|place a (necessary )?limit on|precise conclusion rather than a reconstructed)/i;
+// Archive/record provenance words in the narrative (max 2 per story): "in our archive", "archived", "stored record",
+// "in the PropBetEdge archive", "in our records", "Match DNA snapshot"...
+export const ARCHIVE_TIC = /\b(archive[sd]?|archival|in our records|our records|stored (records?|profile|history|form|results|window|rates?|path|snapshot|evidence)|propbetedge archive|dna snapshot|pre-match records?|prior records?|longer records?)\b/gi;
+// Sentences that explain the article to itself instead of stating the point.
+export const SCAFFOLD = /^(that|this|these|those) (\w+ ){0,2}(results?|comparisons?|figures?|numbers?|evidence|context|distinction|sequence|details?|patterns?|path|records?|contrast|split|gap|statistics?) (matters?|mattered|describes?|described|explains?|did not (dictate|explain|decide|describe)|does not (dictate|explain|decide|describe)|cannot (explain|describe|tell)|(is|was|are|were) (important|relevant|significant|notable|instructive))\b|\bmatters? for (the|this) (preview|story|article)\b|\b(for|in) (the|this) preview\b|\bwhat (this|the) (story|preview|article)\b/i;
+// Plain score language: "Fritz took a 9-7 tiebreak", never "ran beyond the standard finishing threshold".
+export const CLUNKY_SCORE = /\b(finishing threshold|(standard|usual|normal|regular) (finishing )?(threshold|length|limit)|recorded as \d+-\d+|from (his|her|their|[A-Z][\w'’-]+[’']s) side\b|beyond (its|the) (usual|normal|standard) (length|limit|threshold|finish)|tiebreak (that )?(ran|went|continued|extended) (past|beyond))/i;
+/** Statistics in one paragraph: percentages, decimals and W-L records (scorelines and ranks are not statistics). */
+export const statCount = (p) => (String(p).match(/\d+(?:\.\d+)?%|\b\d{1,3}-\d{1,3}(?=\s+(record|mark|against|over|across|in (his|her|their|the) last|career|this season|on (hard|clay|grass)))|\b0\.\d+\b/gi) || []).length;
 
 /** Normalised word stream for phrasing comparison: names -> X, numbers -> N (so two stories about different players
  *  that share a sentence frame still collide). */
@@ -193,8 +206,16 @@ export function editorialGate(article, packet, { plan = null, storyClass = artic
   const net = articleText(article).match(NET_OK);
   if (net && !['A', 'B'].some((s) => packet?.stats?.[s]?.net_points_won)) fail('unsupported_tactical', net[0]);
   // 11b. system meta-language ("the supplied record", "the packet"): journalism never narrates its own inputs
-  const meta = articleText(article).match(/\b(the packet|evidence packet|supplied (path )?records?|source record|the data provided|provided data|not included in the (supplied|available|path)|supplied surface labels?|(statistics|data|scores?) in the source|the source (does|did) not|stored path)\b/i);
+  const meta = articleText(article).match(META_LANGUAGE);
   if (meta) fail('meta_language', meta[0]);
+  // 11c. VOICE (coordinator review 2026-10-03): a sports desk, not a database describing its own records
+  const body = paras.map((x) => x.p).concat(secs.map((s) => s.visual_note || '')).join(' ');
+  const tics = body.match(ARCHIVE_TIC) || [];
+  if (tics.length > 2) fail('archive_tic', `${tics.length} archive/record-provenance phrases in the story (max 2; provenance lives in Source & Method): ${[...new Set(tics.map((t) => t.toLowerCase()))].slice(0, 5).join(', ')}`);
+  for (const x of paras) for (const s of sentences(x.p)) { const m = s.match(SCAFFOLD); if (m) { fail('self_explaining', `${x.id}: "${s.slice(0, 120)}"`); break; } }
+  for (const x of paras) { const st = statCount(x.p); if (st > 3) fail('stat_overload', `${x.id}: ${st} statistics in one paragraph (max 3: choose the one that proves the sentence)`); }
+  const clunk = articleText(article).match(CLUNKY_SCORE);
+  if (clunk) fail('clunky_score_prose', clunk[0]);
   // 12. repeated phrasing across the newsroom
   const stock = stockPhrases(article, corpus);
   if (stock.length >= 3) fail('repeated_phrasing', stock.slice(0, 4).map((x) => `"${x.phrase}" (${x.articles})`).join('; '));

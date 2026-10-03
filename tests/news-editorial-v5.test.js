@@ -144,3 +144,18 @@ test('overhaul queue: waits (pops nothing) once the premium budget for the UTC d
   assert.equal(JSON.parse(m.get('news:overhaul:queue')).length, 1, 'item kept for the next day');
   assert.equal(await processOverhaulQueue({ TENNIS_STATE: { get: async () => null, put: async () => {} } }, null), null, 'empty queue: nothing to do');
 });
+
+test('voice rules (coordinator review 2026-10-03): the real phrases from the first rewrites are rejected', async () => {
+  const { META_LANGUAGE, ARCHIVE_TIC, SCAFFOLD, CLUNKY_SCORE, statCount } = await import('../workers/tennis-news/src/editorial-gate.js');
+  for (const t of ['The available source contains no point-by-point or serve statistics, so the set scores place a necessary limit on the description.', "Shapovalov's earlier Tokyo matches are not included in the supplied path record.", 'His recent hard-court evidence is more limited in the supplied surface labels.', 'The scores alone cannot establish a technical cause.', 'Alcaraz brings two documented tournament wins.']) assert.match(t, META_LANGUAGE, t);
+  const tic = 'On the ATP singles list in the PropBetEdge archive in force at the start of the tournament, Fritz was No. 10. He had won 13.8% of the contests in our archive. His archived match-win rate was 45.3%, and the stored records leaned to Fritz.';
+  assert.ok(tic.match(ARCHIVE_TIC).length > 2);
+  for (const t of ['That result matters for the preview because Alcaraz has already had to respond.', 'That comparison describes a substantial difference in how often each has converted appearances.', 'Those figures did not dictate this match, but they explain why Munar had to survive the opener.']) assert.match(t, SCAFFOLD, t);
+  for (const t of ['That contest also ran beyond the standard finishing threshold before the opener went to Fritz.', "the tiebreak recorded as 7-9 from Munar's side"]) assert.match(t, CLUNKY_SCORE, t);
+  assert.ok(statCount('Before the match, he had won 13.8% of contests after losing the opening set; Fritz converted at 86%. His match-win rate was 62.1% to 45.3%, deciding sets 38.3% to 56.7%, and he was 4-20 against top-10 players at 16.7%.') > 3);
+  assert.equal(statCount('Munar won the second set 6-4 and the third 6-3, after Fritz took a 9-7 tiebreak.'), 0, 'scores are not statistics');
+  const art = structuredClone(GOOD);
+  art.sections[2].paragraphs.push('Those figures did not dictate this match, but they explain why Munar had to survive the opener. His archived and stored records in our archive say so.');
+  const ids = editorialGate(art, PACKET, { plan: PLAN, storyClass: 'full' }).failures.map((f) => f.gate);
+  for (const id of ['self_explaining', 'archive_tic']) assert.ok(ids.includes(id), id);
+});
