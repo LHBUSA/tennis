@@ -168,7 +168,20 @@ export async function writeMatches(store, sourceMatches, edition, opts = {}) {
  * Several editions in one batched pass (identical rules per edition): groups = [{ edition, sourceMatches }].
  * Cross-source matching, writes and hold resolution run once for all groups instead of once per edition.
  */
-export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false, trace = false } = {}) {
+// Sourced day-of-play columns (migration 20261004000100). Written only when the caller passes scheduleDay (env
+// SCHEDULE_DAY_COLUMNS === '1', i.e. after the migration is applied); otherwise these columns are never named.
+const SCHEDULE_DAY_COLS = ['scheduled_day', 'schedule_utc_offset', 'schedule_day_source', 'schedule_day_raw'];
+export function scheduleDayFields(sm, prev) {
+  // the provider spoke (an order-of-play row): its value, null included, is the current sourced state
+  if (sm.schedule_day !== undefined) {
+    const d = sm.schedule_day;
+    return d ? { scheduled_day: d.day, schedule_utc_offset: d.utc_offset ?? null, schedule_day_source: d.source, schedule_day_raw: d.raw } : { scheduled_day: null, schedule_utc_offset: null, schedule_day_source: null, schedule_day_raw: null };
+  }
+  // any other row (live, final, another source) keeps what was recorded
+  return Object.fromEntries(SCHEDULE_DAY_COLS.map((c) => [c, prev?.[c] ?? null]));
+}
+
+export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false, trace = false, scheduleDay = false } = {}) {
   const result = { written: 0, held: 0, changes: 0, skipped: 0, attached: 0, taken_over: 0, duplicate_candidates: 0 };
   // trace (live lanes): one internal reason code per incoming source row — never a silent drop
   const outcome = new Map();
@@ -229,7 +242,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
   }
   onePerMatch();
   if (normalized.length) {
-    const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
+    const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,${scheduleDay ? `${SCHEDULE_DAY_COLS.join(',')},` : ''}tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
     let keep = [];
     const changes = [];
     for (const x of normalized) {
@@ -261,7 +274,8 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     const matchRow = (x) => ({
       match_id: x.id, edition_id: x.ed.edition_id, natural_key: pairKey(x), draw_id: x.draw_id, event_type: x.n.match.event_type, round: x.n.match.round_code || 'unknown', format_key: x.n.match.format_key || 'unknown',
       status: x.n.match.status, winner_side: x.n.match.winner_side, end_reason: x.n.match.end_reason, scheduled_at: x.sm.scheduled_at || null, started_at: x.sm.started_at || null, court: x.sm.court_name || null, schedule_note: x.sm.schedule_note || null, score_text: x.n.match.score_text, duration_s: x.n.match.duration_s,
-      surface: x.ed.surface ?? null, indoor: x.ed.indoor ?? null, source_family: x.sm.provider, live_state: x.n.match.live || null, source_updated_at: x.n.match.source_updated_at, updated_at: now()
+      surface: x.ed.surface ?? null, indoor: x.ed.indoor ?? null, source_family: x.sm.provider, live_state: x.n.match.live || null, source_updated_at: x.n.match.source_updated_at, updated_at: now(),
+      ...(scheduleDay ? scheduleDayFields(x.sm, x.prev) : {})
     });
     const wo = keep.filter((x) => x.n.match.status === 'walkover');
     const rest = keep.filter((x) => x.n.match.status !== 'walkover');

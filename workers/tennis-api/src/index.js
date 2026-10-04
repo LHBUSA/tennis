@@ -67,7 +67,7 @@ async function membershipFor(request, env) {
 }
 
 
-import { PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
+import { configureScheduleDay, PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
 import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
@@ -472,10 +472,12 @@ export async function propsportsFetch(request, env, ctx) {
 
 export default {
   fetch(request, env, ctx) {
+    configureScheduleDay(env);
     return fetchApi(request, env, ctx);
   },
   // frozen pre-match matchup snapshots (matchup-freeze.js): write-once while matches are scheduled (scheduled.js)
   scheduled(_e, env, ctx) {
+    configureScheduleDay(env);
     ctx.waitUntil(scheduledRun(storeFromEnv(env), env));
   }
 };

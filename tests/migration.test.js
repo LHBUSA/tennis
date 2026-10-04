@@ -144,3 +144,24 @@ test('context layer: a mapping needs id + confidence; unmapped carries none; sur
   await rejects(pg, `insert into tennis_edition_attributes (edition_id, attribute, value, source, method) values ('${U(2)}', 'surface', 'clay', 'y', 'guessed')`);
   await rejects(pg, `insert into tennis_draw_slots (edition_id, event_type, draw, position, participant_key, bye, source) values ('${U(2)}', 'WS', 'main', 1, 'S:x', true, 'wta')`);
 });
+
+test('schedule day (20261004000100): sourced day + raw evidence, proven offset only, +00:00 refused; rollback drops cleanly', async () => {
+  const pg = await db();
+  const ins = (cols, vals) => `insert into tennis_matches (event_type, round, format_key, status, source_family${cols}) values ('WS', 'R1', 'BO3_TB7', 'scheduled', 'wta'${vals})`;
+  const raw = `'{"field":"MatchTimeStamp","value":"2026-10-05T11:00+08:00","corroborated_by":{"field":"NotBeforeISOTime","value":"11:00+0800"}}'`;
+  await pg.query(ins('', ''));
+  await pg.query(ins(', scheduled_day, schedule_utc_offset, schedule_day_source, schedule_day_raw', `, '2026-10-05', '+08:00', 'wta_order_of_play', ${raw}`));
+  await pg.query(ins(', scheduled_day, schedule_day_source, schedule_day_raw', `, '2026-10-05', 'wta_not_before_iso', '{"field":"NotBeforeISOTime","value":"2026-10-05T12:00:00+00:00"}'`)); // day, offset unproven -> HOLD
+  await rejects(pg, ins(', scheduled_day, schedule_utc_offset, schedule_day_source, schedule_day_raw', `, '2026-10-05', '+00:00', 'wta_not_before_iso', ${raw}`), /check/i);
+  await rejects(pg, ins(', scheduled_day, schedule_utc_offset, schedule_day_source, schedule_day_raw', `, '2026-10-05', '+8:00', 'wta_order_of_play', ${raw}`), /check/i);
+  await rejects(pg, ins(', scheduled_day, schedule_day_source, schedule_day_raw', `, '2026-10-05', 'city_timezone', ${raw}`), /check/i);
+  await rejects(pg, ins(', scheduled_day, schedule_day_source', `, '2026-10-05', 'wta_order_of_play'`), /check/i); // no raw evidence
+  await rejects(pg, ins(', scheduled_day, schedule_day_raw', `, '2026-10-05', ${raw}`), /check/i); // no source
+  await rejects(pg, ins(', schedule_utc_offset', `, '+08:00'`), /check/i); // offset without a day
+  await rejects(pg, ins(', scheduled_day, schedule_day_source, schedule_day_raw', `, '2026-10-05', 'wta_order_of_play', '{"value":"x"}'`), /check/i);
+  assert.equal((await pg.query('select count(*)::int as n from tennis_matches where scheduled_day is not null')).rows[0].n, 2);
+  await pg.exec(fs.readFileSync(new URL('../supabase/rollback/20261004000100_tennis_match_schedule_day.down.sql', import.meta.url), 'utf8'));
+  const cols = await pg.query("select column_name from information_schema.columns where table_name='tennis_matches' and column_name like 'schedule%'");
+  assert.deepEqual(cols.rows.map((r) => r.column_name).sort(), ['schedule_note', 'scheduled_at']);
+  assert.equal((await pg.query('select count(*)::int as n from tennis_matches')).rows[0].n, 3);
+});

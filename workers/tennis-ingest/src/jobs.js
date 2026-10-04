@@ -77,7 +77,7 @@ export async function editionMatches(ctx, ed) {
   const stale = past ? r.records.filter((m) => m.status === 'in_progress') : [];
   if (stale.length) await hold(ctx.store, stale.map((m) => ({ provider: 'wta', entity_type: 'match', external_id: m.provider_match_id, problems: ['stale_in_progress: finished edition, source never completed the match'], payload: null, capture_id: r.capture?.capture_id || null })));
   // dedupe: an official WTA API row takes over a player-history or ESPN row of the same match (never a second row)
-  const w = await writeMatches(ctx.store, r.records.filter((m) => !stale.includes(m)), ed, { captureId: r.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, r.records.filter((m) => !stale.includes(m)), ed, { captureId: r.capture?.capture_id || null, dedupe: true, scheduleDay: ctx.env?.SCHEDULE_DAY_COLUMNS === '1' });
   return { state: 'PASS', ...w, stale_held: stale.length, live: r.records.filter((m) => m.status === 'in_progress' && !stale.includes(m)).length };
 }
 

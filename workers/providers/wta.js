@@ -104,6 +104,41 @@ const WINNER = { 0: null, 2: { side: 'A', end: 'completed' }, 3: { side: 'B', en
 const STATE = { F: 'final', P: 'in_progress', U: 'scheduled' };
 export const SCORE_SYS = { 1: 'BO3_TB7', 9: 'DOUBLES_TOUR' };
 const FULL_ISO = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/;
+
+// ---- sourced day of play (Picker V1 lock rule: DAY_START_LOCK needs a sourced day + a proven UTC offset) ------------
+// Owner rules: the day is never assumed and the offset never guessed (no city/country timezone tables). '+00:00' / 'Z'
+// is UNPROVEN (the source also emits it as a default), so it yields utc_offset null -> HOLD. 23:59 is never a start time.
+const ISO_PARTS = /^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})(?::\d{2}(?:\.\d+)?)?([+-]\d{2}:?\d{2}|Z)$/;
+const TIME_ONLY = /^(\d{2}:\d{2})([+-]\d{2}:?\d{2})$/;
+const PLACEHOLDER = /^\d{4}-\d{2}-\d{2}T23:59(?::00(?:\.0+)?)?(?:[+-]\d{2}:?\d{2}|Z)$/;
+const offsetOf = (o) => (o === 'Z' ? '+00:00' : o.length === 5 ? `${o.slice(0, 3)}:${o.slice(3)}` : o);
+const provenOffset = (o) => { const n = offsetOf(o); return n === '+00:00' || n === '-00:00' ? null : n; };
+// The 23:59 MatchTimeStamp placeholder may set the day only once proven against real order-of-play data
+// (docs/evidence/wta-oop-day-proof.md). Not proven: on the captured data every placeholder sits on an Unscheduled row.
+export const PLACEHOLDER_DAY_PROVEN = false;
+
+/**
+ * The sourced local day a scheduled WTA match is listed for, with the raw field it came from.
+ * Precedence: (1) a full-ISO NotBeforeISOTime; (2) a non-placeholder MatchTimeStamp whose local time AND offset equal
+ * the time-only NotBeforeISOTime (two sourced fields stating the same slot); (3) the 23:59 placeholder, only when
+ * PLACEHOLDER_DAY_PROVEN and the row is not Unscheduled. Otherwise null (missing stays missing).
+ * @returns {{ day: string, utc_offset: string|null, source: string, raw: object } | null}
+ */
+export function wtaScheduleDay(m, { placeholderDay = PLACEHOLDER_DAY_PROVEN } = {}) {
+  const nb = String(m.NotBeforeISOTime || '');
+  const mts = String(m.MatchTimeStamp || '');
+  const full = ISO_PARTS.exec(nb);
+  if (full) return { day: full[1], utc_offset: provenOffset(full[3]), source: 'wta_not_before_iso', raw: { field: 'NotBeforeISOTime', value: nb } };
+  const t = TIME_ONLY.exec(nb);
+  const ts = ISO_PARTS.exec(mts);
+  if (t && ts && !PLACEHOLDER.test(mts) && m.Unscheduled !== true && ts[2] === t[1] && offsetOf(ts[3]) === offsetOf(t[2])) {
+    return { day: ts[1], utc_offset: provenOffset(ts[3]), source: 'wta_order_of_play', raw: { field: 'MatchTimeStamp', value: mts, corroborated_by: { field: 'NotBeforeISOTime', value: nb } } };
+  }
+  if (placeholderDay && ts && PLACEHOLDER.test(mts) && m.Unscheduled !== true) {
+    return { day: ts[1], utc_offset: provenOffset(ts[3]), source: 'wta_match_timestamp_placeholder', raw: { field: 'MatchTimeStamp', value: mts } };
+  }
+  return null;
+}
 // Grand Slams play a 10-point tiebreak at 6-6 in the deciding set (all events, since 2022). The WTA
 // API reports those matches as ScoreSys 1, so the event level decides the format, not the code alone.
 export function formatFor(scoreSys, { level = null, year = null } = {}) {
@@ -193,6 +228,9 @@ export function parseWtaMatch(m, ctx = {}) {
     // its prefix. The bare time is used only when no phrase exists.
     schedule_note: state === 'scheduled' ? m.NotBefore || m.NotBeforeText || (m.NotBeforeISOTime && !FULL_ISO.test(m.NotBeforeISOTime) ? `Not before ${m.NotBeforeISOTime}` : null) || null : null,
     duration_s: hms(m.MatchTimeTotal),
+    // sourced day of play for an order-of-play row (null = not sourced); undefined once the match is not 'scheduled', so
+    // the writer keeps whatever day was recorded while it was (never erased by a later live/final row)
+    schedule_day: state === 'scheduled' ? wtaScheduleDay(m, ctx) : undefined,
     // MatchTimeStamp is the start of play once a match has begun; for order-of-play entries it is a 23:59
     // placeholder, so it is only trusted for started/finished matches.
     started_at: (state === 'final' || state === 'in_progress') && FULL_ISO.test(m.MatchTimeStamp || '') && status !== 'walkover' ? m.MatchTimeStamp : null,

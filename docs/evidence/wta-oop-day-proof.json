@@ -1,0 +1,213 @@
+{
+ "generated_at": "2026-10-04T13:54:22.296Z",
+ "source": "api.wtatennis.com (same endpoints as workers/providers/wta.js), read-only, polite client",
+ "requests": [
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/?page=0&pageSize=50&from=2026-10-01&to=2026-10-07",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:22.569Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/1143/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:23.511Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/1179/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:24.590Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/4289/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:25.754Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/4656/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:26.941Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/1020/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:28.223Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/1147/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:29.452Z"
+  },
+  {
+   "url": "https://api.wtatennis.com/tennis/tournaments/1149/2026/matches",
+   "status": 200,
+   "fetched_at": "2026-10-04T13:54:30.415Z"
+  }
+ ],
+ "totals": {
+  "tournaments": 7,
+  "scheduled_rows": 26,
+  "placeholders": 14,
+  "placeholders_unscheduled": 14,
+  "E_both": 12,
+  "E_agree": 12,
+  "E_mismatch": 0,
+  "A_both": 0,
+  "A_agree": 0,
+  "A_mismatch": 0,
+  "B_both": 0,
+  "B_agree": 0,
+  "B_mismatch": 0,
+  "C_out_of_window": 0,
+  "tournaments_with_cross_evidence": 0
+ },
+ "D_played_day": {
+  "captures": 2,
+  "compared": 0,
+  "agree": 0,
+  "mismatch": []
+ },
+ "per_tournament": {
+  "JINGSHAN 125 (WTA 125)": {
+   "start": "2026-09-28",
+   "end": "2026-10-04",
+   "scheduled_rows": 0,
+   "placeholders": 0,
+   "placeholders_unscheduled": 0,
+   "E_both": 0,
+   "E_agree": 0,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {}
+  },
+  "ADANA 125 (WTA 125)": {
+   "start": "2026-09-28",
+   "end": "2026-10-04",
+   "scheduled_rows": 1,
+   "placeholders": 0,
+   "placeholders_unscheduled": 0,
+   "E_both": 1,
+   "E_agree": 1,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {}
+  },
+  "TEMPLETON (ITF)": {
+   "start": "2026-09-28",
+   "end": "2026-10-04",
+   "scheduled_rows": 0,
+   "placeholders": 0,
+   "placeholders_unscheduled": 0,
+   "E_both": 0,
+   "E_agree": 0,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {}
+  },
+  "QUINTA DO LAGO (ITF)": {
+   "start": "2026-09-28",
+   "end": "2026-10-05",
+   "scheduled_rows": 0,
+   "placeholders": 0,
+   "placeholders_unscheduled": 0,
+   "E_both": 0,
+   "E_agree": 0,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {}
+  },
+  "BEIJING (WTA 1000)": {
+   "start": "2026-09-30",
+   "end": "2026-10-11",
+   "scheduled_rows": 13,
+   "placeholders": 5,
+   "placeholders_unscheduled": 5,
+   "E_both": 8,
+   "E_agree": 8,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {
+    "2026-10-05": 5
+   }
+  },
+  "SUZHOU 125 (WTA 125)": {
+   "start": "2026-10-05",
+   "end": "2026-10-11",
+   "scheduled_rows": 12,
+   "placeholders": 9,
+   "placeholders_unscheduled": 9,
+   "E_both": 3,
+   "E_agree": 3,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {
+    "2026-10-05": 9
+   }
+  },
+  "SAMSUN 125 (WTA 125)": {
+   "start": "2026-10-05",
+   "end": "2026-10-11",
+   "scheduled_rows": 0,
+   "placeholders": 0,
+   "placeholders_unscheduled": 0,
+   "E_both": 0,
+   "E_agree": 0,
+   "E_mismatch": [],
+   "A_both": 0,
+   "A_agree": 0,
+   "A_mismatch": [],
+   "B_both": 0,
+   "B_agree": 0,
+   "B_mismatch": [],
+   "C_out_of_window": [],
+   "placeholder_days": {}
+  }
+ },
+ "verdict": {
+  "placeholder_day_proven": false,
+  "rule": "proven only if: >= 2 tournaments have entries carrying both a placeholder and a full-ISO NotBeforeISOTime, every such pair agrees on the local day, no placeholder falls outside its tournament window, and no earlier capture contradicts the day the match was played",
+  "placeholders_all_unscheduled": true,
+  "mts_notbefore_agreement": {
+   "rows": 12,
+   "agree": 12,
+   "mismatch": 0,
+   "tournaments": 3,
+   "consistent": true
+  }
+ }
+}
