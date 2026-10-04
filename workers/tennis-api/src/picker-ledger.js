@@ -125,7 +125,9 @@ export async function readLedger(bucket, { limit = 500 } = {}) {
  * seen / graded / corrected sets from one listing each, and R2 work is capped per tick.
  */
 const ID_OF = (prefix) => (k) => k.slice(prefix.length).replace(/\.json$/, '').split('/')[0];
-export async function runPicker(store, env, { now = new Date().toISOString(), fetchImpl = fetch, limit = 12 } = {}) {
+export async function runPicker(store, env, { now = new Date().toISOString(), fetchImpl = null, limit = 12 } = {}) {
+  // benchmarks-at through the MARKETS service binding (same-account workers.dev fetches fail with 1042)
+  fetchImpl = fetchImpl || (env?.MARKETS ? (u, init) => env.MARKETS.fetch(u, init) : fetch);
   const bucket = env?.TENNIS_SOURCE;
   if (!bucket || !store) return { error: 'not_configured' };
   const t = Date.parse(now);

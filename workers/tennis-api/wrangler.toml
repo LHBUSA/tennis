@@ -34,6 +34,12 @@ crons = ["*/10 * * * *"]
 binding = "AUTH"
 service = "propbetedge-auth-magic"
 
+# shared markets service (benchmarks-at for the Picker V1 ledger): a Worker cannot fetch another Worker's
+# workers.dev URL on the same account (error 1042), so it is reached through this binding
+[[services]]
+binding = "MARKETS"
+service = "propsports-markets"
+
 # "1" only after migration 20261004000100_tennis_match_schedule_day.sql is applied (sourced day-of-play columns)
 [vars]
 SCHEDULE_DAY_COLUMNS = "1"

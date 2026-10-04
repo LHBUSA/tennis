@@ -260,3 +260,17 @@ test('runPicker: cheap pass — batched rows, decides due matches, self-corrects
   assert.deepEqual([s2.decided.length, s2.corrected], [0, 0]);
   void appendCorrection;
 });
+
+test('runPicker reaches benchmarks-at through the MARKETS service binding when bound', async () => {
+  const { runPicker } = await import('../workers/tennis-api/src/picker-ledger.js');
+  const b = memBucket();
+  const calls = [];
+  const env = { TENNIS_SOURCE: b, MARKETS: { fetch: async (u) => { calls.push(String(u)); return benchOk(); } } };
+  const row = { match_id: ID, event_type: 'WS', status: 'scheduled', round: 'R16', scheduled_at: '2026-10-05T12:30:00+00:00', tennis_tournament_editions: { level: 'WTA 1000', tennis_tournaments: { slug: 'beijing' } }, tennis_match_participants: [{ side: 'A', tennis_participants: { tennis_participant_members: [{ slot: 1, tennis_players: { pbe_player_id: 'pa', full_name: 'A' } }] } }, { side: 'B', tennis_participants: { tennis_participant_members: [{ slot: 1, tennis_players: { pbe_player_id: 'pb', full_name: 'B' } }] } }] };
+  const store = { async select(t, q) { return q.startsWith('select=match_id&') ? (q.includes('scheduled_at=gte') ? [{ match_id: ID }] : []) : [row]; } };
+  await freezeOne(b, dossier(match()), { now: '2026-10-05T10:00:00.000Z' });
+  const s = await runPicker(store, env, { now: '2026-10-05T11:40:00.000Z' });
+  assert.equal(s.decided[0].state, 'CALL');
+  assert.ok(calls.length === 1 && calls[0].includes('/v1/benchmarks-at?'));
+  assert.equal(JSON.parse(b.m.get(decisionKey(ID))).benchmarks_status, 'frozen');
+});
