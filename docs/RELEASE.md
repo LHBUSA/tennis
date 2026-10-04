@@ -95,6 +95,13 @@ forward-only fixes.
 
 All rollback targets above were confirmed to exist (`wrangler versions view`, Vercel `isRollbackCandidate`) on 2026-09-28.
 
+**2026-10-04 — tennis-api `5b981872-f0c2-4347-9f1f-36912517c698` (a76e11e).** PBE Picker V1 ledger recording in
+production, NOT activated (`PICKER_POLICY.activated_at = null`, `PICKS_LIVE = false`; surfaces only with
+`?preview=picker`). `PICKER_V1 = "0"` stops recording. Rollback: `773cc5f2-7caf-4ef5-8296-3f9c90742a3b` (0fb386b).
+Intermediate 320c5906 / abf2f98d wrote 38 post-hoc records (matches never observed while scheduled); all carry
+appended exclusion corrections (`ledger/picker-v1/corrections/`), records untouched. Schedule-day migration
+`20261004000100` staged, NOT applied; `SCHEDULE_DAY_COLUMNS = "0"` on tennis-api and tennis-ingest.
+
 ## Operations notes
 
 - **Long admin runs:** an admin lane run (e.g. `dna_v2`) can complete even when the HTTP request times out or its
