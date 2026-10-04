@@ -220,3 +220,13 @@ edition (index tennis_matches_edition) with `tennis_match_participants!inner(par
 keys, ordered by (edition_id, match_id), editions in groups of 8, keyset paging (no OFFSET). Generated query in production:
 mean 28 ms, max 1.0 s, ~960 buffers/call. No index, no db-guard change. Evidence: scripts/ops/bench-candidate-query.mjs,
 tests/candidate-lookup.test.js (0 differences vs the old query), `candidate_probe` lane.
+
+**2026-10-04 — edge-rendered HTML never outlives its deployment (P0).** tennis-web `741c6d9f-d5aa-4ba8-bdf1-503c986d0ca9`
+(24b0ef2; rollback `c366f680-c207-47c5-8bd5-fb39f7fa6f9f`): HTML `cache-control: public, max-age=0, must-revalidate`
+(was `max-age=60, s-maxage=300`, which Vercel's edge kept across deploys while the old hashed bundle was already gone
+-> blank match pages for ~5 min after every deploy); shell template fetched `cache: 'no-store'` (was a 30 s fetch
+cache). Proof: asset-hash-changing deploy 1107dab (`dpl_7rLHiJqrbBvesXJ3bAYJKj2oXbY1`, bundle index-CfFB_JW6 ->
+index-BvP13muu at 17:55:40Z) monitored every ~2 s on 4 edge-rendered URLs + Playwright 390/1440 from 30 s after the
+switch: 1,236 page responses (17:54:34-18:07:33Z), zero naming a dead bundle (old bundle last served 17:55:43, new first 17:55:41), no script answered with HTML. Frontend rollback:
+`dpl_Htvpa554ajVdUbJGhCB89KDqiEmH` (24b0ef2) / `dpl_63atB1bWdTEVh5HvoxbQGAMT2cmg` (cc49ac7).
+Shared Kalshi one-sided fix vendored in cc49ac7 (propbetedge-workers 64ca257; markets Worker 481b97f1, rollback 5be40632).
