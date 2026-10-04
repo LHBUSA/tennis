@@ -135,10 +135,10 @@ export function scores(record, g) {
  * before lock_at (or null), `benchmarks` = the shared benchmarksAt response for pbe_at = lock_at (or null when the
  * markets service was unreachable — recorded as such, never filled later).
  */
-export function buildRecord({ match, scope, lock, snapshot, benchmarks, now, policy = PICKER_POLICY }) {
+export function buildRecord({ match, scope, lock, snapshot, benchmarks, now, started: startedIn, policy = PICKER_POLICY }) {
   const model = snapshot?.payload?.model || null;
   const pA = model?.status === 'published' && model.probability ? Number(model.probability.A) : null;
-  const started = match.status !== 'scheduled';
+  const started = startedIn ?? match.status !== 'scheduled';
   const input = { scope, lock, probability_a: pA, rated_a: model?.ratings?.A?.rated_matches ?? null, rated_b: model?.ratings?.B?.rated_matches ?? null, model_status: model?.status ?? null, snapshot_status: snapshot ? 'frozen' : 'none', started };
   const d = decide(input, policy);
   const pl = (s) => match.sides?.[s]?.players?.[0] || null;

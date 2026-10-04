@@ -106,7 +106,7 @@ test('ledger: before lock nothing is written; at lock ONE decision from the snap
   assert.equal(rec.benchmarks_status, 'frozen');
   assert.equal(rec.at_forecast[0].benchmark, 'NO_OBSERVATION_AT_PBE_FORECAST');
   // a later exact start / any later run never replaces the designated decision
-  const again = await decideMatch({ bucket: b, match: { ...m, scheduled_at: '2026-10-05T15:00:00+00:00' }, now: '2026-10-05T14:10:00.000Z', fetchImpl: benchOk });
+  const again = await decideMatch({ bucket: b, match: { ...m, scheduled_at: '2026-10-05T15:00:00+00:00' }, now: '2026-10-05T14:05:00.000Z', fetchImpl: benchOk });
   assert.equal(again.skipped, 'already_decided');
 });
 
@@ -116,7 +116,7 @@ test('ledger: DAY_START_LOCK decision is never replaced when an exact start appe
   await freezeOne(b, dossier({ ...m }, 0.62, { fixture: 'upcoming_day' }), { now: '2026-10-04T15:00:00.000Z' });
   const r = await decideMatch({ bucket: b, match: m, now: '2026-10-04T16:05:00.000Z', fetchImpl: benchOk });
   assert.deepEqual([r.state, r.lock_rule], ['CALL', 'DAY_START_LOCK']);
-  const later = await decideMatch({ bucket: b, match: { ...m, scheduled_at: '2026-10-05T12:30:00+00:00' }, now: '2026-10-05T11:40:00.000Z', fetchImpl: benchOk });
+  const later = await decideMatch({ bucket: b, match: { ...m, scheduled_at: '2026-10-05T12:30:00+00:00' }, now: '2026-10-04T17:40:00.000Z', fetchImpl: benchOk });
   assert.equal(later.skipped, 'already_decided');
   assert.equal(JSON.parse(b.m.get(decisionKey(ID))).lock.lock_rule, 'DAY_START_LOCK');
 });
@@ -141,7 +141,7 @@ test('ledger: markets outage defers (bounded); after the window the record says 
   await freezeOne(b, dossier(m), { now: '2026-10-05T10:00:00.000Z' });
   assert.equal((await decideMatch({ bucket: b, match: m, now: '2026-10-05T11:40:00.000Z', fetchImpl: benchDown })).skipped, 'benchmarks_deferred');
   // still scheduled after the 2 h window: the decision is taken without venues and says so permanently
-  const r = await decideMatch({ bucket: b, match: m, now: '2026-10-05T13:31:00.000Z', fetchImpl: benchDown });
+  const r = await decideMatch({ bucket: b, match: m, now: '2026-10-05T12:05:00.000Z', fetchImpl: benchDown });
   assert.equal(r.state, 'CALL');
   const rec = JSON.parse(b.m.get(decisionKey(ID)));
   assert.deepEqual([rec.benchmarks_status, rec.at_forecast], ['UNAVAILABLE_AT_DECISION', null]);
@@ -200,4 +200,38 @@ test('track record: W/L enter hit rate; VOID counted apart; PBE vs market only o
   assert.deepEqual([t.graded, t.W, t.L, t.VOID, t.hit_rate, t.mean_p], [2, 1, 1, 1, 0.5, 0.65]);
   assert.deepEqual([t.vs_market.compared, t.vs_market.agree_on_favourite, t.vs_market.not_comparable, t.vs_market.no_observation_at_lock], [1, 1, 1, 1]);
   assert.equal(t.vs_market.market_brier, 0.16);
+});
+
+test('never post-hoc: a match first seen after it left scheduled gets NO record; past the window = started', async () => {
+  const b = memBucket();
+  const done = await decideMatch({ bucket: b, match: match({ status: 'completed', scheduled_at: '2009-10-27T12:00:00+00:00', event_type: 'MS', tournament: { level: null } }), now: '2026-10-04T14:00:00Z', fetchImpl: benchOk });
+  assert.equal(done.skipped, 'not_observed_before_start');
+  assert.equal(b.m.size, 0, 'nothing written for a match never observed while scheduled');
+  // observed while scheduled with no lock, then play begins -> exactly one honest HOLD
+  const m = match({ scheduled_at: null });
+  await decideMatch({ bucket: b, match: m, now: '2026-10-05T09:00:00Z', fetchImpl: benchOk });
+  const h = await decideMatch({ bucket: b, match: { ...m, status: 'in_progress' }, now: '2026-10-05T12:00:00Z', fetchImpl: benchOk });
+  assert.deepEqual([h.state, h.reasons], ['HOLD', ['MISSING_DAY_OR_TIMEZONE']]);
+  // a stored status that lags: still 'scheduled' after the sourced start -> treated as started (HOLD LOCK_MISSED)
+  const b2 = memBucket();
+  const s = match();
+  await freezeOne(b2, dossier(s), { now: '2026-10-05T10:00:00.000Z' });
+  await decideMatch({ bucket: b2, match: s, now: '2026-10-05T10:05:00Z', fetchImpl: benchOk });
+  const late = await decideMatch({ bucket: b2, match: s, now: '2026-10-05T12:31:00Z', fetchImpl: benchOk });
+  assert.deepEqual([late.state, late.reasons], ['HOLD', ['LOCK_MISSED']]);
+});
+
+test('corrections are appended, never mutations; an excluded record leaves every count', async () => {
+  const { appendCorrection } = await import('../workers/tennis-api/src/picker-ledger.js');
+  const { trackRecord } = await import('../workers/tennis-api/src/picks-api.js');
+  const b = memBucket();
+  const m = match();
+  await freezeOne(b, dossier(m), { now: '2026-10-05T10:00:00.000Z' });
+  await decideMatch({ bucket: b, match: m, now: '2026-10-05T11:40:00.000Z', fetchImpl: benchOk });
+  await assert.rejects(() => appendCorrection(b, { id: ID }), /needs a reason/);
+  await appendCorrection(b, { id: ID, reason: 'TEST_EXCLUSION', excluded: true, at: '2026-10-05T12:00:00Z' });
+  const rows = await readLedger(b);
+  assert.equal(rows[0].excluded, true);
+  assert.equal(rows[0].record.decision.state, 'CALL', 'the record itself is unchanged');
+  assert.deepEqual(trackRecord(rows), {});
 });

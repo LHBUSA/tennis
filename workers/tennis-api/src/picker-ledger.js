@@ -11,8 +11,13 @@ import { detail } from './matchup.js';
 export const LEDGER_PREFIX = 'ledger/picker-v1/';
 export const decisionKey = (id) => `${LEDGER_PREFIX}decisions/${id}.json`;
 export const gradeKey = (id) => `${LEDGER_PREFIX}grades/${id}.json`;
+// first observation of an in-scope match while it was still SCHEDULED: only such a match may later receive an
+// after-start HOLD. A match the ledger never saw before play gets no record at all (never a post-hoc one).
+export const seenKey = (id) => `${LEDGER_PREFIX}seen/${id}.json`;
+export const correctionKey = (id, at) => `${LEDGER_PREFIX}corrections/${id}/${at.replace(/[:.]/g, '-')}.json`;
 const MARKETS = 'https://propsports-markets.sales-fd3.workers.dev';
-const BENCHMARK_DEFER_MS = 2 * 3600e3; // a markets outage defers the write; after 2 h the record says UNAVAILABLE
+const BENCHMARK_DEFER_MS = 30 * 60e3; // a markets outage defers the write; after 30 min the record says UNAVAILABLE
+const DAY_WINDOW_MS = 6 * 3600e3;
 
 /** Write-once put: refuses to overwrite. Returns true when written. */
 export async function putOnce(bucket, key, obj) {
@@ -40,18 +45,23 @@ export async function decideMatch({ bucket, match, now, fetchImpl, policy = PICK
   if (scope === 'out_of_scope') return { id: match.id, skipped: 'out_of_scope' };
   if (await bucket.head(decisionKey(match.id))) return { id: match.id, skipped: 'already_decided' };
   const lock = lockFor(match);
-  const started = match.status !== 'scheduled';
+  // a stored status can lag play: past the decision window (the sourced start for T-60; 6 h after a 00:00-local
+  // DAY_START_LOCK) the match counts as started, so no decision is ever taken while play may be under way
+  const windowEnd = lock.rule === 'T_MINUS_60' ? Date.parse(lock.scheduled_at) : lock.rule === 'DAY_START_LOCK' ? Date.parse(lock.lock_at) + DAY_WINDOW_MS : Infinity;
+  const started = match.status !== 'scheduled' || Date.parse(now) >= windowEnd;
+  if (started && !(await bucket.head(seenKey(match.id)))) return { id: match.id, skipped: 'not_observed_before_start' };
+  if (!started) await putOnce(bucket, seenKey(match.id), { match_id: match.id, scope, first_seen_at: now, scheduled_at: match.scheduled_at ?? null });
   // no lock time yet and still scheduled: a lock may still become known — wait (the designated decision is not taken)
   if (!lock.lock_at && !started) return { id: match.id, skipped: 'no_lock_yet' };
   if (lock.lock_at && Date.parse(lock.lock_at) > Date.parse(now) && !started) return { id: match.id, skipped: 'before_lock', lock_at: lock.lock_at };
   const snapshot = lock.lock_at && !started ? await snapshotAtOrBefore(bucket, match.id, lock.lock_at) : null;
-  const preview = buildRecord({ match, scope, lock, snapshot, benchmarks: null, now, policy });
+  const preview = buildRecord({ match, scope, lock, snapshot, benchmarks: null, now, started, policy });
   let benchmarks = null;
   if (lock.lock_at && !started) {
     benchmarks = await fetchBenchmarks(fetchImpl, { id: match.id, pbeAt: lock.lock_at, selection: preview.contract.selection_id }, benchBase);
     if (!benchmarks && Date.parse(now) - Date.parse(lock.lock_at) < BENCHMARK_DEFER_MS) return { id: match.id, skipped: 'benchmarks_deferred' };
   }
-  const record = buildRecord({ match, scope, lock, snapshot, benchmarks, now, policy });
+  const record = buildRecord({ match, scope, lock, snapshot, benchmarks, now, started, policy });
   const written = await putOnce(bucket, decisionKey(match.id), record);
   return { id: match.id, written, state: record.decision.state, reasons: record.decision.reasons, lock_rule: lock.rule };
 }
@@ -74,16 +84,33 @@ export async function gradeMatch({ bucket, record, match, now, fetchImpl, benchB
   return { id: record.canonical_event_id, written, result: g.result };
 }
 
-/** All stored decisions (+ grades), newest first. */
-export async function readLedger(bucket, { limit = 500 } = {}) {
+async function listKeys(bucket, prefix, max = 5000) {
   const keys = [];
   let cursor;
-  do { const r = await bucket.list({ prefix: `${LEDGER_PREFIX}decisions/`, cursor, limit: 1000 }); keys.push(...r.objects.map((o) => o.key)); cursor = r.truncated ? r.cursor : undefined; } while (cursor && keys.length < 5000);
+  do { const r = await bucket.list({ prefix, cursor, limit: 1000 }); keys.push(...r.objects.map((o) => o.key)); cursor = r.truncated ? r.cursor : undefined; } while (cursor && keys.length < max);
+  return keys;
+}
+
+/** Append a correction (never a mutation). `excluded` removes the record from every count; the record stays readable. */
+export async function appendCorrection(bucket, { id, reason, excluded = false, note = null, at = new Date().toISOString() }) {
+  if (!reason) throw new Error('a correction needs a reason');
+  return putOnce(bucket, correctionKey(id, at), { schema: 'pbe-decision-correction/1', record_id: `tennis:${id}:PRE_MATCH_LOCK`, canonical_event_id: id, reason, excluded, note, at });
+}
+
+/** All stored decisions (+ grades + corrections), newest first. */
+export async function readLedger(bucket, { limit = 500 } = {}) {
+  const keys = await listKeys(bucket, `${LEDGER_PREFIX}decisions/`);
+  const corr = new Map();
+  for (const k of await listKeys(bucket, `${LEDGER_PREFIX}corrections/`)) {
+    const c = await getJson(bucket, k);
+    if (c) corr.set(c.canonical_event_id, [...(corr.get(c.canonical_event_id) || []), c]);
+  }
   const rows = [];
   for (const k of keys.slice(-limit)) {
     const rec = await getJson(bucket, k);
     if (!rec) continue;
-    rows.push({ record: rec, grade: rec.decision.state === 'CALL' ? await getJson(bucket, gradeKey(rec.canonical_event_id)) : null });
+    const corrections = corr.get(rec.canonical_event_id) || [];
+    rows.push({ record: rec, grade: rec.decision.state === 'CALL' ? await getJson(bucket, gradeKey(rec.canonical_event_id)) : null, corrections, excluded: corrections.some((c) => c.excluded) });
   }
   return rows.sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
 }
@@ -102,12 +129,16 @@ export async function runPicker(store, env, { now = new Date().toISOString(), fe
   // scheduled singles with an exact start inside [-6 h, +36 h] (lock T-60 falls inside), or a source-proven day
   for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=gte.${iso(t - 6 * 3600e3)}&scheduled_at=lte.${iso(t + 36 * 3600e3)}&limit=300`)) ids.add(r.match_id);
   if (env.SCHEDULE_DAY_COLUMNS === '1') for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=is.null&scheduled_day=gte.${iso(t - 86400e3).slice(0, 10)}&scheduled_day=lte.${iso(t + 86400e3).slice(0, 10)}&limit=300`)) ids.add(r.match_id);
-  // singles that left 'scheduled' in the last 12 h (honest HOLD when no decision was taken before play)
-  for (const r of await store.select('tennis_matches', `select=match_id&status=in.(in_progress,suspended,completed,retired,walkover,defaulted,abandoned,cancelled)&event_type=in.(MS,WS)&updated_at=gte.${iso(t - 12 * 3600e3)}&limit=300`)) ids.add(r.match_id);
+  // scheduled singles on an order of play without a sourced start (WTA "Not before …" / "Followed by"): observed while
+  // scheduled, so an honest HOLD can be recorded if play begins with no lock
+  for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=is.null&schedule_note=not.is.null&limit=300`)) ids.add(r.match_id);
+  // matches observed while scheduled that have no decision yet (they may have started without a lock -> HOLD)
+  for (const k of await listKeys(bucket, `${LEDGER_PREFIX}seen/`, 3000)) ids.add(k.slice(`${LEDGER_PREFIX}seen/`.length, -5));
+  const decided = new Set((await listKeys(bucket, `${LEDGER_PREFIX}decisions/`)).map((k) => k.slice(`${LEDGER_PREFIX}decisions/`.length, -5)));
   let work = 0;
   for (const id of ids) {
     if (work >= limit) break;
-    if (await bucket.head(decisionKey(id))) continue;
+    if (decided.has(id)) continue;
     sum.considered += 1;
     try {
       const data = await detail(store, env, id, { raw: true });
@@ -117,8 +148,8 @@ export async function runPicker(store, env, { now = new Date().toISOString(), fe
     } catch (e) { sum.skipped.error = (sum.skipped.error || 0) + 1; }
   }
   // grading: CALLs without a grade
-  for (const { record, grade: g } of await readLedger(bucket, { limit: 300 })) {
-    if (g || record.decision.state !== 'CALL') continue;
+  for (const { record, grade: g, excluded } of await readLedger(bucket, { limit: 300 })) {
+    if (g || excluded || record.decision.state !== 'CALL') continue;
     const [m] = await store.select('tennis_matches', `select=match_id,status,winner_side,end_reason,started_at,score_text&match_id=eq.${record.canonical_event_id}`);
     if (!m) continue;
     const res = await gradeMatch({ bucket, record, match: { status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, started_at: m.started_at, score: m.score_text }, now, fetchImpl });

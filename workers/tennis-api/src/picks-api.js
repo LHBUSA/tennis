@@ -14,7 +14,7 @@ const r4 = (x) => Math.round(x * 1e4) / 1e4;
 const mean = (a) => (a.length ? r4(a.reduce((s, x) => s + x, 0) / a.length) : null);
 
 /** Pure: the public/premium shape of one ledger row. `reveal` = may the CALL side be shown. */
-export function shapePick({ record: r, grade: g }, { reveal }) {
+export function shapePick({ record: r, grade: g, corrections = [], excluded = false }, { reveal }) {
   const resolved = !!g;
   const show = reveal || resolved;
   return {
@@ -27,6 +27,7 @@ export function shapePick({ record: r, grade: g }, { reveal }) {
     evidence: r.evidence ? { schema: r.evidence.schema, sha256: r.evidence.sha256, frozen_at: r.evidence.frozen_at } : null,
     policy: { version: r.decision.policy, status: r.decision.policy_status, activated_at: r.decision.activated_at },
     markets_at_lock: show ? (r.at_forecast || null) : null, markets_status: r.benchmarks_status,
+    corrections: corrections.map((c) => ({ reason: c.reason, excluded: c.excluded, note: c.note, at: c.at })), excluded,
     grade: g ? { result: g.grade.result, reason: g.grade.reason, scores: g.grade.scores, graded_at: g.graded_at, score: g.result.score, winner_side: g.result.winner_side } : null,
   };
 }
@@ -34,7 +35,8 @@ export function shapePick({ record: r, grade: g }, { reveal }) {
 /** Pure: track-record aggregates over ledger rows (graded W/L only enter hit rate / calibration; VOIDs counted apart). */
 export function trackRecord(rows) {
   const by = {};
-  for (const { record: r, grade: g } of rows) {
+  for (const { record: r, grade: g, excluded } of rows) {
+    if (excluded) continue;
     const s = (by[r.scope] ||= { decisions: 0, CALL: 0, PASS: 0, HOLD: 0, reasons: {}, graded: 0, W: 0, L: 0, VOID: 0, pending: 0, p: [], brier: [], log_loss: [], vs_market: { compared: 0, agree: 0, pbe_brier: [], market_brier: [], no_observation: 0, not_comparable: 0 } });
     s.decisions += 1; s[r.decision.state] += 1;
     for (const c of r.decision.reasons) s.reasons[c] = (s.reasons[c] || 0) + 1;
