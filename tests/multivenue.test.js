@@ -34,10 +34,21 @@ test('Polymarket-only match (real WTA 125 shape, no Kalshi): standalone Market P
   const l = (mid) => ({ venue: 'polymarket', match: 'VENUE_ONLY', label: 'PREDICTION MARKET', market_url: 'https://polymarket.com/event/wta-jacquem-liu-2026-10-05', mid_bp: mid, bid_bp: mid - 50, ask_bp: mid + 50, freshness: 'live' });
   const d = { canonical_event_id: '69c67903-e47e-53fb-8df8-dc1fd70a8b28', contracts: [{ label: 'Elsa Jacquemot', venues: [], related: [], listed: [l(4450)] }, { label: 'Claire Liu', venues: [], related: [], listed: [l(5550)] }] };
   const html = venueLines(d, { placement: 'match-venues', standalone: true });
-  assert.match(html, /Market Pulse/); assert.match(html, /Polymarket/); assert.match(html, /44\.5¢/); assert.ok(!/Kalshi/.test(html));
+  assert.match(html, /Market Pulse/); assert.match(html, /Polymarket/); assert.match(html, /44\.5¢/); assert.ok(!/Kalshi/.test(html)); assert.match(html, /class="ic kx kx--venue kx--polymarket"/);
   assert.match(venueChip(d), /MARKET<\/i> · POLYMARKET/);
   const data = fs.readFileSync(new URL('../src/data/kalshi.js', import.meta.url), 'utf8');
   assert.match(data, /kalshiLine\(entry\) \+ venueChip\(kalshi\.deskFor\(id\)\)/);
   for (const f of ['../src/pages/live-pages.js', '../src/pages/today.js', '../src/pages/pbecast.js']) assert.match(fs.readFileSync(new URL(f, import.meta.url), 'utf8'), /loadMarketBoards\(\)/, f);
   assert.match(fs.readFileSync(new URL('../src/pages/pbecast.js', import.meta.url), 'utf8'), /panel \+ venueLines\(kxDesk, \{ placement: 'pbecast-venues', standalone: !panel \}\)/);
+});
+
+test('live refresh: the venue desk has its own 30 s cadence (independent of Kalshi), freshness ticks in place, timers cleared on unmount', () => {
+  const data = fs.readFileSync(new URL('../src/data/kalshi.js', import.meta.url), 'utf8');
+  assert.match(data, /export const DESK_POLL_MS = 30_000;/);
+  const live = fs.readFileSync(new URL('../src/pages/live-pages.js', import.meta.url), 'utf8');
+  assert.match(live, /kalshi\.loadDesk\(params\.id, \{ force: true \}\)/);
+  assert.match(live, /setInterval\(\(\) => tickVenueAges\(root\.querySelector\('\[data-kx-card\]'\)\), VENUE_AGE_TICK_MS\)/);
+  assert.match(live, /clearTimeout\(kxDeskTimer\); kxDeskTimer = null; clearInterval\(kxAgeTimer\);/);
+  const cast = fs.readFileSync(new URL('../src/pages/pbecast.js', import.meta.url), 'utf8');
+  assert.match(cast, /clearTimeout\(kxDeskTimer\); clearInterval\(kxAgeTimer\);/);
 });

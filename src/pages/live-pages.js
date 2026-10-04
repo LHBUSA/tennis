@@ -17,8 +17,8 @@ import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
-import { kalshi, bounded, marketPollMs, paintKalshiLines, loadMarketBoards } from '../data/kalshi.js';
-import { marketModule, wireKalshi, venueLines } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshi, bounded, marketPollMs, paintKalshiLines, loadMarketBoards, DESK_POLL_MS, VENUE_AGE_TICK_MS } from '../data/kalshi.js';
+import { marketModule, wireKalshi, venueLines, tickVenueAges } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 
@@ -282,6 +282,20 @@ export const match = mountWith((root, { params }, signal) => {
   };
   // a market that answers after the bounded wait still lands in place (and re-plans polling from its lifecycle)
   kxFirst.then(() => { if (!signal.aborted) { paintKx(); scheduleKx(); } });
+  // Venue desk (Polymarket, …): its own 30 s cadence while visible, independent of Kalshi; freshness ticks every 10 s.
+  let kxDeskTimer = null;
+  const pollDesk = async () => {
+    if (signal.aborted) return;
+    if (typeof document === 'undefined' || !document.hidden) {
+      const d = await kalshi.loadDesk(params.id, { force: true });
+      if (signal.aborted) return;
+      kxDesk = d;
+      paintKx();
+    }
+    kxDeskTimer = setTimeout(pollDesk, DESK_POLL_MS);
+  };
+  kxFirst.then(() => { if (!signal.aborted) kxDeskTimer = setTimeout(pollDesk, DESK_POLL_MS); });
+  const kxAgeTimer = setInterval(() => tickVenueAges(root.querySelector('[data-kx-card]')), VENUE_AGE_TICK_MS);
   const stop = fill(root, `/v1/matches/${params.id}`, (m) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     miLoad(root, m, signal);
@@ -307,7 +321,7 @@ export const match = mountWith((root, { params }, signal) => {
       ${m.sides?.A?.players?.length === 1 && m.sides?.B?.players?.length === 1 ? html`<p><a class="btn line" href="/h2h/${m.sides.A.players[0].slug}/${m.sides.B.players[0].slug}">Head-to-head →</a></p>` : ''}
       ${shareBar({ url: `${location.origin}/matches/${m.id}`, text: `${nm('A')} vs ${nm('B')} — PropBetEdge Tennis` })}`;
   }, 'This match is not in the canonical store.', signal, { poll: 30, ready: () => bounded(kxFirst), after: (body) => wireKalshi(body) });
-  return stop.then((s) => () => { s(); clearTimeout(kxTimer); kxTimer = null; });
+  return stop.then((s) => () => { s(); clearTimeout(kxTimer); kxTimer = null; clearTimeout(kxDeskTimer); kxDeskTimer = null; clearInterval(kxAgeTimer); });
 });
 
 // ---- rankings -----------------------------------------------------------------------------------------

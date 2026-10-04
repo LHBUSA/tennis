@@ -13,6 +13,13 @@ import { kalshiLine, marketCloseLine, venueChip, wireKalshi } from '../vendor/ka
 export const MARKETS_ORIGIN = 'https://propsports-markets.sales-fd3.workers.dev';
 export const kalshi = createKalshiClient({ sport: 'tennis', base: MARKETS_ORIGIN });
 
+/**
+ * Venue desk cadence (Polymarket, …): the multi-venue desk is re-read on its OWN 30 s cadence while the page is visible,
+ * independent of Kalshi's state (a venue never waits on another venue); "Updated Xs ago" re-renders every 10 s in place.
+ */
+export const DESK_POLL_MS = 30_000;
+export const VENUE_AGE_TICK_MS = 10_000;
+
 /** Longest a page waits for the market read before its first paint (then it fills in when it arrives). */
 export const KALSHI_FIRST_PAINT_MS = 800;
 

@@ -28,8 +28,8 @@ import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
-import { kalshi, marketPollMs, bounded, loadMarketBoards } from '../data/kalshi.js';
-import { wireKalshi, venueLines } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshi, marketPollMs, bounded, loadMarketBoards, DESK_POLL_MS, VENUE_AGE_TICK_MS } from '../data/kalshi.js';
+import { wireKalshi, venueLines, tickVenueAges } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel, tickerMarketText, tickerMarketHtml, patchTickerMarket } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
@@ -633,6 +633,15 @@ export function mount(root, { params, live = null }) {
   // the court's first paint waits for the market at most KALSHI_FIRST_PAINT_MS (bounded), so the module is in the
   // first paint instead of pushing the court down when it lands; a later answer is still written in place
   const kxFirst = loadKx(false);
+  // Venue desk (Polymarket, …): its own 30 s cadence while visible, independent of Kalshi; freshness ticks every 10 s.
+  let kxDeskTimer = null;
+  const pollDesk = async () => {
+    if (ctl.signal.aborted) return;
+    if (!document.hidden) { const d = await kalshi.loadDesk(params.id, { force: true }).catch(() => null); if (ctl.signal.aborted) return; if (d) { kxDesk = d; paintKx(); } }
+    kxDeskTimer = setTimeout(pollDesk, DESK_POLL_MS);
+  };
+  kxDeskTimer = setTimeout(pollDesk, DESK_POLL_MS);
+  const kxAgeTimer = setInterval(() => tickVenueAges($('[data-kx-strip]')), VENUE_AGE_TICK_MS);
 
   const viewState = (i) => {
     const m = data.match;
@@ -931,7 +940,7 @@ export function mount(root, { params, live = null }) {
   wireWatch(root, ctl.signal);
   root.addEventListener('keydown', onKey);
   load(true);
-  return () => { ctl.abort(); clearTimeout(kxTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); clearInterval(staleTick); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
+  return () => { ctl.abort(); clearTimeout(kxTimer); clearTimeout(kxDeskTimer); clearInterval(kxAgeTimer); wide.removeEventListener('change', onWide); clearTimer(); clearInterval(poll); clearInterval(livePoll); clearInterval(tourPoll); clearInterval(staleTick); document.removeEventListener('keydown', onDocKey); root.removeEventListener('click', onClick); root.removeEventListener('keydown', onKey); };
 }
 
 export const __test = { eventText, MODE_LABEL, dnaCompare };
