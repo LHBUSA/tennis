@@ -1,0 +1,1618 @@
+{
+ "protocol": "docs/research/PICKER_V1_PROTOCOL.md@b27aeec",
+ "generated_at": "2026-10-04T13:19:54.324Z",
+ "inputs_manifest": "2026-10-02T22:56:26.193Z",
+ "tours": {
+  "ATP": {
+   "production": {
+    "variant": "standard",
+    "published": true,
+    "surface_published": true,
+    "backtest_from": "2012-01-01",
+    "data_last_day": "2026-10-02"
+   },
+   "windows": {
+    "sel": [
+     "2012-01-01",
+     "2022-12-31"
+    ],
+    "hold": [
+     "2023-01-01",
+     "9999-12-31"
+    ]
+   },
+   "selection_grid": [
+    {
+     "tau": 0.55,
+     "total": 26499,
+     "graded_calls": 19293,
+     "void_calls": 550,
+     "wins": 13293,
+     "hit_rate": 0.689,
+     "wilson95": [
+      0.6824,
+      0.6955
+     ],
+     "mean_p_fav": 0.7248,
+     "calibration_gap": -0.0358,
+     "log_loss": 0.5956,
+     "brier": 0.2043,
+     "rates": {
+      "call": 0.7488,
+      "pass": 0.1223,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 19843,
+      "pass": 3241,
+      "hold": 3415
+     },
+     "bands": {
+      "0.55": {
+       "n": 3134,
+       "hit_rate": 0.5437,
+       "mean_p": 0.575
+      },
+      "0.60": {
+       "n": 3070,
+       "hit_rate": 0.6114,
+       "mean_p": 0.6251
+      },
+      "0.65": {
+       "n": 2760,
+       "hit_rate": 0.642,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.575,
+     "total": 26499,
+     "graded_calls": 17726,
+     "void_calls": 498,
+     "wins": 12447,
+     "hit_rate": 0.7022,
+     "wilson95": [
+      0.6954,
+      0.7089
+     ],
+     "mean_p_fav": 0.7391,
+     "calibration_gap": -0.0369,
+     "log_loss": 0.5871,
+     "brier": 0.2004,
+     "rates": {
+      "call": 0.6877,
+      "pass": 0.1834,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 18224,
+      "pass": 4860,
+      "hold": 3415
+     },
+     "bands": {
+      "0.55": {
+       "n": 1567,
+       "hit_rate": 0.5475,
+       "mean_p": 0.5875
+      },
+      "0.60": {
+       "n": 3070,
+       "hit_rate": 0.6114,
+       "mean_p": 0.6251
+      },
+      "0.65": {
+       "n": 2760,
+       "hit_rate": 0.642,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.6,
+     "total": 26499,
+     "graded_calls": 16159,
+     "void_calls": 450,
+     "wins": 11589,
+     "hit_rate": 0.7172,
+     "wilson95": [
+      0.7102,
+      0.7241
+     ],
+     "mean_p_fav": 0.7538,
+     "calibration_gap": -0.0367,
+     "log_loss": 0.5771,
+     "brier": 0.1957,
+     "rates": {
+      "call": 0.6268,
+      "pass": 0.2443,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 16609,
+      "pass": 6475,
+      "hold": 3415
+     },
+     "bands": {
+      "0.60": {
+       "n": 3070,
+       "hit_rate": 0.6114,
+       "mean_p": 0.6251
+      },
+      "0.65": {
+       "n": 2760,
+       "hit_rate": 0.642,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.625,
+     "total": 26499,
+     "graded_calls": 14624,
+     "void_calls": 404,
+     "wins": 10643,
+     "hit_rate": 0.7278,
+     "wilson95": [
+      0.7205,
+      0.7349
+     ],
+     "mean_p_fav": 0.7687,
+     "calibration_gap": -0.0409,
+     "log_loss": 0.5677,
+     "brier": 0.1914,
+     "rates": {
+      "call": 0.5671,
+      "pass": 0.304,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 15028,
+      "pass": 8056,
+      "hold": 3415
+     },
+     "bands": {
+      "0.60": {
+       "n": 1535,
+       "hit_rate": 0.6065,
+       "mean_p": 0.6376
+      },
+      "0.65": {
+       "n": 2760,
+       "hit_rate": 0.642,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.65,
+     "total": 26499,
+     "graded_calls": 13089,
+     "void_calls": 362,
+     "wins": 9712,
+     "hit_rate": 0.742,
+     "wilson95": [
+      0.7344,
+      0.7494
+     ],
+     "mean_p_fav": 0.784,
+     "calibration_gap": -0.042,
+     "log_loss": 0.5554,
+     "brier": 0.1857,
+     "rates": {
+      "call": 0.5076,
+      "pass": 0.3635,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 13451,
+      "pass": 9633,
+      "hold": 3415
+     },
+     "bands": {
+      "0.65": {
+       "n": 2760,
+       "hit_rate": 0.642,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.675,
+     "total": 26499,
+     "graded_calls": 11682,
+     "void_calls": 320,
+     "wins": 8850,
+     "hit_rate": 0.7576,
+     "wilson95": [
+      0.7497,
+      0.7653
+     ],
+     "mean_p_fav": 0.7987,
+     "calibration_gap": -0.0411,
+     "log_loss": 0.5412,
+     "brier": 0.1792,
+     "rates": {
+      "call": 0.4529,
+      "pass": 0.4182,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 12002,
+      "pass": 11082,
+      "hold": 3415
+     },
+     "bands": {
+      "0.65": {
+       "n": 1353,
+       "hit_rate": 0.6726,
+       "mean_p": 0.6874
+      },
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.7,
+     "total": 26499,
+     "graded_calls": 10329,
+     "void_calls": 276,
+     "wins": 7940,
+     "hit_rate": 0.7687,
+     "wilson95": [
+      0.7605,
+      0.7767
+     ],
+     "mean_p_fav": 0.8133,
+     "calibration_gap": -0.0446,
+     "log_loss": 0.5293,
+     "brier": 0.1738,
+     "rates": {
+      "call": 0.4002,
+      "pass": 0.4709,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 10605,
+      "pass": 12479,
+      "hold": 3415
+     },
+     "bands": {
+      "0.70": {
+       "n": 2668,
+       "hit_rate": 0.6765,
+       "mean_p": 0.7246
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.725,
+     "total": 26499,
+     "graded_calls": 8966,
+     "void_calls": 231,
+     "wins": 7037,
+     "hit_rate": 0.7849,
+     "wilson95": [
+      0.7762,
+      0.7932
+     ],
+     "mean_p_fav": 0.8286,
+     "calibration_gap": -0.0438,
+     "log_loss": 0.5116,
+     "brier": 0.1658,
+     "rates": {
+      "call": 0.3471,
+      "pass": 0.5241,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 9197,
+      "pass": 13887,
+      "hold": 3415
+     },
+     "bands": {
+      "0.70": {
+       "n": 1305,
+       "hit_rate": 0.6912,
+       "mean_p": 0.7374
+      },
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.75,
+     "total": 26499,
+     "graded_calls": 7661,
+     "void_calls": 197,
+     "wins": 6135,
+     "hit_rate": 0.8008,
+     "wilson95": [
+      0.7917,
+      0.8096
+     ],
+     "mean_p_fav": 0.8442,
+     "calibration_gap": -0.0433,
+     "log_loss": 0.4925,
+     "brier": 0.1573,
+     "rates": {
+      "call": 0.2965,
+      "pass": 0.5746,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 7858,
+      "pass": 15226,
+      "hold": 3415
+     },
+     "bands": {
+      "0.75": {
+       "n": 2367,
+       "hit_rate": 0.7351,
+       "mean_p": 0.7747
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.775,
+     "total": 26499,
+     "graded_calls": 6453,
+     "void_calls": 161,
+     "wins": 5249,
+     "hit_rate": 0.8134,
+     "wilson95": [
+      0.8037,
+      0.8227
+     ],
+     "mean_p_fav": 0.8595,
+     "calibration_gap": -0.046,
+     "log_loss": 0.4757,
+     "brier": 0.15,
+     "rates": {
+      "call": 0.2496,
+      "pass": 0.6215,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 6614,
+      "pass": 16470,
+      "hold": 3415
+     },
+     "bands": {
+      "0.75": {
+       "n": 1159,
+       "hit_rate": 0.7368,
+       "mean_p": 0.7875
+      },
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    },
+    {
+     "tau": 0.8,
+     "total": 26499,
+     "graded_calls": 5294,
+     "void_calls": 127,
+     "wins": 4395,
+     "hit_rate": 0.8302,
+     "wilson95": [
+      0.8198,
+      0.8401
+     ],
+     "mean_p_fav": 0.8752,
+     "calibration_gap": -0.045,
+     "log_loss": 0.452,
+     "brier": 0.1398,
+     "rates": {
+      "call": 0.2046,
+      "pass": 0.6666,
+      "hold": 0.1289
+     },
+     "counts": {
+      "call": 5421,
+      "pass": 17663,
+      "hold": 3415
+     },
+     "bands": {
+      "0.80": {
+       "n": 2025,
+       "hit_rate": 0.7773,
+       "mean_p": 0.825
+      },
+      "0.85": {
+       "n": 1584,
+       "hit_rate": 0.8182,
+       "mean_p": 0.8729
+      },
+      "0.90": {
+       "n": 1147,
+       "hit_rate": 0.8901,
+       "mean_p": 0.9239
+      },
+      "0.95": {
+       "n": 538,
+       "hit_rate": 0.9368,
+       "mean_p": 0.9671
+      }
+     }
+    }
+   ],
+   "chosen_tau": null,
+   "selection": null,
+   "holdout": null,
+   "gate": null,
+   "passed": false
+  },
+  "WTA": {
+   "production": {
+    "variant": "margin",
+    "published": true,
+    "surface_published": true,
+    "backtest_from": "2023-01-01",
+    "data_last_day": "2026-10-02"
+   },
+   "windows": {
+    "sel": [
+     "2023-01-01",
+     "2024-12-31"
+    ],
+    "hold": [
+     "2025-01-01",
+     "9999-12-31"
+    ]
+   },
+   "selection_grid": [
+    {
+     "tau": 0.55,
+     "total": 66309,
+     "graded_calls": 45846,
+     "void_calls": 1693,
+     "wins": 34292,
+     "hit_rate": 0.748,
+     "wilson95": [
+      0.744,
+      0.7519
+     ],
+     "mean_p_fav": 0.7369,
+     "calibration_gap": 0.0111,
+     "log_loss": 0.5178,
+     "brier": 0.173,
+     "rates": {
+      "call": 0.7169,
+      "pass": 0.1083,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 47539,
+      "pass": 7183,
+      "hold": 11587
+     },
+     "bands": {
+      "0.55": {
+       "n": 6847,
+       "hit_rate": 0.5854,
+       "mean_p": 0.5751
+      },
+      "0.60": {
+       "n": 6591,
+       "hit_rate": 0.6184,
+       "mean_p": 0.6249
+      },
+      "0.65": {
+       "n": 6369,
+       "hit_rate": 0.6932,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.575,
+     "total": 66309,
+     "graded_calls": 42455,
+     "void_calls": 1547,
+     "wins": 32338,
+     "hit_rate": 0.7617,
+     "wilson95": [
+      0.7576,
+      0.7657
+     ],
+     "mean_p_fav": 0.7508,
+     "calibration_gap": 0.0109,
+     "log_loss": 0.5047,
+     "brier": 0.1673,
+     "rates": {
+      "call": 0.6636,
+      "pass": 0.1617,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 44002,
+      "pass": 10720,
+      "hold": 11587
+     },
+     "bands": {
+      "0.55": {
+       "n": 3456,
+       "hit_rate": 0.5943,
+       "mean_p": 0.5874
+      },
+      "0.60": {
+       "n": 6591,
+       "hit_rate": 0.6184,
+       "mean_p": 0.6249
+      },
+      "0.65": {
+       "n": 6369,
+       "hit_rate": 0.6932,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.6,
+     "total": 66309,
+     "graded_calls": 38999,
+     "void_calls": 1424,
+     "wins": 30284,
+     "hit_rate": 0.7765,
+     "wilson95": [
+      0.7724,
+      0.7806
+     ],
+     "mean_p_fav": 0.7653,
+     "calibration_gap": 0.0112,
+     "log_loss": 0.4895,
+     "brier": 0.1608,
+     "rates": {
+      "call": 0.6096,
+      "pass": 0.2156,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 40423,
+      "pass": 14299,
+      "hold": 11587
+     },
+     "bands": {
+      "0.60": {
+       "n": 6591,
+       "hit_rate": 0.6184,
+       "mean_p": 0.6249
+      },
+      "0.65": {
+       "n": 6369,
+       "hit_rate": 0.6932,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.625,
+     "total": 66309,
+     "graded_calls": 35655,
+     "void_calls": 1289,
+     "wins": 28243,
+     "hit_rate": 0.7921,
+     "wilson95": [
+      0.7879,
+      0.7963
+     ],
+     "mean_p_fav": 0.7796,
+     "calibration_gap": 0.0125,
+     "log_loss": 0.4728,
+     "brier": 0.1536,
+     "rates": {
+      "call": 0.5571,
+      "pass": 0.2681,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 36944,
+      "pass": 17778,
+      "hold": 11587
+     },
+     "bands": {
+      "0.60": {
+       "n": 3247,
+       "hit_rate": 0.6267,
+       "mean_p": 0.6376
+      },
+      "0.65": {
+       "n": 6369,
+       "hit_rate": 0.6932,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.65,
+     "total": 66309,
+     "graded_calls": 32408,
+     "void_calls": 1155,
+     "wins": 26208,
+     "hit_rate": 0.8087,
+     "wilson95": [
+      0.8044,
+      0.8129
+     ],
+     "mean_p_fav": 0.7939,
+     "calibration_gap": 0.0148,
+     "log_loss": 0.454,
+     "brier": 0.1455,
+     "rates": {
+      "call": 0.5062,
+      "pass": 0.3191,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 33563,
+      "pass": 21159,
+      "hold": 11587
+     },
+     "bands": {
+      "0.65": {
+       "n": 6369,
+       "hit_rate": 0.6932,
+       "mean_p": 0.6746
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.675,
+     "total": 66309,
+     "graded_calls": 29135,
+     "void_calls": 1030,
+     "wins": 23973,
+     "hit_rate": 0.8228,
+     "wilson95": [
+      0.8184,
+      0.8272
+     ],
+     "mean_p_fav": 0.8086,
+     "calibration_gap": 0.0142,
+     "log_loss": 0.4347,
+     "brier": 0.1375,
+     "rates": {
+      "call": 0.4549,
+      "pass": 0.3703,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 30165,
+      "pass": 24557,
+      "hold": 11587
+     },
+     "bands": {
+      "0.65": {
+       "n": 3096,
+       "hit_rate": 0.7041,
+       "mean_p": 0.6875
+      },
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.7,
+     "total": 66309,
+     "graded_calls": 26039,
+     "void_calls": 876,
+     "wins": 21793,
+     "hit_rate": 0.8369,
+     "wilson95": [
+      0.8324,
+      0.8414
+     ],
+     "mean_p_fav": 0.823,
+     "calibration_gap": 0.0139,
+     "log_loss": 0.4142,
+     "brier": 0.1291,
+     "rates": {
+      "call": 0.4059,
+      "pass": 0.4194,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 26915,
+      "pass": 27807,
+      "hold": 11587
+     },
+     "bands": {
+      "0.70": {
+       "n": 6004,
+       "hit_rate": 0.7262,
+       "mean_p": 0.7243
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.725,
+     "total": 66309,
+     "graded_calls": 22901,
+     "void_calls": 758,
+     "wins": 19520,
+     "hit_rate": 0.8524,
+     "wilson95": [
+      0.8477,
+      0.8569
+     ],
+     "mean_p_fav": 0.8382,
+     "calibration_gap": 0.0142,
+     "log_loss": 0.3903,
+     "brier": 0.1195,
+     "rates": {
+      "call": 0.3568,
+      "pass": 0.4685,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 23659,
+      "pass": 31063,
+      "hold": 11587
+     },
+     "bands": {
+      "0.70": {
+       "n": 2866,
+       "hit_rate": 0.7282,
+       "mean_p": 0.7373
+      },
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.75,
+     "total": 66309,
+     "graded_calls": 20035,
+     "void_calls": 643,
+     "wins": 17433,
+     "hit_rate": 0.8701,
+     "wilson95": [
+      0.8654,
+      0.8747
+     ],
+     "mean_p_fav": 0.8526,
+     "calibration_gap": 0.0175,
+     "log_loss": 0.3624,
+     "brier": 0.1082,
+     "rates": {
+      "call": 0.3118,
+      "pass": 0.5134,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 20678,
+      "pass": 34044,
+      "hold": 11587
+     },
+     "bands": {
+      "0.75": {
+       "n": 5532,
+       "hit_rate": 0.7827,
+       "mean_p": 0.7748
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.775,
+     "total": 66309,
+     "graded_calls": 17257,
+     "void_calls": 545,
+     "wins": 15297,
+     "hit_rate": 0.8864,
+     "wilson95": [
+      0.8816,
+      0.8911
+     ],
+     "mean_p_fav": 0.8671,
+     "calibration_gap": 0.0193,
+     "log_loss": 0.3338,
+     "brier": 0.0971,
+     "rates": {
+      "call": 0.2685,
+      "pass": 0.5568,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 17802,
+      "pass": 36920,
+      "hold": 11587
+     },
+     "bands": {
+      "0.75": {
+       "n": 2754,
+       "hit_rate": 0.7967,
+       "mean_p": 0.7875
+      },
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    },
+    {
+     "tau": 0.8,
+     "total": 66309,
+     "graded_calls": 14503,
+     "void_calls": 464,
+     "wins": 13103,
+     "hit_rate": 0.9035,
+     "wilson95": [
+      0.8986,
+      0.9082
+     ],
+     "mean_p_fav": 0.8823,
+     "calibration_gap": 0.0212,
+     "log_loss": 0.3013,
+     "brier": 0.0847,
+     "rates": {
+      "call": 0.2257,
+      "pass": 0.5995,
+      "hold": 0.1747
+     },
+     "counts": {
+      "call": 14967,
+      "pass": 39755,
+      "hold": 11587
+     },
+     "bands": {
+      "0.80": {
+       "n": 4990,
+       "hit_rate": 0.8433,
+       "mean_p": 0.8244
+      },
+      "0.85": {
+       "n": 4111,
+       "hit_rate": 0.8969,
+       "mean_p": 0.8742
+      },
+      "0.90": {
+       "n": 3314,
+       "hit_rate": 0.9511,
+       "mean_p": 0.9237
+      },
+      "0.95": {
+       "n": 2088,
+       "hit_rate": 0.9847,
+       "mean_p": 0.9705
+      }
+     }
+    }
+   ],
+   "chosen_tau": 0.55,
+   "selection": {
+    "tau": 0.55,
+    "total": 66309,
+    "graded_calls": 45846,
+    "void_calls": 1693,
+    "wins": 34292,
+    "hit_rate": 0.748,
+    "wilson95": [
+     0.744,
+     0.7519
+    ],
+    "mean_p_fav": 0.7369,
+    "calibration_gap": 0.0111,
+    "log_loss": 0.5178,
+    "brier": 0.173,
+    "rates": {
+     "call": 0.7169,
+     "pass": 0.1083,
+     "hold": 0.1747
+    },
+    "counts": {
+     "call": 47539,
+     "pass": 7183,
+     "hold": 11587
+    },
+    "bands": {
+     "0.55": {
+      "n": 6847,
+      "hit_rate": 0.5854,
+      "mean_p": 0.5751
+     },
+     "0.60": {
+      "n": 6591,
+      "hit_rate": 0.6184,
+      "mean_p": 0.6249
+     },
+     "0.65": {
+      "n": 6369,
+      "hit_rate": 0.6932,
+      "mean_p": 0.6746
+     },
+     "0.70": {
+      "n": 6004,
+      "hit_rate": 0.7262,
+      "mean_p": 0.7243
+     },
+     "0.75": {
+      "n": 5532,
+      "hit_rate": 0.7827,
+      "mean_p": 0.7748
+     },
+     "0.80": {
+      "n": 4990,
+      "hit_rate": 0.8433,
+      "mean_p": 0.8244
+     },
+     "0.85": {
+      "n": 4111,
+      "hit_rate": 0.8969,
+      "mean_p": 0.8742
+     },
+     "0.90": {
+      "n": 3314,
+      "hit_rate": 0.9511,
+      "mean_p": 0.9237
+     },
+     "0.95": {
+      "n": 2088,
+      "hit_rate": 0.9847,
+      "mean_p": 0.9705
+     }
+    }
+   },
+   "holdout": {
+    "tau": 0.55,
+    "total": 64859,
+    "graded_calls": 45314,
+    "void_calls": 1702,
+    "wins": 34275,
+    "hit_rate": 0.7564,
+    "wilson95": [
+     0.7524,
+     0.7603
+    ],
+    "mean_p_fav": 0.7415,
+    "calibration_gap": 0.0149,
+    "log_loss": 0.5052,
+    "brier": 0.1679,
+    "rates": {
+     "call": 0.7249,
+     "pass": 0.107,
+     "hold": 0.1681
+    },
+    "counts": {
+     "call": 47016,
+     "pass": 6938,
+     "hold": 10905
+    },
+    "bands": {
+     "0.55": {
+      "n": 6526,
+      "hit_rate": 0.5783,
+      "mean_p": 0.575
+     },
+     "0.60": {
+      "n": 6428,
+      "hit_rate": 0.6291,
+      "mean_p": 0.6249
+     },
+     "0.65": {
+      "n": 6083,
+      "hit_rate": 0.6814,
+      "mean_p": 0.675
+     },
+     "0.70": {
+      "n": 5849,
+      "hit_rate": 0.7413,
+      "mean_p": 0.7245
+     },
+     "0.75": {
+      "n": 5403,
+      "hit_rate": 0.8038,
+      "mean_p": 0.7748
+     },
+     "0.80": {
+      "n": 4861,
+      "hit_rate": 0.8391,
+      "mean_p": 0.8247
+     },
+     "0.85": {
+      "n": 4291,
+      "hit_rate": 0.907,
+      "mean_p": 0.8744
+     },
+     "0.90": {
+      "n": 3504,
+      "hit_rate": 0.9503,
+      "mean_p": 0.924
+     },
+     "0.95": {
+      "n": 2369,
+      "hit_rate": 0.9844,
+      "mean_p": 0.9712
+     }
+    }
+   },
+   "gate": {
+    "min_calls": true,
+    "wilson_lo": true,
+    "calibration": true,
+    "beats_coin": true
+   },
+   "passed": true,
+   "holdout_by_level_descriptive": {
+    "note": "descriptive breakdown of the frozen holdout at the chosen tau; not a gate and not used for selection",
+    "tau": 0.55,
+    "groups": {
+     "WTA tour-level": {
+      "eligible": 7258,
+      "call_rate": 0.837,
+      "graded_calls": 5928,
+      "hit_rate": 0.7063,
+      "wilson95": [
+       0.6946,
+       0.7178
+      ],
+      "mean_p_fav": 0.7134,
+      "calibration_gap": -0.0071
+     },
+     "WTA 125": {
+      "eligible": 3992,
+      "call_rate": 0.842,
+      "graded_calls": 3249,
+      "hit_rate": 0.7076,
+      "wilson95": [
+       0.6917,
+       0.723
+      ],
+      "mean_p_fav": 0.7144,
+      "calibration_gap": -0.0068
+     },
+     "ITF women": {
+      "eligible": 42667,
+      "call_rate": 0.88,
+      "graded_calls": 36111,
+      "hit_rate": 0.7692,
+      "wilson95": [
+       0.7648,
+       0.7735
+      ],
+      "mean_p_fav": 0.7486,
+      "calibration_gap": 0.0206
+     },
+     "other": {
+      "eligible": 37,
+      "call_rate": 0.73,
+      "graded_calls": 26,
+      "hit_rate": 0.5385,
+      "wilson95": [
+       0.3546,
+       0.7124
+      ],
+      "mean_p_fav": 0.6877,
+      "calibration_gap": -0.1493
+     }
+    }
+   }
+  }
+ }
+}
