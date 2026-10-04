@@ -14,37 +14,44 @@
 /* the strip: cards sized to the content width (percent columns resolve against the visible track) */
 .lr-sec { --lr-gap: 10px; }
 .lr-track { gap: var(--lr-gap); grid-auto-columns: calc((100% - 3 * var(--lr-gap)) / 4); align-items: start; padding: 2px 2px 4px; }
-.lr-wait { height: 166px; }
+.lr-wait { height: 171px; }
 /* a narrower edge fade than the generic rails: it must never sit on a score */
 .lr-in[data-rail].more-end .lr-track { -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, #000 calc(100% - 24px), transparent); }
 .lr-in[data-rail].more-start .lr-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 24px); mask-image: linear-gradient(90deg, transparent, #000 24px); }
 .lr-in[data-rail].more-start.more-end .lr-track { -webkit-mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent); mask-image: linear-gradient(90deg, transparent, #000 24px, #000 calc(100% - 24px), transparent); }
 
 /* cards: compact scoreboard cards — metadata small, the result strongest, the score immediately readable */
-.lr-card { display: flex; flex-direction: column; gap: 5px; min-width: 0; min-height: 160px; padding: 10px 12px 10px; box-sizing: border-box; }
+.lr-card { display: flex; flex-direction: column; gap: 5px; min-width: 0; min-height: 165px; padding: 10px 12px 10px; box-sizing: border-box; }
 .lr-meta { margin: 0; display: flex; align-items: center; gap: 8px; min-width: 0; font: 700 11px/1.25 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .lr-ev { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .lr-tour { font-weight: 800; color: var(--ink-2); }
 .lr-tour-atp { color: #1f4f82; }
 .lr-tour-wta { color: #7a2a5c; }
 .lr-rd { flex: none; font: 700 10.5px/1 var(--f-data); letter-spacing: 0; color: var(--ink-2); padding: 3px 5px; border-radius: 4px; background: var(--paper-2); }
-.lr-res { margin: 2px 0 0; font: 500 14px/1.3 var(--f-ui); color: var(--ink-2); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.lr-res b { font: 800 15px/1.3 var(--f-ui); color: var(--ink); }
-.lr-def { color: var(--muted); font-weight: 500; font-size: 13px; }
-.lr-score { margin: 0; font: 800 19px/1.15 var(--f-data); color: var(--ink); letter-spacing: -0.01em; white-space: nowrap; }
-.lr-ret { font: 700 11px/1 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .lr-card .hm-kx { margin: 0; }
 .lr-ft { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin-top: auto; padding-top: 4px; }
 .lr-ft .hm-go { min-height: 30px; font-size: 12px; }
 .lr-badge { display: inline-flex; align-items: center; min-height: 30px; box-sizing: border-box; font: 800 11.5px/1 var(--f-ui); padding: 0 10px; border-radius: 999px; text-decoration: none; background: #fdecea; color: #8d1f19; }
 .lr-badge:hover { background: #c4302b; color: #fff; }
 
+/* the shared scoreboard rows (scoreGrid): finals drop the set-number header, the loser is muted, the winner bold */
+.lr-card .sg { gap: 2px; }
+.lr-card .sg-row { min-height: 40px; }
+.lr-card[data-lr="final"] .sg-head { display: none; }
+.lr-card[data-lr="final"] .sg-row:not(.won) .sg-nm, .lr-card[data-lr="final"] .sg-row:not(.won) .sg-nm a { color: var(--muted); }
+.lr-card[data-lr="final"] .sg-row:not(.won) .av { opacity: 0.82; }
+.lr-card[data-lr="final"] .sg-row.won .sg-nm a { color: var(--ink); }
+.lr-score { margin: 0; font: 700 13px/1.2 var(--f-data); color: var(--ink-2); }
+.lr-ret { margin: 0; font: 700 10.5px/1 var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+/* restrained tour accent: a thin top rule only */
+.lr-card[data-tour="atp"] { box-shadow: inset 0 2px 0 #2f6aa3, var(--home-shadow); }
+.lr-card[data-tour="wta"] { box-shadow: inset 0 2px 0 #8a3a6c, var(--home-shadow); }
+
 /* live: the card the eye lands on first — red rule, tinted head, pulsing LIVE, the current score grid */
 .lr-card.is-live { border-color: rgba(200, 51, 47, 0.45); box-shadow: inset 0 3px 0 var(--live), var(--home-shadow); background: linear-gradient(180deg, var(--live-soft), var(--home-panel) 44px); }
 .lr-live { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; background: var(--live); color: #fff; font: 800 11px/1 var(--f-display); letter-spacing: 0.14em; }
 .lr-live .hm-dot { width: 7px; height: 7px; background: #fff; box-shadow: none; animation: lr-pulse 1.6s ease-in-out infinite; }
 @keyframes lr-pulse { 50% { opacity: 0.35; } }
-.lr-card.is-live .sg-row { min-height: 34px; }
 
 @media (max-width: 1279px) { .lr-track { grid-auto-columns: calc((100% - 2 * var(--lr-gap)) / 3); } }
 @media (max-width: 899px) { .lr-track { grid-auto-columns: calc((100% - var(--lr-gap)) / 2); } }

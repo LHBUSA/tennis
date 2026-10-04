@@ -3,7 +3,9 @@
 // Per width (390 / 430 / 768 / 1024 / 1440 / 1920): no page overflow; CLS < 0.1 (TICKER=0 isolates the known ticker
 // insertion); cards fully visible before scrolling (4 at >= 1280, 3 at 1024, 2 at 768, 1 + a peek on phones); arrows
 // only when the strip overflows and never on phones, sitting in the header row; no clipped tour / tournament / round
-// metadata; no blank band under the cards; both tours among the finals; a live card (when one exists) first and marked.
+// metadata; no blank band under the cards; both tours among the finals and a doubles final; a live card (when one exists)
+// first and marked; every card has player rows, and every participant /v1/today serves with an approved photo renders
+// .av.is-photo in that card (the text-only regression of 2026-10-03).
 // Writes a section screenshot per width to OUT.
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
@@ -62,9 +64,23 @@ for (const w of WIDTHS) {
       peek: tr && cards[full] ? Math.round(tr.right - cards[full].getBoundingClientRect().left) : 0,
       over: track ? track.scrollWidth - track.clientWidth > 4 : false, navOn, navDy: nr && head ? Math.round(nr.top - head.top) : null, navGap: nr && tr ? Math.round(nr.top - tr.top) : null,
       clipped, tours: [...tours], liveFirst: cards[0]?.dataset.lr === 'live', live: cards.filter((c) => c.dataset.lr === 'live').length, hMin: Math.min(...hs), hMax: Math.max(...hs),
-      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, cls: Number((window.__cls || 0).toFixed(4))
+      overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, cls: Number((window.__cls || 0).toFixed(4)),
+      dbl: cards.filter((c) => c.querySelector('.sg.is-dbl')).length, textOnly: cards.filter((c) => !c.querySelector('.sg-row .av')).length,
+      ids: cards.map((c) => c.dataset.id), photos: Object.fromEntries(cards.map((c) => [c.dataset.id, [...c.querySelectorAll('img.av.is-photo')].map((i) => i.getAttribute('src'))]))
     };
   });
+  // photo regression: every participant in /v1/today with an approved photo must render .av.is-photo in its card
+  const today = await p.evaluate(async () => { const r = await fetch('https://tennis-api.propbetedge.ai/v1/today', { credentials: 'omit' }).catch(() => null); return r && r.ok ? r.json() : null; });
+  const rows = [...(today?.data?.live || today?.live || []), ...(today?.data?.latest_results || today?.latest_results || [])];
+  let want = 0; const missing = [];
+  for (const id of s.ids) {
+    const m = rows.find((x) => x.id === id);
+    for (const side of ['A', 'B']) for (const pl of m?.sides?.[side]?.players || []) {
+      if (!pl.photo) continue;
+      want += 1;
+      if (!(s.photos[id] || []).some((src) => src.includes(`/players/${pl.id}/`))) missing.push(pl.name);
+    }
+  }
   const bad = [];
   if (s.overflow > 0) bad.push(`page overflow ${s.overflow}`);
   if (s.cls > 0.1) bad.push(`CLS ${s.cls}`);
@@ -81,10 +97,17 @@ for (const w of WIDTHS) {
     if (!s.tours.includes('atp') || !s.tours.includes('wta')) bad.push(`finals tours ${s.tours}`);
     if (s.live && !s.liveFirst) bad.push('live card not first');
   }
+  if (s.textOnly) bad.push(`${s.textOnly} card(s) without player rows`);
+  if (!today) bad.push('could not read /v1/today for the photo check');
+  if (missing.length) bad.push(`approved photo not rendered: ${missing.slice(0, 4).join(', ')}`);
+  if (STRICT && !s.dbl) bad.push('no doubles final in the strip');
   if (errs.length) bad.push(`console: ${errs[0].slice(0, 120)}`);
-  say(!bad.length, `${w} section=${s.secH}px tail=${s.tail} cards=${s.cards} full=${s.full} w=${s.cardW} peek=${s.peek} h=${s.hMin}-${s.hMax} arrows=${s.navOn}${s.navOn ? `@${s.navDy}` : ''} tours=${s.tours} live=${s.live}${s.liveFirst ? '(first)' : ''} cls=${s.cls} ${bad.join('; ')}`);
+  say(!bad.length, `${w} section=${s.secH}px tail=${s.tail} cards=${s.cards} full=${s.full} w=${s.cardW} peek=${s.peek} h=${s.hMin}-${s.hMax} arrows=${s.navOn}${s.navOn ? `@${s.navDy}` : ''} tours=${s.tours} dbl=${s.dbl} photos=${want - missing.length}/${want} live=${s.live}${s.liveFirst ? '(first)' : ''} cls=${s.cls} ${bad.join('; ')}`);
   const sec = await p.$('[data-lr]');
   if (sec) { await sec.scrollIntoViewIfNeeded(); await p.waitForTimeout(400); await sec.screenshot({ path: `${OUT}/lr-${w}.png` }); }
+  // LIVE & RECENT above UP NEXT in one frame (the richness comparison)
+  const box = await p.evaluate(() => { const a = document.querySelector('[data-lr]')?.getBoundingClientRect(); const n = document.querySelector('[data-next]')?.getBoundingClientRect(); return a && n ? { y: a.top + scrollY, h: n.bottom - a.top } : null; });
+  if (box) await p.screenshot({ path: `${OUT}/lr-vs-next-${w}.png`, fullPage: true, clip: { x: 0, y: box.y, width: w, height: Math.min(box.h, 1600) } });
   await ctx.close();
 }
 await b.close();
