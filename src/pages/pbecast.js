@@ -28,8 +28,8 @@ import { scoreGrid } from '../ui/score-grid.js';
 import { tourTag, tourFamily, tournamentName, roundShort, tourStatus } from '../lib/home.js';
 import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { courtSituation, situationLine, pointMarker } from '../lib/pbecast-state.js';
-import { kalshi, marketPollMs, bounded } from '../data/kalshi.js';
-import { wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshi, marketPollMs, bounded, loadMarketBoards } from '../data/kalshi.js';
+import { wireKalshi, venueLines } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel, tickerMarketText, tickerMarketHtml, patchTickerMarket } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 import { DEFAULT_SPEED, SPEEDS, dwellMs, initialState, advance, seek, step, togglePlay, replayAgain, jumpToStart, pauseLive, returnToLive, liveArrivals } from '../lib/pbecast-player.js';
@@ -578,7 +578,7 @@ export function mount(root, { params, live = null }) {
   const loadLive = async () => {
     try {
       // the rail is never delayed by the market: the board read runs alongside and its lines land in place
-      const board = kalshi.loadBoard();
+      const board = loadMarketBoards();
       const r = await api('/v1/live', { signal: ctl.signal });
       if (ctl.signal.aborted) return;
       if (Array.isArray(r.data)) drawSwitch(r.data);
@@ -601,11 +601,14 @@ export function mount(root, { params, live = null }) {
   // written into its own slot in place when it lands (survives shell rebuilds). No market -> empty slot (hidden).
   // Polls while mounted: live 20 s, pregame 45 s, no market yet 120 s, CLOSED 5 min until settled, SETTLED: none.
   let kx = null;
+  let kxDesk = null;
   let kxTimer = null;
+  // VENUE-NEUTRAL: the Kalshi panel and the other venues are independent (Polymarket-only matches show Polymarket).
   const paintKx = () => {
     const el = $('[data-kx-strip]');
     if (!el) return;
-    const next = data?.match ? liveMarketPanel(kx, data.match, { name: (s) => sideName(data.match, s), placement: 'pbecast', compact: true }) : '';
+    const panel = data?.match ? liveMarketPanel(kx, data.match, { name: (s) => sideName(data.match, s), placement: 'pbecast', compact: true }) : '';
+    const next = data?.match ? panel + venueLines(kxDesk, { placement: 'pbecast-venues', standalone: !panel }) : '';
     if (el.__kx === next) return;
     el.__kx = next;
     el.innerHTML = next;
@@ -619,9 +622,10 @@ export function mount(root, { params, live = null }) {
     kxTimer = setTimeout(loadKx, ms);
   };
   async function loadKx(force = true) {
-    const e = await kalshi.loadEvent(params.id, { force }).catch(() => null);
+    const [e, d] = await Promise.all([kalshi.loadEvent(params.id, { force }).catch(() => null), kalshi.loadDesk(params.id).catch(() => null)]);
     if (ctl.signal.aborted) return;
     kx = e;
+    kxDesk = d;
     paintKx();
     paintFinal();
     scheduleKx();

@@ -222,11 +222,11 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     assert.deepEqual(files.filter((f) => KALSHI_API.test(fs.readFileSync(f, 'utf8'))), []);
   });
 
-  // pinned: propbetedge-workers 4e49f5f (workers/propsports-markets/client: + loadDesk / venueLines, multi-venue)
+  // pinned: propbetedge-workers 4303a38 (workers/propsports-markets/client: venue-neutral desk client)
   const VENDORED = {
-    'kalshi-market-ui.js': 'b5daf1ae57e254dbc0c9bd6de8f9c084d662e7275ee05b2f718571ab44da51e4',
-    'kalshi-market-ui.css': '8e9bff06672342c6902b0cbcf9972ee90acf676a9c01e63987163481ab82c4ba',
-    'kalshi-market-client.js': '91120da57a6e85dffe505e32b67fb6511165804ec030901cd155ffb928941b03'
+    'kalshi-market-ui.js': '54609730281182c3a7d2ba704edb6a9ffe544aae8d9f47f6cab4f65515102375',
+    'kalshi-market-ui.css': '96dca895400c7b76c76e490dd8e945e8cf3af2f22aa1fd97f5d329dc333ba30f',
+    'kalshi-market-client.js': 'bbab54f78382f336a149b18f332bc54abe0b9c471ada3dd8ef0d67e5e5706301'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
   test('vendored files are byte-identical to the pinned shared release', () => {

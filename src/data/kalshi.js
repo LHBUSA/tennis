@@ -8,7 +8,7 @@
 // No entry -> nothing rendered; a failed or slow market read never blocks or blanks a page.
 
 import { createKalshiClient } from '../vendor/kalshi/kalshi-market-client.js';
-import { kalshiLine, marketCloseLine, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { kalshiLine, marketCloseLine, venueChip, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
 
 export const MARKETS_ORIGIN = 'https://propsports-markets.sales-fd3.workers.dev';
 export const kalshi = createKalshiClient({ sport: 'tennis', base: MARKETS_ORIGIN });
@@ -53,15 +53,25 @@ export const kalshiLineEligible = (m) => !!m?.id && ['scheduled', 'in_progress',
 /** Decided matches (result cards) carry the subtle "how the market closed" line instead. */
 export const kalshiCloseEligible = (m) => !!m?.id && ['completed', 'retired', 'walkover'].includes(m.status);
 
-/** The restrained schedule-card line for a match from the loaded board ('' when none). */
-export const kalshiLineFor = (m) => (kalshiLineEligible(m) ? kalshiLine(kalshi.forEvent(m.id)) : kalshiCloseEligible(m) ? marketCloseLine(kalshi.forEvent(m.id)) : '');
+/**
+ * Both market boards a list page needs, read together: the Kalshi board and the VENUE-NEUTRAL desk board (every match
+ * with a market on any venue). Resolves with the Kalshi board (callers keep their shape); failures resolve, never throw.
+ */
+export const loadMarketBoards = () => Promise.all([kalshi.loadBoard(), kalshi.loadDeskBoard().catch(() => null)]).then(([b]) => b);
 
-/** Fill every compact-card slot under `root` from the current board (slots with no market stay empty). */
+/**
+ * The restrained schedule-card line for a match ('' when none). VENUE-NEUTRAL: the Kalshi line and the other-venue cue
+ * ("MARKET · POLYMARKET ...") are independent — a match listed only on Polymarket still gets its cue.
+ */
+export const kalshiLineFor = (m) => (kalshiLineEligible(m) ? kalshiLine(kalshi.forEvent(m.id)) + venueChip(kalshi.deskFor(m.id)) : kalshiCloseEligible(m) ? marketCloseLine(kalshi.forEvent(m.id)) : '');
+
+/** Fill every compact-card slot under `root` from the current boards (slots with no market on any venue stay empty). */
 export function paintKalshiLines(root) {
   if (!root?.querySelectorAll) return;
   for (const el of root.querySelectorAll('[data-kx-line]')) {
-    const entry = kalshi.forEvent(el.dataset.kxLine);
-    const html = el.hasAttribute('data-kx-close') ? marketCloseLine(entry) : kalshiLine(entry);
+    const id = el.dataset.kxLine;
+    const entry = kalshi.forEvent(id);
+    const html = el.hasAttribute('data-kx-close') ? marketCloseLine(entry) : kalshiLine(entry) + venueChip(kalshi.deskFor(id));
     if (el.innerHTML !== html) el.innerHTML = html;
   }
   wireKalshi(root);

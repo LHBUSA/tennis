@@ -17,7 +17,7 @@ import { castTourState, TOURS_PENDING } from '../ui/home.js';
 import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
-import { kalshi, bounded, marketPollMs, paintKalshiLines } from '../data/kalshi.js';
+import { kalshi, bounded, marketPollMs, paintKalshiLines, loadMarketBoards } from '../data/kalshi.js';
 import { marketModule, wireKalshi, venueLines } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
@@ -79,7 +79,7 @@ function mountWith(fn) {
 // Kalshi board for compact match cards: read alongside the page's own data (bounded, never blocking); when it lands
 // after the first paint it fills the cards' empty slots in place.
 const kxBoard = (root, signal) => () => {
-  const p = kalshi.loadBoard();
+  const p = loadMarketBoards();
   p.then(() => { if (!signal.aborted) paintKalshiLines(root); }).catch(() => {});
   return bounded(p);
 };
@@ -240,11 +240,12 @@ const kxName = (m) => (s) => (m?.sides?.[s]?.players || []).map((p) => p.name).j
 // Market Pulse with its lifecycle label (MLB standard, owner 2026-10-03): the full shared kalshiCard while the market
 // trades, "How the market closed" + our final result (a separate fact) once it is CLOSED / SETTLED. Without our match yet
 // (or with no lifecycle label to give) the shared marketModule decides.
-// Other venues (shared venueLines, multi-venue desk): Polymarket quotes / related markets under the Kalshi module, only
-// while that module shows a market; nothing qualifying -> nothing (the shared Worker's kill switch governs the venue).
+// VENUE-NEUTRAL Market Pulse: the canonical match is the parent, never Kalshi. The Kalshi module and the other venues
+// (shared venueLines: Polymarket as a qualifying quote, a labelled related market, or the only listing) are computed
+// INDEPENDENTLY — Kalshi only, Polymarket only (standalone Market Pulse heading), both, or nothing.
 const kxCardHtml = (entry, m = null, desk = null) => {
   const card = (m && liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })) || marketModule(entry, { placement: 'match' });
-  return raw(card ? card + venueLines(desk, { placement: 'match-venues' }) : '');
+  return raw(card + venueLines(desk, { placement: 'match-venues', standalone: !card }));
 };
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });

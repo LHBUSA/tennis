@@ -20,10 +20,24 @@ test('real desk record: Polymarket shown as a related market with its own price 
   assert.ok(!/gap \d/.test(html));
 });
 
-test('match page: venues render only under a Kalshi module, from the same bounded first read and the same poll', () => {
+test('match page: VENUE-NEUTRAL — Kalshi and other venues independent, from the same bounded first read and poll', () => {
   const live = fs.readFileSync(new URL('../src/pages/live-pages.js', import.meta.url), 'utf8');
-  assert.match(live, /return raw\(card \? card \+ venueLines\(desk, \{ placement: 'match-venues' \}\) : ''\);/);
+  assert.match(live, /return raw\(card \+ venueLines\(desk, \{ placement: 'match-venues', standalone: !card \}\)\);/);
+  assert.ok(!/card \? card \+ venueLines/.test(live), 'Kalshi is never a prerequisite for another venue');
   assert.match(live, /kalshi\.loadDesk\(params\.id\)\.then\(\(d\) => \{ kxDesk = d; \}\)/);
   assert.match(live, /Promise\.all\(\[kalshi\.loadEvent\(params\.id, \{ force: true \}\), kalshi\.loadDesk\(params\.id\)\]\)/);
   assert.equal(venueLines(null), '');
+});
+
+test('Polymarket-only match (real WTA 125 shape, no Kalshi): standalone Market Pulse on the match page + compact cue', async () => {
+  const { venueChip } = await import('../src/vendor/kalshi/kalshi-market-ui.js');
+  const l = (mid) => ({ venue: 'polymarket', match: 'VENUE_ONLY', label: 'PREDICTION MARKET', market_url: 'https://polymarket.com/event/wta-jacquem-liu-2026-10-05', mid_bp: mid, bid_bp: mid - 50, ask_bp: mid + 50, freshness: 'live' });
+  const d = { canonical_event_id: '69c67903-e47e-53fb-8df8-dc1fd70a8b28', contracts: [{ label: 'Elsa Jacquemot', venues: [], related: [], listed: [l(4450)] }, { label: 'Claire Liu', venues: [], related: [], listed: [l(5550)] }] };
+  const html = venueLines(d, { placement: 'match-venues', standalone: true });
+  assert.match(html, /Market Pulse/); assert.match(html, /Polymarket/); assert.match(html, /44\.5¢/); assert.ok(!/Kalshi/.test(html));
+  assert.match(venueChip(d), /MARKET<\/i> · POLYMARKET/);
+  const data = fs.readFileSync(new URL('../src/data/kalshi.js', import.meta.url), 'utf8');
+  assert.match(data, /kalshiLine\(entry\) \+ venueChip\(kalshi\.deskFor\(id\)\)/);
+  for (const f of ['../src/pages/live-pages.js', '../src/pages/today.js', '../src/pages/pbecast.js']) assert.match(fs.readFileSync(new URL(f, import.meta.url), 'utf8'), /loadMarketBoards\(\)/, f);
+  assert.match(fs.readFileSync(new URL('../src/pages/pbecast.js', import.meta.url), 'utf8'), /panel \+ venueLines\(kxDesk, \{ placement: 'pbecast-venues', standalone: !panel \}\)/);
 });
