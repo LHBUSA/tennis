@@ -43,6 +43,10 @@
       "destination": "https://tennis-web.sales-fd3.workers.dev/news/:slug"
     },
     {
+      "source": "/api/markets/v1/article-market/tennis/:id([0-9a-f-]+)",
+      "destination": "https://propsports-markets.sales-fd3.workers.dev/v1/article-market/tennis/:id"
+    },
+    {
       "source": "/(.*)",
       "destination": "/app-shell"
     }

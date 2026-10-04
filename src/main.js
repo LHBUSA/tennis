@@ -21,6 +21,7 @@ import './styles/watch.css';
 import './styles/live-recent.css';
 import './styles/matchup.css';
 import './vendor/kalshi/kalshi-market-ui.css';
+import './vendor/kalshi/article-market-ui.css';
 import './styles/kalshi.css';
 import './styles/picks.css';
 import { render } from './lib/dom.js';

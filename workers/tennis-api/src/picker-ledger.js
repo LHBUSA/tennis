@@ -139,10 +139,10 @@ export async function runPicker(store, env, { now = new Date().toISOString(), fe
   for (const r of await store.select('tennis_matches', `${sel}&scheduled_at=is.null&schedule_note=not.is.null&limit=300`)) ids.add(r.match_id);
   if (env.SCHEDULE_DAY_COLUMNS === '1') for (const r of await store.select('tennis_matches', `${sel}&scheduled_at=is.null&scheduled_day=gte.${iso(t - 86400e3).slice(0, 10)}&scheduled_day=lte.${iso(t + 86400e3).slice(0, 10)}&limit=300`)) ids.add(r.match_id);
   for (const id of seenIds) ids.add(id); // observed while scheduled, undecided: may have started without a lock
-  const todo = [...ids].filter((id) => !decidedIds.has(id));
-  sum.candidates = todo.length;
+  const undecided = [...ids].filter((id) => !decidedIds.has(id));
+  sum.candidates = undecided.length;
   const rows = [];
-  for (let i = 0; i < todo.length; i += 80) rows.push(...await store.select('tennis_matches', `select=${MATCH}&match_id=in.(${todo.slice(i, i + 80).join(',')})`));
+  for (let i = 0; i < undecided.length; i += 80) rows.push(...await store.select('tennis_matches', `select=${MATCH}&match_id=in.(${undecided.slice(i, i + 80).join(',')})`));
   let work = 0;
   for (const row of rows) {
     if (work >= limit) break;

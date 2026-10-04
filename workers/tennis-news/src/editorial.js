@@ -125,9 +125,10 @@ export async function callModel(apiKey, { routing, input, timeoutMs = CALL_TIMEO
 /** Back-compat: the V3 call shape (standard lane, effort medium). */
 export const callSol = (apiKey, { model, input, timeoutMs, fetchImpl }) => callModel(apiKey, { routing: { model, max_output_tokens: 6000, reasoning_effort: 'medium' }, input, timeoutMs, fetchImpl });
 
-/** The packet as the model sees it: facts only (no URLs, media paths or internal ids beyond player ids). */
+/** The packet as the model sees it: facts only (no URLs, media paths or internal ids beyond player ids). The
+ *  market_snapshot link (article-market/1) is presentation beside the story, never a fact source: stripped. */
 export function modelPacket(packet) {
-  return JSON.parse(JSON.stringify(packet, (k, v) => (/^(square|wide|square_jpg|source_page|credit|license|author|photo|data_url|built_at|detector|edition_id)$/.test(k) ? undefined : v)));
+  return JSON.parse(JSON.stringify(packet, (k, v) => (/^(square|wide|square_jpg|source_page|credit|license|author|photo|data_url|built_at|detector|edition_id|market_snapshot)$/.test(k) ? undefined : v)));
 }
 
 // Approved section ids per PACKET evidence family (tennis-editorial 4.1.0). The baseline deciding not to render a

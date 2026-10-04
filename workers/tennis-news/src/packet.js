@@ -10,7 +10,18 @@ import { RANKING_LISTS, rankingProvenance, matchSource, tourOf, tourOfList } fro
 import { MATCH_DEFINITIONS } from '../../shared/dna/match-dna.js';
 import { gamesFromPoints } from '../../shared/canonical/events.js';
 
-export const PACKET_VERSION = 'tennis-packet/4.0.0';
+export const PACKET_VERSION = 'tennis-packet/4.1.0';
+
+/**
+ * market_snapshot (docs/NEWSROOM.md evidence family; network contract article-market/1, propbetedge-workers
+ * workers/propsports-markets/docs/POST_EVENT_MARKET_RESULT.md): the story's ONE canonical event link for the shared
+ * article market module. canonical_event_id = our match UUID — the same id the propsports-markets tennis-atp /
+ * tennis-wta lanes key Kalshi and Polymarket by (never a title or name match). It carries NO prices: market data is an
+ * intelligence layer beside the story, never a fact source for prose (it is also stripped from the model's packet).
+ * `freeze` is written once, after publication, only when the shared API answers freeze = EMBED_THIS_PACKET (FINAL).
+ */
+export const MARKET_CONTRACT = 'article-market/1';
+export const marketSnapshot = (matchId) => ({ contract: MARKET_CONTRACT, sport: 'tennis', canonical_event_id: matchId, link: 'packet.match.id', freeze: null });
 
 // Round codes come prefixed from the WTA feed ('M-S', 'Q-2') and unprefixed from the Slam/ESPN feeds ('S', 'Q', '2',
 // 'Q-2' for qualifying): an unprefixed 'Q' is a main-draw QUARTERFINAL, never a qualifying round.
@@ -368,6 +379,7 @@ export async function buildPacket(store, event, { now = new Date().toISOString()
     if (exp) packet.expectation = { ...exp, winner_id: wid, loser_id: lid };
   }
   packet.canonical_signature = `${event.kind}:${m.id}`;
+  packet.market_snapshot = marketSnapshot(m.id);
   return packet;
 }
 
@@ -409,5 +421,6 @@ export async function buildPreviewPacket(store, event, { now = new Date().toISOS
   for (const pid of [A.id, B.id]) { const x = await matchDnaBefore(store, pid, date, surf, startIso); if (x) md[pid] = x; }
   if (Object.keys(md).length) packet.match_dna = md;
   packet.canonical_signature = `preview:${m.id}`;
+  packet.market_snapshot = marketSnapshot(m.id);
   return packet;
 }

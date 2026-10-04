@@ -15,6 +15,8 @@ import { track } from '../analytics.js';
 import { preferredSourceHtml } from '../ui/preferred-source.js';
 import { CLASS_LABEL, DESK_LABEL, KIND_LABEL, hierarchy, deskCounts, navDesks, wireRow, glanceCells, readingMinutes, shortName, storyClock, latestFresh, deskStories } from '../lib/newsroom.js';
 import { newsPlan, previewPick, setPageSurface } from '../lib/v4.js';
+import { articleMarketSlot, articleMarketWithin, mountArticleMarketSlot } from '../data/article-market.js';
+import { KALSHI_FIRST_PAINT_MS } from '../data/kalshi.js';
 
 export const DESKS = [['all', 'All'], ['atp', 'ATP'], ['wta', 'WTA'], ['grand-slams', 'Grand Slams'], ['doubles', 'Doubles'], ['rankings', 'Rankings'], ['challenger', 'Challenger'], ['itf', 'ITF']];
 const KIND = KIND_LABEL;
@@ -556,7 +558,7 @@ function visualById(id, { a, mods, charts, sb, parts, W, names }) {
   }
 }
 
-function narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel }) {
+function narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel, market = '' }) {
   const ctx = { a, mods, charts, sb, parts, W, names };
   const secs = (a.sections || []).filter((s) => s.id !== 'method');
   const used = new Set(secs.map((s) => s.visual).filter(Boolean));
@@ -569,7 +571,7 @@ function narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked,
     .filter((id) => !used.has(id) && !Object.entries(SUPERSEDED).some(([t, twins]) => tables.has(t) && twins.includes(id)));
   const appendix = appendixIds.map((id) => visualById(id, ctx)).filter(Boolean);
   const read = (s) => (s.visual_note ? html`<p class="nw-read"><span>Reading the data</span> ${s.visual_note}</p>` : '');
-  return html`${secs.map((s, i) => html`<section id="${s.id}" class="${i === 0 ? 'nw-lead' : ''}">${s.heading ? html`<h2>${s.heading}</h2>` : ''}${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${s.visual ? html`<figure class="nw-vis" data-visual="${s.visual}">${visualById(s.visual, ctx)}${read(s)}</figure>` : ''}</section>${i === 0 ? html`<div class="nw-vis nw-opener">${visualById(opener, ctx)}</div>` : ''}`)}
+  return html`${secs.map((s, i) => html`<section id="${s.id}" class="${i === 0 ? 'nw-lead' : ''}">${s.heading ? html`<h2>${s.heading}</h2>` : ''}${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${s.visual ? html`<figure class="nw-vis" data-visual="${s.visual}">${visualById(s.visual, ctx)}${read(s)}</figure>` : ''}</section>${i === 0 ? html`<div class="nw-vis nw-opener">${visualById(opener, ctx)}</div>${raw(market)}` : ''}`)}
     ${intel}
     ${appendix.length ? html`<section id="data-appendix" class="nw-appendix"><details class="nf-more-data"><summary>All the data behind this story (${appendix.length})</summary>${appendix}</details></section>` : ''}`;
 }
@@ -604,11 +606,16 @@ export function article(root, ctx) {
   const slug = ctx?.params?.slug;
   const untrack = trackHeaderHeight();
   let unfade = () => {};
+  let unmarket = () => {};
+  // the article market read (article-market/1) shares the first-paint budget measured from the start of the load
+  const t0 = Date.now();
   render(root, html`<div class="nw"><div data-body><div class="page"><p class="loading">Loading…</p></div></div></div>`);
-  api(withPreview(`/v1/news/${slug}`), { signal: ctl.signal }).then((res) => {
+  api(withPreview(`/v1/news/${slug}`), { signal: ctl.signal }).then(async (res) => {
+    const a = res.data;
+    const mk = a ? await articleMarketWithin(a, Math.max(0, KALSHI_FIRST_PAINT_MS - (Date.now() - t0))) : { now: null, pending: null };
+    if (ctl.signal.aborted) return;
     const body = root.querySelector('[data-body]');
     if (!body) return;
-    const a = res.data;
     if (!a) { render(body, html`<div class="page"><div class="mod"><p class="empty-h">Story not found.</p><p class="note"><a href="/news">All tennis news →</a></p></div></div>`); return; }
     document.title = `${a.headline} | PropBetEdge Tennis`;
     setPageSurface((a.evidence?.tournament || a.tournament)?.surface);
@@ -643,6 +650,9 @@ export function article(root, ctx) {
     const links = railLinks(a, people, t, a.replay);
     const dnaLinks = people.slice(0, 2).map((p) => [`/players/${p.slug}/dna`, `${p.name} — Tennis DNA`, 'Match DNA, PBE Rating, splits, surfaces']);
     const intel = intelligenceMod(a.intelligence);
+    // MARKET (article-market/1): one module with a lifecycle after the first section, only on a story first published
+    // after the module's activation and linked to one canonical match. Ineligible -> no slot at all.
+    const market = articleMarketSlot(a, mk);
     const deskL = DESK_LABEL[a.desk] && a.desk !== 'all' ? DESK_LABEL[a.desk] : null;
     render(body, html`<div class="nwm">
       <div class="page nwm-shell">
@@ -660,8 +670,8 @@ export function article(root, ctx) {
             ${articleHero(a)}
             ${glanceCells(a).length ? html`${glanceStrip(a)}${replayCta(a)}` : facts(a, sb, t, a.replay)}
             <div class="nw-body">
-              ${isNarrative(a) ? narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel }) : html`
-              ${sections.map((s, i) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>${i === 0 ? matchup(a, parts, W) : ''}${i === Math.min(1, sections.length - 1) ? intel : ''}`)}
+              ${isNarrative(a) ? narrativeBody(a, { mods, charts, sb, parts, W, names, entities, linked, intel, market }) : html`
+              ${sections.map((s, i) => html`<section id="${s.id}"><h2>${s.heading}</h2>${s.paragraphs.map((p) => html`<p>${linkParts(p, entities, linked)}</p>`)}${(inserts[s.id] || []).filter(Boolean)}</section>${i === 0 ? html`${matchup(a, parts, W)}${raw(market)}` : ''}${i === Math.min(1, sections.length - 1) ? intel : ''}`)}
               ${!sections.length ? intel : ''}
               ${leftovers.length ? html`<section id="more-data"><h2>The match in numbers</h2>${leftovers}</section>` : ''}
               ${get('form') ? formMod(get('form'), names) : ''}`}
@@ -679,6 +689,7 @@ export function article(root, ctx) {
       </div>
     </div>`);
     unfade = railFade(body.querySelector('.nwm-rail'));
+    unmarket = mountArticleMarketSlot(body, a, mk);
     if (t?.slug && t?.year) {
       api(`/v1/news/live?tournament=${encodeURIComponent(t.slug)}&year=${t.year}&limit=8`, { signal: ctl.signal }).then((r) => {
         const items = (Array.isArray(r?.data?.items) ? r.data.items : []).filter((w) => !w.article_slug || w.article_slug !== a.slug).slice(0, 6);
@@ -689,7 +700,7 @@ export function article(root, ctx) {
       }).catch(() => {});
     }
   }).catch(() => {});
-  return () => { ctl.abort(); untrack(); unfade(); };
+  return () => { ctl.abort(); untrack(); unfade(); unmarket(); };
 }
 
 export const __test = { glanceStrip, intelligenceMod, sourceMethod, articleHero, majorStory, featureStory, resultRows, tournamentsModule, moversModule };

@@ -39,12 +39,17 @@ for (const f of code) if (/Math\.random\s*\(/.test(read(f))) fail('no-math-rando
 //    propsports-markets Worker through the vendored Kalshi client (src/vendor/kalshi/, unchanged). That client may
 //    name no host but propsports-markets, and nothing in src/ may name a Kalshi API host (the browser never calls Kalshi).
 const MARKETS_CLIENT = 'src/vendor/kalshi/kalshi-market-client.js';
+// The shared article market module (article-market/1) reads only through the same-origin exact rewrite
+// /api/markets/v1/article-market/tennis/:id (vercel.json -> propsports-markets): these two files may fetch but name NO host.
+const ARTICLE_MARKET_CLIENTS = new Set(['src/vendor/kalshi/article-market-ui.js', 'src/data/article-market.js']);
 const KALSHI_API_HOST = /(?:api\.elections\.kalshi\.com|trading-api\.kalshi\.com|external-api\.kalshi\.com|demo-api\.kalshi\.co|api\.kalshi\.com)/i;
 for (const f of src) {
   const t = stripComments(read(f));
   if (rel(f) === MARKETS_CLIENT) {
     const hosts = [...t.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((m) => m[1].toLowerCase());
     if (hosts.some((h) => h !== 'propsports-markets.sales-fd3.workers.dev')) fail('markets-client-host', `${rel(f)} -> ${hosts.join(', ')}`);
+  } else if (ARTICLE_MARKET_CLIENTS.has(rel(f))) {
+    if (/https?:\/\//i.test(t)) fail('article-market-client-host', rel(f));
   } else if (/\bfetch\s*\(/.test(t) && !rel(f).endsWith('src/data/api.js')) fail('browser-fetch-outside-api-client', rel(f));
   if (KALSHI_API_HOST.test(read(f))) fail('browser-kalshi-api-host', rel(f));
   if (/supabase\.co|service_role|SUPABASE_SERVICE/i.test(t)) fail('browser-database-access', rel(f));
