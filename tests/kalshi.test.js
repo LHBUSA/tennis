@@ -179,7 +179,7 @@ describe('placements', () => {
   const cast = read('src/pages/pbecast.js');
   test('match page: full card in its own block, loaded with the match (bounded), polled while mounted, cleared on unmount', () => {
     assert.match(live, /marketModule\(entry, \{ placement: 'match' \}\)/);
-    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch\)\}<\/div>/);
+    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch, kxDesk\)\}<\/div>/);
     assert.match(live, /ready: \(\) => bounded\(kxFirst\)/);
     assert.match(live, /clearTimeout\(kxTimer\)/);
     assert.match(live, /wireKalshi/);
@@ -222,11 +222,11 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     assert.deepEqual(files.filter((f) => KALSHI_API.test(fs.readFileSync(f, 'utf8'))), []);
   });
 
-  // pinned: propbetedge-workers ad6187a (workers/propsports-markets/client)
+  // pinned: propbetedge-workers 4e49f5f (workers/propsports-markets/client: + loadDesk / venueLines, multi-venue)
   const VENDORED = {
-    'kalshi-market-ui.js': '03712a0eb48e5265523ec45b145fd2fa880c9435e1adf2c6ca988c78c3fa37a8',
-    'kalshi-market-ui.css': 'fb046ada2b2e5450207e4301c0e41a193aa599e4661843fdcdb50d45ac7191ae',
-    'kalshi-market-client.js': '68f9ed06de627654634e385acc79b1efdee858de4a59801e20b401b5c0bc43dc'
+    'kalshi-market-ui.js': 'b5daf1ae57e254dbc0c9bd6de8f9c084d662e7275ee05b2f718571ab44da51e4',
+    'kalshi-market-ui.css': '8e9bff06672342c6902b0cbcf9972ee90acf676a9c01e63987163481ab82c4ba',
+    'kalshi-market-client.js': '91120da57a6e85dffe505e32b67fb6511165804ec030901cd155ffb928941b03'
   };
   const norm = (s) => s.replace(/\r\n/g, '\n');
   test('vendored files are byte-identical to the pinned shared release', () => {
@@ -315,7 +315,7 @@ describe('market history: "How the market closed" (real settled tennis market)',
   test('completed-match mount: the match page slot renders for every status; PBEcast history lives in the Market Pulse slot', () => {
     const live = read('src/pages/live-pages.js');
     const cast = read('src/pages/pbecast.js');
-    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch\)\}<\/div>/);
+    assert.match(live, /<div class="kx-slot" data-kx-card>\$\{kxCardHtml\(kx, kxMatch, kxDesk\)\}<\/div>/);
     assert.doesNotMatch(live, /status [!=]==? 'completed'[^\n]*data-kx-card/);
     assert.match(live, /marketPollMs\(kx, kxStatus\)/);
     assert.doesNotMatch(cast, /data-kx-history-slot/, 'one slot for the whole lifecycle');

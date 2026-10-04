@@ -1,0 +1,114 @@
+{
+ "captured_at": "2026-10-04T11:50:10.318Z",
+ "source": "GET propsports-markets /v1/market-desk?sport=tennis (production, 2026-10-04)",
+ "event": {
+  "canonical_event_id": "0752bed5-2452-56bb-a9b0-ff80ed68d0bd",
+  "domain": "sports",
+  "sport": "tennis",
+  "title": "Coco Gauff v Xinran Sun",
+  "start_at": null,
+  "destination": {
+   "kind": "event",
+   "url": "https://tennis.propbetedge.ai/matches/0752bed5-2452-56bb-a9b0-ff80ed68d0bd"
+  },
+  "related_events": [
+   {
+    "venue": "polymarket",
+    "venue_event_id": "1125087",
+    "market_url": "https://polymarket.com/event/wta-gauff-su-2026-10-04"
+   }
+  ],
+  "contracts": [
+   {
+    "canonical_contract_id": "sports_winner|tennis:0752bed5-2452-56bb-a9b0-ff80ed68d0bd|team:eac6bc4d-c49d-5b4f-8ec4-a18a596e36d5",
+    "label": "Coco Gauff",
+    "role": "a",
+    "pbe": null,
+    "venues": [
+     {
+      "venue": "kalshi",
+      "match": "EXACT_MATCH",
+      "mid_bp": 9350,
+      "bid_bp": 9300,
+      "ask_bp": 9400,
+      "spread_bp": 100,
+      "observed_at": "2026-10-04T11:49:23.698Z",
+      "venue_ts": "2026-10-04T08:35:38.720354Z",
+      "freshness": "live",
+      "market_url": "https://kalshi.com/markets/kxwtamatch/wta-tennis-match/kxwtamatch-26oct04gausun",
+      "venue_market_id": "KXWTAMATCH-26OCT04GAUSUN-GAU",
+      "outcome_id": "KXWTAMATCH-26OCT04GAUSUN-GAU"
+     }
+    ],
+    "related": [
+     {
+      "venue": "polymarket",
+      "match": "RULE_MISMATCH",
+      "label": "RELATED MARKET · RULES DIFFER",
+      "reason": "Rules differ if the match is postponed, cancelled, decided by walkover, ended by retirement or default, not decided within two weeks, ends in a tie or consensus reporting is used",
+      "reasons": [
+       "exceptions_differs"
+      ],
+      "title": "China Open: Coco Gauff vs Xinran Sun",
+      "market_url": "https://polymarket.com/event/wta-gauff-su-2026-10-04",
+      "venue_market_id": "5239706",
+      "outcome_id": "16986890701084713809822249842806842053165632163329059596481397536992407968715",
+      "mid_bp": 9250,
+      "bid_bp": 9200,
+      "ask_bp": 9300,
+      "spread_bp": 100,
+      "observed_at": "2026-10-04T11:49:29.004Z",
+      "freshness": "live",
+      "market_state": "open"
+     }
+    ],
+    "comparison": null
+   },
+   {
+    "canonical_contract_id": "sports_winner|tennis:0752bed5-2452-56bb-a9b0-ff80ed68d0bd|team:db98caa3-7038-5a85-891c-cac40a505ffe",
+    "label": "Xinran Sun",
+    "role": "b",
+    "pbe": null,
+    "venues": [
+     {
+      "venue": "kalshi",
+      "match": "EXACT_MATCH",
+      "mid_bp": 750,
+      "bid_bp": 700,
+      "ask_bp": 800,
+      "spread_bp": 100,
+      "observed_at": "2026-10-04T11:49:23.698Z",
+      "venue_ts": "2026-10-04T08:35:38.720354Z",
+      "freshness": "live",
+      "market_url": "https://kalshi.com/markets/kxwtamatch/wta-tennis-match/kxwtamatch-26oct04gausun",
+      "venue_market_id": "KXWTAMATCH-26OCT04GAUSUN-SUN",
+      "outcome_id": "KXWTAMATCH-26OCT04GAUSUN-SUN"
+     }
+    ],
+    "related": [
+     {
+      "venue": "polymarket",
+      "match": "RULE_MISMATCH",
+      "label": "RELATED MARKET · RULES DIFFER",
+      "reason": "Rules differ if the match is postponed, cancelled, decided by walkover, ended by retirement or default, not decided within two weeks, ends in a tie or consensus reporting is used",
+      "reasons": [
+       "exceptions_differs"
+      ],
+      "title": "China Open: Coco Gauff vs Xinran Sun",
+      "market_url": "https://polymarket.com/event/wta-gauff-su-2026-10-04",
+      "venue_market_id": "5239706",
+      "outcome_id": "55852267537452682809250510208824983366803969674775004740014639476903289634330",
+      "mid_bp": 750,
+      "bid_bp": 700,
+      "ask_bp": 800,
+      "spread_bp": 100,
+      "observed_at": "2026-10-04T11:49:29.004Z",
+      "freshness": "live",
+      "market_state": "open"
+     }
+    ],
+    "comparison": null
+   }
+  ]
+ }
+}

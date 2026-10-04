@@ -18,7 +18,7 @@ import { replayList } from './men.js';
 import { storyRow, wireList, editorialPicture } from './news.js';
 import { setPageSurface } from '../lib/v4.js';
 import { kalshi, bounded, marketPollMs, paintKalshiLines } from '../data/kalshi.js';
-import { marketModule, wireKalshi } from '../vendor/kalshi/kalshi-market-ui.js';
+import { marketModule, wireKalshi, venueLines } from '../vendor/kalshi/kalshi-market-ui.js';
 import { liveMarketPanel } from '../ui/live-market.js';
 import { watchPanel, wireWatch } from '../ui/watch.js';
 
@@ -240,7 +240,12 @@ const kxName = (m) => (s) => (m?.sides?.[s]?.players || []).map((p) => p.name).j
 // Market Pulse with its lifecycle label (MLB standard, owner 2026-10-03): the full shared kalshiCard while the market
 // trades, "How the market closed" + our final result (a separate fact) once it is CLOSED / SETTLED. Without our match yet
 // (or with no lifecycle label to give) the shared marketModule decides.
-const kxCardHtml = (entry, m = null) => raw((m && liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })) || marketModule(entry, { placement: 'match' }));
+// Other venues (shared venueLines, multi-venue desk): Polymarket quotes / related markets under the Kalshi module, only
+// while that module shows a market; nothing qualifying -> nothing (the shared Worker's kill switch governs the venue).
+const kxCardHtml = (entry, m = null, desk = null) => {
+  const card = (m && liveMarketPanel(entry, m, { name: kxName(m), placement: 'match' })) || marketModule(entry, { placement: 'match' });
+  return raw(card ? card + venueLines(desk, { placement: 'match-venues' }) : '');
+};
 export const match = mountWith((root, { params }, signal) => {
   shell(root, { eyebrow: 'Match', heading: 'Match' });
   wireWatch(root, signal);
@@ -248,11 +253,15 @@ export const match = mountWith((root, { params }, signal) => {
   let kxStatus = null;
   let kxMatch = null;
   let kxTimer = null;
-  const kxFirst = kalshi.loadEvent(params.id).then((e) => { kx = e; }).catch(() => {});
+  let kxDesk = null;
+  const kxFirst = Promise.all([
+    kalshi.loadEvent(params.id).then((e) => { kx = e; }).catch(() => {}),
+    kalshi.loadDesk(params.id).then((d) => { kxDesk = d; }).catch(() => {}),
+  ]);
   const paintKx = () => {
     const el = root.querySelector('[data-kx-card]');
     if (!el) return;
-    const next = String(kxCardHtml(kx, kxMatch));
+    const next = String(kxCardHtml(kx, kxMatch, kxDesk));
     if (el.innerHTML !== next) { el.innerHTML = next; wireKalshi(el); }
   };
   const scheduleKx = () => {
@@ -262,9 +271,10 @@ export const match = mountWith((root, { params }, signal) => {
     if (!ms || signal.aborted) return;
     kxTimer = setTimeout(async () => {
       // shared client ad6187a: a failed read resolves to the last good entry (uncached, retried next poll)
-      const e = await kalshi.loadEvent(params.id, { force: true });
+      const [e, d] = await Promise.all([kalshi.loadEvent(params.id, { force: true }), kalshi.loadDesk(params.id)]);
       if (signal.aborted) return;
       kx = e;
+      kxDesk = d;
       paintKx();
       scheduleKx();
     }, ms);
@@ -285,7 +295,7 @@ export const match = mountWith((root, { params }, signal) => {
     const A = m.statistics?.A, B = m.statistics?.B;
     return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>${miSlot(m)}
       ${matchCard(m, { kalshi: false })}
-      <div class="kx-slot" data-kx-card>${kxCardHtml(kx, kxMatch)}</div>
+      <div class="kx-slot" data-kx-card>${kxCardHtml(kx, kxMatch, kxDesk)}</div>
       <div data-match-watch></div>
       <div class="grid-2" style="margin-top:16px">
         ${m.status === 'scheduled' ? '' : html`<section class="mod"><header class="mod-h"><h2>Match statistics</h2></header><div class="mod-b">${A && B ? html`<table class="cmp2"><tbody>${[['Aces', A.aces, B.aces], ['Double faults', A.double_faults, B.double_faults], ['1st serve in', pct(A.first_serves_in / A.service_points, 0), pct(B.first_serves_in / B.service_points, 0)], ['1st serve points won', pct(A.first_serve_points_won / A.first_serves_in, 0), pct(B.first_serve_points_won / B.first_serves_in, 0)], ['Break points saved', `${A.break_points_saved}/${A.break_points_faced}`, `${B.break_points_saved}/${B.break_points_faced}`], ['Total points won', A.total_points_won, B.total_points_won]].map(([l, a, b]) => html`<tr><td class="n">${a ?? '—'}</td><th scope="row">${l}</th><td>${b ?? '—'}</td></tr>`)}</tbody></table>` : html`<p class="note">${m.stats === 'pending' ? 'Statistics not ingested yet for this match.' : m.stats === 'not_applicable' ? 'Walkover — no match played.' : 'The source publishes no statistics for this match.'}</p>`}</div></section>`}
