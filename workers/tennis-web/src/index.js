@@ -19,11 +19,16 @@ const ready = () => (wasmReady ||= initWasm(wasm));
 import { headFor, apiGet, ROUND, fmtD, newsEntities, playerRank } from './heads.js';
 import { noTransform } from './transport.js';
 
+// Edge-rendered HTML names the CURRENT deployment's hashed entry script, and Vercel stops serving the previous
+// deployment's hashes the moment a new one is live. So this HTML must never outlive the deployment it was built from:
+// the shell is read fresh on every render and the HTML is never kept by a shared cache (no s-maxage, no
+// stale-while-revalidate). Owner P0 2026-10-04: with `s-maxage=300` + a 30 s shell cache, match pages referenced a
+// dead bundle (blank page) for ~5 min after every deploy. Head DATA stays cached where it is fetched (tennis-api).
+export const HTML_CACHE_CONTROL = 'public, max-age=0, must-revalidate';
+export const SHELL_FETCH_INIT = { cache: 'no-store' };
+
 async function shellTemplate(env) {
-  // The shell names the deployment's hashed entry script. A long-lived copy outlives the Vercel deployment
-  // whose assets it points at (old hashes are not served after a deploy -> the page loads no JS), so the
-  // only cache is Cloudflare's 30 s fetch cache: a fresh deploy reaches edge-rendered pages within 30 s.
-  const res = await fetch(`${env.SITE_ORIGIN || SITE}/app-shell-template.html`, { cf: { cacheTtl: 30 } });
+  const res = await fetch(`${env.SITE_ORIGIN || SITE}/app-shell-template.html`, SHELL_FETCH_INIT);
   if (!res.ok) throw new Error(`shell template ${res.status}`);
   return res.text();
 }
@@ -147,5 +152,5 @@ async function handle(request, env, ctx) {
     try { tpl = await shellTemplate(env); } catch { return new Response('temporarily unavailable', { status: 503 }); }
     const html = tpl.replace(/<!--seo:start-->[\s\S]*?<!--seo:end-->/, `<!--seo:start-->\n    ${headHtml(meta)}\n    <!--seo:end-->`).replace('<!--preload-->', '');
     const status = r.id === 'not-found' || /not found/i.test(meta.title) ? 404 : 200;
-    return new Response(html, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'public, max-age=60, s-maxage=300', 'x-robots-tag': meta.robots.startsWith('noindex') ? 'noindex' : 'all', 'x-content-type-options': 'nosniff' } });
+    return new Response(html, { status, headers: { 'content-type': 'text/html; charset=utf-8', 'cache-control': HTML_CACHE_CONTROL, 'x-robots-tag': meta.robots.startsWith('noindex') ? 'noindex' : 'all', 'x-content-type-options': 'nosniff' } });
 }
