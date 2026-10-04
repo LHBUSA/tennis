@@ -39,6 +39,12 @@ TENNIS_AI_ELIGIBLE_TRIGGERS = "new,admin_reedit,canary"
 # previews of late-round singles matches (editorial overhaul 2026-10-03): bounded to 3 per run, 8 per UTC day
 NEWS_PREVIEWS_ENABLED = "true"
 
+# shared markets service (article-market/1 FINAL packet freeze, read-only): a Worker cannot fetch another Worker's
+# workers.dev URL on the same account (error 1042), so it is reached through this binding
+[[services]]
+binding = "MARKETS"
+service = "propsports-markets"
+
 [[kv_namespaces]]
 binding = "TENNIS_STATE"
 id = "a117d7b3846c4a39a27ee74c49574c99"

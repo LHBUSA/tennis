@@ -31,7 +31,7 @@ import { resolveHero } from '../../shared/editorial.js';
 import { RANKING_LISTS, MILESTONE_LISTS, tourOf, tourOfList, pickFair } from './tour.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 
-export const VERSION = '4.3.0';
+export const VERSION = '4.3.1';
 
 function heroAtCreation(packet, plan) {
   const parts = packet.participants || null;
@@ -503,7 +503,7 @@ export async function run(env, { dry = false } = {}) {
   }
   try { out.overhaul = await processOverhaulQueue(env, store); } catch (e) { out.overhaul = { error: redactSecrets(e.message) }; }
   // article-market/1: store a FINAL market packet once in a published story's evidence (no model call, no prose change)
-  try { out.market_freeze = await freezeArticleMarkets(store); } catch (e) { out.market_freeze = { error: redactSecrets(e.message).slice(0, 200) }; }
+  try { out.market_freeze = await freezeArticleMarkets(store, env.MARKETS ? { fetchImpl: (u, init) => env.MARKETS.fetch(u, init) } : {}); } catch (e) { out.market_freeze = { error: redactSecrets(e.message).slice(0, 200) }; }
   out.finished_at = iso();
   if (env.TENNIS_STATE) await env.TENNIS_STATE.put('news:last_run', JSON.stringify(out), { expirationTtl: 7 * 86400 });
   return out;
