@@ -103,7 +103,6 @@ export function footerHtml() {
         <a href="https://propbetedge.ai/terms">Terms</a>
         <a href="https://propbetedge.ai/legal">Legal</a>
         <a href="https://propbetedge.ai/support">Support</a>
-        <a href="https://propbetedge.ai/media">Media</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
         <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
       </nav>
