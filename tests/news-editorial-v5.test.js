@@ -159,3 +159,10 @@ test('voice rules (coordinator review 2026-10-03): the real phrases from the fir
   const ids = editorialGate(art, PACKET, { plan: PLAN, storyClass: 'full' }).failures.map((f) => f.gate);
   for (const id of ['self_explaining', 'archive_tic']) assert.ok(ids.includes(id), id);
 });
+
+test('voice rules, second pass: residual scaffolding and score jargon from the 00:00Z re-runs are rejected', async () => {
+  const { SCAFFOLD, CLUNKY_SCORE } = await import('../workers/tennis-news/src/editorial-gate.js');
+  for (const t of ['That progression matters because his advantage did not prevent the contest from reaching a deciding set.', 'That mattered because his results before the final showed a strong pattern.', 'Those results do not erase the progress in his recent window, but they show the standard required.', 'The evidence points to match control rather than statistical dominance.', 'That narrow statistical picture shifts the focus back to their contrasting routes.', 'The contrast is central to the preview: Munar has played through qualifying.']) assert.match(t, SCAFFOLD, t);
+  assert.match('The breaker extended beyond its usual endpoint, and he claimed it 9-7.', CLUNKY_SCORE);
+  for (const t of ['Munar won the second set 6-4.', 'Fritz took a 9-7 tiebreak.', 'That left Munar a set down.']) { assert.doesNotMatch(t, SCAFFOLD, t); assert.doesNotMatch(t, CLUNKY_SCORE, t); }
+});

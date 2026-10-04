@@ -8,7 +8,7 @@
 
 import { storyAngle, PROSE_TARGETS, availableVisuals } from './angle.js';
 
-export const EDITORIAL_GATE_VERSION = 'tennis-editorial-gate/1.1.0';
+export const EDITORIAL_GATE_VERSION = 'tennis-editorial-gate/1.1.1';
 
 const WORDS = (t) => String(t || '').trim().split(/\s+/).filter(Boolean);
 const wc = (t) => WORDS(t).length;
@@ -45,9 +45,9 @@ export const META_LANGUAGE = /\b(the packet|evidence packet|supplied|source reco
 // "in the PropBetEdge archive", "in our records", "Match DNA snapshot"...
 export const ARCHIVE_TIC = /\b(archive[sd]?|archival|in our records|our records|stored (records?|profile|history|form|results|window|rates?|path|snapshot|evidence)|propbetedge archive|dna snapshot|pre-match records?|prior records?|longer records?)\b/gi;
 // Sentences that explain the article to itself instead of stating the point.
-export const SCAFFOLD = /^(that|this|these|those) (\w+ ){0,2}(results?|comparisons?|figures?|numbers?|evidence|context|distinction|sequence|details?|patterns?|path|records?|contrast|split|gap|statistics?) (matters?|mattered|describes?|described|explains?|did not (dictate|explain|decide|describe)|does not (dictate|explain|decide|describe)|cannot (explain|describe|tell)|(is|was|are|were) (important|relevant|significant|notable|instructive))\b|\bmatters? for (the|this) (preview|story|article)\b|\b(for|in) (the|this) preview\b|\bwhat (this|the) (story|preview|article)\b/i;
+export const SCAFFOLD = /^(that|this|these|those|the) (\w+ ){0,3}(matters?|mattered) (because|for)\b|^(that|this|these|those) (\w+ ){0,2}(results?|comparisons?|figures?|numbers?|evidence|context|distinction|sequence|details?|patterns?|path|records?|contrast|split|gap|statistics?|samples?|picture|progression|rates?) (matters?|mattered|describes?|described|explains?|shifts|frames?|(did|do|does) not (dictate|explain|decide|describe|erase|remove|settle|change)|cannot (explain|describe|tell|settle)|(is|was|are|were) (important|relevant|significant|notable|instructive))\b|^the (evidence|data|numbers?) (points?|suggests?|shows?) (to|that)\b|\bmatters? for (the|this) (preview|story|article)\b|\b(for|in|to) (the|this) preview\b|\bwhat (this|the) (story|preview|article)\b/i;
 // Plain score language: "Fritz took a 9-7 tiebreak", never "ran beyond the standard finishing threshold".
-export const CLUNKY_SCORE = /\b(finishing threshold|(standard|usual|normal|regular) (finishing )?(threshold|length|limit)|recorded as \d+-\d+|from (his|her|their|[A-Z][\w'’-]+[’']s) side\b|beyond (its|the) (usual|normal|standard) (length|limit|threshold|finish)|tiebreak (that )?(ran|went|continued|extended) (past|beyond))/i;
+export const CLUNKY_SCORE = /\b(finishing threshold|(standard|usual|normal|regular) (finishing )?(threshold|length|limit)|recorded as \d+-\d+|from (his|her|their|[A-Z][\w'’-]+[’']s) side\b|beyond (its|the) (usual|normal|standard) (length|limit|threshold|finish)|tiebreak (that )?(ran|went|continued|extended) (past|beyond)|(usual|normal|standard|regular) (end ?point|finish(ing)? point|stopping point)|extended beyond its|\bthe breaker\b)/i;
 /** Statistics in one paragraph: percentages, decimals and W-L records (scorelines and ranks are not statistics). */
 export const statCount = (p) => (String(p).match(/\d+(?:\.\d+)?%|\b\d{1,3}-\d{1,3}(?=\s+(record|mark|against|over|across|in (his|her|their|the) last|career|this season|on (hard|clay|grass)))|\b0\.\d+\b/gi) || []).length;
 
