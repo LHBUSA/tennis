@@ -36,4 +36,4 @@ service = "propbetedge-auth-magic"
 
 # "1" only after migration 20261004000100_tennis_match_schedule_day.sql is applied (sourced day-of-play columns)
 [vars]
-SCHEDULE_DAY_COLUMNS = "0"
+SCHEDULE_DAY_COLUMNS = "1"
