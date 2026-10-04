@@ -1,5 +1,6 @@
 // Data-backed pages. Every page fetches tennis-api routes, renders real rows, or says exactly why not.
 
+import { pickSlot, pickLoad } from './picks.js';
 import { html, render, raw, setIndexable } from '../lib/dom.js';
 import { api } from '../data/api.js';
 import { getMembership } from '../lib/membership.js';
@@ -300,6 +301,7 @@ export const match = mountWith((root, { params }, signal) => {
     track('tennis_match_open', { match_id: m.id, match_status: m.status, surface: m.tournament?.surface });
     miLoad(root, m, signal);
     wvLoad(root, m, signal);
+    pickLoad(root, m, signal);
     kxMatch = { status: m.status, winner_side: m.winner_side, score: m.score, sides: m.sides };
     if (kxStatus !== m.status) { kxStatus = m.status; scheduleKx(); }
     const nm = (s) => (m.sides?.[s]?.players || []).map((p) => p.name).join(' / ');
@@ -310,6 +312,7 @@ export const match = mountWith((root, { params }, signal) => {
     const A = m.statistics?.A, B = m.statistics?.B;
     return html`<div class="vs">${vs('A')}<span class="vs-x">VS</span>${vs('B')}</div>${miSlot(m)}
       ${matchCard(m, { kalshi: false })}
+      <div data-pbe-pick>${pickSlot(m)}</div>
       <div class="kx-slot" data-kx-card>${kxCardHtml(kx, kxMatch, kxDesk)}</div>
       <div data-match-watch></div>
       <div class="grid-2" style="margin-top:16px">

@@ -22,6 +22,7 @@ import './styles/live-recent.css';
 import './styles/matchup.css';
 import './vendor/kalshi/kalshi-market-ui.css';
 import './styles/kalshi.css';
+import './styles/picks.css';
 import { render } from './lib/dom.js';
 import { resolveRoute } from './lib/routes.js';
 import { routeMeta } from './seo/meta.js';
@@ -48,6 +49,7 @@ const PAGES = {
   tournaments: lp('tournaments'), tournament: lp('tournament'), 'tournament-sub': lp('tournament'), venue: lp('venue'),
   rankings: lp('rankingsHub'), 'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
   matchups: () => import('./pages/intel.js').then((m) => ({ mount: m.matchups })), matchup: () => import('./pages/intel.js').then((m) => ({ mount: m.matchup })), 'players-to-watch': () => import('./pages/intel.js').then((m) => ({ mount: m.watch })),
+  'pbe-picks': () => import('./pages/picks.js').then((m) => ({ mount: m.picks })), 'track-record': () => import('./pages/picks.js').then((m) => ({ mount: m.trackRecord })),
   dna: lp('dna'), 'pbecast-hub': lp('pbecastHub'), search: lp('search'), credits: lp('credits'), coverage: lp('coverage')
 };
 const dataPage = () => import('./pages/data-page.js');

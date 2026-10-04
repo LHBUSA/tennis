@@ -42,7 +42,7 @@ export async function listSnapshots(bucket, id) {
 export async function freezeOne(bucket, data, { now = new Date().toISOString() } = {}) {
   const m = data?.match;
   if (!m?.id) return { written: false, reason: 'no_match' };
-  if (m.status !== 'scheduled' || data.fixture !== 'upcoming') return { written: false, reason: `not_pre_play:${m.status}/${data.fixture}` };
+  if (m.status !== 'scheduled' || !['upcoming', 'upcoming_day'].includes(data.fixture)) return { written: false, reason: `not_pre_play:${m.status}/${data.fixture}` };
   if (m.scheduled_at && Date.parse(now) >= Date.parse(m.scheduled_at) + 6 * 3600e3) return { written: false, reason: 'stale_fixture' };
   const existing = await listSnapshots(bucket, m.id);
   if (existing.some((s) => s.as_of === String(data.as_of || 'none') && s.matchup_version === data.matchup_version)) return { written: false, reason: 'already_frozen_for_as_of' };
@@ -77,6 +77,23 @@ export async function preMatchSnapshot(bucket, id) {
 }
 
 /**
+ * The latest pre-match snapshot frozen AT OR BEFORE time T (the Picker lock). Never a later one: a decision at T may only
+ * use evidence that existed at T.
+ */
+export async function snapshotAtOrBefore(bucket, id, T) {
+  const all = await listSnapshots(bucket, id);
+  const t = Date.parse(T);
+  for (let i = all.length - 1; i >= 0; i -= 1) {
+    if (Date.parse(all[i].frozen_at) > t) continue;
+    const obj = await bucket.get(all[i].key);
+    if (!obj) continue;
+    const snap = JSON.parse(await obj.text());
+    if (snap.snapshot_kind === 'pre_match' && snap.frozen_status === 'scheduled' && Date.parse(snap.frozen_at) <= t) return { ...snap, key: all[i].key };
+  }
+  return null;
+}
+
+/**
  * What /v1/matchups/:id serves. data = the freshly computed dossier for the CURRENT state.
  *  - upcoming: the live computation, plus the latest frozen snapshot's metadata (or "not frozen yet")
  *  - live / finished / stale: the latest PRE-PLAY snapshot's payload, untouched (no recomputation with today's
@@ -86,7 +103,7 @@ export async function preMatchSnapshot(bucket, id) {
 export async function applyPreMatch(bucket, data) {
   if (!bucket || !data?.match?.id) return data;
   const id = data.match.id;
-  if (data.fixture === 'upcoming') {
+  if (data.fixture === 'upcoming' || data.fixture === 'upcoming_day') {
     const latest = (await listSnapshots(bucket, id)).at(-1);
     return { ...data, pre_match: latest ? { frozen: true, frozen_at: latest.frozen_at, dna_as_of: latest.as_of, hash12: latest.hash12, note: 'this dossier is re-frozen automatically while the match is scheduled; the last pre-play snapshot becomes the permanent record' } : { frozen: false, note: 'not frozen yet: snapshots are taken automatically while the match is scheduled' } };
   }

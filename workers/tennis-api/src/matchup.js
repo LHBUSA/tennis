@@ -55,7 +55,16 @@ export function fixtureState(m, now = Date.now()) {
   if (m.status === 'in_progress') return 'live';
   if (m.status !== 'scheduled') return 'not_upcoming';
   const at = m.scheduled_at ? Date.parse(m.scheduled_at) : NaN;
-  if (!Number.isFinite(at)) return 'undated';
+  if (!Number.isFinite(at)) {
+    // A SOURCE-PROVEN day of play (+ the source's own UTC offset) without an exact time: dated by its day. Present only
+    // once the schedule-day columns are live (SCHEDULE_DAY_COLUMNS) and the ingest proved both; never guessed.
+    const sd = m.schedule_day;
+    if (sd?.day && sd.utc_offset && sd.source) {
+      const dayEnd = Date.parse(`${sd.day}T23:59:59${sd.utc_offset}`);
+      return Number.isFinite(dayEnd) && dayEnd < now - STALE_H * 3600e3 ? 'stale' : 'upcoming_day';
+    }
+    return 'undated';
+  }
   return at < now - STALE_H * 3600e3 ? 'stale' : 'upcoming';
 }
 const FIXTURE_REASON = { not_upcoming: 'this match is no longer upcoming: a pre-match probability is not shown after the result (today’s ratings already contain it)', stale: `the start time passed more than ${STALE_H} hours ago and no result is stored yet: the fixture is stale, so no probability is shown`, undated: 'the source has not published a start time for this match' };
@@ -197,7 +206,7 @@ async function upcoming(store, env, url) {
   const to = new Date(now + 7 * 86400e3).toISOString();
   const et = tour === 'ATP' ? 'eq.MS' : tour === 'WTA' ? 'eq.WS' : 'in.(MS,WS)';
   const rows = await store.select('tennis_matches', `select=${MATCH}&status=eq.scheduled&event_type=${et}&scheduled_at=gte.${from}&scheduled_at=lte.${to}&order=scheduled_at.asc&limit=300`);
-  const ms = rows.map(shapeMatch).filter((m) => playerOf(m, 'A') && playerOf(m, 'B') && fixtureState(m, now) === 'upcoming');
+  const ms = rows.map(shapeMatch).filter((m) => playerOf(m, 'A') && playerOf(m, 'B') && ['upcoming', 'upcoming_day'].includes(fixtureState(m, now)));
   const [summary, asOf] = await Promise.all([buildSummary(env), latestV2AsOf(store)]);
   const snaps = await snapshots(store, [...new Set(ms.flatMap((m) => [playerOf(m, 'A').id, playerOf(m, 'B').id]))], asOf);
   const list = ms.map((m) => {
@@ -214,7 +223,7 @@ async function upcoming(store, env, url) {
   return ok({ as_of: asOf, window: { from, to }, matchup_version: MATCHUP_VERSION, matchups: list }, { rows, policy: { currentS: 600, staleS: 3600 }, semantics: 'scheduled singles matches in the next 7 days with the PBE Rating matchup; probability published only for validated tours and players inside the backtested range' });
 }
 
-async function detail(store, env, id, { raw = false } = {}) {
+export async function detail(store, env, id, { raw = false } = {}) {
   const rows = await store.select('tennis_matches', `select=${MATCH}&match_id=eq.${id}`);
   if (!rows.length) return null;
   const m = shapeMatch(rows[0]);
@@ -229,7 +238,7 @@ async function detail(store, env, id, { raw = false } = {}) {
   const surface = ['hard', 'clay', 'grass'].includes(m.tournament?.surface) ? m.tournament.surface : null;
   const fixture = fixtureState(m);
   const priced = modelBlock(summary?.tours?.[t], a, b, surface);
-  const model = ['upcoming', 'live'].includes(fixture) ? priced : { status: `fixture_${fixture}`, probability: null, model: priced.model, ratings: priced.ratings, rating_edge: priced.rating_edge, reason: FIXTURE_REASON[fixture] };
+  const model = ['upcoming', 'upcoming_day', 'live'].includes(fixture) ? priced : { status: `fixture_${fixture}`, probability: null, model: priced.model, ratings: priced.ratings, rating_edge: priced.rating_edge, reason: FIXTURE_REASON[fixture] };
   const ctx = contextBlock(a, b, surface);
   const day = (m.scheduled_at || new Date().toISOString()).slice(0, 10);
   // rest: the stored recent list (matches before as_of) + this edition's results since as_of
@@ -284,6 +293,11 @@ export async function freezeUpcoming(store, env, { limit = 20, horizonH = 36, no
   const from = new Date(now - 6 * 3600e3).toISOString();
   const to = new Date(now + horizonH * 3600e3).toISOString();
   const rows = await store.select('tennis_matches', `select=match_id,event_type,status,scheduled_at&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=gte.${from}&scheduled_at=lte.${to}&order=scheduled_at.asc&limit=300`);
+  // source-proven day-only matches (no exact time) are frozen too once the schedule-day columns are live
+  if (env.SCHEDULE_DAY_COLUMNS === '1') {
+    const d0 = new Date(now - 86400e3).toISOString().slice(0, 10), d1 = new Date(now + horizonH * 3600e3).toISOString().slice(0, 10);
+    rows.push(...await store.select('tennis_matches', `select=match_id,event_type,status,scheduled_at&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=is.null&scheduled_day=gte.${d0}&scheduled_day=lte.${d1}&schedule_utc_offset=not.is.null&limit=300`));
+  }
   const asOf = await latestV2AsOf(store);
   const out = { at: new Date(now).toISOString(), candidates: rows.length, as_of: asOf, written: 0, already: 0, skipped: 0, errors: 0, items: [] };
   for (const r of rows) {

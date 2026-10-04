@@ -1,3 +1,4 @@
+import { PICKS_LIVE } from '../pages/picks-flag.js';
 import { readMembership, ALL_ACCESS_OFFER } from './pbe-membership.js';
 import { membershipApi, requestMagic } from '../data/api.js';
 
@@ -96,6 +97,8 @@ function openMembershipPanel(_m, focusSignin = false) {
 export function premiumRoute(route) {
   const id = route?.id || '';
   if (['matchups', 'matchup', 'players-to-watch', 'dna'].includes(id)) return true;
+  // PBE Picks (pending pre-match sides) are All Access once visible (preview before owner activation); Track Record is public
+  if (id === 'pbe-picks') return PICKS_LIVE || new URLSearchParams(location.search).get('preview') === 'picker';
   return id === 'player-sub' && /\/dna\/?$/.test(location.pathname);
 }
 
