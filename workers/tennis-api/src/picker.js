@@ -25,7 +25,7 @@ export const PICKER_POLICY = Object.freeze({
   candidate: 'tennis-picker-v1',
   version: 'tennis-picker-v1@b27aeec',
   status: 'FROZEN_PROSPECTIVE',
-  frozen_at: '2026-10-04T15:00:00Z',
+  frozen_at: '2026-10-04T13:56:05Z', // commit e67c7e4 (policy code frozen)
   activated_at: null, // owner activation sets this; decisions before it are never official
   tau: 0.55,
   model: { id: 'pbe-rating', name: 'PBE Rating', method_version: 1 },
