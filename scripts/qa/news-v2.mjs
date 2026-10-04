@@ -54,7 +54,7 @@ for (const a of list) {
   const personIds = new Set(people.map((p) => `${BASE}/players/${p.slug}#person`));
   ok((art?.mentions || []).filter((x) => x['@type'] === 'Person').every((x) => personIds.has(x['@id'])), `${a.slug}: schema person not in evidence`);
   ok(bc && bc.itemListElement.map((i) => i.name).slice(0, 3).join('>') === 'PropBetEdge>Tennis>News' && bc.itemListElement.length === 4, `${a.slug}: breadcrumb ${JSON.stringify(bc?.itemListElement?.map((i) => i.name))}`);
-  const org = graph.find((x) => x['@id'] === 'https://propbetedge.ai/#org');
+  const org = graph.find((x) => x['@id'] === 'https://propbetedge.ai/#organization');
   ok(org?.logo?.url, `${a.slug}: publisher logo missing`);
   report.push({ story: a.slug.slice(0, 44), http: r.status, card: `${w}x${hh}`, persons: (art?.mentions || []).filter((x) => x['@type'] === 'Person').length, about: art?.about?.length || 0 });
 }

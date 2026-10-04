@@ -85,6 +85,8 @@ export function footerHtml() {
       <nav class="ftr-sports" aria-label="PropBetEdge network">
         <p>Network</p>
         <ul>${NETWORK.sports.map((s) => html`<li><a href="${s.href}" ${s.key === CURRENT_SPORT ? html`aria-current="page"` : ''}><b>${s.label}</b><span>${s.name}</span></a></li>`)}</ul>
+        <p>Intelligence</p>
+        <ul class="ftr-products">${NETWORK.products.map((p) => html`<li><a href="${p.href}"><b>${p.name}</b></a></li>`)}</ul>
       </nav>
       <nav class="ftr-links" aria-label="More">
         <p>Tennis</p>

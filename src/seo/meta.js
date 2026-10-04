@@ -95,7 +95,7 @@ export function newsCardParts(a) {
 }
 
 // ---- JSON-LD ------------------------------------------------------------------------------------------
-export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#org', name: 'PropBetEdge', url: 'https://propbetedge.ai', logo: imageObject(ownedImage({ url: `${SITE}/brand/icon-512.png`, width: 512, height: 512, caption: 'PropBetEdge' })), sameAs: [X_URL] };
+export const ORGANIZATION = { '@type': 'Organization', '@id': 'https://propbetedge.ai/#organization', name: 'PropBetEdge', url: 'https://propbetedge.ai', logo: imageObject(ownedImage({ url: `${SITE}/brand/icon-512.png`, width: 512, height: 512, caption: 'PropBetEdge' })), sameAs: [X_URL] };
 export const WEBSITE = { '@type': 'WebSite', '@id': `${SITE}/#site`, name: BRAND, url: `${SITE}/`, publisher: { '@id': ORGANIZATION['@id'] } };
 
 export function breadcrumb(items) {

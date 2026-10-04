@@ -276,6 +276,8 @@
 .ftr-sports a b { min-width: 48px; }
 .ftr-sports a span { color: var(--on-dark-2); font-size: 12px; }
 .ftr-sports a[aria-current='page'] b { color: var(--gold-bright); }
+.ftr-sports ul + p { margin-top: 18px; }
+.ftr-sports ul.ftr-products { grid-template-columns: 1fr; }
 .ftr-links { display: flex; flex-direction: column; gap: 9px; font-size: 13px; }
 @media (max-width: 900px) { .ftr-in { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .ftr-in { grid-template-columns: 1fr; } }
