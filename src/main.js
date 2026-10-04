@@ -55,6 +55,8 @@ const PAGES = {
 };
 const dataPage = () => import('./pages/data-page.js');
 
+// Release marker (no behaviour): names the shell-freshness release so its asset-hash-changing deploy is verifiable.
+document.documentElement.dataset.release = 'shell-fresh-1';
 const app = document.getElementById('app');
 render(app, shellHtml());
 const main = document.getElementById('main');
