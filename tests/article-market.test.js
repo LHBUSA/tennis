@@ -92,13 +92,13 @@ test('vercel: exact same-origin rewrite for the tennis article-market route only
   assert.ok(i < v.rewrites.findIndex((x) => x.source === '/(.*)'));
 });
 
-test('vendored article-market client pinned byte-for-byte to propbetedge-workers 8d3b73f (SHA-256)', () => {
+test('vendored article-market client pinned byte-for-byte to propbetedge-workers 3f7345e (SHA-256)', () => {
   const sha = (f) => createHash('sha256').update(readFileSync(`src/vendor/kalshi/${f}`, 'utf8').replace(/\r\n/g, '\n')).digest('hex');
   assert.equal(sha('article-market-ui.js'), ARTICLE_UI_SHA);
   assert.equal(sha('article-market-ui.css'), ARTICLE_CSS_SHA);
 });
 const ARTICLE_UI_SHA = '2149e2854142657a554ef119533680c77657f0d2b1ea8406fe4de711e4fbe635';
-const ARTICLE_CSS_SHA = '60c223f6afbe32059ea272aeaff648759c254f3494106c41822afaf328c7aa4e';
+const ARTICLE_CSS_SHA = '582c879d9a634caa467f31896c928bf854fc16579a1565091bb5b0093ee0505c';
 
 // ---- writer side (tennis-news): market_snapshot in the frozen evidence packet + the one-time FINAL freeze ----------
 import { marketSnapshot, PACKET_VERSION } from '../workers/tennis-news/src/packet.js';
