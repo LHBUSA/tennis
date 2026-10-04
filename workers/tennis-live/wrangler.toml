@@ -20,3 +20,8 @@ bucket_name = "tennis-source"
 crons = ["* * * * *"]
 
 # Secrets: TENNIS_MODEL_SUPABASE_URL, TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY
+
+# "1" only after migration 20261004000100_tennis_match_schedule_day.sql is applied: tennis-live writes live-owned
+# editions through tennis-ingest editionMatches, so it carries the same sourced day-of-play columns as tennis-ingest
+[vars]
+SCHEDULE_DAY_COLUMNS = "1"
