@@ -222,9 +222,9 @@ describe('browser code never calls Kalshi; vendored files unchanged; CSP', () =>
     assert.deepEqual(files.filter((f) => KALSHI_API.test(fs.readFileSync(f, 'utf8'))), []);
   });
 
-  // pinned: propbetedge-workers cf55721 (workers/propsports-markets/client: venue cards)
+  // pinned: propbetedge-workers e1d4284 (workers/propsports-markets/client: venue cards)
   const VENDORED = {
-    'kalshi-market-ui.js': 'b82d82a2b99f53b4e27e2e827c506512caf86a416aef012471d8d728a9193aa7',
+    'kalshi-market-ui.js': 'c4989c79ed3824c92363780d08d966ab752a5e65347af1693a8b22afc6fd7e29',
     'kalshi-market-ui.css': 'df81df5650cc66d0bcea37c2808eaf783522ad9f921449e954f590d4ad9a2c60',
     'kalshi-market-client.js': 'bbab54f78382f336a149b18f332bc54abe0b9c471ada3dd8ef0d67e5e5706301'
   };
