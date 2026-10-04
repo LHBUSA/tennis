@@ -104,12 +104,6 @@ export function footerHtml() {
         <a href="https://propbetedge.ai/legal">Legal</a>
         <a href="https://propbetedge.ai/support">Support</a>
         <a href="https://propbetedge.ai/media">Media</a>
-        <a href="https://propbetedge.ai/authors">Editorial Team</a>
-        <a href="https://propbetedge.ai/authors/justin-erickson">Justin Erickson</a>
-        <a href="https://propbetedge.ai/authors/propbetedge-editorial-team">PropBetEdge Editorial Team</a>
-        <a href="https://propbetedge.ai/authors/ty-whitney">Ty Whitney</a>
-        <a href="https://propbetedge.ai/authors/erik-schwartz">Erik Schwartz</a>
-        <a href="https://propbetedge.ai/editorial-standards">Editorial Standards</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
         <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
       </nav>
