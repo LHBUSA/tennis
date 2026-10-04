@@ -235,3 +235,28 @@ test('corrections are appended, never mutations; an excluded record leaves every
   assert.equal(rows[0].record.decision.state, 'CALL', 'the record itself is unchanged');
   assert.deepEqual(trackRecord(rows), {});
 });
+
+test('runPicker: cheap pass — batched rows, decides due matches, self-corrects unseen legacy records once', async () => {
+  const { runPicker, appendCorrection } = await import('../workers/tennis-api/src/picker-ledger.js');
+  const b = memBucket();
+  const kv = new Map();
+  const env = { TENNIS_SOURCE: b, TENNIS_STATE: { get: async (k) => kv.get(k) ?? null, put: async (k, v) => kv.set(k, v) } };
+  const row = (id, over = {}) => ({ match_id: id, event_type: 'WS', status: 'scheduled', round: 'R16', scheduled_at: '2026-10-05T12:30:00+00:00', tennis_tournament_editions: { level: 'WTA 1000', tennis_tournaments: { slug: 'beijing' } }, tennis_match_participants: [{ side: 'A', tennis_participants: { tennis_participant_members: [{ slot: 1, tennis_players: { pbe_player_id: 'pa', full_name: 'A' } }] } }, { side: 'B', tennis_participants: { tennis_participant_members: [{ slot: 1, tennis_players: { pbe_player_id: 'pb', full_name: 'B' } }] } }], ...over });
+  let selects = 0;
+  const store = { async select(table, q) { selects += 1; if (q.startsWith('select=match_id&')) return q.includes('scheduled_at=gte') ? [{ match_id: ID }] : []; return [row(ID)]; } };
+  // a legacy record (no seen marker) already in the ledger
+  b.m.set(decisionKey('legacy-1'), JSON.stringify({ canonical_event_id: 'legacy-1', decision: { state: 'PASS', reasons: [] }, lock: {} }));
+  await freezeOne(b, dossier(match()), { now: '2026-10-05T10:00:00.000Z' });
+  const s = await runPicker(store, env, { now: '2026-10-05T11:40:00.000Z', fetchImpl: benchOk });
+  assert.equal(s.decided.length, 1);
+  assert.equal(s.decided[0].state, 'CALL');
+  assert.equal(s.corrected, 1, 'the unseen legacy record got one appended exclusion');
+  assert.ok(selects <= 4, `batched store reads (${selects})`);
+  const rows = await readLedger(b);
+  assert.equal(rows.find((r) => r.record.canonical_event_id === 'legacy-1').excluded, true);
+  assert.equal(rows.find((r) => r.record.canonical_event_id === ID).excluded, false);
+  assert.ok(JSON.parse(b.m.get(decisionKey(ID))).lock.first_seen_scheduled_at);
+  const s2 = await runPicker(store, env, { now: '2026-10-05T11:50:00.000Z', fetchImpl: benchOk });
+  assert.deepEqual([s2.decided.length, s2.corrected], [0, 0]);
+  void appendCorrection;
+});

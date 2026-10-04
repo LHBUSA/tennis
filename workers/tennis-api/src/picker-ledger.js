@@ -6,7 +6,7 @@
 // (PICKER_POLICY.activated_at), and activation never makes an earlier decision official.
 import { PICKER_POLICY, scopeOf, lockFor, buildRecord, grade, scores } from './picker.js';
 import { snapshotAtOrBefore } from './matchup-freeze.js';
-import { detail } from './matchup.js';
+import { MATCH, shapeMatch } from './shape.js';
 
 export const LEDGER_PREFIX = 'ledger/picker-v1/';
 export const decisionKey = (id) => `${LEDGER_PREFIX}decisions/${id}.json`;
@@ -14,6 +14,7 @@ export const gradeKey = (id) => `${LEDGER_PREFIX}grades/${id}.json`;
 // first observation of an in-scope match while it was still SCHEDULED: only such a match may later receive an
 // after-start HOLD. A match the ledger never saw before play gets no record at all (never a post-hoc one).
 export const seenKey = (id) => `${LEDGER_PREFIX}seen/${id}.json`;
+export const openCallKey = (id) => `${LEDGER_PREFIX}calls/${id}.json`; // index of CALLs (grading reads only these)
 export const correctionKey = (id, at) => `${LEDGER_PREFIX}corrections/${id}/${at.replace(/[:.]/g, '-')}.json`;
 const MARKETS = 'https://propsports-markets.sales-fd3.workers.dev';
 const BENCHMARK_DEFER_MS = 30 * 60e3; // a markets outage defers the write; after 30 min the record says UNAVAILABLE
@@ -40,17 +41,18 @@ export async function fetchBenchmarks(fetchImpl, { id, pbeAt, selection }, base 
 }
 
 /** Decide one match if its designated lock has passed and no decision exists. Pure enough to test with fakes. */
-export async function decideMatch({ bucket, match, now, fetchImpl, policy = PICKER_POLICY, benchBase }) {
+export async function decideMatch({ bucket, match, now, fetchImpl, policy = PICKER_POLICY, benchBase, decidedIds = null, seenIds = null }) {
   const scope = scopeOf(match);
   if (scope === 'out_of_scope') return { id: match.id, skipped: 'out_of_scope' };
-  if (await bucket.head(decisionKey(match.id))) return { id: match.id, skipped: 'already_decided' };
+  if (decidedIds ? decidedIds.has(match.id) : await bucket.head(decisionKey(match.id))) return { id: match.id, skipped: 'already_decided' };
   const lock = lockFor(match);
   // a stored status can lag play: past the decision window (the sourced start for T-60; 6 h after a 00:00-local
   // DAY_START_LOCK) the match counts as started, so no decision is ever taken while play may be under way
   const windowEnd = lock.rule === 'T_MINUS_60' ? Date.parse(lock.scheduled_at) : lock.rule === 'DAY_START_LOCK' ? Date.parse(lock.lock_at) + DAY_WINDOW_MS : Infinity;
   const started = match.status !== 'scheduled' || Date.parse(now) >= windowEnd;
-  if (started && !(await bucket.head(seenKey(match.id)))) return { id: match.id, skipped: 'not_observed_before_start' };
-  if (!started) await putOnce(bucket, seenKey(match.id), { match_id: match.id, scope, first_seen_at: now, scheduled_at: match.scheduled_at ?? null });
+  const wasSeen = seenIds ? seenIds.has(match.id) : !!(await bucket.head(seenKey(match.id)));
+  if (started && !wasSeen) return { id: match.id, skipped: 'not_observed_before_start' };
+  if (!started && !wasSeen) await putOnce(bucket, seenKey(match.id), { match_id: match.id, scope, first_seen_at: now, scheduled_at: match.scheduled_at ?? null });
   // no lock time yet and still scheduled: a lock may still become known — wait (the designated decision is not taken)
   if (!lock.lock_at && !started) return { id: match.id, skipped: 'no_lock_yet' };
   if (lock.lock_at && Date.parse(lock.lock_at) > Date.parse(now) && !started) return { id: match.id, skipped: 'before_lock', lock_at: lock.lock_at };
@@ -62,7 +64,9 @@ export async function decideMatch({ bucket, match, now, fetchImpl, policy = PICK
     if (!benchmarks && Date.parse(now) - Date.parse(lock.lock_at) < BENCHMARK_DEFER_MS) return { id: match.id, skipped: 'benchmarks_deferred' };
   }
   const record = buildRecord({ match, scope, lock, snapshot, benchmarks, now, started, policy });
+  record.lock.first_seen_scheduled_at = wasSeen ? ((await getJson(bucket, seenKey(match.id)))?.first_seen_at ?? null) : now;
   const written = await putOnce(bucket, decisionKey(match.id), record);
+  if (written && record.decision.state === 'CALL') await putOnce(bucket, openCallKey(match.id), { match_id: match.id, decided_at: now });
   return { id: match.id, written, state: record.decision.state, reasons: record.decision.reasons, lock_rule: lock.rule };
 }
 
@@ -116,44 +120,61 @@ export async function readLedger(bucket, { limit = 500 } = {}) {
 }
 
 /**
- * CRON pass (tennis-api every 10 min, after the freezer): decide due matches, record honest HOLDs for in-scope matches that
- * started without a decision, grade finished CALLs. Bounded per tick.
+ * CRON pass (tennis-api every 10 min, after the freezer). It shares the invocation's subrequest budget with the freezer,
+ * so it is deliberately cheap: candidates come from 3 selects + 1 batched row read (never the full dossier), decided /
+ * seen / graded / corrected sets from one listing each, and R2 work is capped per tick.
  */
-export async function runPicker(store, env, { now = new Date().toISOString(), fetchImpl = fetch, limit = 25 } = {}) {
+const ID_OF = (prefix) => (k) => k.slice(prefix.length).replace(/\.json$/, '').split('/')[0];
+export async function runPicker(store, env, { now = new Date().toISOString(), fetchImpl = fetch, limit = 12 } = {}) {
   const bucket = env?.TENNIS_SOURCE;
   if (!bucket || !store) return { error: 'not_configured' };
   const t = Date.parse(now);
   const iso = (ms) => new Date(ms).toISOString();
-  const sum = { at: now, policy: PICKER_POLICY.version, considered: 0, decided: [], graded: [], skipped: {} };
+  const sum = { at: now, policy: PICKER_POLICY.version, candidates: 0, considered: 0, decided: [], graded: [], corrected: 0, skipped: {} };
+  const P = (x) => `${LEDGER_PREFIX}${x}/`;
+  const [decidedIds, seenIds, callIds, gradedIds, correctedIds] = await Promise.all(['decisions', 'seen', 'calls', 'grades', 'corrections'].map(async (x) => new Set((await listKeys(bucket, P(x))).map(ID_OF(P(x))))));
   const ids = new Set();
-  // scheduled singles with an exact start inside [-6 h, +36 h] (lock T-60 falls inside), or a source-proven day
-  for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=gte.${iso(t - 6 * 3600e3)}&scheduled_at=lte.${iso(t + 36 * 3600e3)}&limit=300`)) ids.add(r.match_id);
-  if (env.SCHEDULE_DAY_COLUMNS === '1') for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=is.null&scheduled_day=gte.${iso(t - 86400e3).slice(0, 10)}&scheduled_day=lte.${iso(t + 86400e3).slice(0, 10)}&limit=300`)) ids.add(r.match_id);
-  // scheduled singles on an order of play without a sourced start (WTA "Not before …" / "Followed by"): observed while
-  // scheduled, so an honest HOLD can be recorded if play begins with no lock
-  for (const r of await store.select('tennis_matches', `select=match_id&status=eq.scheduled&event_type=in.(MS,WS)&scheduled_at=is.null&schedule_note=not.is.null&limit=300`)) ids.add(r.match_id);
-  // matches observed while scheduled that have no decision yet (they may have started without a lock -> HOLD)
-  for (const k of await listKeys(bucket, `${LEDGER_PREFIX}seen/`, 3000)) ids.add(k.slice(`${LEDGER_PREFIX}seen/`.length, -5));
-  const decided = new Set((await listKeys(bucket, `${LEDGER_PREFIX}decisions/`)).map((k) => k.slice(`${LEDGER_PREFIX}decisions/`.length, -5)));
+  const sel = 'select=match_id&event_type=in.(MS,WS)&status=eq.scheduled';
+  for (const r of await store.select('tennis_matches', `${sel}&scheduled_at=gte.${iso(t - 6 * 3600e3)}&scheduled_at=lte.${iso(t + 36 * 3600e3)}&limit=300`)) ids.add(r.match_id);
+  for (const r of await store.select('tennis_matches', `${sel}&scheduled_at=is.null&schedule_note=not.is.null&limit=300`)) ids.add(r.match_id);
+  if (env.SCHEDULE_DAY_COLUMNS === '1') for (const r of await store.select('tennis_matches', `${sel}&scheduled_at=is.null&scheduled_day=gte.${iso(t - 86400e3).slice(0, 10)}&scheduled_day=lte.${iso(t + 86400e3).slice(0, 10)}&limit=300`)) ids.add(r.match_id);
+  for (const id of seenIds) ids.add(id); // observed while scheduled, undecided: may have started without a lock
+  const todo = [...ids].filter((id) => !decidedIds.has(id));
+  sum.candidates = todo.length;
+  const rows = [];
+  for (let i = 0; i < todo.length; i += 80) rows.push(...await store.select('tennis_matches', `select=${MATCH}&match_id=in.(${todo.slice(i, i + 80).join(',')})`));
   let work = 0;
-  for (const id of ids) {
+  for (const row of rows) {
     if (work >= limit) break;
-    if (decided.has(id)) continue;
+    const m = shapeMatch(row);
     sum.considered += 1;
     try {
-      const data = await detail(store, env, id, { raw: true });
-      if (!data?.match) continue;
-      const res = await decideMatch({ bucket, match: { ...data.match, tour: data.match.tour ?? null }, now, fetchImpl });
+      const res = await decideMatch({ bucket, match: m, now, fetchImpl, decidedIds, seenIds });
       if (res.skipped) sum.skipped[res.skipped] = (sum.skipped[res.skipped] || 0) + 1; else { sum.decided.push(res); work += 1; }
     } catch (e) { sum.skipped.error = (sum.skipped.error || 0) + 1; }
   }
-  // grading: CALLs without a grade
-  for (const { record, grade: g, excluded } of await readLedger(bucket, { limit: 300 })) {
-    if (g || excluded || record.decision.state !== 'CALL') continue;
-    const [m] = await store.select('tennis_matches', `select=match_id,status,winner_side,end_reason,started_at,score_text&match_id=eq.${record.canonical_event_id}`);
-    if (!m) continue;
-    const res = await gradeMatch({ bucket, record, match: { status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, started_at: m.started_at, score: m.score_text }, now, fetchImpl });
-    if (res.written) sum.graded.push(res);
+  // grading: only indexed CALLs without a grade
+  const open = [...callIds].filter((id) => !gradedIds.has(id)).slice(0, 20);
+  if (open.length) {
+    const res = await store.select('tennis_matches', `select=match_id,status,winner_side,end_reason,started_at,score_text&match_id=in.(${open.join(',')})`);
+    const byId = new Map(res.map((r) => [r.match_id, r]));
+    for (const id of open) {
+      const m = byId.get(id);
+      if (!m || m.status === 'scheduled' || m.status === 'in_progress' || m.status === 'suspended') continue;
+      const record = await getJson(bucket, decisionKey(id));
+      if (!record) continue;
+      const g = await gradeMatch({ bucket, record, match: { status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, started_at: m.started_at, score: m.score_text }, now, fetchImpl });
+      if (g.written) sum.graded.push(g);
+    }
+  }
+  // one-time hygiene: a decision without a pre-start observation (written before the seen guard, c781d5d) is excluded
+  // by an appended correction; the record itself is never touched
+  if (env.TENNIS_STATE && !(await env.TENNIS_STATE.get('picker:v1:unseen-corrected'))) {
+    for (const id of decidedIds) {
+      if (seenIds.has(id) || correctedIds.has(id)) continue;
+      if (await appendCorrection(bucket, { id, reason: 'RECORDED_WITHOUT_PRE_START_OBSERVATION', excluded: true, note: 'written by the pre-c781d5d machinery, which could record matches it never observed while scheduled', at: now })) sum.corrected += 1;
+    }
+    await env.TENNIS_STATE.put('picker:v1:unseen-corrected', now);
   }
   if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picker:v1:last', JSON.stringify({ ...sum, decided: sum.decided.slice(0, 25) }));
   return sum;
