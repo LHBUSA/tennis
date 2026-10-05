@@ -3,6 +3,7 @@
 import { html, raw } from '../lib/dom.js';
 import { NETWORK, CURRENT_SPORT, PROPBETEDGE_X_URL, PROPBETEDGE_X_HANDLE } from '../data/network.js';
 import { ALL_ACCESS_OFFER } from '../lib/pbe-membership.js';
+import { LOCAL_ALL_ACCESS_PATH } from '../lib/all-access.js';
 import { preferredSourceHtml } from './preferred-source.js';
 
 export const PRIMARY_NAV = [
@@ -96,7 +97,7 @@ export function footerHtml() {
       </nav>
       <nav class="ftr-links" aria-label="PropBetEdge">
         <p>PropBetEdge</p>
-        <a class="ftr-aa" href="${ALL_ACCESS_OFFER.learnUrl}" data-pbe-footer-all-access>All Access · ${ALL_ACCESS_OFFER.price}</a>
+        <a class="ftr-aa" href="${LOCAL_ALL_ACCESS_PATH}" data-pbe-footer-all-access>All Access · ${ALL_ACCESS_OFFER.price}</a>
         <a href="${NETWORK.news.href}">${NETWORK.news.label}</a>
         <a href="${NETWORK.learn.href}">${NETWORK.learn.label}</a>
         <a href="https://propbetedge.ai/about">About PropBetEdge</a>

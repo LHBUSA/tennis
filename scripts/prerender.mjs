@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { STATIC_ROUTES, resolveRoute } from '../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_VERSION, breadcrumb } from '../src/seo/meta.js';
+import { allAccessPageHtml } from '../src/lib/all-access.js';
 
 const DIST = path.resolve('dist');
 const base = fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
@@ -27,7 +28,11 @@ for (const r of STATIC_ROUTES) {
   const m = routeMeta(resolved, { jsonld: crumbs ? [crumbs] : [], image });
   const file = r.path === '/' ? 'index.html' : `${r.path.slice(1)}.html`;
   fs.mkdirSync(path.dirname(path.join(DIST, file)), { recursive: true });
-  fs.writeFileSync(path.join(DIST, file), withHead(m, { preload: r.path === '/' }));
+  let page = withHead(m, { preload: r.path === '/' });
+  // /all-access ships its real content in the HTML (the anonymous view): a genuine local page, never a
+  // redirect; the SPA then renders the reader's own membership state over it.
+  if (r.path === '/all-access') page = page.replace('<div id="app"></div>', `<div id="app"><main id="main" class="main">${allAccessPageHtml('signed_out', null)}</main></div>`);
+  fs.writeFileSync(path.join(DIST, file), page);
   written.push(file);
 }
 // SPA shell for data routes (tennis-web replaces the head with a data-backed one): noindex, no canonical.

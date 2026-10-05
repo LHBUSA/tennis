@@ -7,6 +7,7 @@ import './styles/tokens.css';
 import './styles/base.css';
 import './styles/components.css';
 import './styles/membership.css';
+import './styles/account.css';
 import './styles/news.css';
 import './styles/news-modules.css';
 import './styles/theme.css';
@@ -34,7 +35,7 @@ import { wirePreferredSource } from './ui/preferred-source.js';
 import { wireImageFallback } from './ui/avatar.js';
 import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
 import { setPageSurface } from './lib/v4.js';
-import { getMembership, applyMembershipChrome, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
+import { getAccount, applyMembershipChrome, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
 
 const lp = (name) => () => import('./pages/live-pages.js').then((m) => ({ mount: m[name] }));
 const PAGES = {
@@ -51,6 +52,7 @@ const PAGES = {
   rankings: lp('rankingsHub'), 'rankings-list': lp('rankings'), players: lp('players'), player: lp('player'), 'player-sub': lp('player'), h2h: lp('h2h'),
   matchups: () => import('./pages/intel.js').then((m) => ({ mount: m.matchups })), matchup: () => import('./pages/intel.js').then((m) => ({ mount: m.matchup })), 'players-to-watch': () => import('./pages/intel.js').then((m) => ({ mount: m.watch })),
   'pbe-picks': () => import('./pages/picks.js').then((m) => ({ mount: m.picks })), 'track-record': () => import('./pages/picks.js').then((m) => ({ mount: m.trackRecord })),
+  'all-access': () => import('./pages/all-access.js'),
   dna: lp('dna'), 'pbecast-hub': lp('pbecastHub'), search: lp('search'), credits: lp('credits'), coverage: lp('coverage')
 };
 const dataPage = () => import('./pages/data-page.js');
@@ -67,7 +69,7 @@ wireCopy(document);
 wirePreferredSource(document);
 wireImageFallback(document);
 initAnalytics();
-getMembership().then((m) => applyMembershipChrome(app, m)).catch(() => {});
+getAccount().then((acct) => applyMembershipChrome(app, acct)).catch(() => {});
 document.addEventListener('click', (e) => {
   const s = e.target.closest('.share-b');
   if (s) track('tennis_share', { method: s.dataset.copy ? 'copy' : /linkedin/i.test(s.href || '') ? 'linkedin' : 'x', route: location.pathname });
@@ -93,7 +95,8 @@ async function go(pathname) {
   if (r.route.redirect) { r = resolveRoute(r.route.redirect); history.replaceState({}, '', r.path); }
   const mine = ++seq;
   if (premiumRoute(r)) {
-    const membership = await getMembership();
+    const acct = await getAccount();
+    const membership = acct.membership;
     if (mine !== seq) return;
     if (!membership.entitled) {
       if (unmount) unmount();
@@ -102,7 +105,7 @@ async function go(pathname) {
       closeDrawer(false);
       document.documentElement.dataset.page = r.id;
       setPageSurface(null);
-      render(main, premiumGateHtml(membership, r));
+      render(main, premiumGateHtml(membership, r, acct));
       wirePremiumGate(main);
       unmount = null;
       if (initial) { initial = false; setTimeout(() => trackPageView({ routeId: r.id, path: r.route.path }), 600); }

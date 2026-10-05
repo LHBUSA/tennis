@@ -1,5 +1,6 @@
 // Footer family parity: src/data/network.js must agree with the vendored canonical registry
 // src/data/family.json (LHBUSA/propbetedge-workers shared/network/family.json; re-vendor, never hand-edit).
+import { NETWORK_ALL_ACCESS_URL } from '../src/lib/all-access.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -29,7 +30,10 @@ test('network links match family.json', () => {
   assert.equal(NETWORK.news.href, want.hub);
   assert.equal(NETWORK.learn.href, want.learn);
   const f = String(footerHtml());
-  assert.ok(f.includes(`href="${want.all_access}"`), 'All Access link');
+  /* Owner 2026-10-05: the footer's All Access link stays on Tennis (native /all-access); the family's
+     all_access URL remains the network reference constant. */
+  assert.ok(f.includes('href="/all-access"'), 'All Access link is the local page');
+  assert.equal(NETWORK_ALL_ACCESS_URL, want.all_access);
 });
 
 test('rendered footer: exactly one F1 and one Predictions anchor, canonical https, no retired hosts', () => {

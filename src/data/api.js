@@ -40,6 +40,26 @@ export async function membershipApi({ signal } = {}) {
   }
 }
 
+/** The membership read with its HTTP status, for the account surface: status 0 = no answer
+ *  (network failure or the timeout), so an outage is never mistaken for a free reader. */
+export async function membershipResult({ timeoutMs = 0 } = {}) {
+  if (!BASE) return { status: 0, body: null };
+  const ctl = timeoutMs ? new AbortController() : null;
+  const timer = ctl ? setTimeout(() => ctl.abort(), timeoutMs) : null;
+  try {
+    const res = await fetch(`${BASE}/v1/membership`, {
+      credentials: 'include', cache: 'no-store', headers: { accept: 'application/json' },
+      ...(ctl ? { signal: ctl.signal } : {}),
+    });
+    const body = await res.json().catch(() => null);
+    return { status: res.status, body };
+  } catch {
+    return { status: 0, body: null };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
 export async function requestMagic(email, returnTo, { signal } = {}) {
   if (!BASE) return { ok: false, message: 'Sign-in is not connected to this build.' };
   try {

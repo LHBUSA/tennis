@@ -41,6 +41,7 @@ export const ROUTE_TABLE = [
   { id: 'doubles', path: '/doubles', title: 'Doubles Lab', description: 'Not live.', index: false },
   { id: 'breakout-watch', path: '/breakout-watch', title: 'Breakout Watch', description: 'Not live.', index: false },
   { id: 'labs', path: '/labs', title: 'More', description: 'PropBetEdge Tennis tools.', index: false },
+  { id: 'all-access', path: '/all-access', title: 'All Access — Tennis Intelligence and the PropBetEdge Network', description: 'PropBetEdge All Access on Tennis: Tennis DNA, Matchup DNA win probabilities and Players to Watch, plus every PropBetEdge sport (MLB, NFL, NBA, WNBA, NHL, UFC, Soccer, Golf, F1 Intelligence) and PropBetEdge Predictions for $29/month.', index: true },
   { id: 'methodology', path: '/methodology', title: 'Methodology — Tennis DNA Definitions', description: 'How PropBetEdge Tennis defines every derived number: Match DNA (ATP and WTA, same-tour percentiles) and technical DNA formulas, sample sizes, confidence tiers and as-of rules.', index: true },
   { id: 'sources', path: '/sources', title: 'Sources — Where PropBetEdge Tennis Data Comes From', description: 'Every tennis data source PropBetEdge has audited, what it provides, and the latest canary result.', index: true },
   { id: 'credits', path: '/credits', title: 'Photo Credits', description: 'Every player photo on PropBetEdge Tennis with its author, license and source.', index: false },
