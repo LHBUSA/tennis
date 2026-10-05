@@ -68,38 +68,49 @@ test('share intent: x.com/intent/post with encoded text + url; LinkedIn; copy', 
 
 function fakeEnv(host) {
   const head = { children: [], appendChild(n) { this.children.push(n); } };
-  const doc = { title: 'Player page', head, querySelector: (sel) => head.children.find((n) => sel.includes(n.dataset && n.dataset.pbeGa4)) || null, createElement: () => ({ dataset: {} }), addEventListener() {} };
-  const win = { location: { hostname: host, pathname: '/players/x', search: '?token=secret', hash: '', origin: `https://${host}` } };
-  return { win, doc };
+  const doc = { title: 'Player page', head, querySelector: () => null, createElement: () => ({ dataset: {} }), addEventListener() {} };
+  const events = [];
+  const inits = [];
+  const win = {
+    location: { hostname: host, pathname: '/players/x', search: '?token=secret', hash: '', origin: `https://${host}` },
+    gtag: (...args) => events.push(args),
+  };
+  win.PBEPrivacy = {
+    analyticsAllowed: () => true,
+    initAnalytics: (opts) => inits.push(opts),
+    track: (name, payload) => { events.push(['event', name, payload]); return true; },
+    whenAnalyticsAllowed: (fn) => fn(),
+  };
+  return { win, doc, events, inits };
 }
 
-test('GA: network ID, production host only, one script, one page_view per route, no query strings, allowlisted params', () => {
+test('GA: consent-gated network ID, production host only, one page_view per route, no query strings, allowlisted params', () => {
   assert.equal(GA_ID, 'G-BRS48R8PG9');
   assert.ok(isProductionHost('tennis.propbetedge.ai'));
   for (const h of ['localhost', '127.0.0.1', 'tennis-abc-justins-projects.vercel.app']) assert.ok(!isProductionHost(h), h);
   gaTest.reset();
   const dev = fakeEnv('localhost');
   assert.equal(initAnalytics({ win: dev.win, doc: dev.doc }), false);
-  assert.equal(dev.doc.head.children.length, 0);
   gaTest.reset();
-  const { win, doc } = fakeEnv('tennis.propbetedge.ai');
+
+  const { win, doc, events, inits } = fakeEnv('tennis.propbetedge.ai');
   assert.equal(initAnalytics({ win, doc }), true);
-  assert.equal(initAnalytics({ win, doc }), false, 'no double init');
-  assert.equal(doc.head.children.length, 1);
-  const cfg = win.dataLayer.find((a) => a[0] === 'config');
-  assert.equal(cfg[1], GA_ID);
-  assert.equal(cfg[2].send_page_view, false);
-  assert.equal(cfg[2].cookie_domain, '.propbetedge.ai');
+  assert.deepEqual(inits[0], { surface: 'tennis', analytics: true, sendPageView: false });
+  assert.equal(doc.head.children.length, 0, 'Tennis module does not inject Google directly');
+
   assert.equal(trackPageView({ routeId: 'player', win, doc }), true);
   assert.equal(trackPageView({ routeId: 'player', win, doc }), false, 'same route+title never counts twice');
-  const pv = win.dataLayer.filter((a) => a[0] === 'event' && a[1] === 'page_view');
+  const pv = events.filter((a) => a[0] === 'event' && a[1] === 'page_view');
   assert.equal(pv.length, 1);
   assert.ok(!JSON.stringify(pv).includes('secret'), 'query strings never sent');
+
   assert.equal(track('tennis_player_open', { player_id: 'p1', email: 'x@y.z', search_text: 'me' }, { win }), true);
-  const ev = win.dataLayer.find((a) => a[1] === 'tennis_player_open');
+  const ev = events.find((a) => a[0] === 'event' && a[1] === 'tennis_player_open');
   assert.deepEqual(Object.keys(ev[2]).sort(), ['pbe_surface', 'player_id']);
+
   assert.equal(setRouteContext({ routeId: 'schedule', path: '/schedule', win }), true);
-  assert.equal(win.dataLayer.filter((a) => a[0] === 'event' && a[1] === 'page_view').length, 1, 'route context never sends a page_view itself (GA history events count SPA navigations)');
+  assert.equal(events.filter((a) => a[0] === 'event' && a[1] === 'page_view').length, 1, 'route context never sends a page_view itself');
+
   const main = fs.readFileSync('src/main.js', 'utf8');
   assert.match(main, /if \(initial\)/, 'explicit page_view only on the initial load');
   assert.match(main, /if \(!\(initial && r\.route\.ssr\)\) setMeta/, 'the edge-rendered head is never overwritten on a first load of an ssr route');
