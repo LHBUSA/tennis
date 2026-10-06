@@ -28,9 +28,10 @@ export const NETWORK = Object.freeze({
     { key: 'golf', label: 'Golf', name: 'Golf Intelligence', href: 'https://golf.propbetedge.ai/' },
     { key: 'f1', label: 'F1', name: 'F1 Intelligence', href: 'https://f1.propbetedge.ai/' }
   ],
-  // Non-sport PropBetEdge products. Never merged into `sports`, never counted as a sport,
-  // never in the membership contract's SPORT_LABELS / NETWORK.
+  // Non-sport All Access products. Never merged into `sports`, never counted as a sport.
   products: [
-    { key: 'predictions', kind: 'product', label: 'Predictions', name: 'PropBetEdge Predictions', href: 'https://predictions.propbetedge.ai/' }
+    { key: 'members', kind: 'product', label: 'Command Center', name: 'Command Center', href: 'https://members.propbetedge.ai/' },
+    { key: 'compare', kind: 'product', label: 'Compare', name: 'Compare', href: 'https://compare.propbetedge.ai/' },
+    { key: 'predictions', kind: 'product', label: 'Predictions', name: 'Predictions', href: 'https://predictions.propbetedge.ai/' }
   ]
 });
