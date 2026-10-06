@@ -18,11 +18,13 @@ test('footer sports registry matches family.json (set, order, urls)', () => {
   assert.deepEqual(NETWORK.sports.map((s) => abs(s.href)), FAMILY.sports.map((s) => s.url));
 });
 
-test('Predictions is a separate product, never a sport', () => {
+test('All Access products are separate products, never sports', () => {
   assert.deepEqual(NETWORK.products.map((p) => [p.key, p.href]), FAMILY.products.map((p) => [p.key, p.url]));
-  assert.ok(!NETWORK.sports.some((s) => s.key === 'predictions'));
-  assert.ok(!('predictions' in SPORT_LABELS));
-  assert.ok(!CONTRACT_NETWORK.some((s) => s.key === 'predictions'));
+  for (const p of NETWORK.products) {
+    assert.ok(!NETWORK.sports.some((s) => s.key === p.key));
+    assert.ok(!(p.key in SPORT_LABELS));
+    assert.ok(!CONTRACT_NETWORK.some((s) => s.key === p.key));
+  }
 });
 
 test('network links match family.json', () => {
@@ -33,15 +35,14 @@ test('network links match family.json', () => {
   /* Owner 2026-10-05: the footer's All Access link stays on Tennis (native /all-access); the family's
      all_access URL remains the network reference constant. */
   assert.ok(f.includes('href="/all-access"'), 'All Access link is the local page');
-  assert.equal(NETWORK_ALL_ACCESS_URL, want.all_access);
+  assert.equal(NETWORK_ALL_ACCESS_URL, FAMILY.all_access.find((n) => n.key === 'all_access').url);
 });
 
-test('rendered footer: exactly one F1 and one Predictions anchor, canonical https, no retired hosts', () => {
+test('rendered footer: exactly one F1 and each premium product anchor, canonical https, no retired hosts', () => {
   const f = String(footerHtml());
   const hrefs = [...f.matchAll(/href="([^"]+)"/g)].map((m) => m[1]);
   assert.equal(hrefs.filter((h) => h === 'https://f1.propbetedge.ai/').length, 1);
-  assert.equal(hrefs.filter((h) => h === 'https://predictions.propbetedge.ai/').length, 1);
-  assert.equal(hrefs.filter((h) => /f1\.propbetedge\.ai|predictions\.propbetedge\.ai/.test(h)).length, 2);
+  for (const p of FAMILY.products) assert.equal(hrefs.filter((h) => h === p.url).length, 1, p.key);
   for (const host of FAMILY.retired_hosts) assert.ok(!f.includes(host), host);
   assert.ok(!/http:\/\/[^"]*propbetedge\.ai/.test(f));
   assert.ok(!/\b(11|eleven) sports\b/i.test(f));
