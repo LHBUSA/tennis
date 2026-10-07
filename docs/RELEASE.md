@@ -8,6 +8,13 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-07 Superseded match ids 301 to their survivor (tennis-api 0.10.7, tennis-web 0.1.1; c268ef6)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-api | `741ada20-5e49-457a-9544-25d5429e8544` @ c268ef6 (superseded_by + canonical_match_id on /v1/matches/:id and /v1/pbecast/:id; wire skips superseded) | `42e55460-b97b-4c10-a468-8733b6db783d` @ 2224cfa |
+| tennis-web | `67181087-8e2c-41e5-9f26-6198ff9da800` @ c268ef6 (301 /matches + /pbecast superseded ids; noindex record state without survivor) | `741c6d9f-d5aa-4ba8-bdf1-503c986d0ca9` @ 24b0ef2 |
+
 ## 2026-10-07 LIVE & RECENT resolved-sides contract (tennis-api 0.10.6; 2224cfa)
 
 | Component | Current | Rollback target |
