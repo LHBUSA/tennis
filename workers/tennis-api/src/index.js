@@ -357,6 +357,11 @@ const NOT_YET = {
 
 const TTL = [[/^\/v1\/picks\/track-record$/, 120], [/^\/v1\/slams$/, 21600], [/^\/v1\/men(?:\/players)?$/, 21600], [/^\/v1\/matches\/[0-9a-f-]{36}\/videos$/, 300], [/^\/v1\/videos/, 300], [/^\/v1\/matchups/, 600], [/^\/v1\/players-to-watch/, 3600], [/^\/v1\/news/, 60], [/^\/v1\/pbecast/, 15], [/^\/v1\/schedule/, 60], [/^\/v1\/(dna|credits)/, 3600], [/^\/v1\/players\/[^/]+\/(dna|profile)/, 1800], [/^\/v1\/coverage/, 600], [/^\/v1\/search/, 300], [/^\/v1\/venues/, 3600], [/^\/v1\/live/, 15], [/^\/v1\/today/, 30], [/^\/v1\/matches\//, 20], [/^\/v1\/tournaments/, 120], [/^\/v1\/rankings/, 900], [/^\/v1\/players/, 300], [/^\/v1\/h2h/, 600], [/^\/v1\/sources/, 300]];
 const QUERY_AGNOSTIC_ARCHIVE = /^\/v1\/(?:slams|men(?:\/players)?)$/;
+// One cache namespace for every caller (2026-10-07): the key used to carry url.origin, so tennis-web's SSR reads through
+// the service binding (https://tennis-api.internal/...) and the browser's read of the same page
+// (https://tennis-api.propbetedge.ai/...) never shared an entry: every crawled tournament / player page cost two DB reads.
+// No route's body depends on the request host.
+const CACHE_ORIGIN = 'https://tennis-api.propbetedge.ai';
 
 export async function route(path, url, store, env) {
   if (path === '/v1/sources') return sources();
@@ -441,7 +446,7 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
     const bypass = premium || isPreview(url, env);
     // cache key carries the API version: a deploy that changes response shapes never serves the old shape
     const cacheSearch = QUERY_AGNOSTIC_ARCHIVE.test(path) ? '' : url.search;
-    const cacheKey = new Request(`${url.origin}${url.pathname}${cacheSearch}${cacheSearch ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
+    const cacheKey = new Request(`${CACHE_ORIGIN}${url.pathname}${cacheSearch}${cacheSearch ? '&' : '?'}__v=${VERSION}`, { method: 'GET' });
     if (cache && !bypass) {
       const hit = await cache.match(cacheKey);
       if (hit) {
