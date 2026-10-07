@@ -71,7 +71,11 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   await kv.put('live:owned', JSON.stringify(editions.map((e) => e.edition_id)), { expirationTtl: 300 });
   // observed: editions whose rows the writer confirmed this cycle (the per-edition heartbeat tennis-api merges into
   // read freshness, shared/observed.js); it travels in this cycle's run record, so it costs no extra KV write
-  const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0, observed: new Map() };
+  // forced full reconciliation (writer.js `full`) once per UTC day from 04:00 for the editions live owns (tennis-ingest
+  // skips them while owned, so its own daily reconciliation never reaches them)
+  const day = started.slice(0, 10);
+  const reconcile = Number(started.slice(11, 13)) >= 4 && (await kv.get('reconcile:live:day')) !== day;
+  const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0, observed: new Map(), reconcile };
   const out = [];
   const diag = []; // ESPN (game-level) live pipeline stage trace, kept in a bounded internal KV ring (no payloads)
   let stillLive = editions;
@@ -96,8 +100,9 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
     stillLive = next;
     lastRoundMs = Date.now() - r0;
   }
-  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out, observed: Object.fromEntries(ctx.observed) };
+  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out, reconcile, observed: Object.fromEntries(ctx.observed) };
   await kv.put('tennis-live:last_run', JSON.stringify(s));
+  if (reconcile && out.some((o) => o.state === 'PASS')) await kv.put('reconcile:live:day', day);
   if (diag.length) {
     const ring = ((await kv.get(DIAG_KEY, 'json')) || []).concat(diag).slice(-DIAG_MAX);
     await kv.put(DIAG_KEY, JSON.stringify(ring), { expirationTtl: 4 * 86400 });
