@@ -125,10 +125,51 @@ export const matches = schedule;
 
 // ---- tournaments --------------------------------------------------------------------------------------
 export const tournaments = mountWith((root, _c, signal) => {
-  shell(root, { eyebrow: 'Tournaments', heading: 'Tournaments', lede: 'ATP Tour, WTA Tour, WTA 125 and Grand Slam editions from the last week through the next two months — and every Grand Slam edition PropBetEdge holds as one tournament: men’s and women’s singles and doubles, mixed doubles and qualifying. ATP Tour editions come from a secondary source that publishes no tournament level or surface.' });
-  root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section class="mod" data-slams style="margin-top:18px"><header class="mod-h"><h2>Grand Slams</h2><span class="mod-k">every event, by edition</span></header><p class="loading">Loading…</p></section>');
-  api('/v1/slams', { signal }).then((r) => { const el = root.querySelector('[data-slams]'); if (el && r.data?.editions?.length) render(el, html`<header class="mod-h"><h2>Grand Slams</h2><span class="mod-k">every event, by edition</span></header><div class="trs">${r.data.editions.map(slamRow)}</div><p class="note">Each edition holds every event our sources publish — men’s and women’s singles and doubles, mixed and qualifying — in one tournament. Where a Grand Slam’s own feed is not reachable (US Open), that data stays unavailable.</p>`); else if (el) el.remove(); }).catch(() => {});
-  return fill(root, '/v1/tournaments', (d) => (d.length ? html`<h2 class="sec">Current and upcoming</h2><div class="trs">${d.map(tournamentRow)}</div>` : null), 'No tournaments stored for this window yet.', signal);
+  shell(root, {
+    eyebrow: 'Tournaments',
+    heading: 'Tournaments',
+    lede: 'ATP Tour, WTA Tour, WTA 125 and Grand Slams in one event board — what is on court now, what starts next and the editions that just closed. Open a tournament for its matches, results and available intelligence.'
+  });
+  root.querySelector('[data-body]').insertAdjacentHTML('afterend', '<section class="mod tourney-slams" data-slams><header class="mod-h"><h2>Grand Slams</h2><span class="mod-k">every event, one edition</span></header><p class="loading">Loading…</p></section>');
+  api('/v1/slams', { signal }).then((r) => {
+    const el = root.querySelector('[data-slams]');
+    if (el && r.data?.editions?.length) {
+      render(el, html`<header class="mod-h"><h2>Grand Slams</h2><span class="mod-k">every event, one edition</span></header><div class="trs">${r.data.editions.map(slamRow)}</div><p class="note">Each edition keeps the events our sources publish together — men’s and women’s singles and doubles, mixed and qualifying — instead of splitting one Slam into separate tournament cards. Where a Grand Slam’s own feed is not reachable (US Open), that data stays unavailable.</p>`);
+    } else if (el) el.remove();
+  }).catch(() => {});
+
+  return fill(root, '/v1/tournaments', (d) => {
+    if (!d.length) return null;
+    const today = new Date().toISOString().slice(0, 10);
+    const bucket = (t) => {
+      const current = ['live', 'inProgress'].includes(t.status) || (t.start_date && t.end_date && t.start_date <= today && t.end_date >= today);
+      if (current) return 'current';
+      if (t.start_date && t.start_date > today) return 'upcoming';
+      if (t.end_date && t.end_date < today) return 'recent';
+      return 'other';
+    };
+    const groups = {
+      current: d.filter((t) => bucket(t) === 'current'),
+      upcoming: d.filter((t) => bucket(t) === 'upcoming'),
+      recent: d.filter((t) => bucket(t) === 'recent'),
+      other: d.filter((t) => bucket(t) === 'other')
+    };
+    const section = (cls, heading, detail, rows) => rows.length ? html`<section class="tourney-section ${cls}">
+      <h2 class="sec"><span>${heading}</span><small>${detail}</small></h2>
+      <div class="trs">${rows.map(tournamentRow)}</div>
+    </section>` : '';
+
+    return html`<div class="tourney-overview" aria-label="Tournament window summary">
+      <div><b>${groups.current.length}</b><span>Current</span></div>
+      <div><b>${groups.upcoming.length}</b><span>Upcoming</span></div>
+      <div><b>${groups.recent.length}</b><span>Just finished</span></div>
+      <a href="/schedule?view=week">Match schedule →</a>
+    </div>
+    ${section('tourney-current', 'On court now', 'events whose edition window includes today', groups.current)}
+    ${section('tourney-upcoming', 'Coming up', 'next editions in the covered window', groups.upcoming)}
+    ${section('tourney-recent', 'Recently finished', 'editions that closed within the current lookback', groups.recent)}
+    ${section('tourney-other', 'Other editions', 'stored editions without a complete date window', groups.other)}`;
+  }, 'No tournaments stored for this window yet.', signal);
 });
 
 const EVENT_SLUG = { MS: 'mens-singles', WS: 'womens-singles', MD: 'mens-doubles', WD: 'womens-doubles', XD: 'mixed-doubles' };
