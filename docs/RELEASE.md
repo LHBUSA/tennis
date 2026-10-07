@@ -8,6 +8,18 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-07 Change-only match writes (tkmln write relief; docs/API.md "Change-only writes")
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-api | `0d1e3066-7f1c-4565-9987-27c03934e827` @ 4e2890b (store-heartbeat.js: per-edition observation heartbeat merged into tennis_matches.updated_at at read time) | `7e315f95-7be6-4ceb-922c-6e7f733d3352` @ caf6b50 |
+| tennis-ingest | `f4581d66-949c-4bd7-a670-61182eceb926` @ 4e2890b (change-only writer, daily 04:00 UTC + `?reconcile=1` full write, KV `obs:editions:ingest`, DNA v1 9-key stats projection, per-step start logs) | `0e08479d-8803-4fe8-9c29-afeb16754c82` @ c423bd4 |
+| tennis-live | `5544e86a-6e09-462f-82af-ca4e97d7e8d0` @ 45265d4 (change-only writer, idle KV only on change, run record `observed`, daily reconcile of live-owned editions) | `dda06f69-13a7-4f62-a648-e0f268aaf555` |
+
+Roll back tennis-ingest + tennis-live together; tennis-api 0d1e3066 is safe with either writer (no heartbeat key -> rows as
+stored). The writer change also unblocked ATP (ESPN) live writes for already-stored matches: the old writer failed every
+cycle on `tennis_player_external_ids_method_check` (method 'crosswalk', espn-live.js storedIdMap) before writing anything.
+
 ## 2026-10-03 Schedule freshness (Beijing ATP stall; docs/evidence/atp-live-incident-2026-10-03.md, addendum)
 
 | Component | Current | Rollback target |
