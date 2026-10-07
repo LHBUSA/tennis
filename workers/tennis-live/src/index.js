@@ -69,7 +69,9 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   if (!editions.length) return idleCycle(kv, started);
   await kv.put('live:heartbeat', started, { expirationTtl: 300 });
   await kv.put('live:owned', JSON.stringify(editions.map((e) => e.edition_id)), { expirationTtl: 300 });
-  const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0 };
+  // observed: editions whose rows the writer confirmed this cycle (the per-edition heartbeat tennis-api merges into
+  // read freshness, shared/observed.js); it travels in this cycle's run record, so it costs no extra KV write
+  const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0, observed: new Map() };
   const out = [];
   const diag = []; // ESPN (game-level) live pipeline stage trace, kept in a bounded internal KV ring (no payloads)
   let stillLive = editions;
@@ -94,7 +96,7 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
     stillLive = next;
     lastRoundMs = Date.now() - r0;
   }
-  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out };
+  const s = { worker: 'tennis-live', version: VERSION, started_at: started, finished_at: new Date().toISOString(), editions: editions.length, sources: [...new Set(editions.map((e) => e.source || 'wta'))], upstream_requests: ctx.upstream, store_requests: store.requests, rounds: out, observed: Object.fromEntries(ctx.observed) };
   await kv.put('tennis-live:last_run', JSON.stringify(s));
   if (diag.length) {
     const ring = ((await kv.get(DIAG_KEY, 'json')) || []).concat(diag).slice(-DIAG_MAX);

@@ -79,6 +79,7 @@ import { matchupRoute } from './matchup.js';
 import { videoRoute } from './videos.js';
 import { scheduledRun } from './scheduled.js';
 import { withMemo } from './memo.js';
+import { withHeartbeat } from './store-heartbeat.js';
 import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 export { shapeMatch };
@@ -460,7 +461,8 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
     let body;
     try {
       // withMemo: build-versioned shared results (memo.js) for the DNA population / gate reads
-      body = await route(path, url, withMemo(storeFromEnv(env), env, ctx), env);
+      // withHeartbeat: per-edition source confirmation merged into tennis_matches.updated_at (store-heartbeat.js)
+      body = await route(path, url, withHeartbeat(withMemo(storeFromEnv(env), env, ctx), env), env);
     } catch (e) {
       body = envelope(null, { freshness: 'ERROR', semantics: 'canonical store read failed', degraded: [String(e?.message || e).slice(0, 200)] });
     }

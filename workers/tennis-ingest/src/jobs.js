@@ -15,7 +15,7 @@ import { aoPointEvents, eventId, CONTRACT } from '../../shared/canonical/events.
 import { normalizeName, resolveIdentity } from '../../shared/canonical/identity.js';
 import { hold } from './writer.js';
 import { writeFacts } from './context-jobs.js';
-import { recordCapture, recordRun, writeRankingPage, finalizeSnapshot, writeEditions, writeMatches, writeMatchStats, writeCrosswalk, upsertPlayersFull } from './writer.js';
+import { recordCapture, recordRun, writeRankingPage, finalizeSnapshot, writeEditions, writeMatches, writeMatchStats, writeCrosswalk, upsertPlayersFull, writerOpts } from './writer.js';
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const addDays = (s, n) => { const d = new Date(`${s}T00:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return iso(d); };
@@ -77,7 +77,7 @@ export async function editionMatches(ctx, ed) {
   const stale = past ? r.records.filter((m) => m.status === 'in_progress') : [];
   if (stale.length) await hold(ctx.store, stale.map((m) => ({ provider: 'wta', entity_type: 'match', external_id: m.provider_match_id, problems: ['stale_in_progress: finished edition, source never completed the match'], payload: null, capture_id: r.capture?.capture_id || null })));
   // dedupe: an official WTA API row takes over a player-history or ESPN row of the same match (never a second row)
-  const w = await writeMatches(ctx.store, r.records.filter((m) => !stale.includes(m)), ed, { captureId: r.capture?.capture_id || null, dedupe: true, scheduleDay: ctx.env?.SCHEDULE_DAY_COLUMNS === '1' });
+  const w = await writeMatches(ctx.store, r.records.filter((m) => !stale.includes(m)), ed, { captureId: r.capture?.capture_id || null, dedupe: true, scheduleDay: ctx.env?.SCHEDULE_DAY_COLUMNS === '1', ...writerOpts(ctx) });
   return { state: 'PASS', ...w, stale_held: stale.length, live: r.records.filter((m) => m.status === 'in_progress' && !stale.includes(m)).length };
 }
 
@@ -130,7 +130,7 @@ export async function wimbledonMen(ctx, year) {
   const eid = await editionId(tid, year);
   await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'wimbledon', name: 'Wimbledon', competition_key: 'grand_slam', country: 'GBR', city: 'London' }], { onConflict: 'tournament_id', ignore: true });
   await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year, competition_key: 'grand_slam', surface: 'grass', indoor: false, source_family: 'wimbledon', name: `Wimbledon ${year}`, level: 'Grand Slam', city: 'London', country: 'GBR' }], { onConflict: 'edition_id', ignore: true });
-  const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'grass', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'grass', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
   // men's Slam rows carry no stats from this feed
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.wimbledon&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   return { state: 'PASS', ...w };
@@ -145,7 +145,7 @@ export async function ausopenDayMatches(ctx, year, day, period = 'MD') {
   const eid = await editionId(tid, year);
   await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'australian-open', name: 'Australian Open', competition_key: 'grand_slam', country: 'AUS', city: 'Melbourne' }], { onConflict: 'tournament_id', ignore: true });
   await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year, competition_key: 'grand_slam', surface: 'hard', indoor: false, source_family: 'ausopen', name: `Australian Open ${year}`, level: 'Grand Slam', city: 'Melbourne', country: 'AUS' }], { onConflict: 'edition_id', ignore: true });
-  const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, r.records, { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.ausopen&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   return { state: 'PASS', ...w };
 }
@@ -318,7 +318,7 @@ export async function wimbledonArchiveStep(ctx, { lookups = 15 } = {}) {
   const eid = await editionId(tid, st.year);
   await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'wimbledon', name: 'Wimbledon', competition_key: 'grand_slam', country: 'GBR', city: 'London' }], { onConflict: 'tournament_id', ignore: true });
   await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: st.year, competition_key: 'grand_slam', surface: 'grass', indoor: false, source_family: 'wimbledon', name: `Wimbledon ${st.year}`, level: 'Grand Slam', city: 'London', country: 'GBR' }], { onConflict: 'edition_id', ignore: true });
-  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'grass', indoor: false }, { captureId: raw.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'grass', indoor: false }, { captureId: raw.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.wimbledon&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   const next = st.year - 1 < WIMA_FLOOR ? { e: st.e + 1, year: 2025 } : { e: st.e, year: st.year - 1 };
   await ctx.kv.put('bf:wima', JSON.stringify(next));
@@ -385,7 +385,7 @@ export async function rolandGarrosStep(ctx, { lookups = 60 } = {}) {
   const eid = await editionId(tid, st.year);
   await ctx.store.upsert('tennis_tournaments', [{ tournament_id: tid, slug: 'roland-garros', name: 'Roland-Garros', competition_key: 'grand_slam', country: 'FRA', city: 'Paris' }], { onConflict: 'tournament_id', ignore: true });
   await ctx.store.upsert('tennis_tournament_editions', [{ edition_id: eid, tournament_id: tid, year: st.year, competition_key: 'grand_slam', surface: 'clay', indoor: false, source_family: 'rolandgarros', name: `Roland-Garros ${st.year}`, level: 'Grand Slam', city: 'Paris', country: 'FRA' }], { onConflict: 'edition_id', ignore: true });
-  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'clay', indoor: false }, { captureId: res.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, records, { edition_id: eid, surface: 'clay', indoor: false }, { captureId: res.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${eid}&source_family=eq.rolandgarros&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   await ctx.kv.put('bf:rg', JSON.stringify(nextState()));
   return { event, year: st.year, players: people.length, identity: outcomes, ...w };
@@ -404,7 +404,7 @@ export async function ausopenGapStep(ctx, year, batch = 8) {
   for (const id of missing.slice(0, batch)) {
     const r = await fetchRun(ctx, slams.ausopenMatchCentre, { matchId: id });
     const rec = r.state === 'PASS' && r.records[0] ? slams.parseAusopenWalkover(r.records[0], year) : null;
-    if (rec) { const w = await writeMatches(ctx.store, [rec], { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true }); out.push({ id, state: 'walkover_written', ...w }); }
+    if (rec) { const w = await writeMatches(ctx.store, [rec], { edition_id: eid, surface: 'hard', indoor: false }, { captureId: r.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) }); out.push({ id, state: 'walkover_written', ...w }); }
     else out.push({ id, state: r.state === 'PASS' ? 'not_a_walkover' : r.state });
     checked.add(id);
   }

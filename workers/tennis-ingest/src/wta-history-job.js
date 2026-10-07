@@ -6,7 +6,7 @@
 
 import * as hist from '../../providers/wta-history.js';
 import { fetchRun } from './jobs.js';
-import { writeGroups, upsertPlayersFull } from './writer.js';
+import { writeGroups, upsertPlayersFull, writerOpts } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, tournamentKey, editionId, slugify, competitionFor, SLAMS } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
@@ -145,7 +145,7 @@ export async function historyPage(ctx, wtaId, page) {
   }
   // the whole page in one batched pass (identical per-edition rules; ~20 store requests instead of ~15 per edition)
   if (batch.length) {
-    const w = await writeGroups(ctx.store, batch, { captureId: r.capture?.capture_id || null, dedupe: true });
+    const w = await writeGroups(ctx.store, batch, { captureId: r.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
     for (const k of ['written', 'attached', 'taken_over', 'held', 'duplicate_candidates']) out[k] += w[k] || 0;
     const eds = batch.map((b) => b.edition.edition_id);
     for (let i = 0; i < eds.length; i += 100) await ctx.store.req('PATCH', `tennis_matches?edition_id=${inList(eds.slice(i, i + 100))}&source_family=eq.wta_history&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });

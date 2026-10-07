@@ -181,8 +181,47 @@ export function scheduleDayFields(sm, prev) {
   return Object.fromEntries(SCHEDULE_DAY_COLS.map((c) => [c, prev?.[c] ?? null]));
 }
 
-export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false, trace = false, scheduleDay = false } = {}) {
-  const result = { written: 0, held: 0, changes: 0, skipped: 0, attached: 0, taken_over: 0, duplicate_candidates: 0 };
+// ---- change-only writes (2026-10-07, tkmln write relief) ----------------------------------------------------
+// Every tick used to upsert every match / participant / set / external id of every active edition with updated_at=now()
+// although almost nothing had changed (~5 row writes per match per tick). A row is now written only when its CONTENT
+// differs from the stored row (column-by-column, never by timestamps alone); unchanged rows keep their updated_at, so
+// updated_at means "this match (row, sets or participants) last changed". Exceptions, kept on purpose:
+//   - an in_progress match row is always written: its updated_at is the live heartbeat the stuck-live guard
+//     (shared/freshness.js) and the /v1/live ordering read;
+//   - `full: true` (forced reconciliation: admin ?reconcile=1 and the first tick of each UTC day) writes everything
+//     exactly as before.
+// Rows that DO change are written with the same values as before, so the stored state is identical to the old writer
+// except for updated_at on unchanged rows (tests/change-only-writer.test.js proves it on recorded payloads).
+// `observed` (Map edition_id -> ISO) collects the editions whose rows were confirmed this pass: the per-edition
+// observation heartbeat (KV obs:editions:*) that tennis-api merges back into read freshness (store-heartbeat.js).
+const MATCH_COLS = ['edition_id', 'natural_key', 'draw_id', 'event_type', 'round', 'format_key', 'status', 'winner_side', 'end_reason', 'scheduled_at', 'started_at', 'court', 'schedule_note', 'score_text', 'duration_s', 'surface', 'indoor', 'source_family', 'live_state', 'source_updated_at', 'stats_status'];
+const SET_COLS = ['games_a', 'games_b', 'tb_a', 'tb_b', 'tb_winner_points_derived', 'is_match_tiebreak', 'winner_side'];
+const PART_COLS = ['participant_key', 'seed', 'entry_type'];
+const TS_COLS = new Set(['scheduled_at', 'started_at', 'source_updated_at']);
+const sortKeys = (v) => (Array.isArray(v) ? v.map(sortKeys) : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys(v[k])])) : v);
+// jsonb returns keys in its own order and drops undefined: compare canonical JSON
+const canonJson = (v) => JSON.stringify(sortKeys(JSON.parse(JSON.stringify(v))));
+/** Same stored value? null == undefined; timestamps by instant (the DB answers +00:00, sources Z); jsonb by canonical JSON; scalars by text. */
+export function sameValue(col, a, b) {
+  const x = a ?? null;
+  const y = b ?? null;
+  if (x === null || y === null) return x === y;
+  if (TS_COLS.has(col)) { const p = Date.parse(x); const q = Date.parse(y); if (Number.isFinite(p) && Number.isFinite(q)) return p === q; }
+  if (typeof x === 'object' || typeof y === 'object') return typeof x === 'object' && typeof y === 'object' && canonJson(x) === canonJson(y);
+  return String(x) === String(y);
+}
+/** Does writing `row` change the stored row `prev`? Only the columns `row` names are compared (a merge upsert leaves the rest). */
+export function rowChanged(prev, row, cols) {
+  if (!prev) return true;
+  return cols.some((c) => c in row && !sameValue(c, prev[c], row[c]));
+}
+export const PREV_MATCH_SELECT = (scheduleDay) => `select=match_id,${MATCH_COLS.join(',')},${scheduleDay ? `${SCHEDULE_DAY_COLS.join(',')},` : ''}tennis_sets(set_no,${SET_COLS.join(',')}),tennis_match_participants(side,${PART_COLS.join(',')})`;
+
+/** Writer options a job passes from its tick context: forced reconciliation (ctx.reconcile) and the observation collector. */
+export const writerOpts = (ctx) => ({ full: !!ctx?.reconcile, observed: ctx?.observed || null });
+
+export async function writeGroups(store, groups, { captureId = null, dedupe: sourceDedupe = false, trace = false, scheduleDay = false, full = false, observed = null } = {}) {
+  const result = { written: 0, held: 0, changes: 0, skipped: 0, attached: 0, taken_over: 0, duplicate_candidates: 0, rows_written: 0, rows_unchanged: 0, mode: full ? 'full' : 'change_only' };
   // trace (live lanes): one internal reason code per incoming source row — never a silent drop
   const outcome = new Map();
   const normalized = [];
@@ -214,8 +253,11 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
   };
   let attach = [];
   let alias = [];
+  // (provider, external_id) pairs already stored: their ignore-duplicates insert is a no-op, so it is skipped
+  let knownExt = new Set();
   if (sourceDedupe && normalized.length) {
     const cs = await crossSource(store, normalized, holds, captureId);
+    knownExt = cs.knownExt;
     normalized.splice(0, normalized.length, ...cs.write);
     onePerMatch();
     attach = cs.attach;
@@ -242,7 +284,8 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
   }
   onePerMatch();
   if (normalized.length) {
-    const prev = new Map((await store.select('tennis_matches', `select=match_id,status,score_text,winner_side,live_state,format_key,${scheduleDay ? `${SCHEDULE_DAY_COLS.join(',')},` : ''}tennis_sets(set_no,games_a,games_b,tb_a,tb_b,is_match_tiebreak)&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
+    // the stored rows, with every column the writer sets (so an unchanged row can be recognised and left alone)
+    const prev = new Map((await store.select('tennis_matches', `${PREV_MATCH_SELECT(scheduleDay)}&match_id=${inList(normalized.map((x) => x.id))}`)).map((r) => [r.match_id, r]));
     let keep = [];
     const changes = [];
     for (const x of normalized) {
@@ -255,10 +298,26 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
       if (p) for (const c of diffRecord('match', { id: x.id, status: p.status, score: p.score_text, winner_side: p.winner_side }, next)) changes.push({ ...c, source_family: x.sm.provider, capture_id: captureId, from_value: c.from, to_value: c.to });
       keep.push({ ...x, prev: p });
     }
-    await ensurePlayersFromIdentities(store, keep.flatMap((x) => x.n.identities));
+    for (const x of keep) x.draw_id = x.sm.stage ? await drawId(x.ed.edition_id, x.n.match.event_type, x.sm.stage) : null;
+    // what each match would write, and which parts of it differ from the stored rows
+    for (const x of keep) {
+      const p = x.prev;
+      x.parts = ['A', 'B'].map((side) => ({ match_id: x.id, side, participant_key: x.n.match.participants[side], seed: x.sm.seeds?.[side] ?? null, entry_type: x.sm.entry?.[side] || null }));
+      const pParts = new Map((p?.tennis_match_participants || []).map((r) => [r.side, r]));
+      x.partsDirty = full || !p || x.parts.some((r) => rowChanged(pParts.get(r.side), r, PART_COLS));
+      x.sets = (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s, x.n.match.status) }));
+      const pSets = new Map((p?.tennis_sets || []).map((r) => [Number(r.set_no), r]));
+      x.dirtySets = full || !p ? x.sets : x.sets.filter((r) => rowChanged(pSets.get(r.set_no), r, SET_COLS));
+      // a score correction that removed a set: the stale tail is deleted (only for matches whose score changed)
+      x.tailDel = !!p && p.score_text !== x.n.match.score_text;
+    }
+    // players / participants / members / draws are insert-if-missing rows: needed only for a new match, new sides or a
+    // new draw (a stored match's participant and draw rows exist: foreign keys). `full` sends them all, as before.
+    const fresh = full ? keep : keep.filter((x) => !x.prev || x.partsDirty || (x.prev.draw_id ?? null) !== (x.draw_id ?? null));
+    await ensurePlayersFromIdentities(store, fresh.flatMap((x) => x.n.identities));
     const participants = [];
     const members = [];
-    for (const x of keep) for (const side of ['A', 'B']) {
+    for (const x of fresh) for (const side of ['A', 'B']) {
       const key = x.n.match.participants[side];
       participants.push({ participant_key: key, kind: key.startsWith('S:') ? 'singles' : 'pair' });
       for (const m of x.n.match.participants.members[side]) members.push({ participant_key: key, slot: m.slot, pbe_player_id: m.player_id });
@@ -266,10 +325,7 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
     await store.upsert('tennis_participants', dedupe(participants, (r) => r.participant_key), { onConflict: 'participant_key', ignore: true });
     await store.upsert('tennis_participant_members', dedupe(members, (r) => `${r.participant_key}:${r.slot}`), { onConflict: 'participant_key,slot', ignore: true });
     const draws = [];
-    for (const x of keep) {
-      x.draw_id = x.sm.stage ? await drawId(x.ed.edition_id, x.n.match.event_type, x.sm.stage) : null;
-      if (x.draw_id) draws.push({ draw_id: x.draw_id, edition_id: x.ed.edition_id, event_type: x.n.match.event_type, stage: x.sm.stage, format_key: x.n.match.format_key || 'unknown' });
-    }
+    for (const x of fresh) if (x.draw_id) draws.push({ draw_id: x.draw_id, edition_id: x.ed.edition_id, event_type: x.n.match.event_type, stage: x.sm.stage, format_key: x.n.match.format_key || 'unknown' });
     await store.upsert('tennis_draws', dedupe(draws, (r) => r.draw_id), { onConflict: 'draw_id', ignore: true });
     const matchRow = (x) => ({
       match_id: x.id, edition_id: x.ed.edition_id, natural_key: pairKey(x), draw_id: x.draw_id, event_type: x.n.match.event_type, round: x.n.match.round_code || 'unknown', format_key: x.n.match.format_key || 'unknown',
@@ -277,8 +333,15 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
       surface: x.ed.surface ?? null, indoor: x.ed.indoor ?? null, source_family: x.sm.provider, live_state: x.n.match.live || null, source_updated_at: x.n.match.source_updated_at, updated_at: now(),
       ...(scheduleDay ? scheduleDayFields(x.sm, x.prev) : {})
     });
-    const wo = keep.filter((x) => x.n.match.status === 'walkover');
-    const rest = keep.filter((x) => x.n.match.status !== 'walkover');
+    // a match that just went final gets its statistics re-fetched (live values are provisional)
+    const wentFinal = (x) => x.prev && !FINAL.has(x.prev.status) && FINAL.has(x.n.match.status) && x.n.match.status !== 'walkover';
+    const rowOf = (x) => (x.n.match.status === 'walkover' ? { ...matchRow(x), stats_status: 'not_applicable' } : wentFinal(x) ? { ...matchRow(x), stats_status: 'pending' } : matchRow(x));
+    const cmpCols = scheduleDay ? [...MATCH_COLS, ...SCHEDULE_DAY_COLS] : MATCH_COLS;
+    // the match row is written when it, its sets or its participants changed (updated_at = "this match changed": tennis-news
+    // detection and the DNA v2 incremental ledger key on it), and on every pass while in progress (live heartbeat)
+    for (const x of keep) x.dirtyRow = full || !x.prev || x.n.match.status === 'in_progress' || x.partsDirty || x.dirtySets.length > 0 || x.tailDel || rowChanged(x.prev, rowOf(x), cmpCols);
+    const wo = keep.filter((x) => x.n.match.status === 'walkover' && x.dirtyRow);
+    const rest = keep.filter((x) => x.n.match.status !== 'walkover' && x.dirtyRow);
     const rejected = new Set();
     // One malformed row must never fail the whole edition: on a data error, retry row by row and hold
     // only the rows Postgres rejects.
@@ -306,8 +369,6 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
         }
       }
     };
-    // a match that just went final gets its statistics re-fetched (live values are provisional)
-    const wentFinal = (x) => x.prev && !FINAL.has(x.prev.status) && FINAL.has(x.n.match.status) && x.n.match.status !== 'walkover';
     await upsertMatches(rest.filter((x) => !wentFinal(x)), matchRow);
     await upsertMatches(rest.filter(wentFinal), (x) => ({ ...matchRow(x), stats_status: 'pending' }));
     await upsertMatches(wo, (x) => ({ ...matchRow(x), stats_status: 'not_applicable' }));
@@ -317,14 +378,21 @@ export async function writeGroups(store, groups, { captureId = null, dedupe: sou
       result.attached += raced.length;
       result.raced = raced.length;
     }
-    await store.upsert('tennis_match_external_ids', keep.map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id })), { onConflict: 'provider,external_id', ignore: true });
-    await store.upsert('tennis_match_participants', keep.flatMap((x) => ['A', 'B'].map((side) => ({ match_id: x.id, side, participant_key: x.n.match.participants[side], seed: x.sm.seeds?.[side] ?? null, entry_type: x.sm.entry?.[side] || null }))), { onConflict: 'match_id,side' });
-    const sets = keep.flatMap((x) => (x.n.match.sets || []).map((s, i) => ({ match_id: x.id, set_no: i + 1, games_a: s.games.A, games_b: s.games.B, tb_a: s.tiebreak?.A ?? null, tb_b: s.tiebreak?.B ?? null, tb_winner_points_derived: !!s.tiebreak?.winner_points_derived, is_match_tiebreak: !!s.is_match_tiebreak, winner_side: setWinner(s, x.n.match.status) })));
+    // ignore-duplicates: an external id that is already stored is never changed by this insert, so it is not re-sent
+    const extRows = keep.filter((x) => full || !knownExt.has(x.sm.provider_match_id)).map((x) => ({ provider: x.sm.provider, external_id: x.sm.provider_match_id, match_id: x.id }));
+    await store.upsert('tennis_match_external_ids', extRows, { onConflict: 'provider,external_id', ignore: true });
+    const partRows = keep.filter((x) => x.partsDirty).flatMap((x) => x.parts);
+    await store.upsert('tennis_match_participants', partRows, { onConflict: 'match_id,side' });
+    const sets = keep.flatMap((x) => x.dirtySets);
     await store.upsert('tennis_sets', sets, { onConflict: 'match_id,set_no' });
-    // a score correction that removed a set: delete the stale tail (only for matches whose score changed)
-    for (const x of keep.filter((k) => k.prev && k.prev.score_text !== k.n.match.score_text)) await store.del('tennis_sets', `match_id=eq.${x.id}&set_no=gt.${(x.n.match.sets || []).length}`);
+    for (const x of keep.filter((k) => k.tailDel)) await store.del('tennis_sets', `match_id=eq.${x.id}&set_no=gt.${(x.n.match.sets || []).length}`);
     await writeSnapshotEvents(store, keep, captureId);
     if (changes.length) await store.insert('tennis_source_changes', changes.map((c) => ({ entity_type: c.entity_type, entity_id: c.entity_id, field: c.field, kind: c.kind, from_value: c.from_value, to_value: c.to_value, source_family: c.source_family, capture_id: c.capture_id })));
+    const matchRowsWritten = keep.filter((x) => x.dirtyRow).length;
+    result.rows_written = matchRowsWritten;
+    result.rows_unchanged = keep.length - matchRowsWritten;
+    result.row_writes = { matches: matchRowsWritten, participants: partRows.length, sets: sets.length, external_ids: extRows.length, new_or_resided: fresh.length };
+    if (observed) { const at = now(); for (const x of keep) observed.set(x.ed.edition_id, at); }
     result.written = keep.length;
     for (const x of keep) outcome.set(x.sm.provider_match_id, 'WRITTEN');
     result.changes = changes.length;
@@ -559,7 +627,7 @@ async function crossSource(store, normalized, holds, captureId) {
       holds.push({ provider, entity_type: 'cross_source', external_id: x.sm.provider_match_id, problems: [`cross_source_disagreement: ${owner.source_family} ${owner.status} ${a || '-'} vs ${provider} ${x.n.match.status} ${b || '-'}${ownWinner !== ourWinner ? ' (winner differs)' : ''}`], payload: { match_id: target, owner: owner.source_family }, capture_id: captureId });
     }
   }
-  return { write, attach, duplicates, alias, merges };
+  return { write, attach, duplicates, alias, merges, knownExt: new Set(extMap.keys()) };
 }
 
 const prevSnapshot = (p) => snapshotOf({ status: p.status, live: p.live_state, sets: (p.tennis_sets || []).sort((a, b) => a.set_no - b.set_no).map((t) => ({ games: { A: t.games_a, B: t.games_b }, tiebreak: t.tb_a == null ? null : { A: t.tb_a, B: t.tb_b }, is_match_tiebreak: t.is_match_tiebreak })) });

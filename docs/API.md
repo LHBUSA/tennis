@@ -35,3 +35,11 @@ Base: `https://tennis-api.propbetedge.ai`. Edge-cached per route (live 15 s … 
 
 Run ledgers: `tennis-ingest GET/POST /v1/runs` (POST needs `Bearer INGEST_ADMIN_TOKEN`),
 `tennis-live /v1/live/runs` (last live cycle), `tennis-model /v1/model/runs`, `tennis-news /v1/news/runs`.
+
+Change-only writes (2026-10-07): the match writer (tennis-ingest `writer.js`) writes a match / set / participant /
+external-id row only when its content changed; `tennis_matches.updated_at` = the match (row, sets or participants) last
+changed, and in-progress rows are rewritten on every pass (live heartbeat). Forced full reconciliation (every row written
+exactly as before): automatically on the first tick from 04:00 UTC each day (KV `reconcile:day`), or on demand with
+`POST /v1/runs?reconcile=1` (admin token). The time each edition was last confirmed with its source is KV
+`obs:editions:ingest` + `tennis-live:last_run.observed`; tennis-api merges it into `tennis_matches.updated_at` at read time
+(`store-heartbeat.js`), so response freshness (`meta.source_updated_at`, tournament `as_of`) is unchanged.

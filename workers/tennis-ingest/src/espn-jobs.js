@@ -7,7 +7,7 @@
 
 import * as espn from '../../providers/espn.js';
 import { fetchRun, iso } from './jobs.js';
-import { writeMatches, hold } from './writer.js';
+import { writeMatches, hold, writerOpts } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, editionId, snapshotId, slugify } from '../../shared/canonical/ids.js';
 import { mintPlayerId } from '../../shared/canonical/identity.js';
@@ -226,7 +226,7 @@ export async function espnEventStep(ctx, eventId, { lookups = 12, statusLookups 
   const ed = mapped || await writeEspnEdition(ctx.store, parsed.edition);
   // tennis-live owns this edition right now (its heartbeat is fresh): never a second concurrent writer
   if ((await liveOwnedSet(ctx.kv)).has(ed.edition_id)) return { event: eventId, league, state: 'OWNED_BY_LIVE', final: false, start_date: parsed.edition.start_date, end_date: parsed.edition.end_date, name: parsed.edition.name, edition_id: ed.edition_id };
-  const w = await writeMatches(ctx.store, parsed.matches, ed, { captureId: res.capture?.capture_id || null, dedupe: true });
+  const w = await writeMatches(ctx.store, parsed.matches, ed, { captureId: res.capture?.capture_id || null, dedupe: true, ...writerOpts(ctx) });
   // ESPN carries no match statistics
   await ctx.store.req('PATCH', `tennis_matches?edition_id=eq.${ed.edition_id}&source_family=eq.espn&stats_status=eq.pending`, { body: { stats_status: 'unavailable' } });
   const facts = await fillPlayerFacts(ctx.store, idMap);

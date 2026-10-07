@@ -14,7 +14,7 @@
 
 import * as espn from '../../providers/espn.js';
 import { fetchRun } from './jobs.js';
-import { writeMatches } from './writer.js';
+import { writeMatches, writerOpts } from './writer.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { tournamentId, editionId } from '../../shared/canonical/ids.js';
 
@@ -136,7 +136,7 @@ export async function espnLiveObserve(ctx, eventId, { league = 'atp', maxStatus 
     if (!row) { for (const m of keep) mark(compOf(m), 'EDITION_PENDING'); return { state: 'EDITION_PENDING', edition_id, live: Object.keys(liveMap).length, statuses, trace }; }
     for (const m of keep) mark(compOf(m), 'WRITE_ATTEMPTED');
     try {
-      w = await writeMatches(ctx.store, keep, { edition_id, surface: row.surface ?? null, indoor: row.indoor ?? first.edition.indoor ?? null }, { captureId: res.capture?.capture_id || null, dedupe: true, trace: true });
+      w = await writeMatches(ctx.store, keep, { edition_id, surface: row.surface ?? null, indoor: row.indoor ?? first.edition.indoor ?? null }, { captureId: res.capture?.capture_id || null, dedupe: true, trace: true, ...writerOpts(ctx) });
     } catch (e) {
       const msg = String(e?.message || e).slice(0, 200);
       for (const m of keep) mark(compOf(m), `WRITE_FAILED:${msg}`);

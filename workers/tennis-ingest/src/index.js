@@ -34,6 +34,7 @@ import { candidateMatchIds } from './writer.js';
 import { STORE_5XX, BULK_LANES, pausedReason, probe, noteStoreError, acquireSlot, releaseSlot } from './db-guard.js';
 import { planTick, afterRun, LANE_STATE_KEY } from './lanes.js';
 import { readOverdue, GUARD_VERSION, OVERDUE_H } from '../../shared/freshness.js';
+import { flushObserved } from '../../shared/observed.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
 export const VERSION = '0.4.1';
@@ -191,7 +192,7 @@ async function tickLocked(env, store, kv, force, { only = null, budget = null, p
 }
 
 async function tickInner(env, store, kv, force, { only = null, budget = null, params = {} } = {}) {
-  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, [YOUTUBE_HOST]: YOUTUBE_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 }, 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), log: [], steps: [], upstream: 0 };
+  const ctx = { env, store, kv, client: new SourceClient({ policies: { [wta.WTA_HOST]: wta.WTA_POLICY, [espn.ESPN_HOST]: espn.ESPN_POLICY, [YOUTUBE_HOST]: YOUTUBE_POLICY, 'query.wikidata.org': { min_interval_ms: 2000, timeout_ms: 60000 }, 'www.protennislive.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 }, 'wtafiles.wtatennis.com': { min_interval_ms: 1500, timeout_ms: 30000, retries: 1 } } }), log: [], steps: [], upstream: 0, observed: new Map(), reconcile: !!force.reconcile };
   // admin drive of one lane (backfill acceleration): nothing else runs in this invocation
   if (only) return laneOnly(ctx, only, budget, params);
   const started = new Date();
@@ -199,6 +200,10 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
   await step(ctx, 'db_health', () => probe(store, kv));
   const today = iso(started);
   const hour = 3600 * 1000;
+  // forced full reconciliation: the change-only writer writes every row exactly as before (writer.js `full`) on the first
+  // tick from 04:00 UTC each day (away from the 00:00 DNA builds) and on admin POST /v1/runs?reconcile=1
+  const dailyReconcile = !ctx.reconcile && started.getUTCHours() >= 4 && (await kv.get('reconcile:day')) !== today;
+  if (dailyReconcile) ctx.reconcile = true;
 
   // 1. calendar
   await step(ctx, 'calendar', async () => {
@@ -247,6 +252,7 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     return { events: r.events, live: r.live.length, out: r.out };
   });
   await kv.put('live:editions', JSON.stringify(live), { expirationTtl: 900 });
+  if (dailyReconcile) await kv.put('reconcile:day', today);
 
   // 3. stats
   await step(ctx, 'stats', () => pendingStats(ctx, 20));
@@ -412,6 +418,9 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     return { lanes: plan.run, ...out };
   });
 
+  // observation heartbeat of every edition the match lanes confirmed this tick (shared/observed.js): one KV write
+  await step(ctx, 'observed', async () => ({ editions: await flushObserved(kv, ctx.observed), reconcile: ctx.reconcile }));
+
   // 5b. daily Tennis DNA snapshots (stored values the API / PBEcast read)
   await step(ctx, 'dna', async () => {
     const day = iso(started);
@@ -487,6 +496,7 @@ async function laneOnly(ctx, lane, budget, params = {}) {
   const state = (await ctx.kv.get(LANE_STATE_KEY(lane), 'json')) || {};
   let r;
   try { r = { ok: true, out: await fns[lane]() }; } catch (e) { r = { ok: false, out: { error: String(e?.message || e).slice(0, 300) } }; }
+  await flushObserved(ctx.kv, ctx.observed);
   await ctx.kv.put(LANE_STATE_KEY(lane), JSON.stringify(afterRun(state, { ok: r.ok, now: Date.now() })));
   return { worker: 'tennis-ingest', version: VERSION, lane, budget: b, ok: r.ok, upstream_requests: ctx.upstream, store_requests: ctx.store.requests, client: ctx.client.stats, result: r.out, runs: ctx.log.slice(-80) };
 }
@@ -548,7 +558,7 @@ export default {
     if (path === '/v1/runs' && request.method === 'POST') {
       const auth = request.headers.get('authorization') || '';
       if (!env.INGEST_ADMIN_TOKEN || auth !== `Bearer ${env.INGEST_ADMIN_TOKEN}`) return json({ ok: false, error: 'unauthorized' }, { status: 401 });
-      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume'), mode: url.searchParams.get('mode'), dry: url.searchParams.get('dry'), editions: url.searchParams.get('editions'), player: url.searchParams.get('player'), n: url.searchParams.get('n'), legacy: url.searchParams.get('legacy'), event: url.searchParams.get('event') } }) }, { headers: { 'cache-control': 'no-store' } });
+      return json({ ok: true, data: await tick(env, { force: { calendar: url.searchParams.get('calendar') === '1', dna: url.searchParams.get('dna') === '1', reconcile: url.searchParams.get('reconcile') === '1' }, only: url.searchParams.get('lane'), budget: url.searchParams.get('budget'), params: { as_of: url.searchParams.get('as_of'), write: url.searchParams.get('write'), shard: url.searchParams.get('shard'), shards: url.searchParams.get('shards'), resume: url.searchParams.get('resume'), mode: url.searchParams.get('mode'), dry: url.searchParams.get('dry'), editions: url.searchParams.get('editions'), player: url.searchParams.get('player'), n: url.searchParams.get('n'), legacy: url.searchParams.get('legacy'), event: url.searchParams.get('event') } }) }, { headers: { 'cache-control': 'no-store' } });
     }
     return json({ ok: false, error: 'not_found' }, { status: 404 });
   },
