@@ -85,7 +85,8 @@ test('informational links stay on the site: header chip, footer, panel, page', (
   assert.equal(chipHref('owner'), '/all-access');
   assert.equal(chipHref('signed_out'), '#membership-signin');
   const shell = readFileSync(new URL('../src/ui/shell.js', import.meta.url), 'utf8');
-  assert.doesNotMatch(shell, /learnUrl|propbetedge\.ai\/pro/);
+  assert.doesNotMatch(shell, /learnUrl/);
+  assert.match(shell, /LOCAL_ALL_ACCESS_PATH/, 'Tennis informational All Access links stay local');
   assert.match(String(accountPanelHtml('signed_out', ANON)), /href="\/all-access">What’s included in All Access/);
   for (const [v, a] of Object.entries(VIEWS)) assert.doesNotMatch(String(accountPanelHtml(v, a)) + String(allAccessPageHtml(v, a)), /propbetedge\.ai\/pro/, v);
   const membership = readFileSync(new URL('../src/lib/membership.js', import.meta.url), 'utf8');
