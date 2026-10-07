@@ -12,7 +12,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.10.6';
+export const VERSION = '0.10.7';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -80,6 +80,7 @@ import { videoRoute } from './videos.js';
 import { scheduledRun } from './scheduled.js';
 import { withMemo } from './memo.js';
 import { withHeartbeat } from './store-heartbeat.js';
+import { supersession } from './supersede.js';
 import { resolveHero } from '../../shared/editorial.js';
 import editorial from '../../../data/media/editorial-media.json' with { type: 'json' };
 export { shapeMatch };
@@ -222,6 +223,7 @@ async function match(store, id) {
     store.select('tennis_source_changes', `select=kind,field,from_value,to_value,observed_at,source_family&entity_type=eq.match&entity_id=eq.${id}&order=observed_at.asc&limit=200`)
   ]);
   const m = shapeMatch(rows[0]);
+  Object.assign(m, await supersession(store, id, m.status));
   m.statistics = stats.length ? Object.fromEntries(stats.map((s) => [s.side, s.stats])) : null;
   m.observed_changes = changes;
   return ok(m, { rows, policy: { currentS: 240, staleS: 1800 }, semantics: 'canonical match; statistics are the source totals mapped to PropBetEdge keys; observed_changes are upstream mutations we recorded' });

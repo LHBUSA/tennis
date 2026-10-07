@@ -2,6 +2,7 @@
 // search, venues, broadcast, credits, coverage. Returns undefined for paths it does not own.
 
 import { envelope, notConfigured } from '../../shared/envelope.js';
+import { supersession } from './supersede.js';
 import { inList } from '../../shared/store/postgrest.js';
 import { keyMoments, matchControl, gamesFromPoints, normalizeStoredEvent } from '../../shared/canonical/events.js';
 import { DEFINITIONS, DEFINITION_VERSION } from '../../shared/dna/metric.js';
@@ -160,6 +161,7 @@ export async function pbecast(store, id) {
   const rows = await store.select('tennis_matches', `select=${MATCH}&match_id=eq.${id}`);
   if (!rows.length) return null;
   const m = shapeMatch(rows[0]);
+  Object.assign(m, await supersession(store, id, m.status));
   const [points, snaps, stats] = await Promise.all([
     allRows(store, 'tennis_match_events', `select=event_id,quality,event_sequence,event_type,observed_at,event_at,set_number,game_number,server_side,winner_side,derivation,event_detail,state,serve_speed_kmh,serve_number,rally_length,coordinates,source&match_id=eq.${id}&quality=eq.point_event&order=event_sequence.asc`),
     allRows(store, 'tennis_match_events', `select=event_id,quality,event_sequence,event_type,observed_at,event_at,set_number,server_side,winner_side,derivation,event_detail,state,source&match_id=eq.${id}&quality=eq.score_snapshot&order=event_sequence.asc`),

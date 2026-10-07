@@ -27,6 +27,19 @@ export function playerRank(p) {
   return null;
 }
 
+const MATCH_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+export function supersededHead(id, m) {
+  const to = m.canonical_match_id;
+  if (to && MATCH_ID.test(to) && to !== m.id) return { redirect: `/${id === 'pbecast' ? 'pbecast' : 'matches'}/${to}` };
+  return supersededRecordHead();
+}
+export const supersededRecordHead = () => ({ robots: NOINDEX_ROBOTS, title: 'Superseded match record | PropBetEdge Tennis', description: 'This match record was a duplicate and has been superseded. It is kept only as a record.', jsonld: [] });
+/** 301 to the canonical survivor (absolute, path only) for GET/HEAD when the head asks for it; otherwise null. */
+export function permanentRedirect(overrides, method) {
+  if (!overrides?.redirect || !['GET', 'HEAD'].includes(method)) return null;
+  return new Response(null, { status: 301, headers: { location: canonicalUrl(overrides.redirect), 'cache-control': 'public, max-age=3600', 'x-robots-tag': 'noindex' } });
+}
+
 /** Data-backed head for a resolved route. Returns meta overrides (or {} to keep the route default). */
 const DESK_SECTION = { wta: 'WTA', atp: 'ATP', 'grand-slams': 'Grand Slams', challenger: 'Challenger', itf: 'ITF', doubles: 'Doubles', rankings: 'Rankings' };
 /** Schema context for a story, strictly from its frozen evidence (players with canonical slugs only). */
@@ -94,6 +107,9 @@ export async function headFor(env, r, url = null) {
   if (id === 'match' || id === 'pbecast') {
     const m = await apiGet(env, `/v1/matches/${params.id}`);
     if (!m) return { robots: NOINDEX_ROBOTS, title: 'Match not found | PropBetEdge Tennis' };
+    // a superseded duplicate row: permanent redirect to its resolved survivor (the only canonical URL); without a valid
+    // survivor no guess — a noindex "Superseded match record" state, no JSON-LD, no card (2026-10-07)
+    if (m.status === 'superseded') return supersededHead(id, m);
     const vs = `${names(m, 'A')} vs ${names(m, 'B')}`;
     const t = m.tournament || {};
     const live = m.status === 'in_progress';

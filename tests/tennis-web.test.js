@@ -1,7 +1,7 @@
 // tennis-web: data-backed heads index only real records; social cards never break on a missing photo.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { headFor } from '../workers/tennis-web/src/heads.js';
+import { headFor, permanentRedirect } from '../workers/tennis-web/src/heads.js';
 import { playerCard, matchCard } from '../workers/tennis-web/src/cards.js';
 import { resolveRoute } from '../src/lib/routes.js';
 import { routeMeta, headHtml, INDEX_ROBOTS, NOINDEX_ROBOTS } from '../src/seo/meta.js';
@@ -56,4 +56,38 @@ test('news story head: published -> index + NewsArticle + article times; held ->
   const held = await headFor(envWith({ [`/v1/news/${a.slug}`]: { ...a, status: 'held' } }), resolveRoute(`/news/${a.slug}`));
   assert.equal(held.robots, NOINDEX_ROBOTS);
   assert.ok(!held.jsonld.some((n) => n['@type'] === 'NewsArticle'));
+});
+
+// 2026-10-07: China Open WS orphans tombstoned -> the old URL 301s to the survivor; no survivor -> noindex record state
+test('superseded match: /matches and /pbecast 301 to the resolved survivor; survivor keeps its own canonical; no survivor -> noindex record, never a redirect', async () => {
+  const OLD = '95d3c15d-a6b2-5bb5-9d58-afc79f70ae2e';
+  const NEW = '1acf3f48-bf28-5cf1-8206-1fa825ec9e8e';
+  const LOST = '00000000-0000-5000-8000-0000000000ff';
+  const survivor = { id: NEW, status: 'completed', score: '6-4 1-6 3-6', round: 'Q-1', event_type: 'WS', sides: { A: { players: [{ name: 'Yexin Ma', slug: 'yexin-ma' }] }, B: { players: [{ name: 'Yufei Ren', slug: 'yufei-ren' }] } }, tournament: { tournament: 'China Open', year: 2026, slug: 'china-open' }, statistics: { A: {}, B: {} } };
+  const env = envWith({
+    [`/v1/matches/${OLD}`]: { id: OLD, status: 'superseded', sides: {}, tournament: { tournament: 'China Open', year: 2026 }, superseded_by: NEW, canonical_match_id: NEW },
+    [`/v1/matches/${NEW}`]: survivor,
+    [`/v1/matches/${LOST}`]: { id: LOST, status: 'superseded', sides: {}, superseded_by: null, canonical_match_id: null }
+  });
+  for (const [kind, method] of [['matches', 'GET'], ['pbecast', 'GET'], ['matches', 'HEAD']]) {
+    const o = await headFor(env, resolveRoute(`/${kind}/${OLD}`));
+    const r = permanentRedirect(o, method);
+    assert.equal(r.status, 301);
+    assert.equal(r.headers.get('location'), `https://tennis.propbetedge.ai/${kind}/${NEW}`, 'absolute survivor path, no query');
+  }
+  assert.equal(permanentRedirect(await headFor(env, resolveRoute(`/matches/${OLD}`)), 'POST'), null, 'GET/HEAD only');
+  // survivor: 200 page with its own canonical and JSON-LD naming only the survivor
+  const s = await headFor(env, resolveRoute(`/matches/${NEW}`));
+  assert.equal(permanentRedirect(s, 'GET'), null);
+  const meta = routeMeta(resolveRoute(`/matches/${NEW}`), s);
+  assert.equal(meta.canonical, `https://tennis.propbetedge.ai/matches/${NEW}`);
+  const html = headHtml(meta);
+  assert.ok(!html.includes(OLD), 'old id never in the survivor head / JSON-LD');
+  // no valid survivor: no redirect, noindex record state without JSON-LD
+  const lost = await headFor(env, resolveRoute(`/matches/${LOST}`));
+  assert.equal(permanentRedirect(lost, 'GET'), null);
+  assert.equal(lost.robots, NOINDEX_ROBOTS);
+  assert.match(lost.title, /^Superseded match record/);
+  assert.deepEqual(lost.jsonld, []);
+  assert.ok(!/ vs Preview/.test(headHtml(routeMeta(resolveRoute(`/matches/${LOST}`), lost))));
 });

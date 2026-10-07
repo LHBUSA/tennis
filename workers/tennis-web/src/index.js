@@ -12,11 +12,11 @@ import { resolveRoute, STATIC_ROUTES } from '../../../src/lib/routes.js';
 import { routeMeta, headHtml, SITE, OG_DEFAULT, NOINDEX_ROBOTS, canonicalUrl } from '../../../src/seo/meta.js';
 import { playerCard, matchCard, tournamentCard, rankingsCard, newsCardV4 } from './cards.js';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.1.1';
 let wasmReady = null;
 const ready = () => (wasmReady ||= initWasm(wasm));
 
-import { headFor, apiGet, ROUND, fmtD, newsEntities, playerRank } from './heads.js';
+import { headFor, apiGet, ROUND, fmtD, newsEntities, playerRank, permanentRedirect, supersededRecordHead } from './heads.js';
 import { noTransform } from './transport.js';
 
 // Edge-rendered HTML names the CURRENT deployment's hashed entry script, and Vercel stops serving the previous
@@ -66,7 +66,7 @@ async function cardSvg(env, path) {
   }
   if ((m = /^\/og\/(match|pbecast)\/([0-9a-f-]{36})\.png$/.exec(path))) {
     const x = await apiGet(env, `/v1/matches/${m[2]}`);
-    if (!x) return null;
+    if (!x || x.status === 'superseded') return null; // never a card for a duplicate record (generic card instead)
     const side = async (s) => { const p = x.sides?.[s]?.players || []; return { name: p.map((q) => q.name).join(' / '), jpegB64: p.length === 1 ? await jpeg(env, p[0].photo?.square_jpg || p[0].photo?.square) : null }; };
     return matchCard({ a: await side('A'), b: await side('B'), tournament: x.tournament?.tournament, round: ROUND(x.round), status: x.status, pbecast: m[1] === 'pbecast' });
   }
@@ -147,6 +147,11 @@ async function handle(request, env, ctx) {
     const r = resolveRoute(path);
     let overrides = {};
     try { overrides = await headFor(env, r, url); } catch { overrides = { robots: NOINDEX_ROBOTS }; }
+    // superseded match / PBEcast id with a resolved survivor: permanent canonical migration, path only (match pages carry
+    // no meaningful query parameters), GET/HEAD only — never the old blank page
+    const moved = permanentRedirect(overrides, request.method);
+    if (moved) return moved;
+    if (overrides.redirect) overrides = supersededRecordHead();
     const meta = routeMeta(r, overrides);
     let tpl;
     try { tpl = await shellTemplate(env); } catch { return new Response('temporarily unavailable', { status: 503 }); }

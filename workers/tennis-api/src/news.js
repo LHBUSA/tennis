@@ -229,6 +229,8 @@ async function liveWire(store, url) {
   const articles = new Map(aids.length ? (await store.select('tennis_articles', `select=article_id,slug,story_class,status,first_published_at&article_id=in.(${aids.join(',')})&status=eq.published`)).map((a) => [a.article_id, a]) : []);
   const items = [];
   for (const ev of evs) {
+    // a superseded (duplicate) match never reaches the wire: its survivor carries its own events and links
+    if (ev.match_id && matches.get(ev.match_id)?.status === 'superseded') continue;
     const card = wireCard(ev, { match: ev.match_id ? matches.get(ev.match_id) : null, player: ev.match_id ? null : players.get(ev.entities?.[0]), article: ev.article_id ? articles.get(ev.article_id) : null });
     if (!card) continue;
     card.freshness = wireFreshness(ev, ev.match_id ? matches.get(ev.match_id) : null, ev.article_id ? articles.get(ev.article_id) : null);
