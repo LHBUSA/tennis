@@ -111,8 +111,11 @@ test('tennis-live polls only live editions, stops an edition once nothing is liv
   const env = { TENNIS_STATE: kv, TENNIS_MODEL_SUPABASE_URL: 'https://tkmlnhmylqnttmnsnief.supabase.co', TENNIS_MODEL_SUPABASE_SERVICE_ROLE_KEY: 'k' };
   const r = await liveCycle(env, { sleep: async () => {} });
   assert.equal(r.editions, 0);
-  assert.ok(mem.get('live:heartbeat'));
-  assert.deepEqual(JSON.parse(mem.get('live:owned')), []);
+  // idle: nothing is owned, so ingest writes every edition (an absent/empty ownership is the same for liveOwnedSet);
+  // KV is written only on a change (2026-10-07: tests/observation-heartbeat.test.js covers the release of a previous lease)
+  const { liveOwnedSet } = await import('../workers/tennis-ingest/src/espn-live.js');
+  assert.equal((await liveOwnedSet(kv)).size, 0);
+  assert.equal(JSON.parse(mem.get('tennis-live:last_run')).editions, 0, 'the cron-alive record is written');
 });
 
 test('tennis-api cache hits re-issue CORS for the current request (an Origin-less fill must not poison browsers)', async () => {

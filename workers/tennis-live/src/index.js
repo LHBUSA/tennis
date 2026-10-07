@@ -40,6 +40,25 @@ export const CADENCE = Object.freeze({
   })
 });
 
+// Idle minute (no live edition): KV writes only when something changes (2026-10-07; was 3 puts every minute, ~4.3k/day).
+//  - live:owned / live:heartbeat: an empty ownership is identical to an absent or expired one for every reader
+//    (espn-live.js liveOwnedSet), so they are written only to RELEASE editions a previous cycle owned;
+//  - tennis-live:last_run: the cron-alive signal (scripts/canary/production.mjs: cycled within 3 min) is refreshed every
+//    IDLE_RUN_EVERY_MS instead of every minute; any change of its content (leaving live) is written at once.
+export const IDLE_RUN_EVERY_MS = 100e3;
+export async function idleCycle(kv, started) {
+  const owned = await kv.get('live:owned', 'json');
+  if (owned?.length) {
+    await kv.put('live:heartbeat', started, { expirationTtl: 300 });
+    await kv.put('live:owned', '[]', { expirationTtl: 300 });
+  }
+  const s = { worker: 'tennis-live', started_at: started, editions: 0, note: 'no edition with a match in progress' };
+  const last = await kv.get('tennis-live:last_run', 'json');
+  const fresh = last && last.editions === 0 && last.note === s.note && Date.parse(started) - Date.parse(last.started_at) < IDLE_RUN_EVERY_MS;
+  if (!fresh) await kv.put('tennis-live:last_run', JSON.stringify(s));
+  return { ...s, kv_writes: (owned?.length ? 2 : 0) + (fresh ? 0 : 1) };
+}
+
 export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs = BUDGET_MS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
   const t0 = Date.now();
   const store = storeFromEnv(env);
@@ -47,13 +66,9 @@ export async function liveCycle(env, { rounds = ROUNDS, gapMs = GAP_MS, budgetMs
   if (!store || !kv) return { ok: false, error: 'not_configured' };
   const editions = ((await kv.get('live:editions', 'json')) || []).slice(0, MAX_EDITIONS);
   const started = new Date().toISOString();
+  if (!editions.length) return idleCycle(kv, started);
   await kv.put('live:heartbeat', started, { expirationTtl: 300 });
   await kv.put('live:owned', JSON.stringify(editions.map((e) => e.edition_id)), { expirationTtl: 300 });
-  if (!editions.length) {
-    const s = { worker: 'tennis-live', started_at: started, editions: 0, note: 'no edition with a match in progress' };
-    await kv.put('tennis-live:last_run', JSON.stringify(s));
-    return s;
-  }
   const ctx = { env, store, kv, client: new SourceClient({ policies: livePolicies() }), log: [], upstream: 0 };
   const out = [];
   const diag = []; // ESPN (game-level) live pipeline stage trace, kept in a bounded internal KV ring (no payloads)
