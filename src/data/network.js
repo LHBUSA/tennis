@@ -1,11 +1,9 @@
 // PropBetEdge network registry (shape follows LHBUSA/UFC web/lib/network.ts and LHBUSA/wnba src/ui/network.js).
 // Family links must match the vendored canonical registry src/data/family.json
 // (LHBUSA/propbetedge-workers shared/network/family.json); tests/network-parity.test.js fails on drift.
-// The Discord invite and the X account are defined exactly once, network-wide.
 // Canonical network X identity: @PROPBETEDGE (https://x.com/PROPBETEDGE). Retired handles are guarded
 // against in scripts/guard-truth.mjs and must never return.
 
-export const PROPBETEDGE_DISCORD_URL = 'https://discord.gg/kb5zCTHbME';
 export const PROPBETEDGE_X_HANDLE = '@PROPBETEDGE';
 export const PROPBETEDGE_X_URL = 'https://x.com/PROPBETEDGE';
 export const CURRENT_SPORT = 'tennis';
@@ -14,7 +12,6 @@ export const NETWORK = Object.freeze({
   news: { label: 'Sports News', href: 'https://propbetedge.ai/' },
   store: { label: 'Store', href: 'https://ufc.propbetedge.ai/store' },
   learn: { label: 'Learn', href: 'https://learn.propbetedge.ai/' },
-  discord: { label: 'Discord', href: PROPBETEDGE_DISCORD_URL },
   x: { label: PROPBETEDGE_X_HANDLE, href: PROPBETEDGE_X_URL, title: 'Follow PropBetEdge on X' },
   sports: [
     { key: 'mlb', label: 'MLB', name: 'Baseball Intelligence', href: 'https://mlb.propbetedge.ai/' },
