@@ -8,6 +8,13 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-07 ATP live identities (owner-approved; cb1e9c3)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-live | `7bf4b7b1-7f04-432c-9cfe-3b7496654afb` @ cb1e9c3 (espn-live.js storedIdMap method 'external_id', was 'crosswalk' -> 23514) | `5544e86a-6e09-462f-82af-ca4e97d7e8d0` @ 45265d4 |
+| tennis-ingest | `38d2845f-6353-4412-8e29-18cad396250d` @ cb1e9c3 (same file, espn_live step) | `f4581d66-949c-4bd7-a670-61182eceb926` @ 4e2890b |
+
 ## 2026-10-07 Change-only match writes (tkmln write relief; docs/API.md "Change-only writes")
 
 | Component | Current | Rollback target |
