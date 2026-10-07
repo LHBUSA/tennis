@@ -61,3 +61,16 @@ test('withHeartbeat: tennis_matches reads come back with the merged heartbeat (i
   assert.equal(await editionHeartbeat(broken), null, 'KV unreadable -> rows as stored');
   resetHeartbeatMemo();
 });
+
+test('applyHeartbeat: a row read with its participants but missing a side keeps its stored time (no writer confirms it)', () => {
+  const hb = new Map([['E', '2026-10-07T15:48:44.517Z']]);
+  const both = [{ side: 'A' }, { side: 'B' }];
+  const rows = [
+    { match_id: 1, edition_id: 'E', status: 'completed', updated_at: '2026-09-28T23:30:56+00:00', tennis_match_participants: [] },
+    { match_id: 2, edition_id: 'E', status: 'completed', updated_at: '2026-09-28T23:30:56+00:00', tennis_match_participants: [{ side: 'A' }] },
+    { match_id: 3, edition_id: 'E', status: 'completed', updated_at: '2026-09-28T23:30:56+00:00', tennis_match_participants: both },
+    { match_id: 4, edition_id: 'E', status: 'completed', updated_at: '2026-09-28T23:30:56+00:00' } // participants not selected: unchanged rule
+  ];
+  applyHeartbeat(rows, hb);
+  assert.deepEqual(rows.map((r) => r.updated_at), ['2026-09-28T23:30:56+00:00', '2026-09-28T23:30:56+00:00', '2026-10-07T15:48:44.517Z', '2026-10-07T15:48:44.517Z']);
+});

@@ -44,6 +44,11 @@ export function shapeEdition(e) {
   return { slug: e.tennis_tournaments?.slug || null, tournament: e.tennis_tournaments?.name || null, name: e.name, year: e.year, level: e.level, surface: e.surface, indoor: e.indoor, start_date: e.start_date, end_date: e.end_date, city: e.city || null, country: e.country || null };
 }
 
+// A LIVE & RECENT card needs a named player on BOTH sides (2026-10-07: two ESPN China Open WS orphans whose
+// participants were stripped by an interrupted duplicate merge surfaced as name-less ATP-labelled finals). A row
+// without them is not shown there until it is resolved; no placeholder names.
+export const hasBothSides = (m) => ['A', 'B'].every((s) => (m?.sides?.[s]?.players || []).some((p) => p?.id && p?.name));
+
 export function shapeMatch(m) {
   const sides = {};
   for (const p of m.tennis_match_participants || []) {

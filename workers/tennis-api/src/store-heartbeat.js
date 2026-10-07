@@ -32,6 +32,9 @@ export function applyHeartbeat(rows, hb) {
   if (!hb?.size || !Array.isArray(rows)) return rows;
   for (const r of rows) {
     if (!r || !r.edition_id || !r.updated_at || r.status === 'in_progress') continue;
+    // a row read WITH its participants but lacking one side is not confirmed by its edition's observation (no writer
+    // reaches it: 2026-10-07 China Open WS orphans): it keeps its stored time
+    if (Array.isArray(r.tennis_match_participants) && !['A', 'B'].every((s) => r.tennis_match_participants.some((p) => p?.side === s))) continue;
     const at = hb.get(r.edition_id);
     if (at && Date.parse(at) > Date.parse(r.updated_at)) r.updated_at = at;
   }

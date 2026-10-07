@@ -4,7 +4,8 @@
 // insertion); cards fully visible before scrolling (4 at >= 1280, 3 at 1024, 2 at 768, 1 + a peek on phones); arrows
 // only when the strip overflows and never on phones, sitting in the header row; no clipped tour / tournament / round
 // metadata; no blank band under the cards; both tours among the finals and a doubles final; a live card (when one exists)
-// first and marked; every card has player rows, and every participant /v1/today serves with an approved photo renders
+// first and marked; every card has player rows (and every /v1/today live / latest_results row a resolved player on both
+// sides); every participant /v1/today serves with an approved photo renders
 // .av.is-photo in that card (the text-only regression of 2026-10-03).
 // Writes a section screenshot per width to OUT.
 import fs from 'node:fs';
@@ -99,6 +100,9 @@ for (const w of WIDTHS) {
   }
   if (s.textOnly) bad.push(`${s.textOnly} card(s) without player rows`);
   if (!today) bad.push('could not read /v1/today for the photo check');
+  // API contract (2026-10-07 China Open WS orphans): every LIVE & RECENT source row names a player on BOTH sides
+  const nameless = rows.filter((m) => !['A', 'B'].every((x) => (m.sides?.[x]?.players || []).some((pl) => pl?.id && pl?.name)));
+  if (nameless.length) bad.push(`/v1/today card(s) without a resolved player on both sides: ${nameless.slice(0, 4).map((m) => m.id).join(', ')}`);
   if (missing.length) bad.push(`approved photo not rendered: ${missing.slice(0, 4).join(', ')}`);
   if (STRICT && !s.dbl) bad.push('no doubles final in the strip');
   if (errs.length) bad.push(`console: ${errs[0].slice(0, 120)}`);

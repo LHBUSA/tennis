@@ -35,9 +35,9 @@ test('archive routes ignore irrelevant query strings and use a long cache TTL', 
       const res = await worker.fetch(new Request(`https://tennis-api.propbetedge.ai${path}`, { headers: { origin: 'https://tennis.propbetedge.ai' } }), {}, { waitUntil() {} });
       assert.equal(res.headers.get('cache-control'), 'public, max-age=21600', path);
     }
-    assert.equal(seen[0], 'https://tennis-api.propbetedge.ai/v1/slams?__v=0.10.5');
+    assert.equal(seen[0], 'https://tennis-api.propbetedge.ai/v1/slams?__v=0.10.6');
     assert.equal(seen[1], seen[0], 'slams query params do not create new archive cache entries');
-    assert.equal(seen[2], 'https://tennis-api.propbetedge.ai/v1/men?__v=0.10.5');
-    assert.equal(seen[3], 'https://tennis-api.propbetedge.ai/v1/men/players?__v=0.10.5');
+    assert.equal(seen[2], 'https://tennis-api.propbetedge.ai/v1/men?__v=0.10.6');
+    assert.equal(seen[3], 'https://tennis-api.propbetedge.ai/v1/men/players?__v=0.10.6');
   } finally { globalThis.caches = prev; }
 });

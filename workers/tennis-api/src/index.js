@@ -12,7 +12,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.10.5';
+export const VERSION = '0.10.6';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -70,7 +70,7 @@ async function membershipFor(request, env) {
 }
 
 
-import { configureScheduleDay, PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
+import { configureScheduleDay, PLAYER, MATCH, FINAL, TOUR_LEVELS, UUID, SLUG, today, addDays, shapeEdition, shapeMatch, hasBothSides, shapePlayer, shapePhoto, maxTime, families, MEDIA } from './shape.js';
 import { v2Route } from './v2.js';
 import { newsRoute, isPreview } from './news.js';
 import { menRoute } from './men.js';
@@ -120,7 +120,7 @@ export async function liveRows(store, now = Date.now()) {
 
 async function live(store) {
   const rows = await liveRows(store);
-  return ok(rows.map(shapeMatch), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server where the live source publishes them (point-level live), set and game scores only otherwise (game-level live)' });
+  return ok(rows.map(shapeMatch).filter(hasBothSides), { rows, policy: { currentS: 240, staleS: 900 }, semantics: 'matches whose latest observed source state is in progress, every tour and event type (MS, WS, MD, WD, XD); point score + server where the live source publishes them (point-level live), set and game scores only otherwise (game-level live)' });
 }
 
 async function editionsInWindow(store, from, to, all) {
@@ -162,12 +162,12 @@ async function todayView(store) {
   const data = {
     date: d,
     tournaments: eds.map((e) => ({ ...withTour(e), matches: shaped.filter((m) => m.tournament?.slug === e.tennis_tournaments?.slug && m.tournament?.year === e.year).length })),
-    live: shaped.filter((m) => m.status === 'in_progress' && liveIds.has(m.id)),
+    live: shaped.filter((m) => m.status === 'in_progress' && liveIds.has(m.id) && hasBothSides(m)),
     upcoming: shaped.filter((m) => isCurrentUpcoming(m)).sort((a, b) => String(a.scheduled_at || '9').localeCompare(String(b.scheduled_at || '9'))),
     // newest first by when we last observed the result (ESPN rows carry no source timestamp: our write time)
     // up to 20 newest per side of the sport (women's / men's + mixed), merged newest first: a burst of one tour's
     // results (e.g. a backfill) never pushes the other tour's finals off the list
-    latest_results: (() => { const fin = shaped.filter((m) => FINAL.includes(m.status)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))); return [...fin.filter((m) => /^W/.test(m.event_type || '')).slice(0, 20), ...fin.filter((m) => !/^W/.test(m.event_type || '')).slice(0, 20)].sort((a, b) => matchDay(b).localeCompare(matchDay(a))); })(),
+    latest_results: (() => { const fin = shaped.filter((m) => FINAL.includes(m.status) && hasBothSides(m)).sort((a, b) => matchDay(b).localeCompare(matchDay(a))); return [...fin.filter((m) => /^W/.test(m.event_type || '')).slice(0, 20), ...fin.filter((m) => !/^W/.test(m.event_type || '')).slice(0, 20)].sort((a, b) => matchDay(b).localeCompare(matchDay(a))); })(),
     coverage: TOUR_COVERAGE
   };
   // a finished match has a PBEcast REPLAY only when we stored its events (observed live or source points): one row per
