@@ -8,6 +8,12 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-07 LIVE & RECENT resolved-sides contract (tennis-api 0.10.6; 2224cfa)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-api | `42e55460-b97b-4c10-a468-8733b6db783d` @ 2224cfa (/v1/today live + latest_results and /v1/live: a named player on both sides; heartbeat skips participant-less rows) | `0d1e3066-7f1c-4565-9987-27c03934e827` @ 4e2890b |
+
 ## 2026-10-07 ATP live identities (owner-approved; cb1e9c3)
 
 | Component | Current | Rollback target |
