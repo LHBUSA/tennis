@@ -12,7 +12,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.10.7';
+export const VERSION = '0.10.8';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [
@@ -365,6 +365,23 @@ const QUERY_AGNOSTIC_ARCHIVE = /^\/v1\/(?:slams|men(?:\/players)?)$/;
 // (https://tennis-api.propbetedge.ai/...) never shared an entry: every crawled tournament / player page cost two DB reads.
 // No route's body depends on the request host.
 const CACHE_ORIGIN = 'https://tennis-api.propbetedge.ai';
+// Phase 3 coalescing (see fetchApi): the two routes behind tkmln's top statement (the 5-level edition-list read,
+// ~180 ms alone, ~2 s under concurrent misses) wait for a peer isolate's in-flight build
+const COALESCE_ACROSS = /^\/v1\/(?:today|schedule)$/;
+const INFLIGHT = new Map();
+const LOCK_S = 10;          // a lock outlives no build by more than this (a crashed builder never blocks the key)
+const WAIT_MS = 6000;       // a waiter gives up and builds itself after this
+const POLL_MS = 200;
+export async function waitForPeer(cache, cacheKey, lockKey, { waitMs = WAIT_MS, pollMs = POLL_MS, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) } = {}) {
+  if (!(await cache.match(lockKey).catch(() => null))) return null;
+  for (let t = 0; t < waitMs; t += pollMs) {
+    await sleep(pollMs);
+    const hit = await cache.match(cacheKey).catch(() => null);
+    if (hit) return hit;
+    if (!(await cache.match(lockKey).catch(() => null))) return (await cache.match(cacheKey).catch(() => null)) || null;
+  }
+  return null;
+}
 
 export async function route(path, url, store, env) {
   if (path === '/v1/sources') return sources();
@@ -460,18 +477,44 @@ async function fetchApi(request, env, ctx, { propsportsInternal = false } = {}) 
         return r;
       }
     }
-    let body;
-    try {
-      // withMemo: build-versioned shared results (memo.js) for the DNA population / gate reads
-      // withHeartbeat: per-edition source confirmation merged into tennis_matches.updated_at (store-heartbeat.js)
-      body = await route(path, url, withHeartbeat(withMemo(storeFromEnv(env), env, ctx), env), env);
-    } catch (e) {
-      body = envelope(null, { freshness: 'ERROR', semantics: 'canonical store read failed', degraded: [String(e?.message || e).slice(0, 200)] });
+    // Coalescing (2026-10-07, Phase 3): concurrent misses of one cache key build once. In this isolate: one in-flight
+    // build per key (single-flight). Across isolates of the colo (/today, /schedule): the first miss leaves a short lock
+    // entry in caches.default and the others wait for its response to land (bounded; then they build themselves). The
+    // cached body, TTL and freshness are unchanged — waiters get the same fresh build. Never for bypass (premium/preview).
+    let lockKey = null;
+    if (cache && !bypass && COALESCE_ACROSS.test(path) && !INFLIGHT.has(cacheKey.url)) {
+      lockKey = new Request(`${cacheKey.url}&__lock=1`, { method: 'GET' });
+      const waited = await waitForPeer(cache, cacheKey, lockKey);
+      if (waited) {
+        const r = withCors(new Response(waited.body, waited), request);
+        r.headers.set('cache-control', `public, max-age=${ttl}`);
+        return r;
+      }
     }
+    const build = async () => {
+      if (lockKey) await cache.put(lockKey, new Response('1', { headers: { 'cache-control': `max-age=${LOCK_S}` } })).catch(() => {});
+      try {
+        // withMemo: build-versioned shared results (memo.js) for the DNA population / gate reads
+        // withHeartbeat: per-edition source confirmation merged into tennis_matches.updated_at (store-heartbeat.js)
+        return await route(path, url, withHeartbeat(withMemo(storeFromEnv(env), env, ctx), env), env);
+      } catch (e) {
+        return envelope(null, { freshness: 'ERROR', semantics: 'canonical store read failed', degraded: [String(e?.message || e).slice(0, 200)] });
+      }
+    };
+    let body;
+    if (cache && !bypass) {
+      let p = INFLIGHT.get(cacheKey.url);
+      if (!p) { p = build().finally(() => INFLIGHT.delete(cacheKey.url)); INFLIGHT.set(cacheKey.url, p); } else lockKey = null;
+      body = await p;
+    } else body = await build();
     if (body === undefined) return json({ ok: false, error: 'not_found' }, { status: 404 });
     if (body === null) return json(envelope(null, { freshness: 'UNAVAILABLE', semantics: 'not found in the canonical store' }), { status: 404 });
     const res = json(body, { headers: { ...corsFor(request), 'cache-control': bypass ? (premium ? 'private, no-store' : 'no-store') : `public, max-age=${ttl}`, ...(bypass ? { 'x-robots-tag': 'noindex' } : {}) } });
-    if (cache && !bypass && body.meta?.freshness !== 'ERROR') ctx.waitUntil(cache.put(cacheKey, res.clone()));
+    if (cache && !bypass && body.meta?.freshness !== 'ERROR') {
+      const put = cache.put(cacheKey, res.clone());
+      // the lock goes only after the real entry has landed (a waiter that sees neither builds itself)
+      ctx.waitUntil(lockKey ? put.then(() => cache.delete(lockKey)).catch(() => {}) : put);
+    } else if (lockKey) ctx.waitUntil(cache.delete(lockKey).catch(() => {}));
     return res;
 }
 
