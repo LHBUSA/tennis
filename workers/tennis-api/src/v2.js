@@ -19,6 +19,7 @@ const LOWER_IS_BETTER = new Set(['double_fault_rate']);
 import { coveredEditions, keepTour, TOUR_FILTERS, TOUR_COVERAGE } from './tours.js';
 import { readOverdue, tournamentFreshness, GUARD_VERSION, OVERDUE_H } from '../../shared/freshness.js';
 import { matchDna, matchDnaLeaders, pbecastMatchDna, V2_METRICS } from './dna2.js';
+import { dnaMemo } from './memo.js';
 
 // offset paging is only exact over a stable order: every caller's query names one (a page boundary over an unordered
 // scan can skip or repeat rows, which made leader counts drift between requests until 2026-09-28)
@@ -41,7 +42,8 @@ async function playerBySlug(store, slug) {
 /** Latest DNA snapshot date for ONE tour. Tours are never coupled: a newer WTA build must not move the ATP gate
  *  (or the reverse) onto a date where that tour has no complete snapshot. */
 export async function latestAsOfForGender(store, gender) {
-  return (await store.select('tennis_dna_snapshots', `select=as_of,tennis_players!inner(gender)&definition_version=eq.1&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=as_of.desc&limit=1`))[0]?.as_of || null;
+  // memoised per DNA build version (memo.js): the latest as_of only moves when a build writes
+  return dnaMemo(store, `dna1-latest/${gender === 'M' ? 'M' : 'F'}`, async () => (await store.select('tennis_dna_snapshots', `select=as_of,tennis_players!inner(gender)&definition_version=eq.1&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=as_of.desc&limit=1`))[0]?.as_of || null);
 }
 
 const TOUR_OF = { F: 'WTA', M: 'ATP' };
@@ -50,6 +52,10 @@ export const DNA_MIN_QUALIFIED = 30;
 /** Level-3 gate, evaluated live on every request from the tour's own latest snapshot: it opens at
  *  DNA_MIN_QUALIFIED and closes again if a newer legitimate snapshot drops below it (fails closed). */
 export async function tourDnaStatus(store, gender) {
+  // evaluated per stored build: memoised per DNA build version (memo.js), recomputed as soon as a build/retention writes
+  return dnaMemo(store, `dna1-gate/${gender === 'M' ? 'M' : 'F'}`, () => tourDnaStatusUncached(store, gender));
+}
+async function tourDnaStatusUncached(store, gender) {
   const asOf = await latestAsOfForGender(store, gender);
   if (!asOf) return { ready: false, qualified: 0, as_of: null };
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.all&definition_version=eq.1&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=pbe_player_id.asc`);
@@ -58,6 +64,10 @@ export async function tourDnaStatus(store, gender) {
 }
 /** Population for percentiles: same as_of + surface + TOUR (ATP and WTA are never pooled), confidence medium/high. */
 async function population(store, asOf, surface, gender) {
+  // the same rows for every player of the tour: computed once per (as_of, surface, tour, DNA build version)
+  return dnaMemo(store, `dna1-pop/${asOf}/${surface}/${gender === 'M' ? 'M' : 'F'}`, () => populationUncached(store, asOf, surface, gender));
+}
+async function populationUncached(store, asOf, surface, gender) {
   const rows = await allRows(store, 'tennis_dna_snapshots', `select=pbe_player_id,metrics,tennis_players!inner(gender)&as_of=eq.${asOf}&surface=eq.${surface}&definition_version=eq.${DEFINITION_VERSION}&tennis_players.gender=eq.${gender === 'M' ? 'M' : 'F'}&order=pbe_player_id.asc`);
   const pop = {};
   for (const [k] of Object.entries(DEFINITIONS)) pop[k] = rows.map((r) => r.metrics?.[k]).filter((m) => m && m.value != null && ['medium', 'high'].includes(m.confidence)).map((m) => m.value).sort((a, b) => a - b);
