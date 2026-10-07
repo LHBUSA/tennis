@@ -59,6 +59,8 @@ function matcher(query) {
     const k = decodeURIComponent(part.slice(0, i));
     const v = decodeURIComponent(part.slice(i + 1));
     if (k === 'select') {
+      // json path projections (`alias:col->key`): only then is the select list applied to the returned rows
+      if (v.includes('->')) opts.project = v.split(',').map((c) => /^(\w+):(\w+)->(\w+)$/.exec(c) || c);
       opts.embeds = [...v.matchAll(/(\w+)(?:!inner)?\(/g)].map((m) => m[1]);
       for (const m of v.matchAll(/(\w+)!inner\(/g)) opts.inner.add(m[1]);
       continue;
@@ -102,7 +104,9 @@ export class MemStore {
       if (opts.inner.has(e)) out = out.filter((r) => r[e].length);
     }
     if (opts.order) { const [col, dir] = opts.order.split(',')[0].split('.'); out.sort((a, b) => (a[col] < b[col] ? -1 : a[col] > b[col] ? 1 : 0) * (dir === 'desc' ? -1 : 1)); }
-    return out.slice(opts.offset, opts.offset + opts.limit);
+    out = out.slice(opts.offset, opts.offset + opts.limit);
+    if (opts.project) out = out.map((r) => Object.fromEntries(opts.project.map((c) => (Array.isArray(c) ? [c[1], r[c[2]]?.[c[3]] ?? null] : [c, r[c]]))));
+    return out;
   }
   async upsert(table, rows, { onConflict, ignore = false } = {}) {
     this.requests += 1;
@@ -133,7 +137,8 @@ export class MemStore {
 
 export class MemKV {
   constructor() { this.m = new Map(); }
-  async get(k, type) { const v = this.m.get(k); if (v == null) return null; return type === 'json' ? JSON.parse(v) : v; }
+  // type as a string or as the Workers options object ({ type, cacheTtl })
+  async get(k, type) { const t = typeof type === 'object' && type ? type.type : type; const v = this.m.get(k); if (v == null) return null; return t === 'json' ? JSON.parse(v) : v; }
   async put(k, v) { this.m.set(k, typeof v === 'string' ? v : String(v)); }
   async delete(k) { this.m.delete(k); }
 }

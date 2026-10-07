@@ -15,9 +15,17 @@ async function all(store, table, query, page = 1000) {
   }
 }
 
+// The only stats keys the v1 definitions read (shared/dna/metric.js DEFINITIONS). The stored jsonb also carries per-set
+// splits and other totals: ~18.6 MB of JSON for 25k side rows (2026-10-07), all of it parsed and held for the whole build,
+// which made this daily step a memory risk for the 128 MB isolate. Projecting the inputs in PostgREST (stats->key) gives
+// buildDna exactly the values it read before (a missing key is null either way; tests/dna-v1-projection.test.js).
+export const V1_STAT_KEYS = Object.freeze(['service_points', 'aces', 'double_faults', 'first_serves_in', 'first_serve_points_won', 'second_serve_points_won', 'service_games', 'break_points_faced', 'break_points_saved']);
+export const V1_STATS_SELECT = `select=match_id,side,source_family,${V1_STAT_KEYS.map((k) => `${k}:stats->${k}`).join(',')}&order=match_id.asc`;
+export const projectV1Stats = (r) => ({ match_id: r.match_id, side: r.side, source_family: r.source_family, stats: Object.fromEntries(V1_STAT_KEYS.map((k) => [k, r[k] ?? null])) });
+
 export async function buildDnaSnapshots(ctx, { asOf = new Date().toISOString().slice(0, 10), asOfs = null, builder = 'tennis-ingest dna-job v1.1' } = {}) {
   const dates = asOfs || [asOf];
-  const stats = await all(ctx.store, 'tennis_match_stats', 'select=match_id,side,source_family,stats&order=match_id.asc');
+  const stats = (await all(ctx.store, 'tennis_match_stats', V1_STATS_SELECT)).map(projectV1Stats);
   const ids = [...new Set(stats.map((s) => s.match_id))];
   const meta = new Map();
   const parts = new Map();

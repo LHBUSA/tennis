@@ -66,11 +66,15 @@ function isActive(e, today) {
 }
 
 async function step(ctx, name, fn) {
+  // one log line per step start (Workers observability): an invocation killed by exceededMemory / exceededResources
+  // writes no run summary, so the last 'start' line of a failed invocation names the step that was running
+  const t0 = Date.now();
+  console.log(JSON.stringify({ tick_step: name, phase: 'start' }));
   try {
     const out = await fn();
-    ctx.steps.push({ step: name, ok: true, out });
+    ctx.steps.push({ step: name, ok: true, ms: Date.now() - t0, out });
   } catch (e) {
-    ctx.steps.push({ step: name, ok: false, error: String(e?.message || e).slice(0, 300) });
+    ctx.steps.push({ step: name, ok: false, ms: Date.now() - t0, error: String(e?.message || e).slice(0, 300) });
   }
 }
 
