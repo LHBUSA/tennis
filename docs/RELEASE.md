@@ -8,6 +8,12 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-07 Phase 3: /today + /schedule miss coalescing (tennis-api 0.10.8; 29792dc)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-api | `3797fc3e-ad83-415c-8b4d-87e798d99776` @ 29792dc (in-isolate single-flight for cacheable routes; cross-isolate cache lock for /v1/today and /v1/schedule) | `741ada20-5e49-457a-9544-25d5429e8544` @ c268ef6 |
+
 ## 2026-10-07 Superseded match ids 301 to their survivor (tennis-api 0.10.7, tennis-web 0.1.1; c268ef6)
 
 | Component | Current | Rollback target |
