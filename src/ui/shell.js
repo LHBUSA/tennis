@@ -105,7 +105,6 @@ export function footerHtml() {
         <a href="https://propbetedge.ai/legal">Legal</a>
         <a href="https://propbetedge.ai/support">Support</a>
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
-        <a href="${NETWORK.discord.href}" rel="noopener">${NETWORK.discord.label}</a>
       </nav>
     </div>
     <div class="ftr-psrc">${preferredSourceHtml({ surface: 'footer' })}</div>
