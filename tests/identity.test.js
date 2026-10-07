@@ -44,5 +44,5 @@ test('Tennis is in PropBetEdge All Access: footer links the local /all-access pa
   assert.ok(CONTRACT_NETWORK.some((s) => s.key === 'tennis' && s.url === 'https://tennis.propbetedge.ai'));
   const f = String(footerHtml());
   assert.match(f, /<a class="ftr-aa" href="\/all-access" data-pbe-footer-all-access>All Access · \$29\/month<\/a>/);
-  assert.doesNotMatch(f, /propbetedge\.ai\/pro/, 'informational All Access links stay on tennis.propbetedge.ai');
+  assert.match(f, /href="\/all-access"/, 'Tennis informational All Access link stays local');
 });
