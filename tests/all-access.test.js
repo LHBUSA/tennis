@@ -98,7 +98,7 @@ test('the network comes from the registry: 10 sports + PropBetEdge Predictions, 
   const page = String(allAccessPageHtml('signed_out', ANON));
   for (const s of FAMILY.sports) assert.match(page, new RegExp(`<b>${s.key === 'f1' ? 'F1 Intelligence' : s.label}</b>`), s.key);
   assert.match(page, /You are here<\/em><small>Tennis Intelligence/);
-  assert.match(page, /Intelligence product · not a sport<\/span><b>◆ PropBetEdge Predictions/);
+  assert.match(page, /<span>Intelligence<\/span><b>◆ Command Center<\/b><b>◆ Compare<\/b><b>◆ Predictions<\/b>/);
   assert.doesNotMatch(page, /11 sports|eleven sports/i);
   const plat = String(allAccessPageHtml('all_access', PLAT));
   assert.equal((plat.match(/Open →/g) || []).length, (FAMILY.sports.length - 1) * 2 + FAMILY.products.length, 'every other sport launches from the launcher and the grid; Predictions from the launcher (plus its own card)');
