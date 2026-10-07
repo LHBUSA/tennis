@@ -18,6 +18,11 @@ const UNIQUE = {
   tennis_matches: [['edition_id', 'natural_key']]
 };
 
+// CHECK constraints the writers can hit (Postgres evaluates them on the proposed row BEFORE on-conflict resolution, so an
+// ignore-duplicates insert of an existing key still fails): 20260926000100_tennis_core.sql
+const CHECKS = {
+  tennis_player_external_ids: [['tennis_player_external_ids_method_check', (r) => r.method == null || ['founding', 'external_id', 'name_dob', 'manual_review'].includes(r.method)]]
+};
 const DEFAULTS = { tennis_matches: { stats_status: 'pending' }, tennis_players: { status: 'active' } };
 const unq = (v) => (v.startsWith('"') && v.endsWith('"') ? v.slice(1, -1).replace(/\\"/g, '"') : v);
 function parseList(v) {
@@ -113,6 +118,9 @@ export class MemStore {
     this.log.push(['UPSERT', table, rows.length]);
     const cols = onConflict ? onConflict.split(',') : PK[table];
     const list = this.rows(table);
+    for (const row of rows) for (const [name, ok] of CHECKS[table] || []) {
+      if (!ok(row)) { const e = new Error(`postgrest 400 POST ${table}: {"code":"23514","message":"new row violates check constraint \\"${name}\\""}`); e.status = 400; throw e; }
+    }
     for (const row of rows) {
       const k = this.key(table, row, cols);
       const hit = list.find((r) => this.key(table, r, cols) === k);

@@ -60,7 +60,10 @@ export function liveCandidates(json, { now = Date.now(), previously = [], window
 }
 
 /** ESPN athlete ids -> idMap from the STORED crosswalk only (resolved earlier by the espn_atp lane). Unknown ids stay
- *  unresolved: their match is held by the writer, never guessed. */
+ *  unresolved: their match is held by the writer, never guessed. method 'external_id' = the label the espn_atp lane gives
+ *  the same stored-crosswalk resolution (shared/canonical/espn-identity.js); it is written to
+ *  tennis_player_external_ids.method, whose CHECK allows founding | external_id | name_dob | manual_review. Until
+ *  2026-10-07 this said 'crosswalk': every ATP live write failed with 23514 before writing anything. */
 export async function storedIdMap(store, espnIds) {
   if (!espnIds.length) return {};
   const x = await store.select('tennis_player_external_ids', `select=external_id,pbe_player_id&provider=eq.espn&external_id=${inList(espnIds)}`);
@@ -72,7 +75,7 @@ export async function storedIdMap(store, espnIds) {
     const p = byPid.get(r.pbe_player_id);
     const m = /^(atp|wta):(.+)$/.exec(p?.founding_external_key || '');
     if (!m) continue;
-    out[String(r.external_id)] = { provider: m[1], provider_id: m[2], evidence: `stored crosswalk espn:${r.external_id} -> ${p.founding_external_key}`, method: 'crosswalk', first_name: p.first_name || null, last_name: p.last_name || null, country: p.nationality || null, gender: p.gender || null, canonical_name: p.full_name || null };
+    out[String(r.external_id)] = { provider: m[1], provider_id: m[2], evidence: `stored crosswalk espn:${r.external_id} -> ${p.founding_external_key}`, method: 'external_id', first_name: p.first_name || null, last_name: p.last_name || null, country: p.nationality || null, gender: p.gender || null, canonical_name: p.full_name || null };
   }
   return out;
 }
