@@ -107,6 +107,7 @@ export function footerHtml() {
         <a href="${NETWORK.store.href}">${NETWORK.store.label}</a>
       </nav>
     </div>
+    <div class="ftr-kxo" id="tennis-kxo" hidden></div>
     <div class="ftr-psrc">${preferredSourceHtml({ surface: 'footer' })}</div>
   </footer>`;
 }

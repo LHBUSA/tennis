@@ -33,6 +33,7 @@ import { wireLivePulse } from './ui/live-pulse.js';
 import { wireCopy } from './ui/share.js';
 import { wirePreferredSource } from './ui/preferred-source.js';
 import { wireImageFallback } from './ui/avatar.js';
+import { mountKalshiPartnerFooter } from './ui/kalshi-partner-footer.js';
 import { initAnalytics, trackPageView, setRouteContext, track } from './analytics.js';
 import { setPageSurface } from './lib/v4.js';
 import { getAccount, applyMembershipChrome, premiumRoute, premiumGateHtml, wirePremiumGate } from './lib/membership.js';
@@ -68,6 +69,7 @@ wireLivePulse(app);
 wireCopy(document);
 wirePreferredSource(document);
 wireImageFallback(document);
+mountKalshiPartnerFooter();
 initAnalytics();
 getAccount().then((acct) => applyMembershipChrome(app, acct)).catch(() => {});
 document.addEventListener('click', (e) => {
