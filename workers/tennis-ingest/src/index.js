@@ -24,6 +24,7 @@ import { espnAtpStep, espnWtaStep, espnRankingStep } from './espn-jobs.js';
 import { espnLiveScan, espnLiveObserve, liveOwnedSet } from './espn-live.js';
 import { buildDnaSnapshots } from './dna-job.js';
 import { buildDnaV2 } from './dna-v2-job.js';
+import { runDnaV2Unit, acquireLease, releaseLease } from './dna-daily.js';
 import { wtaHistoryStep } from './wta-history-job.js';
 import { wtaEditionFactsStep, drawSheet } from './context-jobs.js';
 import { wtaRecordsStep } from './wta-records-job.js';
@@ -37,7 +38,7 @@ import { readOverdue, GUARD_VERSION, OVERDUE_H } from '../../shared/freshness.js
 import { flushObserved } from '../../shared/observed.js';
 import { calendarWindow, editionContext, editionMatches, pendingStats, rankingStep, wimbledonMen, wimbledonArchiveStep, rolandGarrosStep, ausopenPlayers, ausopenDayMatches, ausopenPointStep, ausopenGapStep, wikidataPage, TOUR_LEVELS, iso, addDays } from './jobs.js';
 
-export const VERSION = '0.4.1';
+export const VERSION = '0.4.2';
 const BACKFILL_FROM = '2025-01-01';       // match backfill start (current + previous season)
 const RANK_HISTORY_FLOOR = '2020-01-06';  // weekly ranking history floor (phase A: 2020 ->)
 const HISTORY_PHASE_A = { from: '2020-01-01', to: '2024-12-31' }; // after the current-season pass
@@ -430,16 +431,30 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
     if (force.dna || (await kv.get('dna:last')) !== day) dates.push(day);
     if (hist >= '2025-02-01') dates.push(hist);
     if (!dates.length) return 'fresh';
-    const r = await buildDnaSnapshots(ctx, { asOfs: dates });
-    if (dates.includes(day)) await kv.put('dna:last', day);
-    if (dates.includes(hist)) { const d = new Date(`${hist}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); await kv.put('dna:hist', d.toISOString().slice(0, 10)); }
-    return r;
+    // daily heavy work runs one unit per tick under the shared build lease (dna-daily.js): never two builds at once
+    const lease = await acquireLease(kv);
+    if (!lease) return 'build_in_progress';
+    ctx.heavyUnit = 'dna';
+    try {
+      const r = await buildDnaSnapshots(ctx, { asOfs: dates });
+      if (dates.includes(day)) await kv.put('dna:last', day);
+      if (dates.includes(hist)) { const d = new Date(`${hist}T00:00:00Z`); d.setUTCMonth(d.getUTCMonth() - 1); await kv.put('dna:hist', d.toISOString().slice(0, 10)); }
+      return r;
+    } finally { await releaseLease(kv, lease); }
   });
 
   // 5c. daily Tennis DNA v2 (Match DNA + PBE Rating): today + one historical month-start per day, back to 2008
   await step(ctx, 'dna_v2', async () => {
     const day = iso(started);
     if (!force.dna && (await kv.get('dna2:last')) === day) return 'fresh';
+    // cron: ONE bounded unit of the day's plan per tick, resumed by the next tick (dna-daily.js); never in the same
+    // tick as another heavy unit. An admin forced rebuild (?dna=1) keeps the single-invocation build below.
+    if (!force.dna) {
+      if (ctx.heavyUnit) return { deferred: ctx.heavyUnit };
+      const u = await runDnaV2Unit(ctx, { day });
+      if (u !== 'unit_in_progress') ctx.heavyUnit = 'dna_v2';
+      return u;
+    }
     const hist = (await kv.get('dna2:hist')) || `${day.slice(0, 7)}-01`;
     const asOfs = [day, ...(hist >= '2008-01-01' && hist !== day ? [hist] : [])];
     // input mode: 'full' until the incremental loader has been proven equal (KV dna2:mode = 'auto' switches)
@@ -454,6 +469,7 @@ async function tickInner(env, store, kv, force, { only = null, budget = null, pa
   await step(ctx, 'dna_retention', async () => {
     const day = iso(started);
     if ((await kv.get('dna:retention:day')) === day) return 'fresh';
+    if (ctx.heavyUnit) return { deferred: ctx.heavyUnit };
     if (await pausedReason(kv)) return 'db_paused';
     if ((await kv.get('dna2:last')) !== day) return 'waiting_for_build';
     const r = await runRetention(ctx, { today: day });

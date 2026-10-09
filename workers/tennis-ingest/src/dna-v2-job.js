@@ -10,6 +10,7 @@ import { writeMm2State } from './mm2-state.js';
 import { ledgerEntry, byOrder, rankIndex, ratingRun, backtest, buildMatchDna, populationIndex, applyPopulationOne, slimForPopulation, recentMatches, buildProfile, PROFILE_VERSION, MATCH_DNA_VERSION, RATING_METHOD_VERSION } from '../../shared/dna/match-dna.js';
 
 const BUILDER = 'tennis-ingest dna-v2-job 1.0';
+export const TOURS = Object.freeze(['ATP', 'WTA']);
 // rating history is stored for players active in the 365 days before as_of (inactive careers keep their splits)
 const yearBefore = (asOf) => new Date(Date.parse(asOf) - 365 * 86400e3).toISOString().slice(0, 10);
 // burn-in seasons before evaluation starts (ATP ledger from 2007; WTA from 2020)
@@ -62,8 +63,13 @@ export async function loadRankLists(ctx, listKey, { mode = 'auto' } = {}) {
  * Build and store v2 snapshots for `asOfs` (default: today). Returns a summary incl. the backtest.
  * write=false computes everything and returns the summary only (research / dry run).
  */
-export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(0, 10)], write = true, mode = 'auto' } = {}) {
+export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(0, 10)], write = true, mode = 'auto', tours = TOURS, primary = true, overall = true, surfaces = true, finalize = true } = {}) {
+  // Partial builds (dna-daily.js splits the daily build into bounded units, one per cron tick): `tours` limits the
+  // tours built; `primary` = asOfs[0] is the build's primary date (ratings, Players to Watch, MM2 state, population
+  // summary, surface DNA); `overall` runs the per-as_of snapshot passes; `surfaces` the surface pass; `finalize` writes
+  // the Players to Watch lists and the KV summary. The defaults are the whole build, exactly as before.
   const t0 = Date.now();
+  const primaryAsOf = primary ? asOfs[0] : null;
   const store = ctx.store;
   const phase = {};
   let tp = Date.now();
@@ -103,7 +109,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   const summary = { builder: BUILDER, definition_version: MATCH_DNA_VERSION, rating_method_version: RATING_METHOD_VERSION, as_of: asOfs, ledger: 0, tours: {} };
   let snapshotCount = 0;
   const ratingRows = [];
-  for (const tour of ['ATP', 'WTA']) {
+  for (const tour of TOURS.filter((t) => tours.includes(t))) {
     // one tour in memory at a time: its ledger is loaded here and released when the tour is done
     const tl = Date.now();
     const { entries: L, info } = await loadTourLedger(ctx, tour, { tourOf, editions, mode });
@@ -131,7 +137,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
     const byPlayer = new Map();
     for (const e of L) for (const pid of [e.A, e.B]) { if (!byPlayer.has(pid)) byPlayer.set(pid, []); byPlayer.get(pid).push(e); }
     // research-only Matchup Model V2 shadow state (mm2-state.js): one R2 object, never part of this build's outputs
-    if (write) await writeMm2State(ctx, tour, byPlayer, run, asOfs[0]);
+    if (write && primary && overall) await writeMm2State(ctx, tour, byPlayer, run, asOfs[0]);
     // one player's full snapshot at asOf (deterministic; computed twice in the two-pass build below)
     const snapshotOf = (pid, entries, asOf) => {
       // rating as of D = the pre-match rating of the player's first match on/after D, else the final rating
@@ -175,21 +181,21 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         r30: r30 && { r: Math.round(r30.r), n: r30.n }, r90: r90 && { r: Math.round(r90.r), n: r90.n }, surf,
         rank: rk?.rank ? { rank: rk.rank, list_date: rk.list_date } : null };
     };
-    for (const asOf of asOfs) {
+    for (const asOf of overall ? asOfs : []) {
       // pass 1: the same-tour, same-as_of population from one slim record per player
       const slim = [];
       for (const [pid, entries] of byPlayer) {
         const x = snapshotOf(pid, entries, asOf);
         if (!x) continue;
         slim.push(slimForPopulation(x.snap));
-        if (asOf === asOfs[0] && x.rating) watchRows.push(watchRow(pid, entries, asOf, x));
-        if (asOf === asOfs[0] && x.rating) {
+        if (asOf === primaryAsOf && x.rating) watchRows.push(watchRow(pid, entries, asOf, x));
+        if (asOf === primaryAsOf && x.rating) {
           ratingRows.push({ pbe_player_id: pid, surface: 'overall', as_of: asOf, method_version: RATING_METHOD_VERSION, rating: x.rating.value, uncertainty: null, sample_matches: x.n, provenance: { variant, published, tour, builder: BUILDER } });
           if (!x.next) for (const sf of ['hard', 'clay', 'grass']) { const r = run.surface.get(`${pid}|${sf}`); if (r?.n) ratingRows.push({ pbe_player_id: pid, surface: sf, as_of: asOf, method_version: RATING_METHOD_VERSION, rating: Math.round(r.r), uncertainty: null, sample_matches: r.n, provenance: { variant, published: surfacePublished, tour, builder: BUILDER, note: 'surface rating from matches whose surface is stored; blend 50/50 with overall for prediction' } }); }
         }
       }
       const idx = populationIndex(slim, { asOf });
-      if (asOf === asOfs[0]) summary.tours[tour].population = idx.counts;
+      if (asOf === primaryAsOf) summary.tours[tour].population = idx.counts;
       snapshotCount += slim.length;
       if (!write) continue; // a dry run needs the population summary only
       // pass 2: rebuild each snapshot, apply the population, write in batches of 200 (one batch held at a time)
@@ -210,7 +216,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
     // is its edition's, never inferred); own tour x surface population and gates; the surface PBE Rating with
     // the surface model's own publication status; wins above expectation against the surface-blend prediction
     // only where that model is published for the tour, else against the overall rating
-    if (write && asOfs.length) {
+    if (write && primary && surfaces && asOfs.length) {
       const asOf = asOfs[0];
       const surfPre = surfacePublished ? { get: (e) => { const x = run.pre.get(e); return x && x.ps != null && x.nsa >= 5 && x.nsb >= 5 ? { ...x, p: x.ps } : x; } } : run.pre;
       for (const sf of SURFACES) {
@@ -243,7 +249,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
         await flush();
       }
     }
-    if (asOfs.length) summary.tours[tour].watch = playersToWatch(watchRows, asOfs[0], { published, surfacePublished });
+    if (primary && overall && asOfs.length) summary.tours[tour].watch = playersToWatch(watchRows, asOfs[0], { published, surfacePublished });
     lists[tour] = null; // this tour's rank maps are no longer needed
   }
   mark('compute_and_snapshot_writes');
@@ -251,8 +257,7 @@ export async function buildDnaV2(ctx, { asOfs = [new Date().toISOString().slice(
   summary.ratings = ratingRows.length;
   if (write) {
     for (let i = 0; i < ratingRows.length; i += 500) await store.upsert('tennis_surface_ratings', ratingRows.slice(i, i + 500), { onConflict: 'pbe_player_id,surface,as_of,method_version' });
-    await writeWatch(ctx.kv, summary, asOfs[0]);
-    await ctx.kv.put('dna:v2:summary', JSON.stringify({ ...summary, built_at: new Date().toISOString() }));
+    if (finalize) await writeSummary(ctx.kv, summary, asOfs[0]);
   }
   if (write) mark('rating_writes');
   summary.phase_ms = phase;
@@ -300,6 +305,12 @@ export function playersToWatch(rows, asOf, { published = false, surfacePublished
     underperforming_ranking: top(ranked.filter((x) => x.gap < 0).sort(by((x) => x.gap, 1))).map((x) => row(x.r, { rating_position: x.rr, ranking_position: x.kp, ranking_gap: x.gap })),
     emerging: top(active.filter((r) => (r.first_day || '') >= emergingFrom).sort(by((r) => r.rating))).map((r) => row(r, { first_ledger_match: r.first_day }))
   };
+}
+
+/** The build's KV outputs: Players to Watch (writeWatch moves each tour's `watch` out of the summary) + dna:v2:summary. */
+export async function writeSummary(kv, summary, asOf) {
+  await writeWatch(kv, summary, asOf);
+  await kv.put('dna:v2:summary', JSON.stringify({ ...summary, built_at: new Date().toISOString() }));
 }
 
 /** KV: the current lists (rebuilt daily) and the weekly edition, frozen on Mondays and never rewritten. */
