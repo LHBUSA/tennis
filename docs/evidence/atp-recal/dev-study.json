@@ -1,0 +1,866 @@
+{
+ "protocol": "docs/research/PICKS_V2_PROTOCOL.md@ff35487",
+ "generated_at": "2026-10-09T11:10:42.535Z",
+ "inputs": {
+  "manifest_sha256": "a634983644453d1501c6a512ae1e39cf5c590596d62d5945f951b0728e8dc4a8",
+  "fetched_at": "2026-10-02T22:56:26.193Z"
+ },
+ "code_commit": "ff35487a6e5c199104726791bc5546fc4e162dcb",
+ "ATP": {
+  "production": {
+   "variant": "standard",
+   "surface_published": true
+  },
+  "dev_window": [
+   "2012-01-01",
+   "2022-12-31"
+  ],
+  "validation_years": [
+   2019,
+   2020,
+   2021,
+   2022
+  ],
+  "rows_dev_total": 38805,
+  "folds": [
+   {
+    "year": 2019,
+    "train": 14318,
+    "test": 2224,
+    "coefficients": {
+     "temperature": {
+      "T": 1.226968
+     },
+     "platt": {
+      "a": 0.815017,
+      "b": 0
+     },
+     "isotonic": {
+      "knots": 20,
+      "y_first": 0.490909,
+      "y_last": 0.927374
+     }
+    },
+    "rank_c": 0.7
+   },
+   {
+    "year": 2020,
+    "train": 16504,
+    "test": 1021,
+    "coefficients": {
+     "temperature": {
+      "T": 1.241478
+     },
+     "platt": {
+      "a": 0.805492,
+      "b": 0
+     },
+     "isotonic": {
+      "knots": 20,
+      "y_first": 0.49697,
+      "y_last": 0.922518
+     }
+    },
+    "rank_c": 0.65
+   },
+   {
+    "year": 2021,
+    "train": 17511,
+    "test": 2164,
+    "coefficients": {
+     "temperature": {
+      "T": 1.242152
+     },
+     "platt": {
+      "a": 0.805055,
+      "b": 0
+     },
+     "isotonic": {
+      "knots": 20,
+      "y_first": 0.493714,
+      "y_last": 0.922374
+     }
+    },
+    "rank_c": 0.65
+   },
+   {
+    "year": 2022,
+    "train": 19628,
+    "test": 2870,
+    "coefficients": {
+     "temperature": {
+      "T": 1.247508
+     },
+     "platt": {
+      "a": 0.801598,
+      "b": 0
+     },
+     "isotonic": {
+      "knots": 20,
+      "y_first": 0.493374,
+      "y_last": 0.918534
+     }
+    },
+    "rank_c": 0.65
+   }
+  ],
+  "pooled_oos": {
+   "temperature": {
+    "n": 8110,
+    "log_loss": 0.6257,
+    "brier": 0.2187,
+    "accuracy": 0.6379,
+    "ece": 0.013,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 3179,
+      "mean_p_fav": 0.5485,
+      "fav_won": 0.531
+     },
+     {
+      "bin": "0.6-0.7",
+      "n": 2444,
+      "mean_p_fav": 0.6474,
+      "fav_won": 0.6346
+     },
+     {
+      "bin": "0.7-0.8",
+      "n": 1625,
+      "mean_p_fav": 0.7455,
+      "fav_won": 0.736
+     },
+     {
+      "bin": "0.8-0.9",
+      "n": 713,
+      "mean_p_fav": 0.8413,
+      "fav_won": 0.8387
+     },
+     {
+      "bin": "0.9-1",
+      "n": 149,
+      "mean_p_fav": 0.9282,
+      "fav_won": 0.9396
+     }
+    ]
+   },
+   "platt": {
+    "n": 8110,
+    "log_loss": 0.6257,
+    "brier": 0.2187,
+    "accuracy": 0.6379,
+    "ece": 0.013,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 3179,
+      "mean_p_fav": 0.5485,
+      "fav_won": 0.531
+     },
+     {
+      "bin": "0.6-0.7",
+      "n": 2444,
+      "mean_p_fav": 0.6474,
+      "fav_won": 0.6346
+     },
+     {
+      "bin": "0.7-0.8",
+      "n": 1625,
+      "mean_p_fav": 0.7455,
+      "fav_won": 0.736
+     },
+     {
+      "bin": "0.8-0.9",
+      "n": 713,
+      "mean_p_fav": 0.8413,
+      "fav_won": 0.8387
+     },
+     {
+      "bin": "0.9-1",
+      "n": 149,
+      "mean_p_fav": 0.9282,
+      "fav_won": 0.9396
+     }
+    ]
+   },
+   "isotonic": {
+    "n": 8110,
+    "log_loss": 0.6257,
+    "brier": 0.2186,
+    "accuracy": 0.6344,
+    "ece": 0.0165,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 2649,
+      "mean_p_fav": 0.5341,
+      "fav_won": 0.5066
+     },
+     {
+      "bin": "0.6-0.7",
+      "n": 3034,
+      "mean_p_fav": 0.6409,
+      "fav_won": 0.6338
+     },
+     {
+      "bin": "0.7-0.8",
+      "n": 1506,
+      "mean_p_fav": 0.7488,
+      "fav_won": 0.7304
+     },
+     {
+      "bin": "0.8-0.9",
+      "n": 753,
+      "mean_p_fav": 0.8338,
+      "fav_won": 0.8247
+     },
+     {
+      "bin": "0.9-1",
+      "n": 168,
+      "mean_p_fav": 0.9159,
+      "fav_won": 0.9464
+     }
+    ]
+   },
+   "uncalibrated": {
+    "n": 8110,
+    "log_loss": 0.6301,
+    "brier": 0.2202,
+    "accuracy": 0.6379,
+    "ece": 0.0404,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 2612,
+      "mean_p_fav": 0.5487,
+      "fav_won": 0.5161
+     },
+     {
+      "bin": "0.6-0.7",
+      "n": 2226,
+      "mean_p_fav": 0.6479,
+      "fav_won": 0.615
+     },
+     {
+      "bin": "0.7-0.8",
+      "n": 1760,
+      "mean_p_fav": 0.7472,
+      "fav_won": 0.6966
+     },
+     {
+      "bin": "0.8-0.9",
+      "n": 1135,
+      "mean_p_fav": 0.8439,
+      "fav_won": 0.7815
+     },
+     {
+      "bin": "0.9-1",
+      "n": 377,
+      "mean_p_fav": 0.9344,
+      "fav_won": 0.9098
+     }
+    ]
+   },
+   "coin": {
+    "n": 8110,
+    "log_loss": 0.6931,
+    "brier": 0.25,
+    "accuracy": 0.5049,
+    "ece": 0.0049,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 8110,
+      "mean_p_fav": 0.5,
+      "fav_won": 0.5049
+     }
+    ]
+   },
+   "rank": {
+    "n": 6911,
+    "log_loss": 0.6384,
+    "brier": 0.2244,
+    "accuracy": 0.6226,
+    "ece": 0.0262,
+    "reliability": [
+     {
+      "bin": "0.5-0.6",
+      "n": 2891,
+      "mean_p_fav": 0.5497,
+      "fav_won": 0.5282
+     },
+     {
+      "bin": "0.6-0.7",
+      "n": 1995,
+      "mean_p_fav": 0.6463,
+      "fav_won": 0.6125
+     },
+     {
+      "bin": "0.7-0.8",
+      "n": 1197,
+      "mean_p_fav": 0.7457,
+      "fav_won": 0.7235
+     },
+     {
+      "bin": "0.8-0.9",
+      "n": 653,
+      "mean_p_fav": 0.844,
+      "fav_won": 0.8101
+     },
+     {
+      "bin": "0.9-1",
+      "n": 175,
+      "mean_p_fav": 0.9257,
+      "fav_won": 0.9086
+     }
+    ]
+   }
+  },
+  "ranking_same_matches": {
+   "n": 6911,
+   "uncalibrated": 0.6316,
+   "rank": 0.6384
+  },
+  "selected_method": "temperature",
+  "gain_vs_uncalibrated": 0.0044,
+  "tau_grid_selected": [
+   {
+    "tau": 0.55,
+    "calls": 6588,
+    "graded_calls": 6455,
+    "void_calls": 133,
+    "wins": 4331,
+    "hit_rate": 0.671,
+    "wilson95": [
+     0.6594,
+     0.6823
+    ],
+    "mean_p_fav": 0.6828,
+    "calibration_gap": -0.0118,
+    "log_loss": 0.6085,
+    "brier": 0.2107
+   },
+   {
+    "tau": 0.575,
+    "calls": 5789,
+    "graded_calls": 5677,
+    "void_calls": 112,
+    "wins": 3937,
+    "hit_rate": 0.6935,
+    "wilson95": [
+     0.6814,
+     0.7054
+    ],
+    "mean_p_fav": 0.6993,
+    "calibration_gap": -0.0058,
+    "log_loss": 0.5961,
+    "brier": 0.2049
+   },
+   {
+    "tau": 0.6,
+    "calls": 5029,
+    "graded_calls": 4931,
+    "void_calls": 98,
+    "wins": 3485,
+    "hit_rate": 0.7068,
+    "wilson95": [
+     0.6939,
+     0.7193
+    ],
+    "mean_p_fav": 0.7162,
+    "calibration_gap": -0.0095,
+    "log_loss": 0.5846,
+    "brier": 0.1997
+   },
+   {
+    "tau": 0.625,
+    "calls": 4322,
+    "graded_calls": 4239,
+    "void_calls": 83,
+    "wins": 3068,
+    "hit_rate": 0.7238,
+    "wilson95": [
+     0.7101,
+     0.737
+    ],
+    "mean_p_fav": 0.7331,
+    "calibration_gap": -0.0094,
+    "log_loss": 0.5703,
+    "brier": 0.1931
+   },
+   {
+    "tau": 0.65,
+    "calls": 3679,
+    "graded_calls": 3608,
+    "void_calls": 71,
+    "wins": 2689,
+    "hit_rate": 0.7453,
+    "wilson95": [
+     0.7308,
+     0.7592
+    ],
+    "mean_p_fav": 0.7499,
+    "calibration_gap": -0.0046,
+    "log_loss": 0.5519,
+    "brier": 0.1847
+   },
+   {
+    "tau": 0.675,
+    "calls": 3085,
+    "graded_calls": 3030,
+    "void_calls": 55,
+    "wins": 2287,
+    "hit_rate": 0.7548,
+    "wilson95": [
+     0.7392,
+     0.7698
+    ],
+    "mean_p_fav": 0.7666,
+    "calibration_gap": -0.0118,
+    "log_loss": 0.5394,
+    "brier": 0.1793
+   },
+   {
+    "tau": 0.7,
+    "calls": 2528,
+    "graded_calls": 2487,
+    "void_calls": 41,
+    "wins": 1934,
+    "hit_rate": 0.7776,
+    "wilson95": [
+     0.7609,
+     0.7936
+    ],
+    "mean_p_fav": 0.7839,
+    "calibration_gap": -0.0063,
+    "log_loss": 0.5152,
+    "brier": 0.1686
+   },
+   {
+    "tau": 0.725,
+    "calls": 2025,
+    "graded_calls": 1993,
+    "void_calls": 32,
+    "wins": 1586,
+    "hit_rate": 0.7958,
+    "wilson95": [
+     0.7775,
+     0.8129
+    ],
+    "mean_p_fav": 0.8017,
+    "calibration_gap": -0.0059,
+    "log_loss": 0.4922,
+    "brier": 0.1587
+   },
+   {
+    "tau": 0.75,
+    "calls": 1603,
+    "graded_calls": 1578,
+    "void_calls": 25,
+    "wins": 1275,
+    "hit_rate": 0.808,
+    "wilson95": [
+     0.7878,
+     0.8267
+    ],
+    "mean_p_fav": 0.8187,
+    "calibration_gap": -0.0108,
+    "log_loss": 0.4734,
+    "brier": 0.1509
+   },
+   {
+    "tau": 0.775,
+    "calls": 1205,
+    "graded_calls": 1187,
+    "void_calls": 18,
+    "wins": 992,
+    "hit_rate": 0.8357,
+    "wilson95": [
+     0.8136,
+     0.8557
+    ],
+    "mean_p_fav": 0.8375,
+    "calibration_gap": -0.0018,
+    "log_loss": 0.434,
+    "brier": 0.1343
+   },
+   {
+    "tau": 0.8,
+    "calls": 875,
+    "graded_calls": 862,
+    "void_calls": 13,
+    "wins": 738,
+    "hit_rate": 0.8561,
+    "wilson95": [
+     0.8311,
+     0.878
+    ],
+    "mean_p_fav": 0.8564,
+    "calibration_gap": -0.0002,
+    "log_loss": 0.3994,
+    "brier": 0.1205
+   }
+  ],
+  "tau_grid_uncalibrated": [
+   {
+    "tau": 0.55,
+    "calls": 6903,
+    "graded_calls": 6764,
+    "void_calls": 139,
+    "wins": 4502,
+    "hit_rate": 0.6656,
+    "wilson95": [
+     0.6542,
+     0.6767
+    ],
+    "mean_p_fav": 0.7089,
+    "calibration_gap": -0.0433,
+    "log_loss": 0.6172,
+    "brier": 0.2142
+   },
+   {
+    "tau": 0.575,
+    "calls": 6245,
+    "graded_calls": 6122,
+    "void_calls": 123,
+    "wins": 4165,
+    "hit_rate": 0.6803,
+    "wilson95": [
+     0.6685,
+     0.6919
+    ],
+    "mean_p_fav": 0.7243,
+    "calibration_gap": -0.0439,
+    "log_loss": 0.609,
+    "brier": 0.2103
+   },
+   {
+    "tau": 0.6,
+    "calls": 5604,
+    "graded_calls": 5498,
+    "void_calls": 106,
+    "wins": 3825,
+    "hit_rate": 0.6957,
+    "wilson95": [
+     0.6834,
+     0.7077
+    ],
+    "mean_p_fav": 0.7398,
+    "calibration_gap": -0.0441,
+    "log_loss": 0.5997,
+    "brier": 0.2059
+   },
+   {
+    "tau": 0.625,
+    "calls": 4984,
+    "graded_calls": 4886,
+    "void_calls": 98,
+    "wins": 3459,
+    "hit_rate": 0.7079,
+    "wilson95": [
+     0.695,
+     0.7205
+    ],
+    "mean_p_fav": 0.7558,
+    "calibration_gap": -0.0478,
+    "log_loss": 0.5903,
+    "brier": 0.2015
+   },
+   {
+    "tau": 0.65,
+    "calls": 4399,
+    "graded_calls": 4315,
+    "void_calls": 84,
+    "wins": 3114,
+    "hit_rate": 0.7217,
+    "wilson95": [
+     0.7081,
+     0.7348
+    ],
+    "mean_p_fav": 0.7714,
+    "calibration_gap": -0.0497,
+    "log_loss": 0.5792,
+    "brier": 0.1964
+   },
+   {
+    "tau": 0.675,
+    "calls": 3851,
+    "graded_calls": 3776,
+    "void_calls": 75,
+    "wins": 2793,
+    "hit_rate": 0.7397,
+    "wilson95": [
+     0.7254,
+     0.7534
+    ],
+    "mean_p_fav": 0.787,
+    "calibration_gap": -0.0473,
+    "log_loss": 0.5642,
+    "brier": 0.1894
+   },
+   {
+    "tau": 0.7,
+    "calls": 3334,
+    "graded_calls": 3272,
+    "void_calls": 62,
+    "wins": 2456,
+    "hit_rate": 0.7506,
+    "wilson95": [
+     0.7355,
+     0.7651
+    ],
+    "mean_p_fav": 0.8023,
+    "calibration_gap": -0.0517,
+    "log_loss": 0.5532,
+    "brier": 0.1844
+   },
+   {
+    "tau": 0.725,
+    "calls": 2835,
+    "graded_calls": 2786,
+    "void_calls": 49,
+    "wins": 2133,
+    "hit_rate": 0.7656,
+    "wilson95": [
+     0.7495,
+     0.781
+    ],
+    "mean_p_fav": 0.8181,
+    "calibration_gap": -0.0524,
+    "log_loss": 0.5372,
+    "brier": 0.1772
+   },
+   {
+    "tau": 0.75,
+    "calls": 2343,
+    "graded_calls": 2307,
+    "void_calls": 36,
+    "wins": 1807,
+    "hit_rate": 0.7833,
+    "wilson95": [
+     0.766,
+     0.7996
+    ],
+    "mean_p_fav": 0.8347,
+    "calibration_gap": -0.0515,
+    "log_loss": 0.5172,
+    "brier": 0.1682
+   },
+   {
+    "tau": 0.775,
+    "calls": 1921,
+    "graded_calls": 1890,
+    "void_calls": 31,
+    "wins": 1507,
+    "hit_rate": 0.7974,
+    "wilson95": [
+     0.7786,
+     0.8149
+    ],
+    "mean_p_fav": 0.8507,
+    "calibration_gap": -0.0533,
+    "log_loss": 0.4993,
+    "brier": 0.1604
+   },
+   {
+    "tau": 0.8,
+    "calls": 1536,
+    "graded_calls": 1512,
+    "void_calls": 24,
+    "wins": 1230,
+    "hit_rate": 0.8135,
+    "wilson95": [
+     0.7931,
+     0.8323
+    ],
+    "mean_p_fav": 0.8665,
+    "calibration_gap": -0.053,
+    "log_loss": 0.4766,
+    "brier": 0.1507
+   }
+  ],
+  "chosen_tau": 0.55,
+  "selection": {
+   "tau": 0.55,
+   "calls": 6588,
+   "graded_calls": 6455,
+   "void_calls": 133,
+   "wins": 4331,
+   "hit_rate": 0.671,
+   "wilson95": [
+    0.6594,
+    0.6823
+   ],
+   "mean_p_fav": 0.6828,
+   "calibration_gap": -0.0118,
+   "log_loss": 0.6085,
+   "brier": 0.2107
+  },
+  "outside_chalk": {
+   "selected": {
+    "pbe_fav_is_rank_underdog": {
+     "graded_calls": 867,
+     "wins": 490,
+     "hit_rate": 0.5652,
+     "wilson95": [
+      0.532,
+      0.5978
+     ],
+     "mean_p_fav": 0.6235
+    },
+    "pbe_fav_is_rank_favourite": {
+     "graded_calls": 4600,
+     "wins": 3164,
+     "hit_rate": 0.6878,
+     "wilson95": [
+      0.6743,
+      0.7011
+     ],
+     "mean_p_fav": 0.6924
+    },
+    "unranked_pair": {
+     "graded_calls": 988,
+     "wins": 677,
+     "hit_rate": 0.6852,
+     "wilson95": [
+      0.6556,
+      0.7134
+     ],
+     "mean_p_fav": 0.6903
+    }
+   },
+   "uncalibrated_same_tau": {
+    "pbe_fav_is_rank_underdog": {
+     "graded_calls": 970,
+     "wins": 543,
+     "hit_rate": 0.5598,
+     "wilson95": [
+      0.5284,
+      0.5907
+     ],
+     "mean_p_fav": 0.6398
+    },
+    "pbe_fav_is_rank_favourite": {
+     "graded_calls": 4767,
+     "wins": 3256,
+     "hit_rate": 0.683,
+     "wilson95": [
+      0.6697,
+      0.6961
+     ],
+     "mean_p_fav": 0.721
+    },
+    "unranked_pair": {
+     "graded_calls": 1027,
+     "wins": 703,
+     "hit_rate": 0.6845,
+     "wilson95": [
+      0.6555,
+      0.7122
+     ],
+     "mean_p_fav": 0.7182
+    }
+   }
+  },
+  "frozen": {
+   "challenger": "atp-recal/2:temperature",
+   "candidate": "tennis-picker-v2-atp-shadow",
+   "status": "FROZEN_PROSPECTIVE_SHADOW",
+   "method": "temperature",
+   "params": {
+    "T": 1.24867
+   },
+   "fit_window": [
+    "2012-01-01",
+    "2022-12-31"
+   ],
+   "fit_matches": 22428,
+   "tau": 0.55,
+   "min_prior": 10,
+   "production_input": "matchup-freeze/1 model.probability (PBE Rating served probability, unchanged)",
+   "protocol": "docs/research/PICKS_V2_PROTOCOL.md@ff35487",
+   "inputs_manifest_sha256": "a634983644453d1501c6a512ae1e39cf5c590596d62d5945f951b0728e8dc4a8",
+   "code_commit": "ff35487a6e5c199104726791bc5546fc4e162dcb",
+   "frozen_at": "2026-10-09T11:10:44.515Z"
+  }
+ },
+ "WTA_chalk": {
+  "window": [
+   "2023-01-01",
+   "2024-12-31"
+  ],
+  "note": "Picker V1 selection window (already used to choose tau 0.55); descriptive only, V1 unchanged",
+  "tau": 0.55,
+  "metrics": {
+   "n": 52744,
+   "log_loss": 0.5404,
+   "brier": 0.183,
+   "accuracy": 0.719,
+   "ece": 0.0098,
+   "reliability": [
+    {
+     "bin": "0.5-0.6",
+     "n": 13745,
+     "mean_p_fav": 0.5502,
+     "fav_won": 0.5559
+    },
+    {
+     "bin": "0.6-0.7",
+     "n": 12960,
+     "mean_p_fav": 0.6494,
+     "fav_won": 0.6552
+    },
+    {
+     "bin": "0.7-0.8",
+     "n": 11536,
+     "mean_p_fav": 0.7485,
+     "fav_won": 0.7533
+    },
+    {
+     "bin": "0.8-0.9",
+     "n": 9101,
+     "mean_p_fav": 0.8469,
+     "fav_won": 0.8675
+    },
+    {
+     "bin": "0.9-1",
+     "n": 5402,
+     "mean_p_fav": 0.9418,
+     "fav_won": 0.9641
+    }
+   ]
+  },
+  "outside_chalk": {
+   "pbe_fav_is_rank_underdog": {
+    "graded_calls": 708,
+    "wins": 410,
+    "hit_rate": 0.5791,
+    "wilson95": [
+     0.5424,
+     0.6149
+    ],
+    "mean_p_fav": 0.6374
+   },
+   "pbe_fav_is_rank_favourite": {
+    "graded_calls": 3209,
+    "wins": 2214,
+    "hit_rate": 0.6899,
+    "wilson95": [
+     0.6737,
+     0.7057
+    ],
+    "mean_p_fav": 0.7027
+   },
+   "unranked_pair": {
+    "graded_calls": 41929,
+    "wins": 31668,
+    "hit_rate": 0.7553,
+    "wilson95": [
+     0.7511,
+     0.7594
+    ],
+    "mean_p_fav": 0.7412
+   }
+  }
+ }
+}

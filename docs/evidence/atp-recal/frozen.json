@@ -1,0 +1,21 @@
+{
+ "challenger": "atp-recal/2:temperature",
+ "candidate": "tennis-picker-v2-atp-shadow",
+ "status": "FROZEN_PROSPECTIVE_SHADOW",
+ "method": "temperature",
+ "params": {
+  "T": 1.24867
+ },
+ "fit_window": [
+  "2012-01-01",
+  "2022-12-31"
+ ],
+ "fit_matches": 22428,
+ "tau": 0.55,
+ "min_prior": 10,
+ "production_input": "matchup-freeze/1 model.probability (PBE Rating served probability, unchanged)",
+ "protocol": "docs/research/PICKS_V2_PROTOCOL.md@ff35487",
+ "inputs_manifest_sha256": "a634983644453d1501c6a512ae1e39cf5c590596d62d5945f951b0728e8dc4a8",
+ "code_commit": "ff35487a6e5c199104726791bc5546fc4e162dcb",
+ "frozen_at": "2026-10-09T11:10:44.515Z"
+}
