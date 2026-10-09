@@ -133,22 +133,46 @@ export function trackRecord(rows) {
 }
 
 export const ACTIVATION_GATES = Object.freeze({
-  status: 'PROPOSED — owner decision; nothing is activated',
+  status: 'PROPOSED only — owner decision 2026-10-09: Tennis stays RESEARCH ONLY; nothing activates',
   protocol: 'docs/research/PICKS_V2_PROTOCOL.md §4',
   wta_main: 'Prospective only: >= 250 graded CALLs from >= 25 editions, 100% lock integrity, Wilson 95% low >= 60%, hit − mean p >= −3 pts, log loss < ln 2; PBE vs same-contract market Brier disclosed',
   atp_shadow: 'Prospective only: same, with >= 300 graded CALLs from >= 30 editions, and the recalibrated probability beating the uncalibrated one on the same calls (edition-bootstrap CI below 0)',
 });
 
+// Shown on every picks surface (owner 2026-10-09: Tennis stays RESEARCH ONLY). Numbers are from committed evidence
+// (docs/research/PICKS_V2_RESULTS.md); none of them is part of the prospective record.
+export const DISCLOSURES = Object.freeze([
+  { code: 'RESEARCH_ONLY', text: 'Research only. No Tennis pick is official: the WTA ledger is prospective proof and ATP is shadow research. Official picks need a separate owner decision.' },
+  { code: 'UNDERDOG_WATCH', text: 'Underdog watch is a watch item, not a pick and not value. When the PBE favourite was the ranking underdog it won less often than PBE said: ATP 56.5% vs 62.4% (867 calls, 2019–2022), WTA 57.9% vs 63.7% (708 calls, 2023–2024).' },
+  { code: 'OVERCONFIDENCE', text: 'The ATP PBE Rating ran about 4 points over-confident historically; the ATP shadow uses a frozen recalibration and is not validated until its prospective record passes the gate.' },
+  { code: 'MARKETS_BENCHMARK_ONLY', text: 'Kalshi and Polymarket prices are benchmarks frozen at the lock from our own observations. They are never a model input, are compared only where the venue’s rules match the same contract, and no historical market comparison exists for the model’s development data.' },
+  { code: 'SMALL_SAMPLES', text: 'The prospective samples are small: hit rates and market comparisons can swing widely until hundreds of calls are graded.' },
+  { code: 'SEPARATE_RECORDS', text: 'Each line of the record is its own ledger and version: WTA main tour, WTA 125 shadow and ATP shadow are never pooled; historical development numbers are never part of the record; other PropBetEdge engines (such as Upset Hunter) are not counted here.' },
+]);
+
 const POLICY_META = () => ({ candidate: PICKER_POLICY.candidate, version: PICKER_POLICY.version, status: PICKER_POLICY.status, tau: PICKER_POLICY.tau, frozen_at: PICKER_POLICY.frozen_at, activated_at: PICKER_POLICY.activated_at, protocol: PICKER_POLICY.protocol, evidence: PICKER_POLICY.evidence,
-  scope: { wta_main: 'WTA main-tour singles (Grand Slam, WTA 1000/500/250, Finals): the official candidate', shadow_wta125: 'WTA 125 singles: prospective shadow, never official', atp: 'ATP (Picker V1): PASS · MODEL_NOT_VALIDATED', atp_shadow: 'ATP singles: SHADOW research with the recalibrated probability (atp-recal/2), never official' },
+  scope: { wta_main: 'WTA main-tour singles (Grand Slam, WTA 1000/500/250, Finals): prospective research record (no official picks)', shadow_wta125: 'WTA 125 singles: prospective shadow, never official', atp: 'ATP (Picker V1): PASS · MODEL_NOT_VALIDATED', atp_shadow: 'ATP singles: SHADOW research with the recalibrated probability (atp-recal/2), never official' },
   validation: { WTA: { holdout_calls: 45314, hit_rate: 0.756, wilson95: [0.752, 0.76], calibration_gap: 0.015, log_loss: 0.505, tour_level_descriptive: { graded_calls: 5928, hit_rate: 0.706, wilson95: [0.695, 0.718], calibration_gap: -0.007 } }, ATP: { result: 'FAILED calibration at every tau (about -4 pts); holdout untouched' } },
   atp_shadow: { candidate: ATP_SHADOW_POLICY.candidate, version: ATP_SHADOW_POLICY.version, challenger: ATP_SHADOW_POLICY.challenger, status: ATP_SHADOW_POLICY.status, tau: ATP_SHADOW_POLICY.tau, frozen_at: ATP_SHADOW_POLICY.frozen_at, protocol: ATP_SHADOW_POLICY.protocol, evidence: ATP_SHADOW_POLICY.evidence,
     development: { window: '2019-2022 forward-chained (fit on earlier years only)', matches: 8110, log_loss: 0.6257, log_loss_uncalibrated: 0.6301, ece: 0.013, ece_uncalibrated: 0.0404, calls_at_tau: 6455, hit_rate: 0.671, calibration_gap: -0.0118 },
     holdout: 'prospective shadow ledger only — not validated' },
   activation_gates: ACTIVATION_GATES,
+  disclosures: DISCLOSURES,
   opportunities: { version: OPPORTUNITY_VERSION, MATCH_WINNER: 'a CALL', SURFACE_MATCHUP: 'the surface blend moved the probability >= 5 pts from the overall rating (or flipped the favourite)', UNDERDOG_WATCH: 'a venue’s market favourite at the lock is not the PBE favourite — a watch item, not a pick (historically PBE favourites that are ranking underdogs win less often than PBE says)', PBE_ABOVE_MARKET: 'same-contract venue only: PBE >= 5 pts above the market at the lock — a probability difference, not a profit claim', PBE_BELOW_MARKET: 'same-contract venue only: PBE >= 5 pts below the market at the lock' },
   lock_rule: 'sourced exact start -> T-60 min; else source-proven day + source-proven UTC offset -> 00:00 tournament local; else HOLD. One designated decision per match, never replaced.',
   grading: 'completed -> W / L; walkover, retirement, default, abandonment, cancellation -> VOID (counted, never in hit rate)' });
+
+/** Public lock proofs for ATP shadow decisions: WHEN each record was locked and the sha256 of its stored bytes and of
+ *  its frozen evidence — never its state, side or probability before the result (a hash commitment, not a reveal). */
+export function lockProofs(rows) {
+  return rows.filter((x) => x.record.scope === 'atp_shadow').slice(0, 300).map((x) => ({
+    record_id: x.record.record_id, match_id: x.record.canonical_event_id, scope: x.record.scope, policy: x.record.decision.policy,
+    decided_at: x.record.lock.decided_at, lock_at: x.record.lock.lock_at, lock_rule: x.record.lock.lock_rule,
+    scheduled_at_known_at_lock: x.record.lock.scheduled_at_known_at_lock, first_seen_scheduled_at: x.record.lock.first_seen_scheduled_at ?? null,
+    record_sha256: x.record_sha256 ?? null, evidence_sha256: x.record.evidence?.sha256 ?? null, evidence_frozen_at: x.record.evidence?.frozen_at ?? null,
+    resolved: !!x.grade, excluded: !!x.excluded,
+  }));
+}
 
 async function allRows(bucket) {
   const [v1, shadow] = await Promise.all([readLedger(bucket, { limit: 1000 }), readShadowLedger(bucket, { limit: 400 }).catch(() => [])]);
@@ -174,7 +198,7 @@ export async function picksRoute(path, url, env) {
   const meta = (semantics) => ({ source: ['pbe_derived'], source_updated_at: updated, freshness: updated ? 'CURRENT' : 'UNAVAILABLE', semantics });
   if (path === '/v1/picks/track-record') {
     const resolved = rows.filter((x) => x.grade);
-    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })) },
+    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows) },
       meta('PBE Picks resolved track record: graded decisions only (pending pre-match sides are All Access). PROSPECTIVE · NOT OFFICIAL until owner activation; ATP is SHADOW research; activation never makes an earlier decision official.'));
   }
   const m = /^\/v1\/picks\/([0-9a-f-]{36})$/.exec(path);

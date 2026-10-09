@@ -32,3 +32,5 @@
 .pk-op { font: 600 11px/1 var(--f-ui); letter-spacing: .04em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--rule); color: var(--ink-2); }
 .pk-links { font: 13px/1.4 var(--f-ui); margin: 6px 0 0; display: flex; gap: 12px; flex-wrap: wrap; }
 .pk-sub { font: 600 13px/1.3 var(--f-ui); color: var(--ink-2); margin: 14px 0 6px; }
+.pk-disclosures { margin: 0; padding-left: 18px; font: 14px/1.5 var(--f-ui); color: var(--ink); }
+.pk-disclosures li { margin: 4px 0; overflow-wrap: anywhere; }

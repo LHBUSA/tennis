@@ -178,3 +178,54 @@ test('runAtpShadow: bounded pass over MS candidates; writes KV summary', async (
   assert.equal(sum.candidates, 1);
   assert.ok(kv.has('picker:v2:atp-shadow:last'));
 });
+
+test('R2 self-test: passes on a store honouring If-None-Match: *, FAILS on one that ignores it (overwrite detected)', async () => {
+  const { r2CreateOnlySelftest, SELFTEST_PREFIX } = await import('../workers/tennis-api/src/r2-selftest.js');
+  const good = memBucket();
+  const ok = await r2CreateOnlySelftest(good, { now: '2026-10-09T12:00:00.000Z', nonce: 'abcdef12-0000' });
+  assert.equal(ok.pass, true, JSON.stringify(ok.checks));
+  assert.ok([...good.m.keys()].every((k) => k.startsWith(SELFTEST_PREFIX)), 'writes only under ledger/selftest/');
+  const m = new Map(); let n = 0;
+  const naive = { async head(k) { return m.has(k) ? { etag: m.get(k).e } : null; }, async get(k) { return m.has(k) ? { text: async () => m.get(k).v } : null; }, async put(k, v) { await null; m.set(k, { v, e: `e${n += 1}` }); return {}; } };
+  const bad = await r2CreateOnlySelftest(naive, { now: '2026-10-09T12:00:00.000Z', nonce: 'abcdef12-0000' });
+  assert.equal(bad.pass, false);
+  assert.equal(bad.checks.second_write_refused.bytes_unchanged, false);
+});
+
+test('records never mixed: each scope is its own line; disclosures (research only, underdog, markets, samples) are served', async () => {
+  const { picksRoute, DISCLOSURES } = await import('../workers/tennis-api/src/picks-api.js');
+  const { decideMatch } = await import('../workers/tennis-api/src/picker-ledger.js');
+  const b = memBucket();
+  const atp = match();
+  const wta = match({ id: '1a2b3c4d-0000-5000-8000-000000000002', event_type: 'WS', tournament: { slug: 'wuhan', level: 'WTA 1000' } });
+  await freezeOne(b, dossier(atp, 0.7), { now: '2026-10-10T05:00:00.000Z' });
+  await freezeOne(b, { ...dossier(wta, 0.7), tour: 'WTA' }, { now: '2026-10-10T05:00:00.000Z' });
+  await decideShadowMatch({ bucket: b, match: atp, now: LOCK_NOW, fetchImpl: benchOk });
+  await decideMatch({ bucket: b, match: wta, now: LOCK_NOW, fetchImpl: benchOk });
+  const res = await picksRoute('/v1/picks/track-record', null, { TENNIS_SOURCE: b });
+  const rec = res.data.record;
+  assert.deepEqual(Object.keys(rec).sort(), ['atp_shadow', 'wta_main']);
+  assert.equal(rec.atp_shadow.CALL, 1); assert.equal(rec.wta_main.CALL, 1);
+  assert.ok(rec.atp_shadow.version.startsWith('tennis-picker-v2-atp-shadow') && rec.wta_main.version.startsWith('tennis-picker-v1'));
+  const codes = res.data.policy.disclosures.map((d) => d.code);
+  for (const c of ['RESEARCH_ONLY', 'UNDERDOG_WATCH', 'OVERCONFIDENCE', 'MARKETS_BENCHMARK_ONLY', 'SMALL_SAMPLES', 'SEPARATE_RECORDS']) assert.ok(codes.includes(c), c);
+  assert.ok(/Upset Hunter/.test(DISCLOSURES.find((d) => d.code === 'SEPARATE_RECORDS').text));
+  assert.equal(res.data.policy.activated_at, null);
+});
+
+test('public lock proofs: lock time + record/evidence sha256 only — never state, side or probability', async () => {
+  const { picksRoute } = await import('../workers/tennis-api/src/picks-api.js');
+  const b = memBucket();
+  const m = match();
+  await freezeOne(b, dossier(m, 0.7), { now: '2026-10-10T05:00:00.000Z' });
+  await decideShadowMatch({ bucket: b, match: m, now: LOCK_NOW, fetchImpl: benchOk });
+  const res = await picksRoute('/v1/picks/track-record', null, { TENNIS_SOURCE: b });
+  const [p] = res.data.lock_proofs;
+  assert.equal(p.match_id, ID);
+  assert.match(p.record_sha256, /^[0-9a-f]{64}$/);
+  const stored = b.m.get(key.decision(ID));
+  const h = (await import('node:crypto')).createHash('sha256').update(stored).digest('hex');
+  assert.equal(p.record_sha256, h, 'commitment = sha256 of the stored bytes');
+  assert.ok(Date.parse(p.decided_at) < Date.parse(p.scheduled_at_known_at_lock));
+  assert.ok(!/"(side|probability|state|selection|p_fav)"/.test(JSON.stringify(res.data.lock_proofs)));
+});

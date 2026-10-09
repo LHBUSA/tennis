@@ -214,14 +214,18 @@ export async function readShadowLedger(bucket, { limit = 400 } = {}) {
   const corrIds = await listIds(bucket, 'corrections');
   const rows = [];
   for (const id of ids.slice(-limit)) {
-    const rec = await getJson(bucket, key.decision(id));
-    if (!rec) continue;
+    const obj = await bucket.get(key.decision(id));
+    if (!obj) continue;
+    const text = await obj.text();
+    const rec = JSON.parse(text);
+    // sha256 of the stored bytes: a public commitment to the full record (side included) before the result
+    const recordSha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))].map((b) => b.toString(16).padStart(2, '0')).join('');
     let corrections = [];
     if (corrIds.has(id)) {
       const l = await bucket.list({ prefix: `${SHADOW_PREFIX}corrections/${id}/` });
       corrections = (await Promise.all(l.objects.map((o) => getJson(bucket, o.key)))).filter(Boolean);
     }
-    rows.push({ record: rec, grade: rec.decision.state === 'CALL' ? await getJson(bucket, key.grade(id)) : null, corrections, excluded: corrections.some((c) => c.excluded) });
+    rows.push({ record: rec, record_sha256: recordSha256, grade: rec.decision.state === 'CALL' ? await getJson(bucket, key.grade(id)) : null, corrections, excluded: corrections.some((c) => c.excluded) });
   }
   return rows.sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
 }

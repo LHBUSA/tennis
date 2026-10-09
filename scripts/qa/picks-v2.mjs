@@ -65,7 +65,7 @@ const summary = [];
 for (const w of WIDTHS) {
   const e = await open('/pbe-picks?preview=picker', w, true);
   await e.p.waitForSelector('.pk-table', { timeout: 20000 }).catch(() => fails.push(`${w}: record table missing`));
-  const t = await e.p.evaluate(() => ({ text: document.body.innerText, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, cards: document.querySelectorAll('[data-pick]').length, shadowCards: document.querySelectorAll('[data-scope="atp_shadow"]').length, why: document.querySelectorAll('.pk-whylist li').length, pbecast: document.querySelectorAll('.pk-links a[href^="/pbecast/"]').length, inlineStyle: document.querySelectorAll('.pk-page [style]').length }));
+  const t = await e.p.evaluate(() => ({ text: document.body.innerText, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, cards: document.querySelectorAll('[data-pick]').length, shadowCards: document.querySelectorAll('[data-scope="atp_shadow"]').length, why: document.querySelectorAll('.pk-whylist li').length, pbecast: document.querySelectorAll('.pk-links a[href^="/pbecast/"]').length, inlineStyle: document.querySelectorAll('.pk-page [style]').length, disclosures: [...document.querySelectorAll('[data-disclosure]')].map((x) => x.dataset.disclosure) }));
   const T = t.text.toUpperCase();
   check(t.overflow <= 0, `${w}: horizontal overflow ${t.overflow}`);
   check(T.includes('ATP (SHADOW RESEARCH'), `${w}: ATP shadow row in record`);
@@ -74,6 +74,9 @@ for (const w of WIDTHS) {
   check(T.includes('RIGHT') && T.includes('MISSED'), `${w}: RIGHT/MISSED from real graded records`);
   check(T.includes('PROSPECTIVE · NOT OFFICIAL'), `${w}: not official label`);
   check(t.shadowCards >= 1 && t.why >= 2 && t.pbecast >= 1, `${w}: shadow card/why/pbecast (${t.shadowCards}/${t.why}/${t.pbecast})`);
+  for (const c of ['RESEARCH_ONLY', 'UNDERDOG_WATCH', 'OVERCONFIDENCE', 'MARKETS_BENCHMARK_ONLY', 'SMALL_SAMPLES', 'SEPARATE_RECORDS']) check(t.disclosures.includes(c), `${w}: disclosure ${c} visible`);
+  check(/UPSET HUNTER/.test(T) && T.includes('NOT A PICK AND NOT VALUE') && T.includes('NO HISTORICAL MARKET COMPARISON'), `${w}: disclosure wording`);
+  check(!T.includes('OFFICIAL CANDIDATE'), `${w}: no official-candidate wording`);
   check(t.inlineStyle === 0, `${w}: inline style attributes`);
   check(!e.errs.length, `${w}: console errors ${e.errs.slice(0, 3).join(' | ')}`);
   if (w === 390 || w === 1440) await e.p.screenshot({ path: `${OUT}/entitled-${w}.png`, fullPage: false });

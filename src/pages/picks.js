@@ -56,7 +56,7 @@ export function pickCard(pick, { compact = false } = {}) {
 }
 
 function recordTable(rec) {
-  const rows = [['wta_main', 'WTA main tour (official candidate)'], ['shadow_wta125', 'WTA 125 (shadow)'], ['atp_shadow', 'ATP (SHADOW research, recalibrated)'], ['atp', 'ATP Picker V1 (not validated)']].filter(([k]) => rec?.[k]);
+  const rows = [['wta_main', 'WTA main tour (prospective research)'], ['shadow_wta125', 'WTA 125 (shadow)'], ['atp_shadow', 'ATP (SHADOW research, recalibrated)'], ['atp', 'ATP Picker V1 (not validated)']].filter(([k]) => rec?.[k]);
   if (!rows.length) return '';
   const bandRows = rows.flatMap(([k, l]) => Object.entries(rec[k].by_probability || {}).map(([b, x]) => [l, b, x]));
   const opRows = rows.flatMap(([k, l]) => Object.entries(rec[k].opportunities || {}).filter(([c]) => c !== 'MATCH_WINNER').map(([c, x]) => [l, c, x]));
@@ -69,7 +69,7 @@ function recordTable(rec) {
 }
 
 function policyBox(p) {
-  return html`<section class="mod pk-policy"><header class="mod-h"><h2>How PBE Picks work</h2></header><div class="mod-b">
+  return html`${p.disclosures?.length ? html`<section class="mod pk-disclose" aria-label="Read this first"><header class="mod-h"><h2>Read this first</h2></header><div class="mod-b"><ul class="pk-disclosures">${p.disclosures.map((d) => html`<li data-disclosure="${d.code}">${d.text}</li>`)}</ul></div></section>` : ''}<section class="mod pk-policy"><header class="mod-h"><h2>How PBE Picks work</h2></header><div class="mod-b">
     <p><b>${p.status === 'FROZEN_PROSPECTIVE' && !p.activated_at ? 'PROSPECTIVE · NOT OFFICIAL' : 'OFFICIAL'}</b> — policy ${p.version}, threshold ${Math.round(p.tau * 100)}%. ${p.activated_at ? `Official since ${localTime(p.activated_at)}; decisions before activation are never official.` : 'Official Picks are not activated. Records below are prospective proof only.'}</p>
     <p>${p.scope.wta_main}. ${p.scope.shadow_wta125}. ${p.scope.atp}.${p.scope.atp_shadow ? ` ${p.scope.atp_shadow}.` : ''}</p>
     ${p.atp_shadow ? html`<p>ATP shadow (${p.atp_shadow.challenger}, threshold ${Math.round(p.atp_shadow.tau * 100)}%): the PBE Rating ATP probability ran about 4 points over-confident, so a frozen recalibration shrinks it toward 50%. Development test 2019–2022: log loss ${p.atp_shadow.development.log_loss_uncalibrated} → ${p.atp_shadow.development.log_loss}, ${p.atp_shadow.development.calls_at_tau.toLocaleString('en-US')} calls at ${pc(p.atp_shadow.development.hit_rate)}. It is validated only by the prospective record on this page.</p>` : ''}
