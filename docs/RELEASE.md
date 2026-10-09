@@ -8,6 +8,39 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-09 Tennis #14: OFFICIAL PBE Picks (tennis-api 0.11.0; 6c76c1e; owner-approved)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-api | `1e85f74d-20e9-4f8c-8f0f-5d2b62a0284d` @ 6c76c1e, deployed 2026-10-09 19:09:31Z (PICKS_ACTIVATED_AT; official ATP stream `ledger/picks-official-v1/atp/`; `official` + per-stream `record` on /v1/picks*; API VERSION 0.11.0) | `409c4f16-a533-48df-adca-2626ba3b651a` @ 4f9e87c |
+| Vercel production | `dpl_4uxEsZCzrG3HyRZ9Bv5zQMD11pBX` @ 6c76c1e (redesigned /pbe-picks + /track-record, PICKS_LIVE) | `dpl_9wNJtzFWZVM5NAQXHcAUxv7eyQ79` @ 4f9e87c |
+
+- **Cutover:** `PICKS_ACTIVATED_AT = 2026-10-09T19:40:00Z`, 30 minutes after the Worker went live. It is prospective only.
+  - Nothing recorded earlier was promoted.
+  - Picker V1 WTA before the cutover, WTA 125 and the ATP shadow stay as prelaunch research.
+  - Spec: `docs/picks/OFFICIAL_V1.md`.
+- **Gates:**
+  - `npm run check` passed 720/720.
+  - `scripts/qa/picks-official.mjs` had 0 fails at 320/390/768/1024/1440/1920 under SIMULATED membership.
+  - Production guest browser QA passed 12/12 at the same widths.
+  - Owner signed-in check still OWED.
+- **Post-cutover verification (2026-10-09 20:25Z, read-only), operationally verified:**
+  - **Cron:** tennis-api `*/10` ticks succeeded at 19:40:55, 19:50:55, 20:00:55, 20:10:55 and 20:20:55 (scheduled times; CF
+    `workersInvocationsScheduled`).
+  - **First official tick:** the 19:40:55 tick was the first after the cutover. The official ATP stream wrote its own 22
+    first-seen markers at 19:41:22–19:41:41Z. It wrote no objects before the cutover and copied no shadow markers (the shadow
+    first-seen dates from 11:31Z).
+  - **KV `picks:official:atp:last`** at 20:21:18Z: policy `tennis-picks-official-v1-atp@tennis#14`, candidates 22, decided 0,
+    skipped `before_lock` 22.
+  - **Error keys:** `picks:official:atp:error`, `picker:v2:atp-shadow:error` and `picks:verify:error` are absent.
+    `picker:v1:error` and `matchup:freeze:error` are stale (2026-10-07, before this release).
+  - **Official record:** 0 picks, 0 pending, 0 graded. No eligible match had reached its lock; the first ATP lock is
+    2026-10-10T03:00Z.
+  - **Guest access:**
+    - `/v1/picks` returns 401 `membership_required`, `private, no-store`.
+    - `/v1/picks/track-record` lists 36 resolved prelaunch rows, all graded, with no duplicates, none official and no
+      pending rows (also with `?pending=1`).
+
 ## 2026-10-09 Daily DNA v2 build in bounded units (tennis-ingest 0.4.2; d8fb542)
 
 | Component | Current | Rollback target |
