@@ -37,7 +37,7 @@ NO INVENTED TENNIS — narrative is not invention:
 
 VOICE — a sports desk, not a database describing its own records (the gate rejects each of these):
 - At most TWO provenance words in the whole story ("archive", "archived", "in our records", "stored", "Match DNA snapshot"). Provenance lives in Source & Method.
-- Never tell the reader what data we lack or how the story was built: no "The available source contains no point-by-point or serve statistics, so the set scores place a necessary limit on the description", no "supplied", "documented", "path record", "the scores alone cannot...". If the evidence does not support a claim, simply do not make it.
+- Never tell the reader what data we lack or how the story was built: no "The available source contains no point-by-point or serve statistics, so the set scores place a necessary limit on the description", no "path record", "the scores alone cannot...". The words "supplied" and "documented" are rejected in ANY sense, even as ordinary verbs ("break points supplied the damage") — write "gave", "produced", "delivered". If the evidence does not support a claim, simply do not make it.
 - No self-explaining scaffolding: not "That result matters for the preview because...", "That comparison describes...", "Those figures did not dictate this match, but..." — state the point itself.
 - At most THREE statistics (percentages, W-L records) in any paragraph, ideally one or two: choose the one that proves the sentence. Never stack both players' rates on several measures in one paragraph.
 - Plain score language: "Fritz took a 9-7 tiebreak", "Munar won the second set 6-4". Never "ran beyond the standard finishing threshold", "recorded as 7-9 from Munar's side".
@@ -175,7 +175,7 @@ const FIX_HINTS = {
   self_explaining: 'self_explaining: delete every sentence that comments on the story\'s own evidence instead of stating a tennis fact. No sentence may start "That/This/These/Those/The <noun> matters/mattered/did not .../describes/explains/was important". Put the point itself into the sentence that carries the fact.',
   repeated_phrasing: 'repeated_phrasing: rewrite every quoted frame AND every frame in the STOCK PHRASES list with a different construction; do not introduce a new formula elsewhere. Vary how you compare numbers (never "rate was/stood at N compared with X" twice) and how you place a player in the draw or rankings.',
   wrong_winner: 'wrong_winner: re-read SETS and the score; only the stored winner wins, and the loser never "reaches" or "advances" past this match.',
-  meta_language: 'meta_language: never mention the data you were given ("supplied", "packet", "database", "the data shows"); write as a reporter.',
+  meta_language: 'meta_language: never mention the data you were given ("packet", "the data shows", "available source"); write as a reporter. The words "supplied" and "documented" are rejected in ANY sense, even as ordinary verbs ("five breaks supplied the damage"): use "gave", "produced" or "delivered".',
   unsupported_mentality: 'unsupported_mentality: remove every claim about nerves, composure, belief or confidence; the evidence does not show minds.'
 };
 export const correctionHints = (correction = '') => {
