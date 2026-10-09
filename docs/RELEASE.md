@@ -150,6 +150,14 @@ Picker V1 (first run 11:31:01Z: 17 candidates, 14 before_lock, 3 not_observed_be
 `PICKER_POLICY.activated_at = null`; picks screen still only with `?preview=picker`. VERSION kept 0.10.8 on purpose (a bump
 flushes every edge cache). UI gate `scripts/qa/picks-v2.mjs` PASS (mocked membership).
 
+**2026-10-09 12:35Z — tennis-api `612e1c0f-f0f7-4d35-a253-f86b3b06f1f9` (0812f10), rollback `8ea00b8e-035f-4ee7-a64f-4189a0068224`.**
+Owner decision: Tennis stays RESEARCH ONLY. Adds public ATP shadow `lock_proofs` (record + evidence sha256, no values),
+"Read this first" disclosures, and a one-time REAL-R2 create-only self-test in the */10 cron (`r2-selftest.js`, writes
+only `ledger/selftest/`): **PASS 12:41:31Z** — the second conditional put returned null, etag b781fd45… and bytes
+unchanged; 5 concurrent conditional puts → exactly 1 stored; createOnly true then false
+(`docs/evidence/picks-v2/r2-selftest-2026-10-09.json`, KV `picker:v2:r2-selftest:r2-create-only/1`). First ATP shadow
+locks expected 2026-10-10 03:00Z: verify with `node scripts/qa/atp-shadow-first-lock.mjs` (exit PASS 0 / HOLD 2 / FAIL 1).
+
 ## Operations notes
 
 - **Long admin runs:** an admin lane run (e.g. `dna_v2`) can complete even when the HTTP request times out or its
