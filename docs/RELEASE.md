@@ -158,6 +158,20 @@ unchanged; 5 concurrent conditional puts → exactly 1 stored; createOnly true t
 (`docs/evidence/picks-v2/r2-selftest-2026-10-09.json`, KV `picker:v2:r2-selftest:r2-create-only/1`). First ATP shadow
 locks expected 2026-10-10 03:00Z: verify with `node scripts/qa/atp-shadow-first-lock.mjs` (exit PASS 0 / HOLD 2 / FAIL 1).
 
+**2026-10-09 13:16Z — tennis-api `81fdf9f4-637f-4c77-ac4f-ddff76adde56` (cbe8345), rollback `251a2809-9151-4599-b76d-e6d038fb234a`
+(625d0ba), then `612e1c0f`.** Persistent lock VERIFICATION LEDGER (`picks-verify.js`, `pbe-lock-verification/1`, checks
+`lock-verify/2`): a bounded read-only step in the existing */10 tick re-checks every ATP shadow + WTA V1 decision decided
+since 2026-10-09T11:00Z from its stored R2 bytes (singles; decided ≥ lock and < sourced start; record sha256; evidence
+re-hash = content_hash = cited sha256, frozen while scheduled and before the lock; inside the public reader's window and
+not excluded) and, once play starts, decided < canonical started_at (UNVERIFIABLE when no source gives a start; a HOLD is
+NOT_A_LOCK). Entries are create-only under `ledger/verification/v1/<scope>/<id>/{lock,start}.json`; decisions are never
+written. Aggregate (no sides / probabilities): `/health` → `picks_verification`, `/v1/picks/track-record` → `verification`;
+full entries: `/v1/picks/verification` (verified owner only; members 403, anonymous 401). No alert channel is bound to
+tennis-api: a FAIL shows as `last_fail`. `PICKS_VERIFY = "0"` stops it. First entry 13:11:13Z (wta_v1 12fd926f, a
+MISSING_DAY_OR_TIMEZONE HOLD: lock PASS, record sha256 8daff812…); /1 wrongly timed that HOLD against the start (FAIL) →
+appended correction `start.correction-1.json` (CHECK_DEFINITION_ERROR → NOT_A_LOCK), original entry kept.
+Browser QA for picks uses SIMULATED membership: it is never a verified production access test.
+
 ## Operations notes
 
 - **Long admin runs:** an admin lane run (e.g. `dna_v2`) can complete even when the HTTP request times out or its
