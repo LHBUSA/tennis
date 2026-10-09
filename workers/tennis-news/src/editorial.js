@@ -185,7 +185,7 @@ export function buildInput(packet, baseline, correction = null, ctx = {}) {
     `AVAILABLE VISUALS (attach where they prove your point; suggested for this angle: ${angle.visuals.suggested.join(', ') || 'none'}):\n${visualCatalog(angle, plan) || '- none'}`,
     `ALLOWED SECTION IDS: ${allowed.join(', ')}`,
     avoid.length ? `STOCK PHRASES ALREADY OVERUSED IN OUR NEWSROOM (X = a name, N = a number) — do not use these frames:\n${avoid.map((x) => `- ${x}`).join('\n')}` : '',
-    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${ctx.previousDraft ? `Return THE SAME DRAFT with only the sentences that cause these problems rewritten (keep everything else word for word and keep the length). Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
+    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${ctx.previousDraft ? `Revise the previous draft to fix EVERY rejection. If any failure is thin_prose, mostly_structured, chart_without_interpretation, recap_no_development or a layout/length failure, REBUILD and EXPAND the actual narrative to the requested word target with only sourced facts; do not preserve the old length or layout. Otherwise make precise corrections and preserve sound facts. Never pad with generic filler. Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
     `SOURCE PACKET:\n${JSON.stringify(modelPacket(packet))}`
   ].filter(Boolean).join('\n\n');
 }
@@ -210,12 +210,12 @@ export function adopt(modelJson, baseline, packet = null, { plan = null } = {}) 
 }
 
 /**
- * Prose for one story under a routing decision. Automatic newsroom runs use attempts = 1 (one model call; a failed draft
- * falls back to the fact-safe baseline); an explicit admin / canary repair may pass attempts = 2. Every call is reported
+ * Prose for one story under a routing decision. Automatic newsroom runs may allow 2 attempts (the second corrects a rejected first draft);
+ * first-pass successes still cost one call. Admin/canary callers can choose attempts independently. Every call is reported
  * through onCall({ attempt, model, usage, response_id, latency_ms, gate_pass, error }) for telemetry. Returns
  * { article, origin: 'model' | 'baseline' | null, gate, attempts: [...], usage, routing } — origin null means HOLD.
  */
-export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, ctx: ctx0 = {} }) {
+export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, canRetry = null, ctx: ctx0 = {} }) {
   let ctx = ctx0;
   const log = [];
   const usage = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, reasoning_tokens: 0 };
@@ -223,7 +223,13 @@ export async function editorialize({ packet, baseline, gate, apiKey, routing = n
   const add = (u = {}) => { for (const k of Object.keys(usage)) usage[k] += Number(u[k]) || 0; };
   if (r0 && r0.lane !== 'DETERMINISTIC' && r0.model && apiKey) {
     let correction = null;
-    for (let i = 0; i < attempts; i += 1) {
+    for (let i = 0; i < Math.min(2, Math.max(1, attempts)); i += 1) {
+      if (i > 0 && canRetry) {
+        // Per-call accounting has already updated KV; never exceed the pool soft cap on a correction.
+        let permitted = false;
+        try { permitted = (await canRetry()) === true; } catch { permitted = false; }
+        if (!permitted) { log.push({ skipped: 'correction_budget_guard' }); break; }
+      }
       try {
         const r = await callModel(apiKey, { routing: r0, input: buildInput(packet, baseline, correction, ctx), fetchImpl });
         add(r.usage);
