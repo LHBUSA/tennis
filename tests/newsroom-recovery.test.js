@@ -16,12 +16,13 @@ function makeFetch(drafts) {
   return { fetchImpl, requests };
 }
 const routing = { lane: 'STANDARD_EDITORIAL', model: 'gpt-5.6-sol', pool: 'premium', max_output_tokens: 6000, reasoning_effort: 'medium' };
+const ctx = { plan: { modules: [] }, angle: { type: 'recap', target: { min: 350, max: 750, label: 'news' }, angle: { thesis: 'A supported result' }, secondary: [], beats: ['lead', 'match'], sets: [], turning_points: [], visuals: { available: [], suggested: [] } } };
 const gate = (draft) => draft.headline === 'Full story' ? { pass: true, failures: [] } : { pass: false, failures: [{ gate: 'thin_prose', detail: 'narrative below required length' }] };
 
 test('failed production first draft retries exactly once with explicit rewrite instructions, then publishes only a gate PASS', async () => {
   const { fetchImpl, requests } = makeFetch([fail, pass]);
   let checks = 0;
-  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, canRetry: async () => { checks++; return true; } });
+  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, ctx, canRetry: async () => { checks++; return true; } });
   assert.equal(ed.origin, 'model');
   assert.equal(ed.article.headline, 'Full story');
   assert.equal(ed.attempts.length, 2);
@@ -33,14 +34,14 @@ test('failed production first draft retries exactly once with explicit rewrite i
 
 test('success uses only one model call, no wasted correction', async () => {
   const { fetchImpl, requests } = makeFetch([pass]);
-  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, canRetry: async () => { throw Error('must not call'); } });
+  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, ctx, canRetry: async () => { throw Error('must not call'); } });
   assert.equal(ed.origin, 'model');
   assert.equal(requests.length, 1);
 });
 
 test('budget guard blocks second transport and preserves fail-closed HOLD', async () => {
   const { fetchImpl, requests } = makeFetch([fail]);
-  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, canRetry: async () => false });
+  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, ctx, canRetry: async () => false });
   assert.equal(requests.length, 1);
   assert.equal(ed.origin, null);
   assert.ok(ed.attempts.some(x => x.skipped === 'correction_budget_guard'));
@@ -48,7 +49,7 @@ test('budget guard blocks second transport and preserves fail-closed HOLD', asyn
 
 test('two invalid model drafts cannot pass by retrying', async () => {
   const { fetchImpl, requests } = makeFetch([fail, fail]);
-  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl });
+  const ed = await editorialize({ packet, baseline, gate, apiKey: 'test', routing, attempts: 2, fetchImpl, ctx });
   assert.equal(requests.length, 2);
   assert.equal(ed.origin, null);
   assert.equal(ed.gate.pass, false);
