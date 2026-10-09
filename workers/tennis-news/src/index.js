@@ -631,6 +631,60 @@ export async function editorialAudit(store, { limit = 40 } = {}) {
   return { stories: out.length, passing: out.filter((x) => x.pass).length, items: out };
 }
 
+/** Retry a held article without deleting its frozen packet, article id, slug, or failed-run history.
+ * Failed attempts leave the original hold untouched; only a passed editorial + factual gate publishes.
+ * The first publish timestamp is the actual retry time, never the event's earlier detection time.
+ */
+export async function retryHeldArticle(env, store, ev, { attempts = 2 } = {}) {
+  const a = (await store.select('tennis_articles', `select=article_id,event_id,slug,status,story_class,headline,deck,body,gate_results,hold_reason,content_plan,first_published_at,published_at,revised_at,revisions,tennis_article_evidence(packet,frozen_at)&article_id=eq.${ev.article_id}`))[0];
+  if (!a || a.status !== 'held') return { error: a ? `story is ${a.status}` : 'held story not found', status: 409 };
+  const evidence = Array.isArray(a.tennis_article_evidence) ? a.tennis_article_evidence[0] : a.tennis_article_evidence;
+  const packet = evidence?.packet;
+  if (!packet) return { error: 'frozen packet unavailable; refused destructive re-enrichment', status: 409 };
+  const storyClass = a.story_class || 'brief';
+  const baseline = compose(packet, { storyClass });
+  const plan = buildPlan(packet, baseline);
+  for (const key of ['media', 'evidence_dimensions']) if (a.content_plan?.[key] !== undefined) plan[key] = a.content_plan[key];
+  const angle = storyAngle(packet, plan, storyClass);
+  const corpus = await loadCorpus(store, { exclude: a.article_id }).catch(() => []);
+  const gate = publicationGate(packet, { plan, storyClass, corpus, angle });
+  const ed = await routedProse(env, store, {
+    ev, articleId: a.article_id, storyClass, packet, baseline, gate,
+    dims: evidenceDimensions(packet), trigger: 'admin_reedit', attempts: Math.min(2, Math.max(1, attempts)),
+    ctx: { plan, angle, avoid: overusedFrames(corpus), keepDraft: true }
+  });
+  if (ed.origin !== 'model' || !ed.gate.pass || env.NEWS_PUBLISH_ENABLED !== 'true') {
+    return { event_id: ev.event_id, article_id: a.article_id, slug: a.slug, state: 'held',
+      reason: env.NEWS_PUBLISH_ENABLED !== 'true' ? 'shadow' : 'editorial_or_factual_gates_failed',
+      attempts: ed.attempts, usage: ed.usage };
+  }
+  const now = iso();
+  const revisions = Array.isArray(a.revisions) ? a.revisions : [];
+  plan.routing = ed.routing;
+  if (ed.article.layout) plan.layout = ed.article.layout;
+  const prior = { at: now, type: 'held_article_recovery', original_status: 'held',
+    original_hold_reason: a.hold_reason, original_gate_results: a.gate_results,
+    prior_headline: a.headline, prior_deck: a.deck,
+    frozen_at: evidence.frozen_at, packet_hash: await packetHash(packet) };
+  // Optimistic status filter ensures two concurrent retries cannot both publish the same article.
+  const patch = { status: 'published', headline: ed.article.headline, deck: ed.article.dek,
+    body: { sections: ed.article.sections }, prose_origin: ed.origin, content_plan: plan,
+    gate_results: { gates_version: GATES_VERSION, editorial_gate_version: EDITORIAL_GATE_VERSION,
+      gate: ed.gate, attempts: ed.attempts, usage: ed.usage, routing: ed.routing,
+      nominal_standard_cost_usd: costUsd(ed.usage) },
+    hold_reason: null, updated_at: now, published_at: now, first_published_at: now,
+    revised_at: now, revisions: [...revisions, prior] };
+  const done = await store.req('PATCH', `tennis_articles?article_id=eq.${a.article_id}&status=eq.held`, { body: patch, prefer: 'return=representation' });
+  if (!Array.isArray(done) || done.length !== 1) return { error: 'concurrent article update, no event promotion', status: 409 };
+  await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}&article_id=eq.${a.article_id}&state=eq.held`, {
+    body: { state: 'published', state_reason: 'held article recovered: passed unchanged quality gates', state_changed_at: now }, prefer: 'return=minimal'
+  });
+  await telemetry(store, [{ event_id: ev.event_id, article_id: a.article_id, stage: 'publish', status: 'ok',
+    detail: { recovered_held: true, frozen_at: evidence.frozen_at, model_attempts: ed.attempts.length } }]);
+  return { event_id: ev.event_id, article_id: a.article_id, slug: a.slug, state: 'published',
+    recovered_held: true, attempts: ed.attempts, usage: ed.usage };
+}
+
 /** Admin re-run of ONE held/unpublished event through the full pipeline (attempts <= 2; the second edits the first draft).
  *  The held draft + evidence are rebuilt from a fresh packet. Never touches a published story. */
 export async function adminEnrich(env, store, id, attempts = 1) {
@@ -638,11 +692,9 @@ export async function adminEnrich(env, store, id, attempts = 1) {
   if (!ev) return { error: 'no such event', status: 404 };
   if (!['held', 'detected', 'wire'].includes(ev.state)) return { error: `event is ${ev.state}`, status: 409 };
   if (ev.article_id) {
-    const a = (await store.select('tennis_articles', `select=status&article_id=eq.${ev.article_id}`))[0];
-    if (a?.status === 'published') return { error: 'published story: use /v1/news/rewrite', status: 409 };
-    await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { article_id: null }, prefer: 'return=minimal' });
-    await store.del('tennis_article_evidence', `article_id=eq.${ev.article_id}`);
-    await store.del('tennis_articles', `article_id=eq.${ev.article_id}`);
+    // Existing held stories retain their ID, packet, original failure and audit history.
+    // Do not clear the article link or delete its frozen evidence.
+    return retryHeldArticle(env, store, ev, { attempts });
   }
   const token = crypto.randomUUID();
   await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(id)}`, { body: { state: 'enriching', lease_token: token, lease_expires_at: new Date(Date.now() + LEASE_S * 1000).toISOString(), state_changed_at: iso() }, prefer: 'return=minimal' });
