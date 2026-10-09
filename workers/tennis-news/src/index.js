@@ -760,6 +760,12 @@ export default {
     if (!authed(request, env)) return json({ ok: false, error: 'not_found' }, { status: 404 });
     const store = storeFromEnv(env);
     if (path === '/v1/news/runs' && request.method === 'POST') return json({ ok: true, data: await run(env, { dry: url.searchParams.get('dry') === '1' }) });
+    // read-only list of held stories (runbook step 1): event, article id/slug, original hold reason, freeze time
+    if (path === '/v1/news/held' && request.method === 'GET') {
+      const since = iso(new Date(Date.now() - Math.min(336, Math.max(1, Number(url.searchParams.get('hours')) || 72)) * 3600e3));
+      const rows = await store.select('tennis_news_events', `select=event_id,kind,detected_at,state_changed_at,state_reason,article_id,tennis_articles(slug,status,story_class,headline,first_published_at,tennis_article_evidence(frozen_at))&state=eq.held&detected_at=gte.${since}&order=detected_at.desc&limit=100`);
+      return json({ ok: true, data: { since, held: rows } });
+    }
     if (path === '/v1/news/drought' && request.method === 'POST') return json({ ok: true, data: await checkDrought(env, storeFromEnv(env), { force: true }) });
     if (path === '/v1/news/latency') return json({ ok: true, data: await latency(store, Number(url.searchParams.get('hours')) || 168) });
     if (path === '/v1/news/reclassify' && request.method === 'POST') {
