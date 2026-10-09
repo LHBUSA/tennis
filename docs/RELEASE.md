@@ -140,6 +140,16 @@ Intermediate 320c5906 / abf2f98d wrote 38 post-hoc records (matches never observ
 appended exclusion corrections (`ledger/picker-v1/corrections/`), records untouched. Schedule-day migration
 `20261004000100` staged, NOT applied; `SCHEDULE_DAY_COLUMNS = "0"` on tennis-api and tennis-ingest.
 
+**2026-10-09 — Tennis Picks V2 (LHBUSA/tennis#11): tennis-api `8ea00b8e-035f-4ee7-a64f-4189a0068224` (a278ce4), rollback
+`3797fc3e-ad83-415c-8b4d-87e798d99776` (29792dc); Vercel = main a278ce4.** ATP SHADOW prospective ledger
+(`ledger/picker-v2-atp-shadow/`, challenger `atp-recal/2:temperature` T=1.2487, tau 0.55; protocol
+`docs/research/PICKS_V2_PROTOCOL.md`, results `PICKS_V2_RESULTS.md`) runs as a bounded step in the existing `*/10` cron after
+Picker V1 (first run 11:31:01Z: 17 candidates, 14 before_lock, 3 not_observed_before_start; KV `picker:v2:atp-shadow:last`).
+`PICKER_V2_ATP = "0"` stops it. Never official. /v1/picks* add why, uncertainty, opportunity labels
+(`tennis-opportunity/1`), record by version / probability band / lock integrity. Nothing activated: `PICKS_LIVE = false`,
+`PICKER_POLICY.activated_at = null`; picks screen still only with `?preview=picker`. VERSION kept 0.10.8 on purpose (a bump
+flushes every edge cache). UI gate `scripts/qa/picks-v2.mjs` PASS (mocked membership).
+
 ## Operations notes
 
 - **Long admin runs:** an admin lane run (e.g. `dna_v2`) can complete even when the HTTP request times out or its
