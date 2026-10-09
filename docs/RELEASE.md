@@ -8,6 +8,16 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-09 Daily DNA v2 build in bounded units (tennis-ingest 0.4.2; d8fb542)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-ingest | `ca17d395-a0c6-462e-b404-a70de9c34605` 0.4.2 @ d8fb542 (dna-daily.js: KV `dna2:plan` units, one per tick; lease `dna:build:lease`) | `38d2845f-6353-4412-8e29-18cad396250d` @ cb1e9c3 |
+
+Cause: the whole v2 build ran in one */2 tick (~290 s CPU, ~800 s wall); the 170 s tick lock let later ticks start
+more builds in the same 128 MB isolate -> exceededMemory every other tick 00:00-01:10 UTC (10-06..10-09). First
+natural proof: the 2026-10-10 00:00Z window (expect 1 v1 tick + 7 v2 units + retention, no exceededMemory).
+
 ## 2026-10-07 Phase 3: /today + /schedule miss coalescing (tennis-api 0.10.8; 29792dc)
 
 | Component | Current | Rollback target |
