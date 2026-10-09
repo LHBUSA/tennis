@@ -8,6 +8,33 @@ origin/main, and the commit currently in production is an ancestor of HEAD; it t
 `/health`, deploys, and records the rollback version. Added after one session's tennis-api deploy silently replaced
 another session's for four minutes (17029cfb -> b2c4c8e1 -> e45b1109).
 
+## 2026-10-09 Newsroom P0 recovery (tennis-news 4.4.0; 055c036; LHBUSA/tennis#15, PR #16; owner-approved)
+
+| Component | Current | Rollback target |
+|---|---|---|
+| tennis-news | `0b7aa261-cd07-49ff-b9b4-ea51884f5aca` @ 055c036, deployed 2026-10-09 21:09Z. Bounded corrective second pass, in-place held retry, non-destructive requeue, drought watchdog, writer avoid-list aligned with the `repeated_phrasing` gate. | `f6a21fc2-8a17-4bbd-955c-1a0e6e0755f0` @ 09bf6db |
+
+- **Cause:**
+  - New stories got one model attempt. On a gate failure the fallback was the legacy V3 baseline, which can never pass V5 (thin_prose / mostly_structured).
+  - The writer's avoid-list only warned about frames shared by 3 stories, while the gate rejects frames shared by 2.
+  - Result: 0 publications from 2026-10-06 07:19Z until this release.
+- **Gates unchanged:** factual, editorial, wrong-winner, rights and media gates.
+- **Tests:** `npm run check` passed 735/735 (`tests/newsroom-recovery.test.js` and `tests/newsroom-retry-held.test.js`).
+- **Canary:** undeployed preview versions on production data, with real model calls, publishing only on a full gate pass.
+  - **Mannarino–Cobolli:** published 20:59:26Z after a corrected second draft (92 → 797 words, narrative/1).
+  - **Zheng–Svitolina:** published 21:07:08Z on the first draft.
+  - **Bartunkova–Muchova:** held after 2 retries (`wrong_winner`, `clean_hold_claim`).
+  - **Hurkacz–Djokovic:** held after 1 retry on the earlier prompt.
+  - **Preservation:** article id, slug, `frozen_at`, packet hash and `detected_at` are unchanged for all 4. The original hold is kept in a `held_article_recovery` revision. `first_published_at` is the real retry time.
+- **Deploy:** `deploy-worker.mjs` passed its checks (ancestor, preview `/health`) twice, but both times its immediate `versions deploy` returned 100146 "version could not be found" (upload propagation lag). The health-checked version `0b7aa261` was then deployed with the script's exact command and message.
+- **Retrying a held story:** `POST /v1/news/enrich?event_id=<id>&attempts=2` (in place; never deletes).
+  - `GET /v1/news/held` lists held stories.
+  - `GET /v1/news/story?event_id=` is the per-story audit view.
+- **Alert:** KV `news:alert:drought`, refreshed every 30 minutes, is on `/health` as `alerts.newsroom_drought`.
+  - It alerts when 0 articles have published in 18 hours while 2 or more eligible stories are held.
+  - `POST /v1/news/drought` forces a check.
+  - No push channel is bound (owner decision).
+
 ## 2026-10-09 Tennis #14: OFFICIAL PBE Picks (tennis-api 0.11.0; 6c76c1e; owner-approved)
 
 | Component | Current | Rollback target |
