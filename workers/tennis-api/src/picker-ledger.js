@@ -26,6 +26,16 @@ export async function putOnce(bucket, key, obj) {
   await bucket.put(key, JSON.stringify(obj), { httpMetadata: { contentType: 'application/json' } });
   return true;
 }
+/** Ledger reads keep at most this many R2 GETs in flight (the runtime queues any beyond its open-connection limit). */
+export const READ_CONCURRENCY = 16;
+/** Order-preserving map with at most `n` calls in flight. */
+export async function mapLimit(items, n, fn) {
+  const out = new Array(items.length);
+  let i = 0;
+  const worker = async () => { while (i < items.length) { const j = i++; out[j] = await fn(items[j], j); } };
+  await Promise.all(Array.from({ length: Math.min(n, items.length) }, worker));
+  return out;
+}
 export async function getJson(bucket, key) { const o = await bucket.get(key); return o ? JSON.parse(await o.text()) : null; }
 
 /** benchmarksAt from the shared markets Worker for OUR observations at or before pbe_at; null when unreachable. */
@@ -105,17 +115,16 @@ export async function appendCorrection(bucket, { id, reason, excluded = false, n
 export async function readLedger(bucket, { limit = 500 } = {}) {
   const keys = await listKeys(bucket, `${LEDGER_PREFIX}decisions/`);
   const corr = new Map();
-  for (const k of await listKeys(bucket, `${LEDGER_PREFIX}corrections/`)) {
-    const c = await getJson(bucket, k);
+  for (const c of await mapLimit(await listKeys(bucket, `${LEDGER_PREFIX}corrections/`), READ_CONCURRENCY, (k) => getJson(bucket, k))) {
     if (c) corr.set(c.canonical_event_id, [...(corr.get(c.canonical_event_id) || []), c]);
   }
-  const rows = [];
-  for (const k of keys.slice(-limit)) {
+  // bounded-parallel reads (2026-10-09 P0: one-by-one GETs made every uncached track-record build take 16-18 s)
+  const rows = (await mapLimit(keys.slice(-limit), READ_CONCURRENCY, async (k) => {
     const rec = await getJson(bucket, k);
-    if (!rec) continue;
+    if (!rec) return null;
     const corrections = corr.get(rec.canonical_event_id) || [];
-    rows.push({ record: rec, grade: rec.decision.state === 'CALL' ? await getJson(bucket, gradeKey(rec.canonical_event_id)) : null, corrections, excluded: corrections.some((c) => c.excluded) });
-  }
+    return { record: rec, grade: rec.decision.state === 'CALL' ? await getJson(bucket, gradeKey(rec.canonical_event_id)) : null, corrections, excluded: corrections.some((c) => c.excluded) };
+  })).filter(Boolean);
   return rows.sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
 }
 

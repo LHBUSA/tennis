@@ -9,7 +9,7 @@
 // record only and never change it (docs/research/PICKS_V2_PROTOCOL.md §3).
 import { envelope } from '../../shared/envelope.js';
 import { PICKER_POLICY, REASONS } from './picker.js';
-import { readLedger, getJson } from './picker-ledger.js';
+import { readLedger, getJson, mapLimit, READ_CONCURRENCY } from './picker-ledger.js';
 import { readShadowLedger, ATP_SHADOW_POLICY, SHADOW_REASONS } from './picker-v2-atp.js';
 import { readVerification, SUMMARY_KEY } from './picks-verify.js';
 
@@ -221,13 +221,10 @@ async function allRows(bucket) {
 }
 /** "Why" for V1 CALLs (V1 records predate stored why): read from the frozen snapshot the decision cites. Bounded. */
 async function attachWhy(bucket, rows, max = 30) {
-  let n = 0;
-  for (const x of rows) {
-    if (n >= max) break;
-    if (x.record.why || x.record.decision.state !== 'CALL' || !x.record.evidence?.snapshot_ref) continue;
-    n += 1;
+  const needWhy = rows.filter((x) => !x.record.why && x.record.decision.state === 'CALL' && x.record.evidence?.snapshot_ref).slice(0, max);
+  await mapLimit(needWhy, READ_CONCURRENCY, async (x) => {
     try { const s = await getJson(bucket, x.record.evidence.snapshot_ref); x.why = Array.isArray(s?.payload?.why) ? s.payload.why.slice(0, 6) : null; } catch { x.why = null; }
-  }
+  });
 }
 
 export async function picksRoute(path, url, env, store = null) {

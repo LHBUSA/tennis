@@ -11,18 +11,32 @@ function local(freshness, semantics, degraded = []) {
   return { ok: false, data: null, meta: { source: [], fetched_at: new Date().toISOString(), source_updated_at: null, age_s: null, freshness, semantics, degraded } };
 }
 
-export async function api(path, { signal } = {}) {
+/** timeoutMs (opt-in): a read that has not finished by then resolves to UNAVAILABLE instead of waiting forever.
+ *  Only the caller's own signal (page left) rejects with AbortError. */
+export async function api(path, { signal, timeoutMs = 0 } = {}) {
   if (!BASE) return local('NOT_CONFIGURED', 'tennis-api is not connected to this build');
+  // live-sensitive reads never come from the browser HTTP cache (a stale header must never freeze a live page);
+  // the API's edge cache still absorbs the load
+  return apiRequest(`${BASE}${path}`, { signal, timeoutMs, init: LIVE_PATH.test(path) ? { cache: 'no-store' } : {} });
+}
+/** The fetch behind api() (exported for tests: fetchImpl stands in for the network). */
+export async function apiRequest(url, { signal, timeoutMs = 0, init = {}, fetchImpl = fetch } = {}) {
+  const ctl = timeoutMs ? new AbortController() : null;
+  const onAbort = () => ctl.abort();
+  if (ctl && signal) { if (signal.aborted) ctl.abort(); else signal.addEventListener('abort', onAbort, { once: true }); }
+  const timer = ctl ? setTimeout(() => ctl.abort(), timeoutMs) : null;
   try {
-    // live-sensitive reads never come from the browser HTTP cache (a stale header must never freeze a live page);
-    // the API's edge cache still absorbs the load
-    const res = await fetch(`${BASE}${path}`, { signal, credentials: 'include', headers: { accept: 'application/json' }, ...(LIVE_PATH.test(path) ? { cache: 'no-store' } : {}) });
+    const res = await fetchImpl(url, { signal: ctl ? ctl.signal : signal, credentials: 'include', headers: { accept: 'application/json' }, ...init });
     const body = await res.json();
     if (!body || typeof body !== 'object' || !body.meta) return local('ERROR', 'unexpected response shape');
     return body;
   } catch (err) {
-    if (err?.name === 'AbortError') throw err;
+    if (err?.name === 'AbortError' && (!ctl || signal?.aborted)) throw err;
+    if (err?.name === 'AbortError') return local('UNAVAILABLE', `tennis-api did not respond within ${Math.round(timeoutMs / 1000)} s`);
     return local('UNAVAILABLE', 'tennis-api did not respond', [String(err?.message || err)]);
+  } finally {
+    if (timer) clearTimeout(timer);
+    if (ctl && signal) signal.removeEventListener('abort', onAbort);
   }
 }
 

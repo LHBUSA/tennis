@@ -84,15 +84,32 @@ function policyBox(p) {
 function shell(root, { eyebrow, heading, lede }) {
   render(root, html`<div class="page pk-page"><header class="page-h"><p class="eyebrow">${eyebrow}</p><h1>${heading}</h1><p class="lede">${lede}</p><p class="meta" data-meta></p></header><div data-body><p class="loading">Loading…</p></div></div>`);
 }
-async function load(root, path, draw, emptyNote, signal) {
-  let res;
-  try { res = await api(path, { signal }); } catch { return; }
+// 2026-10-09 P0: the page never stays on "Loading…" — a slow read times out, a failed read or a render error shows a
+// visible error with a retry; only leaving the page (our own abort) ends a load silently.
+export const LOAD_TIMEOUT_MS = 15000;
+export async function load(root, path, draw, emptyNote, signal, { timeoutMs = LOAD_TIMEOUT_MS, fetcher = api } = {}) {
   const body = root.querySelector('[data-body]');
   if (!body) return;
+  render(body, html`<p class="loading">Loading…</p>`);
+  let res;
+  try { res = await fetcher(path, { signal, timeoutMs }); } catch (e) {
+    if (signal?.aborted) return;
+    res = { ok: false, data: null, meta: { freshness: 'UNAVAILABLE', semantics: String(e?.message || e) } };
+  }
+  if (signal?.aborted || !body.isConnected) return;
+  const fail = (meta, note) => {
+    render(body, html`${errorModule(meta, note)}<p class="pk-retry"><button type="button" class="btn line" data-retry>Try again</button></p>`);
+    body.querySelector('[data-retry]')?.addEventListener('click', () => load(root, path, draw, emptyNote, signal, { timeoutMs, fetcher }), { once: true });
+  };
   const meta = root.querySelector('[data-meta]');
   if (meta) render(meta, html`${freshnessBadge(res.meta)} <span>${res.meta?.semantics || ''}</span>`);
-  if (resultState(res) === 'error') { render(body, errorModule(res.meta, 'The pick ledger could not be loaded right now.')); return; }
-  render(body, (res.data != null && draw(res.data)) || emptyModule(res.meta, emptyNote));
+  if (resultState(res) === 'error') return fail(res.meta, 'The pick ledger could not be loaded right now.');
+  let out;
+  try { out = (res.data != null && draw(res.data)) || emptyModule(res.meta, emptyNote); } catch (e) {
+    console.error('[picks] render failed', e);
+    return fail({ ...res.meta, freshness: 'ERROR' }, 'The pick ledger loaded but could not be displayed.');
+  }
+  render(body, out);
 }
 const notLive = (root, heading, note) => render(root, html`<div class="page"><header class="page-h"><p class="eyebrow">${heading}</p><h1>${heading}</h1><p class="lede">${note}</p></header></div>`);
 

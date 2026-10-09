@@ -11,7 +11,7 @@
 // through the frozen monotone recalibration (recal.js). Markets are never an input; benchmarks are frozen beside it.
 import { scopeOf, lockFor, grade, GRADING_RULE, COUNTING_UNIT } from './picker.js';
 import { snapshotAtOrBefore } from './matchup-freeze.js';
-import { fetchBenchmarks } from './picker-ledger.js';
+import { fetchBenchmarks, mapLimit, READ_CONCURRENCY } from './picker-ledger.js';
 import { MATCH, shapeMatch } from './shape.js';
 import { applyRecal } from './recal.js';
 
@@ -212,10 +212,10 @@ export async function runAtpShadow(store, env, { now = new Date().toISOString(),
 export async function readShadowLedger(bucket, { limit = 400 } = {}) {
   const ids = [...await listIds(bucket, 'decisions')];
   const corrIds = await listIds(bucket, 'corrections');
-  const rows = [];
-  for (const id of ids.slice(-limit)) {
+  // bounded-parallel reads (2026-10-09 P0: see readLedger)
+  const rows = (await mapLimit(ids.slice(-limit), READ_CONCURRENCY, async (id) => {
     const obj = await bucket.get(key.decision(id));
-    if (!obj) continue;
+    if (!obj) return null;
     const text = await obj.text();
     const rec = JSON.parse(text);
     // sha256 of the stored bytes: a public commitment to the full record (side included) before the result
@@ -225,7 +225,7 @@ export async function readShadowLedger(bucket, { limit = 400 } = {}) {
       const l = await bucket.list({ prefix: `${SHADOW_PREFIX}corrections/${id}/` });
       corrections = (await Promise.all(l.objects.map((o) => getJson(bucket, o.key)))).filter(Boolean);
     }
-    rows.push({ record: rec, record_sha256: recordSha256, grade: rec.decision.state === 'CALL' ? await getJson(bucket, key.grade(id)) : null, corrections, excluded: corrections.some((c) => c.excluded) });
-  }
+    return { record: rec, record_sha256: recordSha256, grade: rec.decision.state === 'CALL' ? await getJson(bucket, key.grade(id)) : null, corrections, excluded: corrections.some((c) => c.excluded) };
+  })).filter(Boolean);
   return rows.sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
 }
