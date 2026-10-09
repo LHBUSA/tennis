@@ -198,3 +198,26 @@ test('drought: reason parser, public view hides the per-story list, KV record ke
     assert.equal(JSON.parse(env.TENNIS_STATE.m.get(DROUGHT_KEY)).checked_at, later.toISOString());
   } finally { console.error = err; }
 });
+
+// ---- prompt alignment (#15 canaries) ----
+import { correctionHints } from '../workers/tennis-news/src/editorial.js';
+import { overusedFrames } from '../workers/tennis-news/src/overhaul.js';
+import { stockPhrases, shingles } from '../workers/tennis-news/src/editorial-gate.js';
+
+test('writer is warned about every frame the repeated_phrasing gate can reject (gate: shared by 2 stories)', () => {
+  const a = { sections: [{ id: 'lead', paragraphs: ['Her return points won rate was 52 percent compared with Svitolina in the semifinal.'] }] };
+  const corpus = [a, a].map((x) => ({ shingles: shingles(x.sections[0].paragraphs[0]) }));
+  const flagged = stockPhrases(a, corpus).map((x) => x.phrase);
+  assert.ok(flagged.length > 0);
+  const warned = new Set(overusedFrames(corpus));
+  for (const f of flagged) assert.ok(warned.has(f), `gate frame not in the writer's avoid list: ${f}`);
+});
+
+test('correction hints: only for the gates that failed; none for others', () => {
+  const h = correctionHints('- self_explaining: x\n- repeated_phrasing: "a b c" (2)\n- thin_prose: short');
+  assert.match(h, /^HOW TO FIX THEM:/);
+  assert.match(h, /self_explaining:/);
+  assert.match(h, /repeated_phrasing:/);
+  assert.doesNotMatch(h, /wrong_winner|meta_language/);
+  assert.equal(correctionHints('- thin_prose: short'), '');
+});

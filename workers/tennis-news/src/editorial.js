@@ -169,13 +169,27 @@ function visualCatalog(angle, plan) {
  * any prose (angle.js); the editor writes to it and attaches visuals to the points they prove. The deterministic
  * baseline is no longer shown to the model (its fixed frame produced templated stories).
  */
+// How to repair specific rejections (#15 canaries: corrected drafts kept failing these). Guidance only: the gates that
+// judge the result are unchanged.
+const FIX_HINTS = {
+  self_explaining: 'self_explaining: delete every sentence that comments on the story\'s own evidence instead of stating a tennis fact. No sentence may start "That/This/These/Those/The <noun> matters/mattered/did not .../describes/explains/was important". Put the point itself into the sentence that carries the fact.',
+  repeated_phrasing: 'repeated_phrasing: rewrite every quoted frame AND every frame in the STOCK PHRASES list with a different construction; do not introduce a new formula elsewhere. Vary how you compare numbers (never "rate was/stood at N compared with X" twice) and how you place a player in the draw or rankings.',
+  wrong_winner: 'wrong_winner: re-read SETS and the score; only the stored winner wins, and the loser never "reaches" or "advances" past this match.',
+  meta_language: 'meta_language: never mention the data you were given ("supplied", "packet", "database", "the data shows"); write as a reporter.',
+  unsupported_mentality: 'unsupported_mentality: remove every claim about nerves, composure, belief or confidence; the evidence does not show minds.'
+};
+export const correctionHints = (correction = '') => {
+  const hints = Object.entries(FIX_HINTS).filter(([g]) => new RegExp(`^- ${g}:`, 'm').test(correction)).map(([, h]) => `- ${h}`);
+  return hints.length ? `HOW TO FIX THEM:\n${hints.join('\n')}\n` : '';
+};
+
 export function buildInput(packet, baseline, correction = null, ctx = {}) {
   const plan = ctx.plan || buildPlan(packet, baseline);
   const storyClass = baseline?.story_class || ctx.storyClass || 'full';
   const angle = ctx.angle || storyAngle(packet, plan, storyClass);
   const allowed = allowedSectionIds(packet, baseline);
   const t = angle.target;
-  const avoid = (ctx.avoid || []).slice(0, 20);
+  const avoid = (ctx.avoid || []).slice(0, 60);
   return [
     `Write the PropBetEdge Tennis ${angle.type === 'preview' ? 'PREVIEW' : angle.type === 'recap' ? 'match story' : 'ranking story'} for this ${String(packet.event?.kind || angle.type).replace(/_/g, ' ')} event.`,
     `WORD TARGET: ${t.min}-${t.max} words of narrative prose (a ${t.label}). Fewer is a rejection; padding is a rejection.`,
@@ -185,7 +199,7 @@ export function buildInput(packet, baseline, correction = null, ctx = {}) {
     `AVAILABLE VISUALS (attach where they prove your point; suggested for this angle: ${angle.visuals.suggested.join(', ') || 'none'}):\n${visualCatalog(angle, plan) || '- none'}`,
     `ALLOWED SECTION IDS: ${allowed.join(', ')}`,
     avoid.length ? `STOCK PHRASES ALREADY OVERUSED IN OUR NEWSROOM (X = a name, N = a number) — do not use these frames:\n${avoid.map((x) => `- ${x}`).join('\n')}` : '',
-    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${ctx.previousDraft ? `Revise the previous draft to fix EVERY rejection. If any failure is thin_prose, mostly_structured, chart_without_interpretation, recap_no_development or a layout/length failure, REBUILD and EXPAND the actual narrative to the requested word target with only sourced facts; do not preserve the old length or layout. Otherwise make precise corrections and preserve sound facts. Never pad with generic filler. Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
+    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${correctionHints(correction)}${ctx.previousDraft ? `Revise the previous draft to fix EVERY rejection. If any failure is thin_prose, mostly_structured, chart_without_interpretation, recap_no_development or a layout/length failure, REBUILD and EXPAND the actual narrative to the requested word target with only sourced facts; do not preserve the old length or layout. Otherwise make precise corrections and preserve sound facts. Never pad with generic filler. Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
     `SOURCE PACKET:\n${JSON.stringify(modelPacket(packet))}`
   ].filter(Boolean).join('\n\n');
 }
