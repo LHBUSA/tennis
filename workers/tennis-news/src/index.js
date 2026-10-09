@@ -766,6 +766,16 @@ export default {
       const rows = await store.select('tennis_news_events', `select=event_id,kind,detected_at,state_changed_at,state_reason,article_id,tennis_articles(slug,status,story_class,headline,first_published_at,tennis_article_evidence(frozen_at))&state=eq.held&detected_at=gte.${since}&order=detected_at.desc&limit=100`);
       return json({ ok: true, data: { since, held: rows } });
     }
+    // read-only audit of ONE story (any state): article identity, publish times, revision trail, frozen_at + packet hash
+    if (path === '/v1/news/story' && request.method === 'GET') {
+      const id = url.searchParams.get('event_id');
+      const ev = id ? (await store.select('tennis_news_events', `select=event_id,state,state_reason,state_changed_at,detected_at,article_id&event_id=eq.${encodeURIComponent(id)}`))[0] : null;
+      if (!ev) return json({ ok: false, error: 'no such event' }, { status: 404 });
+      const a = ev.article_id ? (await store.select('tennis_articles', `select=article_id,event_id,slug,status,story_class,headline,hold_reason,prose_origin,detected_at,first_published_at,published_at,revised_at,revisions,content_plan,body,tennis_article_evidence(packet,frozen_at)&article_id=eq.${ev.article_id}`))[0] : null;
+      const evd = a ? (Array.isArray(a.tennis_article_evidence) ? a.tennis_article_evidence[0] : a.tennis_article_evidence) : null;
+      const article = a ? { article_id: a.article_id, event_id: a.event_id, slug: a.slug, status: a.status, story_class: a.story_class, headline: a.headline, hold_reason: a.hold_reason, prose_origin: a.prose_origin, detected_at: a.detected_at, first_published_at: a.first_published_at, published_at: a.published_at, revised_at: a.revised_at, layout: a.content_plan?.layout || null, prose_words: a.body ? proseWords(a.body) : null, revisions: (a.revisions || []).map(({ prior_packet: _p, prior_body: _b, ...r }) => r), frozen_at: evd?.frozen_at || null, packet_hash: evd?.packet ? await packetHash(evd.packet) : null } : null;
+      return json({ ok: true, data: { event: ev, article } });
+    }
     if (path === '/v1/news/drought' && request.method === 'POST') return json({ ok: true, data: await checkDrought(env, storeFromEnv(env), { force: true }) });
     if (path === '/v1/news/latency') return json({ ok: true, data: await latency(store, Number(url.searchParams.get('hours')) || 168) });
     if (path === '/v1/news/reclassify' && request.method === 'POST') {
