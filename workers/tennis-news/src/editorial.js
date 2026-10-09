@@ -37,7 +37,7 @@ NO INVENTED TENNIS — narrative is not invention:
 
 VOICE — a sports desk, not a database describing its own records (the gate rejects each of these):
 - At most TWO provenance words in the whole story ("archive", "archived", "in our records", "stored", "Match DNA snapshot"). Provenance lives in Source & Method.
-- Never tell the reader what data we lack or how the story was built: no "The available source contains no point-by-point or serve statistics, so the set scores place a necessary limit on the description", no "supplied", "documented", "path record", "the scores alone cannot...". If the evidence does not support a claim, simply do not make it.
+- Never tell the reader what data we lack or how the story was built: no "The available source contains no point-by-point or serve statistics, so the set scores place a necessary limit on the description", no "path record", "the scores alone cannot...". The words "supplied" and "documented" are rejected in ANY sense, even as ordinary verbs ("break points supplied the damage") — write "gave", "produced", "delivered". If the evidence does not support a claim, simply do not make it.
 - No self-explaining scaffolding: not "That result matters for the preview because...", "That comparison describes...", "Those figures did not dictate this match, but..." — state the point itself.
 - At most THREE statistics (percentages, W-L records) in any paragraph, ideally one or two: choose the one that proves the sentence. Never stack both players' rates on several measures in one paragraph.
 - Plain score language: "Fritz took a 9-7 tiebreak", "Munar won the second set 6-4". Never "ran beyond the standard finishing threshold", "recorded as 7-9 from Munar's side".
@@ -169,13 +169,27 @@ function visualCatalog(angle, plan) {
  * any prose (angle.js); the editor writes to it and attaches visuals to the points they prove. The deterministic
  * baseline is no longer shown to the model (its fixed frame produced templated stories).
  */
+// How to repair specific rejections (#15 canaries: corrected drafts kept failing these). Guidance only: the gates that
+// judge the result are unchanged.
+const FIX_HINTS = {
+  self_explaining: 'self_explaining: delete every sentence that comments on the story\'s own evidence instead of stating a tennis fact. No sentence may start "That/This/These/Those/The <noun> matters/mattered/did not .../describes/explains/was important". Put the point itself into the sentence that carries the fact.',
+  repeated_phrasing: 'repeated_phrasing: rewrite every quoted frame AND every frame in the STOCK PHRASES list with a different construction; do not introduce a new formula elsewhere. Vary how you compare numbers (never "rate was/stood at N compared with X" twice) and how you place a player in the draw or rankings.',
+  wrong_winner: 'wrong_winner: re-read SETS and the score; only the stored winner wins, and the loser never "reaches" or "advances" past this match.',
+  meta_language: 'meta_language: never mention the data you were given ("packet", "the data shows", "available source"); write as a reporter. The words "supplied" and "documented" are rejected in ANY sense, even as ordinary verbs ("five breaks supplied the damage"): use "gave", "produced" or "delivered".',
+  unsupported_mentality: 'unsupported_mentality: remove every claim about nerves, composure, belief or confidence; the evidence does not show minds.'
+};
+export const correctionHints = (correction = '') => {
+  const hints = Object.entries(FIX_HINTS).filter(([g]) => new RegExp(`^- ${g}:`, 'm').test(correction)).map(([, h]) => `- ${h}`);
+  return hints.length ? `HOW TO FIX THEM:\n${hints.join('\n')}\n` : '';
+};
+
 export function buildInput(packet, baseline, correction = null, ctx = {}) {
   const plan = ctx.plan || buildPlan(packet, baseline);
   const storyClass = baseline?.story_class || ctx.storyClass || 'full';
   const angle = ctx.angle || storyAngle(packet, plan, storyClass);
   const allowed = allowedSectionIds(packet, baseline);
   const t = angle.target;
-  const avoid = (ctx.avoid || []).slice(0, 20);
+  const avoid = (ctx.avoid || []).slice(0, 60);
   return [
     `Write the PropBetEdge Tennis ${angle.type === 'preview' ? 'PREVIEW' : angle.type === 'recap' ? 'match story' : 'ranking story'} for this ${String(packet.event?.kind || angle.type).replace(/_/g, ' ')} event.`,
     `WORD TARGET: ${t.min}-${t.max} words of narrative prose (a ${t.label}). Fewer is a rejection; padding is a rejection.`,
@@ -185,7 +199,7 @@ export function buildInput(packet, baseline, correction = null, ctx = {}) {
     `AVAILABLE VISUALS (attach where they prove your point; suggested for this angle: ${angle.visuals.suggested.join(', ') || 'none'}):\n${visualCatalog(angle, plan) || '- none'}`,
     `ALLOWED SECTION IDS: ${allowed.join(', ')}`,
     avoid.length ? `STOCK PHRASES ALREADY OVERUSED IN OUR NEWSROOM (X = a name, N = a number) — do not use these frames:\n${avoid.map((x) => `- ${x}`).join('\n')}` : '',
-    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${ctx.previousDraft ? `Return THE SAME DRAFT with only the sentences that cause these problems rewritten (keep everything else word for word and keep the length). Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
+    correction ? `YOUR PREVIOUS DRAFT WAS REJECTED for exactly these reasons:\n${correction}\n${correctionHints(correction)}${ctx.previousDraft ? `Revise the previous draft to fix EVERY rejection. If any failure is thin_prose, mostly_structured, chart_without_interpretation, recap_no_development or a layout/length failure, REBUILD and EXPAND the actual narrative to the requested word target with only sourced facts; do not preserve the old length or layout. Otherwise make precise corrections and preserve sound facts. Never pad with generic filler. Previous draft:\n${JSON.stringify(ctx.previousDraft)}` : 'Fix these problems; keep every fact rule.'}` : '',
     `SOURCE PACKET:\n${JSON.stringify(modelPacket(packet))}`
   ].filter(Boolean).join('\n\n');
 }
@@ -210,12 +224,12 @@ export function adopt(modelJson, baseline, packet = null, { plan = null } = {}) 
 }
 
 /**
- * Prose for one story under a routing decision. Automatic newsroom runs use attempts = 1 (one model call; a failed draft
- * falls back to the fact-safe baseline); an explicit admin / canary repair may pass attempts = 2. Every call is reported
+ * Prose for one story under a routing decision. Automatic newsroom runs may allow 2 attempts (the second corrects a rejected first draft);
+ * first-pass successes still cost one call. Admin/canary callers can choose attempts independently. Every call is reported
  * through onCall({ attempt, model, usage, response_id, latency_ms, gate_pass, error }) for telemetry. Returns
  * { article, origin: 'model' | 'baseline' | null, gate, attempts: [...], usage, routing } — origin null means HOLD.
  */
-export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, ctx: ctx0 = {} }) {
+export async function editorialize({ packet, baseline, gate, apiKey, routing = null, model = null, attempts = 1, fetchImpl = fetch, onCall = null, canRetry = null, ctx: ctx0 = {} }) {
   let ctx = ctx0;
   const log = [];
   const usage = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0, reasoning_tokens: 0 };
@@ -223,7 +237,13 @@ export async function editorialize({ packet, baseline, gate, apiKey, routing = n
   const add = (u = {}) => { for (const k of Object.keys(usage)) usage[k] += Number(u[k]) || 0; };
   if (r0 && r0.lane !== 'DETERMINISTIC' && r0.model && apiKey) {
     let correction = null;
-    for (let i = 0; i < attempts; i += 1) {
+    for (let i = 0; i < Math.min(2, Math.max(1, attempts)); i += 1) {
+      if (i > 0 && canRetry) {
+        // Per-call accounting has already updated KV; never exceed the pool soft cap on a correction.
+        let permitted = false;
+        try { permitted = (await canRetry()) === true; } catch { permitted = false; }
+        if (!permitted) { log.push({ skipped: 'correction_budget_guard' }); break; }
+      }
       try {
         const r = await callModel(apiKey, { routing: r0, input: buildInput(packet, baseline, correction, ctx), fetchImpl });
         add(r.usage);

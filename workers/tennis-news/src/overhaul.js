@@ -17,8 +17,10 @@ export async function loadCorpus(store, { exclude = null, limit = 40 } = {}) {
   return rows.filter((r) => r.article_id !== exclude).map((r) => ({ slug: r.slug, shingles: shingles(textOf(r)) }));
 }
 
-/** The most repeated 6-word frames across the corpus (shared by >= minArticles stories): the editor is told to avoid them. */
-export function overusedFrames(corpus, { minArticles = 3, max = 20 } = {}) {
+/** The most repeated 6-word frames across the corpus (shared by >= minArticles stories): the editor is told to avoid them.
+ *  minArticles mirrors the editorial gate (stockPhrases: a frame already in 2 stories counts against a draft), so the
+ *  writer is warned about every frame the gate can reject (#15: the old 3 left the gate's 2-story frames unannounced). */
+export function overusedFrames(corpus, { minArticles = 2, max = 60 } = {}) {
   const n = new Map();
   for (const c of corpus) for (const g of c.shingles) n.set(g, (n.get(g) || 0) + 1);
   return [...n.entries()].filter(([, k]) => k >= minArticles).sort((a, b) => b[1] - a[1]).slice(0, max).map(([g]) => g);
