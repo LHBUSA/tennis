@@ -11,6 +11,7 @@ import { envelope } from '../../shared/envelope.js';
 import { PICKER_POLICY, REASONS } from './picker.js';
 import { readLedger, getJson } from './picker-ledger.js';
 import { readShadowLedger, ATP_SHADOW_POLICY, SHADOW_REASONS } from './picker-v2-atp.js';
+import { readVerification, SUMMARY_KEY } from './picks-verify.js';
 
 const wilson = (k, n, z = 1.96) => { if (!n) return null; const p = k / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)); return [r4((c - m) / d), r4((c + m) / d)]; };
 const r4 = (x) => Math.round(x * 1e4) / 1e4;
@@ -174,6 +175,12 @@ export function lockProofs(rows) {
   }));
 }
 
+/** Public aggregate of the verification ledger (counts only; no sides / probabilities). */
+export async function verificationSummary(env) {
+  const v = env?.TENNIS_STATE ? await env.TENNIS_STATE.get(SUMMARY_KEY, 'json').catch(() => null) : null;
+  return v ? { schema: v.schema, since: v.since, last_run_at: v.last_run_at, counts: v.counts, pending: v.pending, last_fail: v.last_fail ? { at: v.last_fail.at, scope: v.last_fail.scope, stage: v.last_fail.stage } : null } : null;
+}
+
 async function allRows(bucket) {
   const [v1, shadow] = await Promise.all([readLedger(bucket, { limit: 1000 }), readShadowLedger(bucket, { limit: 400 }).catch(() => [])]);
   return [...v1, ...shadow].sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
@@ -190,15 +197,21 @@ async function attachWhy(bucket, rows, max = 30) {
 }
 
 export async function picksRoute(path, url, env) {
-  if (path !== '/v1/picks' && path !== '/v1/picks/track-record' && !/^\/v1\/picks\/[0-9a-f-]{36}$/.test(path)) return undefined;
+  if (path !== '/v1/picks' && path !== '/v1/picks/track-record' && path !== '/v1/picks/verification' && !/^\/v1\/picks\/[0-9a-f-]{36}$/.test(path)) return undefined;
   const bucket = env?.TENNIS_SOURCE;
   if (!bucket) return envelope(null, { freshness: 'NOT_CONFIGURED', semantics: 'pick ledger storage not bound' });
+  // OWNER ONLY (index.js requires membership state 'owner' before this route runs): the full verification entries
+  if (path === '/v1/picks/verification') {
+    const entries = await readVerification(bucket, { limit: 300 });
+    const summary = env.TENNIS_STATE ? await env.TENNIS_STATE.get(SUMMARY_KEY, 'json').catch(() => null) : null;
+    return envelope({ summary, entries }, { source: ['pbe_derived'], source_updated_at: summary?.last_run_at || null, freshness: summary?.last_run_at ? 'CURRENT' : 'UNAVAILABLE', semantics: 'Picks lock verification ledger (pbe-lock-verification/1): read-only re-checks of stored decisions; owner only' });
+  }
   const rows = await allRows(bucket);
   const updated = rows.reduce((t, x) => { const a = x.grade?.graded_at || x.record.lock.decided_at; return a > t ? a : t; }, '') || null;
   const meta = (semantics) => ({ source: ['pbe_derived'], source_updated_at: updated, freshness: updated ? 'CURRENT' : 'UNAVAILABLE', semantics });
   if (path === '/v1/picks/track-record') {
     const resolved = rows.filter((x) => x.grade);
-    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows) },
+    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows), verification: await verificationSummary(env) },
       meta('PBE Picks resolved track record: graded decisions only (pending pre-match sides are All Access). PROSPECTIVE · NOT OFFICIAL until owner activation; ATP is SHADOW research; activation never makes an earlier decision official.'));
   }
   const m = /^\/v1\/picks\/([0-9a-f-]{36})$/.exec(path);

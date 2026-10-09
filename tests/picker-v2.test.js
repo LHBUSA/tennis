@@ -229,3 +229,64 @@ test('public lock proofs: lock time + record/evidence sha256 only — never stat
   assert.ok(Date.parse(p.decided_at) < Date.parse(p.scheduled_at_known_at_lock));
   assert.ok(!/"(side|probability|state|selection|p_fav)"/.test(JSON.stringify(res.data.lock_proofs)));
 });
+
+test('verification ledger: read-only lock + start checks from stored bytes, create-only, no sides/probabilities, tamper = FAIL', async () => {
+  const { runVerification, entryKey, readVerification } = await import('../workers/tennis-api/src/picks-verify.js');
+  const b = memBucket();
+  const m = match();
+  await freezeOne(b, dossier(m, 0.7), { now: '2026-10-10T05:00:00.000Z' });
+  await decideShadowMatch({ bucket: b, match: m, now: '2026-10-10T06:00:00.000Z', fetchImpl: benchOk }); // seen
+  await decideShadowMatch({ bucket: b, match: m, now: LOCK_NOW, fetchImpl: benchOk });
+  const decisionBytes = b.m.get(key.decision(ID));
+  let row = { match_id: ID, event_type: 'MS', status: 'scheduled', scheduled_at: '2026-10-10T08:00:00+00:00', started_at: null };
+  const store = { async select() { return [row]; } };
+  const kv = new Map();
+  const env = { TENNIS_SOURCE: b, TENNIS_STATE: { get: async (k) => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => kv.set(k, v) } };
+  const r1 = await runVerification(store, env, { now: '2026-10-10T07:10:00.000Z' });
+  assert.deepEqual(r1.written.map((w) => [w.stage, w.verdict]), [['lock', 'PASS']]);
+  const lock = JSON.parse(b.m.get(entryKey('atp_shadow', ID, 'lock')));
+  assert.equal(lock.checks.record_sha256, (await import('node:crypto')).createHash('sha256').update(decisionBytes).digest('hex'));
+  assert.equal(lock.checks.evidence_rehash_matches, true);
+  assert.equal(lock.checks.decided_before_sourced_start, true);
+  assert.equal(lock.checks.counted_publicly, true);
+  assert.ok(!/"(side|probability|p_fav|selection|selection_name)"/.test(b.m.get(entryKey('atp_shadow', ID, 'lock'))), 'no side / probability in the verification ledger');
+  assert.equal(b.m.get(key.decision(ID)), decisionBytes, 'the decision bytes are untouched');
+  // nothing new until the match starts; then one start entry
+  assert.equal((await runVerification(store, env, { now: '2026-10-10T07:20:00.000Z' })).written.length, 0);
+  row = { ...row, status: 'completed', started_at: '2026-10-10T08:07:00+00:00' };
+  const r3 = await runVerification(store, env, { now: '2026-10-10T10:00:00.000Z' });
+  assert.deepEqual(r3.written.map((w) => [w.stage, w.verdict]), [['start', 'PASS']]);
+  assert.equal((await runVerification(store, env, { now: '2026-10-10T10:10:00.000Z' })).written.length, 0, 'create-only: never rewritten');
+  assert.equal(JSON.parse(kv.get('picks:verify:summary')).counts['atp_shadow:lock'].PASS, 1);
+  assert.equal((await readVerification(b)).length, 2);
+});
+
+test('verification ledger: a decision after the sourced start, broken evidence or a doubles row FAILS; no start time = UNVERIFIABLE', async () => {
+  const { runVerification, entryKey } = await import('../workers/tennis-api/src/picks-verify.js');
+  const b = memBucket();
+  const m = match();
+  await freezeOne(b, dossier(m, 0.7), { now: '2026-10-10T05:00:00.000Z' });
+  await decideShadowMatch({ bucket: b, match: m, now: LOCK_NOW, fetchImpl: benchOk });
+  // simulate corrupted storage (the test fake allows it; production writes are create-only)
+  const rec = JSON.parse(b.m.get(key.decision(ID)));
+  rec.lock.decided_at = '2026-10-10T08:30:00.000Z';
+  b.m.set(key.decision(ID), JSON.stringify(rec));
+  const snapKey = [...b.m.keys()].find((k) => k.startsWith('intel/matchup-prematch/'));
+  const snap = JSON.parse(b.m.get(snapKey)); snap.payload.model.probability.A = 0.99; b.m.set(snapKey, JSON.stringify(snap));
+  const row = { match_id: ID, event_type: 'MD', status: 'completed', scheduled_at: '2026-10-10T08:00:00+00:00', started_at: null };
+  const kv = new Map();
+  const env = { TENNIS_SOURCE: b, TENNIS_STATE: { get: async (k) => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => kv.set(k, v) } };
+  const r = await runVerification({ async select() { return [row]; } }, env, { now: '2026-10-10T11:00:00.000Z' });
+  const lock = JSON.parse(b.m.get(entryKey('atp_shadow', ID, 'lock')));
+  assert.equal(lock.verdict, 'FAIL');
+  for (const f of ['decided_before_sourced_start', 'evidence_rehash_matches', 'singles']) assert.ok(lock.failed.includes(f), f);
+  assert.equal(JSON.parse(b.m.get(entryKey('atp_shadow', ID, 'start'))).verdict, 'UNVERIFIABLE');
+  assert.equal(JSON.parse(kv.get('picks:verify:summary')).last_fail.scope, 'atp_shadow');
+  assert.ok(r.written.length === 2);
+});
+
+test('owner-only verification route: premium path + owner state check in index.js', async () => {
+  const src = (await import('node:fs')).readFileSync(new URL('../workers/tennis-api/src/index.js', import.meta.url), 'utf8');
+  assert.ok(src.includes(String.raw`/^\/v1\/picks\/verification$/`));
+  assert.ok(src.includes(`path === '/v1/picks/verification' && membership?.membership?.state !== 'owner'`));
+});

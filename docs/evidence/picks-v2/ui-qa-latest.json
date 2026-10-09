@@ -1,7 +1,7 @@
 {
  "at": "2026-10-09T12:32:26.135Z",
  "base": "http://localhost:5203",
- "mock": "membership mocked; picks = real resolved production records + in-memory fixtures",
+ "mode": "SIMULATED MEMBERSHIP — not a verified production access test; picks = real resolved production records + in-memory fixtures",
  "summary": [
   {
    "w": 390,

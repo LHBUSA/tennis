@@ -148,7 +148,7 @@ Picker V1 (first run 11:31:01Z: 17 candidates, 14 before_lock, 3 not_observed_be
 `PICKER_V2_ATP = "0"` stops it. Never official. /v1/picks* add why, uncertainty, opportunity labels
 (`tennis-opportunity/1`), record by version / probability band / lock integrity. Nothing activated: `PICKS_LIVE = false`,
 `PICKER_POLICY.activated_at = null`; picks screen still only with `?preview=picker`. VERSION kept 0.10.8 on purpose (a bump
-flushes every edge cache). UI gate `scripts/qa/picks-v2.mjs` PASS (mocked membership).
+flushes every edge cache). UI gate `scripts/qa/picks-v2.mjs` PASS under SIMULATED membership (never a verified production access test).
 
 **2026-10-09 12:35Z — tennis-api `612e1c0f-f0f7-4d35-a253-f86b3b06f1f9` (0812f10), rollback `8ea00b8e-035f-4ee7-a64f-4189a0068224`.**
 Owner decision: Tennis stays RESEARCH ONLY. Adds public ATP shadow `lock_proofs` (record + evidence sha256, no values),

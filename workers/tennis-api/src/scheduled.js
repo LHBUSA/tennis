@@ -6,6 +6,7 @@ import { shadowFrozen } from './mm2-shadow.js';
 import { runPicker } from './picker-ledger.js';
 import { runAtpShadow } from './picker-v2-atp.js';
 import { r2CreateOnlySelftest, SELFTEST_VERSION } from './r2-selftest.js';
+import { runVerification } from './picks-verify.js';
 
 export async function scheduledRun(store, env) {
   let out;
@@ -26,6 +27,12 @@ export async function scheduledRun(store, env) {
   if (env.PICKER_V2_ATP !== '0') {
     try { await runAtpShadow(store, env); }
     catch (e) { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picker:v2:atp-shadow:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }
+  }
+  // Read-only lock verification ledger (picks-verify.js): re-checks every new decision from its stored bytes and appends
+  // findings under ledger/verification/v1/ only — it never writes or changes a decision. PICKS_VERIFY=0 stops it.
+  if (env.PICKS_VERIFY !== '0') {
+    try { await runVerification(store, env); }
+    catch (e) { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picks:verify:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }
   }
   // One-time REAL-R2 proof of the create-only ledger contract (r2-selftest.js): runs once per SELFTEST_VERSION, writes only
   // under ledger/selftest/, evidence in KV picker:v2:r2-selftest:<version>.

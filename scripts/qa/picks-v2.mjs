@@ -1,4 +1,4 @@
-// Tennis Picks V2 UI gate (2026-10-09). One-shot; no entitled session exists, so membership is MOCKED (never forged
+// Tennis Picks V2 UI gate (2026-10-09). One-shot; no entitled session exists, so membership is SIMULATED — never a verified production access test (never forged
 // against production). The /v1/picks payload = the REAL production resolved records (public /v1/picks/track-record)
 // + fixture pending records built through the real ledger code (picker.js / picker-v2-atp.js / picks-api.js) in memory.
 // ENTITLED /pbe-picks?preview=picker: policy, ATP+WTA record (versions, bands, lock integrity), RIGHT/MISSED/PENDING,
@@ -95,7 +95,7 @@ for (const w of WIDTHS) {
   await n.ctx.close();
 }
 await b.close();
-const res = { at: new Date().toISOString(), base: BASE, mock: 'membership mocked; picks = real resolved production records + in-memory fixtures', summary, fails, verdict: fails.length ? 'FAIL' : 'PASS' };
+const res = { at: new Date().toISOString(), base: BASE, mode: 'SIMULATED MEMBERSHIP — not a verified production access test; picks = real resolved production records + in-memory fixtures', summary, fails, verdict: fails.length ? 'FAIL' : 'PASS' };
 fs.writeFileSync(`${OUT}/result.json`, JSON.stringify(res, null, 1));
 console.log(JSON.stringify(res, null, 1));
 process.exit(fails.length ? 1 : 0);
