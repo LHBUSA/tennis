@@ -1,0 +1,39 @@
+{
+ "at": "2026-10-09T11:25:52.515Z",
+ "base": "http://localhost:5203",
+ "mock": "membership mocked; picks = real resolved production records + in-memory fixtures",
+ "summary": [
+  {
+   "w": 390,
+   "entitled": {
+    "cards": 35,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  },
+  {
+   "w": 768,
+   "entitled": {
+    "cards": 35,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  },
+  {
+   "w": 1440,
+   "entitled": {
+    "cards": 35,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  }
+ ],
+ "fails": [],
+ "verdict": "PASS"
+}
