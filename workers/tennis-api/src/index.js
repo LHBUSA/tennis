@@ -392,7 +392,7 @@ export async function route(path, url, store, env) {
   if (news !== undefined) return news;
   const mr = await menRoute(path, url, store);
   if (mr !== undefined) return mr;
-  const pk = await picksRoute(path, url, env);
+  const pk = await picksRoute(path, url, env, store);
   if (pk !== undefined) return pk;
   const mu = await matchupRoute(path, url, store, env);
   if (mu !== undefined) return mu;

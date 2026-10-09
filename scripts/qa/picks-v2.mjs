@@ -1,9 +1,9 @@
 // Tennis Picks V2 UI gate (2026-10-09). One-shot; no entitled session exists, so membership is SIMULATED — never a verified production access test (never forged
 // against production). The /v1/picks payload = the REAL production resolved records (public /v1/picks/track-record)
 // + fixture pending records built through the real ledger code (picker.js / picker-v2-atp.js / picks-api.js) in memory.
-// ENTITLED /pbe-picks?preview=picker: policy, ATP+WTA record (versions, bands, lock integrity), RIGHT/MISSED/PENDING,
+// ENTITLED /pbe-picks: policy, ATP+WTA record (versions, bands, lock integrity), RIGHT/MISSED/PENDING,
 //   why list, PBEcast + Match links, ATP section labelled SHADOW; no overflow, no console errors.
-// FREE: the gate ("Unlock PBE Picks") and no pick values. NO PREVIEW FLAG: the "not launched" page (PICKS_LIVE=false).
+// FREE: the gate (no pick values); /track-record against the REAL API: resolved only + nav entry points. No ?preview needed.
 //   BASE=http://localhost:5197 node scripts/qa/picks-v2.mjs
 import fs from 'node:fs';
 import { chromium } from 'playwright-core';
@@ -14,7 +14,7 @@ import { picksRoute } from '../../workers/tennis-api/src/picks-api.js';
 
 const BASE = (process.env.BASE || 'http://localhost:5197').replace(/\/+$/, '');
 const API = 'https://tennis-api.propbetedge.ai';
-const WIDTHS = (process.env.WIDTHS || '390,768,1440').split(',').map(Number);
+const WIDTHS = (process.env.WIDTHS || '320,390,768,1024,1440').split(',').map(Number);
 const OUT = process.env.OUT || 'D:/Temp/claude/C--Users-goodl/dccf58e3-2c74-4539-8af1-9b5924de6297/scratchpad/qa-picks-v2';
 fs.mkdirSync(OUT, { recursive: true });
 
@@ -63,7 +63,7 @@ async function open(path, w, entitled) {
 }
 const summary = [];
 for (const w of WIDTHS) {
-  const e = await open('/pbe-picks?preview=picker', w, true);
+  const e = await open('/pbe-picks', w, true);
   await e.p.waitForSelector('.pk-table', { timeout: 20000 }).catch(() => fails.push(`${w}: record table missing`));
   const t = await e.p.evaluate(() => ({ text: document.body.innerText, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, cards: document.querySelectorAll('[data-pick]').length, shadowCards: document.querySelectorAll('[data-scope="atp_shadow"]').length, why: document.querySelectorAll('.pk-whylist li').length, pbecast: document.querySelectorAll('.pk-links a[href^="/pbecast/"]').length, inlineStyle: document.querySelectorAll('.pk-page [style]').length, disclosures: [...document.querySelectorAll('[data-disclosure]')].map((x) => x.dataset.disclosure) }));
   const T = t.text.toUpperCase();
@@ -82,16 +82,28 @@ for (const w of WIDTHS) {
   if (w === 390 || w === 1440) await e.p.screenshot({ path: `${OUT}/entitled-${w}.png`, fullPage: false });
   summary.push({ w, entitled: { cards: t.cards, shadowCards: t.shadowCards, why: t.why, overflow: t.overflow, errors: e.errs.length } });
   await e.ctx.close();
-  const f = await open('/pbe-picks?preview=picker', w, false);
+  const f = await open('/pbe-picks', w, false);
   await f.p.waitForSelector('#progate-title', { timeout: 20000 }).catch(() => fails.push(`${w}: free gate missing`));
   const ft = await f.p.evaluate(() => ({ text: document.body.innerText, cards: document.querySelectorAll('[data-pick]').length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth }));
-  check(/UNLOCK PBE PICKS/i.test(ft.text) && ft.cards === 0 && !/\b\d{2}(\.\d)?%/.test(ft.text.split(/GET ALL ACCESS/i)[0] || ''), `${w}: free teaser shows a value or no gate`);
+  check(/UNLOCK PBE (RESEARCH )?PICKS/i.test(ft.text) && ft.cards === 0 && !/\b\d{2}(\.\d)?%/.test(ft.text.split(/GET ALL ACCESS/i)[0] || ''), `${w}: free teaser shows a value or no gate`);
   check(ft.overflow <= 0, `${w}: free overflow`);
   await f.ctx.close();
+  // FREE /track-record against the REAL production API (no mock): resolved only, nav entry points, no pending cards
+  const t = await open('/track-record', w, false);
+  await t.p.waitForSelector('.pk-policy', { timeout: 20000 }).catch(() => fails.push(`${w}: public track record did not render`));
+  const tt = await t.p.evaluate(() => ({ text: document.body.innerText, pendingCards: [...document.querySelectorAll('[data-pick]')].filter((c) => /PENDING/i.test(c.querySelector('.pk-res')?.textContent || '')).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, navPicks: !!document.querySelector('a[href="/pbe-picks"][data-nav]'), navTr: !!document.querySelector('a[href="/track-record"][data-nav]'), desktopNav: [...document.querySelectorAll('.nav a[data-nav]')].map((a) => a.getAttribute('href')), notLaunched: /not launched/i.test(document.body.innerText) }));
+  check(tt.pendingCards === 0, `${w}: public track record shows a pending selection`);
+  check(!tt.notLaunched, `${w}: track record still says not launched`);
+  check(tt.navPicks && tt.navTr, `${w}: Picks / Track Record nav links missing`);
+  if (w >= 1024) check(tt.desktopNav.includes('/pbe-picks') && tt.desktopNav.includes('/track-record'), `${w}: desktop primary nav lacks Picks / Track Record`);
+  check(tt.overflow <= 0, `${w}: track record overflow ${tt.overflow}`);
+  if (w === 390 || w === 1440) await t.p.screenshot({ path: `${OUT}/public-track-record-${w}.png`, fullPage: false });
+  await t.ctx.close();
+  // ENTITLED without any query flag: the research page renders (no ?preview=picker needed)
   const n = await open('/pbe-picks', w, true);
-  await n.p.waitForTimeout(2500);
+  await n.p.waitForSelector('.pk-table', { timeout: 20000 }).catch(() => fails.push(`${w}: /pbe-picks without the preview query did not render for a member`));
   const nt = await n.p.evaluate(() => ({ text: document.body.innerText, cards: document.querySelectorAll('[data-pick]').length }));
-  check(/not launched/i.test(nt.text) && nt.cards === 0, `${w}: without the preview flag the page must stay "not launched"`);
+  check(!/not launched/i.test(nt.text) && nt.cards > 0, `${w}: research page hidden without the preview query`);
   await n.ctx.close();
 }
 await b.close();

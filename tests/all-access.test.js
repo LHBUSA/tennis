@@ -72,11 +72,12 @@ test('Platinum, owner and access check show no purchase CTA; prospects buy only 
   assert.match(String(accessPanelHtml('signed_in', SIGNED)), /SIGNED IN<b>reader@example\.com<\/b>/);
 });
 
-test('PBE Picks is never presented as live or unlocked', () => {
+test('Official PBE Picks are never presented as live; research picks are always labelled research (not official)', () => {
   for (const [v, a] of Object.entries(VIEWS)) {
     const h = String(accountPanelHtml(v, a)) + String(allAccessPageHtml(v, a));
-    assert.doesNotMatch(h, /<a [^>]*href="\/pbe-picks"/, v);
-    if (/PBE Picks/.test(h)) assert.match(h, /<li class="is-pending"><div><i><\/i><b>PBE Picks<\/b><span>Not live yet<\/span>/, v);
+    if (/Official PBE Picks/.test(h)) assert.match(h, /<li class="is-pending"><div><i><\/i><b>Official PBE Picks<\/b><span>Not activated \(research only\)<\/span>/, v);
+    assert.doesNotMatch(h, /<a [^>]*><i><\/i><b>Official PBE Picks/, v);
+    if (/PBE Picks \(research\)/.test(h)) assert.match(h, /not official picks/, v);
   }
 });
 

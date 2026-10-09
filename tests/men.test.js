@@ -7,7 +7,7 @@ import { resolveRoute, STATIC_ROUTES } from '../src/lib/routes.js';
 import { stages, STAGE_LABEL } from '../workers/tennis-api/src/men.js';
 
 test('one Tennis product: gender is context, never primary navigation; News is primary', () => {
-  assert.deepEqual(PRIMARY_NAV.map((n) => n.label), ['Today', 'Live', 'PBEcast', 'News', 'Players', 'Tournaments', 'Tennis DNA']);
+  assert.deepEqual(PRIMARY_NAV.map((n) => n.label), ['Today', 'Live', 'PBEcast', 'News', 'Players', 'Tournaments', 'Tennis DNA', 'Picks', 'Track Record']);
   assert.ok(!PRIMARY_NAV.some((n) => /^(Men|Women)$/i.test(n.label)), 'no gender nav item');
   assert.ok(MORE_NAV.some((n) => n.href === '/schedule') && MORE_NAV.some((n) => n.href === '/rankings'));
   const f = String(footerHtml());

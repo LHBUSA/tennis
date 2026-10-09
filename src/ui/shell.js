@@ -13,7 +13,9 @@ export const PRIMARY_NAV = [
   { href: '/news', label: 'News', id: 'news' },
   { href: '/players', label: 'Players', id: 'players' },
   { href: '/tournaments', label: 'Tournaments', id: 'tournaments' },
-  { href: '/dna', label: 'Tennis DNA', id: 'dna' }
+  { href: '/dna', label: 'Tennis DNA', id: 'dna' },
+  { href: '/pbe-picks', label: 'Picks', id: 'pbe-picks' },
+  { href: '/track-record', label: 'Track Record', id: 'track-record' }
 ];
 
 export const MORE_NAV = [

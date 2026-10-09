@@ -306,3 +306,28 @@ test('verification /2: a HOLD is NOT_A_LOCK (never timed against the start); a /
   assert.equal(JSON.parse(b.m.get(entryKey('wta_v1', id, 'start'))).verdict, 'FAIL', 'the original entry is kept');
   assert.equal(JSON.parse(b.m.get(`${VERIFY_PREFIX}wta_v1/${id}/start.correction-1.json`)).corrected_verdict, 'NOT_A_LOCK');
 });
+
+test('guest safety (#12): the public track record never carries an unresolved selection, side or probability; upcoming locks are schedule facts only', async () => {
+  const { picksRoute } = await import('../workers/tennis-api/src/picks-api.js');
+  const { decideMatch } = await import('../workers/tennis-api/src/picker-ledger.js');
+  const b = memBucket();
+  const atp = match();
+  const wta = match({ id: '1a2b3c4d-0000-5000-8000-000000000003', event_type: 'WS', tournament: { slug: 'wuhan', level: 'WTA 1000' } });
+  await freezeOne(b, dossier(atp, 0.7), { now: '2026-10-10T05:00:00.000Z' });
+  await freezeOne(b, { ...dossier(wta, 0.72), tour: 'WTA' }, { now: '2026-10-10T05:00:00.000Z' });
+  await decideShadowMatch({ bucket: b, match: atp, now: LOCK_NOW, fetchImpl: benchOk });
+  await decideMatch({ bucket: b, match: wta, now: LOCK_NOW, fetchImpl: benchOk });
+  const store = { async select(t) { return t === 'tennis_tournament_editions' ? [{ edition_id: 'e1', level: 'WTA 1000' }, { edition_id: 'e2', level: 'ITF W75' }] : [
+    { match_id: 'm-atp', event_type: 'MS', scheduled_at: '2026-10-10T12:00:00+00:00', edition_id: 'e0' },
+    { match_id: 'm-wta', event_type: 'WS', scheduled_at: '2026-10-10T13:00:00+00:00', edition_id: 'e1' },
+    { match_id: 'm-itf', event_type: 'WS', scheduled_at: '2026-10-10T13:00:00+00:00', edition_id: 'e2' }]; } };
+  const res = await picksRoute('/v1/picks/track-record', null, { TENNIS_SOURCE: b }, store);
+  const body = JSON.stringify(res.data);
+  assert.equal(res.data.resolved.length, 0, 'no pending selection is public');
+  assert.ok(!body.includes('"selection_id":"pa"') && !body.includes('Player A'), 'no pending side / player name');
+  assert.ok(!/"probability(_a|_raw_a|_uncalibrated)?":0\.\d/.test(body), 'no unresolved probability');
+  assert.equal(res.data.record.wta_main.pending, 1);
+  const u = res.data.upcoming_locks;
+  assert.deepEqual([u.atp_shadow.candidates, u.wta.candidates], [1, 1], 'ITF never counted');
+  assert.ok(!/side|probability|selection/.test(JSON.stringify(u)));
+});

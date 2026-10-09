@@ -175,6 +175,40 @@ export function lockProofs(rows) {
   }));
 }
 
+const PICK_MAIN = new Set(['Grand Slam', 'WTA 1000', 'WTA 500', 'WTA 250', 'WTA Finals', 'WTA 125']);
+/**
+ * Public WAITING facts (no sides / probabilities): which in-scope singles matches will be decided next and when, from
+ * the canonical schedule — the same lock rule the ledgers use (sourced start - 60 min; else a source-proven day +
+ * offset -> 00:00 local; else the match will be a HOLD). Two selects, no embeds, bounded.
+ */
+export async function upcomingLocks(store, now = new Date().toISOString()) {
+  if (!store) return null;
+  const t = Date.parse(now);
+  const iso = (ms) => new Date(ms).toISOString();
+  const base = 'select=match_id,event_type,scheduled_at,edition_id&event_type=in.(MS,WS)&status=eq.scheduled';
+  const rows = [...await store.select('tennis_matches', `${base}&scheduled_at=gte.${iso(t)}&scheduled_at=lte.${iso(t + 48 * 3600e3)}&limit=300`)];
+  let dayRows = [];
+  try { dayRows = await store.select('tennis_matches', `select=match_id,event_type,scheduled_day,schedule_utc_offset,schedule_day_source,edition_id&event_type=eq.WS&status=eq.scheduled&scheduled_at=is.null&scheduled_day=gte.${iso(t - 86400e3).slice(0, 10)}&scheduled_day=lte.${iso(t + 86400e3).slice(0, 10)}&limit=300`); } catch { dayRows = []; }
+  const eds = [...new Set([...rows, ...dayRows].map((r) => r.edition_id).filter(Boolean))];
+  const level = new Map();
+  for (let i = 0; i < eds.length; i += 80) for (const e of await store.select('tennis_tournament_editions', `select=edition_id,level&edition_id=in.(${eds.slice(i, i + 80).join(',')})`)) level.set(e.edition_id, e.level);
+  const out = { as_of: now, window_hours: 48, atp_shadow: [], wta: [], wta_without_lock_source: 0, rule: 'sourced start - 60 min; else source-proven day + UTC offset -> 00:00 tournament local; else HOLD (never an invented start)' };
+  for (const r of rows) {
+    const lv = level.get(r.edition_id) || null;
+    if (/^ITF/i.test(lv || '')) continue;
+    const item = { match_id: r.match_id, scheduled_at: r.scheduled_at, lock_at: iso(Date.parse(r.scheduled_at) - 3600e3), rule: 'T_MINUS_60' };
+    if (r.event_type === 'MS') out.atp_shadow.push(item); else if (PICK_MAIN.has(lv)) out.wta.push({ ...item, level: lv });
+  }
+  for (const r of dayRows) {
+    const lv = level.get(r.edition_id) || null;
+    if (!PICK_MAIN.has(lv)) continue;
+    if (r.scheduled_day && r.schedule_utc_offset && r.schedule_day_source) out.wta.push({ match_id: r.match_id, scheduled_at: null, day: r.scheduled_day, lock_at: iso(Date.parse(`${r.scheduled_day}T00:00:00${r.schedule_utc_offset}`)), rule: 'DAY_START_LOCK', level: lv });
+    else out.wta_without_lock_source += 1;
+  }
+  const fin = (a) => { const s = a.filter((x) => Date.parse(x.lock_at) > t - 6 * 3600e3).sort((x, y) => x.lock_at.localeCompare(y.lock_at)); return { candidates: s.length, next_lock_at: s.find((x) => Date.parse(x.lock_at) >= t)?.lock_at ?? null, next: s.slice(0, 8) }; };
+  return { ...out, atp_shadow: fin(out.atp_shadow), wta: fin(out.wta) };
+}
+
 /** Public aggregate of the verification ledger (counts only; no sides / probabilities). */
 export async function verificationSummary(env) {
   const v = env?.TENNIS_STATE ? await env.TENNIS_STATE.get(SUMMARY_KEY, 'json').catch(() => null) : null;
@@ -196,7 +230,7 @@ async function attachWhy(bucket, rows, max = 30) {
   }
 }
 
-export async function picksRoute(path, url, env) {
+export async function picksRoute(path, url, env, store = null) {
   if (path !== '/v1/picks' && path !== '/v1/picks/track-record' && path !== '/v1/picks/verification' && !/^\/v1\/picks\/[0-9a-f-]{36}$/.test(path)) return undefined;
   const bucket = env?.TENNIS_SOURCE;
   if (!bucket) return envelope(null, { freshness: 'NOT_CONFIGURED', semantics: 'pick ledger storage not bound' });
@@ -211,7 +245,7 @@ export async function picksRoute(path, url, env) {
   const meta = (semantics) => ({ source: ['pbe_derived'], source_updated_at: updated, freshness: updated ? 'CURRENT' : 'UNAVAILABLE', semantics });
   if (path === '/v1/picks/track-record') {
     const resolved = rows.filter((x) => x.grade);
-    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows), verification: await verificationSummary(env) },
+    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows), verification: await verificationSummary(env), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
       meta('PBE Picks resolved track record: graded decisions only (pending pre-match sides are All Access). PROSPECTIVE · NOT OFFICIAL until owner activation; ATP is SHADOW research; activation never makes an earlier decision official.'));
   }
   const m = /^\/v1\/picks\/([0-9a-f-]{36})$/.exec(path);
@@ -223,6 +257,6 @@ export async function picksRoute(path, url, env) {
   }
   const shown = rows.slice(0, 400);
   await attachWhy(bucket, shown.filter((x) => !x.grade));
-  return envelope({ policy: POLICY_META(), picks: shown.map((x) => shapePick(x, { reveal: true })), record: trackRecord(rows) },
+  return envelope({ policy: POLICY_META(), picks: shown.map((x) => shapePick(x, { reveal: true })), record: trackRecord(rows), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
     meta('PBE Picks ledger (All Access): every designated decision — CALL / PASS / HOLD — frozen at its lock; ATP rows are SHADOW research'));
 }
