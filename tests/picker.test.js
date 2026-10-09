@@ -72,7 +72,14 @@ test('official = activated_at != null && decided_at >= activated_at; never retro
   assert.equal(isOfficial(rec('2026-10-10T00:00:00Z'), act), true);
   assert.equal(isOfficial(rec('2026-10-11T00:00:00Z', 'shadow_wta125'), act), false);
   assert.equal(isOfficial(rec('2026-10-11T00:00:00Z', 'wta_main', 'PASS'), act), false);
-  assert.equal(PICKER_POLICY.activated_at, null, 'V1 ships NOT activated');
+  // tennis#14 (owner activation 2026-10-09): the shipped policy carries ONE precise cutover — a real UTC instant after the
+  // policy freeze — and the same rule applies: nothing recorded before it is official, ever.
+  assert.match(PICKER_POLICY.activated_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/, 'cutover is a precise UTC instant (not the placeholder)');
+  assert.ok(Date.parse(PICKER_POLICY.activated_at) > Date.parse(PICKER_POLICY.frozen_at));
+  const cut = Date.parse(PICKER_POLICY.activated_at);
+  assert.equal(isOfficial(rec(new Date(cut - 1000).toISOString())), false, 'a decision one second before the cutover is never official');
+  assert.equal(isOfficial(rec(new Date(cut).toISOString())), true);
+  assert.equal(isOfficial(rec('2026-10-05T00:00:00Z')), false, 'every prelaunch decision stays unofficial');
 });
 
 test('grading: completed -> W/L from our canonical result; walkover / retired / defaulted / abandoned / cancelled -> VOID', () => {
@@ -179,7 +186,8 @@ test('picks API: public track record never reveals a pending CALL side; premium 
   const [row] = await readLedger(b);
   const pub = shapePick(row, { reveal: false });
   assert.deepEqual([pub.side, pub.selection, pub.probability, pub.markets_at_lock], [null, null, null, null]);
-  assert.equal(pub.label, 'PROSPECTIVE · NOT OFFICIAL');
+  assert.equal(pub.label, 'PRELAUNCH RESEARCH', 'a pre-cutover WTA decision is prelaunch research, never official');
+  assert.equal(pub.official, false);
   assert.equal(shapePick(row, { reveal: true }).side, 'A');
   const tr = trackRecord([row]);
   assert.deepEqual([tr.wta_main.CALL, tr.wta_main.pending, tr.wta_main.graded], [1, 1, 0]);

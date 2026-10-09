@@ -4,7 +4,7 @@
 import { freezeUpcoming } from './matchup.js';
 import { shadowFrozen } from './mm2-shadow.js';
 import { runPicker } from './picker-ledger.js';
-import { runAtpShadow } from './picker-v2-atp.js';
+import { runAtpShadow, OFFICIAL_STREAM } from './picker-v2-atp.js';
 import { r2CreateOnlySelftest, SELFTEST_VERSION } from './r2-selftest.js';
 import { runVerification } from './picks-verify.js';
 
@@ -27,6 +27,13 @@ export async function scheduledRun(store, env) {
   if (env.PICKER_V2_ATP !== '0') {
     try { await runAtpShadow(store, env); }
     catch (e) { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picker:v2:atp-shadow:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }
+  }
+  // PBE PICKS · ATP official decision stream (tennis#14): forward-only — its own create-only ledger
+  // (ledger/picks-official-v1/atp/), the frozen atp-recal/2 rule, deciding nothing before the cutover and no match whose
+  // lock fell before it. The shadow above keeps running unchanged as prelaunch research. PICKS_OFFICIAL_ATP=0 stops it.
+  if (env.PICKS_OFFICIAL_ATP !== '0') {
+    try { await runAtpShadow(store, env, { stream: OFFICIAL_STREAM }); }
+    catch (e) { if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picks:official:atp:error', JSON.stringify({ at: new Date().toISOString(), error: String(e?.stack || e).slice(0, 600) })); }
   }
   // Read-only lock verification ledger (picks-verify.js): re-checks every new decision from its stored bytes and appends
   // findings under ledger/verification/v1/ only — it never writes or changes a decision. PICKS_VERIFY=0 stops it.

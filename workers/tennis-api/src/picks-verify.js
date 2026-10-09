@@ -15,7 +15,7 @@
 // full entries are owner-only (/v1/picks/verification). No alert channel is bound to tennis-api, so FAIL is surfaced in
 // the summary (last_fail) only.
 import { contentHash } from './matchup-freeze.js';
-import { SHADOW_PREFIX } from './picker-v2-atp.js';
+import { SHADOW_PREFIX, OFFICIAL_ATP_PREFIX } from './picker-v2-atp.js';
 import { LEDGER_PREFIX } from './picker-ledger.js';
 
 export const VERIFY_SCHEMA = 'pbe-lock-verification/1';
@@ -24,6 +24,7 @@ export const VERIFY_FROM = '2026-10-09T11:00:00Z'; // the ATP shadow ledger's fi
 export const SUMMARY_KEY = 'picks:verify:summary';
 const LEDGERS = [
   { scope: 'atp_shadow', prefix: SHADOW_PREFIX, publicWindow: 400 },
+  { scope: 'atp_official', prefix: OFFICIAL_ATP_PREFIX, publicWindow: 1000 },
   { scope: 'wta_v1', prefix: LEDGER_PREFIX, publicWindow: 1000 },
 ];
 const DAY_WINDOW_MS = 6 * 3600e3;
@@ -49,7 +50,7 @@ export async function lockChecks({ bucket, text, record: r, row, inPublicWindow,
   const decided = Date.parse(r.lock?.decided_at);
   c.record_sha256 = await sha256Text(text);
   c.singles = singlesRecord(r) && (!row || (['MS', 'WS'].includes(row.event_type)));
-  c.scope_tour_match = !row || (r.scope === 'atp_shadow' ? row.event_type === 'MS' : row.event_type === 'WS');
+  c.scope_tour_match = !row || (/^atp_(shadow|official)$/.test(r.scope) ? row.event_type === 'MS' : row.event_type === 'WS');
   if (r.lock?.lock_at) c.decided_after_lock = decided >= Date.parse(r.lock.lock_at);
   if (r.lock?.lock_rule === 'T_MINUS_60') c.decided_before_sourced_start = decided < Date.parse(r.lock.scheduled_at_known_at_lock);
   if (r.lock?.lock_rule === 'DAY_START_LOCK') c.decided_within_day_window = decided < Date.parse(r.lock.lock_at) + DAY_WINDOW_MS;

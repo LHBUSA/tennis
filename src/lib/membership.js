@@ -1,5 +1,4 @@
 import { PICKS_LIVE } from '../pages/picks-flag.js';
-import { PICKS_RESEARCH_VISIBLE } from '../pages/picks-research.js';
 import { ALL_ACCESS_OFFER } from './pbe-membership.js';
 import { membershipResult, requestMagic } from '../data/api.js';
 import { ACCOUNT_TIMEOUT_MS, LOCAL_ALL_ACCESS_PATH, OFFER_LINE, accountPanelHtml, accountView, chipHref, classifyAccount, designation } from './all-access.js';
@@ -99,7 +98,7 @@ export function premiumRoute(route) {
   const id = route?.id || '';
   if (['matchups', 'matchup', 'players-to-watch', 'dna'].includes(id)) return true;
   // PBE Picks (pending pre-match sides) are All Access once visible (preview before owner activation); Track Record is public
-  if (id === 'pbe-picks') return PICKS_LIVE || PICKS_RESEARCH_VISIBLE || new URLSearchParams(location.search).get('preview') === 'picker';
+  if (id === 'pbe-picks') return PICKS_LIVE || new URLSearchParams(location.search).get('preview') === 'picker';
   return id === 'player-sub' && /\/dna\/?$/.test(location.pathname);
 }
 
@@ -124,7 +123,7 @@ export function premiumGateHtml(m, route, acct = null) {
           ? 'Unlock PBE Picks'
           : 'Unlock Tennis Pro Intelligence';
   // PBE Picks teaser: what a member sees, never a value (side, probability and market numbers stay behind the gate)
-  const picksTeaser = route?.id === 'pbe-picks' ? '<p class="progate-lede">Locked pre-match calls with the chosen side, model probability, why, prediction-market benchmarks at the lock and the full ATP / WTA record. Resolved results are public on the <a href="/track-record">Track Record</a>. Research only — not official picks.</p>' : '';
+  const picksTeaser = route?.id === 'pbe-picks' ? '<p class="progate-lede">PBE Picks for ATP and WTA singles: the selected player, PBE win probability, lock time and the reason — locked before play. Every settled pick is public on the <a href="/track-record">Track Record</a>.</p>' : '';
   const member = m?.email ? `<p class="progate-member">Signed in as <b>${escapeHtml(m.email)}</b> · All Access isn’t active on this account.</p>` : '';
   return `<section class="progate" aria-labelledby="progate-title">
     <div class="progate-kicker">PropBetEdge Tennis · All Access</div>

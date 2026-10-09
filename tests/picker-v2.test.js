@@ -1,6 +1,7 @@
 // Tennis Picks V2 (docs/research/PICKS_V2_PROTOCOL.md): ATP recalibration map, ATP SHADOW ledger (create-only, never
 // official, never post-hoc, concurrent duplicates write once), grading, opportunity labels, record aggregates.
 import { test } from 'node:test';
+import { readLedger as readLedgerV1 } from '../workers/tennis-api/src/picker-ledger.js';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { applyRecal } from '../workers/tennis-api/src/recal.js';
@@ -160,7 +161,8 @@ test('public shape: a pending shadow CALL hides side, probability, why, labels a
   const [row] = await readShadowLedger(b);
   const pub = shapePick(row, { reveal: false });
   assert.deepEqual([pub.side, pub.probability, pub.why, pub.opportunities, pub.markets_at_lock, pub.uncertainty], [null, null, null, [], null, null]);
-  assert.equal(pub.label, 'SHADOW · ATP RESEARCH');
+  assert.equal(pub.label, 'PRELAUNCH RESEARCH');
+  assert.equal(pub.official, false, 'an ATP shadow record is never official');
   const full = shapePick(row, { reveal: true });
   assert.equal(full.side, 'A');
   assert.equal(full.probability_uncalibrated, 0.7);
@@ -204,13 +206,19 @@ test('records never mixed: each scope is its own line; disclosures (research onl
   await decideMatch({ bucket: b, match: wta, now: LOCK_NOW, fetchImpl: benchOk });
   const res = await picksRoute('/v1/picks/track-record', null, { TENNIS_SOURCE: b });
   const rec = res.data.record;
-  assert.deepEqual(Object.keys(rec).sort(), ['atp_shadow', 'wta_main']);
-  assert.equal(rec.atp_shadow.CALL, 1); assert.equal(rec.wta_main.CALL, 1);
-  assert.ok(rec.atp_shadow.version.startsWith('tennis-picker-v2-atp-shadow') && rec.wta_main.version.startsWith('tennis-picker-v1'));
+  const { streamOf } = await import('../workers/tennis-api/src/picks-api.js');
+  const wtaKey = streamOf((await readLedgerV1(b))[0].record);
+  // the ATP shadow is ALWAYS prelaunch research; the WTA decision's stream follows its own recorded time vs the cutover
+  assert.deepEqual(Object.keys(rec).sort(), ['prelaunch_atp', wtaKey].sort());
+  assert.equal(rec.prelaunch_atp.CALL, 1); assert.equal(rec[wtaKey].CALL, 1);
+  assert.ok(rec.prelaunch_atp.version.startsWith('tennis-picker-v2-atp-shadow') && rec[wtaKey].version.startsWith('tennis-picker-v1'));
   const codes = res.data.policy.disclosures.map((d) => d.code);
-  for (const c of ['RESEARCH_ONLY', 'UNDERDOG_WATCH', 'OVERCONFIDENCE', 'MARKETS_BENCHMARK_ONLY', 'SMALL_SAMPLES', 'SEPARATE_RECORDS']) assert.ok(codes.includes(c), c);
+  for (const c of ['HOW', 'COUNTED', 'MODEL', 'SEPARATE_RECORDS', 'NO_GUARANTEE']) assert.ok(codes.includes(c), c);
   assert.ok(/Upset Hunter/.test(DISCLOSURES.find((d) => d.code === 'SEPARATE_RECORDS').text));
-  assert.equal(res.data.policy.activated_at, null);
+  assert.ok(/never counted as official/.test(DISCLOSURES.find((d) => d.code === 'SEPARATE_RECORDS').text));
+  const { PICKS_ACTIVATED_AT } = await import('../workers/tennis-api/src/picker.js');
+  assert.equal(res.data.policy.activated_at, PICKS_ACTIVATED_AT);
+  assert.equal(res.data.official.activated_at, PICKS_ACTIVATED_AT);
 });
 
 test('public lock proofs: lock time + record/evidence sha256 only — never state, side or probability', async () => {
@@ -326,7 +334,8 @@ test('guest safety (#12): the public track record never carries an unresolved se
   assert.equal(res.data.resolved.length, 0, 'no pending selection is public');
   assert.ok(!body.includes('"selection_id":"pa"') && !body.includes('Player A'), 'no pending side / player name');
   assert.ok(!/"probability(_a|_raw_a|_uncalibrated)?":0\.\d/.test(body), 'no unresolved probability');
-  assert.equal(res.data.record.wta_main.pending, 1);
+  const { streamOf } = await import('../workers/tennis-api/src/picks-api.js');
+  assert.equal(res.data.record[streamOf((await readLedgerV1(b))[0].record)].pending, 1);
   const u = res.data.upcoming_locks;
   assert.deepEqual([u.atp_shadow.candidates, u.wta.candidates], [1, 1], 'ITF never counted');
   assert.ok(!/side|probability|selection/.test(JSON.stringify(u)));

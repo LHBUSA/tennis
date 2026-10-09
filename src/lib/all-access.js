@@ -56,17 +56,16 @@ export function chipHref(view) {
   return view === 'all_access' || view === 'owner' ? LOCAL_ALL_ACCESS_PATH : view === 'signed_out' ? '#membership-signin' : '#membership-account';
 }
 
-/* What All Access actually unlocks on Tennis (src/lib/membership.js premiumRoute). PBE Picks is not
-   live (PICKS_LIVE=false): listed, never shown as unlocked. */
+/* What All Access actually unlocks on Tennis (src/lib/membership.js premiumRoute). Official PBE Picks are live (tennis#14). */
 export const TENNIS_UNLOCKS = Object.freeze([
   { key: 'dna', label: 'Tennis DNA', sub: 'Ratings, technical profiles, leaderboards', href: '/dna' },
   { key: 'player-dna', label: 'Player DNA', sub: 'Every player’s DNA tab', href: '/players' },
   { key: 'matchups', label: 'Matchup DNA', sub: 'Win probability + edges this week', href: '/matchups' },
   { key: 'watch', label: 'Players to Watch', sub: 'Risers, fallers, rating gaps', href: '/players-to-watch' },
-  { key: 'picks', label: 'PBE Picks (research)', sub: 'Locked research selections + full record — not official picks', href: '/pbe-picks' },
-  { key: 'track-record', label: 'Track Record', sub: 'Every resolved research selection, right and missed', href: '/track-record' }
+  { key: 'picks', label: 'PBE Picks', sub: 'ATP + WTA picks, locked before play and tracked', href: '/pbe-picks' },
+  { key: 'track-record', label: 'Track Record', sub: 'Every settled pick — right, missed and void', href: '/track-record' }
 ]);
-export const TENNIS_PENDING = Object.freeze([{ key: 'official-picks', label: 'Official PBE Picks', sub: 'Not activated (research only)' }]);
+export const TENNIS_PENDING = Object.freeze([]);
 export const TENNIS_FREE = Object.freeze([
   ['Live scores', '/live'], ['PBEcast', '/pbecast'], ['Newsroom', '/news'], ['Schedule', '/schedule'],
   ['Rankings', '/rankings'], ['Players', '/players'], ['Tournaments', '/tournaments']

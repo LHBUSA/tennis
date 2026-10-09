@@ -12,7 +12,7 @@ import { buildDna } from '../../shared/dna/metric.js';
 import registry from '../../../data/source-registry/sources.json' with { type: 'json' };
 import canary from '../../../docs/evidence/source-canary-latest.json' with { type: 'json' };
 
-export const VERSION = '0.10.8';
+export const VERSION = '0.11.0';
 
 const TENNIS_ORIGIN = 'https://tennis.propbetedge.ai';
 const PREMIUM_PATHS = [

@@ -21,12 +21,18 @@ export const RECORD_SCHEMA = 'pbe-decision-record/1';
 export const COUNTING_UNIT = 'PRE_MATCH_LOCK';
 export const GRADING_RULE = 'tennis-picker-grading/1';
 
+// OFFICIAL PBE PICKS CUTOVER (owner decision 2026-10-09, LHBUSA/tennis#14). Set once, to a moment AFTER the release that
+// carries it is live — never backdated. Every official stream reads this one value: WTA tour-level CALLs (this policy) and
+// the forward-only ATP official stream (picker-v2-atp.js OFFICIAL_STREAM). A decision is official only when it is recorded
+// at or after it; nothing recorded earlier — Picker V1 research, WTA 125 shadow, ATP shadow — is ever reclassified.
+export const PICKS_ACTIVATED_AT = '2026-10-09T19:40:00Z';
+
 export const PICKER_POLICY = Object.freeze({
   candidate: 'tennis-picker-v1',
   version: 'tennis-picker-v1@b27aeec',
   status: 'FROZEN_PROSPECTIVE',
   frozen_at: '2026-10-04T13:56:05Z', // commit e67c7e4 (policy code frozen)
-  activated_at: null, // owner activation sets this; decisions before it are never official
+  activated_at: PICKS_ACTIVATED_AT, // owner activation (tennis#14); decisions recorded before it are never official
   tau: 0.55,
   model: { id: 'pbe-rating', name: 'PBE Rating', method_version: 1 },
   t_minus_min: 60,
@@ -159,5 +165,8 @@ export function buildRecord({ match, scope, lock, snapshot, benchmarks, now, sta
     path: null, result: null, grade: null,
   };
   record.decision.official = isOfficial(record, policy);
+  // the status the decision was actually made under: OFFICIAL only for an official decision (a pre-cutover or shadow record
+  // keeps the frozen-prospective status it was recorded with)
+  if (record.decision.official) record.decision.policy_status = 'OFFICIAL';
   return record;
 }

@@ -8,9 +8,9 @@
 // semantic gate says comparable. Opportunity labels (tennis-opportunity/1) are derived at read time from the frozen
 // record only and never change it (docs/research/PICKS_V2_PROTOCOL.md §3).
 import { envelope } from '../../shared/envelope.js';
-import { PICKER_POLICY, REASONS } from './picker.js';
+import { PICKER_POLICY, REASONS, PICKS_ACTIVATED_AT } from './picker.js';
 import { readLedger, getJson, mapLimit, READ_CONCURRENCY } from './picker-ledger.js';
-import { readShadowLedger, ATP_SHADOW_POLICY, SHADOW_REASONS } from './picker-v2-atp.js';
+import { readShadowLedger, ATP_SHADOW_POLICY, SHADOW_REASONS, OFFICIAL_STREAM, ATP_OFFICIAL_POLICY } from './picker-v2-atp.js';
 import { readVerification, SUMMARY_KEY } from './picks-verify.js';
 
 const wilson = (k, n, z = 1.96) => { if (!n) return null; const p = k / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)); return [r4((c - m) / d), r4((c + m) / d)]; };
@@ -56,7 +56,26 @@ export function opportunities(r) {
   return out;
 }
 
-const labelOf = (r) => (r.scope === 'atp_shadow' ? 'SHADOW · ATP RESEARCH' : r.decision.official ? 'OFFICIAL' : r.scope === 'shadow_wta125' ? 'SHADOW · WTA 125' : 'PROSPECTIVE · NOT OFFICIAL');
+// OFFICIAL PBE PICKS (tennis#14). The decision STREAM of a stored record, from what it was recorded as — never relabelled:
+//   official_atp      the forward-only ATP official ledger (picker-v2-atp.js OFFICIAL_STREAM)
+//   official_wta      Picker V1 WTA tour-level decisions recorded at or after the cutover (a CALL there is official)
+//   prelaunch_wta     Picker V1 WTA tour-level decisions recorded before the cutover (research, historical)
+//   prelaunch_wta125  WTA 125 shadow (research, never official)
+//   prelaunch_atp     ATP shadow ledger (research, never official)
+//   atp_v1            Picker V1's ATP PASS lane (not a pick stream; never shown as one)
+const cutoverMs = () => Date.parse(PICKS_ACTIVATED_AT);
+export function streamOf(r) {
+  if (r.scope === 'atp_official') return 'official_atp';
+  if (r.scope === 'atp_shadow') return 'prelaunch_atp';
+  if (r.scope === 'shadow_wta125') return 'prelaunch_wta125';
+  if (r.scope === 'atp') return 'atp_v1';
+  if (r.scope === 'wta_main') return r.decision?.official || Date.parse(r.lock?.decided_at) >= cutoverMs() ? 'official_wta' : 'prelaunch_wta';
+  return 'other';
+}
+export const isOfficialStream = (st) => st === 'official_atp' || st === 'official_wta';
+/** An official PICK: a CALL recorded as official in an official stream (PASS / HOLD are never picks). */
+export const isOfficialPick = (r) => isOfficialStream(streamOf(r)) && r.decision?.state === 'CALL' && r.decision?.official === true;
+const labelOf = (r) => (isOfficialPick(r) ? 'OFFICIAL' : isOfficialStream(streamOf(r)) ? 'NO PICK' : 'PRELAUNCH RESEARCH');
 const reasonText = (code) => REASONS[code] || SHADOW_REASONS[code] || code;
 
 /** Pure: the public/premium shape of one ledger row. `reveal` = may the CALL side be shown. */
@@ -73,7 +92,7 @@ export function shapePick({ record: r, grade: g, corrections = [], excluded = fa
     uncertainty: show ? r.uncertainty ?? null : null,
     why: show ? (r.why || why || null) : null,
     opportunities: show ? opportunities(r) : [],
-    official: !!r.decision.official, label: labelOf(r),
+    official: isOfficialPick(r), stream: streamOf(r), tour: r.event?.tour ?? null, label: labelOf(r),
     model: { version: r.model?.version ?? null, basis: r.model?.basis ?? null, challenger: r.model?.challenger ?? null },
     lock: { rule: r.lock.lock_rule, lock_at: r.lock.lock_at, decided_at: r.lock.decided_at, day: r.lock.day, utc_offset: r.lock.utc_offset },
     evidence: r.evidence ? { schema: r.evidence.schema, sha256: r.evidence.sha256, frozen_at: r.evidence.frozen_at } : null,
@@ -134,29 +153,28 @@ export function trackRecord(rows) {
 }
 
 export const ACTIVATION_GATES = Object.freeze({
-  status: 'PROPOSED only — owner decision 2026-10-09: Tennis stays RESEARCH ONLY; nothing activates',
-  protocol: 'docs/research/PICKS_V2_PROTOCOL.md §4',
-  wta_main: 'Prospective only: >= 250 graded CALLs from >= 25 editions, 100% lock integrity, Wilson 95% low >= 60%, hit − mean p >= −3 pts, log loss < ln 2; PBE vs same-contract market Brier disclosed',
-  atp_shadow: 'Prospective only: same, with >= 300 graded CALLs from >= 30 editions, and the recalibrated probability beating the uncalibrated one on the same calls (edition-bootstrap CI below 0)',
+  status: `OFFICIAL since the cutover (owner decision 2026-10-09, tennis#14)`,
+  protocol: 'docs/picks/OFFICIAL_V1.md',
+  wta_main: 'Official: Picker V1 CALLs on WTA tour-level singles recorded at or after the cutover',
+  atp_official: 'Official: the forward-only ATP stream (atp-recal/2 probability, same frozen threshold) from the cutover',
 });
 
-// Shown on every picks surface (owner 2026-10-09: Tennis stays RESEARCH ONLY). Numbers are from committed evidence
-// (docs/research/PICKS_V2_RESULTS.md); none of them is part of the prospective record.
+// "How Picks Work" — short method notes (one disclosure affordance on the page, never a wall on every card).
 export const DISCLOSURES = Object.freeze([
-  { code: 'RESEARCH_ONLY', text: 'Research only. No Tennis pick is official: the WTA ledger is prospective proof and ATP is shadow research. Official picks need a separate owner decision.' },
-  { code: 'UNDERDOG_WATCH', text: 'Underdog watch is a watch item, not a pick and not value. When the PBE favourite was the ranking underdog it won less often than PBE said: ATP 56.5% vs 62.4% (867 calls, 2019–2022), WTA 57.9% vs 63.7% (708 calls, 2023–2024).' },
-  { code: 'OVERCONFIDENCE', text: 'The ATP PBE Rating ran about 4 points over-confident historically; the ATP shadow uses a frozen recalibration and is not validated until its prospective record passes the gate.' },
-  { code: 'MARKETS_BENCHMARK_ONLY', text: 'Kalshi and Polymarket prices are benchmarks frozen at the lock from our own observations. They are never a model input, are compared only where the venue’s rules match the same contract, and no historical market comparison exists for the model’s development data.' },
-  { code: 'SMALL_SAMPLES', text: 'The prospective samples are small: hit rates and market comparisons can swing widely until hundreds of calls are graded.' },
-  { code: 'SEPARATE_RECORDS', text: 'Each line of the record is its own ledger and version: WTA main tour, WTA 125 shadow and ATP shadow are never pooled; historical development numbers are never part of the record; other PropBetEdge engines (such as Upset Hunter) are not counted here.' },
+  { code: 'HOW', text: 'One designated selection per match, locked before play (60 minutes before a sourced start, or at the start of the tournament day) and never changed afterwards.' },
+  { code: 'COUNTED', text: 'Every official pick is graded automatically from the final result: right, missed, or void for a walkover, retirement or cancellation. Losses stay on the record.' },
+  { code: 'MODEL', text: 'The probability is the PBE Rating for that matchup (ATP uses a frozen recalibration). Prediction-market prices are never an input.' },
+  { code: 'SEPARATE_RECORDS', text: 'The official record starts at the launch. Prelaunch research decisions stay in their own historical record and are never counted as official; other PropBetEdge engines (such as Upset Hunter) are not counted here.' },
+  { code: 'NO_GUARANTEE', text: 'Picks are probabilities, not guarantees. Past results do not promise future ones.' },
 ]);
 
-const POLICY_META = () => ({ candidate: PICKER_POLICY.candidate, version: PICKER_POLICY.version, status: PICKER_POLICY.status, tau: PICKER_POLICY.tau, frozen_at: PICKER_POLICY.frozen_at, activated_at: PICKER_POLICY.activated_at, protocol: PICKER_POLICY.protocol, evidence: PICKER_POLICY.evidence,
-  scope: { wta_main: 'WTA main-tour singles (Grand Slam, WTA 1000/500/250, Finals): prospective research record (no official picks)', shadow_wta125: 'WTA 125 singles: prospective shadow, never official', atp: 'ATP (Picker V1): PASS · MODEL_NOT_VALIDATED', atp_shadow: 'ATP singles: SHADOW research with the recalibrated probability (atp-recal/2), never official' },
+const POLICY_META = () => ({ candidate: PICKER_POLICY.candidate, version: PICKER_POLICY.version, status: Date.now() >= cutoverMs() ? 'OFFICIAL' : PICKER_POLICY.status, tau: PICKER_POLICY.tau, frozen_at: PICKER_POLICY.frozen_at, activated_at: PICKER_POLICY.activated_at, protocol: PICKER_POLICY.protocol, evidence: PICKER_POLICY.evidence,
+  scope: { official: 'ATP tour singles and WTA tour-level singles (Grand Slam, WTA 1000/500/250, Finals)', wta_main: 'WTA tour-level singles: official from the cutover; earlier decisions are the prelaunch record', shadow_wta125: 'WTA 125 singles: prelaunch research, not part of Official Picks', atp: 'ATP (Picker V1 lane): PASS only — ATP official picks come from the ATP official stream', atp_shadow: 'ATP shadow: prelaunch research ledger, never official' },
+  official: { activated_at: PICKS_ACTIVATED_AT, live: Date.now() >= cutoverMs(), atp: { candidate: ATP_OFFICIAL_POLICY.candidate, version: ATP_OFFICIAL_POLICY.version, challenger: ATP_OFFICIAL_POLICY.challenger, tau: ATP_OFFICIAL_POLICY.tau }, wta: { version: PICKER_POLICY.version, tau: PICKER_POLICY.tau } },
   validation: { WTA: { holdout_calls: 45314, hit_rate: 0.756, wilson95: [0.752, 0.76], calibration_gap: 0.015, log_loss: 0.505, tour_level_descriptive: { graded_calls: 5928, hit_rate: 0.706, wilson95: [0.695, 0.718], calibration_gap: -0.007 } }, ATP: { result: 'FAILED calibration at every tau (about -4 pts); holdout untouched' } },
   atp_shadow: { candidate: ATP_SHADOW_POLICY.candidate, version: ATP_SHADOW_POLICY.version, challenger: ATP_SHADOW_POLICY.challenger, status: ATP_SHADOW_POLICY.status, tau: ATP_SHADOW_POLICY.tau, frozen_at: ATP_SHADOW_POLICY.frozen_at, protocol: ATP_SHADOW_POLICY.protocol, evidence: ATP_SHADOW_POLICY.evidence,
     development: { window: '2019-2022 forward-chained (fit on earlier years only)', matches: 8110, log_loss: 0.6257, log_loss_uncalibrated: 0.6301, ece: 0.013, ece_uncalibrated: 0.0404, calls_at_tau: 6455, hit_rate: 0.671, calibration_gap: -0.0118 },
-    holdout: 'prospective shadow ledger only — not validated' },
+    holdout: 'live record from the launch (the ATP official stream) — development numbers are not part of it' },
   activation_gates: ACTIVATION_GATES,
   disclosures: DISCLOSURES,
   opportunities: { version: OPPORTUNITY_VERSION, MATCH_WINNER: 'a CALL', SURFACE_MATCHUP: 'the surface blend moved the probability >= 5 pts from the overall rating (or flipped the favourite)', UNDERDOG_WATCH: 'a venue’s market favourite at the lock is not the PBE favourite — a watch item, not a pick (historically PBE favourites that are ranking underdogs win less often than PBE says)', PBE_ABOVE_MARKET: 'same-contract venue only: PBE >= 5 pts above the market at the lock — a probability difference, not a profit claim', PBE_BELOW_MARKET: 'same-contract venue only: PBE >= 5 pts below the market at the lock' },
@@ -166,7 +184,7 @@ const POLICY_META = () => ({ candidate: PICKER_POLICY.candidate, version: PICKER
 /** Public lock proofs for ATP shadow decisions: WHEN each record was locked and the sha256 of its stored bytes and of
  *  its frozen evidence — never its state, side or probability before the result (a hash commitment, not a reveal). */
 export function lockProofs(rows) {
-  return rows.filter((x) => x.record.scope === 'atp_shadow').slice(0, 300).map((x) => ({
+  return rows.filter((x) => x.record.scope === 'atp_shadow' || x.record.scope === 'atp_official').slice(0, 300).map((x) => ({
     record_id: x.record.record_id, match_id: x.record.canonical_event_id, scope: x.record.scope, policy: x.record.decision.policy,
     decided_at: x.record.lock.decided_at, lock_at: x.record.lock.lock_at, lock_rule: x.record.lock.lock_rule,
     scheduled_at_known_at_lock: x.record.lock.scheduled_at_known_at_lock, first_seen_scheduled_at: x.record.lock.first_seen_scheduled_at ?? null,
@@ -175,7 +193,8 @@ export function lockProofs(rows) {
   }));
 }
 
-const PICK_MAIN = new Set(['Grand Slam', 'WTA 1000', 'WTA 500', 'WTA 250', 'WTA Finals', 'WTA 125']);
+// official scope (tennis#14): WTA tour-level singles; WTA 125 is prelaunch research only and is not an official lock
+const PICK_MAIN = new Set(['Grand Slam', 'WTA 1000', 'WTA 500', 'WTA 250', 'WTA Finals']);
 /**
  * Public WAITING facts (no sides / probabilities): which in-scope singles matches will be decided next and when, from
  * the canonical schedule — the same lock rule the ledgers use (sourced start - 60 min; else a source-proven day +
@@ -206,7 +225,8 @@ export async function upcomingLocks(store, now = new Date().toISOString()) {
     else out.wta_without_lock_source += 1;
   }
   const fin = (a) => { const s = a.filter((x) => Date.parse(x.lock_at) > t - 6 * 3600e3).sort((x, y) => x.lock_at.localeCompare(y.lock_at)); return { candidates: s.length, next_lock_at: s.find((x) => Date.parse(x.lock_at) >= t)?.lock_at ?? null, next: s.slice(0, 8) }; };
-  return { ...out, atp_shadow: fin(out.atp_shadow), wta: fin(out.wta) };
+  const atp = fin(out.atp_shadow);
+  return { ...out, atp, atp_shadow: atp, wta: fin(out.wta) };
 }
 
 /** Public aggregate of the verification ledger (counts only; no sides / probabilities). */
@@ -216,8 +236,8 @@ export async function verificationSummary(env) {
 }
 
 async function allRows(bucket) {
-  const [v1, shadow] = await Promise.all([readLedger(bucket, { limit: 1000 }), readShadowLedger(bucket, { limit: 400 }).catch(() => [])]);
-  return [...v1, ...shadow].sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
+  const [v1, shadow, atpOfficial] = await Promise.all([readLedger(bucket, { limit: 1000 }), readShadowLedger(bucket, { limit: 400 }).catch(() => []), readShadowLedger(bucket, { limit: 1000, stream: OFFICIAL_STREAM }).catch(() => [])]);
+  return [...v1, ...shadow, ...atpOfficial].sort((a, b) => String(b.record.lock.lock_at || b.record.lock.decided_at).localeCompare(String(a.record.lock.lock_at || a.record.lock.decided_at)));
 }
 /** "Why" for V1 CALLs (V1 records predate stored why): read from the frozen snapshot the decision cites. Bounded. */
 async function attachWhy(bucket, rows, max = 30) {
@@ -226,6 +246,22 @@ async function attachWhy(bucket, rows, max = 30) {
     try { const s = await getJson(bucket, x.record.evidence.snapshot_ref); x.why = Array.isArray(s?.payload?.why) ? s.payload.why.slice(0, 6) : null; } catch { x.why = null; }
   });
 }
+
+/** Pure: the OFFICIAL record — official picks only (CALLs recorded as official), counted from the cutover. A PASS / HOLD is
+ *  never a pick; VOIDs are counted but never enter the hit rate; pending stays pending. Per tour and combined. */
+export function officialRecord(rows) {
+  const blank = () => ({ picks: 0, W: 0, L: 0, VOID: 0, pending: 0, graded: 0, hit_rate: null });
+  const out = { all: blank(), ATP: blank(), WTA: blank() };
+  for (const x of rows) {
+    if (x.excluded || !isOfficialPick(x.record)) continue;
+    const res = x.grade ? x.grade.grade.result : 'pending';
+    for (const b of [out.all, out[x.record.event?.tour === 'ATP' ? 'ATP' : 'WTA']]) { b.picks += 1; b[res] += 1; if (res === 'W' || res === 'L') b.graded += 1; }
+  }
+  for (const b of Object.values(out)) b.hit_rate = b.graded ? r4(b.W / b.graded) : null;
+  return { activated_at: PICKS_ACTIVATED_AT, live: Date.now() >= cutoverMs(), ...out };
+}
+/** Pure: per-stream research aggregates (the prelaunch / official streams are never pooled; the V1 ATP PASS lane is not a pick stream). */
+export const recordByStream = (rows) => trackRecord(rows.filter((x) => streamOf(x.record) !== 'atp_v1').map((x) => ({ ...x, record: { ...x.record, scope: streamOf(x.record) } })));
 
 export async function picksRoute(path, url, env, store = null) {
   if (path !== '/v1/picks' && path !== '/v1/picks/track-record' && path !== '/v1/picks/verification' && !/^\/v1\/picks\/[0-9a-f-]{36}$/.test(path)) return undefined;
@@ -241,19 +277,20 @@ export async function picksRoute(path, url, env, store = null) {
   const updated = rows.reduce((t, x) => { const a = x.grade?.graded_at || x.record.lock.decided_at; return a > t ? a : t; }, '') || null;
   const meta = (semantics) => ({ source: ['pbe_derived'], source_updated_at: updated, freshness: updated ? 'CURRENT' : 'UNAVAILABLE', semantics });
   if (path === '/v1/picks/track-record') {
-    const resolved = rows.filter((x) => x.grade);
-    return envelope({ policy: POLICY_META(), record: trackRecord(rows), resolved: resolved.slice(0, 200).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows), verification: await verificationSummary(env), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
+    const resolved = rows.filter((x) => x.grade && streamOf(x.record) !== 'atp_v1');
+    return envelope({ policy: POLICY_META(), official: officialRecord(rows), record: recordByStream(rows), resolved: resolved.slice(0, 400).map((x) => shapePick(x, { reveal: false })), lock_proofs: lockProofs(rows), verification: await verificationSummary(env), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
       meta('PBE Picks resolved track record: graded decisions only (pending pre-match sides are All Access). PROSPECTIVE · NOT OFFICIAL until owner activation; ATP is SHADOW research; activation never makes an earlier decision official.'));
   }
   const m = /^\/v1\/picks\/([0-9a-f-]{36})$/.exec(path);
   if (m) {
     const mine = rows.filter((x) => x.record.canonical_event_id === m[1]);
-    const row = mine.find((x) => x.record.scope !== 'atp_shadow' && x.record.decision.state !== 'PASS') || mine.find((x) => x.record.scope === 'atp_shadow') || mine[0] || null;
+    const row = mine.find((x) => isOfficialPick(x.record)) || mine.find((x) => x.record.scope === 'atp_official') || mine.find((x) => x.record.scope === 'wta_main' && x.record.decision.state !== 'PASS') || mine.find((x) => x.record.scope === 'atp_shadow') || mine[0] || null;
     if (row) await attachWhy(bucket, [row], 1);
     return envelope(row ? { policy: POLICY_META(), pick: shapePick(row, { reveal: true }) } : null, { ...meta(row ? 'PBE designated decision for this match' : 'no designated decision recorded for this match yet'), freshness: row ? 'CURRENT' : 'UNAVAILABLE' });
   }
-  const shown = rows.slice(0, 400);
+  // members: the official picks (every one, pending and settled) — the prelaunch research ledgers live on the track record
+  const shown = rows.filter((x) => isOfficialPick(x.record)).slice(0, 400);
   await attachWhy(bucket, shown.filter((x) => !x.grade));
-  return envelope({ policy: POLICY_META(), picks: shown.map((x) => shapePick(x, { reveal: true })), record: trackRecord(rows), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
+  return envelope({ policy: POLICY_META(), official: officialRecord(rows), picks: shown.map((x) => shapePick(x, { reveal: true })), record: recordByStream(rows), upcoming_locks: await upcomingLocks(store).catch(() => ({ error: 'UPSTREAM_UNAVAILABLE' })) },
     meta('PBE Picks ledger (All Access): every designated decision — CALL / PASS / HOLD — frozen at its lock; ATP rows are SHADOW research'));
 }

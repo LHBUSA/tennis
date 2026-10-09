@@ -9,7 +9,7 @@
 // Writes are create-only (head check + conditional put If-None-Match: *); nothing is ever overwritten.
 // The input is the production probability frozen in the pre-match snapshot (the same input as Picker V1), mapped
 // through the frozen monotone recalibration (recal.js). Markets are never an input; benchmarks are frozen beside it.
-import { scopeOf, lockFor, grade, GRADING_RULE, COUNTING_UNIT } from './picker.js';
+import { scopeOf, lockFor, grade, GRADING_RULE, COUNTING_UNIT, PICKS_ACTIVATED_AT } from './picker.js';
 import { snapshotAtOrBefore } from './matchup-freeze.js';
 import { fetchBenchmarks, mapLimit, READ_CONCURRENCY } from './picker-ledger.js';
 import { MATCH, shapeMatch } from './shape.js';
@@ -49,13 +49,38 @@ const DAY_WINDOW_MS = 6 * 3600e3;
 const BENCHMARK_DEFER_MS = 30 * 60e3;
 const r4 = (x) => (x == null ? null : Math.round(x * 1e4) / 1e4);
 
-export const key = {
-  decision: (id) => `${SHADOW_PREFIX}decisions/${id}.json`,
-  seen: (id) => `${SHADOW_PREFIX}seen/${id}.json`,
-  call: (id) => `${SHADOW_PREFIX}calls/${id}.json`,
-  grade: (id) => `${SHADOW_PREFIX}grades/${id}.json`,
-  correction: (id, at) => `${SHADOW_PREFIX}corrections/${id}/${at.replace(/[:.]/g, '-')}.json`,
-};
+export const keysFor = (prefix) => ({
+  decision: (id) => `${prefix}decisions/${id}.json`,
+  seen: (id) => `${prefix}seen/${id}.json`,
+  call: (id) => `${prefix}calls/${id}.json`,
+  grade: (id) => `${prefix}grades/${id}.json`,
+  correction: (id, at) => `${prefix}corrections/${id}/${at.replace(/[:.]/g, '-')}.json`,
+});
+export const key = keysFor(SHADOW_PREFIX);
+
+// ATP OFFICIAL-PICKS DECISION STREAM (owner decision 2026-10-09, LHBUSA/tennis#14). A NEW, forward-only ledger — not a relabel of the
+// shadow: its own prefix, policy version, record ids and grades. The decision rule is the frozen atp-recal/2 challenger
+// unchanged (same recalibration, threshold and history floor). It decides only once the cutover has passed and only matches
+// whose lock falls at or after it, so no decision that existed before the launch can enter it. The shadow ledger keeps
+// running unchanged as the prelaunch research record.
+export const OFFICIAL_ATP_PREFIX = 'ledger/picks-official-v1/atp/';
+export const ATP_OFFICIAL_POLICY = Object.freeze({
+  candidate: 'tennis-picks-official-v1-atp',
+  version: 'tennis-picks-official-v1-atp@tennis#14',
+  challenger: ATP_SHADOW_POLICY.challenger,
+  status: 'OFFICIAL',
+  official: true,
+  recal: ATP_SHADOW_POLICY.recal,
+  tau: ATP_SHADOW_POLICY.tau,
+  min_prior: ATP_SHADOW_POLICY.min_prior,
+  frozen_at: ATP_SHADOW_POLICY.frozen_at,
+  activated_at: PICKS_ACTIVATED_AT,
+  protocol: 'docs/picks/OFFICIAL_V1.md',
+  evidence: ATP_SHADOW_POLICY.evidence,
+});
+export const SHADOW_STREAM = Object.freeze({ prefix: SHADOW_PREFIX, policy: ATP_SHADOW_POLICY, scope: 'atp_shadow', idSuffix: ':atp-shadow', kv: 'picker:v2:atp-shadow:last', activatedAt: null });
+export const OFFICIAL_STREAM = Object.freeze({ prefix: OFFICIAL_ATP_PREFIX, policy: ATP_OFFICIAL_POLICY, scope: 'atp_official', idSuffix: ':atp-official', kv: 'picks:official:atp:last', activatedAt: PICKS_ACTIVATED_AT });
+const keysOf = (stream) => (stream.prefix === SHADOW_PREFIX ? key : keysFor(stream.prefix));
 
 /** Create-only put: head check, then a conditional put that the store refuses when the key exists. true = written. */
 export async function createOnly(bucket, k, obj) {
@@ -89,7 +114,8 @@ export function decideShadow(x, policy = ATP_SHADOW_POLICY) {
 
 export const bandOf = (pFav) => DEV_RELIABILITY.find((b) => pFav >= b.from && pFav < b.to) || null;
 
-export function buildShadowRecord({ match, lock, snapshot, benchmarks, now, started, policy = ATP_SHADOW_POLICY }) {
+export function buildShadowRecord({ match, lock, snapshot, benchmarks, now, started, stream = SHADOW_STREAM, policy = stream.policy }) {
+  const official = !!policy.official && Number.isFinite(Date.parse(policy.activated_at)) && Date.parse(now) >= Date.parse(policy.activated_at);
   const payload = snapshot?.payload || {};
   const model = payload.model || null;
   const pA = model?.status === 'published' && model.probability ? Number(model.probability.A) : null;
@@ -99,8 +125,8 @@ export function buildShadowRecord({ match, lock, snapshot, benchmarks, now, star
   const ov = model?.overall_probability ? Number(model.overall_probability.A) : null;
   const band = d.p_fav != null ? bandOf(d.p_fav) : null;
   return {
-    schema: 'pbe-decision-record/1', record_id: `tennis:${match.id}:${COUNTING_UNIT}:atp-shadow`,
-    domain: 'sports', sport: 'tennis', canonical_event_id: match.id, scope: 'atp_shadow',
+    schema: 'pbe-decision-record/1', record_id: `tennis:${match.id}:${COUNTING_UNIT}${stream.idSuffix}`,
+    domain: 'sports', sport: 'tennis', canonical_event_id: match.id, scope: stream.scope,
     event: { tour: 'ATP', level: match.tournament?.level || null, tournament: match.tournament?.slug || null, round: match.round || null, a: pl('A') ? { id: pl('A').id, name: pl('A').name, slug: pl('A').slug ?? null } : null, b: pl('B') ? { id: pl('B').id, name: pl('B').name, slug: pl('B').slug ?? null } : null, scheduled_at: match.scheduled_at ?? null, day: match.schedule_day?.day ?? null, surface: match.tournament?.surface ?? null },
     contract: { canonical_contract_id: sel ? `sports_winner|tennis:${match.id}|team:${sel.id}` : null, selection_role: d.side ? d.side.toLowerCase() : null, selection_id: sel?.id ?? null, selection_name: sel?.name ?? null },
     evidence: snapshot ? { schema: snapshot.freeze_version, sha256: snapshot.content_hash, data_cutoff_at: snapshot.dna_as_of, snapshot_ref: snapshot.key, frozen_at: snapshot.frozen_at } : null,
@@ -110,7 +136,7 @@ export function buildShadowRecord({ match, lock, snapshot, benchmarks, now, star
     probability: d.side ? d.p_fav : null,
     uncertainty: band ? { method: 'development reliability band (2019-2022 OOS)', band: [band.from, band.to], past_calls: band.n, favourite_won: band.won } : null,
     why: Array.isArray(payload.why) ? payload.why.slice(0, 6) : null,
-    decision: { state: d.state, side: d.side, reasons: d.reasons, threshold: d.threshold, p_fav: d.p_fav ?? null, p_fav_raw: d.p_fav_raw ?? null, policy: policy.version, policy_status: policy.status, candidate: policy.candidate, frozen_at: policy.frozen_at, activated_at: null, official: false },
+    decision: { state: d.state, side: d.side, reasons: d.reasons, threshold: d.threshold, p_fav: d.p_fav ?? null, p_fav_raw: d.p_fav_raw ?? null, policy: policy.version, policy_status: policy.status, candidate: policy.candidate, frozen_at: policy.frozen_at, activated_at: policy.activated_at ?? null, official: official && d.state === 'CALL' },
     lock: { decided_at: now, lock_at: lock.lock_at, lock_rule: lock.rule, scheduled_at_known_at_lock: lock.scheduled_at, day: lock.day ?? null, utc_offset: lock.utc_offset ?? null, day_source: lock.day_source ?? null, counting_unit: COUNTING_UNIT },
     at_forecast: benchmarks?.at_forecast ?? null, benchmarks_status: benchmarks ? 'frozen' : 'UNAVAILABLE_AT_DECISION',
     grading_rule: GRADING_RULE,
@@ -118,10 +144,14 @@ export function buildShadowRecord({ match, lock, snapshot, benchmarks, now, star
 }
 
 /** Decide one ATP match (pure enough to test with fakes). */
-export async function decideShadowMatch({ bucket, match, now, fetchImpl, benchBase, decided = null, seen = null }) {
+export async function decideShadowMatch({ bucket, match, now, fetchImpl, benchBase, decided = null, seen = null, stream = SHADOW_STREAM }) {
+  const key = keysOf(stream);
   if (scopeOf(match) !== 'atp') return { id: match.id, skipped: 'out_of_scope' };
+  // forward-only official stream: nothing before the cutover, and never a match whose lock fell before it
+  if (stream.activatedAt != null && !(Date.parse(now) >= Date.parse(stream.activatedAt))) return { id: match.id, skipped: 'before_activation' };
   if (decided ? decided.has(match.id) : await bucket.head(key.decision(match.id))) return { id: match.id, skipped: 'already_decided' };
   const lock = lockFor(match);
+  if (stream.activatedAt != null && lock.lock_at && Date.parse(lock.lock_at) < Date.parse(stream.activatedAt)) return { id: match.id, skipped: 'locked_before_activation' };
   const windowEnd = lock.rule === 'T_MINUS_60' ? Date.parse(lock.scheduled_at) : lock.rule === 'DAY_START_LOCK' ? Date.parse(lock.lock_at) + DAY_WINDOW_MS : Infinity;
   const started = match.status !== 'scheduled' || Date.parse(now) >= windowEnd;
   const wasSeen = seen ? seen.has(match.id) : !!(await bucket.head(key.seen(match.id)));
@@ -130,13 +160,13 @@ export async function decideShadowMatch({ bucket, match, now, fetchImpl, benchBa
   if (!lock.lock_at && !started) return { id: match.id, skipped: 'no_lock_yet' };
   if (lock.lock_at && Date.parse(lock.lock_at) > Date.parse(now) && !started) return { id: match.id, skipped: 'before_lock', lock_at: lock.lock_at };
   const snapshot = lock.lock_at && !started ? await snapshotAtOrBefore(bucket, match.id, lock.lock_at) : null;
-  const preview = buildShadowRecord({ match, lock, snapshot, benchmarks: null, now, started });
+  const preview = buildShadowRecord({ match, lock, snapshot, benchmarks: null, now, started, stream });
   let benchmarks = null;
   if (lock.lock_at && !started) {
     benchmarks = await fetchBenchmarks(fetchImpl, { id: match.id, pbeAt: lock.lock_at, selection: preview.contract.selection_id }, benchBase);
     if (!benchmarks && Date.parse(now) - Date.parse(lock.lock_at) < BENCHMARK_DEFER_MS) return { id: match.id, skipped: 'benchmarks_deferred' };
   }
-  const record = buildShadowRecord({ match, lock, snapshot, benchmarks, now, started });
+  const record = buildShadowRecord({ match, lock, snapshot, benchmarks, now, started, stream });
   record.lock.first_seen_scheduled_at = wasSeen ? ((await getJson(bucket, key.seen(match.id)))?.first_seen_at ?? null) : now;
   const written = await createOnly(bucket, key.decision(match.id), record);
   if (written && record.decision.state === 'CALL') await createOnly(bucket, key.call(match.id), { match_id: match.id, decided_at: now });
@@ -144,7 +174,8 @@ export async function decideShadowMatch({ bucket, match, now, fetchImpl, benchBa
 }
 
 /** Grade one shadow CALL from our canonical result; scores both the recalibrated and the raw probability (paired). */
-export async function gradeShadowMatch({ bucket, record, match, now, fetchImpl, benchBase }) {
+export async function gradeShadowMatch({ bucket, record, match, now, fetchImpl, benchBase, stream = SHADOW_STREAM }) {
+  const key = keysOf(stream);
   if (record.decision.state !== 'CALL') return { skipped: 'not_a_call' };
   const g = grade(record, match);
   if (!g) return { skipped: 'not_final' };
@@ -161,8 +192,8 @@ export async function gradeShadowMatch({ bucket, record, match, now, fetchImpl, 
   return { written: await createOnly(bucket, key.grade(record.canonical_event_id), out), result: g.result };
 }
 
-async function listIds(bucket, sub) {
-  const p = `${SHADOW_PREFIX}${sub}/`;
+async function listIds(bucket, sub, prefix = SHADOW_PREFIX) {
+  const p = `${prefix}${sub}/`;
   const ids = new Set();
   let cursor;
   do { const r = await bucket.list({ prefix: p, cursor, limit: 1000 }); for (const o of r.objects) ids.add(o.key.slice(p.length).replace(/\.json$/, '').split('/')[0]); cursor = r.truncated ? r.cursor : undefined; } while (cursor);
@@ -170,14 +201,17 @@ async function listIds(bucket, sub) {
 }
 
 /** CRON step (tennis-api every 10 min, after Picker V1). Bounded: <= `limit` decisions and <= 15 grades per tick. */
-export async function runAtpShadow(store, env, { now = new Date().toISOString(), fetchImpl = null, limit = 8 } = {}) {
+export async function runAtpShadow(store, env, { now = new Date().toISOString(), fetchImpl = null, limit = 8, stream = SHADOW_STREAM } = {}) {
+  const key = keysOf(stream);
   fetchImpl = fetchImpl || (env?.MARKETS ? (u, init) => env.MARKETS.fetch(u, init) : fetch);
   const bucket = env?.TENNIS_SOURCE;
   if (!bucket || !store) return { error: 'not_configured' };
   const t = Date.parse(now);
   const iso = (ms) => new Date(ms).toISOString();
-  const sum = { at: now, policy: ATP_SHADOW_POLICY.version, candidates: 0, decided: [], graded: [], skipped: {} };
-  const [decided, seen, calls, graded] = await Promise.all(['decisions', 'seen', 'calls', 'grades'].map((s) => listIds(bucket, s)));
+  const sum = { at: now, policy: stream.policy.version, candidates: 0, decided: [], graded: [], skipped: {} };
+  // the official stream does nothing at all before the cutover (no reads, no writes)
+  if (stream.activatedAt != null && !(Date.parse(now) >= Date.parse(stream.activatedAt))) { sum.skipped.before_activation = 1; return sum; }
+  const [decided, seen, calls, graded] = await Promise.all(['decisions', 'seen', 'calls', 'grades'].map((s) => listIds(bucket, s, stream.prefix)));
   const ids = new Set();
   for (const r of await store.select('tennis_matches', `select=match_id&event_type=eq.MS&status=eq.scheduled&scheduled_at=gte.${iso(t - 6 * 3600e3)}&scheduled_at=lte.${iso(t + 36 * 3600e3)}&limit=300`)) ids.add(r.match_id);
   for (const id of seen) ids.add(id);
@@ -189,7 +223,7 @@ export async function runAtpShadow(store, env, { now = new Date().toISOString(),
   for (const row of rows) {
     if (work >= limit) break;
     try {
-      const res = await decideShadowMatch({ bucket, match: shapeMatch(row), now, fetchImpl, decided, seen });
+      const res = await decideShadowMatch({ bucket, match: shapeMatch(row), now, fetchImpl, decided, seen, stream });
       if (res.skipped) sum.skipped[res.skipped] = (sum.skipped[res.skipped] || 0) + 1; else { sum.decided.push(res); work += 1; }
     } catch { sum.skipped.error = (sum.skipped.error || 0) + 1; }
   }
@@ -200,18 +234,19 @@ export async function runAtpShadow(store, env, { now = new Date().toISOString(),
       if (['scheduled', 'in_progress', 'suspended'].includes(m.status)) continue;
       const record = await getJson(bucket, key.decision(m.match_id));
       if (!record) continue;
-      const g = await gradeShadowMatch({ bucket, record, match: { status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, started_at: m.started_at, score: m.score_text }, now, fetchImpl });
+      const g = await gradeShadowMatch({ bucket, record, match: { status: m.status, winner_side: m.winner_side, end_reason: m.end_reason, started_at: m.started_at, score: m.score_text }, now, fetchImpl, stream });
       if (g.written) sum.graded.push({ id: m.match_id, result: g.result });
     }
   }
-  if (env.TENNIS_STATE) await env.TENNIS_STATE.put('picker:v2:atp-shadow:last', JSON.stringify({ ...sum, decided: sum.decided.slice(0, 25) }));
+  if (env.TENNIS_STATE) await env.TENNIS_STATE.put(stream.kv, JSON.stringify({ ...sum, decided: sum.decided.slice(0, 25) }));
   return sum;
 }
 
 /** All shadow decisions (+ grades + corrections), newest first. */
-export async function readShadowLedger(bucket, { limit = 400 } = {}) {
-  const ids = [...await listIds(bucket, 'decisions')];
-  const corrIds = await listIds(bucket, 'corrections');
+export async function readShadowLedger(bucket, { limit = 400, stream = SHADOW_STREAM } = {}) {
+  const key = keysOf(stream);
+  const ids = [...await listIds(bucket, 'decisions', stream.prefix)];
+  const corrIds = await listIds(bucket, 'corrections', stream.prefix);
   // bounded-parallel reads (2026-10-09 P0: see readLedger)
   const rows = (await mapLimit(ids.slice(-limit), READ_CONCURRENCY, async (id) => {
     const obj = await bucket.get(key.decision(id));
@@ -222,7 +257,7 @@ export async function readShadowLedger(bucket, { limit = 400 } = {}) {
     const recordSha256 = [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)))].map((b) => b.toString(16).padStart(2, '0')).join('');
     let corrections = [];
     if (corrIds.has(id)) {
-      const l = await bucket.list({ prefix: `${SHADOW_PREFIX}corrections/${id}/` });
+      const l = await bucket.list({ prefix: `${stream.prefix}corrections/${id}/` });
       corrections = (await Promise.all(l.objects.map((o) => getJson(bucket, o.key)))).filter(Boolean);
     }
     return { record: rec, record_sha256: recordSha256, grade: rec.decision.state === 'CALL' ? await getJson(bucket, key.grade(id)) : null, corrections, excluded: corrections.some((c) => c.excluded) };
