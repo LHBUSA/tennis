@@ -119,11 +119,16 @@ export function premiumGateHtml(m, route, acct = null) {
       ? 'Unlock Matchup Intelligence'
       : route?.id === 'players-to-watch'
         ? 'Unlock Player Signals'
-        : 'Unlock Tennis Pro Intelligence';
+        : route?.id === 'pbe-picks'
+          ? 'Unlock PBE Picks'
+          : 'Unlock Tennis Pro Intelligence';
+  // PBE Picks teaser: what a member sees, never a value (side, probability and market numbers stay behind the gate)
+  const picksTeaser = route?.id === 'pbe-picks' ? '<p class="progate-lede">Locked pre-match calls with the chosen side, model probability, why, prediction-market benchmarks at the lock and the full ATP / WTA record. Resolved results are public on the Track Record.</p>' : '';
   const member = m?.email ? `<p class="progate-member">Signed in as <b>${escapeHtml(m.email)}</b> · All Access isn’t active on this account.</p>` : '';
   return `<section class="progate" aria-labelledby="progate-title">
     <div class="progate-kicker">PropBetEdge Tennis · All Access</div>
     <h1 id="progate-title">${title}</h1>
+    ${picksTeaser}
     <p class="progate-lede">News, scores, schedules, rankings, tournament pages and core player profiles stay free. All Access unlocks the proprietary intelligence layer built on top of that data.</p>
     <div class="progate-grid">
       <div><b>Matchup DNA</b><span>Win probabilities, rating edges, surface context, form and validation history.</span></div>
