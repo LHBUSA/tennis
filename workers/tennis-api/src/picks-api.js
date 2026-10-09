@@ -178,7 +178,7 @@ export function lockProofs(rows) {
 /** Public aggregate of the verification ledger (counts only; no sides / probabilities). */
 export async function verificationSummary(env) {
   const v = env?.TENNIS_STATE ? await env.TENNIS_STATE.get(SUMMARY_KEY, 'json').catch(() => null) : null;
-  return v ? { schema: v.schema, since: v.since, last_run_at: v.last_run_at, counts: v.counts, pending: v.pending, last_fail: v.last_fail ? { at: v.last_fail.at, scope: v.last_fail.scope, stage: v.last_fail.stage } : null } : null;
+  return v ? { schema: v.schema, since: v.since, last_run_at: v.last_run_at, counts: v.counts, check_version: v.check_version ?? null, pending_lock_checks: v.pending_lock_checks ?? null, corrections: v.corrections || [], last_fail: v.last_fail ? { at: v.last_fail.at, scope: v.last_fail.scope, stage: v.last_fail.stage } : null } : null;
 }
 
 async function allRows(bucket) {

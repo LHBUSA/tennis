@@ -69,7 +69,10 @@ export async function lockChecks({ bucket, text, record: r, row, inPublicWindow,
   return { checks: c, failed: bad, verdict: bad.length ? 'FAIL' : 'PASS' };
 }
 
+export const CHECK_VERSION = 'lock-verify/2'; // /1 wrongly timed HOLD records (a HOLD is not a pre-match call)
 export function startChecks({ record: r, row, grade }) {
+  // a HOLD is the honest record that NO pre-match call was made (no lock, or play had begun): there is no lock to time
+  if (r.decision?.state === 'HOLD') return { started_at: row?.started_at ?? null, source: null, verdict: 'NOT_A_LOCK', failed: [], note: `HOLD (${(r.decision.reasons || []).join(', ')}): no pre-match call to verify against the start` };
   const startedAt = row?.started_at || grade?.result?.started_at || null;
   if (startedAt) {
     const ok = Date.parse(r.lock.decided_at) < Date.parse(startedAt);
@@ -129,13 +132,26 @@ export async function runVerification(store, env, { now = new Date().toISOString
   // summary (aggregate only; no side / probability anywhere in the verification ledger)
   const prev = env.TENNIS_STATE ? await env.TENNIS_STATE.get(SUMMARY_KEY, 'json').catch(() => null) : null;
   const s = prev && prev.schema === VERIFY_SCHEMA ? prev : { schema: VERIFY_SCHEMA, since: now, counts: {}, last_fail: null };
+  // appended correction (never a rewrite) for a FAIL produced by check /1 on a HOLD record
+  if (s.last_fail && !s.last_fail.corrected) {
+    const e = await bucket.get(entryKey(s.last_fail.scope, s.last_fail.match_id, s.last_fail.stage));
+    const entry = e ? JSON.parse(await e.text()) : null;
+    if (entry?.verdict === 'FAIL' && entry.stage === 'start' && entry.decision_state_public === 'HOLD') {
+      await putCreateOnly(bucket, `${VERIFY_PREFIX}${entry.scope}/${entry.match_id}/start.correction-1.json`, { schema: VERIFY_SCHEMA, kind: 'correction', corrects: entryKey(entry.scope, entry.match_id, 'start'), at: now, reason: 'CHECK_DEFINITION_ERROR', note: `${CHECK_VERSION}: a HOLD records that no pre-match call was made; check /1 wrongly timed it against the start. Corrected verdict NOT_A_LOCK. The original entry is kept.`, corrected_verdict: 'NOT_A_LOCK' });
+      const c = s.counts[`${entry.scope}:start`];
+      if (c && c.FAIL > 0) { c.FAIL -= 1; c.NOT_A_LOCK = (c.NOT_A_LOCK || 0) + 1; }
+      s.corrections = [...(s.corrections || []), { at: now, scope: entry.scope, stage: 'start', reason: 'CHECK_DEFINITION_ERROR' }];
+      s.last_fail = null;
+    }
+  }
+  s.check_version = CHECK_VERSION;
   for (const w of out.written) {
     const k = `${w.scope}:${w.stage}`;
     const c = (s.counts[k] ||= { PASS: 0, FAIL: 0, UNVERIFIABLE: 0, OUT_OF_SCOPE: 0 });
     c[w.verdict] = (c[w.verdict] || 0) + 1;
     if (w.verdict === 'FAIL') s.last_fail = { at: now, scope: w.scope, match_id: w.id, stage: w.stage };
   }
-  s.last_run_at = now; s.last_written = out.written.length; s.pending = Math.max(0, queue.length - out.written.length);
+  s.last_run_at = now; s.last_written = out.written.length; s.pending = undefined; s.pending_lock_checks = Math.max(0, queue.filter((q) => q.needLock).length - out.written.filter((w) => w.stage === 'lock').length - out.skipped_old);
   if (env.TENNIS_STATE) await env.TENNIS_STATE.put(SUMMARY_KEY, JSON.stringify(s));
   return { ...out, summary: s };
 }

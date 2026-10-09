@@ -290,3 +290,19 @@ test('owner-only verification route: premium path + owner state check in index.j
   assert.ok(src.includes(String.raw`/^\/v1\/picks\/verification$/`));
   assert.ok(src.includes(`path === '/v1/picks/verification' && membership?.membership?.state !== 'owner'`));
 });
+
+test('verification /2: a HOLD is NOT_A_LOCK (never timed against the start); a /1 FAIL on a HOLD gets an appended correction', async () => {
+  const { runVerification, entryKey, startChecks, VERIFY_PREFIX } = await import('../workers/tennis-api/src/picks-verify.js');
+  assert.equal(startChecks({ record: { decision: { state: 'HOLD', reasons: ['MISSING_DAY_OR_TIMEZONE'] }, lock: { decided_at: '2026-10-09T11:50:00Z' } }, row: { started_at: '2026-10-09T11:30:00Z' } }).verdict, 'NOT_A_LOCK');
+  const b = memBucket();
+  const id = 'aaaaaaaa-0000-5000-8000-000000000009';
+  const bad = { schema: 'pbe-lock-verification/1', scope: 'wta_v1', match_id: id, stage: 'start', verdict: 'FAIL', decision_state_public: 'HOLD' };
+  b.m.set(entryKey('wta_v1', id, 'start'), JSON.stringify(bad));
+  const kv = new Map([['picks:verify:summary', JSON.stringify({ schema: 'pbe-lock-verification/1', since: 'x', counts: { 'wta_v1:start': { PASS: 0, FAIL: 1 } }, last_fail: { at: 'x', scope: 'wta_v1', match_id: id, stage: 'start' } })]]);
+  const env = { TENNIS_SOURCE: b, TENNIS_STATE: { get: async (k) => (kv.has(k) ? JSON.parse(kv.get(k)) : null), put: async (k, v) => kv.set(k, v) } };
+  await runVerification({ async select() { return []; } }, env, { now: '2026-10-09T13:20:00.000Z' });
+  const s = JSON.parse(kv.get('picks:verify:summary'));
+  assert.deepEqual([s.counts['wta_v1:start'].FAIL, s.counts['wta_v1:start'].NOT_A_LOCK, s.last_fail], [0, 1, null]);
+  assert.equal(JSON.parse(b.m.get(entryKey('wta_v1', id, 'start'))).verdict, 'FAIL', 'the original entry is kept');
+  assert.equal(JSON.parse(b.m.get(`${VERIFY_PREFIX}wta_v1/${id}/start.correction-1.json`)).corrected_verdict, 'NOT_A_LOCK');
+});
