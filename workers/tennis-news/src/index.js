@@ -258,7 +258,12 @@ export async function routedProse(env, store, { ev, articleId = null, storyClass
     await telemetry(store, [callTelemetry({ eventId: ev.event_id, articleId, storyClass, routing, trigger, call, cfg })]);
     await addPoolTokens(kv, routing.pool, (Number(call.usage?.input_tokens) || 0) + (Number(call.usage?.output_tokens) || 0)).catch(() => null);
   };
-  const ed = await editorialize({ packet, baseline, gate, apiKey: env.OPENAI_API_KEY, routing, attempts, onCall, ctx });
+  const canRetry = async () => {
+    if (routing.pool !== 'premium') return false;
+    const current = await poolUsage(kv);
+    return current.premium_today < cfg.premiumWarn && current.premium_today < cfg.premiumSoftCap;
+  };
+  const ed = await editorialize({ packet, baseline, gate, apiKey: env.OPENAI_API_KEY, routing, attempts, onCall, canRetry, ctx });
   return { ...ed, routing: { lane: routing.lane, model: routing.model, pool: routing.pool, reason: routing.reason, max_output_tokens: routing.max_output_tokens, reasoning_effort: routing.reasoning_effort, soft_cap: routing.soft_cap || null, flagship_eligible: !!routing.flagship_eligible, router_version: routing.router_version, pool_usage_before: usage } };
 }
 
@@ -379,7 +384,7 @@ export async function enrichOne(env, store, ev, { attempts = 1 } = {}) {
   await store.req('PATCH', `tennis_news_events?event_id=eq.${encodeURIComponent(ev.event_id)}`, { body: { article_id: articleId }, prefer: 'return=minimal' });
   await telemetry(store, [{ event_id: ev.event_id, article_id: articleId, stage: 'packet', status: 'ok', latency_ms: Date.now() - t0, since_detect_ms: sinceDetect(), detail: { version: PACKET_VERSION, families: Object.keys(packet), class: storyClass, dimensions: story.evidence_dimensions } }]);
 
-  const ed = await routedProse(env, store, { ev, articleId, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: 'new', attempts: Math.min(2, Math.max(1, attempts)), ctx: { ...ctx, keepDraft: attempts > 1 } });
+  const ed = await routedProse(env, store, { ev, articleId, storyClass, packet, baseline, gate, dims: story.evidence_dimensions, trigger: 'new', attempts: env.TENNIS_NEWS_CORRECTION_ENABLED === 'false' ? 1 : 2, ctx: { ...ctx, keepDraft: true } });
   plan.routing = ed.routing;
   if (ed.article?.layout) plan.layout = ed.article.layout;
   // nominal standard-rate cost (never an actual bill: the org may receive complimentary tokens)
@@ -388,7 +393,11 @@ export async function enrichOne(env, store, ev, { attempts = 1 } = {}) {
 
   let status = 'held';
   let hold = null;
-  if (!ed.origin) hold = `gates: ${ed.gate.failures.map((f) => f.gate).join(', ')}`;
+  if (!ed.origin) {
+    const modelFailures = [...new Set(ed.attempts.flatMap((a) => (a.failures || []).map((f) => f.gate)))];
+    const baselineFailures = [...new Set(ed.gate.failures.map((f) => f.gate))];
+    hold = `model_failed_then_baseline_not_v5: model=[${modelFailures.join(',')}]; baseline=[${baselineFailures.join(',')}]`;
+  }
   else if (env.NEWS_PUBLISH_ENABLED !== 'true') hold = `shadow (${ed.origin} prose passed gates)`;
   else if (ed.origin === 'baseline' && storyClass !== 'brief' && Number(ev.materiality) < BASELINE_MIN_MATERIALITY) hold = `baseline prose below the fallback bar for a ${storyClass} story (${ev.materiality} < ${BASELINE_MIN_MATERIALITY})`;
   else status = 'published';
