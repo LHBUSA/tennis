@@ -259,7 +259,7 @@ export async function routedProse(env, store, { ev, articleId = null, storyClass
     await addPoolTokens(kv, routing.pool, (Number(call.usage?.input_tokens) || 0) + (Number(call.usage?.output_tokens) || 0)).catch(() => null);
   };
   const canRetry = async () => {
-    if (routing.pool !== 'premium') return false;
+    if (!kv || routing.pool !== 'premium') return false;
     const current = await poolUsage(kv);
     return current.premium_today < cfg.premiumWarn && current.premium_today < cfg.premiumSoftCap;
   };
