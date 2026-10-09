@@ -1,12 +1,22 @@
 {
- "at": "2026-10-09T12:32:26.135Z",
+ "at": "2026-10-09T16:13:49.255Z",
  "base": "http://localhost:5203",
  "mode": "SIMULATED MEMBERSHIP — not a verified production access test; picks = real resolved production records + in-memory fixtures",
  "summary": [
   {
+   "w": 320,
+   "entitled": {
+    "cards": 37,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  },
+  {
    "w": 390,
    "entitled": {
-    "cards": 36,
+    "cards": 37,
     "shadowCards": 1,
     "why": 4,
     "overflow": 0,
@@ -16,7 +26,27 @@
   {
    "w": 768,
    "entitled": {
-    "cards": 36,
+    "cards": 37,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  },
+  {
+   "w": 1024,
+   "entitled": {
+    "cards": 37,
+    "shadowCards": 1,
+    "why": 4,
+    "overflow": 0,
+    "errors": 0
+   }
+  },
+  {
+   "w": 1280,
+   "entitled": {
+    "cards": 37,
     "shadowCards": 1,
     "why": 4,
     "overflow": 0,
@@ -26,7 +56,7 @@
   {
    "w": 1440,
    "entitled": {
-    "cards": 36,
+    "cards": 37,
     "shadowCards": 1,
     "why": 4,
     "overflow": 0,

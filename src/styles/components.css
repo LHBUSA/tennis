@@ -57,7 +57,7 @@
   .hdr-search { width: 40px; }
 }
 @media (max-width: 400px) { .hdr-live-w { display: none; } .brand-sep { display: none; } .brand { gap: 6px; } }
-@media (max-width: 1140px) { .nav { display: none; } .hdr-search { margin-left: auto; } .menu-btn { display: inline-flex; } .hdr-live { margin-left: auto; } .hdr-live:not([hidden]) + .hdr-search { margin-left: 6px; } }
+@media (max-width: 1200px) { .nav { display: none; } .hdr-search { margin-left: auto; } .menu-btn { display: inline-flex; } .hdr-live { margin-left: auto; } .hdr-live:not([hidden]) + .hdr-search { margin-left: 6px; } }
 @media (max-width: 380px) { .brand img { height: 32px; } .brand-text b { font-size: 18px; } .brand-text i { display: none; } }
 
 /* ================= hero ================= */
@@ -818,3 +818,6 @@ a.rk-card:hover { text-decoration: none; border-color: var(--court-500); }
 @media (max-width: 360px) {
   .nw-chart.has-n .nw-bar em { grid-template-columns: 3.9em 3.3em; column-gap: 4px; }
 }
+/* #12: Picks + Track Record joined the primary nav — tighter link padding where the header is crowded */
+.nav { gap: 2px; }
+.nav a { padding: 11px 10px; }

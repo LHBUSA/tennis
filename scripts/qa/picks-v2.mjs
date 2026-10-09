@@ -89,16 +89,16 @@ for (const w of WIDTHS) {
   check(ft.overflow <= 0, `${w}: free overflow`);
   await f.ctx.close();
   // FREE /track-record against the REAL production API (no mock): resolved only, nav entry points, no pending cards
-  const t = await open('/track-record', w, false);
-  await t.p.waitForSelector('.pk-policy', { timeout: 20000 }).catch(() => fails.push(`${w}: public track record did not render`));
-  const tt = await t.p.evaluate(() => ({ text: document.body.innerText, pendingCards: [...document.querySelectorAll('[data-pick]')].filter((c) => /PENDING/i.test(c.querySelector('.pk-res')?.textContent || '')).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, navPicks: !!document.querySelector('a[href="/pbe-picks"][data-nav]'), navTr: !!document.querySelector('a[href="/track-record"][data-nav]'), desktopNav: [...document.querySelectorAll('.nav a[data-nav]')].map((a) => a.getAttribute('href')), notLaunched: /not launched/i.test(document.body.innerText) }));
+  const pt = await open('/track-record', w, false);
+  await pt.p.waitForSelector('.pk-policy', { timeout: 20000 }).catch(() => fails.push(`${w}: public track record did not render`));
+  const tt = await pt.p.evaluate(() => ({ text: document.body.innerText, pendingCards: [...document.querySelectorAll('[data-pick]')].filter((c) => /PENDING/i.test(c.querySelector('.pk-res')?.textContent || '')).length, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, navPicks: !!document.querySelector('a[href="/pbe-picks"][data-nav]'), navTr: !!document.querySelector('a[href="/track-record"][data-nav]'), desktopNav: [...document.querySelectorAll('.nav a[data-nav]')].map((a) => a.getAttribute('href')), notLaunched: /not launched/i.test(document.body.innerText) }));
   check(tt.pendingCards === 0, `${w}: public track record shows a pending selection`);
   check(!tt.notLaunched, `${w}: track record still says not launched`);
   check(tt.navPicks && tt.navTr, `${w}: Picks / Track Record nav links missing`);
   if (w >= 1024) check(tt.desktopNav.includes('/pbe-picks') && tt.desktopNav.includes('/track-record'), `${w}: desktop primary nav lacks Picks / Track Record`);
   check(tt.overflow <= 0, `${w}: track record overflow ${tt.overflow}`);
-  if (w === 390 || w === 1440) await t.p.screenshot({ path: `${OUT}/public-track-record-${w}.png`, fullPage: false });
-  await t.ctx.close();
+  if (w === 390 || w === 1440) await pt.p.screenshot({ path: `${OUT}/public-track-record-${w}.png`, fullPage: false });
+  await pt.ctx.close();
   // ENTITLED without any query flag: the research page renders (no ?preview=picker needed)
   const n = await open('/pbe-picks', w, true);
   await n.p.waitForSelector('.pk-table', { timeout: 20000 }).catch(() => fails.push(`${w}: /pbe-picks without the preview query did not render for a member`));
